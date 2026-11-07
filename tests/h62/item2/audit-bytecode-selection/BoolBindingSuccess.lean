@@ -117,4 +117,131 @@ theorem short_head_reverts (C : Solidity.Contract) (base : Nat)
 #guard_msgs (whitespace := lax) in #print axioms dirty_word_reverts
 /-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.short_head_reverts' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms short_head_reverts
+
+/-- Finite-word size representation is possible exactly below the word modulus. -/
+theorem word_size_representable_iff (n : Nat) :
+    (∃ size : Fin W, size.val = n) ↔ n < W := by
+  constructor
+  · rintro ⟨size, same⟩
+    exact same ▸ size.isLt
+  · intro small
+    exact ⟨⟨n, small⟩, rfl⟩
+
+
+/-- Every representable semantic input has a joint frame/selection witness for
+the existing rejection-equivalence field. Native loading is not supplied here. -/
+theorem represented_entry_jointWitness (C : Solidity.Contract) (base : Nat)
+    (label : Fin W) (input : Solidity.AbiEntry.Input) (fuel : Nat)
+    (machine : Machine) (small : input.size < W) :
+    ∃ (_certificate : BoolBindingCertificate BoolBinding.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx) (BoolBinding.program C label))
+      (prepared : Machine) (size : Fin W),
+      Compiler.compile base (Frag.init RouteCtx) (BoolBinding.program C label) = some result ∧
+      size.val = input.size ∧ prepared.mem base = .val (rawArgumentWord input) ∧
+      prepared.mem (base + 1) = .val size ∧
+      (run result.code prepared = .revert ↔
+        Solidity.AbiEntry.entry input (fuel + 2) (singleWordParams .bool) = .error .revert) := by
+  let size : Fin W := ⟨input.size, small⟩
+  let prepared : Machine := seeded base (rawArgumentWord input) size machine
+  refine ⟨BoolBinding.certificate, BoolBinding.compiled C base label, prepared, size,
+    BoolBinding.selected C base label, rfl, ?_, ?_, ?_⟩
+  · exact seeded_word base (rawArgumentWord input) size machine
+  · exact seeded_size base (rawArgumentWord input) size machine
+  · exact BoolBinding.entry_rejection C base label _ (BoolBinding.selected C base label)
+      input fuel prepared size (seeded_word base (rawArgumentWord input) size machine)
+      (seeded_size base (rawArgumentWord input) size machine) rfl
+
+/-- A concrete short input inhabits all rejection-equivalence hypotheses.
+This is feasibility of a refusal theorem, not a supported-success claim. -/
+theorem entry_rejection_hypotheses_jointWitness :
+    ∃ (input : Solidity.AbiEntry.Input) (fuel : Nat),
+      input.data = [] ∧ input.free = 0 ∧ input.size < W ∧
+      ∃ (_certificate : BoolBindingCertificate BoolBinding.program)
+        (result : Compiler.Compilation 7 (Frag.init RouteCtx)
+          (BoolBinding.program {vars := []} (wmod 13)))
+        (prepared : Machine) (size : Fin W),
+        Compiler.compile 7 (Frag.init RouteCtx)
+          (BoolBinding.program {vars := []} (wmod 13)) = some result ∧
+        size.val = input.size ∧ prepared.mem 7 = .val (rawArgumentWord input) ∧
+        prepared.mem 8 = .val size ∧
+        (run result.code prepared = .revert ↔
+          Solidity.AbiEntry.entry input (fuel + 2) (singleWordParams .bool) = .error .revert) := by
+  let input : Solidity.AbiEntry.Input := {data := [], free := 0}
+  have small : input.size < W := by decide
+  refine ⟨input, 0, rfl, rfl, small, ?_⟩
+  exact represented_entry_jointWitness {vars := []} 7 (wmod 13) input 0 Machine.init small
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.represented_entry_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms represented_entry_jointWitness
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.entry_rejection_hypotheses_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms entry_rejection_hypotheses_jointWitness
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.word_size_representable_iff' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms word_size_representable_iff
+
+
+/-- Existing semantic decoder success and selected IR execution share the same
+represented input and validated local; no native load provenance is supplied. -/
+theorem decoded_input_success_jointWitness (C : Solidity.Contract) (base : Nat)
+    (label : Fin W) (input : Solidity.AbiEntry.Input) (fuel : Nat)
+    (machine : Machine) (small : input.size < W) (full : ¬ input.size < 36)
+    (valid : Solidity.AbiEntry.Kind.bool.valid (Solidity.AbiEntry.load input.data 4) = true) :
+    ∃ (_certificate : BoolBindingCertificate BoolBinding.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx) (BoolBinding.program C label))
+      (prepared : Machine) (size : Fin W) (value : Solidity.AbiEntry.Word .bool),
+      Compiler.compile base (Frag.init RouteCtx) (BoolBinding.program C label) = some result ∧
+      size.val = input.size ∧ prepared.mem base = .val (rawArgumentWord input) ∧
+      prepared.mem (base + 1) = .val size ∧
+      Solidity.AbiEntry.entry input (fuel + 2) (singleWordParams .bool) =
+        .ok (.cons (.val (.word value)) .nil) ∧
+      run result.code prepared =
+        .ok (boolBoundMachine base label (rawArgumentWord input) prepared) 0 ∧
+      (boolBoundMachine base label (rawArgumentWord input) prepared).mem
+        (cellOf base (.here : Solidity.Idx BoolBoundCtx (.val .bool))) =
+          .val ⟨value.val, value.lt⟩ := by
+  let size : Fin W := ⟨input.size, small⟩
+  let prepared : Machine := seeded base (rawArgumentWord input) size machine
+  obtain ⟨value, decoded, executed, localValue⟩ :=
+    BoolBinding.decoded_and_bound C base label _ (BoolBinding.selected C base label)
+      input fuel prepared size (seeded_word base (rawArgumentWord input) size machine)
+      (seeded_size base (rawArgumentWord input) size machine) rfl full valid
+  exact ⟨BoolBinding.certificate, BoolBinding.compiled C base label, prepared, size, value,
+    BoolBinding.selected C base label, rfl,
+    seeded_word base (rawArgumentWord input) size machine,
+    seeded_size base (rawArgumentWord input) size machine, decoded, executed, localValue⟩
+
+/-- Concrete byte data inhabits all semantic-success and representation facts.
+This is a modeled ABI/IR success control, not a native or whole-Source call. -/
+theorem zero_word_input_success_jointWitness :
+    ∃ input : Solidity.AbiEntry.Input,
+      input.data = List.replicate 36 (0 : UInt8) ∧ input.free = 0 ∧ input.size < W ∧
+      ¬ input.size < 36 ∧
+      Solidity.AbiEntry.Kind.bool.valid (Solidity.AbiEntry.load input.data 4) = true ∧
+      ∃ (_certificate : BoolBindingCertificate BoolBinding.program)
+        (result : Compiler.Compilation 7 (Frag.init RouteCtx)
+          (BoolBinding.program {vars := []} (wmod 13)))
+        (prepared : Machine) (size : Fin W) (value : Solidity.AbiEntry.Word .bool),
+        Compiler.compile 7 (Frag.init RouteCtx)
+          (BoolBinding.program {vars := []} (wmod 13)) = some result ∧
+        size.val = input.size ∧ prepared.mem 7 = .val (rawArgumentWord input) ∧
+        prepared.mem 8 = .val size ∧
+        Solidity.AbiEntry.entry input 2 (singleWordParams .bool) =
+          .ok (.cons (.val (.word value)) .nil) ∧
+        run result.code prepared =
+          .ok (boolBoundMachine 7 (wmod 13) (rawArgumentWord input) prepared) 0 ∧
+        (boolBoundMachine 7 (wmod 13) (rawArgumentWord input) prepared).mem
+          (cellOf 7 (.here : Solidity.Idx BoolBoundCtx (.val .bool))) =
+            .val ⟨value.val, value.lt⟩ := by
+  let input : Solidity.AbiEntry.Input := {data := List.replicate 36 (0 : UInt8), free := 0}
+  have small : input.size < W := by decide
+  have full : ¬ input.size < 36 := by decide
+  have valid : Solidity.AbiEntry.Kind.bool.valid (Solidity.AbiEntry.load input.data 4) = true := by decide
+  refine ⟨input, rfl, rfl, small, full, valid, ?_⟩
+  exact decoded_input_success_jointWitness {vars := []} 7 (wmod 13) input 0 Machine.init small full valid
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.decoded_input_success_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms decoded_input_success_jointWitness
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.zero_word_input_success_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms zero_word_input_success_jointWitness
+
 end Solidity.H62.BytecodeSelection.BoolBindingFixture

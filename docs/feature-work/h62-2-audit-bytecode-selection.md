@@ -718,3 +718,54 @@ this lane; the global axiom inventory has zero nonstandard-axiom errors but 106
 unrecorded changes, including this module's seven. A scoped pin proposal is
 provided in the owned audit tests for coordinator registration. Neither failure
 is waived or counted as a whole-checkpoint/full gate pass.
+
+
+## Entry-rejection hypothesis feasibility
+
+The same audit module now also proves the exact finite-word size representation
+boundary, a joint certificate/selection/frame witness for every representable
+semantic input, and a closed empty-input witness for the existing rejection
+equivalence. The latter exposes empty data and zero free-memory facts. It proves
+hypothesis feasibility and the equivalence, not either side's actual rejection;
+it is separate from the earlier supported-success and dirty/short execution
+controls. The size bound is not an added producer exclusion: existence of
+`size : Fin W` with `size.val = input.size` is equivalent to `input.size < W`.
+The concrete witness proves its bound rather than assuming it.
+
+This extends the existing generic certificate in the same file under H112.
+No new compiler family, interface, producer premise or original statement changes.
+The file kernel-checked on the first attempt in 7.121 seconds, with ten exact
+standard-only axiom guards (the representability equivalence is axiom-free).
+The same 238 frozen import products were rebound and read only; PowerBounds
+was not recompiled. Both monitors passed with a maximum sampled parent peak of
+1,411,379,200 bytes under the unchanged 12 GiB/no-swap/one-CPU and 4 GiB reserve
+plus margin. No module exceeded 60 seconds; no exit 135 occurred and no OS stack
+limit was changed.
+
+Q-BUDGET-01 was delivered through coord-ask and answered A in GitHub issue #69:
+H30/H33 allow a fresh window for a genuinely independent checkpoint. Its new
+epoch is 2026-11-07 00:17:29.158130 UTC, deadline 04:17:29.158130 UTC, at most
+14,400 seconds with the same per-proof/group cap. The expired H86 ledger was
+not extended and its STOP remains. The goal, VM and branch were not reset.
+
+The scoped pin proposal now has ten records; the global registry remains for
+coordinator integration. Exact generated-domain linkage and the full
+703-source/190-core/37-Bridge, Source/native, package and matched performance
+obligations remain open. Evidence is under
+`/workspace/parallel-20261103/executable-bytecode/entry-rejection-witness/`.
+
+
+The same checkpoint also adds a parameterized semantic-decoder/IR success
+witness and a concrete 36-zero-byte input control. It proves both successful
+semantic decoding and execution of the actual selected IR result, with the
+validated local equal to the decoded Boolean. The input bytes, representability,
+full-size and validation facts are explicit and jointly proved in the closed
+control. This is not native loading, selector/route correspondence, charged
+execution or whole-Source adequacy.
+
+The full extended file passed in 9.836 seconds with twelve standard-only axiom
+guards and empty diagnostics; both monitors passed, maximum sampled parent
+1,423,917,056 bytes. The new success controls stayed in the same authorized
+checkpoint window, which was not restarted. Earlier passing versions are
+separately retained with their source hashes. The scoped pin proposal now has
+twelve records; it remains a proposal, not global inventory integration.
