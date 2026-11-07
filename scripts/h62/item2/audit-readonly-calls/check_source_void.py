@@ -42,14 +42,32 @@ SOURCE='tests/h62/item2/audit-readonly-calls/SourceVoidSelection.lean'
 PREFIX='Solidity.H62.ReadonlyCalls.SourceVoidSelection.'
 NAMES=['body_derived','signature','body_pair','instance_selected','function_selected','resolved_body','selector_length','source_dispatch','source_call','undeployed_refused','zero_horizon','wrong_selector','prepared','prepared_entry','prepared_input','nonempty_store','paired_execution']
 LOCAL=frame.LOCAL+[('NativeFrameTransport',frame.SOURCE)]
+EXTRA_TARGETS=[]
+MODE='selection'
+def configure_world():
+    global SOURCE,PREFIX,NAMES,LOCAL,EXTRA_TARGETS,MODE
+    if MODE!='selection':raise ValueError('duplicate world configuration')
+    LOCAL=LOCAL+[('SourceVoidSelection',SOURCE)]
+    SOURCE='tests/h62/item2/audit-readonly-calls/SourceVoidWorld.lean'
+    PREFIX='Solidity.H62.ReadonlyCalls.SourceVoidWorld.'
+    NAMES=['source_code','locate','image','time_aligned','installed_account','storage_lookup','funds_at_receiver','caller_storage','reached_image','wrong_name','missing_account_refused','wrong_funds_refused']
+    EXTRA_TARGETS=['Solidity.Lowering.V08.WorldCatalogueTransport'];MODE='world'
+
+def local_plan():
+    plan=LOCAL+[(Path(SOURCE).stem,SOURCE)]
+    names=[name for name,_ in plan]
+    if len(names)!=len(set(names)) or any(Path(file).stem!=name for name,file in plan):
+        raise ValueError('duplicate or mismatched local module staging name')
+    return plan
 
 def closure():
-    order,pins=m.profile.closure(ROOT,[m.TARGET,frame.legacy.CHECKED_TARGET,'Solidity.Source.SemanticsExamples'],{})
+    order,pins=m.profile.closure(ROOT,[m.TARGET,frame.legacy.CHECKED_TARGET,'Solidity.Source.SemanticsExamples']+EXTRA_TARGETS,{})
     if frame.legacy.HELD in order:raise ValueError('held Premises dependency refused')
     return order,pins
 
 def inventory(raw):
-    if m.profile.imports(raw.decode())!=['NativeFrameTransport','Solidity.Source.SemanticsExamples']:raise ValueError('Source void import drift')
+    expected=['SourceVoidSelection','Solidity.Lowering.V08.WorldCatalogueTransport'] if MODE=='world' else ['NativeFrameTransport','Solidity.Source.SemanticsExamples']
+    if m.profile.imports(raw.decode())!=expected:raise ValueError('Source void import drift')
     rows=m.joint.export.census.declarations_text(SOURCE,raw.decode())
     if [r['source_name'] for r in rows]!=[PREFIX+n for n in NAMES]:raise ValueError('Source void theorem inventory drift')
     return rows
@@ -80,7 +98,9 @@ def capture_tools(roots,out,require_loaded=True):
     return pins,snapshots
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--native',type=Path,required=True);p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--native',type=Path,required=True);p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--world',action='store_true');a=p.parse_args()
+    if a.world:configure_world()
+    local_plan()
     native=a.native.resolve();source=a.source.resolve();out=a.output.resolve()
     if out.is_relative_to(ROOT):raise ValueError('evidence must stay private')
     nr=frame.load_pinned(native/'receipt.json',NATIVE_SHA);sr=frame.load_pinned(source/'receipt.json',SOURCE_SHA)
@@ -150,13 +170,15 @@ def main():
             parent=(root,record['artifacts'][file])
         module(file[:-5],file,parent)
     local_dirty=bool(dirty & set(nr['source_pins']))
-    for name,file in LOCAL:module(name,file,None if local_dirty else (native,nr['artifacts'][file]))
-    module('SourceVoidSelection',SOURCE)
-    probe=out/'staged/SourceVoidProbe.lean';probe.write_text('import SourceVoidSelection\n'+''.join('#print axioms '+PREFIX+n+'\n' for n in NAMES));protected[str(probe)]=frame.sha(probe)
+    for name,file in local_plan():
+        parent=None if file==SOURCE or local_dirty or file not in nr['artifacts'] else (native,nr['artifacts'][file])
+        module(name,file,parent)
+    module_name=local_plan()[-1][0]
+    probe=out/'staged/SourceVoidProbe.lean';probe.write_text('import '+module_name+'\n'+''.join('#print axioms '+PREFIX+n+'\n' for n in NAMES));protected[str(probe)]=frame.sha(probe)
     axioms=m.joint.parse_axioms(run('probe',probe),PREFIX,NAMES)
     parents();m.check.verify_hashes(protected)
     if closure()!=(order,pins):raise ValueError('current source/import closure drift')
-    receipt={'status':'pass','head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'source':SOURCE,'source_sha256':source_pin,'native_receipt_sha256':NATIVE_SHA,'source_receipt_sha256':SOURCE_SHA,'source_pins':pins,'project_order':order,'changed_or_new':sorted(dirty),'reused':reused,'rebuilt':rebuilt,'artifacts':artifacts,'steps':steps,'protected_sha256':protected,'historical_tools':historical,'helper_source_bindings':tool_snapshots,'helper_binding_boundary':'Repository helper buffers retained before execution; CLI bootstrap/Python runtime/stdlib trusted; no remote attestation','theorems':rows,'axioms':axioms,'sdk_root':sdk,'original_obligations_discharged':0,'full_ro_adequacy':False,'runtime_gate_pass':False}
+    receipt={'status':'pass','mode':MODE,'head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'source':SOURCE,'source_sha256':source_pin,'native_receipt_sha256':NATIVE_SHA,'source_receipt_sha256':SOURCE_SHA,'source_pins':pins,'project_order':order,'changed_or_new':sorted(dirty),'reused':reused,'rebuilt':rebuilt,'artifacts':artifacts,'steps':steps,'protected_sha256':protected,'historical_tools':historical,'helper_source_bindings':tool_snapshots,'helper_binding_boundary':'Repository helper buffers retained before execution; CLI bootstrap/Python runtime/stdlib trusted; no remote attestation','theorems':rows,'axioms':axioms,'sdk_root':sdk,'original_obligations_discharged':0,'full_ro_adequacy':False,'runtime_gate_pass':False}
     (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print('SOURCE_VOID_PASS modules='+str(len(order))+' reused='+str(len(reused))+' rebuilt='+str(len(rebuilt))+' theorems='+str(len(axioms)))
 if __name__=='__main__':main()
