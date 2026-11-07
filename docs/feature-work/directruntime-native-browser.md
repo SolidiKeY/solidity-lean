@@ -657,3 +657,68 @@ are weakened. This checkpoint does not complete the original queue.
 The locally verified24-artifact incremental cache pack is retained for coordinator
 pull with path/size/SHA in the manifest. Delivery is coordinator-pending; no
 ship-cache.sh or H88 cross-cache coherence claim is made.
+
+
+## H71 address-local qualification and owner conflict versions
+
+[Address results manifest](../../tests/directruntime-20261104/native-browser/address/results-manifest.json)
+pins source build4234b74778787f681ebb50f2890355d99f37731a,exact producer0834bc67
+Translate/Compose hashes and verified packet c19c588e…ec5dfb. The delivered
+0a96c06e producer archive was inspected without execution. H71authorizes scoped
+consumption while the coordinator publication/merge wait remains separate.
+Both conflict files now equal the reviewed owner versions;no manual producer
+rewrite or unpublished master adoption occurred.
+
+All343runtime source files match reviewed owner09bb5b5e. Compared with the full
+0834tree,only the published LinearCountermodel dependency differs. This dependency
+context is explicit;the packet is a two-file increment,not wholebranch,census or
+source/ABI qualification.
+
+Both freshly built native and real Chromium backends match all16source-backed
+address fixtures:10proved,2refuted,4unsupported,plus2positive harness guards per
+backend. Eight source-level box annotations erase to the exact diamond source.
+Parameter/payable refusals retain the exact unsupported-address diagnostic.
+A separate compiler-produced AddressStateRefusal contract fails closed on both
+backends;that gap request is neither a positive proof nor part of the16fixtures.
+
+The new kernel decoder equation and prior narrow/fixed-byte equations print
+only propext,Classical.choice,Quot.sound. Marker/identity/malformed/payable guards,
+3builtinidentity negatives,base-first error priority,32fixed-byte spellings,
+18finite modal cases,one return-effect check,two refusal guards and12intrinsic memory controls pass.
+Eight per-file diagnostics report0errors. These prove decoder/model facts and
+record trusted checker observations;source/compiler/ABI/native preservation,
+full importer parity and original semantic/world obligations remain open.
+
+Retained fresh fixed-byte20,C13,A8,B84 and83function controls match their unchanged
+expectations on both backends. B retains64proved/16refuted/4pending,including the
+positive exact Identitydiamond in both compiler modes. Native negatives pass14/14;
+browser negatives remain13/14 with invariantCountsToBound stack overflow. Edited
+source,counterexample and disconnected fresh-edit UI controls pass.
+
+The206-module selected-C/object inventory has9985functions/5006closed values,
+with native/WASM parity and current request-specific no-forbidden-load traces.
+Its exact-body classification is not a universal purity or machine-correctness
+proof. Actual Lean4.24.0/Lake5.0.0-src+797c613,18unit checks and on-demand KeySort
+377/131/131 with matching annotations pass. Every heavy gate uses serial12GiB,
+swap0,CPU1,threads1/-j1 and4GiB outer reserve. Native28.80s is incremental;WASM
+269.95s recompiles selected C. The191.48s marker gate includes transitive rebuilds.
+These are not matched-cold measurements and do not clear the prior native median
++21.32%,browser startup+32.20% or native build+26.13% STOPs. No unchanged stopped
+benchmark was rerun;RUNTIME_GATE_PASS remains pending.
+
+Finder and skeptic caught a supplementary-harness provenance gap before use:
+fixture/source/compiler were initially only self-consistent. The tested version
+binds them to the exact pinned suite and completed parent report,checks its
+single public function,current binaries/bridge/closure/sourcepins,and fails
+closed on RPC timeout. Both reviewers confirmed the correction. The executed
+private script and committed script are byte-identical.
+
+| Local registration proposal | Role | Central action |
+|---|---|---|
+| address/MarkerIdentityControls.lean |Standalone marker/identity/signature/axiom driver |No generated productionroot addition |
+
+Bulk ASTs,logs,binaries and24incremental cache artifacts remain off Git with
+absolute paths,per-file indexes and SHA256 in the manifest. Cache delivery is
+coordinator-pending;no ship-cache or H88cross-cache coherence is inferred.
+Independent final finder/skeptic review remains scoped to these receipts and
+limits;this increment does not complete the original assigned queue.
