@@ -187,6 +187,134 @@ theorem wrong_target_refuses : ¬ (∀ query ∈ readQueries,
   have unequal : (⟨0, by decide⟩ : Fin Evm.W) ≠ ⟨1, by decide⟩ := by decide
   exact unequal wrong
 
+def writeLocations : List Storage.Loc := [.root 0, .data (.root 0) 0, .data (.root 0) 1]
+def writePreimages : List Storage.Pre := [.data 0]
+def frameQueries : List (Query graph (.array (.prim .bool))) := [PrimitivePop.elementQuery one]
+
+theorem write_run : FiniteRun 16 2 1 hash writePreimages writeLocations := by
+  constructor
+  · intro _; change 8 < 16; decide
+  · decide
+  · decide
+  · decide
+  · intro loc member
+    simp only [writeLocations, List.mem_cons, List.not_mem_nil, or_false] at member
+    rcases member with rfl | rfl | rfl <;> simp only [Storage.Loc.Bounded] <;> decide
+  · intro loc member
+    simp only [writeLocations, List.mem_cons, List.not_mem_nil, or_false] at member
+    rcases member with rfl | rfl | rfl <;> decide
+
+theorem write_header : Represented old [.length .nil] (.root 0) readStore := by
+  intro query member
+  have same : query = .length .nil := List.mem_singleton.mp member
+  subst query
+  exact read_before _ List.mem_cons_self
+
+theorem write_frame : Represented old frameQueries (.root 0) readStore := by
+  intro query member
+  have same : query = PrimitivePop.elementQuery one := List.mem_singleton.mp member
+  subst query
+  refine ⟨?_, True.intro, ?_⟩
+  · change 1 < Storage.lmax ∧ True
+    exact ⟨by decide, True.intro⟩
+  · intro value observed
+    cases observed
+    rfl
+
+theorem write_support : PathSupported (TargetArrayRead.path (G := graph) (p := .bool) zero) := by
+  change 0 < Storage.lmax ∧ True
+  exact ⟨by decide, True.intro⟩
+
+theorem write_apart : ∀ query ∈ frameQueries,
+    query.apart (TargetArrayRead.path (G := graph) (p := .bool) zero) := by
+  intro query member
+  have same : query = PrimitivePop.elementQuery one := List.mem_singleton.mp member
+  subst query
+  exact Apart.fork (StepApart.index zero one (by decide)) .nil .nil
+
+theorem write_nonalias : ∀ query ∈ frameQueries,
+    query.location (.root 0) ≠ pathLoc (TargetArrayRead.path (G := graph) (p := .bool) zero) (.root 0) := by
+  intro query member
+  have same : query = PrimitivePop.elementQuery one := List.mem_singleton.mp member
+  subst query
+  change Storage.Loc.data (.root 0) 1 ≠ .data (.root 0) 0
+  decide
+
+theorem write_transport : Transport 16 hash writeLocations readStore numeric := by
+  intro loc _
+  rfl
+
+theorem write_header_covered : Storage.Loc.root 0 ∈ writeLocations := List.mem_cons_self
+
+theorem write_child_covered :
+    pathLoc (TargetArrayRead.path (G := graph) (p := .bool) zero) (.root 0) ∈ writeLocations :=
+  List.mem_cons_of_mem _ List.mem_cons_self
+
+theorem write_fitting : ∀ loc ∈ writeLocations, TargetOperations.KeysFit loc := by
+  intro loc member
+  simp only [writeLocations, List.mem_cons, List.not_mem_nil, or_false] at member
+  rcases member with rfl | rfl | rfl <;> exact True.intro
+
+theorem write_initial : ∀ loc (member : loc ∈ writeLocations),
+    machine.store.cells (TargetOperations.toSlot loc (write_fitting loc member)) =
+      TargetOperations.encodeWord (readStore loc) := by
+  intro loc member
+  simp only [writeLocations, List.mem_cons, List.not_mem_nil, or_false] at member
+  rcases member with rfl | rfl | rfl <;> rfl
+
+theorem numeric_write_joint :
+    FiniteRun 16 2 1 hash writePreimages writeLocations ∧
+    TargetArrayWrite.writeAt old zero false = some result ∧
+    TargetOperations.KeysFit (.root 0) ∧
+    Represented old [.length .nil] (.root 0) readStore ∧
+    Represented old frameQueries (.root 0) readStore ∧
+    PathSupported (TargetArrayRead.path (G := graph) (p := .bool) zero) ∧
+    (∀ query ∈ frameQueries, query.apart (TargetArrayRead.path (G := graph) (p := .bool) zero)) ∧
+    (∀ query ∈ frameQueries, query.location (.root 0) ≠
+      pathLoc (TargetArrayRead.path (G := graph) (p := .bool) zero) (.root 0)) ∧
+    Transport 16 hash writeLocations readStore numeric ∧
+    Storage.Loc.root 0 ∈ writeLocations ∧
+    pathLoc (TargetArrayRead.path (G := graph) (p := .bool) zero) (.root 0) ∈ writeLocations ∧
+    ∃ fitting : ∀ loc ∈ writeLocations, TargetOperations.KeysFit loc,
+      ∀ loc (member : loc ∈ writeLocations),
+        machine.store.cells (TargetOperations.toSlot loc (fitting loc member)) =
+          TargetOperations.encodeWord (readStore loc) :=
+  ⟨write_run, success_joint, True.intro, write_header, write_frame, write_support,
+    write_apart, write_nonalias, write_transport, write_header_covered, write_child_covered,
+    write_fitting, write_initial⟩
+
+def writtenStore : Store := write readStore (.data (.root 0) 0) (PrimTy.toWord (p := .bool) false)
+def writtenNumeric : WordStore := writeWord numeric 8 (PrimTy.toWord (p := .bool) false)
+def writtenTarget : Evm.Machine := {machine with stack := tail, store := Evm.WordStore.write machine.store (.data (.root 0) 0) 0}
+
+theorem numeric_write_actual :
+    Evm.run TargetArrayWrite.code {machine with stack := .val zero :: .slot (.root 0) :: .val (TargetOperations.encodeWord (PrimTy.toWord (p := .bool) false)) :: tail} = .ok writtenTarget 0 ∧
+    Represented result (.length .nil :: .word (TargetArrayRead.path zero) :: frameQueries) (.root 0) writtenStore ∧
+    Transport 16 hash writeLocations writtenStore writtenNumeric ∧
+    (∀ loc (member : loc ∈ writeLocations),
+      writtenTarget.store.cells (TargetOperations.toSlot loc (write_fitting loc member)) =
+        TargetOperations.encodeWord (writtenStore loc)) := by
+  rcases numeric_write_joint with ⟨run, performed, fits, header, before, supported,
+    apart, nonalias, initial, headerCovered, childCovered, fitting, targetInitial⟩
+  exact TargetArrayWrite.complete_numeric run old result zero false performed frameQueries
+    (.root 0) fits readStore numeric machine tail header before supported apart nonalias
+    initial headerCovered childCovered fitting targetInitial
+
+theorem numeric_write_observations :
+    (writtenNumeric 0, writtenNumeric 8, writtenNumeric 9,
+      writtenTarget.store (.root 0), writtenTarget.store (.data (.root 0) 0),
+      writtenTarget.store (.data (.root 0) 1), writtenTarget.store (.root 9),
+      writtenTarget.stack, writtenTarget.mem 0) =
+    (PrimTy.toWord (p := .bool) true, PrimTy.toWord (p := .bool) false,
+      PrimTy.toWord (p := .bool) true, 1, 0, 1, 99, tail, machine.mem 0) := rfl
+
+theorem colliding_hash_refuses :
+    ¬ FiniteRun 16 2 1 (fun _ => 0) writePreimages writeLocations := by
+  intro run
+  have alias := run.word_inj (a := .root 0) (b := .data (.root 0) 0)
+    write_header_covered write_child_covered rfl
+  exact (Storage.Loc.data_ne_self (.root 0) 0) alias.symm
+
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.read_joint' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms read_joint
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_joint' does not depend on any axioms -/
@@ -236,5 +364,37 @@ theorem wrong_target_refuses : ¬ (∀ query ∈ readQueries,
 #guard_msgs (whitespace := lax) in #print axioms wrong_numeric_refuses
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.wrong_target_refuses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms wrong_target_refuses
+
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_run' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms write_run
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_header' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms write_header
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms write_frame
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_support' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms write_support
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_apart' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms write_apart
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_nonalias' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms write_nonalias
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms write_transport
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_header' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_header_covered' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms write_header_covered
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_child_covered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms write_child_covered
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_fitting' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms write_fitting
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_initial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms write_initial
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.numeric_write_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms numeric_write_joint
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.numeric_write_actual' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms numeric_write_actual
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.numeric_write_observations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms numeric_write_observations
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.colliding_hash_refuses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms colliding_hash_refuses
 
 end H62.StorageAudit.ArrayAccessWitnesses
