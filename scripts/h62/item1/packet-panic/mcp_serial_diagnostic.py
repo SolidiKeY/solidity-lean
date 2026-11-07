@@ -4,6 +4,7 @@
 The caller holds the repository writer lock. This process imposes a 12 GiB
 per-process address-space limit on itself and descendants. The monitored cgroup reserve is sampled, not a hard aggregate cap.
 """
+import argparse
 import asyncio
 import ctypes
 import os
@@ -15,11 +16,22 @@ import sys
 import time
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import get_default_environment, stdio_client
+from diagnostic_policy import validated_target
 
 root = Path(__file__).resolve().parents[4]
-if len(sys.argv) != 1:
-    raise SystemExit("usage: mcp_serial_diagnostic.py")
-project = root / "tests/h62/item1/packet-panic/closure-project-retry"
+parser = argparse.ArgumentParser()
+parser.add_argument("--project", type=Path, default=root / "tests/h62/item1/packet-panic/closure-project-retry")
+parser.add_argument("--diagnostic", type=Path, help="optional Lean file for a per-file MCP diagnostic after a successful build")
+args = parser.parse_args()
+project = args.project.resolve(strict=True)
+allowed_projects = {
+    root / "tests/h62/item1/packet-panic/closure-project-retry",
+    Path("/workspace/h62-packet-panic-overlay-2a18/tests/h62/item1/packet-panic/closure-project-overlay"),
+}
+if project not in allowed_projects:
+    raise SystemExit("project is outside the two authorized isolated diagnostic paths")
+target = validated_target(project, args.diagnostic) if args.diagnostic else None
+print(f"isolated project: {project}", flush=True)
 if (project / ".lake").exists():
     raise SystemExit("isolated cache already exists; preserve it and use a fresh isolated project")
 resource.setrlimit(resource.RLIMIT_AS, (12 * 1024**3, 12 * 1024**3))
@@ -83,11 +95,21 @@ async def diagnose():
             build = payload.get("result", payload)
             output = build.get("output", "")
             if (result.isError or not build.get("success") or build.get("errors") or
-                    len(output.splitlines()) >= 1000000 or re.search(r"(?im)(?:\bwarning:|^\s*warn\b|⚠)", output)):
-                raise RuntimeError("isolated helper build failed, output may be truncated, or warnings occurred")
+                    len(output.splitlines()) >= 1000000):
+                raise RuntimeError("isolated helper build failed or output may be truncated")
+            has_warnings = bool(re.search(r"(?im)(?:\bwarning:|^\s*warn\b|⚠)", output))
             artifact = project / ".lake/build/lib/lean/PanicBytes.olean"
             if not artifact.is_file():
                 raise RuntimeError("build reported success but target olean is missing")
+            if target is not None:
+                diagnostic = await session.call_tool("lean_diagnostic_messages", {"file_path": str(target), "interactive": False, "timeout_s": 120})
+                print(diagnostic.model_dump_json(indent=2), flush=True)
+                details = (diagnostic.structuredContent or {}).get("result", {})
+                problems = [item for item in details.get("items", []) if item.get("severity") in ("error", "warning") or "out of date" in item.get("message", "").lower()]
+                if diagnostic.isError or not details.get("success") or details.get("partial") or details.get("timed_out") or details.get("failed_dependencies") or problems:
+                    raise RuntimeError("per-file diagnostic failed, was incomplete or reported warnings")
+            if has_warnings:
+                raise RuntimeError("isolated helper build reported warnings")
 
 async def guard():
     global peak
