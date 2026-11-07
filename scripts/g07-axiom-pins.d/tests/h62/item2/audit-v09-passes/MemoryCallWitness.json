@@ -1,0 +1,108 @@
+{
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.actual_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.costs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.final_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.first_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.frame_difference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.initial_repr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.noRefs_premises_impossible": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.public_recognizer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.push_free": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.costs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.private_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.reached_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.scope_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.suffix_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.Scope.suffix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.second_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/MemoryCallWitness.lean:Solidity.Backend.Passes.AuditMemoryCall.source_get_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
