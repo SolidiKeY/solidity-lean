@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/closer-normal-roles-v105/semantic-roles-reviewed.json",
-    "bytes": 3612964,
-    "sha256": "23053db109e7488a2ceace47c38471b75ea7100598faf5f5b12a2757d6126264"
+    "path": "/workspace/h62-successor-bulk/clean-tail-fold-roles-v106/semantic-roles-reviewed.json",
+    "bytes": 3669822,
+    "sha256": "a75a8b8402fc273715a5b22db52caca4e8ebed2d6c1be20b5595bb2f8aa34cc8"
   }
 }
