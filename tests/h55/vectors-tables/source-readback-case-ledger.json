@@ -1,0 +1,156 @@
+{
+  "scope": "Explicit selected-local read boundary only; not all Source expressions/statements, raw-copy propagation or all Raw cases.",
+  "definitions": [
+    "Solidity.Yul.DirtyReadback.readAt",
+    "Solidity.Yul.DirtyReadback.evalLocal"
+  ],
+  "cases": [
+    {
+      "decode": "none",
+      "fuel": "any",
+      "result": "outer none; no fabricated Source halt",
+      "theorem": "evalLocal_refused"
+    },
+    {
+      "decode": "some value",
+      "fuel": "zero",
+      "result": "actual Source timeout with prepared Source state and original RawFrame.State",
+      "theorem": "evalLocal_zero"
+    },
+    {
+      "decode": "some value",
+      "fuel": "successor",
+      "result": "actual Source RVal.val value with prepared Source state and original RawFrame.State",
+      "theorem": "evalLocal_success"
+    }
+  ],
+  "index_cases": [
+    "here",
+    "there; induction on typed index"
+  ],
+  "raw_preservation": "evalLocal_raw retains the complete original RawFrame.State",
+  "controls": [
+    "readbackSelectedLazy",
+    "readbackSourceLocal",
+    "readbackSourceTimeout",
+    "readbackSourceRefusal",
+    "readbackSourceRaw",
+    "readbackRawWords"
+  ],
+  "pipelines": "Both constructors, using the actual Source global pipeline.",
+  "limitations": [
+    "Unsupported address, fixed bytes and enum dirty words remain refused by the published decoder.",
+    "No representation rewrite; H58 HOLD unchanged.",
+    "Fixture global is inhabited only for local-read controls, not a crypto/call correctness witness."
+  ],
+  "conservation": {
+    "typed_index_cases": [
+      "here",
+      "there"
+    ],
+    "locals_set_get": "Preparing the selected local with its own value preserves the complete local environment.",
+    "evalLocal_readable": "For every fuel and runtime plan, outer admission equals selected decoder admission.",
+    "evalLocal_compatible": "Conditional on readAt returning the selected clean backup, the complete Source result/state equals actual Source.evalE on original clean/world, and the original raw frame is retained.",
+    "limitation": "No unconditional materialized-clean-frame decoding or general expression/statement agreement is asserted."
+  },
+  "pipeline_agreement": {
+    "api": [
+      "readValue_pipelines",
+      "readLocal_pipelines",
+      "readback_pipelines",
+      "readbackFrom_pipelines",
+      "readAt_pipelines",
+      "evalLocal_pipelines"
+    ],
+    "context_cases": [
+      "nil",
+      "cons; induction for readback and readbackFrom"
+    ],
+    "decode_cases": "Full optional equality follows existing cleanWord_pipelines; no refusal or backup fallback is removed.",
+    "source_cases": [
+      "fuel zero: actual Source timeout after successful selected decode",
+      "fuel successor: actual Source local lookup after successful selected decode"
+    ],
+    "global_change": "Only G.pipeline changes; all other global fields, frame, fuel, state, index and runtime plan are identical.",
+    "reuse": "RawFrame.Logic.frame_readback_pipelines has unchanged signature and reuses readbackFrom_pipelines.",
+    "limitation": "No equality of arbitrary Source expressions, unchecked arithmetic, statements or raw-copy propagation."
+  },
+  "view_and_capture": {
+    "readAt_agrees_premises": [
+      "equal clean backup",
+      "equal authoritative word view"
+    ],
+    "evalLocal_source_agrees_extra_premise": "equal world",
+    "source_observation": "Option of complete Source R result and complete prepared Source EMState; only original raw-frame return component projected away",
+    "capture": "Existing RawFrame.capture of exactly the same authoritative view; backup and world unchanged",
+    "semantic_cases": [
+      "selected decoder none: both observations refuse",
+      "selected decoder some: same full Source evaluation with G/F/fuel/index/plan unchanged"
+    ],
+    "metadata_control": "At flag, selectedReadState.raw is none and captured state.raw is some(view flag), while full optional Source observations agree in both pipelines.",
+    "limits": [
+      "No raw-frame identity or overlay equality",
+      "No general Source expression/statement or copy integration",
+      "No all-Raw-case completeness claim"
+    ]
+  },
+  "integer_cleanup": {
+    "numeric_scope": "Existing Source.wrapBits for every Bool signedness, Nat width and Int input",
+    "cases": [
+      "signed cleanup conditional subtracts its modulus",
+      "non-subtracting cleanup retains residue"
+    ],
+    "laws": [
+      "residue preservation",
+      "equal residues imply equal wrapping",
+      "numeric idempotence",
+      "full intrinsic intWrap idempotence",
+      "equal low-bit word residues imply equal full optional integer readback in both pipelines"
+    ],
+    "limitations": [
+      "Sufficiency theorem, not stated as an iff",
+      "No bool modulo law: bool remains nonzero testing",
+      "No automatic Source integration or encode/decode roundtrip theorem",
+      "No Raw state or decoder definition changes"
+    ],
+    "axioms": {
+      "wrapBits_emod": "[propext]",
+      "wrapBits_congr": null,
+      "wrapBits_idempotent": "[propext]",
+      "intWrap_idempotent": "[propext, Classical.choice, Quot.sound]",
+      "cleanWord_int_lowBits": "[propext, Classical.choice, Quot.sound]"
+    }
+  },
+  "encoder_roundtrip": {
+    "scope": "Actual Source.Val.word.bind published cleanWord, complete Option Val equality",
+    "types": [
+      "every valid integer type with its actual lo/hi proof",
+      "Boolean"
+    ],
+    "pipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "proof_cases": [
+      "unsigned in range",
+      "signed nonnegative in range",
+      "signed negative in range",
+      "Boolean false and true in each pipeline"
+    ],
+    "encoder": "Existing 256-bit intWord; for every valid width, the modulus 2^bits divides 2^256",
+    "limits": [
+      "No roundtrip for unsupported dirty types",
+      "No arbitrary RawFrame materialization adequacy",
+      "No Source expression/statement or raw-copy integration"
+    ],
+    "numeric_helpers": [
+      "intWord_value",
+      "wrap_intWord",
+      "intWrap_of_range"
+    ],
+    "roundtrips": [
+      "cleanWord_int_roundtrip",
+      "cleanWord_bool_roundtrip"
+    ]
+  }
+}
