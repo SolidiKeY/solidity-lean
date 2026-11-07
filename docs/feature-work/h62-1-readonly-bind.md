@@ -156,3 +156,58 @@ The global documentation gate currently fails on two inherited synthetic fixture
 references in another chain's tests/h62/item2/audit-evm-compiler/check_scope.py.
 That file is byte-identical to current master; it was not edited here. Whitespace
 checks pass. The documentation failure remains an outstanding global gate.
+
+
+## Actual encoding-failure fixture (2026-11-07)
+
+The additive test `tests/h62/item1/readonly-bind/EncodingFailureControls.lean`
+closes the previously missing concrete encoding-failure phase fixture. A typed
+`bool[] memory` reference points to an allocated one-element array. At one
+shared state and fuel6, receiver evaluation, zero-value evaluation and identity
+argument conversion all succeed; `encodeVals` then returns the exact
+`stuck "not ABI-encodable"` failure. The unchanged
+`CaptureFailures.encoding_failed` theorem transports those jointly checked
+runs to the complete external-call expression at fuel7, with the same state.
+The declaration's actual `fnSig` and heap allocation are checked. Declaration
+membership in EB, general array ABI support, compiler success, source/callee
+outcome correspondence and physical-frame adequacy are not claimed.
+
+Reproduce under the existing serial bounded runner with
+`scripts/h62/item1/readonly-bind/check_encoding_fixture.py --output NEW_DIRECTORY`.
+It compiles exact current Source.Hoare, CapturePhases and CaptureFailures, then
+the fixture and an axiom query, in a private library. Normal cached CaptureFailures
+initially failed due to an evaluator signature mismatch; the failed attempts
+are retained rather than reported as passing. The controlled fresh-leaf check
+passed initially in5.451s; the final source-pinned check passed in4.532s at299130880bytes aggregate peak RSS. All four fixture theorem
+axiom sets contain only propext, Classical.choice and Quot.sound. Remaining
+project and SDK dependencies are cached inputs, not independently source-bound.
+Actual tools: Lean4.24.0 (797c613), Lake5.0.0-src+797c613; one Lean process,
+-j1,12GiB cap,4GiB reserve, no swap. No before/after rebaseline or runtime-pass
+claim; the historical +80.254966536% Premises STOP remains unchanged.
+
+All792 original obligations and original private identities are retained.
+This completes one inherited actual fixture, not complete declaration/case
+acceptance or any of the other inherited queues. Evidence, failed logs,
+receipt and handoff are exported under
+`/workspace/h62-audit-readonly-calls/encoding-failure/`.
+H121 routes actual compiler-success/G42.04 adequacy to memory-reference-structs;
+our full RO source/callee outcome and physical-frame correspondence remain
+unfinished. The exact retired proof-cleanup object remains UNVERIFIABLE.
+
+
+Independent read-only finder and skeptic confirmed joint feasibility and the
+allocated typed argument. Both found an evidence sealing gap; it was fixed by
+parsing the exact hashed log buffer and rechecking staged sources, objects,
+probe, process logs, compiler, toolchain and runner identity before the receipt.
+Targeted controls reject substituted compiler/toolchain/source/object/probe/log
+bytes and missing, duplicate, foreign or sorryAx theorem records (three tests,
+all refusal subcases passed). Neither reviewer used Lean or wrote files.
+These external tooling controls do not prove the imported cached dependencies.
+
+The final finder follow-up also required retaining the captured source digest
+before compilation. The driver now checks that initial digest before and after
+compilation; an orchestration control replaces both original and staged source
+after fake compilation and verifies refusal. Both final reviewers report no
+remaining confirmed finding within this checkpoint's stated boundary.
+The documentation gate still fails only on the two inherited references already
+routed to v17-validation-release; this checkpoint did not edit that other chain.
