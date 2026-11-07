@@ -1,0 +1,41 @@
+{
+  "scope": "two complete static declared-return transport roles; zero fresh witnesses/runtime acceptance",
+  "counts": {
+    "reviewed": 255,
+    "pending": 5028,
+    "owners_confirmed": 3746,
+    "owners_unresolved": 1537
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/return-transport-classification-v19/evidence.tar.gz",
+      "bytes": 917117,
+      "sha256": "10842470456d53c6b93e5a4e22b8430bcc6b676499f7a43b09748a2d63bd0cbf"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/return-transport-classification-v19/inputs.json",
+      "bytes": 914,
+      "sha256": "ceb23101df0097d32f3a2c42332287c189c91852f7c521f956b9150f32a252ec"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/return-transport-classification-v19/gates.json",
+      "bytes": 2181,
+      "sha256": "52676f6bc99aecfcec195ff72598ac25ae98f749f158f0c83b08a9a11185e801"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/return-transport-classification-v19/reviews.md",
+      "bytes": 378,
+      "sha256": "f51f10694f0d4eb24e7a4a30dd9f043c984d1fc50bb92eb4caab562178e761b4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/return-transport-classification-v19/doc-metrics.json",
+      "bytes": 222,
+      "sha256": "92d67706e4e79032b7c6882516b969d607a8c7e5883a1d0443676fd1b9c2c349"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/return-transport-classification-v19/semantic-roles-reviewed.json",
+      "bytes": 709881,
+      "sha256": "158f069fad157ed06173a739e93f3b03dd228a2a070fd455d355426bc6e26104"
+    }
+  ]
+}
