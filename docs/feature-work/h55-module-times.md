@@ -1334,3 +1334,20 @@ unverified.
 Independent read-only finder and skeptic reviewed all four contexts without
 Lean, a server or a build. Their review added the native lock requirement and
 negative-vector distinction. No H56 acceptance or exclusion follows.
+
+## Bridge precompile control candidates
+
+`precompile_controls.py` records eight supplied tracked candidates against
+their census hashes. Five are named in the serial `verify.py` driver, which
+stops Lean MCP and writes logs, a receipt and producer oleans; exact inputs,
+resource enforcement and current outcomes have not been verified. The cache
+hash tool, native MODEXP probe and trust probe have no established current
+invocation in that driver. Subsets are accepted; this is not coverage proof.
+
+The source-backed historical record reports missing native FFI symbols in
+the MODEXP probe and an earlier boundary attempt whose printed marker was
+followed by exit 1. A marker alone is not a pass. Computed core vectors are
+not cryptographic implementation equality proofs. Independent read-only
+finder and skeptic checked the mapping without Lean, server or builds. The
+skeptic requested the historical exit failure be recorded in the individual
+boundary row; it was added. No H56 measurement, production acceptance or candidate exclusion is inferred.
