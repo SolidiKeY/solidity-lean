@@ -1,0 +1,102 @@
+{
+  "guardedRegression": "Split RowsNine obligation must stay checked in CI/full/lane-end while moving out of the ordinary checkpoint/default library; classification cannot hide its300second STOP.",
+  "consumerLane": "solidity-fullscope-20261104/vx1-contracts-environment",
+  "consumerHead": "ee8eccaf5f9536a44912c7d2ec31329e7b46adaf",
+  "reportedConsumerHandoffSha256": "c88f4072bc6ecc484666d062b72d1580a272da1078dfcfa9f55bcea8f6833363",
+  "consumerHandoffBoundary": "Coordinator supplied this handoff hash; handoff file itself not retrieved here. Exact Git source files inspected separately.",
+  "inspectedAtHead": "adcadb59ab4664440c8c3916b917ea1f16a8d75c",
+  "producerSourcePins": [
+    {
+      "path": "Solidity/Examples/Tactics/OpenLoops.lean",
+      "sha256": "c7792125666cc42b8b5eb7b9b35fa789485727859341ee79e37da805b824c355"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/OpenLoops/RowsNine.lean",
+      "sha256": "563b15eca59bf58cbd4c67602209935780c23422a684cb159b7b52792dc7cb44"
+    },
+    {
+      "path": "SoliditySlowExamples.lean",
+      "sha256": "475fee9699da1518d5ad11cc233c4d474ee7fd8591bf461e96443511111e3927"
+    },
+    {
+      "path": "SolidityExamples.lean",
+      "sha256": "9222947be6e143853da17dec3e61e8b20431c47ee175ba5ab30fe15702580f14"
+    },
+    {
+      "path": "scripts/coord-tools/register.sh",
+      "sha256": "60acf4e27b73393397b8f9e71f9c38572c6cfa0da19e896d668a885a901e6190"
+    }
+  ],
+  "module": "Solidity.Examples.Tactics.OpenLoops.RowsNine",
+  "source": "Solidity/Examples/Tactics/OpenLoops/RowsNine.lean",
+  "classification": "H109 non-default slow example; explicit slow-root member required, not ordinary default/checkpoint selection.",
+  "theorem": "Solidity.Examples.Tactics.OpenLoops.binomialRowsNine",
+  "signatureTextMatchesExistingParent": true,
+  "signatureBoundary": "Text comparison only; no Lean elaboration, definitional equality or proof-validity claim.",
+  "parentImportsChild": false,
+  "observedProducerRoots": {
+    "slowParent": true,
+    "slowRowsNine": false,
+    "regularParent": true,
+    "regularRowsNine": true,
+    "boundary": "Observed exact ee8 source root text; roots are stale relative to intended H109 partition. No producer source merged."
+  },
+  "proposedSlowMembers": [
+    "Solidity.Examples.DecisionAPF",
+    "Solidity.Examples.DecisionBlocks",
+    "Solidity.Examples.DecisionGapCore",
+    "Solidity.Examples.DecisionGapHashes",
+    "Solidity.Examples.DecisionGapKInt",
+    "Solidity.Examples.DecisionGaps",
+    "Solidity.Examples.DecisionLedger",
+    "Solidity.Examples.DecisionOperators",
+    "Solidity.Examples.DecisionRefutations",
+    "Solidity.Examples.DecisionResidue",
+    "Solidity.Examples.DecisionStorageArrays",
+    "Solidity.Examples.DecisionThreeKindCoverage",
+    "Solidity.Examples.Tactics.OpenLoops",
+    "Solidity.Examples.Tactics.OpenLoops.RowsNine",
+    "Solidity.Examples.Tactics.RevertData"
+  ],
+  "centralActions": [
+    {
+      "file": "scripts/coord-tools/register.sh",
+      "action": "Append exact RowsNine module to SLOW_EXAMPLES; preserve every existing member and exact-match policy."
+    },
+    {
+      "file": "SoliditySlowExamples.lean",
+      "action": "Regenerate centrally with register.sh: include parent and RowsNine (15explicit slow members). Do not hand-edit generated root."
+    },
+    {
+      "file": "SolidityExamples.lean",
+      "action": "Regenerate centrally: remove parent and RowsNine direct default imports, retaining them in slow root. Preserve unrelated descendants such as DecisionGaps.Extra."
+    },
+    {
+      "file": "tests/h55/module-times/test_slow_examples.py",
+      "action": "Add the explicit RowsNine regression with the owning integration; retain existing sparse/default/import-closure coverage."
+    },
+    {
+      "file": "tests/directruntime-20261104/native-browser/h109/prepare-plan.py",
+      "action": "After producer source/root adoption, update exact reviewed slow target inventory to15; current14target planner intentionally fails drift rather than omit a check."
+    }
+  ],
+  "localModuleMapRowProposal": "| Solidity.Examples.Tactics.OpenLoops.RowsNine | H109 slow example; existing binomialRowsNine obligation, CI/full/lane-end retained | Solidity/Examples/Tactics/OpenLoops/RowsNine.lean |",
+  "retainedValidation": {
+    "leanCI": ".github/workflows/lean.yml builds SoliditySlowExamples",
+    "pagesCI": ".github/workflows/pages.yml includes SoliditySlowExamples in build-args",
+    "fullLaneEnd": "run-lean.sh explicitly builds SoliditySlowExamples; gate.sh full calls run-lean.sh",
+    "axiomAudit": "scripts/AxiomAudit.lean imports SoliditySlowExamples",
+    "checkpoint": "gate.sh checkpoint removes explicit slow-root members; after central regeneration this includes RowsNine",
+    "boundary": "Static hook membership only, not successful build/CI/audit or new authenticated runner execution."
+  },
+  "performanceBoundary": "Producer RowsNine doc reports chunk128:8992MiB/457s; chunk64:5876MiB/594s. These are producer-reported observations, not reproduced here.594s exceeds unchanged H55300second module maximum; no unchanged rerun. H116CI600 applies only to cumulative originalDerived17, never RowsNine.",
+  "status": "Classification/proposal ready; central registration and RowsNine proof-cost repair/real validation remain pending.",
+  "scope": "No Lean/proof/budget/generatedroot/map/pin edits. No new implementation scope or static-classification takeover.",
+  "generatorPatchBaseHead": "adcadb59ab4664440c8c3916b917ea1f16a8d75c",
+  "generatorPatchBaseSha256": "60acf4e27b73393397b8f9e71f9c38572c6cfa0da19e896d668a885a901e6190",
+  "generatorPatch": {
+    "path": "tests/directruntime-20261104/native-browser/h109/rowsnine-register.patch",
+    "sha256": "cbd54d36b36d59b6d205e61ccd6414b644dca1bdd881f6d08c262b60ebfca40a",
+    "boundary": "Proposal only; coordinator checks base and regenerates centrally, preserving unrelated newer changes."
+  }
+}

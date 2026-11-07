@@ -933,3 +933,29 @@ H109 module measurements retain300 in both contexts. No default checkpoint,
 static-classification owner, shared pin/root or theorem/budget was changed.
 The real serial controller, kernel resource/measurement/cleanup implementation,
 matched A/B, CI/lane-end gates and pin quiet window remain pending.
+
+
+### VX1 RowsNine slow-library classification
+
+At producer ee8eccaf5f9536a44912c7d2ec31329e7b46adaf,
+Solidity.Examples.Tactics.OpenLoops.RowsNine imports the parent and contains the
+existing binomialRowsNine signature. The parent does not import the child.
+The producer regular root directly imports both, while its slow root imports
+only the parent. The current generator's explicit fourteen-member list omits
+the new child; a generated regular root would therefore still select RowsNine.
+
+The [classification packet](../../tests/directruntime-20261104/native-browser/h109/rowsnine-registration.json)
+pins the exact producer files and proposes explicit slow membership (fifteen
+entries), a module-map row and central regeneration. The local script patch is
+a proposal only: no producer Lean source or shared generator/root/map was
+edited. Synthetic tests reproduce the default leak, verify the exact-list fix
+and preserve unrelated descendants. CI, full/lane-end and axiom-audit hooks
+retain the entire slow library. This is static membership, not successful
+Lean/CI/runtime validation. The owned runner inventory must be updated after
+that exact source/root adoption, rather than silently omit the new obligation.
+
+VX1's source reports RowsNine at594seconds with chunk64 (5876MiB), above the
+unchanged300second module maximum. This is producer-reported data, not a fresh
+measurement here. No unchanged STOP rerun or H116600exception is permitted.
+Classification does not repair the proof cost, authorize deletion or certify
+producer source; central registration and real validation remain pending.
