@@ -1311,11 +1311,11 @@ original final acceptance remain open.
 ### Exact original environment archive staged for courier
 
 H70's missing-host-original notice was answered by checking actual local bytes.
-The original environment-evidence.tar.zst still exists at65,713bytes, SHA256
+The original environment-evidence.tar.zst still exists at 65,713 bytes, SHA256
 d8a141a7703e95cc81f7aa0741ed12a5073739b1cb7d4363354211ca3cb16060.
 Its committed environment-manifest.json is byte-identical to the manifest at
 44d89439afd8fe7aca251cd5693b5b7ea36cf603, manifestSHA8ee027cf3c84e2162d98a07cf38e07706076be85948483e8a9d5e35cbeb5f6b5.
-All56safe unique regular members and55internal checksums verify. Archived
+All 56 safe unique regular members and 55 internal checksums verify. Archived
 Translate bytes equal that historical Git blob; compilation sourceSHA matches
 the historical source; original ASTSHA4b57bac4 matches the separately delivered AST.
 Nothing is extracted or executed.
@@ -1341,9 +1341,9 @@ Q-H90-DYNAMIC-VALIDATION and original full acceptance obligations remain open.
 DynamicBytesModelControls.lean addresses the held candidate review's
 bare-declaration limitation without installing that candidate or changing any
 frozen expectation. Six existing intrinsic Raw-program cases run from explicit
-State.init, fuel128, in both constructed modalities: default bytes length0,
+State.init, fuel 128, in both constructed modalities: default bytes length0,
 default string-to-bytes length0, their wrong-length1 assertions, and same-kind
-empty alias reads. All12finite executions match:8normal and4assertion panics.
+empty alias reads. All 12 finite executions match: 8 normal and 4 assertion panics.
 These observable length checks go beyond termination-only declarations. Empty
 alias reads do not distinguish alias identity from copying. Finite execution
 does not prove either modal formula or source/default-memory adequacy.
@@ -1357,15 +1357,15 @@ equation remains unchanged. No AST/compiler fixture or new translator is used.
 Initial diagnostics caught a numeral helper declared Int rather than Nat and
 Lean.Name constructors used where this repository's Solidity.Name is String.
 Both corrections are local to the test; failed diagnostics are retained. Final
-MCP reports zero errors9.5899s. The final new-model/legacy-refusal/KeySort gate
-and185input/78fixture/5,692profile/static checks pass7.4837s under unchanged
-12GiB/no-swap/threads1/-j1. Child maximumRSS1,082,720KiB, cgrouppeak212,951,040bytes,
-minimum outer available11,102,654,464bytes. No pre-work equivalent exists for
+MCP reports zero errors in 9.5899 seconds. The final new-model/legacy-refusal/KeySort gate
+and the checks for 185 inputs, 78 fixtures, 5,692 profile rows and static scope pass in 7.4837 seconds under unchanged
+12GiB/no-swap/threads1/-j1. Child maximum RSS 1,082,720 KiB, cgroup peak 212,951,040 bytes,
+minimum outer available 11,102,654,464 bytes. No pre-work equivalent exists for
 this new additive test; no performance acceptance or STOP release is claimed.
 
 Dynamic-bytes-model-manifest.json pins source/model inputs, exact observations
-and the15member off-Git H44 evidence archive32c5f7e8ed7e30ef68ec4103e76917c0bb2a187643af7664080b3a4e375718ce
-(13,282bytes). Outer size/hash, exact member set and all member hashes verify.
+and the 15-member off-Git H44 evidence archive 32c5f7e8ed7e30ef68ec4103e76917c0bb2a187643af7664080b3a4e375718ce
+(13,282 bytes). Outer size/hash, exact member set and all member hashes verify.
 The model source input pins describe this bounded sample, not universal machine
 closure. This isolated test adds no production root registration or public API.
 Finder and skeptic read-only reviews found no checkpoint blocker; neither used
@@ -1376,3 +1376,17 @@ remain unchanged. Dynamic admission and Q-H90-DYNAMIC-VALIDATION remain open;
 this backfill does not authorize the previously rejected verifier/audit update.
 Original courier, migration, stack/cost/startup, storage-diamond and final gates
 remain separate dependencies.
+
+
+### Candidate archive pin clarification
+
+Published master e286f1843 was adopted by fast-forward before this metadata fix.
+The candidate manifest now names its four source pins
+`archivedCandidateSourceFiles`. Each entry has an explicit `archiveMember` and
+`intendedRepositoryRelative` destination. The hashes identify the preserved draft
+bytes, not accepted source or current checkout files. All four archive members
+were rehashed against the unchanged sealed archive and member index. The archive
+remains at SHA256 f7501b31521131172ae774afb006adcee546a90ea503b592ddfb0dfaa55b12ab.
+No candidate was installed and no production, proof, validation contract or
+resource budget changed. The test-standing-owner and static-handoff script notes
+belong to the audit-calculus scope and were left unchanged in this lane.
