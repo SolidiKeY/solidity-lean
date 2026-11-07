@@ -1,8 +1,8 @@
 /** Guarded regression: wrong Engine domains, bad hashes/parameters or resource
  * refusals must not manufacture payload matches or complete RPC/source claims. */
 import test from 'node:test';import assert from 'node:assert/strict';
-import {createReadStream,mkdtempSync,mkdirSync,symlinkSync,writeFileSync,readFileSync,rmSync} from 'node:fs';import {createGunzip,gzipSync} from 'node:zlib';import {createHash} from 'node:crypto';import {createInterface} from 'node:readline';import {createRequire} from 'node:module';import {pathToFileURL,fileURLToPath} from 'node:url';import {fork,spawnSync} from 'node:child_process';
-import {convertEngineFixture,selectionRange,executeEngineFixture,engineExitCode} from '../../../../scripts/h62/item3/g52-differential/engine_payload_reference.mjs';
+import {createReadStream,mkdtempSync,mkdirSync,symlinkSync,writeFileSync,readFileSync,rmSync} from 'node:fs';import {createGunzip,gzipSync} from 'node:zlib';import {createHash} from 'node:crypto';import {createInterface} from 'node:readline';import {createRequire} from 'node:module';import {pathToFileURL,fileURLToPath} from 'node:url';import {fork,spawn,spawnSync} from 'node:child_process';
+import {convertEngineFixture,selectionRange,executeEngineFixture,engineExitCode,executeNativeWorker} from '../../../../scripts/h62/item3/g52-differential/engine_payload_reference.mjs';
 test('wrong fork/format and negative/version RPC profiles refuse before native conversion',async()=>{
  for(const f of [{network:'Prague'},{network:'Osaka',_info:{'fixture-format':'blockchain_test_sync'}},{network:'Osaka',_info:{'fixture-format':'blockchain_test_engine'},pre:{},postState:{},genesisBlockHeader:{},engineNewPayloads:[{params:[],newPayloadVersion:5,forkchoiceUpdatedVersion:3}]}])assert.equal((await convertEngineFixture({fixture:f},{})).status,'unsupported');
 });
@@ -10,6 +10,7 @@ test('real constructors reject bad payload hash/blob parameters and native worke
  const bulk=process.env.G52_BULK;if(!bulk)throw new Error('G52_BULK required; never skip');const require=createRequire(bulk+'/reference/package.json');const loaded=[];for(const name of ['@ethereumjs/common','@ethereumjs/block','@ethereumjs/util','micro-eth-signer/kzg.js','@paulmillr/trusted-setups/fast-peerdas.js'])loaded.push(await import(pathToFileURL(require.resolve(name)).href));const m={...loaded[0],...loaded[1],...loaded[2],kzg:new loaded[3].KZG(loaded[4].trustedSetup)};
  const source=createReadStream(bulk+'/engine-inputs.jsonl.gz').pipe(createGunzip()),lines=createInterface({input:source,crlfDelay:Infinity});let record;for await(const line of lines){record=JSON.parse(line);break;}lines.close();source.destroy();
  const badHash=structuredClone(record);badHash.fixture.engineNewPayloads[0].params[0].blockHash='0x'+'00'.repeat(32);await assert.rejects(()=>convertEngineFixture(badHash,m),/Invalid blockHash/);
+ const unavailable=await executeEngineFixture(record,m,async()=>({status:'unsupported',reason:'provider-failure'}));assert.equal(unavailable.status,'engine_error');assert.equal(unavailable.retryable,true);assert.equal(engineExitCode({[unavailable.status]:1}),1);
  const badGenesis=structuredClone(record);badGenesis.fixture.genesisBlockHeader.hash='0x'+'00'.repeat(32);
  for(const bad of [badGenesis,badHash]) {
   const result=await executeEngineFixture(bad,m,async()=>{throw new Error('unexpected native execution after conversion failure');});
@@ -46,4 +47,14 @@ test('resumed selections are nonempty bounded ranges without rounding or wrap',(
  assert.deepEqual(selectionRange(21124,20,21120),{start:21120,end:21124});
  assert.deepEqual(selectionRange(Number.MAX_SAFE_INTEGER,Number.MAX_SAFE_INTEGER,1),{start:1,end:Number.MAX_SAFE_INTEGER});
  for(const args of [[0,20,0],[10,0,0],[10,2,-1],[10,2,10],[10,1.5,0],[10,1,NaN],[10,Infinity,0],[10,1,Number.MAX_SAFE_INTEGER+1]])assert.throws(()=>selectionRange(...args),/invalid Engine selection range/);
+});
+
+// Real child processes exercise transport failure, not a fake success oracle.
+test('worker timeout, crash and disconnected IPC fail and remain retryable',{timeout:10000},async()=>{
+ for(const [name,code,timeout] of [['native-worker-timeout','setInterval(()=>{},1000)',25],['native-worker-exited','process.exit(7)',1000],['native-worker-ipc-error','setInterval(()=>{},1000)',1000]]) {
+  const child=spawn(process.execPath,['--max-old-space-size=4096','-e',code],{stdio:['ignore','ignore','inherit','ipc']});
+  if(name==='native-worker-ipc-error')child.disconnect();
+  try{const result=await executeNativeWorker(()=>child,{fixture:{}},()=>{},timeout);assert.equal(result.status,'engine_error');assert.equal(result.retryable,true);assert.equal(result.reason,name);assert.equal(engineExitCode({[result.status]:1}),1);}
+  finally{if(child.exitCode===null&&child.signalCode===null)await new Promise(done=>{child.once('close',done);child.kill('SIGKILL');});}
+ }
 });

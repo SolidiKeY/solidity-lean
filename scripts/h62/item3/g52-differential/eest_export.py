@@ -159,7 +159,7 @@ def export(root, kind="state_test"):
 
 
 @lru_cache(maxsize=2)
-def _archive_engine_x_expectations(archive_name, archive_sha, generator_pins):
+def _archive_input_expectations(archive_name, archive_sha, generator_pins, kind):
     """Regenerate from verified upstream bytes, never a mutable receipt/cache file.
 
     Guard coordinated input/result/receipt substitution. Reuse the existing
@@ -175,19 +175,20 @@ def _archive_engine_x_expectations(archive_name, archive_sha, generator_pins):
         (root/"upstream").mkdir(); (root/"evidence").mkdir()
         (root/"upstream/fixtures_develop-v5.3.0.tar.gz").symlink_to(archive)
         census(root)
-        generated = export(root, "blockchain_test_engine_x")
-        names = ["engine-x-inputs.jsonl.gz", "engine-x-allocations.jsonl",
-                 "engine-x-allocations-index.json", "archive-inventory.jsonl.gz",
-                 "evidence/archive-census.json"]
-        sources = {entry["path"]: entry["source_sha256"] for entry in
-                   json.loads((root/"engine-x-allocations-index.json").read_text()).values()}
-        with gzip.open(root/"engine-x-inputs.jsonl.gz", "rt") as stream:
+        generated = export(root, kind)
+        names = [FORMATS[kind]+"-inputs.jsonl.gz", "archive-inventory.jsonl.gz", "evidence/archive-census.json"]
+        sources = {}
+        if kind == "blockchain_test_engine_x":
+            names += ["engine-x-allocations.jsonl", "engine-x-allocations-index.json"]
+            sources = {entry["path"]: entry["source_sha256"] for entry in
+                       json.loads((root/"engine-x-allocations-index.json").read_text()).values()}
+        with gzip.open(root/(FORMATS[kind]+"-inputs.jsonl.gz"), "rt") as stream:
             for line in stream:
                 row = json.loads(line)
                 previous = sources.setdefault(row["path"], row["fixture_sha256"])
                 if previous != row["fixture_sha256"]:
                     raise ValueError("inconsistent archive source audit")
-        proof = dict(algorithm="verify pinned archive SHA256; regenerate existing census and Engine-X export; compare exact stream/index hashes",
+        proof = dict(algorithm="verify pinned archive SHA256; regenerate existing census/export; compare exact stream/index hashes", format=kind,
                      archive_sha256=EEST_SHA, cases=generated["cases"],
                      files={name: file_sha(root/name) for name in names},
                      generator_sha256=dict(generator_pins), source_files=sources)
@@ -196,8 +197,10 @@ def _archive_engine_x_expectations(archive_name, archive_sha, generator_pins):
     return json.dumps(proof, sort_keys=True)
 
 
-def verify_engine_x_inputs(root):
-    """Guard archive-unbound, mutually consistent input and result mutations."""
+def verify_archive_inputs(root, kind):
+    """Guard coordinated fixture/expectation/receipt substitutions against the archive."""
+    if kind not in ("blockchain_test_engine_x", "transaction_test"):
+        raise ValueError("unsupported archive verification format")
     archive = (root/"upstream/fixtures_develop-v5.3.0.tar.gz").resolve()
     actual = file_sha(archive)
     if actual != EEST_SHA:
@@ -205,14 +208,20 @@ def verify_engine_x_inputs(root):
     directory = Path(__file__).resolve().parent
     pins = tuple((name, file_sha(directory/name)) for name in
                  ("archive_census.py", "eest_export.py", "pipeline.py"))
-    proof = json.loads(_archive_engine_x_expectations(str(archive), actual, pins))
+    proof = json.loads(_archive_input_expectations(str(archive), actual, pins, kind))
     for name, expected in proof["files"].items():
         if file_sha(root/name) != expected:
             raise ValueError("input differs from pinned archive: " + name)
     return proof
 
+
+def verify_engine_x_inputs(root):
+    """Preserve the Engine-X verifier interface and its archive anchor."""
+    return verify_archive_inputs(root, "blockchain_test_engine_x")
+
+
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(__doc__); p.add_argument("--bulk", type=Path, required=True); p.add_argument("--format", choices=list(FORMATS), default="state_test"); a = p.parse_args()
+    p = argparse.ArgumentParser(__doc__); p.add_argument("--verify", action="store_true"); p.add_argument("--bulk", type=Path, required=True); p.add_argument("--format", choices=list(FORMATS), default="state_test"); a = p.parse_args()
     root=a.bulk.resolve(); repo=Path(__file__).resolve().parents[4]
     if root==repo or repo in root.parents: p.error("bulk must stay outside repository")
-    print(json.dumps(export(root, a.format)))
+    print(json.dumps(verify_archive_inputs(root, a.format) if a.verify else export(root, a.format)))

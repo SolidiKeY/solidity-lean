@@ -3,6 +3,7 @@
  * transaction decoding/validation only: no world execution or source agreement.
  */
 import {createRequire} from 'node:module';
+import {spawnSync} from 'node:child_process';
 import {createReadStream,readFileSync,writeFileSync,renameSync} from 'node:fs';
 import {createGunzip} from 'node:zlib';
 import {createInterface} from 'node:readline';
@@ -51,7 +52,11 @@ async function digest(path){const h=createHash('sha256');for await(const b of cr
 export async function main(bulk) {
  if(!bulk)throw new Error('usage: node transaction_admission.mjs H44_BULK');bulk=resolve(bulk);
  const json=name=>JSON.parse(readFileSync(resolve(bulk,name),'utf8'));
+ const verified=spawnSync('python3',[fileURLToPath(new URL('./eest_export.py',import.meta.url)),'--verify','--format','transaction_test','--bulk',bulk],{encoding:'utf8',timeout:240000,maxBuffer:16*1024*1024,env:{...process.env,LEAN_NUM_THREADS:'1'}});
+ if(verified.status!==0)throw new Error('archive-derived transaction input verification failed: '+(verified.stderr??verified.error??verified.status));
+ const archiveBinding=JSON.parse(verified.stdout);
  const receipt=json('evidence/transaction-export.json'),census=json('evidence/archive-census.json');
+ if(archiveBinding.cases!==receipt.cases)throw new Error('archive-derived transaction case count mismatch');
  if(receipt.archive_sha256!=='5dd08fee0fb41bc2a59bc4ab1dc75b19723fc71fe6af2f855454d3283fba09b9'||receipt.stream_sha256!==await digest(bulk+'/transaction-inputs.jsonl.gz')||receipt.census_sha256!==await digest(bulk+'/evidence/archive-census.json')||census.inventory_sha256!==await digest(bulk+'/archive-inventory.jsonl.gz'))throw new Error('transaction export provenance mismatch');
  const lock=readFileSync(bulk+'/reference/package-lock.json');if(!lock.equals(readFileSync(new URL('../../../../tests/h62/item3/g52-differential/package-lock.json',import.meta.url))))throw new Error('installed/committed lock mismatch');
  const categorySource=bulk+'/evidence/transaction-category-sources/test_invalid_tx.py';if(await digest(categorySource)!==RLP_CATEGORY_SOURCE.sha256)throw new Error('upstream RLP category source pin mismatch');
@@ -81,7 +86,7 @@ export async function main(bulk) {
  }
  if(rows.length!==receipt.cases)throw new Error('incomplete transaction coverage');
  const output=rows.map(r=>JSON.stringify(r)+'\n').join('');writeFileSync(bulk+'/evidence/transaction-admission.jsonl.partial',output);renameSync(bulk+'/evidence/transaction-admission.jsonl.partial',bulk+'/evidence/transaction-admission.jsonl');
- const summary={rlp_category_source:RLP_CATEGORY_SOURCE,native_versions:nativeVersions,native_source_sha256:nativeSources,cases:rows.length,counts,native_rejected:rows.filter(r=>r.native_admission==='rejected').length,fixture_admission_complete:counts.reference_match===rows.length,execution_complete:false,differential_complete:false,source_semantics_unsupported:rows.length,export_sha256:await digest(bulk+'/evidence/transaction-export.json'),reference_lock_sha256:createHash('sha256').update(lock).digest('hex'),adapter_sha256:await digest(fileURLToPath(import.meta.url)),results_sha256:createHash('sha256').update(output).digest('hex')};
+ const summary={archive_binding:archiveBinding,rlp_category_source:RLP_CATEGORY_SOURCE,native_versions:nativeVersions,native_source_sha256:nativeSources,cases:rows.length,counts,native_rejected:rows.filter(r=>r.native_admission==='rejected').length,fixture_admission_complete:counts.reference_match===rows.length,execution_complete:false,differential_complete:false,source_semantics_unsupported:rows.length,export_sha256:await digest(bulk+'/evidence/transaction-export.json'),reference_lock_sha256:createHash('sha256').update(lock).digest('hex'),adapter_sha256:await digest(fileURLToPath(import.meta.url)),results_sha256:createHash('sha256').update(output).digest('hex')};
  writeFileSync(bulk+'/evidence/transaction-admission-summary.json.partial',JSON.stringify(summary,null,2)+'\n');renameSync(bulk+'/evidence/transaction-admission-summary.json.partial',bulk+'/evidence/transaction-admission-summary.json');console.log(JSON.stringify(summary));
  return counts.reference_mismatch?1:summary.fixture_admission_complete?0:2;
 }

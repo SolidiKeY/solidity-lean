@@ -22,7 +22,7 @@ SPEC.loader.exec_module(MODULE)
 
 class CoverageControls(unittest.TestCase):
     def test_real_disjoint_native_ranges(self):
-        result = MODULE.coverage(REPO, BULK, ['review-fix-0-20', 'review-fix-20-40', 'review-fix-40-60', 'review-fix-60-80'])
+        result = MODULE.coverage(REPO, BULK, ['review-final-0-20', 'review-final-20-40', 'review-final-40-60', 'review-final-60-80'])
         self.assertEqual(result['processed_unique_cases'], 80)
         self.assertEqual(result['counts'], {'payload_reference_match': 80})
         self.assertEqual(result['unprocessed_ranges'], [[80, 21124]])
@@ -30,11 +30,37 @@ class CoverageControls(unittest.TestCase):
         self.assertEqual(result['source_matches'], 0)
 
     def test_duplicate_overlap_and_binding_only_rejected(self):
-        for labels, error in [(['review-fix-0-20', 'review-fix-0-20'], 'duplicate'),
-                              (['review-fix-0-20', 'review-fix-overlap'], 'overlapping'),
+        for labels, error in [(['review-final-0-20', 'review-final-0-20'], 'duplicate'),
+                              (['review-final-0-20', 'review-final-overlap'], 'overlapping'),
                               (['engine-x-bindings'], 'not a native')]:
             with self.subTest(labels=labels), self.assertRaisesRegex(ValueError, error):
                 MODULE.coverage(REPO, BULK, labels)
+
+    def test_known_rpc_profile_is_not_a_payload_pass(self):
+        result = MODULE.coverage(REPO, BULK, ['review-final-profile-856'])
+        self.assertEqual(result['counts'], {'unsupported':1})
+        self.assertEqual(result['validated_blocks'], 0)
+        self.assertEqual(result['retryable_cases'], 0)
+        self.assertFalse(result['full_payload_match'])
+        with tempfile.TemporaryDirectory(prefix='profile-evidence-control-', dir=BULK) as temporary:
+            root = Path(temporary)
+            for name in ['evidence','reference','upstream']:(root/name).mkdir()
+            for name in ['engine-x-inputs.jsonl.gz','archive-inventory.jsonl.gz','engine-x-allocations.jsonl','engine-x-allocations-index.json','reference/package.json','reference/package-lock.json','reference/node_modules','upstream/fixtures_develop-v5.3.0.tar.gz']:(root/name).symlink_to(BULK/name)
+            for name in ['engine-x-export.json','archive-census.json']:shutil.copyfile(BULK/'evidence'/name,root/'evidence'/name)
+            summary=json.loads((BULK/'evidence/review-final-profile-856-summary.json').read_text());command=json.loads((BULK/'evidence/review-final-profile-856-command.json').read_text());row=json.loads((BULK/'evidence/review-final-profile-856.jsonl').read_text());row['fields']=['state_root'];data=(json.dumps(row)+'\n').encode();summary['results_sha256']=hashlib.sha256(data).hexdigest();command['command'][3]=str(root);command['command'][5]='profile-evidence-control'
+            (root/'evidence/profile-evidence-control.jsonl').write_bytes(data);(root/'evidence/profile-evidence-control-summary.json').write_text(json.dumps(summary));(root/'evidence/profile-evidence-control-command.json').write_text(json.dumps(command))
+            with self.assertRaisesRegex(ValueError,'retains failure/execution evidence'):MODULE.coverage(REPO,root,['profile-evidence-control'])
+
+    def test_infrastructure_error_retains_retryable_gap(self):
+        with tempfile.TemporaryDirectory(prefix='retry-control-', dir=BULK) as temporary:
+            root = Path(temporary)
+            for name in ['evidence','reference','upstream']:(root/name).mkdir()
+            for name in ['engine-x-inputs.jsonl.gz','archive-inventory.jsonl.gz','engine-x-allocations.jsonl','engine-x-allocations-index.json','reference/package.json','reference/package-lock.json','reference/node_modules','upstream/fixtures_develop-v5.3.0.tar.gz']:(root/name).symlink_to(BULK/name)
+            for name in ['engine-x-export.json','archive-census.json']:shutil.copyfile(BULK/'evidence'/name,root/'evidence'/name)
+            summary=json.loads((BULK/'evidence/review-final-0-20-summary.json').read_text());command=json.loads((BULK/'evidence/review-final-0-20-command.json').read_text());rows=[json.loads(line) for line in (BULK/'evidence/review-final-0-20.jsonl').read_text().splitlines()]
+            rows[0].update(status='engine_error',retryable=True,reason='native-worker-timeout');summary['counts']={'engine_error':1,'payload_reference_match':19};command['exit']=1;command['command'][3]=str(root);command['command'][5]='retry-control';data=''.join(json.dumps(row)+'\n' for row in rows).encode();summary['results_sha256']=hashlib.sha256(data).hexdigest()
+            (root/'evidence/retry-control.jsonl').write_bytes(data);(root/'evidence/retry-control-summary.json').write_text(json.dumps(summary));(root/'evidence/retry-control-command.json').write_text(json.dumps(command))
+            result=MODULE.coverage(REPO,root,['retry-control']);self.assertEqual(result['attempted_unique_cases'],20);self.assertEqual(result['processed_unique_cases'],19);self.assertEqual(result['retryable_ranges'],[[0,1]]);self.assertEqual(result['unprocessed_ranges'],[[0,1],[20,21124]])
 
     def test_corrupt_artifact_controls(self):
         # Only negative tests use this temporary copy. Large pinned inputs are
@@ -52,7 +78,14 @@ class CoverageControls(unittest.TestCase):
                 target = rows[0]['blocks'][0] if block else rows[0]['blocks'][0]['transactions'][0]
                 target[field] = int(target[field]) + 0.5
             return mutate
+        def downgrade(summary, command, rows, mismatch=False):
+            rows[0].update(status='payload_reference_mismatch' if mismatch else 'engine_error');command['exit']=1
+            rows[0].update(status='unsupported', reason='engine-rpc-negative-or-version-profile-pending',
+                           **({'fields':['state_root']} if mismatch else {'error':'native-worker-timeout','retryable':True}))
+            summary['counts'] = {'payload_reference_match':19,'unsupported':1};command['exit']=2
         mutations = [
+            ('error-downgrade', lambda s,c,r:downgrade(s,c,r), 'unsupported classification'),
+            ('mismatch-downgrade', lambda s,c,r:downgrade(s,c,r,True), 'unsupported classification'),
             ('string-log-list', lambda s,c,r:next(tx for row in r for block in row['blocks'] for tx in block['transactions'] if tx['execution_exception'] is None).update(logs='garbage'), 'malformed native logs'),
             ('malformed-log-data', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs=[dict(address='0x'+'00'*20,topics=[],data='0x0')]), 'malformed native logs'),
             ('bool-row-index', lambda s,c,r:r[0].update(index=False), 'range identity'),
@@ -109,9 +142,9 @@ class CoverageControls(unittest.TestCase):
                     (root/p).symlink_to(BULK/p)
                 for p in ['engine-x-export.json', 'archive-census.json']:
                     shutil.copyfile(BULK/'evidence'/p, root/'evidence'/p)
-                summary = json.loads((BULK/'evidence/review-fix-0-20-summary.json').read_text())
-                command = json.loads((BULK/'evidence/review-fix-0-20-command.json').read_text())
-                rows = [json.loads(line) for line in (BULK/'evidence/review-fix-0-20.jsonl').read_text().splitlines()]
+                summary = json.loads((BULK/'evidence/review-final-0-20-summary.json').read_text())
+                command = json.loads((BULK/'evidence/review-final-0-20-command.json').read_text())
+                rows = [json.loads(line) for line in (BULK/'evidence/review-final-0-20.jsonl').read_text().splitlines()]
                 command['command'][3] = str(root)
                 command['command'][5] = 'negative-control'
                 mutate(summary, command, rows)

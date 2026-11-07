@@ -1594,3 +1594,18 @@ fresh-checkpoint handoff records the changed gate, failed attempts, actual
 qualified prefix and next requalification range. Full Source/runtime agreement,
 Approved_i and all public obligations remain open; no Lean statement or proof
 budget is changed by these external-test checks.
+
+
+## Transaction archive binding and retryable execution failures
+
+Serialized-transaction admission now uses the same independent archive-derived
+verification as Engine-X qualification. Fixture expectations and complete corpus
+membership come from regenerated pinned inputs, not mutually editable receipts.
+
+Worker timeout, process exit, IPC errors and unclassified provider refusals fail
+execution and retain retryable gaps. Unsupported rows are admitted only for the
+exact RPC profile derived from the pinned request and carry no retained failure
+or execution evidence. Attempted indices remain disjoint: retry by replacing the
+failed ranged label with its freshly executed replacement, rather than combining
+an overlapping single-case retry with the old range. These checks do not provide
+Source/runtime correspondence or discharge production Bridge obligations.

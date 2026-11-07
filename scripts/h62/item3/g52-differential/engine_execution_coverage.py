@@ -112,6 +112,7 @@ def canonical_payloads(input_name, index_name, stream_name, inventory_name,
                 identities.append((row['path'], row['case']))
     input_allocation_refs = []
     payload_expectations = []
+    unsupported_profiles = []
     allowed_request_keys = {'forkchoiceUpdatedVersion', 'newPayloadVersion', 'params'}
     with gzip.open(input_name, 'rt') as stream:
         for i, line in enumerate(stream):
@@ -131,6 +132,16 @@ def canonical_payloads(input_name, index_name, stream_name, inventory_name,
             input_allocation_refs.append(record['allocation_ref'])
             requests = fixture.get('engineNewPayloads')
             require(isinstance(requests, list), 'input payload list missing')
+            unsupported = False
+            for request in requests:
+                if not isinstance(request, dict):
+                    break
+                params = request.get('params')
+                if (set(request)-allowed_request_keys or request.get('newPayloadVersion') not in (4, '4') or
+                    request.get('forkchoiceUpdatedVersion') not in (3, '3') or not isinstance(params, list) or len(params) != 4):
+                    unsupported = True
+                    break
+            unsupported_profiles.append(unsupported)
             expected = []
             for request in requests:
                 params = request.get('params') if isinstance(request, dict) else None
@@ -157,7 +168,7 @@ def canonical_payloads(input_name, index_name, stream_name, inventory_name,
     immutable_payloads = tuple(None if row is None else tuple(
         MappingProxyType({**payload, 'transactions': tuple(payload['transactions'])})
         for payload in row) for row in payload_expectations)
-    return tuple(MappingProxyType(ref) for ref in input_allocation_refs), immutable_payloads, tuple(identities)
+    return tuple(MappingProxyType(ref) for ref in input_allocation_refs), immutable_payloads, tuple(identities), tuple(unsupported_profiles)
 
 
 def coverage(repo, bulk, labels):
@@ -207,7 +218,7 @@ def coverage(repo, bulk, labels):
         archive_binding['files']['engine-x-allocations-index.json']))
     for group in allocation_groups.values():
         group['members'] = set(group['members'])
-    input_allocation_refs, payload_expectations, cached_identities = canonical_payloads(
+    input_allocation_refs, payload_expectations, cached_identities, unsupported_profiles = canonical_payloads(
         str((bulk/'engine-x-inputs.jsonl.gz').resolve()),
         str((bulk/'engine-x-allocations-index.json').resolve()),
         str((bulk/'engine-x-allocations.jsonl').resolve()),
@@ -228,6 +239,8 @@ def coverage(repo, bulk, labels):
     lock = digest(bulk/'reference/package-lock.json')
     require(lock == digest(repo/'tests/h62/item3/g52-differential/package-lock.json'), 'installed lock mismatch')
     visited = set()
+    attempted = set()
+    retryable = set()
     counts = Counter()
     transactions = logs = blocks = 0
     receipts = []
@@ -282,8 +295,8 @@ def coverage(repo, bulk, labels):
             for line in stream:
                 row = json.loads(line)
                 require(position < end and type(row['index']) is int and row['index'] == position and (row['path'], row['case']) == identities[position], 'range identity/count mismatch')
-                require(position not in visited, 'overlapping native coverage: '+str(position))
-                visited.add(position)
+                require(position not in attempted, 'overlapping native coverage: '+str(position))
+                attempted.add(position)
                 position += 1
                 status = row['status']
                 require(status in {'payload_reference_match', 'payload_reference_mismatch', 'unsupported', 'engine_error'}, 'non-native result status')
@@ -293,6 +306,17 @@ def coverage(repo, bulk, labels):
                 require(binding['pre_hash'] == source_ref['pre_hash'], 'row allocation differs from pinned input')
                 entry = index.get(source_ref['pre_hash'])
                 require(entry is not None and binding['allocation_path'] == entry['path'] and binding['allocation_source_sha256'] == entry['source_sha256'] and binding['allocation_record_sha256'] == entry['record_sha256'] and binding['exact_case_membership'] is True and binding['environment_genesis_checked'] is True and binding['final_account_map_present'] is False, 'row allocation mismatch')
+                if status == 'unsupported':
+                    allowed = {'index','path','case','status','reason','allocation_binding','post_state_scope',
+                               'engine_rpc_complete','forkchoice_executed','source_semantics'}
+                    require(unsupported_profiles[row['index']] and row.get('reason') == 'engine-rpc-negative-or-version-profile-pending',
+                            'unsupported classification differs from pinned input profile')
+                    require(set(row) == allowed, 'unsupported row retains failure/execution evidence')
+                if status == 'engine_error':
+                    require(row.get('retryable') is True, 'execution error missing retryable marker')
+                    retryable.add(row['index'])
+                else:
+                    visited.add(row['index'])
                 local[status] += 1
                 if status == 'payload_reference_match':
                     require(all(row.get(k) is True for k in ['header_validation', 'block_validation', 'block_size_validation']), 'match without native validators')
@@ -348,7 +372,14 @@ def coverage(repo, bulk, labels):
             start = i
         elif not missing and start is not None:
             gaps.append([start, i]); start = None
-    return dict(expected=total, processed_unique_cases=len(visited), counts=dict(counts),
+    retry_ranges = []
+    for i in sorted(retryable):
+        if retry_ranges and retry_ranges[-1][1] == i:
+            retry_ranges[-1][1] = i+1
+        else:
+            retry_ranges.append([i, i+1])
+    return dict(expected=total, processed_unique_cases=len(visited), attempted_unique_cases=len(attempted),
+                retryable_cases=len(retryable), retryable_ranges=retry_ranges, counts=dict(counts),
                 unprocessed_cases=total-len(visited), unprocessed_ranges=gaps, runs=receipts,
                 validated_blocks=blocks, transaction_observations=transactions, raw_log_entries=logs,
                 final_account_map_present=False, engine_rpc_complete=False, differential_complete=False,

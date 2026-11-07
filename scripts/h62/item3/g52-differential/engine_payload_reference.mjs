@@ -33,15 +33,41 @@ export async function convertEngineFixture(record,m) {
  }
  return {status:'converted',record:{fixture:{...f,_info:{...f._info,'fixture-format':'blockchain_test','original-fixture-format':'blockchain_test_engine'},sealEngine:'NoProof',genesisRLP:m.bytesToHex(genesis.serialize()),blocks}},binding:{original_format:'blockchain_test_engine',payload_versions:4,forkchoice_version:3,genesis_hash:m.bytesToHex(genesis.hash()),payload_block_hashes:hashes,blob_parameters_checked:true,request_hashes_derived_from_exact_parameters:true}};
 }
+/** Guarded regression: worker timeout, crash and IPC failure are retryable
+ * execution errors, never unsupported fixture-profile coverage. */
+export function executeNativeWorker(getWorker,record,check=()=>{},timeoutMs=60000) {
+ if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1||timeoutMs>60000)throw new Error('invalid bounded worker timeout');
+ check();let c;
+ try{c=getWorker();}catch(error){return Promise.resolve({status:'engine_error',retryable:true,reason:'native-worker-start-error',worker_error:String(error)});}
+ if(c.exitCode!==null||c.signalCode!==null)return Promise.resolve({status:'engine_error',retryable:true,reason:'native-worker-exited'});
+ return new Promise(resolveResult=>{
+  let done=false,timedOut=false,failure=null,timer;
+  const finish=result=>{if(done)return;done=true;clearTimeout(timer);c.removeListener('message',message);c.removeListener('close',closed);c.removeListener('exit',closed);c.removeListener('error',error);resolveResult(result);};
+  const message=result=>{if(!timedOut&&!failure)finish(result);};
+  const closed=(code,signal)=>finish({status:'engine_error',retryable:true,reason:failure??(timedOut?'native-worker-timeout':'native-worker-exited'),worker_exit_code:code,worker_signal:signal});
+  const error=()=>{if(done)return;failure='native-worker-ipc-error';if(!c.kill('SIGKILL'))finish({status:'engine_error',retryable:true,reason:failure});};
+  c.once('message',message);c.once('close',closed);c.once('exit',closed);c.once('error',error);
+  timer=setTimeout(()=>{timedOut=true;if(!c.kill('SIGKILL'))finish({status:'engine_error',retryable:true,reason:'native-worker-timeout'});},timeoutMs);
+  if(c.connected===false){error();return;}
+  try{c.send(record,e=>{if(e)error();});}catch{error();}
+ });
+}
+/** A disconnected IPC pipe need not produce close before process exit. */
+function stopWorker(c) {
+ if(c.exitCode!==null||c.signalCode!==null)return Promise.resolve();
+ return new Promise(done=>{const finish=()=>{c.removeListener('exit',finish);c.removeListener('close',finish);done();};c.once('exit',finish);c.once('close',finish);c.kill('SIGKILL');});
+}
 /** Runner classification: conversion/validation exceptions fail the job rather
  * than becoming unsupported profiles. Negative controls exercise status and exit. */
 export async function executeEngineFixture(record,m,execute) {
  try {
   const converted=await convertEngineFixture(record,m);
-  if(converted.status!=='converted')return converted;
+  if(converted.status!=='converted')return converted.status==='engine_error'?{...converted,retryable:true}:converted;
   const native=await execute(converted.record);
-  return {...native,status:native.status==='reference_match'?'payload_reference_match':native.status==='reference_mismatch'?'payload_reference_mismatch':native.status,binding:converted.binding};
- } catch(error) { return {status:'engine_error',reason:'engine-conversion-validation-failed',conversion_error:String(error)}; }
+  if(!native||!['reference_match','reference_mismatch','unsupported','engine_error'].includes(native.status))return {status:'engine_error',retryable:true,reason:'native-worker-invalid-result',binding:converted.binding};
+  if(native.status==='unsupported')return {...native,status:'engine_error',retryable:true,reason:'native-execution-unsupported',native_reason:native.reason,binding:converted.binding};
+  return {...native,...(native.status==='engine_error'?{retryable:true}:{}),status:native.status==='reference_match'?'payload_reference_match':native.status==='reference_mismatch'?'payload_reference_mismatch':native.status,binding:converted.binding};
+ } catch(error) { return {status:'engine_error',retryable:true,reason:'engine-conversion-validation-failed',conversion_error:String(error)}; }
 }
 export function engineExitCode(counts) {return counts.payload_reference_mismatch||counts.engine_error?1:2;}
 async function digest(path){const hash=createHash('sha256');for await(const b of createReadStream(path))hash.update(b);return hash.digest('hex');}
@@ -64,16 +90,16 @@ export async function main(bulk,limit=20,label='engine-payload-pilot',format='bl
  const inventory=[];const input=createInterface({input:createReadStream(bulk+'/archive-inventory.jsonl.gz').pipe(createGunzip()),crlfDelay:Infinity});for await(const line of input){const r=JSON.parse(line);if(r.role==='fixture'&&r.selection==='exact-osaka'&&r.format===format)inventory.push([r.path,r.case]);}if(inventory.length!==receipt.cases)throw new Error('Engine inventory count mismatch');
  if(isX){const a=receipt.allocation;if(!a||a.stream!=='engine-x-allocations.jsonl'||a.index!=='engine-x-allocations-index.json'||a.stream_sha256!==await digest(bulk+'/'+a.stream)||a.index_sha256!==await digest(bulk+'/'+a.index))throw new Error('Engine-X allocation stream/index provenance mismatch');const index=json(a.index);if(Object.keys(index).length!==a.groups)throw new Error('Engine-X allocation group count mismatch');allocations=new EngineXAllocations(bulk+'/'+a.stream,index);}
  const require=createRequire(bulk+'/reference/package.json');const loaded=[];for(const name of ['@ethereumjs/common','@ethereumjs/block','@ethereumjs/util','micro-eth-signer/kzg.js','@paulmillr/trusted-setups/fast-peerdas.js'])loaded.push(await import(pathToFileURL(require.resolve(name)).href));const m={...loaded[0],...loaded[1],...loaded[2],kzg:new loaded[3].KZG(loaded[4].trustedSetup)};
- const worker=()=>{if(!child){child=fork(fileURLToPath(new URL('./eest_reference.mjs',import.meta.url)),['--worker',bulk],{execArgv:['--max-old-space-size=4096'],stdio:['ignore','ignore','inherit','ipc']});const c=child;c.on('error',()=>{});c.once('close',()=>{if(child===c)child=undefined;});}return child;};
- async function execute(record){guard.check();const c=worker();return new Promise(resolveResult=>{let done=false,stopped=false,failure=null;const finish=r=>{if(done)return;done=true;clearTimeout(timer);c.removeListener('message',message);c.removeListener('close',closed);c.removeListener('error',error);resolveResult(r);};const message=r=>{if(!stopped)finish(r);};const closed=()=>finish({status:'unsupported',reason:failure??(stopped?'native-worker-timeout':'native-worker-exited')});const error=()=>{if(done)return;stopped=true;failure='native-worker-error';c.kill('SIGKILL');};const timer=setTimeout(()=>{stopped=true;c.kill('SIGKILL');},60000);c.once('message',message);c.once('close',closed);c.once('error',error);c.send(record,e=>{if(e)error(e);});});}
+ const worker=()=>{if(!child){child=fork(fileURLToPath(new URL('./eest_reference.mjs',import.meta.url)),['--worker',bulk],{execArgv:['--max-old-space-size=4096'],stdio:['ignore','ignore','inherit','ipc']});const c=child;c.on('error',()=>{});c.once('close',()=>{if(child===c)child=undefined;});c.once('exit',()=>{if(child===c)child=undefined;});}return child;};
+ const execute=record=>executeNativeWorker(worker,record,()=>guard.check());
  const counts={};let selected=0,scanned=0;const path=bulk+'/evidence/'+label+'.jsonl';const output=createWriteStream(path+'.partial');const resultHash=createHash('sha256');const source=createReadStream(bulk+'/'+prefix+'-inputs.jsonl.gz').pipe(createGunzip());const lines=createInterface({input:source,crlfDelay:Infinity});
  try{for await(const line of lines){guard.check();if(selected>=range.end-range.start)break;const record=JSON.parse(line);if(record.index!==scanned||JSON.stringify([record.path,record.case])!==JSON.stringify(inventory[record.index])||record.status!=='input-only-not-executed')throw new Error('Engine identity mismatch');scanned++;if(record.index<range.start)continue;const allocation=isX?allocations.bind(record):null;let result;
  if(bindOnly)result={status:'allocation_bound_input',execution_attempted:false};else result=await executeEngineFixture(allocation?.record??record,m,execute);
  if(isX){result={...result,allocation_binding:allocation.binding,post_state_scope:result.status==='payload_reference_match'?'validated payload header commitments only; Engine-X has no final account/storage map':'no complete payload validation claim; Engine-X has no final account/storage map'};if(result.binding)result.binding={...result.binding,original_format:format};}
  guard.check();const row={index:record.index,path:record.path,case:record.case,...result,engine_rpc_complete:false,forkchoice_executed:false,source_semantics:'unsupported-adapter-pending'};const text=JSON.stringify(row)+'\n';resultHash.update(text);if(!output.write(text))await once(output,'drain');selected++;counts[row.status]=(counts[row.status]??0)+1;if(selected%100===0)console.log(JSON.stringify({cases:selected,counts}));}}
- finally{lines.close();source.destroy();if(child)await new Promise(done=>{child.once('close',done);child.kill('SIGKILL');});output.end();await once(output,'finish');}
+ finally{lines.close();source.destroy();if(child)await stopWorker(child);output.end();await once(output,'finish');}
  guard.check();if(selected!==range.end-range.start)throw new Error('Incomplete Engine payload selection');renameSync(path+'.partial',path);
  const summary={selected,range_start:range.start,range_end:range.end,expected:receipt.cases,counts,payload_execution_only:!bindOnly,binding_only:bindOnly,engine_fixture_conformance_complete:false,engine_rpc_complete:false,differential_complete:false,source_semantics_unsupported:receipt.cases,export_sha256:await digest(bulk+'/evidence/'+prefix+'-export.json'),input_sha256:receipt.stream_sha256,inventory_sha256:census.inventory_sha256,reference_lock_sha256:await digest(bulk+'/reference/package-lock.json'),adapter_sha256:await digest(fileURLToPath(import.meta.url)),resource_guard_sha256:await digest(fileURLToPath(new URL('./host_resource_guard.mjs',import.meta.url))),native_worker_sha256:await digest(fileURLToPath(new URL('./eest_reference.mjs',import.meta.url))),native_block_adapter_sha256:await digest(fileURLToPath(new URL('./blockchain_adapter.mjs',import.meta.url))),rejection_adapter_sha256:await digest(fileURLToPath(new URL('./eest_rejection.mjs',import.meta.url))),peak_aggregate_rss:guard.peakAggregateRss,results_sha256:resultHash.digest('hex'),original_format:format,final_account_map_present:!isX,allocation_binding:isX?{stream_sha256:receipt.allocation.stream_sha256,index_sha256:receipt.allocation.index_sha256,module_sha256:await digest(fileURLToPath(new URL('./engine_x_allocation.mjs',import.meta.url))),reads:allocations.reads,cache_hits:allocations.hits}:null};guard.check();writeFileSync(bulk+'/evidence/'+label+'-summary.json.partial',JSON.stringify(summary,null,2)+'\n');renameSync(bulk+'/evidence/'+label+'-summary.json.partial',bulk+'/evidence/'+label+'-summary.json');console.log(JSON.stringify(summary));return engineExitCode(counts);
- } finally {guard.stop();allocations?.close();if(child)await new Promise(done=>{child.once('close',done);child.kill('SIGKILL');});}
+ } finally {guard.stop();allocations?.close();if(child)await stopWorker(child);}
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))process.exitCode=await main(process.argv[2],Number(process.argv[3]??20),process.argv[4]??'engine-payload-pilot',process.argv[5]??'blockchain_test_engine',process.argv[6]??'execute',Number(process.argv[7]??0));
