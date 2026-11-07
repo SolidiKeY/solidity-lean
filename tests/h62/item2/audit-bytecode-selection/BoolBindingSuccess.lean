@@ -293,4 +293,77 @@ theorem generic_gate_positive_domain :
 /-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.generic_gate_positive_domain' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms generic_gate_positive_domain
 
+/-- The generic rejection field has simultaneous representation hypotheses
+for every representable semantic input, independently of word validity. -/
+theorem generic_entry_rejection_jointWitness (C : Solidity.Contract) (base : Nat)
+    (kind : Solidity.AbiEntry.Kind) (label : Fin W) (input : Solidity.AbiEntry.Input)
+    (fuel : Nat) (machine : Machine) (small : input.size < W) :
+    ∃ (_certificate : SingleWordGateCertificate SingleWordGate.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx)
+        (SingleWordGate.program C kind label)) (prepared : Machine) (size : Fin W),
+      Compiler.compile base (Frag.init RouteCtx) (SingleWordGate.program C kind label) = some result ∧
+      size.val = input.size ∧ prepared.mem base = .val (rawArgumentWord input) ∧
+      prepared.mem (base + 1) = .val size ∧
+      (run result.code prepared = .revert ↔
+        Solidity.AbiEntry.entry input (fuel + 2) (singleWordParams kind) = .error .revert) := by
+  let size : Fin W := ⟨input.size, small⟩
+  let prepared : Machine := seeded base (rawArgumentWord input) size machine
+  exact ⟨SingleWordGate.certificate, SingleWordGate.compiled C base kind label,
+    prepared, size, SingleWordGate.selected C base kind label, rfl,
+    seeded_word base (rawArgumentWord input) size machine,
+    seeded_size base (rawArgumentWord input) size machine,
+    SingleWordGate.entry_rejection C base kind label _ (SingleWordGate.selected C base kind label)
+      input fuel prepared size (seeded_word base (rawArgumentWord input) size machine)
+      (seeded_size base (rawArgumentWord input) size machine) rfl⟩
+
+/-- Semantic decoding and selected IR success use the same raw input for any
+modeled kind. No decoded payload or favorable execution is a premise. -/
+theorem generic_decoded_success_jointWitness (C : Solidity.Contract) (base : Nat)
+    (kind : Solidity.AbiEntry.Kind) (label : Fin W) (input : Solidity.AbiEntry.Input)
+    (fuel : Nat) (machine : Machine) (small : input.size < W)
+    (full : ¬ input.size < 36)
+    (valid : kind.valid (Solidity.AbiEntry.load input.data 4) = true) :
+    ∃ (_certificate : SingleWordGateCertificate SingleWordGate.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx)
+        (SingleWordGate.program C kind label)) (prepared : Machine) (size : Fin W)
+      (value : Solidity.AbiEntry.Word kind),
+      Compiler.compile base (Frag.init RouteCtx) (SingleWordGate.program C kind label) = some result ∧
+      size.val = input.size ∧ prepared.mem base = .val (rawArgumentWord input) ∧
+      prepared.mem (base + 1) = .val size ∧
+      value.val = Solidity.AbiEntry.load input.data 4 ∧
+      Solidity.AbiEntry.entry input (fuel + 2) (singleWordParams kind) =
+        .ok (.cons (.val (.word value)) .nil) ∧
+      run result.code prepared =
+        .ok {prepared with mem := upd prepared.mem (base + 1) (.val label)} 0 := by
+  let size : Fin W := ⟨input.size, small⟩
+  let prepared : Machine := seeded base (rawArgumentWord input) size machine
+  let value : Solidity.AbiEntry.Word kind :=
+    ⟨Solidity.AbiEntry.load input.data 4, Solidity.AbiEntry.load_lt _ _, valid⟩
+  refine ⟨SingleWordGate.certificate, SingleWordGate.compiled C base kind label,
+    prepared, size, value, SingleWordGate.selected C base kind label, rfl,
+    seeded_word base (rawArgumentWord input) size machine,
+    seeded_size base (rawArgumentWord input) size machine, rfl,
+    SingleWordGate.entry_success input fuel kind full valid, ?_⟩
+  rw [SingleWordGate.executed C base kind label _ (SingleWordGate.selected C base kind label)
+    prepared (rawArgumentWord input) size (seeded_word base (rawArgumentWord input) size machine)
+    (seeded_size base (rawArgumentWord input) size machine)]
+  simp only [singleWordOutcome, wordGateOutcome, rawArgumentWord, size, if_neg full, if_pos valid]
+
+/-- The same selected generic family actually rejects a short frame for every
+kind, including kinds with no valid words; no word-validity premise is hidden. -/
+theorem generic_short_frame_reverts (C : Solidity.Contract) (base : Nat)
+    (kind : Solidity.AbiEntry.Kind) (label word : Fin W) (machine : Machine) :
+    run (SingleWordGate.compiled C base kind label).code
+      (seeded base word (wmod 35) machine) = .revert := by
+  exact SingleWordGate.short_before_word C base kind label
+    (seeded base word (wmod 35) machine) (wmod 35)
+    (seeded_size base word (wmod 35) machine) (by decide)
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.generic_entry_rejection_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms generic_entry_rejection_jointWitness
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.generic_decoded_success_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms generic_decoded_success_jointWitness
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.generic_short_frame_reverts' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms generic_short_frame_reverts
+
 end Solidity.H62.BytecodeSelection.BoolBindingFixture

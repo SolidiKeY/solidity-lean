@@ -827,3 +827,46 @@ changed. This pure-tooling checkpoint starts no proof window or prerequisite
 build and never retries the retained PowerBounds STOP. Full703/190core/37Bridge,
 package/Bridge, provenance, external acceptance and performance gates stay open.
 Evidence: /workspace/parallel-20261103/executable-bytecode/inherited-type-evidence/.
+
+
+## Generic represented raw-entry domains
+
+Three further additive lemmas in the existing audit file use the same generic
+SingleWordGate producer. generic_entry_rejection_jointWitness constructs all
+size/raw-memory/selection/certificate hypotheses for every representable input,
+without a validity premise, and retains the actual rejection equivalence.
+generic_decoded_success_jointWitness constructs the typed value from the same
+raw input, proves its loaded value identity and both semantic decoder and
+selected IR success under the explicit full-size/validity domain. The short35
+control proves actual generic refusal for every kind without assuming validity.
+No producer or frozen statement changed; no per-kind compiler family was added.
+
+The initial direct proof failed because the local Fin-size definition was not
+unfolded by the simplifier. Failed source hash and diagnostics remain in check-1;
+its error-recovery sorryAx output was rejected, with no accepted artifact and
+no sorry in source. Repository try-tactics confirmed the size projection;
+explicit size unfolding repairs the proof. check-2 passes with empty diagnostics
+in 8.786 seconds, eighteen standard-only axiom guards and both monitors passing.
+No module exceeded60s. This remains gasless semantic/IR representation, not a
+native load, Source/selector adequacy, charged gas or fork theorem.
+
+Both attempts retain exactly the prior generic-word-gate epoch/deadline
+01:11:01.069665→05:11:01.069665 UTC; no window reset or PowerBounds retry.
+No prerequisite source was rebuilt. The full703/190core/37Bridge census and
+expanded exact-domain linkage, full validation/performance and existing producer
+waits remain open; counts were not reduced by these standalone audit helpers.
+The eighteen scoped pins remain a coordinator proposal.
+Evidence: /workspace/parallel-20261103/executable-bytecode/generic-entry-domain/.
+
+Independent finder and skeptic preflight/postcheck reviews passed with no
+concrete findings. Both retained the failed-check boundary and verified current
+hashes and all eighteen scoped pins. Runtime parent peak was 1,456,140,288 bytes;
+automation and final check together completed in 16.35 seconds.
+
+Checkpoint tests63 PASS, trust/reachability/roots/fragments/whitespace PASS.
+The global layer check is RED: twelve core-to-non-core edges outside this
+checkpoint, recorded in evidence/gate-3.log. No production imports changed.
+The global pin scan has zero errors,29 unrecorded changes and99 baselined
+changes;18 own records remain proposed. The known off-scope documentation
+citation gate remains unresolved and was not repeated unchanged. No full-gate
+or whole-lane PASS follows. Coordinator producer waits remain unchanged.
