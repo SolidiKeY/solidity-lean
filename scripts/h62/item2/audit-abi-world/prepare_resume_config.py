@@ -3,7 +3,7 @@
 from pathlib import Path
 import re,subprocess,tomllib
 root=Path(__file__).resolve().parents[4]
-INTEGRATION="d96f2406d352de7e0b72ba6ac4ab29dc457582c6"
+INTEGRATION="706e36825929d6d0084dc08b88de9349abcd25aa"
 def main():
  original=subprocess.check_output(["git","show",INTEGRATION+":lakefile.toml"],cwd=root,text=True)
  assert (root/"lakefile.toml").read_text()==original
