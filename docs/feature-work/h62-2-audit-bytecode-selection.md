@@ -2253,3 +2253,37 @@ import rebinding and an unpinned parent report. The verifier now rebinds the
 reconstructed strict manifest and checks the exact sealed parent hash/size
 before selection. Both reviewers confirmed the fixes; verifier replay passes.
 Native probe/strict times are 43.675s/39.822s, with no new module over 60s.
+
+### Decidable dependent premises
+
+The same generic default-domain constructor now has an opt-in proof-bearing
+mode. It retains every dependent existential binder, synthesizes a decision
+for each proof premise, and constructs `of_decide_eq_true` only when Lean
+reduces that decision to true. Complete witnesses still pass the kernel and
+standard-axiom checks. False, stuck or missing decisions are unsupported;
+resource exceptions propagate. The default data-only mode remains byte-exact
+against its prior renderer and its sealed artifact replays unchanged.
+
+The selected frozen-map slice contains 328 proof-bearing candidates across
+82 modules. Probe/strict kernel checks pass in 30.393s/28.826s: 18 hypothesis
+witnesses, including five private declarations, and 310 unsupported attempts.
+Five accepted targets repeat the existing public renderer roster; 13 lie
+outside that roster. These are local slice counts, not distinct global witness
+or census totals. Original conclusions and source correspondence remain open.
+
+Nine refusal controls, four synthetic inhabited domains and two intentional
+impossibility controls pass. In particular, a premise unsupported at default
+`n=0` has a checked alternative witness at `n=1`; a separate `False` premise
+has a checked impossible domain. Unsupported synthesis must never be read as
+an impossibility result for a frozen statement.
+
+External evidence is under
+`/workspace/parallel-20261103/executable-bytecode/decidable-premise-domains/`.
+The non-mutating `verify-proof.py --check` reconstructs the strict source,
+pins parent metadata/original source receipts, and rechecks 603 existing frozen
+import products and native guard/output receipts. Independent read-only
+finder and skeptic reviews pass. No Lean module exceeds 60s; no prerequisite,
+PowerBounds retry, proof-budget increase, new registered module or public
+import was added. The existing budget deadline remains 17:23:24 UTC.
+All original full-source/census, supported-program success, Source/physical,
+gas/fork, Bridge/runtime and performance obligations remain unfinished.

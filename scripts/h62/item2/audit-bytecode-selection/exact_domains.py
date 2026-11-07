@@ -446,30 +446,102 @@ elab "#default_hypothesis_batch " "[" entries:dataEntry,* "]" : command => do
 '''
 
 
-def data_render(repo, rows, source_candidate_names, expectations=None):
-    """Kernel-checked default attempts for data-only candidate hypotheses.
+DECIDABLE_PREMISE = r'''
+-- The decision is reduced by Lean and the resulting proof is kernel checked.
+-- False, stuck or missing decisions are unsupported, never assumed premises.
+private def decidablePremiseProof (proposition : Lean.Expr) : MetaM (Except String Lean.Expr) := do
+  let some decisionInstance ← synthInstance? (mkApp (mkConst ``Decidable) proposition)
+    | return .error "decidable premise unsupported at chosen values"
+  let decision ← whnf (mkAppN (mkConst ``Decidable.decide) #[proposition,decisionInstance])
+  unless decision.isConstOf ``Bool.true do
+    return .error "decidable premise unsupported at chosen values"
+  let equality ← mkEqRefl (mkConst ``Bool.true)
+  let proof := mkAppN (mkConst ``of_decide_eq_true) #[proposition,decisionInstance,equality]
+  return .ok (← instantiateMVars proof)
+'''
+
+
+def decidable_checker():
+    """Extend the existing domain constructor; retain its refusal/axiom checks."""
+    old = '''  if ← isProp alpha then
+    return .error "proof binder requires explicit witness"
+  let level ← getLevel alpha
+  let instanceType := mkApp (mkConst ``Inhabited [level]) alpha
+  let some inhabitant ← synthInstance? instanceType
+    | return .error "default instance synthesis unsupported at chosen values"
+  let value ← instantiateMVars (mkAppN (mkConst ``default [level]) #[alpha,inhabitant])'''
+    new = '''  let valueResult ← if ← isProp alpha then
+      decidablePremiseProof alpha
+    else do
+      let level ← getLevel alpha
+      let instanceType := mkApp (mkConst ``Inhabited [level]) alpha
+      let some inhabitant ← synthInstance? instanceType
+        | return .error "default instance synthesis unsupported at chosen values"
+      pure (.ok (← instantiateMVars (mkAppN (mkConst ``default [level]) #[alpha,inhabitant])))
+  let value ← match valueResult with
+    | .error reason => return .error reason
+    | .ok value => pure value'''
+    if DATA_CHECKER.count(old) != 1:
+        raise ValueError("default constructor proof-policy splice changed")
+    checker = DECIDABLE_PREMISE + DATA_CHECKER.replace(old,new)
+    checker = checker.replace(".Defaults.",".DecidableDefaults.")
+    checker = checker.replace("proof binder requires explicit witness","decidable premise unsupported at chosen values")
+    # The new positive control needs actual dependent proof values; no premise
+    # is supplied by a caller or silently erased by the renderer.
+    checker += '''
+theorem decidedToy (n : Nat) (_same : n = n) (_room : n ≤ n+1) : True := True.intro
+theorem decided_domain : hypotheses_of% decidedToy := default_domain_witness% decidedToy
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.DecidableDefaults.decided_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms decided_domain
+-- Guard the regression of reading unsupported default synthesis as impossibility:
+-- proofToy failed at n=0 above but its full dependent domain is inhabited at n=1.
+theorem proofToy_alternate : hypotheses_of% proofToy := ⟨1, Nat.zero_lt_succ 0, True.intro⟩
+theorem falseToy (_impossible : False) : True := True.intro
+theorem false_domain_impossible : ¬ (hypotheses_of% falseToy) := by
+  intro witness
+  rcases witness with ⟨impossible, _⟩
+  exact impossible
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.DecidableDefaults.proofToy_alternate' does not depend on any axioms -/
+#guard_msgs in
+#print axioms proofToy_alternate
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.DecidableDefaults.false_domain_impossible' does not depend on any axioms -/
+#guard_msgs in
+#print axioms false_domain_impossible
+/-- error: data hypothesis audit: decidable premise unsupported at chosen values -/
+#guard_msgs in
+#check default_domain_witness% falseToy
+'''
+    return checker
+
+
+def data_render(repo, rows, source_candidate_names, expectations=None, *, decide_premises=False):
+    """Kernel-checked default attempts for candidate hypotheses.
 
     Unsupported default synthesis is not an impossibility result or coverage.
-    Proof binders are refused, resource exceptions propagate, and actual
-    dependent Exists witnesses must pass the kernel without added premises.
+    Default mode refuses proof binders; the opt-in proof-bearing mode constructs
+    actual proofs with checked decisions. Resource exceptions propagate, and
+    dependent Exists witnesses pass the kernel without added premises.
     """
     import kernel_metadata as metadata
     metadata.partition_records(rows, source_candidate_names)
     names = set(source_candidate_names)
     selected = sorted((r for r in rows if r["name"] in names and r["binders"] and
-                       not r["level_params"] and not any(b["proof_binder"] for b in r["binders"])),key=lambda r:r["name"])
+                       not r["level_params"] and any(b["proof_binder"] for b in r["binders"]) == decide_premises),key=lambda r:r["name"])
     if not selected:
-        raise ValueError("no data-only source candidates")
+        raise ValueError("no proof-bearing source candidates" if decide_premises else "no data-only source candidates")
     if expectations is not None and set(expectations) != {r["name"] for r in selected}:
         raise ValueError("default expectation membership differs")
     modules = sorted({r["module"] for r in selected})
     frozen_map, producer_sources = _frozen_scope(repo,modules)
+    namespace = NAMESPACE+".DecidableDefaults" if decide_premises else DATA_NAMESPACE
+    local_namespace = "DecidableDefaults" if decide_premises else "Defaults"
     fragment = macro_fragment((repo/MACRO_PATH).read_text())
     program = "import Lean\n" + "".join("import "+m+"\n" for m in modules)
     program += "/-! Guard default witness attempts from dropping proof premises or treating unsupported defaults as impossible. Original conclusions are not proved. -/\n"
-    program += fragment + "\nnamespace Defaults\nopen Lean Meta Elab Term\n" + DATA_CHECKER
+    program += fragment + "\nnamespace "+local_namespace+"\nopen Lean Meta Elab Term\n" + (decidable_checker() if decide_premises else DATA_CHECKER)
     program += '/-- error: data hypothesis audit: missing or ambiguous kernel name -/\n#guard_msgs in\n#default_hypothesis_batch ["missing.kernel.name" => reject_missing against% "" expecting% "probe"]\n'
-    program += '/-- error: data hypothesis audit: recorded type differs -/\n#guard_msgs in\n#default_hypothesis_batch ["'+DATA_NAMESPACE+'.positiveToy" => reject_type against% "wrong recorded type" expecting% "probe"]\n'
+    program += '/-- error: data hypothesis audit: recorded type differs -/\n#guard_msgs in\n#default_hypothesis_batch ["'+namespace+'.positiveToy" => reject_type against% "wrong recorded type" expecting% "probe"]\n'
     targets = {}
     for start in range(0,len(selected),8):
         entries=[]
@@ -481,7 +553,7 @@ def data_render(repo, rows, source_candidate_names, expectations=None):
                     raise ValueError("strict default expectations cannot bypass checks")
                 record=metadata.parse_json(golden)
                 if (not isinstance(record,dict) or set(record)!={"target","helper","status","reason","axioms"} or
-                        record["target"]!=row["name"] or record["helper"]!=DATA_NAMESPACE+"."+helper or
+                        record["target"]!=row["name"] or record["helper"]!=namespace+"."+helper or
                         record["status"] not in {"proved","unsupported-default"} or
                         not isinstance(record["reason"],str) or not isinstance(record["axioms"],list) or
                         any(a not in {"propext","Classical.choice","Quot.sound"} for a in record["axioms"]) or
@@ -491,8 +563,8 @@ def data_render(repo, rows, source_candidate_names, expectations=None):
             entries.append(json.dumps(row["name"],ensure_ascii=False)+" => "+helper+" against% "+json.dumps(row["type_expr"],ensure_ascii=False)+" expecting% "+json.dumps(golden,ensure_ascii=False))
             targets[helper]=metadata.observed_type(row)
         program+="\n#default_hypothesis_batch [\n"+",\n".join(entries)+"\n]\n"
-    program+="\nend Defaults\nend "+NAMESPACE+"\n"
-    return program,{"namespace":DATA_NAMESPACE,"targets":targets,"modules":modules,
+    program+="\nend "+local_namespace+"\nend "+NAMESPACE+"\n"
+    return program,{"namespace":namespace,"targets":targets,"modules":modules,
         "macro_sha256":MACRO_SHA256,"frozen_map_sha256":sha(frozen_map),
         "producer_source_sha256":producer_sources,"generated_lean_sha256":sha(program.encode()),
         "expected_results":expectations,"kernel_accepted":False,"witness_ledger_linked":False,
