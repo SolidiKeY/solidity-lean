@@ -191,3 +191,37 @@ weakened premise. They requested checked axiom pins (now present) and a
 direct region-only positive control; `one_query_region_hit` now states
 exactly one failing region oracle in the same tiny model. Full gates and
 measured module timing remain pending.
+
+## Checkpoint 4: compiler bridge and inhabited execution
+
+`Solidity/Hash/CollisionBridgeCompiler.lean` adds `Compiler.refines`,
+`prefix_refines`, `decode_reach`, `prefix_empty`, and `failure_le`.
+The full refinement theorem keeps the source Forward restriction and both
+hash guards; backward prefix refinement preserves the original complete
+Prefix.Le observation. The probability event is failure of that full
+backward prefix property on the chosen admissible run. It does not claim
+that a fixed-hash correctness proof holds for replacement hashes, nor that
+the existing compiler contracts have been implemented by this bridge.
+
+The oracle-indexed source/intrinsic/EVM/compiler/export/environment/run
+family has PublicCorrectness and the ordinary admission/compilation/allowed/
+admissible conditions on sampled tuples, with V.fixed exactly oracleFixed.
+The two actual query lists are included in all q strategy queries, including
+offline attacker work. These are the explicit probabilistic model
+instantiation relations; no extra semantic correctness premise is added.
+The semantic failure classifier is classical/noncomputable; it is not an
+external test or executable compiler-correctness decision procedure.
+
+`Solidity/Hash/CollisionBridgeControls.lean` instantiates the existing
+`toy_publicCorrectness` on the admitted compiled input `[3,1]`, a quiet
+program that actually returns `[1]` with no hash queries. The three theorems
+`quiet_compiler_prefix`, `quiet_success`, `quiet_premise` demonstrate an
+inhabited admissible successful compiler run; its premise is HashPremise.nil.
+No claim rests merely on an abstract inhabited premise.
+
+Both independent checkpoint 4 finder and skeptic found no proof defect,
+new semantic premise, or weakened observation. Both requested checked
+compiler axiom pins instead of raw prints; these have been added. Actual
+axioms: Compiler.refines `[]`, Compiler.failure_le the standard triple.
+MCP diagnostics and Lean per-file checks for compiler and controls passed;
+library/full gates and registration remain outstanding.
