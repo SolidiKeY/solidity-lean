@@ -151,3 +151,7 @@ The attribute scanner now uses the shared offset-preserving mask with attribute 
 ## Raw strings and interpolation safety
 
 The shared lexical mask now handles Lean raw strings with zero or more hash delimiters, preserving character positions and LF offsets, and rejects unterminated raw strings. It conservatively fails on an exclamation mark followed by a string or comment rather than silently masking possible interpolation terms. This can reject ordinary non-interpolation text and does not recognize all Lean syntax; it is not a Lean parser. Tests cover nested delimiters, Unicode and quoted macro spellings, comment-separated cases and masked contexts. The current pinned-tree occurrence output remains byte-identical to the earlier snapshot.
+
+## LF-aligned occurrence lines
+
+The panic occurrence scanner now splits raw and masked text only on LF, preserving alignment when CR, form-feed or Unicode separators appear inside a masked comment. Synthetic controls cover those separators and CRLF. Other source-window and header generators still use Python `splitlines()`, which has broader line-separator behavior; independent review found none of the differing separators in the current 48 pinned files or registered helper, but other inputs may map differently or fail closed. LF line numbers and Unicode code-point columns are lexical conventions, not a Lean position or semantic guarantee.

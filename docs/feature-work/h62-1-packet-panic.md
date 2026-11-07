@@ -191,3 +191,7 @@ The scanner now masks comments and strings and recognizes certain nested, multip
 ## Raw-string and interpolation follow-up
 
 The shared lexical mask handles hash-delimited raw strings and conservatively fails on possible interpolation instead of silently masking embedded terms. Independent read-only finder and skeptic supplied Unicode and comment-separated counterexamples; fixes and false-positive limitations were rechecked without Lean. The rule can reject non-interpolation text and is not a full Lean lexer. Current pinned-tree panic occurrence output is unchanged.
+
+## LF occurrence-line follow-up
+
+The occurrence scanner now splits raw and masked text only on LF; CR, form-feed and Unicode separators in comments no longer produce a line-count mismatch in the synthetic control. Independent read-only finder and skeptic verified current output without Lean. Other window and census generators still use Python `splitlines()`; the pinned files and registered helper contain none of the differing separators, and other inputs remain subject to lexical mismatch or fail-closed behavior.
