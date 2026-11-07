@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "boundary": "Exact source comparison only; no old/new statement equivalence or proof-only classification.",
+  "source_candidates": 968,
+  "byte_changed_modules": 22,
+  "changed_headers": 19,
+  "stable_headers_in_changed_modules": 141,
+  "headers_with_mapfree_text_pattern": 19,
+  "strict_original_fidelity_pass": false,
+  "external_directory": "/workspace/sol-numeric-literals-v07-header-drift",
+  "frozen_inventory_sha256": "43d0f854e22026978220b1e9925a12fbc866012ae4f01b5140c15aa1389e0db6",
+  "current_inventory_sha256": "7c0bbea2ea5d4b85aacd9109a17f247bac783bcd7b9f92220eabf93061c8864e",
+  "comparison_sha256": "0a87f9518c4a8216a71fa2023c24962364a9e174ab713f37809429227d0baed3",
+  "owner_review_sha256": "85d9f5b6846c23e2dbc44643df941f3ea2fe7d1f7a8a5468da1d74bb27c0dcef",
+  "tool_sha256": "acb2bc7a499a81ba6e25e2eaa24d0f84be7ec325c6040676e4ea23b2fd5c96b8",
+  "limitations": [
+    "Whitespace normalization and literal argument deletion are textual pattern checks only.",
+    "Stable header bytes do not classify edits as proof-only or preserve dependent definition semantics.",
+    "Original baseline, pending statuses and source exclusions remain unchanged."
+  ]
+}
