@@ -26,3 +26,17 @@ test('missing or substituted native executable evidence refuses',()=>{for(const 
 test('omitted launched images, DLL references and coherently forged reference lists refuse',()=>{for(const mutate of [o=>o.cases[0].process.artifacts.shift(),o=>o.cases[0].process.artifacts.pop(),o=>delete o.cases[0].process.artifacts[1].reference]){const o=fixture('dafny');mutate(o);assert.ok(errors(o,'r').length);}const o=fixture('dafny'),expected=structuredClone(o.referenceImages);o.referenceImages.pop();o.cases.forEach(c=>c.process.artifacts.pop());assert.ok(errors(o,'r',60000,expected).length);const local=fixture();local.cases[0].process.artifacts.pop();assert.ok(errors(local,'r').length);});
 
 test('actual aggregate config wiring uses launcher references rather than receipt references',()=>{const {validationConfig}=require('../parity/run.cjs'),{validateHostResult}=require('../parity/core.cjs');const o=fixture('dafny'),cfg={runId:'r',target:'dafny',suite:'verification-time-limit',operationTimeoutMs:60000},host={...cfg,timeLimitReferenceImages:structuredClone(o.referenceImages)},result={schemaVersion:1,runId:'r',target:'dafny',status:'passed-with-gaps',checks:[],scenarios:[{id:'native-verification-time-limit',status:'partial',observation:o}]};assert.ok(validateHostResult(result,validationConfig(cfg,host)).result);o.referenceImages.pop();o.cases.forEach(c=>c.process.artifacts.pop());assert.ok(validateHostResult(result,validationConfig(cfg,host)).error);assert.throws(()=>validationConfig(cfg,{}),/trusted reference/);});
+
+test('aggregate rejects observation target substitution in both directions',()=>{
+ const {validateHostResult}=require('../parity/core.cjs');
+ for(const target of ['dafny','local']){
+  const references=fixture('dafny').referenceImages;
+  const cfg={runId:'r',target,suite:'verification-time-limit',operationTimeoutMs:60000,timeLimitReferenceImages:references};
+  const result={schemaVersion:1,runId:'r',target,status:'passed-with-gaps',checks:[],scenarios:[{id:'native-verification-time-limit',status:'partial',observation:fixture(target)}]};
+  assert.ok(validateHostResult(JSON.parse(JSON.stringify(result)),cfg).result);
+  result.scenarios[0].observation=fixture(target==='dafny'?'local':'dafny');
+  const checked=validateHostResult(JSON.parse(JSON.stringify(result)),cfg);
+  assert.ok(checked.rejectedResult);
+  assert.ok(checked.validationErrors.includes('foreign time-limit observation target'));
+ }
+});

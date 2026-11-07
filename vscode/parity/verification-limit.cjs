@@ -15,8 +15,9 @@ async function withinOperation(operation,timeoutMs,label,{now=()=>require('node:
  try{const timeout=new Promise((_,reject)=>{timer=setTimer(()=>reject(expired()),timeoutMs);});const value=await Promise.race([Promise.resolve().then(operation),timeout]);if(now()>=deadline)throw expired();return value;}finally{clearTimer(timer);}
 }
 function referenceImages(executable){const directory=path.dirname(executable);return[executable,...fs.readdirSync(directory).filter(name=>/^Dafny.*\.dll$/.test(name)||name.endsWith('.runtimeconfig.json')).map(name=>path.join(directory,name))].map(file=>({file:fs.realpathSync(file),bytes:fs.statSync(file).size,sha256:digest(fs.readFileSync(file))}));}
-function errors(o,runId,expectedOuterTimeoutMs,expectedImages){
+function errors(o,runId,expectedOuterTimeoutMs,expectedImages,expectedTarget){
  const e=[];if(!o||o.runId!==runId||!['dafny','local'].includes(o.target)||!Array.isArray(o.cases)||o.cases.length!==3)return['missing time-limit cases'];
+ if(expectedTarget!==undefined&&o.target!==expectedTarget)return['foreign time-limit observation target'];
  const references=expectedImages||o.referenceImages;
  if(o.target==='dafny'&&(!Array.isArray(references)||!references.some(a=>path.basename(a.file||'')==='DafnyLanguageServer.dll')||o.referenceImages&&JSON.stringify(o.referenceImages)!==JSON.stringify(references)))e.push('missing exact pinned reference set');
  const full=section(o.target)+'.'+key(o.target),nativeDefault=o.target==='dafny'?'20':600000;
@@ -85,8 +86,8 @@ async function run({vscode,config,api,events,until}){
   try{await withinOperation(()=>cfg().update(setting,before,vscode.ConfigurationTarget.Workspace),config.operationTimeoutMs,'owned setting restoration');const actual=inspect().workspaceValue;const rawAfter=fs.readFileSync(settingsFile,'utf8');o.restoration={expected:before,actual,confirmed:JSON.stringify(actual)===JSON.stringify(before),rawBefore,rawAfter};}catch(error){o.restoration={confirmed:false,error:error.message};}
   save();
  }
- const failed=errors(o,config.runId,config.operationTimeoutMs,config.timeLimitReferenceImages);if(failed.length){const error=Error(failed.join('; '));error.observation=o;throw error;}
+ const failed=errors(o,config.runId,config.operationTimeoutMs,config.timeLimitReferenceImages,config.target);if(failed.length){const error=Error(failed.join('; '));error.observation=o;throw error;}
  return{...o,status:'partial'};
 }
-const safeErrors=(o,id,timeout,images)=>{try{return errors(o,id,timeout,images);}catch{return['malformed time-limit observation'];}};
+const safeErrors=(o,id,timeout,images,target)=>{try{return errors(o,id,timeout,images,target);}catch{return['malformed time-limit observation'];}};
 module.exports={launchSettings,errors:safeErrors,run,serverProcesses,withinOperation,snapshotHover,referenceImages};

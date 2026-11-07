@@ -1962,3 +1962,7 @@ The [owner response](dafny-storage-counterexample-owner-response.json) identifie
 
 
 H71 intake recovery: exact consumer08f3769 was subsequently fetched object-only from existing origin with all refs and FETCH_HEAD byte-identical. Consumer a2cb12e8... and ticket baff225e... hashes verify in the saved intake. The earlier commit-absence observation is historical/resolved; four exact JSON fixtures remain absent from that commit and examined bulk-source/history objects. Recovered consumer deliberately asserts candidate none and retained theorem absence, rather than persisting a successful refutation. It is not executed without its original inputs. The owner response is updated; primitive/profile/source proof boundaries remain unchanged and no exact-case diagnosis is invented.
+
+### Target-bound time-limit evidence validation (2026-11-07)
+
+The aggregate and native scenario validators now require the observation target to match the launcher target before applying target-specific checks. This closes the reviewed local-receipt-in-Dafny-result bypass without changing native outcomes, deadlines, image requirements or the parity gate. JSON-roundtrip controls cover both substitutions and matching-target positive cases. The new regression failed before repair; the focused suite then passed 11/11. Read-only ui_finder and ui_skeptic found no remaining concrete defect. Review and failure details: `/workspace/dafny-target-binding-20261107/REVIEWS.json`. These are regression/source reviews, not paired per-row judgments; full parity remains unfinished.
