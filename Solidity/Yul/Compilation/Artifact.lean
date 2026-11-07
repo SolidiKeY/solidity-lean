@@ -27,6 +27,35 @@ structure Artifact {c : Control} {n : Nat} (depth : Nat) (stmt : Stmt [] [] c n)
 namespace Artifact
 variable {c : Control} {n depth : Nat} {stmt : Stmt [] [] c n}
 
+/-- Reuse an existing empty-newer-prefix certificate without inventing a
+stronger calling convention. The two laws retain every source horizon, local
+word and arbitrary machine/caller frame. Other depths need their own proof. -/
+def ofZero (profile : StmtWordP stmt) (code : List Evm.Instr)
+    (forward : ∀ (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n),
+      evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) = some result →
+      ∀ (m : Evm.Machine) (caller : List Evm.Word),
+      ∃ out : Vector Scalar.Word n, result = ⟨sourceLocals out, .normal⟩ ∧
+        Evm.run code {m with stack := locals.toList.map coreWord ++ caller} =
+          .ok {m with stack := out.toList.map coreWord ++ caller} 0)
+    (backward : ∀ (locals : Vector Scalar.Word n) (m final : Evm.Machine)
+      (caller : List Evm.Word) (skip : Nat),
+      Evm.run code {m with stack := locals.toList.map coreWord ++ caller} = .ok final skip →
+      ∃ (horizon : Nat) (out : Vector Scalar.Word n),
+        evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+          some ⟨sourceLocals out, .normal⟩ ∧ skip = 0 ∧
+          final = {m with stack := out.toList.map coreWord ++ caller}) : Artifact 0 stmt where
+  profile := profile
+  code := code
+  source_to_model := by
+    intro horizon locals result ran newer m caller
+    have empty : newer.toList = [] := List.length_eq_zero_iff.mp (by simp only [Vector.length_toList])
+    simpa only [empty, List.nil_append] using forward horizon locals result ran m caller
+  model_to_source := by
+    intro locals newer m final caller skip ran
+    have empty : newer.toList = [] := List.length_eq_zero_iff.mp (by simp only [Vector.length_toList])
+    simp only [empty, List.nil_append] at ran
+    simpa only [empty, List.nil_append] using backward locals m final caller skip ran
+
 theorem normal_to_model (artifact : Artifact depth stmt) (horizon : Nat)
     (locals out : Vector Scalar.Word n)
     (ran : evalStmt horizon .nil True.intro stmt artifact.profile (sourceLocals locals) =

@@ -1,4 +1,5 @@
 import Solidity.Yul.Compilation.Artifact
+import Solidity.Yul.Compilation.InitializedSequenceCompilationControls
 import Solidity.Yul.Compilation.LetControlCompletion
 import Solidity.Yul.Compilation.LetScopeCompletion
 import Solidity.Yul.Compilation.LoopControlCompletion
@@ -127,3 +128,54 @@ theorem inhabited_images : Nonempty (LetControl.Image 3 letSource) ∧
 #print axioms inhabited_images
 end Controls
 end Solidity.Yul.Compilation.H55ControlFamilies
+
+/-! Another producer instantiation of the same common Artifact and exact
+image. The empty-newer-prefix calling convention is preserved, not extended. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.InitializedSequence
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n f g : Nat} {rhs : Expr [] [] n 1} {body : Stmt [] [] c (1+n)}
+
+def encode (a : InitializedSequenceCompilation.Artifact f g rhs body) :
+    Artifact 0 (.let_ 1 rhs body) :=
+  Artifact.ofZero a.profile a.code a.source_to_model a.model_to_source
+
+abbrev Image (f g : Nat) (rhs : Expr [] [] n 1) (body : Stmt [] [] c (1+n)) :=
+  Artifact.Image (encode (f := f) (g := g) (rhs := rhs) (body := body))
+
+theorem source_roundtrip (a : InitializedSequenceCompilation.Artifact f g rhs body) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image f g rhs body) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem code_preserved (a : InitializedSequenceCompilation.Artifact f g rhs body) :
+    (encode a).code = a.code := rfl
+
+namespace Controls
+/-- The actual initializer and sequence visitor copy all dirty high bits to
+an outer local, then retire the fresh slot. Reuse its original effectful law. -/
+theorem dirty_copy (old : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode InitializedSequenceCompilation.Controls.copied).code
+      {m with stack := coreWord old :: caller} =
+      .ok {m with stack := coreWord SourceLoop.Controls.dirty :: caller} 0 :=
+  InitializedSequenceCompilation.Controls.copied_target old m caller
+
+theorem compiler_image_inhabited :
+    Nonempty (Image (n := 1) (c := SourceLoop.Controls.root) 2 6 (.literal SourceLoop.Controls.dirty.toFin)
+      InitializedSequenceCompilation.Controls.copiedBody) :=
+  ⟨Artifact.toImage encode InitializedSequenceCompilation.Controls.copied⟩
+
+#guard (InitializedSequenceCompilation.lower (n := 1) 0 6
+  (.literal SourceLoop.Controls.dirty.toFin) InitializedSequenceCompilation.Controls.copiedBody).isNone
+#guard (InitializedSequenceCompilation.lower (n := 1) 2 0
+  (.literal SourceLoop.Controls.dirty.toFin) InitializedSequenceCompilation.Controls.copiedBody).isNone
+end Controls
+
+#print axioms Artifact.ofZero
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms code_preserved
+#print axioms Controls.dirty_copy
+#print axioms Controls.compiler_image_inhabited
+end Solidity.Yul.Compilation.H55ControlFamilies.InitializedSequence

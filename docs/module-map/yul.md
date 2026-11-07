@@ -218,7 +218,7 @@
 | `Yul/Views/DynamicJournalChild.lean` | Original actual child sequence, rollback, static, error and MemOK facts. |
 | `Yul/Views/DynamicJournalControls.lean` | Original dynamic journal reencoding, reset, account, padding and path-isolation facts. |
 | `Yul/Compilation/CompletionControls.lean` | General closed-normal completion and exact full-frame reasoning. |
-| `Yul/Compilation/Artifact.lean` | Shared intrinsic normal-completion certificate and exact successful-producer image. |
+| `Yul/Compilation/Artifact.lean` | Shared intrinsic normal-completion certificate, reusable empty-prefix constructor and exact successful-producer image. |
 | `Yul/Compilation/ArtifactPreparation.lean` | General certified selection laws and exact preparation-image roundtrips preserving Some/None without runtime-failure semantics. |
 | `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
 | `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |

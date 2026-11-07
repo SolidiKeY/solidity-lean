@@ -90,6 +90,15 @@
       "declaration_name": "Artifact",
       "adapter_kind": "selected_artifact",
       "boundary": "Instantiates the existing common Artifact and exact Artifact.Image with original guarded-if source, code, profile, separate component fuel and arbitrary newer-prefix depth. Generic image roundtrips retain the full selected producer; no per-shape Artifact definition or family migration."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/InitializedSequenceCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.InitializedSequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates generic Artifact.ofZero and exact Artifact.Image for the actual single-result let source, profile and concatenated code. Separate initializer/body fuels, selected entry/body/exit data and full original producer retained. Empty newer prefix and arbitrary caller/machine frame preserved; no arbitrary-depth strengthening or family migration."
     }
   ]
 }
