@@ -411,3 +411,31 @@ fidelity, public interface membership, global contract or per-input feasibility,
 compiler success, gas/fork coverage, original 4.35 migration or full acceptance.
 The remaining 160 drifted candidates and every uncovered proof obligation stay
 in scope. No production statement, definition, budget, axiom or exclusion changed.
+
+
+## Exact header drift within the 22 remaining files
+
+After fetching and merging master ba3c0f153, the existing extractor and source
+verifier independently checked a separate current inventory: still162 modules,
+968 unique source identities, seven structures and32 fields. The frozen source
+inventory is not replaced. compare_source_drift.py authenticates that frozen
+artifact, verifies each current module and exact header slice, and rejects
+identity moves or set changes requiring explicit reconciliation.
+
+Among the22 byte-drifted modules,19 theorem headers changed and141 retain
+identical header bytes. All19 changed headers match addition of one literal
+E.mapFree argument modulo whitespace. This is a textual observation, not an
+old/new equivalence proof. The four pattern tests include one positive and
+three refusal controls for whitespace-only changes, premise deletion and an
+extra duplicate argument. Repeated comparison output is byte-identical.
+
+Stable headers also do not establish proof-only edits: for example the check
+definition in UdvtAssignmentControls now supplies (E .u8).mapFree to implicit.
+No statement/definition transport, feasibility or semantic classification follows
+from a header comparison. The strict original-fidelity failure remains retained.
+Both inventories, all exact old/new changed headers, hashes and19-name owner
+review request are off Git at /workspace/sol-numeric-literals-v07-header-drift;
+a small source-header-drift.json pins them. Independent read-only finder and
+skeptic reviews passed without Lean/server use. No producer, frozen baseline,
+budget, axiom, exclusion or existing pending status was changed. No new Lean
+execution or full acceptance is claimed.
