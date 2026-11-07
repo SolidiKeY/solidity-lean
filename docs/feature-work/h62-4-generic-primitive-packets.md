@@ -1006,3 +1006,116 @@ A tiny TERM-ignoring detached-process regression passes; the former cleanup
 fails its bound, and an injected fixture error still leaves no owned descendants.
 This repairs cleanup latency, not the rebinding proof's memory use. Original
 global failures, exact-byte fidelity debt and performance STOPs remain open.
+
+
+Rebinding resource isolation after master 3c2734000: the input-only fragment
+checks in 0.855 seconds (805352 KiB sampled workload RSS). The first agreement
+theorem alone stops at the unchanged whole-VM guard after 44.571 seconds;
+explicit input/call unfolding also stops after 18.939 seconds. These are
+reduced diagnostics, not a rerun of the full draft or a passing simulation.
+Restricted-transparency variants produce prompt context-conversion errors.
+Local reducibility annotations were rejected and no unsafe override was used.
+This localizes the unfinished elaboration to the first theorem's application
+rather than input construction alone; it does not prove the root cause.
+Exact sources, errors and resource receipts remain off Git under
+/workspace/mrs-h121-rebind-isolation, covered by SHA256SUMS. The candidate stays
+parked and unregistered; all original global failures and performance STOPs
+remain open. No production P1/G42.04 completion is claimed.
+
+
+Rebinding agreement repair: typed aliases for the body contexts and selected
+program permit restricted-transparency application of the unchanged generic
+reference agreement theorem. The new ReferenceRebindAgreement module covers
+all legal indices and arbitrary journal/returndata, with the actual public
+selected code, original Entry and alias certificates. Source old-root and
+wrong-root observations remain exact instances. Missing-export refusal is
+transported through forget_run_lift with explicit equality/contradiction terms.
+The candidate kernel check passes in 0.994 seconds, 813856 KiB sampled workload
+RSS. This is a focused new-proof receipt, not a comparable original performance
+measurement or clearance of any prior STOP.
+
+The separate direct-failure and positive target-snapshot draft statements still
+reach the unchanged 200000-heartbeat limit, despite explicit transport attempts.
+Their exact sources/errors remain off Git in the isolation directory; no old
+registered theorem was removed or weakened. Only the passing agreement/refusal
+subset is registered. Full production session/profile/origin/all-outcome P1 and
+G42.04 remain open. The newly published PlanGraphAdmission is explicitly model
+only and does not discharge the actual library Source-origin dependency.
+
+Final exact-source kernel receipt: 0.830 seconds, 827796 KiB sampled workload
+RSS; all four axiom reports contain only existing standard axioms. MCP initial
+Lake setup/rebuild exceeded its diagnostic guard and is retained as a failure.
+The checked-cache diagnostic without Lake setup discovery then passes with zero
+errors in 1.864 seconds; it supplies diagnostic credit only. Independent
+read-only finder and skeptic found no semantic weakening, new premises or
+overclaim. No registered original declaration was changed.
+
+
+Rebinding execution follow-up after master a10b60f23: the two previously parked
+draft statements now kernel-check without changing their claims or the existing
+heartbeat limit. Restricted transparency must surround the entire staged proof,
+including intermediate theorem application and equality transport, rather than
+only its final exact. ReferenceRebindExecutionControls proves actual lifted bare
+failure with arbitrary journal/returndata and the positive old-graph snapshot
+through operational forget_run_lift. The snapshot remains diagnostic observation,
+not a replacement for StateRepr or all-outcome session adequacy. Initial check:
+0.734 seconds, 824936 KiB sampled workload RSS. Failed intermediate attempts and
+original memory stops remain historical evidence, not passing performance data.
+
+The requested coordinator disk.sh ran before this work and removed regenerable
+.lake builds and older checksum-verified checkpoint copies. Free space increased
+from 2138001408 bytes to over 12 GB. Some historical delivery paths are therefore
+no longer locally available; their exact-byte availability must not be inferred
+from old receipts. The latest rebinding agreement seal, owned raw isolation
+evidence, current Git history and authenticated audit object cache remain.
+Full original acceptance/performance gates and full P1/G42.04 stay open.
+
+Final execution-control receipt: 1.121 seconds, 841080 KiB sampled workload RSS;
+MCP zero errors in 1.943 seconds. Both theorem axiom closures contain only the
+existing standard axioms. Separate read-only finder/skeptic confirm exact same
+selected code/input and no failed-state, StateRepr or full-session substitution.
+These focused receipts discharge the two draft control proofs, not the original
+performance comparison or broader acceptance gates. Latest measured free disk:
+13574893568 bytes.
+
+
+General native reference bridge: ReferenceBridge abstracts the former concrete
+readAt-only pattern over every existing certified memory/tuple Form and actual
+selected Composition.Program. Canonical P1LangV2 source/target languages and
+selected save/body/restore image are reused. Local retains exactly the original
+profile agreement, universal coverage, genuine success and revert entries, full
+ReturnClaim and BareRevertClaim. Source classification and target execution are
+proved using the actual selected compiler; neither execution agreement, a full
+producer nor a PassCorrect is assumed. ProducerGoal/make and producer_image bind
+the actual old producer's exact plan. The environment map remains identity and
+Unit target need is the existing canonical P1LangV2 executable resource map.
+The source quotation family is constant; this introduces no recursive session
+or alternate language/prefix family.
+
+ReferenceBridgeControls uses the actual old-graph rebinding call. The same
+program simultaneously inhabits Form, alias flags, original profile agreement
+and both physical-entry witnesses. A closed physical_certificate and nonempty
+physical inputs are constructed; this native reflexive profile is explicitly
+not evidence that an external Source Approved profile has been authenticated.
+All legal indices and arbitrary journal/returndata stay in the physical domain.
+A genuine successful physical entry refutes a complete fixed-map certificate
+for an always-revert substitute in the same target language. This is an
+intentional substitute counterexample, not assumed failure of the real source.
+
+Initial notation/type errors and importer memory stops are retained. Staged
+endpoint aliases, rewriting only the old call definition in entry-witness types,
+and proved generic admission equalities/transport avoid eager concrete heap
+conversion without increasing any budget. The joint importing consumer checks
+in 0.783 seconds. Exact-source final receipts follow; no old performance STOP or
+full production gate is cleared. Full Source/profile/session P1, G42.04, actual
+library Source H24 admission/origin, RO physical frame and whole decoder work
+retain their original obligations and ownership.
+
+Final general-bridge fresh receipts: 1.374 seconds for the generic module and
+0.783 seconds for the joint consumer; exact source/import cached revalidation
+also passes. MCP reports zero errors on both (2.594 and 0.866 seconds). All 37
+new public declaration axiom reports contain only the existing standard axioms
+or none. Read-only finder and skeptic independently found no domain narrowing,
+near-vacuous joint witness, semantic weakening or full-production overclaim.
+The original broad root/full gates and timing STOPs remain open; no unchanged
+Source.Horizon/Derived17/OpenLoops failure was rerun or relabeled a pass.
