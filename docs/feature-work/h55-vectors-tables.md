@@ -512,3 +512,24 @@ Read-only finder and skeptic passed the six laws without Lean or writes.
 Affected LocalBlock, original decoder controls and P16 built successfully (201
 jobs), including all exact axiom pins. The bounded affected run took 78.32
 seconds with no swap/OOM; no controlled before/after timing is claimed.
+
+## VY2 Raw adapter producer handoff
+
+H70 requested exact producer contracts under the H123 generic scope.
+tests/h55/vectors-tables/raw-adapter-producer-handoff.json pins producer source
+head 239f71cd3d547c01c0d751f9053c6442c918d0fc and the bytes, Git blobs,
+source commits, line positions and 20 exact signatures in RawFrame, RawCoherent
+and RawTypedScope. Pure Tier-A projection/preservation, certified Source
+coherence transport and generic typed closure remain distinct contracts.
+
+Completion and coherence premises remain explicit. RawSource.Supported remains
+the existing LocalBoolControl-certified expression-statement slice.
+Coherence is equality with the clean backup, not successful dirty cleanup.
+No arbitrary physical adapter correctness, VY2 integration, gate acceptance,
+new admission predicate or H58 release is claimed. The consumer must instantiate
+the exact contracts and retain every premise.
+
+Both static reviewers found a direct-proof signature extraction error; all
+entries were corrected and reauthenticated, and both final reviews passed.
+No Lean source changed. Prior source gate provenance is recorded separately
+from consumer acceptance; the handoff does not close VY2's whole waiting item.
