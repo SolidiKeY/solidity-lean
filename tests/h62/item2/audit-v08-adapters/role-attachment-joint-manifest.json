@@ -1,0 +1,68 @@
+{
+  "status": "PROVED_ROLE_ATTACHMENT_COMPONENT_MODEL",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/RoleAttachmentJoint.lean": "2a27598ced4ead2d572ad2d30470d893198a0d84a74a24f6ac99b39248fa25af",
+    "Solidity/Lowering/V08/DeclarationRoles.lean": "643b74886bdb6570160ead0e129eebb112995bae76f959b2a3dd90408b565a75",
+    "Solidity/Lowering/V08/RoleControls.lean": "69d2a0a3b9d905be009f3808b99c56d4be0ea91a5bd4cfc43b3e1f60ee6d2065"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.DeclarationRoles.attach_of_role",
+    "Solidity.Lowering.V08.DeclarationRoles.other_role",
+    "Solidity.Lowering.V08.DeclarationRoles.source_library_create_refused",
+    "Solidity.Lowering.V08.DeclarationRoles.library_call_refused"
+  ],
+  "general_lemma": "frames packages existing attachment with full accounts/funds function equality, timestamp equality and another distinct key role preservation. No new World or role semantics.",
+  "joint_fixture": "Existing abstract library/interface unit, actual library membership/selected library role, Bool false != true, existing sender funds100.",
+  "guard_result": "Exact Option(error revert) for ordinary create and callFrame on attached library role, for arbitrary supplied typed constructor/entry and context.",
+  "new_joint_model_families": 1,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/RoleAttachmentJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 2.009,
+    "peak_sampled_aggregate_rss": 693489664,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Reuses existing generic refusal laws; no new failure classification or Source execution evidence.",
+    "Initial world has no installed accounts; universal role guard refusal holds independently of account installation.",
+    "No Source deployment/body/link/layout preservation, canonical admission or H68 certificate.",
+    "Component audit only; complete statement-fidelity and family timing remain open."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-attachment-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "6ec990629738726ec1d57d0187f228b89b02e143e5d81c714db53a7d0111601c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-attachment-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-attachment-joint-20261107-first/results.json",
+      "bytes": 399,
+      "sha256": "e7f531201aa7913641378525007ea86f107144720ff2e77e564f12ff9dcb18a1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/role-attachment-joint-20261107-first/gates/1.log",
+      "bytes": 14340,
+      "sha256": "3453131be5ce1c6a6bdf978b373a2df5abda9393b04c2d1b7dde5b543c452353"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic accepted whole-function framing, distinct-key same-model metadata and exact universal guard refusals; no findings, no reviewer Lean/server/tests."
+}

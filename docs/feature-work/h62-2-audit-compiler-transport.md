@@ -230,3 +230,75 @@ findings: original queue/scope/owner routing and all seven handoff-file hashes
 were verified read-only, without Lean/compiler/server calls. Review limitations:
 pre-move draft byte identity has no separate independent snapshot; final commit
 and export checks occur after review. No failed proof is upgraded by the review.
+
+## 2026-11-07 authorized resumption and versioned re-baseline
+
+The coordinator explicitly instructed this lane to resume after reporting its
+head merged and gate.sh touched/finder/skeptic passed on origin/master.
+Fetched and verified master `5da4771e63a4278ed53932ac39a032e3d7aea6ed`;
+fast-forwarded this same assigned lane from its clean pre-existing coordinator
+merge head `76a6dc24bb1b7805e2623f4c72773451719bcc7f`. The original retirement
+head `9f773cbdc5f4d9e5996bb5e040dae638243c7e73` remains an ancestor.
+No reset, discard, push, replacement goal or competing continuation occurred.
+This explicit later instruction supersedes retirement's implementation stop;
+the original scope/queue/evidence and all unfinished obligations remain.
+
+The compiler-transport map now contains134 modules. Its original122 module
+files are byte-for-byte unchanged;12 optimizer modules add248 source theorem
+declarations. `rebaseline.py` writes separate exact-ref source snapshots and
+transition evidence:560 retained source declarations,248 added,808 total,
+zero removals. Added declarations retain their optimizer-owner routing and
+are uncovered current-tree obligations. No original proof status is promoted
+by source equality: transitive dependencies have changed, so current Lean
+census/replay, proof-valued-definition/producer inventory and semantic domain
+review remain pending. Historical1134 proof constants/498 uncovered/91
+producer obligations remain distinct from this new source-only inventory.
+
+Scanner coverage now includes mutual blocks, absolute `_root_` theorem names
+and equation-style bodies. Independent finder and skeptic identified a first
+attempt's confusion between type-level match arms and equation-body arms;
+offside match tracking fixes the three reported truncations. Regression cases
+cover both forms, nested comments, strings, root names and default binders.
+Independent per-file keyword counts account for all808 declarations once.
+
+Comparison with preserved historical census bytes also finds three older
+signature spans that had consumed equation-proof text: `typed_sequencing_assoc`,
+`MemoryJoinCost.cost_join`, and `MemoryJoinFrame.frame_join` (all in
+`Solidity.Backend.Passes`). This is an extraction correction, not a Lean
+statement or premise change. `acceptance.json` records old/corrected signature
+hashes and unchanged full-module hashes; historical files are untouched.
+Whole-module identity supports source preservation. Historical signature hashes
+alone do not establish exact statement fidelity for these three cases.
+Source-only extraction still needs elaborated Lean name/type reconciliation.
+
+Reproduction, under the writer lock:
+
+```sh
+python3 scripts/h62/item2/audit-compiler-transport/rebaseline.py --ref 5da4771e63a4278ed53932ac39a032e3d7aea6ed --output /workspace/h62-audit-compiler-transport/resume-20261107/evidence
+python3 scripts/h62/item2/audit-compiler-transport/resume_acceptance.py --ref 5da4771e63a4278ed53932ac39a032e3d7aea6ed --historical /workspace/h62-audit-compiler-transport/evidence/census.json --output /workspace/h62-audit-compiler-transport/resume-20261107/evidence/acceptance.json
+```
+
+Both commands pass. Original `census.py generate` remains frozen against the
+original map and intentionally rejects the expanded map; its constant/criterion
+was not silently repinned. The new versioned path reports the extension.
+No Lean file was changed in this checkpoint. Actual tools remain Lean4.24.0
+(797c613eb9b6d4ec95db23e3e00af9ac6657f24b) and Lake5.0.0-src+797c613.
+No new runtime, KeySort or timing pass is claimed, and no RUNTIME_GATE_PASS.
+The prior narrow+9.585492% timing evidence is historical, not a measurement of
+this new tree. Full affected/end-to-end/final gates remain pending.
+
+Next queue: replay/reconcile the current tree, complete retained498 uncovered
+constants and91 producer domains, account for248 newly mapped source theorems
+and their generated/proof-valued counterparts, then broader supported-success
+and failure/gas/fork obligations and full validation. The preserved Boolean-write
+draft is still unvalidated; no proof from it has been promoted. Independent
+backfill remains the original scanner/census, negative controls, isolated
+fixtures and deterministic acceptance/measurement work. waits=[]; no external
+owner dependency wait is invented for unfinished proof/audit work.
+
+Final independent read-only finder and skeptic follow-ups accept this source-only
+checkpoint with no unresolved concrete finding. They do not establish current
+Lean fidelity or semantic/proof completion. Four completed work items are the
+safe re-baseline, scanner repairs, versioned inventory and acceptance regressions;
+the required fresh-thread checkpoint handoff retains this VM/branch/original
+unfinished goal. No competing continuation is created.

@@ -1,0 +1,347 @@
+{
+  "schema_version": 1,
+  "adapters": [
+    {
+      "producer_file": "Solidity/Yul/Compilation/CaseCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/CaseAdapter.lean",
+      "namespace": "Solidity.Yul.Compilation.H55Cases",
+      "boundary": "Context-indexed by arbitrary literal selector and real original scoped fallback artifact; exact Artifact.Image recovers the original case producer. Source is actual switch; code prepends selector push to the exact original dispatch. No family migration or inverse on arbitrary common artifacts claimed.",
+      "adapter_kind": "contextual_artifact"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ConditionalCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ConditionalAdapter.lean",
+      "namespace": "Solidity.Yul.Compilation.H55Conditional",
+      "boundary": "Exact original if statement, code, separate guard/arm fuels and selection evidence; inverse only on the exact image. No production family migration claimed.",
+      "adapter_kind": "selected_artifact"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ForCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Exact preparation image of original raw For producer and its optional common Artifact. Original emission/selection None is retained as preparation refusal, not runtime failure; selected payload uses unchanged For execution laws."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ForCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Exact original for statement/code and arbitrary newer prefix. Both old execution laws and all original selected producer data are retained in the exact image."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ScopedControlAdapter.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ScopedControl",
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
+      "adapter_kind": "selected_artifact"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetControlCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetControl",
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
+      "adapter_kind": "selected_artifact"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetScopeCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetScope",
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
+      "adapter_kind": "selected_artifact"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LoopControlCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LoopControl",
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
+      "adapter_kind": "selected_artifact"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/GuardedForCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For.Guarded",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic Artifact.select and PreparationImage. Selected payload derives both actual guarded-for execution laws; source-feasible DUP17 refusal retains the exact original compiled producer. None is preparation refusal, not a runtime verdict."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/GuardedForCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For.Guarded",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates the existing common Artifact and exact Artifact.Image with original guarded-if source, code, profile, separate component fuel and arbitrary newer-prefix depth. Generic image roundtrips retain the full selected producer; no per-shape Artifact definition or family migration."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/InitializedSequenceCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.InitializedSequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates generic Artifact.ofZero and exact Artifact.Image for the actual single-result let source, profile and concatenated code. Separate initializer/body fuels, selected entry/body/exit data and full original producer retained. Empty newer prefix and arbitrary caller/machine frame preserved; no arbitrary-depth strengthening or family migration."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetBranchCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetBranch",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic Artifact.select and PreparationImage for actual guarded let-sequence code. Source-feasible local16/DUP17 refusal retains full original raw producer and None without runtime-failure claims."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetBranchCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetBranch",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates Artifact.ofZero and exact Image using actual let-branch source/profile/code and both original execution laws. Original fuel/condition/arm/selection data retained; empty newer prefix and arbitrary caller frame preserved, no producer migration."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetControlCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetControl",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic Artifact.select/PreparationImage using the existing selected LetControl adapter. Exact selected payload and all raw producer data retained; actual source-feasible DUP17 refusal remains None without runtime-failure claims."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetScopeCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetScope",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic Artifact.select/PreparationImage using the existing selected LetScope adapter. Exact selected payload and all raw producer data retained; actual source-feasible DUP17 refusal remains None without runtime-failure claims."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetSequenceCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetSequence",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_kind": "total_compiled_artifact",
+      "boundary": "Structural code_total proof for accepted selected-scope/concatenation evidence instantiates generic Artifact.ofTotalSelection; exact semantic Image retains raw original. Code is constrained by actual selection. No preparation envelope or visitor/admission totality claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetSequenceCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetSequence",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates generic Artifact.ofZero and exact Image from both original sequence execution laws, actual source/profile/code and full original selected evidence. Empty newer prefix and arbitrary caller/machine framing preserved."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LoopControlCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LoopControl",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic two-stage afterSelection and PreparationImage with actual depth-indexed block emission and WordControl instruction selection. Both selection proofs feed existing semantic encode. Full raw producer retained; actual source-completing depth15 emission refusal is None, not runtime failure."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/MultiSwitchCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.MultiSwitch",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic two-stage preparation from actual block emission and instruction selection. Full original finite-case/default producer retained; genuine source-completing local16 emission refusal remains None without runtime-failure claims."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/MultiSwitchCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.MultiSwitch",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates generic zero-prefix Artifact and exact Image from both actual finite-case switch laws. Actual selector, cases/default, fuel, emitted block, selected code and full source/profile data retained; original empty-newer-prefix convention and arbitrary caller/machine frame preserved."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ProducerStatements.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Statements",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic actual-total-update certificate and two-stage preparation from unchanged source/update/lowered machine proofs. Raw producer, exact emitted program and selected code context retained; source-completing depth16 refusal remains preparation None, not runtime failure."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/OpenStatements.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.OpenStatement",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Contextual preparation of the original WordAdapter packed closed program, retaining the entire open producer and policy/support evidence through exact PreparationImage. Actual open evaluation/projected state and exact packed machine update are proved in both directions. No repack-after-projection identity or direct semantic Artifact for the open AST is claimed; depth16 refusal remains preparation None while source completes."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ProducerExpressions.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Expressions",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates shared Artifact.Realization for the actual fixed-fuel expression evaluator, profile and original arity-one witness. Actual emission/selection proofs certify result push and complete machine/newer/locals/caller frame. Dependent ResultImage retains all raw producer evidence, including source-completing depth16 emission None. No wrapper statement, arbitrary-arity admission, inverse encoding or native/runtime-failure claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ScopedControlAdapter.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ScopedControl",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic two-stage preparation using actual scoped block emission/selection and existing selected scoped encode. Retains full raw constructor evidence; genuine source-completing local16 condition emission refusal is preparation None, not runtime failure."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ScopedForCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For.Scoped",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic two-stage preparation from actual scoped-for emission/selection and selected encode; full component artifacts/profile/raw evidence retained. Source-completing local16 condition emission refusal remains preparation None."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ScopedForCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For.Scoped",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates shared zero-prefix Artifact from both original scoped-for source/model laws. Exact Image retains complete component artifacts, source horizons, block and code selection; actual initializer-only and taken/post effects checked. No termination, admission or native/source-session adequacy assumption."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SequenceCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Sequence",
+      "adapter_kind": "total_compiled_artifact",
+      "boundary": "Accepted raw sequence evidence consists of selected scoped/switch leaves and concatenation. Structural emission+selection totality instantiates shared ofTotalSelection; actual constrained selectRaw payload and exact Image preserve complete original data. selected_raw equates chosen semantic encoding to actual selected encoding. No visitor/admission/termination totality claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SequenceCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Sequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate derives both directions from unchanged sequence laws. Exact Image retains original source/profile, independent horizon, emitted block and selected code. Real ordered switch updates and mixed scoped/sequence controls retained."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.StructuredSequence",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Shared actual emission/selection preparation instantiates selected structured encode. Full raw binder/branch/sequence evidence retained; real local16 guard source completion with emission None remains preparation failure, not runtime verdict."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.StructuredSequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate and exact Image retain actual recursively changing-context source/profile/block/code evidence and owner execution/reflection laws. Genuine taken update, false identity and scope retirement controls; no native/resource/admission closure."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SwitchCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Switch",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Shared actual emission/selection preparation and exact PreparationImage retain whole raw switch/condition/scoped arm data. Real source-completing local16 selector emission refusal remains None without runtime verdict; existing zero/multiple-case exclusions preserved."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SwitchCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Switch",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix Artifact derives both directions from original one-case/default source/model laws. Exact Image retains source/profile/block/code and full-word selector behavior; dirty match, default identity and low-bits-alias default controls preserve arbitrary caller/machine frames."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/SwitchSequence.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.SwitchSequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix joined-sequence Artifact retains both original components and independent compiler fuels through exact Image. Explicit phase_reflection preserves both independent source horizons, intermediate raw source locals and actual intermediate machine boundary, beyond joined completion. Actual ordered 0-to-3-to-6 dispatch retained."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroControl",
+      "adapter_kind": "total_compiled_artifact",
+      "boundary": "Shared actual prefix-selection laws prove accepted raw code totality around an already-selected body. Generic ofTotalSelection is constrained by actual code equations; selected_raw ties chosen payload to exact original selected encoding, and exact Image retains complete raw body evidence. No visitor acceptance, termination or capacity totality claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroControl",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate derives both semantic directions from actual original owner laws. Exact Image preserves original scope/profile/code/selection and full caller/nonstack frame; genuine dirty fresh-word retirement and outer updates retained."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroScopeCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroScope",
+      "adapter_kind": "total_compiled_artifact",
+      "boundary": "Shared actual prefix-selection laws prove accepted raw code totality around an already-selected body. Generic ofTotalSelection is constrained by actual code equations; selected_raw ties chosen payload to exact original selected encoding, and exact Image retains complete raw body evidence. No visitor acceptance, termination or capacity totality claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroScopeCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroScope",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate derives both semantic directions from actual original owner laws. Exact Image preserves original scope/profile/code/selection and full caller/nonstack frame; genuine dirty fresh-word retirement and outer updates retained."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ZeroSequenceCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.ZeroSequence",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Shared zero-prefix certificate reuses both actual source/model laws for original zero scope around sequence bodies. Exact Image retains compiledBody, entry/exit code and selection evidence, fresh count and compiler fuel. Genuine outer-update and full-fresh-prefix retirement controls retain complete caller/machine frame; native capacity excluded."
+    }
+  ]
+}

@@ -936,3 +936,457 @@ source hashes, reviews and the H44 bulk archive path/hash; generated AST/logs
 remain outside Git. Full source/semantic closure, other H90 forms/contexts,
 CR H68/H102 landing/importer migration, native/WASM qualification and timing
 acceptance remain open. Historical STOPs were not rerun.
+
+### H77 fixed-byte recipient inspection (2026-11-07)
+
+The five delivered files from native-browser head `14a39effa376` are now inspected,
+resolving their missing-byte wait. `verify-fixed-byte-intake.py` authenticates
+875 evidence payloads and five runtime payloads against both pinned outer hashes
+and embedded/external indexes. All 343 unique source records match Git build head
+1b2bdb490054293c86cddb5e4b7fa15736bae25b. The eight executable-boundary modules
+(five Shared modules, ControlTuple.Adapter, Memory.Reader, DirectRuntime) also match producer
+2738af99661d7ba582c92519b20d47bcba34a5a4. This is a boundary-subset comparison
+against 2738, not an entire producer-tree comparison. Native/WASM/JS bytes match
+their recorded build manifests. Nothing was extracted or executed.
+
+Saved native/browser projections agree after removing browser boot and reply
+timing fields; unique case identities and actual WASM boot hashes are checked.
+Box/diamond fixed-byte inventories contain 11 requests each, including one guard
+each; A 9, B 84, C 14 and functional 83 inventories also match. B remains 64 proved,
+16 refuted and 4 pending. The four mandatory Identity box/diamond x IR/non-IR rows
+are proved and correctly tagged in these saved observations. This is not a
+new execution, source-mode adequacy proof or qualification of the newer address
+reader. The 206 selected module records are counted; actual C/object bytes are
+not independently verified.
+
+All 19 handoff gate receipts match their indexed bytes and commands:18 exit 0 and
+one exit 1. The invariantCountsToBound browser stack failure remains; its 10 saved
+frames fall inside the delivered WASM's indexed bodies. No function-name/cause
+repair is inferred. Native cost/browser startup STOPs remain reported holds;
+no stopped benchmark or build was rerun.
+
+Four new external negative controls and three shared archive controls pass.
+Finder found an omitted Memory.Reader comparison; it is now included and both
+reviewers confirm no remaining static-intake blocker. An initial incorrect
+assumption of nine runtime modules and the intermediate report of the seven-module subset
+are preserved outside Git. Nine is the development cache count, not this runtime
+boundary count. `fixed-byte-intake.json` records provenance, counts, saved gate
+commands and limits. No production Lean, theorem, axiom or budget changed.
+CR relay remains held under H118; full importer parity/migration, address-native
+qualification, authorized stack/cost repair and whole-goal acceptance remain open.
+
+### Existing environment members (2026-11-07)
+
+`Shared.environmentMember?` reuses `EnvKey.ofParts` for guarded `msg.sender`,
+`msg.value` and `block.timestamp`. Both executable expression paths share it.
+Root kind/name, compiler magic type identifier, negative builtin reference and
+result spelling are checked. Matching metadata is not authentication. Ordinary
+fields, unsupported members and base-before-member error order remain intact.
+No Source/Core, Reader signature, entry premise, import or proof budget changed.
+The helper's axiom inventory is empty; no new source adequacy theorem is claimed.
+
+Nine owned modules build and 31 affected Lean files pass. The final strengthened
+control file also passes MCP and a per-file gate with exact source-ID assertions.
+Its 16 box/diamond requests produce eight proved, four refuted and four unsupported
+outcomes; block.number and tx.origin keep their exact unsupported reasons.
+These exercise the existing intrinsic model, not source/world/native adequacy.
+The compiler first rejected an invalid nonpayable msg.value fixture; the valid
+fixture uses payable functions. An initial incomplete MCP response during adopted
+master dependency setup is preserved; retry and final validation pass. Neither
+failed attempt is retroactively counted as passing.
+
+The strict environment transition requires zero changes across eight saved
+profiles, both 55,218-row occurrence matrices and the pinned 78-file census.
+All replay unchanged: canonical admissions remain 245 versus 1,486 existing
+printed functions among 1,655 functions. This preserves observed outcomes, not
+decoded-term equality. The fresh model controls cover the new routing separately.
+
+`environment-manifest.json` records exact commands, source/fixture hashes, source
+identities, reviews, resources, timing boundaries and the H44 archive path/hash.
+Source checking took four seconds versus six in the earlier address gate; these
+are separate warmed runs with different dependency states, not matched runtime
+performance acceptance. The production delta is 19 added/eight removed Lean
+lines, no new production module and one test module. Global timing STOPs remain.
+Finder/skeptic final read-only reviews found no checkpoint blocker. CR relay
+remains held under H118; importer parity/migration, fresh native/WASM qualification,
+source/physical adequacy and the remaining original queues remain open.
+
+### General environment decoder guard proof (2026-11-07)
+
+`environmentMember?_guard` proves that any successful helper result originates
+in the existing `EnvKey.ofParts` map and satisfies the negative builtin-reference
+guard. It quantifies over arbitrary JSON inputs, members, result spellings and
+keys; it is not a compiler authentication or source/world adequacy theorem.
+The exact statement was unchanged throughout repair. Final axioms are only
+`propext` and `Quot.sound`; no axiom, admission or budget increase was added.
+
+Removing the lemma/doc block reproduces the pre-work Translate file byte for
+byte. There is no executable definition, import, Reader signature or entry-premise
+change. The production delta is 37 proof/doc lines and no new module. Nine owned
+modules build; six focused files pass, including axiom/signature inventories,
+32 existing environment/address model requests and KeySort. Actual versions are
+Lean 4.24.0 and Lake 5.0.0-src+797c613. The serial 12 GiB/no-swap gate exits zero
+in 34.0344 seconds; the cgroup peak is 229,416,960 bytes and minimum outer
+available memory is 11,538,579,456 bytes. This is checking evidence, not runtime
+performance acceptance. Prior census outcomes are retained because definitions
+are identical; only their source-file proof hash is refreshed.
+
+Failed proof attempts and MCP goal/tactic trials are preserved in the H44 archive
+indexed by environment-proof-manifest.json. Independent read-only finder and
+skeptic reviews found no remaining proof checkpoint blocker. The scope baseline
+is the immutable pre-work head f83a7016, which already contains published05d2c2587
+and an inherited README-only bookkeeping commit636fc9880. That unrelated file
+was preserved, not authored or modified by this proof increment.
+
+The accepted H71 address handoff still lacks local payload bytes; its transport
+route is not duplicated. Existing environment qualification, H118-held CR relay,
+importer migration, ReadBounds production-owner resolution and all original
+source/physical/performance obligations remain open.
+
+
+### Address handoff metadata integrity
+
+`verify-handoff-metadata.py` authenticates the delivered native-browser a14d56c9
+handoff and its committed manifest, then verifies the two explicit Translate and
+Compose source pins at sourceBuild0eb39db1. It checks declared 16-address counts
+(10 proved, 2 refuted, 4 unsupported, plus two guards), 24 unique gate receipts
+(23 pass, one failure), pending runtime status and retained performance STOPs.
+This is metadata consistency, not inspection of receipt contents, the reported
+343-module runtime index, 206 selected objects, binaries or request results.
+All six referenced address archives/indexes are absent locally at capture.
+Presence alone never changes the verifier's `payloadInspected: false` result.
+
+Three external controls include twelve rejecting mutations for independent drift,
+coordinated false acceptance, erased failures/STOPs, duplicate gate/artifact
+identities and unsafe locators. Read-only finder and skeptic found no confirmed
+checkpoint defect; neither used Lean/server/builds or writes. Four lightweight
+checks pass, including the unchanged extraction/trust audit and whitespace check.
+There are no production Lean changes or new checking/runtime measurements.
+The ownership audit now pins adopted published master d93f6839c explicitly;
+its scope allowlists are unchanged.
+
+`address-metadata-manifest.json` records portable archive/tool/Git pins and exact
+commands. Restore its H44 archive under `artifacts/address-metadata`, then run
+`python3 tests/directruntime-20261104/shared-translator/verify-handoff-metadata.py
+--handoff tests/directruntime-20261104/shared-translator/artifacts/address-metadata/handoff.ticket`.
+The external controls use the original coordinator inbox ticket. The archive
+contains that ticket and report, not native-browser's missing runtime payloads.
+No duplicate delivery ticket was issued. Fresh environment qualification,
+CR fixture/importer migration, ReadBounds production-owner resolution and the
+original stack/cost/performance holds remain open.
+
+
+### Shared environment decoder proofs
+
+`environmentMember?_guards` performs one general successful-decoder inversion
+for the existing map entry, negative builtin reference and result spelling.
+The existing `environmentMember?_guard` keeps its exact statement and projects
+its first two facts; `environmentMember?_resultType` projects the type fact.
+`environmentMember?_of_metadata` proves successful decoding from the explicit
+root/name/map/magic/reference/result guards for arbitrary JSON. These are
+metadata decoder facts, not compiler identity authentication, source/world
+adequacy or intrinsic semantics transport. All four theorem axiom reports are
+only `propext` and `Quot.sound`.
+
+The initial independent proofs checked correctly but failed the paired local
+checking limit: baseline median3.9615s, head6.3626s (+60.61%). That STOP, its
+source snapshot, failed proof attempts and tactic trials remain in the H44
+archive. Sharing guard inversion and replacing the positive proof's `simp_all`
+with explicit rewrites preserves all existing statements and brings three
+interleaved same-path checking medians to3.9282s/4.1776s (+6.35%, below10%).
+This local proof-checking result releases no native/browser performance hold.
+
+The final serial12GiB/no-swap gate passes nine requested owned module builds
+and six affected per-file checks, including 32 existing environment/address
+model requests, axiom/signature inventories and KeySort. Gate wall time39.9118s,
+child maximum RSS1261764KiB, cgroup peak230342656bytes, minimum outer available
+memory11480817664bytes. Lean4.24.0/Lake5.0.0-src+797c613 and threads1/-j1 remain
+unchanged. Final source and inventory MCP diagnostics report zero errors.
+Inherited dependency warnings are retained. This is checking evidence, not
+matched whole-build or runtime performance acceptance.
+
+Normalization verifies the old guard statement byte for byte, removes only
+three added theorem/doc blocks and restores its former proof; the resulting
+Translate file exactly matches immutable pre-work88a946c78971. Executable
+bodies, imports, Reader signatures, entry premises and exclusions are unchanged.
+Historical census/profile outcomes are retained, with only the proof-source
+SHA refreshed; no fresh census capture is claimed. The pre-work head preserves
+the existing clean published3a5b9de41 merge and prior66268454b intake checkpoint.
+The ownership allowlists are unchanged.
+
+Manifest: `environment-decoder-proof-manifest.json`; bulk logs, source snapshots,
+paired checking script/results and checksums are outside Git in its recorded
+archive. Independent read-only finder/skeptic found no confirmed proof or
+normalization defect; neither used Lean/server/builds or writes. Original H90
+forms/importer migration, inherited queues, absent address runtime payloads,
+environment qualification and all stack/native/browser holds remain open.
+
+
+### Portable decoder validation inputs
+
+The active `environment-decoder-validate.sh` now preflights 185 exact data files
+before Lean runs: 73 tracked files remain read-only and 112 untracked inputs
+are confined to this lane's artifact directory. `validation-inputs-manifest.json`
+records relative paths, sizes, hashes and required Git objects. The input
+archive is off Git under H44, 1,571,832 bytes, SHA256
+`fde3beea1c7d20ec0af848db05907d3ff66d9f0b2cb3254dbc17f2ee293aad95`.
+Its data pins derive from existing committed manifests and authenticated
+archives at pre-work16c7ecb40198. Repeat capture produced identical bytes.
+
+```bash
+python3 tests/directruntime-20261104/shared-translator/validation-inputs.py
+python3 tests/directruntime-20261104/shared-translator/validation-inputs.py --restore /path/to/validation-inputs-fde3beea1c7d20ec.tar.gz
+bash tests/directruntime-20261104/shared-translator/bounded.sh bash tests/directruntime-20261104/shared-translator/environment-decoder-validate.sh
+```
+
+Preflight reports all missing/changed files and missing Git objects. Restoration
+authenticates the whole archive and exact member set before writing, accepts
+only missing untracked owned artifact data, and rejects changed existing files,
+missing tracked fixtures, path escapes and symlinks. It never replaces CR's
+tracked fixtures or silently updates their pins. Git history, Lean/Lake and
+managed dependency setup remain separate prerequisites; no executable cache
+is included. Unavailable bulk is a delivery dependency, not successful validation.
+
+The proof baseline is an explicit immutable Git constant instead of a VM-only
+`base-head.txt`. All nine requested builds, six per-file checks and census,
+profile and static verifiers remain. Replay no longer runs the authoring
+`--capture-manifest` operation, so expected committed census pins stay frozen.
+No statement, premise, exclusion, axiom, gate check or resource budget changes.
+This inventory covers the active decoder runner; historical runners retain
+their own versioned checkpoint contracts.
+
+Six external controls cover missing/idempotent restoration, changed tracked
+and existing data, damaged or extra-member archives, per-member tampering,
+unsafe paths/symlinks, tracked reclassification and missing tracked inputs.
+A synthetic data tree copied 73 read-only files and restored all 112 archived
+files; every one of the 185 hashes matched. This establishes data integrity,
+not clean-VM/toolchain, source/compiler or runtime acceptance.
+
+Published master80c156bf13d1 arrived during this work and was fast-forwarded
+without discarding it. The full decoder gate and inherited five-fixture-proof
+gate passed together in 27.1722 seconds, child maximum RSS1,266,512KiB, cgroup
+peak220,766,208bytes and minimum outer available11,132,612,608bytes. Actual
+Lean4.24.0/Lake5.0.0-src+797c613 and serial12GiB/no-swap/threads1/-j1 are unchanged.
+These are checking measurements, not matched performance acceptance or release
+of existing runtime timing STOPs. No production Lean or proof changed.
+
+`portable-validation-manifest.json` records the evidence and input archive pins.
+Both archives remain off Git under H44. Read-only finder/skeptic found no
+confirmed restore-scope or freeze-boundary defect; neither used Lean/server,
+builds or writes. Original H90/importer, inherited extraction, binary-courier
+and native/browser obligations remain open.
+
+
+### Saved H90 first-refusal frontier
+
+After fetching master81512fd7298e, the lane contains that publication and keeps
+its prior portability commit. The immutable scope publication pin advances to
+81512fd7298e without changing allowlists; historical checkpoint source pins remain
+versioned observations, not current-file equality promises.
+
+`census-refusal-frontier.py` reuses the complete frozen H90 census verifier, joins
+all1,655 rows to exact pinned fixture/contract/function/source-ID AST identities,
+and partitions them as241both,1,245printed-only,4canonical-only and165neither.
+The1,245 printed-only rows have66distinct first-refusal diagnostics. The largest
+are binary common-type metadata293, unsupported expression211, unsupported type
+declaration158, String expected86 and unsupported statement80. These counts
+describe the saved reader observations; no fresh reader execution or admission
+gain is claimed. Printed bodies still do not establish existing-route elaboration.
+
+Each printed-only row retains its full identity, canonical function-AST hash and
+observed elementary/user-defined type occurrences. Context labels follow the
+outer function signature versus body; nested function-type parameter syntax in a
+body stays body context. Occurrences are neither failing-node attribution nor
+later-blocker discovery. The report does not infer an algorithm repair or relax
+refusals. All original form-by-form support/parity obligations remain.
+
+`census-refusal-frontier-manifest.json` pins generator, input census and off-Git
+H44 report4233c0585c733b012656e8542d3b9dc13a0e06060c2b350de8ec83165cd4238e
+(68,357bytes). Default replay compares the frozen manifest and full report bytes
+without rewriting either. External controls cover all four partitions, duplicate
+identity, invalid outcome/identity rejection and nested type contexts. Capture,
+replay and controls pass. No Lean source/proof/interface/budget changes occurred;
+no new Lean/MCP/build or stopped runtime benchmark was needed. Independent
+read-only finder/skeptic confirmed the context correction and found no remaining
+blocker; neither used Lean/server/builds/writes. Producer transport, migration,
+runtime STOP and original acceptance dependencies stay open.
+
+
+### Dynamic bytes/string boundary preparation
+
+Pinned compiler0.8.34 produced DynamicBytesBoundary.sol witnesses for default
+locals, alias initializers, allocation/literal bodies, parameters and state roots.
+The existing metadata-retention helper preserves raw and normalized ASTs
+separately. Eight function contexts and two state-contract contexts retain exact
+current bytes/string type refusals. Alias/allocation/literal examples stop at
+the enclosing type gate; they do not independently test those expression stages.
+No production reader admission changes in this checkpoint.
+
+DynamicBytesBoundaryControls.lean adds the general dynamicByteRows_preserved
+equation for the existing elabTyW: every dynamic-byte spelling preserves its
+existing dynamic marker rows. Both concrete bytes/string equations and their
+distinct marker rows are checked. The theorem depends only on propext; it does
+not prove compiler decoding, heap contents, source transport or backend adequacy.
+
+Initial diagnostics exposed an unfinished pure/Except equality and wrong
+memory-qualified parameter expectations. Explicit rfl and the actual normalized
+bytes/string spellings fix these controls. Failed diagnostics/trials remain in
+the off-Git evidence. Recovery MCP has zero errors19.331s; final per-file controls
+and KeySort pass4.488s, child maximumRSS1,070,132KiB, cgrouppeak210,022,400bytes,
+minimum outer available11,136,221,184bytes. Lean4.24/Lake5.0, serial12GiB/no-swap,
+threads1/-j1 unchanged. No production imports changed; no full build or runtime
+benchmark rerun was required. There is no pre-work equivalent checking time for
+this new additive test; no performance or existing STOP recovery is claimed.
+
+The hash-only dynamic-bytes-boundary-manifest.json records16payloads in the
+off-Git H44 archive dynamic-bytes-boundary-c02a4db5d3f2f272.tar.gz,13,933bytes,
+SHA256c02a4db5d3f2f272dcc01b46a2de80c2a71766cf4173be7f5e46c99e928ea01e.
+Outer hash/size, exact regular member set and every member hash verify. Restore
+payloads beneath artifacts/dynamic-bytes to replay the isolated test through
+bounded.sh and gate.sh per-file. No generated library-root registration or
+production API is added by this test module.
+
+Independent read-only finder/skeptic confirmed marker/refusal/provenance limits
+and found no blocker; neither used Lean/server/builds/writes. Dynamic bytes/string
+implementation, parameter/storage handling, heap semantics, full H90 parity and
+original migration/runtime/final acceptance obligations remain open.
+
+
+### Historical environment intake and held dynamic-memory candidate
+
+H77 delivered all eight wrapper/index/evidence/runtime/cache inputs for historical
+sourceBuild4d7285. verify-environment-intake.py checks their exact outer SHA pins,
+safe unique regular members, embedded index equality and every payload hash.
+There are522evidence payloads,5runtime payloads and32cache payloads; each archive
+also embeds its own separately counted index. Twenty wrapper-index entries match
+their sealed executed-private payload bytes. Neither wrappers nor binaries run;
+no cache is extracted, installed or adopted.
+
+Native/WASM manifests contain the same343unique source-module rows and match
+actual delivered binary bytes. This is consistency, not Git source verification.
+The sealed box/diamond inventories have eight selected requests each plus one
+mandatory proved harness guard. Exact saved request hashes and core result
+objects match native/browser:16selected observations perbackend total8proved,
+4refuted,4unsupported, plus2provedguards. The29saved gate receipts retain27exit0
+and2exit1 records. The failed invariantCountsToBound request is bound to actual
+WASM5a5be87b and retains Maximum call stack size exceeded with nonempty frame
+indices. Those frames remain unmapped: old6ae symbols are not this binary's map.
+No fresh execution, cause diagnosis, current-reader qualification or STOP release
+follows. Original producer d8a141a7 evidence is a separate undelivered archive.
+
+The H90 default-memory candidate passed per-file MCP and a serial capture gate:
+strict bytes/string metadata to existing marker-bearing declMemory, initializers
+and other locations refused. Two bare-declaration witnesses proved construction/
+termination in both modalities; they do not observe empty contents or prove
+source default-memory adequacy. Finder/skeptic requested that semantic limit stay
+explicit and observable-content controls precede any such claim. The matched
+78-file census stays245canonical/241both;17refusals change to String expected.
+Six reader-profile refusals also change; no admission gain occurs in those sets.
+
+Automatic approval review rejected proposed frozen verifier/audit expectation
+updates because stripping the new decoder from comparison and capturing new
+baselines could mask regressions. No rejected edit ran. Candidate source, exact
+observations and failed/passing evidence are preserved off Git in the35-member
+f7501b31521131172ae774afb006adcee546a90ea503b592ddfb0dfaa55b12ab archive
+(630,918bytes), indexed by dynamic-memory-candidate-manifest.json. Production,
+legacy controls and frozen observations are restored; no candidate admission is
+integrated. Q-H90-DYNAMIC-VALIDATION is routed through coord-ask for a versioned
+validation contract or deferral; the question branch is
+coord-q/codex/solidity-directruntime-20261104/shared-translator/20261107T091354Z.
+
+The restored nine-target/six-file decoder runner passes25.0735s under unchanged
+12GiB/no-swap/threads1/-j1, child maximumRSS1,272,216KiB, cgrouppeak215,810,048bytes,
+minimum outer available11,104,948,224bytes. An initial ancestry-check failure
+pinned a subsequently advanced remote ref; it is retained and corrected to the
+exact fetched/merged8a710f9d44df publication. No allowlist changes. Existing185
+inputs, frozen78-file census and5,692reader observations verify unchanged.
+
+Environment-intake-manifest.json pins the new report/tool and off-Git H44 evidence.
+Independent read-only finder/skeptic confirmed mandatory guards, byte bindings,
+actual stack error and the limits; neither used Lean/server/builds/writes. Full
+source/importer migration, ReadBounds authority, runtime/performance repairs and
+original final acceptance remain open.
+
+
+### Exact original environment archive staged for courier
+
+H70's missing-host-original notice was answered by checking actual local bytes.
+The original environment-evidence.tar.zst still exists at 65,713 bytes, SHA256
+d8a141a7703e95cc81f7aa0741ed12a5073739b1cb7d4363354211ca3cb16060.
+Its committed environment-manifest.json is byte-identical to the manifest at
+44d89439afd8fe7aca251cd5693b5b7ea36cf603, manifestSHA8ee027cf3c84e2162d98a07cf38e07706076be85948483e8a9d5e35cbeb5f6b5.
+All 56 safe unique regular members and 55 internal checksums verify. Archived
+Translate bytes equal that historical Git blob; compilation sourceSHA matches
+the historical source; original ASTSHA4b57bac4 matches the separately delivered AST.
+Nothing is extracted or executed.
+
+A byte-identical copy is staged off Git under H44 at
+artifacts/environment-handoff/original-environment-evidence.tar.zst.
+Original-environment-staging.json records repository-relative paths and exact
+provenance for the existing accepted H71 request. It is the original44d archive,
+not native-browser c3c9ce43 evidence. Approved host pull, consumer delivery and
+inspection remain unconfirmed; local staging is not transport or qualification.
+No duplicate ticket, source push or cache shipment occurred.
+
+Finder and skeptic independently checked custody/provenance limits and found no
+blocker, without Lean/server/builds/writes. Publishedf5bfb9ba1 was already merged
+before this metadata work; the explicit publication pin advances without any
+allowlist change. No Lean/production source or frozen validation contract changes.
+All performance/stack holds, production-owner authority, four storage diamonds,
+Q-H90-DYNAMIC-VALIDATION and original full acceptance obligations remain open.
+
+
+### Observable dynamic-reference model backfill
+
+DynamicBytesModelControls.lean addresses the held candidate review's
+bare-declaration limitation without installing that candidate or changing any
+frozen expectation. Six existing intrinsic Raw-program cases run from explicit
+State.init, fuel 128, in both constructed modalities: default bytes length0,
+default string-to-bytes length0, their wrong-length1 assertions, and same-kind
+empty alias reads. All 12 finite executions match: 8 normal and 4 assertion panics.
+These observable length checks go beyond termination-only declarations. Empty
+alias reads do not distinguish alias identity from copying. Finite execution
+does not prove either modal formula or source/default-memory adequacy.
+
+Four existing encodeCallArg checks admit same-marker bytes/string arguments and
+refuse cross-marker arguments. Their contexts are supplied explicitly; this is
+ABI argument compatibility testing, not declaration-to-context propagation,
+assignment typing or ABI/source transport proof. The prior general marker-row
+equation remains unchanged. No AST/compiler fixture or new translator is used.
+
+Initial diagnostics caught a numeral helper declared Int rather than Nat and
+Lean.Name constructors used where this repository's Solidity.Name is String.
+Both corrections are local to the test; failed diagnostics are retained. Final
+MCP reports zero errors in 9.5899 seconds. The final new-model/legacy-refusal/KeySort gate
+and the checks for 185 inputs, 78 fixtures, 5,692 profile rows and static scope pass in 7.4837 seconds under unchanged
+12GiB/no-swap/threads1/-j1. Child maximum RSS 1,082,720 KiB, cgroup peak 212,951,040 bytes,
+minimum outer available 11,102,654,464 bytes. No pre-work equivalent exists for
+this new additive test; no performance acceptance or STOP release is claimed.
+
+Dynamic-bytes-model-manifest.json pins source/model inputs, exact observations
+and the 15-member off-Git H44 evidence archive 32c5f7e8ed7e30ef68ec4103e76917c0bb2a187643af7664080b3a4e375718ce
+(13,282 bytes). Outer size/hash, exact member set and all member hashes verify.
+The model source input pins describe this bounded sample, not universal machine
+closure. This isolated test adds no production root registration or public API.
+Finder and skeptic read-only reviews found no checkpoint blocker; neither used
+Lean/server/builds/writes.
+
+Production source, interfaces, theorem statements, axioms, exclusions and budgets
+remain unchanged. Dynamic admission and Q-H90-DYNAMIC-VALIDATION remain open;
+this backfill does not authorize the previously rejected verifier/audit update.
+Original courier, migration, stack/cost/startup, storage-diamond and final gates
+remain separate dependencies.
+
+
+### Candidate archive pin clarification
+
+Published master e286f1843 was adopted by fast-forward before this metadata fix.
+The candidate manifest now names its four source pins
+`archivedCandidateSourceFiles`. Each entry has an explicit `archiveMember` and
+`intendedRepositoryRelative` destination. The hashes identify the preserved draft
+bytes, not accepted source or current checkout files. All four archive members
+were rehashed against the unchanged sealed archive and member index. The archive
+remains at SHA256 f7501b31521131172ae774afb006adcee546a90ea503b592ddfb0dfaa55b12ab.
+No candidate was installed and no production, proof, validation contract or
+resource budget changed. The test-standing-owner and static-handoff script notes
+belong to the audit-calculus scope and were left unchanged in this lane.

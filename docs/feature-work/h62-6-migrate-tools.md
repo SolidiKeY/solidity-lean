@@ -243,3 +243,42 @@ review-only Raw patch are committed under tests/h62/item6/migrate-tools/handoff/
 Originals remain unchanged. No H71 push permission was supplied; no push is made.
 Available goal tool exposes only complete/blocked, not PAUSED; operational pause
 is preserved, with no goal reset/replacement/completion or automatic continuation.
+
+## 2026-11-07 coordinator-authorized re-baseline and static continuation
+
+The latest coordinator instruction explicitly resumes the queue after reporting
+merge/touched-gate/review acceptance. The existing lane branch was clean at
+93580be8783a33b4d8b9092a2918a9e7047c8197 (already containing the retirement
+checkpoint) and fast-forwarded without reset to origin/master
+5da4771e63a4278ed53932ac39a032e3d7aea6ed. All prior history and stopped
+exports remain preserved. This supersedes the prior operational retirement pause
+for this requested continuation, not the separate trust/performance holds. No
+new goal, scope takeover, push, master edit or Lean run occurred.
+
+The tracked toolchain remains v4.24.0. Tools and Syntax.Raw still match their
+pinned c6 source bytes; no accepted Raw replacement or PERF-PREFIX-435 clearing
+disposition is locally available. Other imported source changed on master, so
+the old c6 build and type snapshots remain historical evidence and must not be
+reported as freshly validated against this working baseline. No timing STOP was
+rerun unchanged.
+
+Independent static backfill: h78-ledger.py preserves every one of the 2,283 recorded
+module-owned declarations, including private/generated names, with exact old
+Expr representation/universe parameters and existing interface fingerprints. It
+does not infer visibility or non-theorem kinds, and leaves all new-signature and
+shim evidence unset. No shim implemented; compatibility_established remains false.
+Six negative/coverage controls pass, including forbidden old-only acceptance and
+missing actual-shim signatures. Finder and skeptic independently verified every
+record and input hash without Lean/server use; no remaining finding.
+
+The new ledger is off Git at
+/workspace/migrate-tools-evidence/h78-evidence-ledger.json. Its generator and
+controls are committed under the assigned scripts/tests directories. H78 public
+visibility, new exports, comparisons and any producer shim still require actual
+evidence. Source-name equality or an unchanged old axiom union cannot substitute.
+
+After this independent item the waits remain: accepted migrate-syntax Raw input
+and root trust review, migrate-root-gate performance STOP disposition, and actual
+old/new public generated export evidence. No further assigned independent item
+can establish those facts from the currently delivered evidence. Full new build,
+meaning/axiom checks, complete matched timings and final acceptance stay open.

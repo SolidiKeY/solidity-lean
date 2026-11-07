@@ -46,6 +46,38 @@ def _root_.Solidity.Val.const? : {p : PrimTy} → Val C Γ p → Option p.Denote
   | _, .modular .. => none
   | _, .hash .. => none
 
+/-- Index-generalizing literal view, additive beside the frozen matcher. -/
+def _root_.Solidity.Simple.constView? : {p : PrimTy} → Simple C Γ p → Option p.Denote :=
+  fun {_} value => Simple.casesOn (motive := fun p _ => Option p.Denote) value
+    (fun {p} n h => some (PrimTy.ofLit p n h))
+    (fun b => some b)
+    (fun {_} _ => none)
+    (fun {_} _ _ => none)
+
+/-- The new view agrees with the unchanged matcher on every typed input. -/
+theorem _root_.Solidity.Simple.constView?_eq {p : PrimTy} (value : Simple C Γ p) :
+    value.constView? = value.const? := by
+  cases value <;> rfl
+
+/-- Index-generalizing literal view; existing optimizer callers stay unchanged. -/
+def _root_.Solidity.Val.constView? : {p : PrimTy} → Val C Γ p → Option p.Denote :=
+  fun {_} value => Val.casesOn (motive_5 := fun p _ => Option p.Denote) value
+    (fun {_} s => s.constView?)
+    (fun {_} _ => none)
+    (fun {_ _} _ _ _ _ _ => none)
+    (fun {_ _} _ _ _ _ => none)
+    (fun {_} _ _ _ => none)
+    (fun {_} _ => none)
+    (fun {_ _} _ _ => none)
+    (fun {_ _} _ _ => none)
+    (fun _ _ _ _ => none)
+    (fun {_ _} _ _ _ => none)
+
+/-- Agreement with the frozen matcher, without changing any of its equations. -/
+theorem _root_.Solidity.Val.constView?_eq {p : PrimTy} (value : Val C Γ p) :
+    value.constView? = value.const? := by
+  cases value <;> simp only [Val.constView?, Val.const?, Simple.constView?_eq]
+
 /-- The literal denoting a value of a primitive type. -/
 def litV : (p : PrimTy) → p.Denote → Val C Γ p
   | .bool, b => .simple (.bool b)

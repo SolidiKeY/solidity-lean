@@ -15,11 +15,11 @@ each proof iteration. Documentation-only edits need path and link checks.
 
 | Command | Coverage |
 |---|---|
-| `./run-lean.sh` | Layer, root and fragment checks, then the default targets and `SolkeyTestSuite` in one Lake invocation (`--bridge` adds the Bridge gate) |
+| `./run-lean.sh` | Layer, root and fragment checks, then the default targets, `SolkeyTestSuite` and `SoliditySlowExamples` in one Lake invocation (`--bridge` adds the Bridge gate) |
 | `bash scripts/coord-tools/register.sh --check` | The generated library roots match the file tree (`register.sh` rewrites them); no Lean |
 | `bash scripts/coord-tools/fragments.sh --check` | The module map, `docs/README.md`, `TERRA-TODO.md` and `scripts/g07-axiom-pins.json` match their fragment directories (`fragments.sh` rewrites them); no Lean |
 | `lake build Solidity` | The library without the examples: a lane checkpoint (`scripts/coord-tools/gate.sh checkpoint`) |
-| `lake build SolidityExamples SolkeyTestSuite` | The examples and the TestSuite: a checkpoint touching `Syntax`, `Semantics` or `Calculus` adds them |
+| `lake build SolidityExamples SolkeyTestSuite` | The regular examples and the TestSuite: a checkpoint touching `Syntax`, `Semantics` or `Calculus` adds them |
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |
 | `node scripts/check-layers.mjs` | No new core import boundary beyond the pinned107 snapshot; elaborator/parser bans remain unconditional; no Lean |
 | `bash scripts/coord-tools/gate.sh touched` | Merge pre-gate: check layers first on the prospective merged tree, then build touched modules; fail before build on new boundary edges |
@@ -63,13 +63,15 @@ negative fixture, not claims that these files exist. A different source citing
 the same nonexistent file, or a new missing reference in an exempt source, still
 fails. Ambiguous existing references retain the separate `--strict` behavior.
 
-The examples are their own library, `SolidityExamples`, still a default
-target: `lake build` and `./run-lean.sh` build them.  A lane checkpoint builds
-`lake build Solidity` alone and adds `SolidityExamples SolkeyTestSuite` when
-it touches `Syntax`, `Semantics` or `Calculus` (otherwise only the examples
-and TestSuite modules it edits, with what imports them); the executables
-also wait for the lane's last gate, `./run-lean.sh` (`gate.sh full`).
-Integration builds everything.
+Most examples remain in the default `SolidityExamples` library. H109 moves
+three expensive examples and the eleven importers of `DecisionGaps` to the
+non-default `SoliditySlowExamples` library; see [parallelism.md](parallelism.md)
+for the full list. A checkpoint does not build the slow library. CI and
+`./run-lean.sh` (`gate.sh full`) build it explicitly. A checkpoint touching
+`Syntax`, `Semantics` or `Calculus` adds the regular examples and TestSuite.
+Otherwise it checks the edited regular example and TestSuite modules with their
+importers; executables wait for the final full gate. Integration includes the
+slow examples.
 
 Run long builds in the background and inspect the log for errors.
 The SolKey sort check is no longer a gate (H89, 2026-11-06); the

@@ -69,6 +69,18 @@
       {
         "command": "solidityLean.buildCustomArgs",
         "title": "Solidity Lean: Build Compiler Artifact with Import Options"
+      },
+      {
+        "command": "solidityLean.showVerificationTrace",
+        "title": "Solidity Lean: Show Verification Trace (producer required)"
+      },
+      {
+        "command": "solidityLean.hideVerificationTrace",
+        "title": "Solidity Lean: Hide Verification Trace"
+      },
+      {
+        "command": "solidityLean.copyVerificationTrace",
+        "title": "Solidity Lean: Copy Verification Trace"
       }
     ],
     "submenus": [
@@ -135,6 +147,21 @@
           "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
           "command": "solidityLean.buildCustomArgs",
           "group": "0_execution@3"
+        },
+        {
+          "command": "solidityLean.showVerificationTrace",
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted && solidityLean.verificationTrace.CanShow",
+          "group": "4_trace"
+        },
+        {
+          "command": "solidityLean.hideVerificationTrace",
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted && solidityLean.verificationTrace.CanHide",
+          "group": "4_trace"
+        },
+        {
+          "command": "solidityLean.copyVerificationTrace",
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted && solidityLean.verificationTrace.CanCopy",
+          "group": "4_trace"
         }
       ]
     },
@@ -218,6 +245,13 @@
           "scope": "resource",
           "description": "Show current-version verification status beside function declarations."
         },
+        "solidityLean.compilerOutputDir": {
+          "type": "string",
+          "default": "bin",
+          "scope": "resource",
+          "restricted": true,
+          "description": "Build compiler AST artifacts under this absolute directory or path relative to the Solidity file's workspace folder. Each build uses an immutable source-named child directory. These artifacts are not proof or runtime results."
+        },
         "solidityLean.includePaths": {
           "type": "array",
           "items": {
@@ -247,6 +281,32 @@
           "default": false,
           "scope": "resource",
           "description": "Audit possible entry states for certified backend requests. This audit is not run by direct IDE checking."
+        },
+        "solidityLean.verificationTraceColor": {
+          "type": "object",
+          "default": {
+            "backgroundColor": null,
+            "fontColor": null
+          },
+          "scope": "resource",
+          "properties": {
+            "backgroundColor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null
+            },
+            "fontColor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null
+            }
+          },
+          "additionalProperties": false,
+          "description": "Trace annotation colors; null uses theme defaults. Positioned trace producer is currently unavailable."
         }
       }
     },
@@ -273,6 +333,16 @@
         "command": "solidityLean.buildCustomArgs",
         "key": "f6",
         "mac": "f6",
+        "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted"
+      },
+      {
+        "command": "solidityLean.showVerificationTrace",
+        "key": "f7",
+        "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted"
+      },
+      {
+        "command": "solidityLean.hideVerificationTrace",
+        "key": "f8",
         "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted"
       }
     ]

@@ -39,6 +39,14 @@ class CensusControls(unittest.TestCase):
         self.assertEqual(set(imports)-{"Lean"},set(c["targets"]))
         imports=graph.header_imports((ROOT/"tests/h62/item6/migrate-roadmap/ExportEvm.lean").read_text())
         self.assertEqual(set(imports),{"Lean","Solidity.Roadmap.Evm"})
+    def test_new_producer_modules_do_not_expand_assignment(self):
+        c=census.census(ROOT)
+        assigned={m["path"] for m in c["modules"]}
+        observed={str(p.relative_to(ROOT)) for p in (ROOT/"Solidity/Roadmap").rglob("*.lean")}
+        self.assertEqual(set(c["unassigned_directory_files"]),observed-assigned)
+        self.assertTrue(all("/G49Final/" not in p for p in assigned))
+        self.assertEqual(len(assigned),15)
+
     def test_full_assigned_census_and_order(self):
         c=census.census(ROOT)
         self.assertEqual(c,census.census(ROOT))

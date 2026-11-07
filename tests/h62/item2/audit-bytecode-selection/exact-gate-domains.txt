@@ -1,0 +1,1130 @@
+open Solidity.Evm Solidity.Backend.AbiEntry
+open Solidity.Backend.AbiEntry.Interface
+
+private def sampleContract : Solidity.Contract := {vars := []}
+private def sampleLabel : Fin W := wmod 13
+private def sampleWord : Fin W := wmod 0
+private def sampleMachine : Machine := {Machine.init with mem := fun _ => .val sampleWord}
+private def sampleInput : Solidity.AbiEntry.Input := {data := [], free := 0}
+private def sampleParameters : List Solidity.AbiEntry.Param := [{shape := .word .bool, loc := .value}]
+
+/-- Includes the program and global certificate self as well as every input/proof binder. -/
+theorem head_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadGateCertificate.executed := by
+  exact ⟨HeadGate.program, HeadGate.certificate, sampleContract, 7, sampleParameters,
+    sampleLabel, HeadGate.compiled sampleContract 7 sampleParameters sampleLabel,
+    HeadGate.selected sampleContract 7 sampleParameters sampleLabel,
+    sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- Includes one common program/self/result/frame, not separately inhabited structures. -/
+theorem word_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.WordGateCertificate.executed := by
+  exact ⟨WordGate.program, WordGate.certificate, sampleContract, 7, .bool,
+    sampleLabel, WordGate.compiled sampleContract 7 .bool sampleLabel,
+    WordGate.selected sampleContract 7 .bool sampleLabel,
+    sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- The exact loaded-word hypothesis is witnessed at a nonzero zero-padded offset.
+This is premise feasibility, not native loading or successful decoding. -/
+theorem word_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.correspondence := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel,
+    WordGate.compiled sampleContract 7 .bool sampleLabel,
+    WordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine,
+    sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- The stated rejected-run premise is actually derived for this short input. -/
+theorem head_semantic_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.semantic_rejection := by
+  have rejected : Solidity.Evm.run
+      (HeadGate.compiled sampleContract 7 sampleParameters sampleLabel).code sampleMachine = .revert :=
+    (HeadGate.rejected_iff sampleContract 7 sampleParameters sampleLabel _
+      (HeadGate.selected sampleContract 7 sampleParameters sampleLabel)
+      sampleMachine sampleWord rfl).2 (by decide)
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel,
+    HeadGate.compiled sampleContract 7 sampleParameters sampleLabel,
+    HeadGate.selected sampleContract 7 sampleParameters sampleLabel,
+    sampleMachine, sampleWord, rfl, sampleInput, by decide, 0, rejected, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_certificate_executed_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_certificate_executed_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_correspondence_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_semantic_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_semantic_rejection_domain
+
+/-- error: hypothesis audit: target is not a theorem -/
+#guard_msgs in
+#check hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.program
+
+/-- error: hypothesis audit: universe-polymorphic target needs explicit review -/
+#guard_msgs in
+#check hypotheses_of% Eq.symm
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.admitted is retained; only the conclusion is removed. -/
+theorem head_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.admitted := by
+  exact ⟨sampleContract, sampleParameters, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms head_admitted_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.selected is retained; only the conclusion is removed. -/
+theorem head_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.selected := by
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms head_selected_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.run_program is retained; only the conclusion is removed. -/
+theorem head_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.run_program := by
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms head_run_program_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.executed is retained; only the conclusion is removed. -/
+theorem head_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.executed := by
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel, HeadGate.compiled sampleContract 7 sampleParameters sampleLabel, HeadGate.selected sampleContract 7 sampleParameters sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_executed_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.HeadGate.rejected_iff is retained; only the conclusion is removed. -/
+theorem head_rejected_iff_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadGate.rejected_iff := by
+  exact ⟨sampleContract, 7, sampleParameters, sampleLabel, HeadGate.compiled sampleContract 7 sampleParameters sampleLabel, HeadGate.selected sampleContract 7 sampleParameters sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_rejected_iff_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_rejected_iff_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.Interface.HeadGateCertificate.selected is retained; only the conclusion is removed. -/
+theorem head_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadGateCertificate.selected := by
+  exact ⟨HeadGate.program, HeadGate.certificate, sampleContract, 7, sampleParameters, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_certificate_selected_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.admitted is retained; only the conclusion is removed. -/
+theorem word_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.admitted := by
+  exact ⟨sampleContract, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms word_admitted_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.selected is retained; only the conclusion is removed. -/
+theorem word_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.selected := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms word_selected_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.run_program is retained; only the conclusion is removed. -/
+theorem word_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.run_program := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms word_run_program_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.executed is retained; only the conclusion is removed. -/
+theorem word_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.executed := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, WordGate.compiled sampleContract 7 .bool sampleLabel, WordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_executed_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.WordGate.rejected_iff is retained; only the conclusion is removed. -/
+theorem word_rejected_iff_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.WordGate.rejected_iff := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, WordGate.compiled sampleContract 7 .bool sampleLabel, WordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_rejected_iff_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_rejected_iff_domain
+
+
+/-- Every raw binder of Solidity.Backend.AbiEntry.Interface.WordGateCertificate.selected is retained; only the conclusion is removed. -/
+theorem word_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.WordGateCertificate.selected := by
+  exact ⟨WordGate.program, WordGate.certificate, sampleContract, 7, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.word_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms word_certificate_selected_domain
+
+private def fullInput : Solidity.AbiEntry.Input := {data := List.replicate 36 (0 : UInt8), free := 0}
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.admitted; only the conclusion becomes True. -/
+theorem single_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.admitted := by
+  exact ⟨sampleContract, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms single_admitted_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.selected; only the conclusion becomes True. -/
+theorem single_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.selected := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms single_selected_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.run_program; only the conclusion becomes True. -/
+theorem single_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.run_program := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms single_run_program_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.executed; only the conclusion becomes True. -/
+theorem single_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.executed := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, SingleWordGate.compiled sampleContract 7 .bool sampleLabel, SingleWordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_executed_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.entry_form; only the conclusion becomes True. -/
+theorem single_entry_form_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.entry_form := by
+  exact ⟨sampleInput, 0, .bool, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_entry_form_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms single_entry_form_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.entry_rejection; only the conclusion becomes True. -/
+theorem single_entry_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.entry_rejection := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, SingleWordGate.compiled sampleContract 7 .bool sampleLabel, SingleWordGate.selected sampleContract 7 .bool sampleLabel, sampleInput, 0, sampleMachine, sampleWord, rfl, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_entry_rejection_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.entry_success; only the conclusion becomes True. -/
+theorem single_entry_success_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.entry_success := by
+  exact ⟨fullInput, 0, .bool, by decide, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_entry_success_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms single_entry_success_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.short_before_word; only the conclusion becomes True. -/
+theorem single_short_before_word_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.short_before_word := by
+  exact ⟨sampleContract, 7, .bool, sampleLabel, sampleMachine, sampleWord, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_short_before_word_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms single_short_before_word_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.SingleWordGate.insufficient_fuel; only the conclusion becomes True. -/
+theorem single_insufficient_fuel_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SingleWordGate.insufficient_fuel := by
+  exact ⟨fullInput, .bool, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_insufficient_fuel_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms single_insufficient_fuel_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.selected; only the conclusion becomes True. -/
+theorem single_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.selected := by
+  exact ⟨SingleWordGate.program, SingleWordGate.certificate, sampleContract, 7, .bool, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_certificate_selected_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.executed; only the conclusion becomes True. -/
+theorem single_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.executed := by
+  exact ⟨SingleWordGate.program, SingleWordGate.certificate, sampleContract, 7, .bool, sampleLabel, SingleWordGate.compiled sampleContract 7 .bool sampleLabel, SingleWordGate.selected sampleContract 7 .bool sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_certificate_executed_domain
+
+/-- All raw binders of Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.entry_rejection; only the conclusion becomes True. -/
+theorem single_certificate_entry_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SingleWordGateCertificate.entry_rejection := by
+  exact ⟨SingleWordGate.program, SingleWordGate.certificate, sampleContract, 7, .bool, sampleLabel, SingleWordGate.compiled sampleContract 7 .bool sampleLabel, SingleWordGate.selected sampleContract 7 .bool sampleLabel, sampleInput, 0, sampleMachine, sampleWord, rfl, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_certificate_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_certificate_entry_rejection_domain
+
+private def fullSize : Fin W := wmod 36
+private def fullMachine : Machine :=
+  {Machine.init with mem := fun address => if address = 8 then .val fullSize else .val sampleWord}
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.admitted := by
+  exact ⟨sampleContract, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_admitted_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.selected := by
+  exact ⟨sampleContract, 7, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_selected_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_code_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.code := by
+  exact ⟨sampleContract, 7, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_code_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_code_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.run_program := by
+  exact ⟨sampleContract, 7, sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_run_program_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.executed := by
+  exact ⟨sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_executed_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_entry_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.entry_rejection := by
+  exact ⟨sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, sampleInput, 0, sampleMachine, sampleWord, rfl, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_entry_rejection_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_validated_word_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.validated_word := by
+  exact ⟨sampleWord, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_validated_word_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms binding_validated_word_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_decoded_and_bound_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.decoded_and_bound := by
+  exact ⟨sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, fullInput, 0, fullMachine, fullSize, rfl, rfl, by decide, by decide, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_decoded_and_bound_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_decoded_and_bound_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_short_before_word_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.short_before_word := by
+  exact ⟨sampleContract, 7, sampleLabel, sampleMachine, sampleWord, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_short_before_word_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_short_before_word_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BoolBindingCertificate.selected := by
+  exact ⟨BoolBinding.program, BoolBinding.certificate, sampleContract, 7, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_certificate_selected_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BoolBindingCertificate.executed := by
+  exact ⟨BoolBinding.program, BoolBinding.certificate, sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_certificate_executed_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_certificate_entry_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BoolBindingCertificate.entry_rejection := by
+  exact ⟨BoolBinding.program, BoolBinding.certificate, sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, sampleInput, 0, sampleMachine, sampleWord, rfl, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_certificate_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_certificate_entry_rejection_domain
+
+private def dirtyWord : Fin W := wmod 256
+private def dirtyMachine : Machine := {Machine.init with mem := fun _ => .val dirtyWord}
+private def dirtyInput : Solidity.AbiEntry.Input := {data := List.replicate 30 (0 : UInt8) ++ [1, 0], free := 0}
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.admitted := by
+  exact ⟨sampleContract, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_admitted_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.selected := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.run_program := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_run_program_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.executed := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.UnsignedGateCertificate.selected := by
+  exact ⟨UnsignedGate.program, UnsignedGate.certificate, sampleContract, 7, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_certificate_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.UnsignedGateCertificate.executed := by
+  exact ⟨UnsignedGate.program, UnsignedGate.certificate, sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_certificate_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_rejected_iff_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.rejected_iff := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_rejected_iff_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_rejected_iff_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_condition_code_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.condition_code := by
+  exact ⟨sampleContract, 7, sampleWord, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_condition_code_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_condition_code_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_enum_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.enum_correspondence := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_enum_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_enum_correspondence_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_uint_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.uint_correspondence := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, UnsignedGate.compiled sampleContract 7 (2^8) sampleLabel, UnsignedGate.selected sampleContract 7 (2^8) sampleLabel, sampleMachine, sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_uint_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_uint_correspondence_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_bool_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.bool_correspondence := by
+  exact ⟨sampleContract, 7, sampleLabel, UnsignedGate.compiled sampleContract 7 2 sampleLabel, UnsignedGate.selected sampleContract 7 2 sampleLabel, sampleMachine, sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_bool_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_bool_correspondence_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.admitted := by
+  exact ⟨sampleContract, 8, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_admitted_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.selected := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.run_program := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_run_program_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.executed := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, SignedGate.compiled sampleContract 7 8 sampleLabel, SignedGate.selected sampleContract 7 8 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SignedGateCertificate.selected := by
+  exact ⟨SignedGate.program, SignedGate.certificate, sampleContract, 7, 8, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_certificate_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SignedGateCertificate.executed := by
+  exact ⟨SignedGate.program, SignedGate.certificate, sampleContract, 7, 8, sampleLabel, SignedGate.compiled sampleContract 7 8 sampleLabel, SignedGate.selected sampleContract 7 8 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_certificate_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_rejected_iff_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.rejected_iff := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, SignedGate.compiled sampleContract 7 8 sampleLabel, SignedGate.selected sampleContract 7 8 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_rejected_iff_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_rejected_iff_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.correspondence := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, SignedGate.compiled sampleContract 7 8 sampleLabel, SignedGate.selected sampleContract 7 8 sampleLabel, sampleMachine, sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_correspondence_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BytesGate.admitted := by
+  exact ⟨sampleContract, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_admitted_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BytesGate.selected := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BytesGate.run_program := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_run_program_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BytesGate.executed := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, BytesGate.compiled sampleContract 7 1 sampleLabel, BytesGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BytesGateCertificate.selected := by
+  exact ⟨BytesGate.program, BytesGate.certificate, sampleContract, 7, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_certificate_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BytesGateCertificate.executed := by
+  exact ⟨BytesGate.program, BytesGate.certificate, sampleContract, 7, 1, sampleLabel, BytesGate.compiled sampleContract 7 1 sampleLabel, BytesGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_certificate_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_enum_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.enum_rejection := by
+  have rejected : Solidity.Evm.run (UnsignedGate.compiled sampleContract 7 1 sampleLabel).code dirtyMachine = .revert :=
+    (UnsignedGate.rejected_iff sampleContract 7 1 sampleLabel _ (UnsignedGate.selected sampleContract 7 1 sampleLabel)
+      dirtyMachine dirtyWord rfl).2 (by decide)
+  exact ⟨sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, dirtyMachine, dirtyWord, rfl,
+    dirtyInput, 0, 0, 0, by decide, rejected, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_enum_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_enum_rejection_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_uint_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.uint_rejection := by
+  have rejected : Solidity.Evm.run (UnsignedGate.compiled sampleContract 7 (2^8) sampleLabel).code dirtyMachine = .revert :=
+    (UnsignedGate.rejected_iff sampleContract 7 (2^8) sampleLabel _ (UnsignedGate.selected sampleContract 7 (2^8) sampleLabel)
+      dirtyMachine dirtyWord rfl).2 (by decide)
+  exact ⟨sampleContract, 7, 8, sampleLabel, UnsignedGate.compiled sampleContract 7 (2^8) sampleLabel, UnsignedGate.selected sampleContract 7 (2^8) sampleLabel, dirtyMachine, dirtyWord, rfl,
+    dirtyInput, 0, 0, 0, by decide, rejected, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_uint_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_uint_rejection_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_bool_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.bool_rejection := by
+  have rejected : Solidity.Evm.run (UnsignedGate.compiled sampleContract 7 2 sampleLabel).code dirtyMachine = .revert :=
+    (UnsignedGate.rejected_iff sampleContract 7 2 sampleLabel _ (UnsignedGate.selected sampleContract 7 2 sampleLabel)
+      dirtyMachine dirtyWord rfl).2 (by decide)
+  exact ⟨sampleContract, 7, sampleLabel, UnsignedGate.compiled sampleContract 7 2 sampleLabel, UnsignedGate.selected sampleContract 7 2 sampleLabel, dirtyMachine, dirtyWord, rfl,
+    dirtyInput, 0, 0, 0, by decide, rejected, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_bool_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_bool_rejection_domain
+
+
+/-- Guard the regression of treating a parent-name edge as instantiated correctness.
+The same code parameter and child self determine the actual parent field type. -/
+theorem raw_tail_inherited_correct (code : Solidity.Backend.Program)
+    (self : RawTailGuardCertificate code)
+    (size base relative extent length stride address : Solidity.Backend.Scalar.Word)
+    (suffix : Solidity.Backend.Scalar.Stack) :
+    Solidity.Backend.Scalar.run code (extent::size::base::relative::length::stride::size::address::suffix)=
+      some (Solidity.Backend.Scalar.flag
+        (Solidity.AbiEntry.tailFits size.toNat base.toNat relative.toNat extent.toNat &&
+          decide (length.toNat≤Solidity.AbiEntry.lim) &&
+          Solidity.AbiEntry.regionFits size.toNat address.toNat length.toNat stride.toNat)::suffix) :=
+  self.toTailGuardCertificate.correct size base relative extent length stride address suffix
+
+/-- Guard loss of the common code parameter and room hypothesis in parent transport. -/
+theorem raw_tail_inherited_capacity (code : Solidity.Backend.Program)
+    (self : RawTailGuardCertificate code) (suffix : Solidity.Backend.Scalar.Stack)
+    (room : suffix.length+9≤1024) :
+    Solidity.Backend.Scalar.stackBound code ((suffix.length+8 : Nat) : Int)=true :=
+  self.toTailGuardCertificate.capacity suffix room
+
+/-- Exact inherited field domain, using an actual child certificate projection. -/
+theorem tail_inherited_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.TailGuardCertificate.correct := by
+  exact ⟨TailGuard.code, RawTailGuard.certificate.toTailGuardCertificate,
+    68, 4, 32, 32, 0, 32, 36, [258,513], True.intro⟩
+
+/-- Exact capacity field domain includes the same child and a populated suffix. -/
+theorem tail_inherited_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.TailGuardCertificate.capacity := by
+  exact ⟨TailGuard.code, RawTailGuard.certificate.toTailGuardCertificate,
+    [258,513], by decide, True.intro⟩
+
+/-- Guard vacuous inherited transport with one closed child, actual accepted numeric
+execution, capacity and overflowing-height refusal on the SAME emitted code.
+This certifies no native operand loading, byte execution or Source admission. -/
+theorem raw_tail_parent_joint :
+    ∃ child : RawTailGuardCertificate TailGuard.code,
+      child.toTailGuardCertificate = TailGuard.certificate ∧
+      Solidity.Backend.Scalar.run TailGuard.code
+        (32::68::4::32::0::32::68::36::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.stackBound TailGuard.code 10=true ∧
+      Solidity.Backend.Scalar.stackBound TailGuard.code 1024=false := by
+  exact ⟨RawTailGuard.certificate, rfl, TailGuardControls.accepted,
+    raw_tail_inherited_capacity TailGuard.code RawTailGuard.certificate [258,513] (by decide),
+    TailGuardControls.capacity_refused⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_inherited_correct' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_inherited_correct
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_inherited_capacity' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_inherited_capacity
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_inherited_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms tail_inherited_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_inherited_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms tail_inherited_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_parent_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_parent_joint
+
+
+private def tailInput : Solidity.AbiEntry.Input := {data := List.replicate 32 0, free := 0}
+private def tailShape : Solidity.AbiEntry.Shape := .array (.word (.uint 256))
+
+/-- Guard dropped raw-field input/shape/frame binders using the same closed child. -/
+theorem raw_tail_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.RawTailGuardCertificate.raw := by
+  exact ⟨TailGuard.code, RawTailGuard.certificate, tailInput, tailShape, 0, 0,
+    [258,513], True.intro⟩
+
+/-- Guard omission of the length-prefixed premise from reference-field witnesses. -/
+theorem raw_tail_reference_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.RawTailGuardCertificate.reference := by
+  exact ⟨TailGuard.code, RawTailGuard.certificate, tailInput, tailShape, 0, 0,
+    by decide, True.intro⟩
+
+/-- Guard replacing common raw/reference inputs with separately inhabited cases.
+The certificate, raw numeric execution, semantic reference and capacity coexist.
+No native load order, encoded execution or Source admission is claimed. -/
+theorem raw_tail_operand_joint :
+    ∃ child : RawTailGuardCertificate TailGuard.code,
+      child.toTailGuardCertificate = TailGuard.certificate ∧
+      Solidity.Backend.Scalar.run TailGuard.code
+        (rawTailOperands tailInput tailShape 0 0 ++ [258,513])=some (1::[258,513]) ∧
+      Solidity.AbiEntry.tailRef tailInput tailShape 0 0=.ok (32,0) ∧
+      tailShape.lengthPrefixed=true ∧
+      Solidity.Backend.Scalar.stackBound TailGuard.code 10=true ∧
+      Solidity.Backend.Scalar.stackBound TailGuard.code 1024=false := by
+  have pass : rawTailCondition tailInput tailShape 0 0=true := by decide
+  have executed : Solidity.Backend.Scalar.run TailGuard.code
+      (rawTailOperands tailInput tailShape 0 0 ++ [258,513])=some (1::[258,513]) := by
+    have raw : Solidity.Backend.Scalar.run TailGuard.code
+        (rawTailOperands tailInput tailShape 0 0 ++ [258,513])=
+        some (Solidity.Backend.Scalar.flag (rawTailCondition tailInput tailShape 0 0)::[258,513]) :=
+      RawTailGuard.certificate.raw tailInput tailShape 0 0 [258,513]
+    simp only [pass, Solidity.Backend.Scalar.flag, ite_true] at raw
+    exact raw
+  exact ⟨RawTailGuard.certificate, rfl, executed, TailGuardControls.raw_empty_array,
+    by decide,
+    raw_tail_inherited_capacity TailGuard.code RawTailGuard.certificate [258,513] (by decide),
+    TailGuardControls.capacity_refused⟩
+
+/-- Guard applying the conditional reference field to a non-prefixed shape.
+This is a refused premise, not a claim of a native execution trap. -/
+theorem raw_tail_unprefixed_refused :
+    ¬ ((.word .bool : Solidity.AbiEntry.Shape).lengthPrefixed=true) := by decide
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_raw_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_reference_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_reference_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_operand_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_operand_joint
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_unprefixed_refused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_unprefixed_refused
+
+
+/-- Guard omission of the public correctness method's numeric/frame binders. -/
+theorem tail_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.correct := by
+  exact ⟨32, 0, 0, 32, 0, 32, 0, [258,513], True.intro⟩
+
+/-- Guard loss of the public method's actual room premise. -/
+theorem tail_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.capacity := by
+  exact ⟨[258,513], by decide, True.intro⟩
+
+/-- All six initial operand-representation facts coexist with the SAME input,
+shape and prefix premise. No successful native load is assumed. -/
+theorem tail_method_reference_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.reference := by
+  exact ⟨tailInput, tailShape, 0, 32, 0, 0, 32, 0, 32, 0,
+    by decide, by decide, by decide, by decide, by decide, by decide,
+    by decide, True.intro⟩
+
+/-- Public raw method uses the exact common input/shape/protected suffix. -/
+theorem raw_tail_method_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.RawTailGuard.raw := by
+  exact ⟨tailInput, tailShape, 0, 0, [258,513], True.intro⟩
+
+/-- Public reference method retains its length-prefix hypothesis. -/
+theorem raw_tail_method_reference_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.RawTailGuard.reference := by
+  exact ⟨tailInput, tailShape, 0, 0, by decide, True.intro⟩
+
+/-- Guard forged initial-size facts in a reference-method witness.
+This rejects a representation premise, not native execution. -/
+theorem tail_initial_size_mismatch_refused :
+    ¬ ((33 : Solidity.Backend.Scalar.Word).toNat=tailInput.size) := by decide
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_reference_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_reference_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_method_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_method_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_method_reference_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_method_reference_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_initial_size_mismatch_refused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_initial_size_mismatch_refused
+
+
+private def oversizedInput : Solidity.AbiEntry.Input :=
+  {data := List.replicate 31 0 ++ [32] ++ List.replicate 23 0 ++ [1] ++ List.replicate 8 0, free := 0}
+private def shortOversizedInput : Solidity.AbiEntry.Input :=
+  {data := oversizedInput.data.take 63, free := 0}
+
+private theorem oversized_load_zero : Solidity.AbiEntry.load oversizedInput.data 0=32 := by decide
+private theorem oversized_load_length : Solidity.AbiEntry.load oversizedInput.data 32=2^64 := by decide
+private theorem oversized_length_large :
+    Solidity.AbiEntry.lim<Solidity.AbiEntry.load oversizedInput.data
+      (Solidity.AbiEntry.wrap (0+Solidity.AbiEntry.load oversizedInput.data 0)) := by
+  have address : Solidity.AbiEntry.wrap (0+32)=32 := by decide
+  simp only [oversized_load_zero, address, oversized_load_length]
+  decide
+
+/-- Guard dropping the length-check certificate self or protected frame. -/
+theorem length_certificate_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.correct := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, BitVec.ofNat 256 (2^64), [258,513], True.intro⟩
+
+/-- Guard vacuous room premises in the length-check capacity field. -/
+theorem length_certificate_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.capacity := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, [258,513], by decide, True.intro⟩
+
+/-- Tail-fit, prefix and oversized loaded length coexist with a valid head span. -/
+theorem length_certificate_lazy_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.lazy_revert := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, oversizedInput, tailShape, 0, 0,
+    by decide, by decide, oversized_length_large, True.intro⟩
+
+theorem length_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.correct := by
+  exact ⟨BitVec.ofNat 256 (2^64), [258,513], True.intro⟩
+
+theorem length_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.capacity := by
+  exact ⟨[258,513], by decide, True.intro⟩
+
+theorem length_method_lazy_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.lazy_revert := by
+  exact ⟨oversizedInput, tailShape, 0, 0, by decide, by decide, oversized_length_large, True.intro⟩
+
+theorem length_method_eager_bytes_panic_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.eager_bytes_panic := by
+  exact ⟨oversizedInput, 0, 32, 0, by decide, by decide, True.intro⟩
+
+theorem length_method_eager_array_panic_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.eager_array_panic := by
+  exact ⟨oversizedInput, (.word (.uint 256)), 0, 32, 0, by decide, by decide, True.intro⟩
+
+/-- Guard unrelated/vacuous failure fixtures: one well-formed head/tail input,
+certificate and code exhibit numeric boundary rejection, lazy revert and eager
+panic. A related one-byte truncation keeps the padded length but reverts at the
+head-span check; zero fuel takes priority. No charged/native behavior is claimed. -/
+theorem length_failure_joint :
+    ∃ _self : LengthCheckCertificate LengthCheck.code,
+      0+31<oversizedInput.size ∧ 32+31<oversizedInput.size ∧
+      Solidity.AbiEntry.load oversizedInput.data 0=32 ∧
+      Solidity.AbiEntry.load oversizedInput.data 32=2^64 ∧
+      Solidity.Backend.Scalar.run LengthCheck.code (0::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run LengthCheck.code (BitVec.ofNat 256 (2^64)::[258,513])=some (0::[258,513]) ∧
+      Solidity.AbiEntry.tailRef oversizedInput tailShape 0 0=.error .revert ∧
+      Solidity.AbiEntry.mdec oversizedInput 1 .bytes 32 0=.error .panic ∧
+      Solidity.AbiEntry.mdec oversizedInput 1 tailShape 32 0=.error .panic ∧
+      Solidity.AbiEntry.mdec oversizedInput 0 .bytes 32 0=.error .fuel ∧
+      Solidity.AbiEntry.load shortOversizedInput.data 32=2^64 ∧
+      Solidity.AbiEntry.mdec shortOversizedInput 1 .bytes 32 0=.error .revert ∧
+      Solidity.Backend.Scalar.stackBound LengthCheck.code 3=true ∧
+      Solidity.Backend.Scalar.stackBound LengthCheck.code 1024=false := by
+  have lazyFailure : Solidity.AbiEntry.tailRef oversizedInput tailShape 0 0=.error .revert :=
+    LengthCheck.certificate.lazy_revert oversizedInput tailShape 0 0 (by decide) (by decide) oversized_length_large
+  have bytesFailure : Solidity.AbiEntry.mdec oversizedInput 1 .bytes 32 0=.error .panic :=
+    LengthCheck.eager_bytes_panic oversizedInput 0 32 0 (by decide) (by decide)
+  have arrayFailure : Solidity.AbiEntry.mdec oversizedInput 1 tailShape 32 0=.error .panic :=
+    LengthCheck.eager_array_panic oversizedInput (.word (.uint 256)) 0 32 0 (by decide) (by decide)
+  have shortFailure : Solidity.AbiEntry.mdec shortOversizedInput 1 .bytes 32 0=.error .revert := rfl
+  exact ⟨LengthCheck.certificate, by decide, by decide, by decide, by decide,
+    LengthCheckControls.boundaries.1, LengthCheckControls.boundaries.2.2.1,
+    lazyFailure, bytesFailure, arrayFailure, rfl, by decide, shortFailure,
+    LengthCheck.certificate.capacity [258,513] (by decide),
+    LengthCheckControls.inhabited_frame.2.2⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_lazy_revert_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_lazy_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_lazy_revert_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_lazy_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_eager_bytes_panic_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_eager_bytes_panic_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_eager_array_panic_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_eager_array_panic_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_failure_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_failure_joint
+
+
+/-- Guard omission of either code parameter or the common certificate self. -/
+theorem offset_certificate_tail_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.tail_correct := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    68,4,32,32,[258,513],True.intro⟩
+
+theorem offset_certificate_region_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.region_correct := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    68,4,1,32,[258,513],True.intro⟩
+
+theorem offset_certificate_tail_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.tail_capacity := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    [258,513],by decide,True.intro⟩
+
+theorem offset_certificate_region_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.region_capacity := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    [258,513],by decide,True.intro⟩
+
+/-- Signed relative offsets remain allowed; no unsigned-span premise is invented. -/
+theorem offset_method_tail_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_raw := by
+  exact ⟨68,4,BitVec.ofNat 256 (2^256-32),32,[258,513],True.intro⟩
+
+/-- Wrapped products remain legal raw operands rather than an added exclusion. -/
+theorem offset_method_region_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_raw := by
+  exact ⟨0,BitVec.ofNat 256 (2^256-32),BitVec.ofNat 256 (2^255),2,[258,513],True.intro⟩
+
+theorem offset_method_tail_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_correct := by
+  exact ⟨68,4,32,32,[258,513],True.intro⟩
+
+theorem offset_method_region_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_correct := by
+  exact ⟨68,4,1,32,[258,513],True.intro⟩
+
+theorem offset_method_tail_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_capacity := by
+  exact ⟨[258,513],by decide,True.intro⟩
+
+theorem offset_method_region_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_capacity := by
+  exact ⟨[258,513],by decide,True.intro⟩
+
+private theorem frame_witness_output (input output target : Solidity.Backend.Scalar.Stack)
+    (same : output=target) (code : Solidity.Backend.Program) (peak : Nat) :
+    (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate input output,
+      frame.code=code ∧ frame.peak=peak) →
+    (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate input target,
+      frame.code=code ∧ frame.peak=peak) := by
+  cases same
+  exact fun witness => witness
+
+/-- Guard canonicalization of signed offsets/wrapped products and conflation of
+predicate flags with full-reference admission. Both emitted codes retain the
+protected suffix, opposite boundary flags and actual frame/capacity behavior. -/
+theorem offset_predicate_joint :
+    ∃ _certificate : OffsetChecksCertificate OffsetChecks.tailCode OffsetChecks.regionCode,
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode (32::68::4::32::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode (32::68::4::33::[258,513])=some (0::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode
+        (32::68::4::BitVec.ofNat 256 (2^256-32)::[258,513])=some (1::[258,513]) ∧
+      68<(BitVec.ofNat 256 (2^256-32)).toNat ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode (1::32::68::4::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode (1::32::67::4::[258,513])=some (0::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode
+        (BitVec.ofNat 256 (2^255)::2::0::BitVec.ofNat 256 (2^256-32)::[258,513])=some (1::[258,513]) ∧
+      (2^255 : Nat)*2=2^256 ∧
+      Solidity.Backend.Scalar.stackBound OffsetChecks.tailCode 1024=false ∧
+      Solidity.Backend.Scalar.stackBound OffsetChecks.regionCode 1024=true ∧
+      (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32] [1],
+        frame.code=OffsetChecks.tailCode ∧ frame.peak=1) ∧
+      (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4] [1],
+        frame.code=OffsetChecks.regionCode ∧ frame.peak=1) := by
+  have tailFlag : Solidity.Backend.Scalar.flag
+      (Solidity.AbiEntry.tailFits (68 : Solidity.Backend.Scalar.Word).toNat
+        (4 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat
+        (32 : Solidity.Backend.Scalar.Word).toNat)=1 := by
+    have agreement : some (1::([258,513] : Solidity.Backend.Scalar.Stack))=
+        some (Solidity.Backend.Scalar.flag
+          (Solidity.AbiEntry.tailFits (68 : Solidity.Backend.Scalar.Word).toNat
+            (4 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat
+            (32 : Solidity.Backend.Scalar.Word).toNat)::[258,513]) :=
+      OffsetChecksControls.tail_edges.1.symm.trans (OffsetChecks.tail_correct 68 4 32 32 [258,513])
+    exact (List.cons.inj (Option.some.inj agreement)).1.symm
+  have regionFlag : Solidity.Backend.Scalar.flag
+      (Solidity.AbiEntry.regionFits (68 : Solidity.Backend.Scalar.Word).toNat
+        (4 : Solidity.Backend.Scalar.Word).toNat (1 : Solidity.Backend.Scalar.Word).toNat
+        (32 : Solidity.Backend.Scalar.Word).toNat)=1 := by
+    have agreement : some (1::([258,513] : Solidity.Backend.Scalar.Stack))=
+        some (Solidity.Backend.Scalar.flag
+          (Solidity.AbiEntry.regionFits (68 : Solidity.Backend.Scalar.Word).toNat
+            (4 : Solidity.Backend.Scalar.Word).toNat (1 : Solidity.Backend.Scalar.Word).toNat
+            (32 : Solidity.Backend.Scalar.Word).toNat)::[258,513]) :=
+      OffsetChecksControls.region_edges.1.symm.trans (OffsetChecks.region_correct 68 4 1 32 [258,513])
+    exact (List.cons.inj (Option.some.inj agreement)).1.symm
+  have tailFrame : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32] [1],
+      frame.code=OffsetChecks.tailCode ∧ frame.peak=1 := by
+    have original : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32]
+        [Solidity.Backend.Scalar.flag (Solidity.AbiEntry.tailFits
+          (68 : Solidity.Backend.Scalar.Word).toNat (4 : Solidity.Backend.Scalar.Word).toNat
+          (32 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat)],
+        frame.code=OffsetChecks.tailCode ∧ frame.peak=1 :=
+      ⟨OffsetChecks.tailFrame 68 4 32 32,rfl,rfl⟩
+    exact frame_witness_output [32,68,4,32] _ [1]
+      (congrArg (fun value : Solidity.Backend.Scalar.Word => [value]) tailFlag)
+      OffsetChecks.tailCode 1 original
+  have regionFrame : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4] [1],
+      frame.code=OffsetChecks.regionCode ∧ frame.peak=1 := by
+    have original : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4]
+        [Solidity.Backend.Scalar.flag (Solidity.AbiEntry.regionFits
+          (68 : Solidity.Backend.Scalar.Word).toNat (4 : Solidity.Backend.Scalar.Word).toNat
+          (1 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat)],
+        frame.code=OffsetChecks.regionCode ∧ frame.peak=1 :=
+      ⟨OffsetChecks.regionFrame 68 4 1 32,rfl,rfl⟩
+    exact frame_witness_output [1,32,68,4] _ [1]
+      (congrArg (fun value : Solidity.Backend.Scalar.Word => [value]) regionFlag)
+      OffsetChecks.regionCode 1 original
+  exact ⟨OffsetChecks.certificate,
+    OffsetChecksControls.tail_edges.1, OffsetChecksControls.tail_edges.2,
+    OffsetChecksControls.signed_relative.1, OffsetChecksControls.signed_relative.2,
+    OffsetChecksControls.region_edges.1, OffsetChecksControls.region_edges.2,
+    OffsetChecksControls.wrapped_product.1, OffsetChecksControls.wrapped_product.2,
+    OffsetChecksControls.height_boundaries.1, OffsetChecksControls.height_boundaries.2,
+    tailFrame, regionFrame⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_tail_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_tail_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_region_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_region_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_tail_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_tail_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_region_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_region_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_predicate_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_predicate_joint
+
+
+private def headShortInput : Solidity.AbiEntry.Input := {data := List.replicate 35 0, free := 0}
+private def headDirtyInput : Solidity.AbiEntry.Input := {data := List.replicate 35 0 ++ [2], free := 0}
+private def hugeHeadParameters : List Solidity.AbiEntry.Param :=
+  [{shape := .fixed (.word (.uint 256)) (2^256),loc := .memory}]
+
+/-- Preserve the emitted function, common global self, parameters and frame. -/
+theorem head_check_certificate_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.correct := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,sampleParameters,35,[258,513],True.intro⟩
+
+theorem head_check_certificate_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.capacity := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,sampleParameters,[258,513],by decide,True.intro⟩
+
+/-- Size representation is an actual initial fact, not successful decoding. -/
+theorem head_check_certificate_classified_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.classified := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,headShortInput,sampleParameters,35,[258,513],by decide,True.intro⟩
+
+theorem head_check_certificate_early_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.early_revert := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,headShortInput,0,sampleParameters,by decide,True.intro⟩
+
+theorem head_check_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.correct := by
+  exact ⟨sampleParameters,35,[258,513],True.intro⟩
+
+theorem head_check_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.capacity := by
+  exact ⟨sampleParameters,[258,513],by decide,True.intro⟩
+
+theorem head_check_method_classified_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.classified := by
+  exact ⟨headShortInput,sampleParameters,35,[258,513],by decide,True.intro⟩
+
+theorem head_check_method_early_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.early_revert := by
+  exact ⟨headShortInput,0,sampleParameters,by decide,True.intro⟩
+
+/-- Guard conflating a passed short-head predicate with full entry admission.
+Actual size representation, boundary flags, early-before-fuel failure, dirty
+payload refusal, huge METADATA saturation and physical capacity coexist.
+No huge buffer is allocated and no native/gas/Source behavior is certified. -/
+theorem head_check_joint :
+    ∃ _certificate : HeadCheckCertificate HeadCheck.code,
+      headShortInput.size=35 ∧ headDirtyInput.size=36 ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code sampleParameters) (35::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code sampleParameters) (36::[258,513])=some (0::[258,513]) ∧
+      Solidity.AbiEntry.entry headShortInput 0 sampleParameters=.error .revert ∧
+      Solidity.AbiEntry.entry headDirtyInput 2 sampleParameters=.error .revert ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code hugeHeadParameters) (36::[258,513])=
+        some (Solidity.Backend.Scalar.flag true::[258,513]) ∧
+      (HeadCheck.frameCertificate sampleParameters 35).peak=1 ∧
+      Solidity.Backend.Scalar.run (HeadCheck.frameCertificate sampleParameters 35).code
+        (35::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.stackBound (HeadCheck.code sampleParameters) 3=true ∧
+      Solidity.Backend.Scalar.stackBound (HeadCheck.code sampleParameters) 1024=false := by
+  have early : Solidity.AbiEntry.entry headShortInput 0 sampleParameters=.error .revert :=
+    HeadCheck.certificate.early_revert headShortInput 0 sampleParameters (by decide)
+  exact ⟨HeadCheck.certificate,by decide,by decide,
+    HeadCheckControls.one_word_boundary.1,HeadCheckControls.one_word_boundary.2,
+    early,HeadCheckControls.passed_head_not_entry.2,HeadCheckControls.huge_is_short 36,
+    rfl,HeadCheckControls.one_word_boundary.1,
+    HeadCheck.certificate.capacity sampleParameters [258,513] (by decide),
+    HeadCheckControls.height_refusal⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_correct_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_capacity_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_classified_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_classified_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_early_revert_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_early_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_correct_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_classified_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_classified_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_early_revert_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_early_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_joint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_joint

@@ -6,8 +6,9 @@ const closures=new WeakMap();
 function trackChild(child){child.processBirth??=processState(child.pid)?.birth;let closed=closures.get(child);if(!closed){closed=new Promise(resolve=>child.once('close',resolve));closures.set(child,closed);}return closed;}
 async function waitForGroup(child,{deadline=Date.now()+1000,kill=false}={}){
  if(kill)terminateTree(child);
- if(groupMembers(child).some(running))terminateTree(child);
- while(groupMembers(child).some(running)){if(Date.now()>=deadline)throw new Error('Owned session remained live after shutdown deadline');await new Promise(setImmediate);}
+ let members=groupMembers(child);
+ if(members.some(running)){terminateTree(child);members=groupMembers(child);}
+ while(members.some(running)){if(Date.now()>=deadline)throw new Error('Owned session remained live after shutdown deadline');await new Promise(setImmediate);members=groupMembers(child);}
 }
 async function waitForClose(child,{closed=trackChild(child),kill=false,timeoutMs=1000,deadline=Date.now()+timeoutMs}={}){
  if(kill&&(child.ownedGroup||child.pid&&child.exitCode===null&&child.signalCode===null))terminateTree(child);

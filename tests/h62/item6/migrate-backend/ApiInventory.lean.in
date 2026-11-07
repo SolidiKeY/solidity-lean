@@ -6,6 +6,9 @@ Metadata export only, after the complete library has passed its prescribed gate.
 Types are serialized as DAGs without expression pretty-printing or expanding
 shared intrinsic terms. Python computes sharing-independent Merkle hashes. All imported
 Backend declarations, including generated/private ones, remain in the inventory.
+Schema 2 retains private-name classification and protected metadata without
+filtering internal-looking generated public names. This does not establish
+module exported-context accessibility or completeness.
 No theorem or trust-policy claim follows from this exporter alone.
 -/
 open Lean Elab Command
@@ -107,7 +110,7 @@ run_cmd do
     | .ok () => pure ()
     | .error message => throwError "{message}"
   let header := Json.mkObj [
-    ("schema", Json.num 1),
+    ("schema", Json.num 2),
     ("module_inventory", Json.arr (targets.map fun name => Json.str name.toString)),
     ("declaration_count", toJson roots.size)]
   liftIO do
@@ -125,7 +128,9 @@ run_cmd do
           ("name", nameJson name), ("display_name", Json.str name.toString),
           ("module", Json.str origin.toString), ("kind", Json.str (kind info)),
           ("level_params", Json.arr (info.levelParams.map nameJson).toArray),
-          ("unsafe", Json.bool info.isUnsafe), ("type", encoded)]
+          ("unsafe", Json.bool info.isUnsafe),
+          ("visibility", Json.str (if isPrivateName name then "private" else "public")),
+          ("protected", Json.bool (isProtected env name)), ("type", encoded)]
         handle.putStrLn row.compress
     IO.FS.rename temporary destination
   logInfo "Backend metadata export: {targets.size} imported modules, {roots.size} declarations"

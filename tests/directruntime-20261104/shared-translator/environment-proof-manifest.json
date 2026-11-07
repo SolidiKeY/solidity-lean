@@ -1,0 +1,102 @@
+{
+  "guardedRegression": "Successful environment decoding must originate in existing EnvKey.ofParts and retain negative builtin-reference guard",
+  "base": "f83a7016e867e2bc270198688b50b8054980e9f6",
+  "publishedAncestor": "05d2c25872c4bb963a0ca7f605905e6e1e99eedc",
+  "sourcePath": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+  "sourceSha256": "35d64218f2156a209f0d9873e7c55e9568de9e1393304ebe02faa50a2928fcd3",
+  "newTheorem": "Solidity.Frontend.ExecutableAst.Shared.environmentMember?_guard",
+  "signature": "theorem environmentMember?_guard (base : Json) (member resultType : String)\n    (key : EnvKey) (success : environmentMember? base member resultType = some key) :\n    (\u2203 root : String, (str base \"name\").toOption = some root \u2227\n      EnvKey.ofParts root member = some key) \u2227 (J.ref? base).any (\u00b7 < 0) = true",
+  "axioms": [
+    "propext",
+    "Quot.sound"
+  ],
+  "definitionComparison": {
+    "base": "f83a7016e867e2bc270198688b50b8054980e9f6",
+    "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+    "baseSha256": "90479bcc5c022c435be037ccb2bf16a95dd41b7c15d8cd79696502c3a3e508c5",
+    "strippedCurrentSha256": "90479bcc5c022c435be037ccb2bf16a95dd41b7c15d8cd79696502c3a3e508c5",
+    "onlyAddition": "environmentMember?_guard lemma/doc",
+    "executableDefinitionsByteIdentical": true,
+    "boundary": "Source text comparison, not compiled binary or source/world adequacy proof."
+  },
+  "gates": {
+    "gates": [
+      {
+        "command": "lake lean Solidity/Frontend/ExecutableAst/Shared/Translate.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 4,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment-proof/gates/1.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/AxiomInventory.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 4,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment-proof/gates/2.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/ApiSignatures.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment-proof/gates/3.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/EnvironmentMemberControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment-proof/gates/4.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/AddressLocalControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment-proof/gates/5.log"
+      },
+      {
+        "command": "lake lean Solidity/KeySort.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment-proof/gates/6.log"
+      }
+    ],
+    "ownedBuildTargets": 9,
+    "suiteExit": 0,
+    "wallSeconds": 34.03437097099959,
+    "scopePeakBytes": 229416960,
+    "minimumOuterAvailableBytes": 11538579456,
+    "memoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "leanThreads": 1,
+    "jobs": 1,
+    "toolchain": "Lean4.24.0/Lake5.0.0-src+797c613",
+    "keySort": "PASS3s; no emitted text; exact command in gates.tsv",
+    "newLemmaAxioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "baseLemma": "absent",
+    "headSignature": "theorem environmentMember?_guard (base : Json) (member resultType : String)\n    (key : EnvKey) (success : environmentMember? base member resultType = some key) :\n    (\u2203 root : String, (str base \"name\").toOption = some root \u2227\n      EnvKey.ofParts root member = some key) \u2227 (J.ref? base).any (\u00b7 < 0) = true"
+  },
+  "reviews": {
+    "finder": "Read-only statement/proof and final evidence review: no confirmed defect. Stripped current source exactly matches preworkf83. Nine builds/sixfocused gates pass; decoder guard fact only. No Lean/server/build/writes.",
+    "skeptic": "Read-only final proof/evidence review: no remaining checkpoint blocker. Forward inversion only; no authentication/source/world/binary qualification. Inherited README bookkeeping preserved, not authorized as new edit. Failed attempts retained. No Lean/server/build/writes."
+  },
+  "archive": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/environment-proof-evidence.tar.zst",
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/environment-proof-evidence.tar.zst",
+    "sha256": "d529b5dbc930e865e296933032cbf15e724f304dd9619ab55c18b5703adca4d3",
+    "bytes": 24304
+  },
+  "failures": "Initial option-bind normalization, nested result-type split and dependent-context match proof attempts failed; source/logs/tactic trials preserved. FinalMCP and gates pass; no statement/budget/runtime definition change.",
+  "delta": {
+    "productionLeanAdded": 37,
+    "productionLeanRemoved": 0,
+    "newTheorems": 1,
+    "newProductionModules": 0
+  },
+  "inheritedWork": {
+    "commit": "636fc9880a8480a921abc7a328efc85222394981",
+    "file": "docs/README.md",
+    "boundary": "Present before proof work, preserved unchanged, not part of owned delta."
+  },
+  "boundary": "Kernel-proved decoder guard inversion and selected regression gates, not compiler authentication, source/world adequacy, compiled binary identity or full original assignment closure."
+}

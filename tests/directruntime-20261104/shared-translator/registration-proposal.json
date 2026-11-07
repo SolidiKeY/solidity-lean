@@ -37,6 +37,11 @@
       "path": "tests/directruntime-20261104/shared-translator/AddressLocalControls.lean",
       "row": "H90 nonpayable address-local marker, builtin-identity and diagnostic-order controls.",
       "registrationStatus": "Test-only explicit per-file gate; no production root import proposed."
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/EnvironmentMemberControls.lean",
+      "row": "Existing environment-member routing, builtin metadata-shape defenses, source IDs and retained sibling/error-order controls.",
+      "registrationStatus": "Test-only explicit per-file gate; no production root import proposed."
     }
   ]
 }

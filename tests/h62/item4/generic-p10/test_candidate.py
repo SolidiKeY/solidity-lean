@@ -4,6 +4,8 @@ import json
 import sys
 import tomllib
 import unittest
+import subprocess
+import hashlib
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT/'scripts/h62/item4/generic-p10'))
@@ -13,7 +15,7 @@ import make_candidate as G
 
 class CandidateTests(unittest.TestCase):
     def setUp(self):
-        self.original = (ROOT/G.SOURCE).read_text()
+        self.original = subprocess.check_output(["git","-C",str(ROOT),"show",f"{census.BASE}:{G.SOURCE.as_posix()}"],text=True)
 
     def test_all_original_signatures_and_other_bodies_are_retained(self):
         candidate = G.candidate(self.original)
@@ -29,6 +31,21 @@ class CandidateTests(unittest.TestCase):
     def test_unknown_original_positive_proof_shape_is_refused(self):
         changed = self.original.replace('  apply observed\n  decide +kernel', '  exact other_proof', 1)
         with self.assertRaises(ValueError): G.candidate(changed)
+
+    def test_h126_production_application_retains_original_contracts(self):
+        import export_migration
+        actual=(ROOT/G.SOURCE).read_text()
+        receipt=json.loads((ROOT/'tests/h62/item4/generic-p10/owner-relay-request.json').read_text())
+        self.assertEqual(hashlib.sha256(actual.encode()).hexdigest(),receipt['proposed_source_sha256'])
+        old={r['name']:r for r in census.declarations(self.original,'old')}
+        new={r['name']:r for r in census.declarations(actual,'production')}
+        self.assertEqual(len(old),32)
+        self.assertEqual(set(new)-set(old),export_migration.NEW_NAMES)
+        for name,row in old.items():
+            self.assertEqual(row['statement_sha256'],new[name]['statement_sha256'],name)
+            if name not in set(G.CASES)|{'observed'}:
+                self.assertEqual(row['declaration_sha256'],new[name]['declaration_sha256'],name)
+        self.assertEqual(actual.count('exact table_case .'),9)
 
     def test_standalone_package_identity_and_remote_pins(self):
         package = ROOT/'tests/h62/item4/generic-p10'

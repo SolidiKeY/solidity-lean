@@ -1,0 +1,22 @@
+{
+ "tests/v14-constructor/FailureAxioms.lean:Solidity.Backend.Executable.ConstructorArgumentFailure.constructor_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/FailureAxioms.lean:Solidity.Backend.Executable.ConstructorArgumentFailure.giveArgs_failed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/FailureAxioms.lean:Solidity.Backend.Executable.ConstructorArgumentFailure.run_inner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/FailureAxioms.lean:Solidity.Backend.Executable.ConstructorArgumentFailure.transport_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

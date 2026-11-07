@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "guarded_regression": "Successful local probe metadata parsed from bytes detached from the process record, including intermediate-child log substitution.",
+  "generator_sources_in_git": {
+    "scripts/h62/item1/duplication-scanner/observe_signature_environment.py": "8546578b91232fce6a92cf5a73e101405a4fc7b298e018ab36aae61c2ddd7528",
+    "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py": "98c14554db4fc2b67f48e797083358ae3cf3fad715502fdf2faf82e809b68966",
+    "scripts/h62/item1/duplication-scanner/census_fixture_kernel.py": "915b62d80297100b002a24805f08c0234a014d04a29baba4c7eb95883b32aaec",
+    "scripts/h62/item1/duplication-scanner/bind_source_locations.py": "8aa826d5ec422583a8c95f17f10483ba7a3cf232ff6a4cc5d541a4dd5617b956",
+    "scripts/h62/item1/duplication-scanner/bind_project_leaf.py": "6ee89b22cf688398c2d1fe334710590f57dc0e7680d296e5a6ec1bfd641351c6",
+    "scripts/h62/item1/duplication-scanner/bind_project_closure.py": "dd0ecbc4ac11de52085e2c1a941c1ff66037700779f0613fe99fa2d1eef5b171",
+    "scripts/h62/item1/duplication-scanner/header_dependencies.py": "e542035d66b2aa159713b7648bd660d246b79883e96c697142b4abf194f52a75"
+  },
+  "test_sha256": "d627769a19785c90abf893dc70fde4ed2be5018cdc8d0217b8bd0609647fd2de",
+  "evidence_sha256": {
+    "acceptance.json": "68caf3e52236d8f892ce06e2295d2d0fa600bcc079872867c103d374a940a741",
+    "timing-summary.json": "3589450929e1a9768894c50c3189a621ece6d66ced29ae4094a24205f725727c",
+    "tests-reviewed.log": "613bdfe65d49ada5d18f228b9ae7c5c3b28730609bf12379aa5923f144d76678",
+    "reviews.json": "b1e66ce16591030e3c067ab92b866f8943402fed12edad09a4cc2bf7cd05c279",
+    "profile-fixtures.py": "d3ea2d297a8c4f90e4d218fa93b2e8daac74dbb6dccaab7ddfeb547f0d96c007"
+  },
+  "external_tests": 152,
+  "new_controls": 8,
+  "coverage": {
+    "source": {
+      "coverage": {
+        "local-fixture-linkage": 20,
+        "unresolved": 0
+      },
+      "visible_kernel_constants": 46,
+      "raw_scan_sha256": "b82b47f97d9b060a4ecfa3f7b2826d006c19774b9ec14bc02944414f50a6ff6a"
+    },
+    "keysort": {
+      "coverage": {
+        "local-project-linkage": 16,
+        "unresolved": 36
+      },
+      "visible_kernel_constants": 161,
+      "raw_scan_sha256": "b8a892741eb2e8fffd12773d4dcc61265f9a74f90af8626301d47517d4b7939e"
+    },
+    "ast": {
+      "coverage": {
+        "local-project-linkage": 98,
+        "unresolved": 89
+      },
+      "visible_kernel_constants": 781,
+      "raw_scan_sha256": "a3c963d3393e74a33cd58c841ca79b4695a29405f4da842e182b6a4ec1c3f407"
+    },
+    "headers": {
+      "nodes": 6454,
+      "targets": 129,
+      "statuses": {
+        "no-declared-path-to-held-module": 104,
+        "declared-path-to-held-module": 25
+      },
+      "inventoried_project_modules_loaded": false,
+      "inventoried_body_execution": false
+    },
+    "unchanged_project_metadata_and_bindings": true
+  },
+  "production_Lean_delta": {
+    "files": 0,
+    "lines": 0,
+    "declarations": 0
+  },
+  "boundary": "No new proof or compiler-adequacy result; original792 obligations and +80.254966536% Lean STOP retained."
+}

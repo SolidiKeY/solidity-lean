@@ -1,0 +1,62 @@
+{
+  "scope": "fifty-seven static capture/lifting roles; full721-line inspection; document gate FAIL retained; zero fresh witnesses/runtime acceptance",
+  "counts": {
+    "role_reviewed": 443,
+    "role_pending": 4840,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/evidence.tar.gz",
+      "bytes": 1060494,
+      "sha256": "351fd19473d782614b251f265c7b764c0b9799e029fb5d287441f71407866243"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/inputs.json",
+      "bytes": 964,
+      "sha256": "1eaab1cde999490384f3194267fab1ab6cc7e1b0cbac2e6f2a7c853444564e8b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/gates.json",
+      "bytes": 3089,
+      "sha256": "ec46a2aade816cd3bfeed14bbc9900ffb4d9692dc92bd2fcaf1f9bf1cec5c5ef"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/reviews.md",
+      "bytes": 689,
+      "sha256": "4f3b5d68b965d5939bda419d885e933f1b7d6ccb50925935a2f66a436a91b873"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/case-rosters.json",
+      "bytes": 1066,
+      "sha256": "03655cb194da3ff63103d7a478d9429e4dfcab3cbc2277ba02e7516c4699b174"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/supporting-source-bindings.json",
+      "bytes": 274,
+      "sha256": "a1fde7d469615bf115740210d60600bd392e6743b847143814cfc7fb21a08499"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/doc-failure-source-binding.json",
+      "bytes": 463,
+      "sha256": "3a3dfe2939af5893876ab3f9666069fce56692f2a06895634432e11c340619cf"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/failed-attempt.json",
+      "bytes": 548,
+      "sha256": "8f0a6dcd5fd55f3f838977e46ecf32a771a6fd8e8e8f09c184f6741c1539b1cb"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-premises-classification-v33/failed-recovery-attempt.json",
+      "bytes": 575,
+      "sha256": "e2351986365f8f2d3f977b191d99f189b6830ce12d09d47deaaa4eb1573380c0"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/capture-premises-classification-v33/semantic-roles-reviewed.json",
+      "bytes": 1194838,
+      "sha256": "36d19d67c8e51c3ac4d3c3f666a39d01a605838005ca61135f0ce3926eb200b8"
+    }
+  ]
+}
