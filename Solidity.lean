@@ -3201,6 +3201,7 @@ import Solidity.Hash.CollisionBound
 import Solidity.Hashes
 import Solidity.Keccak
 import Solidity.KeySort
+import Solidity.Language.EnvironmentFields.Consequences
 import Solidity.Language.EnvironmentFields.ContractControls
 import Solidity.Language.EnvironmentFields.Contracts
 import Solidity.Language.EnvironmentFields.Frozen

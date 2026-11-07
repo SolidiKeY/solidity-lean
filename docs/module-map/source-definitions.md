@@ -130,6 +130,9 @@
 | `Source/Agreement/PrimitiveSlotReverseControls.lean` | Retained source/tail/neighbors and real opposite-direction controls. |
 | `Source/Agreement/PrimitiveCopySequence.lean` | Both orders of concrete primitive copies, actual intermediate reads, normal agreements/clients and horizon-four timeouts. |
 | `Source/Agreement/PrimitiveCopySequenceControls.lean` | Original-value survival by copy order, same-input model noncommutation and swap refusal controls. |
+| `Source/HorizonFuel.lean` | S05 item 2, first part of the `Horizon` split: fuel monotonicity (`belowAt`) and horizon independence (`runTx_stable`, `firstDone_runTx`, `runTx_stuck_stable`). |
+| `Source/HorizonGrow.lean` | S05 item 2, `Horizon` split: every interpreter function only appends events (`grow_go`, `growAt`). |
+| `Source/HorizonConst.lean` | S05 item 2, `Horizon` split: the helpers that leave the events as they are (`const_go`). |
 
 # VX1 OOM split of the horizon development
 
@@ -142,9 +145,6 @@
 | `Frontend/Checked/UnitExamples/Parsed.lean` | Per-program kernel certificates of `ctorsOf` for the declaration, unit and expression corpora (`parsedCtors_*`). |
 | `Frontend/Checked/UnitExamples/ProfileParsed.lean` | Per-program kernel certificates of the in-profile constructors for the declaration and unit corpora (`parsedCtors_profileDecl*`, `parsedCtors_profileUnit*`). |
 | `Frontend/Checked/UnitExamples/ProfileExprParsed.lean` | Per-program kernel certificates of the in-profile constructors for the expression corpus, and of the Yul program (`parsedCtors_profileExpr*`, `parsedCtors_yul0`). |
-| `Source/HorizonFuel.lean` | S05 item 2, first part of the `Horizon` split: fuel monotonicity (`belowAt`) and horizon independence (`runTx_stable`, `firstDone_runTx`, `runTx_stuck_stable`). |
-| `Source/HorizonGrow.lean` | S05 item 2, `Horizon` split: every interpreter function only appends events (`grow_go`, `growAt`). |
-| `Source/HorizonConst.lean` | S05 item 2, `Horizon` split: the helpers that leave the events as they are (`const_go`). |
 | `Source/CalldataLayout.lean` | ABI head dimensions for the owned calldata aggregate subset (`cdStaticWords`, `cdHeadBytes`, `STy.cdStride`), taken from v14 781938cf. |
 | `Source/CalldataAggregates.lean` | S02/G18.04 nested calldata reads, string and static-reference slices, and typed read-only locations, taken from v14 781938cf. |
 | `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly; its typed-source reachability is in `CalldataNestedCopyControls`. |
