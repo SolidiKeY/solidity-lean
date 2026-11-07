@@ -2060,3 +2060,53 @@ permission wait is replaced by actual application and validation obligations.
 The initial source application and imported producer limits are recorded in
 docs/feature-work/h62-4-generic-p10.md. No PowerBounds STOP or other producer
 wait is cleared by the scope answer.
+
+
+### Frozen lexical source-byte bindings (2026-11-07)
+
+The existing metadata framework now binds recorded lexical signatures to actual
+UTF-8 source slices and preceding context using the existing census scanner.
+Every supplied module must retain its complete candidate membership; forged
+self-consistent hashes, duplicate/omitted ranges, wrong context and incorrect
+Unicode positions are refused. Older entries lacking name positions retain
+that distinction while positions are reproduced from the supplied snapshot.
+The caller must authenticate source snapshots; the helper alone does not.
+
+The actual receipt checks all227 mapped frozen files (190core/37Bridge) against
+Git basec6f550e281a7e5affa9a99bc2cdaed556dec00e4 and the sealed original census.
+All1,660 historical named-theorem/lemma candidates bind to their signature and
+context bytes. The selected150-module metadata subset separately binds all1,046
+recorded candidates and their supplied Unicode name positions to the same
+sources. Reversed-input reproduction is identical. This completes these lexical
+byte checks only: macros/generated declarations, kernel statement correspondence,
+ownership, inherited instantiation and joint witnesses remain unestablished.
+No new kernel link or witness is credited and full703 source closure/full
+190core+37Bridge elaborated census acceptance remain pending.
+
+Three new regression tests cover UTF-8 versus character offsets, legacy position
+reproduction, signature/context/position corruption, complete membership and
+snapshot aliasing. All92 audit tests pass. The initial Unicode test incorrectly
+compared the scanner range (including private) with the later theorem token;
+its failure is retained and the test now compares the same source boundary.
+Finder/skeptic reviews found no helper issue; skeptic confirmed this test fix.
+No reviewer edits/builds/server use. Evidence and recipe/input/scanner/helper/
+test/output hashes are under
+`/workspace/parallel-20261103/executable-bytecode/frozen-source-byte-bindings`.
+
+Published masterfc060cb4b was merged first, preserving the H126 P10 application;
+roots/fragments regenerated. No producer/interface/statement/axiom/exclusion
+changes or Lean/prerequisite workload/new proof-budget epoch. PowerBounds STOP
+and original proof/Source/native/gas/fork/full-package/Bridge/performance holds
+remain. Q-WV-SCOPE-01 remains resolved support-only; do not refile. Master also
+changed the prior SelectedHeapBoundaryWitness citation to truthful H44 wording;
+changed-input doc-path validation is recorded separately, without inferring
+kernel or producer acceptance from a documentation fix.
+
+
+Final checkpoint92tests and trust/orphans/roots/fragments/whitespace pass.
+Changed-input doc-path validation passes in61.988s: every cited Lean path
+resolves (142 ambiguous basenames remain informational). This resolves the
+prior SelectedHeapBoundaryWitness documentation wait only; historical failure
+receipts remain preserved. It supplies no kernel, materialized-control or
+producer-adequacy credit. Missing P10 prerequisite products and all original
+proof/acceptance obligations remain pending.
