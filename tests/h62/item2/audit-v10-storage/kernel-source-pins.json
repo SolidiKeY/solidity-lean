@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "boundary": "Source identities from the separately executed bounded Lean4.24.0 kernel/axiom-guard checks. This metadata does not replace kernel execution or semantic review.",
+  "sources": {
+    "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean": {
+      "sha256": "c60e03615c0c3400c9f2dc2861523a850d1dc38d8888b7f90cd9143ef11b8637",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/1.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean": {
+      "sha256": "4b05fe6e6926b4ad3b50c68bc3835532fd135689990a1e41000d9b19958b90be",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/2.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean": {
+      "sha256": "c50c3da1fe1bc508f0638fe8698ac973a25d0f62d8e0b5947df626a3092c732c",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/3.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean": {
+      "sha256": "e022c4d26cc1f4e65888116d1ae1d2230e0924078bd76071bfe624e3cacf3b43",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint222-source-read-gates/1.log",
+      "checked_head": "7cf454b36d35e7b9f2783eb962573b8f7fbd3166"
+    },
+    "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean": {
+      "sha256": "85c54bf51f313fb235dd99d4fcc7e39a822c01acf6bf969d9f4567984e617987",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint222-source-write-gates/1.log",
+      "checked_head": "7cf454b36d35e7b9f2783eb962573b8f7fbd3166"
+    },
+    "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean": {
+      "sha256": "ae5fc9ba79e1725860ccec31a9713d83d45db8ef0c4aca15d7dd7554e8e35d55",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/4.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean": {
+      "sha256": "c21eb09f4facc7a5ef86cbfb96ec1e1420af95aef1915b06360154d453bd75f4",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/5.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean": {
+      "sha256": "4ddf34ba7d724ef2ef3c7eb6dbcc4995378dc76a5dddf8bd10e6cd8552f32ac2",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/6.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/PushWitnesses.lean": {
+      "sha256": "ab6f6b2ea60f955481f1929d51a7f9ca09d743f97e52b92fdfc08807cdac6e6d",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/7.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean": {
+      "sha256": "687edc982deb68779252ff7ea9a7cf42afa5b39e1e65b23f34894ca9f481bde1",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint223-final-gates/1.log",
+      "checked_head": "6346da978fe6c9ae53306b4cf78894faad6e04ee"
+    }
+  },
+  "validated_dependency_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30",
+  "latest_partial_validation": {
+    "head": "7cf454b36d35e7b9f2783eb962573b8f7fbd3166",
+    "sources": [
+      "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean",
+      "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean"
+    ],
+    "boundary": "Only these two unchanged Source witness modules were freshly checked. validated_dependency_head retains the historical complete nine-module check; other checked_head values and receipts are unchanged."
+  },
+  "latest_additive_validation": {
+    "head": "6346da978fe6c9ae53306b4cf78894faad6e04ee",
+    "source": "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean",
+    "guards": 15,
+    "boundary": "New additive test module checked at this exact source head. Previous complete and source-specific validation histories are unchanged."
+  }
+}
