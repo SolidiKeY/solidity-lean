@@ -141,6 +141,25 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(split_rows[2]["line"], 7)
             self.assertEqual(split_rows[0]["body"], ["0"])
 
+    def test_compound_class_declarations_keep_their_names_and_refusals(self):
+        root = Path("/virtual")
+        source = ("def before : Nat := 0\n"
+                  "class inductive Foo where\n  | mk : Foo\n"
+                  "@[foo] public class\n  abbrev Bar := Nat\n"
+                  "class Ordinary where\n  field : Nat\n"
+                  "def after : Nat := 1\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["kind"], r["name"]) for r in rows],
+                         [("def", "before"), ("class inductive", "Foo"),
+                          ("class abbrev", "Bar"), ("class", "Ordinary"), ("def", "after")])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["1"])
+        self.assertEqual(rows[2]["qualifiers"], ["public"])
+        for row in rows[1:4]:
+            self.assertEqual(row["reject_reason"], "unsupported-declaration-form")
+            self.assertIsNone(row["statement"])
+            self.assertEqual(row["body"], [])
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))

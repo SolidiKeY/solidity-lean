@@ -1164,3 +1164,24 @@ signature-binding paths. Independent finder and skeptic reviewed the replay
 without Lean. These runs demonstrate repeatability for this snapshot, not
 complete census, signature equivalence or live ownership. Full reports and
 timing records are outside Git in the alias-containment evidence directory.
+
+## Compound class declaration inventory
+
+The lexical inventory now preserves the compound kinds and actual declaration
+names for line-initial `class inductive` and `class abbrev` forms. Both remain
+explicitly rejected as unsupported declaration forms: no statement or body
+candidate is emitted for them. Controls cover ordinary classes, modifiers,
+attributes, split compound keywords and surrounding body boundaries. This
+does not enumerate constructors or establish complete Lean parser coverage;
+source-binding receipts must match the updated row identities and cannot be
+reused merely because a previous inventory existed.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 197 tests. A matched bounded full scan took
+116.686 seconds before and 113.712 seconds after (-2.55%). Both used the same
+7,321 inputs, recognized 123,559 declarations and reported no file errors or
+unmatched globs. No compound-form row was recognized in that selected project scan; the
+focused controls demonstrate the identity correction. Statement
+and body group counts remained 4,441 and 5,551 respectively, which does not
+prove equal membership or semantic equivalence. Evidence is outside Git
+under `/workspace/h62-duplication-scanner-evidence/compound-class/`.
