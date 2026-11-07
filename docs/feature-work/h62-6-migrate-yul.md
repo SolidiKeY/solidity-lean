@@ -996,3 +996,24 @@ files are untouched. Finder and skeptic report no remaining findings after the
 final spacing corrections; neither ran Lean or wrote files. No production Lean,
 proof budget, axiom, interface, exclusion, new-toolchain run or performance-STOP
 retry occurred. The original assignment and all remaining gates stay unfinished.
+
+
+## Complete original old metadata query plan
+
+After the coordinator merge at `d7a1cbdf597826add5af3533fdaf6b8d91e28f66`,
+`plan-old-metadata.py` prepares all 1774 original modules against the pinned
+census, old kernel summaries and source hashes. Nine modules have zero own
+kernel declarations; none can be skipped on that basis because serialized
+registration effects can exist independently. All queries remain required,
+and zero queries are performed by the planner. Existing focused observations
+are separate; selected families do not constitute all attributes or public
+classification. No Lean execution or performance STOP retry occurred.
+
+Finder recomputed the complete plan. Skeptic identified an input race, fixed
+by parsing captured bytes and checking hashes again before output, including
+all source and summary inputs. A changed-input negative control asserts no
+output is accepted. All 81 Python tests pass in 26.352 seconds; deterministic
+final generation matches byte for byte. Full queue, constraints and retrieval
+are in [the metadata plan handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-plan-handoff.md).
+All four original checkpoints remain partial. No model statements, budgets,
+axioms, interfaces, exclusions or shims changed.
