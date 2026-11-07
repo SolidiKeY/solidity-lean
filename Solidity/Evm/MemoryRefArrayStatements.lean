@@ -1,6 +1,9 @@
 import Solidity.Evm.MemoryRefArrayPaths
 
 /-! Source statements using fallible reference-array pointers. -/
+-- Retain the existing typed reference-store proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}

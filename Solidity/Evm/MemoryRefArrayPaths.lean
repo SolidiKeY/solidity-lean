@@ -3,6 +3,9 @@ import Solidity.Evm.MemoryPaths
 
 /-! Fallible typed pointer paths. Unlike `PtrFrag`, indexed reference paths
 may revert; no success premise hides their bounds check. -/
+-- Retain the existing typed fallible-reference proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}

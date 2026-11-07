@@ -8,6 +8,9 @@ those prefixes, including a turn whose body later reverts. No bound on iteration
 count or successful-termination premise is used. The body is the existing finite
 memory fragment; unsupported body statements remain refused by its compiler.
 -/
+-- Retain the existing typed loop-prefix proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 
 variable {C : Contract} {Γ Δ : Ctx}

@@ -10,6 +10,9 @@ no core-only simulation is used as a memory prefix. Certificates retain the
 largest expanded frame and the exact reached allocation cost. A returned
 reference is copied by pointer after dropping the private parameter frame.
 -/
+-- Retain the existing typed internal-call frame proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Calls
 
 variable {C : Contract}
