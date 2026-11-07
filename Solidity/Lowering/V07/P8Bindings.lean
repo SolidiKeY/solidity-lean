@@ -5,9 +5,9 @@ import Solidity.Lowering.V07.WrappedAssignmentPair
 /-! Consumers of the EXACT relayed P8a interface. No parallel SourceSpec,
 admission/failure premise structure or producer inhabitant is introduced.
 These conditional laws do not supply Source reference adequacy or a graph
-producer; the graph evidence remains an actual DeclarationGraph argument. Everything indexed by `P8a.Producer` is vacuous until P8-SPEC-LAW1 is
-resolved: the frozen V1 `Producer` is uninhabited over the current `Nat`
-resource (`Lowering/P8/ResourceContractLaw1.lean`).
+producer; the graph evidence remains an actual DeclarationGraph argument. Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
+resource (P8-SPEC-LAW1, `Lowering/P8/ResourceContractLaw1.lean`); the only
+known inhabitant is the off-master model witness `P8.PlanWitness.planProducer`.
 `scalar_value` and `source_assignment_run` do not use the producer argument. -/
 namespace Solidity.Lowering.V07.P8Bindings
 open Solidity.Lowering.P8

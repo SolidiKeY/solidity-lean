@@ -4,9 +4,9 @@ import Solidity.Lowering.V07.GraphAdmissionBoundary
 
 /-! G18.01's computed graph producer bound to the EXACT frozen P8a origin.
 Successful checks return a real certificate. None does not reject Source.
-No assumption that all producer-admitted inputs pass these checks is supplied. Everything indexed by `P8a.Producer` is vacuous until P8-SPEC-LAW1 is
-resolved: the frozen V1 `Producer` is uninhabited over the current `Nat`
-resource (`Lowering/P8/ResourceContractLaw1.lean`). -/
+No assumption that all producer-admitted inputs pass these checks is supplied. Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
+resource (P8-SPEC-LAW1, `Lowering/P8/ResourceContractLaw1.lean`); the only
+known inhabitant is the off-master model witness `P8.PlanWitness.planProducer`. -/
 namespace Solidity.Lowering.V07.AcceptedGraphProducer
 open Solidity.Lowering.P8
 open P8Bindings

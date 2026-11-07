@@ -132,9 +132,10 @@ location check in Source typing and the elaborator.
 checks pass; `certificate_excludes_inline_self_origin` shows a graph rules out
 the inline-self environment. `LocationGraphInterface.Admission` and
 `LocationGraphProducer.produceAccepted` are the per-location counterparts.
-Everything indexed by `P8a.Producer` is vacuous until P8-SPEC-LAW1 is resolved:
-over the current `Nat` resource, `Producer` is uninhabited
-([P8 admission](p8-admission.md#failure-projection-conflict)). `scalar_value` and
+Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
+resource, where `Producer` is uninhabited (P8-SPEC-LAW1,
+[P8 admission](p8-admission.md#failure-projection-conflict)). The only known
+inhabitant is the off-master model witness `P8.PlanWitness.planProducer` (CP77). `scalar_value` and
 `source_assignment_run` ignore the producer; they only rename the environment
 and are proved by `integer_related` and `source_assign_local_run`.
 
@@ -1130,8 +1131,8 @@ structs, storage 4, `mixed_memory_excludes_mapping`), also through the
 premise route (`mixed_memory_premises`, `mixed_memory_graph`) but is not admitted, on refusal alone
 (`mixed_not_admitted`).
 
-Still open for G18.01: an inhabited `P8a.Producer` (P8-SPEC-LAW1, so every
-`Producer`-indexed result here is vacuous); deriving `GraphPremises` from
+Still open for G18.01: an inhabited `P8a.Producer` over real accepted Source (P8-SPEC-LAW1 excludes
+`Nat`-encodable resources; see CP77 for the model witness); deriving `GraphPremises` from
 accepted Source (Source admits inline-recursive structs that solc rejects,
 `GraphAdmissionBoundary`, so a rank cannot be derived from current Source
 either); the refusal repair above; parameters, returns and state variables.
@@ -1200,11 +1201,12 @@ lane. Lean MCP diagnostics on the four new modules: no errors, no `sorry`,
 no `native_decide`, no new axioms. `tests/v07/check-effect-fixtures.mjs`
 passes (173 cases).
 
-Still open in this lane: G16, G17 and G18.06 (it waits for V16/V14). Also
+Still open in this lane: G16, G17 and G18.06 (it waits for V16/V14 children). Also
 open: `GraphPremises` derived from accepted Source, the VY5 Source repair
 (`SourceRefusal.envLocOK`), refusal for parameters, returns and tuples,
 P12 selection from admitted syntax and effectful reference paths, and
-P8-SPEC-LAW1 (all `P8a.Producer`-indexed results stay vacuous until then).
+P8-SPEC-LAW1 (`P8a.Producer`-indexed results are vacuous for `Nat`-encodable
+resources; CP77 corrects the earlier wording).
 
 ### CP77: master merge and the H24 instance at the P8 model producer
 
@@ -1216,21 +1218,48 @@ recorded.
 
 `GraphAdmissionAssembly.admissionOfEmpty` and
 `declarationGraphProducerOfEmpty` give the H24 field to any producer whose
-accepted Sources all live in the empty environment. `empty_admitted` is
-derived from the actual producer and the decidable refusal check. The P8 model
-witness `P8.PlanWitness.planProducer` (branch
-`cloud/move5-20261106/p8-producer`, not on master) is such a producer, since
-`sourceOf` uses `emptyEnv`. Its instance
-`declarationGraphProducerOfEmpty planProducer (fun _ _ _ _ => rfl)` was
-elaborated in an uncommitted scratch module containing that branch's
-`PlanWitness.lean` over this head: no errors, and only the standard axioms.
-The instance belongs in the p8 lane, or here once that branch merges.
+accepted Sources all live in the empty environment. At the empty environment
+both H24 obligations are trivial: the certificates are zero-node graphs
+(`choices emptyEnv loc = []`) and refusal holds because no struct is declared.
+This route therefore exercises neither `GraphPremises` nor mapping-struct
+refusal. It shows only that `DeclarationGraphAdmission.Producer` is
+inhabitable alongside a model producer, and that H24 does not constrain a
+producer whose accepted Sources are empty.
+
+The P8 model witness `P8.PlanWitness.planProducer` (branch
+`cloud/move5-20261106/p8-producer`, `PlanWitness.lean` as of `6d4b705c3`,
+branch head `809f6d7f8`, not on master) is such a producer: `sourceOf` uses
+`P8.PlanWitness.emptyEnv`, which is `⟨[]⟩` like
+`GraphAdmissionAssembly.emptyEnv`, so `rfl` holds by unfolding. The statement
+`def planDeclarationGraphProducer := declarationGraphProducerOfEmpty planProducer (fun _ _ _ _ => rfl)`
+was elaborated in an uncommitted scratch module: that `PlanWitness.lean`,
+importing `GraphAdmissionAssembly` at this head, with the instance appended.
+It produced no errors, and `#print axioms` gave `[propext, Classical.choice,
+Quot.sound]`. The instance belongs in the p8 lane, or here once that branch
+merges. The two `emptyEnv` constants (and `Backend.Aggregates.Controls.emptyEnv`)
+should be deduplicated then.
 
 Correction: `ResourceContractLaw1.nat_encodable_resource_impossible`
 excludes producers only over `Nat`-encodable resources. `planProducer` uses
-`PlanBound`, so the H24 record is not vacuous once that branch merges. It is
-still a model witness (G07's toy, empty Source), not real accepted Source.
+`PlanBound` (it carries `Evm.FailurePoints`), so the `Producer` type is
+inhabited once that branch merges. That inhabitant is a model witness (G07's
+toy, empty Source), and its H24 record is degenerate as above. The earlier
+"vacuous until P8-SPEC-LAW1" wording in this document and in the V07
+docstrings (`LocationGraphInterface`, `P8Bindings`, `LocationGraphProducer`,
+`AcceptedGraphProducer`, `GraphAdmissionAssembly`) is narrowed accordingly.
 
-G18.06 remains blocked. V14's `v14-help-g18.md` marks G18.04/.05 as partial,
-and G18.02/.03 belong to V16, which is not on master. G16 and G17 are
-unchanged in this checkpoint.
+G18.06 remains blocked: V14 left G18.04/.05 partial (`v14-help-g18.md`), and
+V16's G18.02/.03 work on master is partial (`g18-aggregates.md`,
+`g18-storage-cells.md`). G16 and G17 are unchanged in this checkpoint.
+
+Gates and reviews: after the merge, `gate.sh touched` PASS (build-touched,
+6185 jobs, all of `Solidity`, no errors). Lean MCP diagnostics: no errors on
+`GraphAdmissionAssembly.lean` with the helpers and pins, and on the four V07
+modules whose docstrings changed. A read-only finder and skeptic (no Lean
+server) confirmed the code. They found the following wording and pin issues,
+all fixed: vacuity wording stale against the new inhabitant; the degenerate
+empty-environment admission not stated; the two `emptyEnv` constants
+conflated; the scratch check not reproducible (commits now named); "V16 not
+on master" wrong (V16 is merged, and its G18.02/.03 work is partial);
+`emptyEnv`, `admission` and `declarationGraphProducer` unpinned; module
+docstring, module-map row and an `empty_produces` docstring missing.

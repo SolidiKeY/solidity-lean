@@ -24,9 +24,15 @@ the accepted `Source.Env` alone and supplies no producer.
 - `admission`/`declarationGraphProducer`: the H24 field and the additive P8
   record from those per-environment premises. Existing P8 statements,
   premises and exclusions are unchanged.
+- `admissionOfEmpty`/`declarationGraphProducerOfEmpty`: the same for a
+  producer whose accepted Sources all have the empty environment. There both
+  obligations are trivial (zero-node certificates, no struct to refuse), so
+  this route exercises neither `GraphPremises` nor mapping-struct refusal; it
+  shows H24 places no constraint on such a producer.
 
 Open (recorded in the feature document): every `P8a.Producer`-indexed result
-is vacuous until P8-SPEC-LAW1 is resolved; `GraphPremises` is not derived
+is vacuous for every `Nat`-encodable resource (P8-SPEC-LAW1); the only known
+inhabitant is the off-master model witness `P8.PlanWitness.planProducer`; `GraphPremises` is not derived
 from accepted Source (Source admits inline-recursive structs,
 `GraphAdmissionBoundary`); refusal for mapping-containing structs needs the
 VY5 Source repair (`SourceRefusal.envLocOK`).
@@ -98,24 +104,31 @@ def declarationGraphProducer (producer : P8.P8a.Producer S reference origins roo
     P8.DeclarationGraphAdmission.Producer S reference origins roots :=
   ⟨producer, admission producer env⟩
 
-/-- The empty Source environment (no declarations). -/
+/-- The empty Source environment (no declarations). Definitionally equal to
+`P8.PlanWitness.emptyEnv` (off master) and
+`Backend.Aggregates.Controls.emptyEnv`; all are `⟨[]⟩`. -/
 def emptyEnv : Source.Env := ⟨[]⟩
 
+/-- The actual producer succeeds at the empty environment, with zero-node
+schemas (`choices emptyEnv loc = []`). -/
 theorem empty_produces : ∀ loc, (produce "h24-empty" emptyEnv loc).isSome = true := by
   intro loc
   cases loc <;> decide
 
-/-- The empty environment is admitted: certificates at every location by the
-actual producer, and refusal (it declares no struct). -/
+/-- The empty environment is admitted. Both halves are trivial: the
+certificates are zero-node graphs and refusal holds because no struct is
+declared (only Source's own refusal of direct `mapping` outside storage
+remains). -/
 theorem empty_admitted : EnvAdmission emptyEnv :=
   ⟨fun loc => graph_of_produce "h24-empty" emptyEnv loc (empty_produces loc),
    SourceRefusal.refuses_of_decls emptyEnv (by decide)⟩
 
 /-- **The H24 field for any producer whose accepted Sources all live in the
-empty environment.** The P8 model witness `P8.PlanWitness.planProducer`
-(branch `cloud/move5-20261106/p8-producer`, not yet on master) is such a
-producer: its origins map every admitted input to `sourceOf`, whose
-environment is `emptyEnv` by definition, so its instance is
+empty environment.** Degenerate: see `empty_admitted`. The P8 model witness
+`P8.PlanWitness.planProducer` (branch `cloud/move5-20261106/p8-producer`, not
+yet on master) is such a producer: its origins map every admitted input to
+`sourceOf`, whose environment is `P8.PlanWitness.emptyEnv`, definitionally
+`⟨[]⟩` like this module's `emptyEnv`, so its instance is
 `admissionOfEmpty planProducer (fun _ _ _ _ => rfl)`. -/
 def admissionOfEmpty (producer : P8.P8a.Producer S reference origins roots)
     (empty : ∀ (i : S.Input) (r : S.Resolved) (h : producer.admission.frontend i = some r)
@@ -214,6 +227,12 @@ theorem mixed_graphs : ∀ loc : Source.DataLoc,
 #guard_msgs (whitespace := lax) in #print axioms mixed_memory_graph
 /-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.empty_produces' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms empty_produces
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.emptyEnv' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms emptyEnv
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.admission' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms admission
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.declarationGraphProducer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationGraphProducer
 /-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.empty_admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms empty_admitted
 /-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.admissionOfEmpty' depends on axioms: [propext, Classical.choice, Quot.sound] -/

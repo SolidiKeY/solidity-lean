@@ -1,4 +1,9 @@
 {
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.admission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.admissionOfEmpty": [
   "Classical.choice",
   "Quot.sound",
@@ -10,6 +15,11 @@
   "propext"
  ],
  "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.chain_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.declarationGraphProducer": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -29,6 +39,7 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.emptyEnv": [],
  "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.env_admission_iff": [
   "Classical.choice",
   "Quot.sound",

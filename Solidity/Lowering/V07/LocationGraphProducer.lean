@@ -4,8 +4,9 @@ import Solidity.Lowering.V07.LocationGraphInterface
 None is a component failure, never Source rejection. Structural selection,
 field and rank checks are computed; no final certificate/preservation premise.
 Source refusal and all-admitted success remain separate obligations.
-The results indexed by `P8a.Producer` are vacuous until P8-SPEC-LAW1 is
-resolved (`Lowering/P8/ResourceContractLaw1.lean`). -/
+Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
+resource (P8-SPEC-LAW1, `Lowering/P8/ResourceContractLaw1.lean`); the only
+known inhabitant is the off-master model witness `P8.PlanWitness.planProducer`. -/
 namespace Solidity.Lowering.V07.LocationGraphProducer
 open Solidity Solidity.Lowering.V07
 open LocationGraphInterface
