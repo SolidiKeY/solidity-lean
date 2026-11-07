@@ -770,12 +770,12 @@ theorem allocationCostProg_zero {Γ Δ : Ctx} (P : Prog C Γ Δ)
 /-- The cost of a block is exactly the reached cost of its body. -/
 theorem allocationCostStmt_block {Γ Δ : Ctx} (P : Prog C Γ Δ) (σ : State C Γ) :
     allocationCostStmt (.block P) σ = allocationCostProg P σ := by
-  simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt]
-  cases hh : hasAllocation P with
-  | false =>
-    simp only [Bool.false_eq_true, if_false]
+  unfold allocationCostStmt
+  dsimp only [hasAllocationStmt, rawAllocationCostStmt]
+  rcases Bool.eq_false_or_eq_true (hasAllocation P) with hh | hh
+  · simp only [hh, ite_true]
+  · simp only [hh, Bool.false_eq_true, ite_false]
     exact (allocationCostProg_zero P hh σ).symm
-  | true => simp only [if_true]
 
 /-- Only the selected branch contributes cells; a failed condition contributes none. -/
 theorem allocationCostStmt_ite {Γ Δ Ξ : Ctx} (c : Val C Γ .bool)
@@ -783,13 +783,16 @@ theorem allocationCostStmt_ite {Γ Δ Ξ : Ctx} (c : Val C Γ .bool)
     allocationCostStmt (.ite c thn els) σ = match c.evalT σ with
       | .ok v => if boolT v then allocationCostProg thn σ else allocationCostProg els σ
       | .error _ => 0 := by
-  simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt]
-  cases ht : hasAllocation thn <;> cases he : hasAllocation els
-  · rw [allocationCostProg_zero thn ht, allocationCostProg_zero els he]
-    cases c.evalT σ with
-    | error _ => rfl
-    | ok v => simp only [Bool.false_or, Bool.false_eq_true, ite_self]
-  all_goals rfl
+  unfold allocationCostStmt
+  dsimp only [hasAllocationStmt, rawAllocationCostStmt]
+  rcases Bool.eq_false_or_eq_true (hasAllocation thn) with ht | ht <;>
+    rcases Bool.eq_false_or_eq_true (hasAllocation els) with he | he
+  all_goals simp only [ht, he, Bool.true_or, Bool.false_or, Bool.or_true, Bool.or_false,
+    ite_true, Bool.false_eq_true, ite_false]
+  rw [allocationCostProg_zero thn ht, allocationCostProg_zero els he]
+  cases c.evalT σ with
+  | error _ => rfl
+  | ok v => simp only [ite_self]
 
 /-- The optimized cost still equals the cost of the reached source prefix. -/
 theorem allocationCostProg_cons {Γ Δ Ξ : Ctx} (s : Stmt C Γ Δ) (P : Prog C Δ Ξ)
@@ -1023,6 +1026,7 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
       · intro c _ hc hcspace
         have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
         subst c
+        change StructAllocatorRepr _ _ _ ⟨cursor.val + ((n.evalT σ).word.val + 1), _⟩ _
         simpa only [Nat.add_assoc] using hn'.2.2.2.1
   | defaultArray F p x code hs ih =>
     intro σ base m h hcap ha
@@ -1035,8 +1039,9 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
     let plan : DefaultPlan (.struct s) :=
       ⟨data.cost, data.root, data.code, cert.1, cert.2.1, cert.2.2⟩
     have hcost : allocationCostStmt (.declMem (.struct s) x none hd hm) σ = data.cost := by
-      simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt,
-        if_true, finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
+      unfold allocationCostStmt
+      dsimp only [hasAllocationStmt, rawAllocationCostStmt]
+      simp only [ite_true, finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
     rw [hcost] at ha ⊢
     exact plan.declare_correct h hb hm (statementEndCap hcap) ha
   | allocateArrayField F src hf n pointer hp hb hn =>
@@ -1106,15 +1111,17 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
     intro σ base m h hcap ha
     let plan : DefaultPlan _ := ⟨data.cost, data.root, data.code, cert.1, cert.2.1, cert.2.2⟩
     have hcost : allocationCostStmt (.deleteMem (.var dst hm) hd) σ = data.cost := by
-      simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt,
-        if_true, finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
+      change (finiteDefaultCellsComputed (.ref (.struct _))).getD 0 = data.cost
+      simp only [finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
     rw [hcost] at ha ⊢
     exact plan.deleteLocal_correct h hb dst hm ha
   | deleteArrayField F src hf pointer hs hb =>
     intro σ base m h hcap ha
     obtain ⟨r, hr, _⟩ := hs.correct h
     have hcost : allocationCostStmt (.deleteMem (.loc (.field src _ hf)) rfl) σ = 1 := by
-      simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt, hr, if_true]
+      unfold allocationCostStmt
+      dsimp only [hasAllocationStmt, rawAllocationCostStmt]
+      simp only [hr, ite_true]
     rw [hcost] at ha ⊢
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
     · omega
@@ -1131,8 +1138,9 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
     obtain ⟨r, hr, _⟩ := hs.correct h
     let plan : DefaultPlan _ := ⟨data.cost, data.root, data.code, cert.1, cert.2.1, cert.2.2⟩
     have hcost : allocationCostStmt (.deleteMem (.loc (.field src _ hf)) hd) σ = data.cost := by
-      simp only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt, hr,
-        if_true, finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
+      unfold allocationCostStmt
+      dsimp only [hasAllocationStmt, rawAllocationCostStmt]
+      simp only [hr, ite_true, finiteDefaultCellsComputed_eq, cert.1, Option.getD_some]
     rw [hcost] at ha ⊢
     exact plan.deleteField_correct h hb hs r hr hf hm ha
   | deleteField F src hf code hs ih =>
@@ -1213,6 +1221,7 @@ private theorem stmt_sound {L b frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Fr
       · intro c _ hc hcspace
         have he : c = cursor := Word.val.inj (hc.arrays.free.cell.symm.trans hal.arrays.free.cell)
         subst c
+        change StructAllocatorRepr _ _ _ ⟨cursor.val + ((n.evalT σ).word.val + 1), _⟩ _
         simpa only [Nat.add_assoc] using hn'.2.2.2.1
   | storageWrite F l v code hl hv =>
     intro σ base m h hcap ha

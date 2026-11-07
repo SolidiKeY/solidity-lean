@@ -193,9 +193,10 @@ theorem copyBoundProg_cons {Γ Δ Ξ : Ctx} (s : Stmt C Γ Δ) (P : Prog C Δ Ξ
 theorem copyBoundStmt_block {Γ Δ : Ctx} (P : Prog C Γ Δ) (σ : State C Γ) :
     copyBoundStmt (.block P) σ = copyBoundProg P σ := by
   simp only [copyBoundStmt, hasArrayCopyStmt, rawCopyBoundStmt]
-  cases hh : hasArrayCopy P with
-  | false => simp only [Bool.false_eq_true, if_false]; exact (copyBoundProg_zero P hh σ).symm
-  | true => simp only [if_true]
+  rcases Bool.eq_false_or_eq_true (hasArrayCopy P) with hh | hh
+  · simp only [hh, ite_true]
+  · simp only [hh, Bool.false_eq_true, ite_false]
+    exact (copyBoundProg_zero P hh σ).symm
 
 theorem copyBoundStmt_ite {Γ Δ Ξ : Ctx} (c : Val C Γ .bool)
     (P : Prog C Γ Δ) (Q : Prog C Γ Ξ) (σ : State C Γ) :
@@ -203,12 +204,14 @@ theorem copyBoundStmt_ite {Γ Δ Ξ : Ctx} (c : Val C Γ .bool)
       | .ok v => if boolT v then copyBoundProg P σ else copyBoundProg Q σ
       | .error _ => 0 := by
   simp only [copyBoundStmt, hasArrayCopyStmt, rawCopyBoundStmt]
-  cases hp : hasArrayCopy P <;> cases hq : hasArrayCopy Q
-  · rw [copyBoundProg_zero P hp, copyBoundProg_zero Q hq]
-    cases c.evalT σ with
-    | error _ => rfl
-    | ok v => simp only [Bool.false_or, Bool.false_eq_true, ite_self]
-  all_goals rfl
+  rcases Bool.eq_false_or_eq_true (hasArrayCopy P) with hp | hp <;>
+    rcases Bool.eq_false_or_eq_true (hasArrayCopy Q) with hq | hq
+  all_goals simp only [hp, hq, Bool.true_or, Bool.false_or, Bool.or_true, Bool.or_false,
+    ite_true, Bool.false_eq_true, ite_false]
+  rw [copyBoundProg_zero P hp, copyBoundProg_zero Q hq]
+  cases c.evalT σ with
+  | error _ => rfl
+  | ok v => simp only [ite_self]
 
 theorem copyBoundStmt_array {Γ : Ctx} {p : PrimTy}
     (dst : Loc C Γ (.ref (.array (.prim p)))) (src : MPath C Γ (.ref (.array (.prim p))))

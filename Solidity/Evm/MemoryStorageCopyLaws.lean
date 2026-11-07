@@ -8,6 +8,9 @@ The new live prefix is the actual heap snapshot. The old live suffix is
 zeroed, the length is replaced, and all slots outside the destination layout
 are unchanged. No source heap mutation or heap-equality premise is involved.
 -/
+-- Retain the existing typed memory-value proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 
@@ -103,7 +106,7 @@ theorem primitiveArray_copy_repr {H : HTy} {p : PrimTy} {hp : Heap H}
     refine .array ?_ ?_ ?_
     · rw [arrayCopyStore_length _ _ _ _ (hp.len_dyn_lt r), List.length_map]
       rfl
-    · simpa only [List.length_map] using hn
+    · simpa only [List.length_map, Heap.len] using hn
     · intro i x hx
       rw [SVec.toList_ofList, List.getElem?_map] at hx
       obtain ⟨v, hv, rfl⟩ := Option.map_eq_some_iff.mp hx
