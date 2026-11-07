@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/observation-controls-roles-v119/semantic-roles-reviewed.json",
-    "bytes": 4050420,
-    "sha256": "d44dffddb82635a329240654e931a66b40ee83271dc339be03205f7dfb52a304"
+    "path": "/workspace/h62-successor-bulk/fixed-shape-copy-roles-v120/semantic-roles-reviewed.json",
+    "bytes": 4071003,
+    "sha256": "1a751d7d382ffcdd45254806a3b07205a79bc75cdb7b98627676b808c2300404"
   }
 }
