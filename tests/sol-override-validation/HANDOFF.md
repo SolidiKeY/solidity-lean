@@ -59,3 +59,11 @@ assumed. See the feature doc for exact review fixes and trust boundaries.
 Replay entry verifies frozen archive inputs before execution, fingerprints the
 shared runner, and places timeout inside the selected execution environment.
 SOL_OV_BULK_ARCHIVE can locate the retrieved archive outside its recorded path.
+
+## H82 current checkpoint
+
+Fresh replay execution and archive-bound validation now PASS; this supersedes
+the earlier stale-fingerprint wait. See H82-HANDOFF.md for new archive/hash,
+actual gate outputs, trust boundaries and inheritance relay barrier. Central
+inventory and full-cache/final gates remain waits; C3's authenticated final
+handoff and stopped acknowledgement are still missing. No completion claim.

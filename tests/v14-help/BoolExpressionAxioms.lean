@@ -1,0 +1,46 @@
+import Solidity.Backend.Aggregates.BoolArrayExpressionControls
+
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpression.eval_expr_run
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpression.eval_expr_zero
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpression.eval_expr_one
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpression.scopedCopy_run
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpression.scopedCopy_low_run
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpression.scoped_error_iff
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.good_scoped_run
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.good_result
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.caller_locals_restored
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.heap_related
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.joint_second
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.zero_budget
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.one_budget
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.low_no_allocation
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.phase_vs_exhaustion
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.dirty_zero
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.dirty_two
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.short_zero
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.short_two
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.empty_related
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.wrong_timeout_revert
+#print axioms Solidity.Backend.Aggregates.BoolArrayExpressionControls.protected_old_objects
+#check Solidity.Backend.Aggregates.BoolArrayExpression.eval_expr_run
+#check Solidity.Backend.Aggregates.BoolArrayExpression.eval_expr_zero
+#check Solidity.Backend.Aggregates.BoolArrayExpression.eval_expr_one
+#check Solidity.Backend.Aggregates.BoolArrayExpression.scopedCopy_run
+#check Solidity.Backend.Aggregates.BoolArrayExpression.scopedCopy_low_run
+#check Solidity.Backend.Aggregates.BoolArrayExpression.scoped_error_iff
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.good_scoped_run
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.good_result
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.caller_locals_restored
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.heap_related
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.joint_second
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.zero_budget
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.one_budget
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.low_no_allocation
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.phase_vs_exhaustion
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.dirty_zero
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.dirty_two
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.short_zero
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.short_two
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.empty_related
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.wrong_timeout_revert
+#check Solidity.Backend.Aggregates.BoolArrayExpressionControls.protected_old_objects
