@@ -2788,3 +2788,22 @@ removed since the preceding snapshot. Independent read-only finder and skeptic
 checked roles, hashes and history preservation without Lean or a server. Evidence
 hashes are in `tests/h55/module-times/testsuite-migration-evidence.sha256`. This
 non-atomic observation does not establish current runtime acceptance.
+
+## V08 callable follow-up observations
+
+`v08_callable_followup.py` records five previously unreferenced V08 component
+sources with hashes and the audit document hash. Their roles cover nonpayable
+and payable target guards, integer callable inputs, role attachment and typed
+Keccak byte-bound premises. The UInt8 bound is not hash injectivity, and the
+guards do not establish Source admission or the canonical H68 bridge. Current
+invocation, inputs, effects and outcomes remain unresolved.
+
+At `693bba27f2e2d11a4d6ea86d1c6f5a8e4d1d57a5`, the refreshed static index has
+837 candidates, 654 with supplied current references and 183 without; fourteen
+retain historical references for review. One previously unreferenced candidate
+changed and none was added or removed since the preceding snapshot. The updated
+IntegerCallable source has a new current static observation; its earlier source
+and artifact record remains historical. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server. Evidence
+hashes are in `tests/h55/module-times/v08-callable-followup-evidence.sha256`. This
+non-atomic observation does not establish current runtime acceptance.
