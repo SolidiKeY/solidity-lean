@@ -19,7 +19,7 @@ Mandatory self-contained files in this Git patch/bundle and evidence archive:
 - h82-standing-authority.txt and h82-retirement-authority.txt: full current user
   rules; retirement overrides permission to continue implementation.
 - h78-root-owner-request.json: exact complete delivered ticket content, SHA256
-  749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5.
+  9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10.
 - retirement-state-and-open-queue.json: every pending work/backfill item, six
   waits, public-visibility/new-signature gaps, shim state, pause/push limits.
 - SHA256SUMS: checksums of all these handoff files.

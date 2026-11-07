@@ -9,8 +9,8 @@
     "status": "coordinator-reported byte delivery verified",
     "bytes": 965584,
     "sha256": "047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167",
-    "hostArchive": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1200Z/shared-translator-owned-delta.tar.zst",
-    "hostReceipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1200Z/shared-cache-received.json",
+    "hostArchive": "$XDG_STATE_HOME/cloudvm-coord/receipts/sched-20261105T1200Z/shared-translator-owned-delta.tar.zst",
+    "hostReceipt": "$XDG_STATE_HOME/cloudvm-coord/receipts/sched-20261105T1200Z/shared-cache-received.json",
     "hostReceiptReadLocally": false,
     "boundary": "User-reported verified byte delivery; not installation,entrypoint migration,parity or native/WASM closure."
   }

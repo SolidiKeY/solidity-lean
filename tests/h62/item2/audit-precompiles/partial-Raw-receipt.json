@@ -7,7 +7,7 @@
   "reconstructed_source_sha256": "a463aa0f978da5d5bae6ba5cffdfa95861a495a8d69942502b706b7b157ec506",
   "reported_host_patch_sha256": "34fc66ea93a8a2c956ebb51f225b03593109239c5b46631aaa28bfb24efb2a9a",
   "inline_excerpt_sha256": "34fc66ea93a8a2c956ebb51f225b03593109239c5b46631aaa28bfb24efb2a9a",
-  "host_patch_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/34fc66ea93a8a2c956ebb51f225b03593109239c5b46631aaa28bfb24efb2a9a-Raw.patch",
+  "host_patch_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/34fc66ea93a8a2c956ebb51f225b03593109239c5b46631aaa28bfb24efb2a9a-Raw.patch",
   "host_patch_accessible_in_worker": false,
   "reported_patch_digest_verified_from_inline_bytes": true,
   "inline_patch_evidence": "producer-Raw.inline.patch",

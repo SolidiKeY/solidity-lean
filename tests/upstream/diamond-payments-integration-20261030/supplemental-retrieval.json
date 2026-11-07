@@ -10,49 +10,49 @@
       "path": "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/committed.patch",
       "size": 332341,
       "sha256": "1810e50cb44f264a330e53a9bb2b1497021e78cf251683645f2ba5b245b89776",
-      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/0-committed.patch"
+      "local": "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/0-committed.patch"
     },
     {
       "role": "bundle",
       "path": "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/committed.bundle",
       "size": 93638,
       "sha256": "221baeaa0103292f0a974b07239c656a649c7c3bc140a298230c2c4069464b96",
-      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/1-committed.bundle"
+      "local": "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/1-committed.bundle"
     },
     {
       "role": "original_patch",
       "path": "/workspace/next10-diamond-payments.patch",
       "size": 332341,
       "sha256": "1810e50cb44f264a330e53a9bb2b1497021e78cf251683645f2ba5b245b89776",
-      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/2-next10-diamond-payments.patch"
+      "local": "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/2-next10-diamond-payments.patch"
     },
     {
       "role": "handoff",
       "path": "/workspace/next10-diamond-payments-handoff.md",
       "size": 47435,
       "sha256": "50a46831a954d894d7bbc00d1e207c2ec5426084d3d3372eb4303c52ef0ec35b",
-      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/3-next10-diamond-payments-handoff.md"
+      "local": "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/3-next10-diamond-payments-handoff.md"
     },
     {
       "role": "evidence",
       "path": "/workspace/next10-diamond-payments-evidence.json",
       "size": 104661,
       "sha256": "5279a82ead6ce4ae48a4fc1e702e5527511b3084b5e455ed95cd4b0fc49ea428",
-      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/4-next10-diamond-payments-evidence.json"
+      "local": "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/4-next10-diamond-payments-evidence.json"
     },
     {
       "role": "evidence",
       "path": "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/evidence-3.tar.gz",
       "size": 4522554,
       "sha256": "e8bc40d0aa74edb65d0a99f76891102d0c0ea4ed8d43260e70a096c616fb68b1",
-      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/5-evidence-3.tar.gz"
+      "local": "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/5-evidence-3.tar.gz"
     },
     {
       "role": "checksums",
       "path": "/workspace/.cloudvm-export/solidity-next10-20261028/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/verified-original-checksums.sha256",
       "size": 48630,
       "sha256": "afa36935f4829589eaef3ed51114081c1c7ab413f44b2f17d286616029157f5e",
-      "local": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/6-verified-original-checksums.sha256"
+      "local": "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/6-verified-original-checksums.sha256"
     }
   ],
   "original_checksums_verified": [
@@ -241,8 +241,8 @@
   "threadId": "01a18298-b467-7720-ae4b-3a6c2d1c5068",
   "environmentId": "ccarenv_b64_Y2NhcmVudl80YTIwNzJmZTFkNjQ4MTkxYjNlNWU3NzU5NmVmZDg0NQ",
   "archive_index": {
-    "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/4-next10-diamond-payments-evidence.json": [],
-    "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/5-evidence-3.tar.gz": [
+    "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/4-next10-diamond-payments-evidence.json": [],
+    "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/artifacts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/supplements/8ba611e40179bf799807e7effa1204333ca69d7b4018de7837454cb5716fa7a4/5-evidence-3.tar.gz": [
       {
         "name": "verified-original-0ae506f378730c2a/original-175-checksums.sha256",
         "size": 22969,

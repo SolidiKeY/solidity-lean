@@ -105,7 +105,7 @@
   },
   "H78_root_request": {
     "head": "16d7e371a1e013f492784b596397cf500dbd7543",
-    "request_sha256_as_relayed": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+    "request_sha256_as_relayed": "9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10",
     "ids": [
       "H78-ROADMAP-PUBLIC-API",
       "H78-COMPLETE-PUBLIC-INVENTORY"

@@ -7,7 +7,7 @@ H41 supersedes the earlier worker-shipping requirement: retain verified packs
 on this VM, record path/SHA, never run ship-cache.sh on a VM, and mark delivery
 coordinator-pending. The coordinator reports pulling the H35 archive and
 verifying SHA256 95342ae5f29dc9999bbfbeea80df80ba7d079aa8e16d447d0afed1a30a8cee32.
-Receipt: /home/guilherme/.local/state/cloudvm-coord/receipts/c3-exactness-cache-received-20261105T020449Z.json
+Receipt: $XDG_STATE_HOME/cloudvm-coord/receipts/c3-exactness-cache-received-20261105T020449Z.json
 This remote receipt is user-supplied coordinator evidence, not a file read on
 this VM. Local archive bytes independently match. No import success was reported.
 
