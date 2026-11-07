@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/leaf-derivation-roles-v88/semantic-roles-reviewed.json",
-    "bytes": 2768443,
-    "sha256": "454715d52296d271dcd575dc0f8427e12aca4e93b9ef31a9f5458410fc7ee55d"
+    "path": "/workspace/h62-successor-bulk/rewrite-denotation-roles-v89/semantic-roles-reviewed.json",
+    "bytes": 2796024,
+    "sha256": "8f9ccc6bd75c0cb9616d51dc23932e9b4374099e7416aa360c181585c39f7ab5"
   }
 }
