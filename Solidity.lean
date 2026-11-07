@@ -3273,6 +3273,7 @@ import Solidity.Lowering.P8.GraphSchemaControls
 import Solidity.Lowering.P8.PlanGraphAdmission
 import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
+import Solidity.Lowering.P8.ResolvedGraphAdmissionV2
 import Solidity.Lowering.P8.ResourceBoundary
 import Solidity.Lowering.P8.ResourceContractLaw1
 import Solidity.Lowering.P8.ScalarSchema
@@ -3289,6 +3290,7 @@ import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstLiteralCorrespondence
 import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 import Solidity.Lowering.P8.SourceAstParameters
+import Solidity.Lowering.P8.SourceAstResolvedGraphs
 import Solidity.Lowering.P8.SourceAstStatementCorrespondence
 import Solidity.Lowering.P8.SourceAstStatements
 import Solidity.Lowering.P8.SourceAstTryCorrespondence
