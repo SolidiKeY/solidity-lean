@@ -1,0 +1,10 @@
+{
+  "source": "visible original user thread, full assignment transcription",
+  "launcher_rendered_prompt_sha256": "554d5c54a6b7551f343751438d75d8e9c3e381efb9d6c8f3cb642748324a3c12",
+  "transcription_sha256": "d1419e327b3194f46b1d57694fc0be939c04c62f13194da6cfc33016977ac64e",
+  "renderer_byte_identity_verified": false,
+  "full_original_assignment_present": true,
+  "original_queue_file": "original-queues.txt",
+  "exact_scope_file": "scope-manifest.json",
+  "latest_retirement_overrides": "retirement-and-inputs.md"
+}
