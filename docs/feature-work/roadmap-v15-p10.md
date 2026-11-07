@@ -2077,24 +2077,36 @@ leave the callee's output after an entered call and an empty buffer otherwise.
 
 | Theorem | Statement |
 |---|---|
-| `callIn_agrees` | If the reference `EVM.call` does not error, the entry balances agree (`hbal`), depth is below 1024, and the core oracle `reply a v input` equals the output of the exact `Θ` run (`hreply`), then the core `CALLIN` buffer equals the reference buffer byte for byte. |
+| `callIn_agrees` | Case alignment. If the reference `EVM.call` does not error, the two entry tests coincide (`hbal`), depth is below 1024, and, when the call is entered, the core oracle `reply a v input` equals the output of the exact `Θ` run (`hreply`), then the core `CALLIN` buffer equals the reference buffer byte for byte. In the entered branch the equality is `hreply` itself; the theorem contributes the alignment of the entered and not-entered branches and the empty case. |
 | `reference_depth_limit` | At depth 1024 a non-erroring reference CALL leaves an empty buffer. |
-| `core_ignores_depth` | A covered core `CALLIN` leaves `reply a v input`, with no depth condition. |
+| `core_ignores_depth` | A covered core `CALLIN` leaves `reply a v input`; the core has no depth to test. |
+| `depth_disagreement` | At reference depth 1024, with a covered core value (`v ≤ bal self`) and a nonempty reply, the core buffer differs from the buffer of every non-erroring reference CALL. |
 
-The differences are explicit. Depth: the core has none, so the two disagree at
-depth 1024 whenever the reply is nonempty. Gas and world: the reference output
-reads the forwarded `Ccallgas` gas, depth + 1, account map, substate and
-header, while the core `reply` reads only callee, value and input. `hreply`
-is therefore a premise about one `Θ` run; no uniformity across states is
-proved or assumed. Input: core `readBytes` of whole cells and reference
-`readWithPadding` are related only through `hreply`. The reference call's own
-errors are excluded by its `.ok` hypothesis; the core step never errors.
+Differences, stated explicitly:
+
+- **Depth.** The core has none (`depth_disagreement`).
+- **Gas and world.** The reference output reads the forwarded `Ccallgas` gas, depth + 1, account map, substate and header; the core `reply` reads only callee, value and input. `hreply` is a premise about one `Θ` run, used only when the call is entered; no uniformity across states is proved or assumed.
+- **Operands.** `hbal` relates only the entry tests (core `bal self` against `v`, reference `codeOwner` balance against `value`). Core value, callee and input bytes (`readBytes` of whole cells) are not tied to the reference `value`, `t`/`recipient` or `readWithPadding` window; that correspondence is carried by `hreply` alone. The theorems hold for every `EVM.call` use (CALL, CALLCODE, DELEGATECALL, STATICCALL).
+- **Not compared.** The pushed success flag (core `accepts`, reference `x`), post-call balances (the core pays nothing on a self-call, the reference moves value inside `Θ`), the core ghost journal `calls`, and gas.
+- **Errors.** The reference call's own errors are excluded by its `.ok` hypothesis. `callInStep` never errors; `InstrV2.callIn` faults when `readBytes` fails, outside these theorems since `input` is given.
 
 Item 1 (EVM agreement over P1) beyond this instruction is not done. The P1
-language `RuntimeFrameP1LangV2` targets core `InstrV2` code. No encoder from
-`InstrV2` to EVM bytes exists, and the core macro instructions (fixed-cell
-`MLOAD`/`MSTORE`, relative jumps, two-operand `CALL`) do not match single
-opcodes (`Solidity.Evm.External` arity obstructions). A whole-frame P1 EVM
-agreement needs that encoder and its execution correspondence; the world-call
-part also still waits on V13's WorldCalls step producers.
+language `RuntimeFrameP1LangV2` targets core `InstrV2` code, and no encoder
+covers `InstrV2`. The assembler for the frozen `Evm.Instr`
+(`Bridge/SolidityBridge/ExternalEvm/Assembly/CodeLayout.lean`, with execution
+proofs in `ExternalEvm/Assembly/`) covers push, pop, jump, jumpi and loop, the
+relative jumps as PUSH32/JUMP pairs; `ExternalEvm/StorageMacros.lean` lowers a
+storage subset. Fixed-cell MLOAD/MSTORE, CALL and the version-2 data
+instructions (`CALLIN`, `RETURNDATASIZE`, `RETURNDATACOPY`, data `REVERT`,
+`RETURN`) have no lowering; the arity obstructions in
+`ExternalEvm/Obstructions.lean` rule out single-opcode matches for them. A
+whole-frame P1 EVM agreement needs those lowerings and their execution
+correspondence; the world-call part also still waits on V13's WorldCalls step
+producers.
 
+Finder and skeptic reviews of this section found that `callIn_agrees` is mostly
+case alignment, that operands, flag, balances and journal were uncompared but
+unmentioned, that the depth claim lacked a theorem and its balance condition,
+and that the encoder paragraph ignored the frozen-`Instr` assembler. Fixed
+above: `depth_disagreement` added, `hreply` weakened to entered calls, the
+wording corrected.

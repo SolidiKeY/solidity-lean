@@ -12,5 +12,10 @@
  "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean:SolidityBridge.RoadmapV15.P10.CallInAgreement.core_ignores_depth": [
   "Quot.sound",
   "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean:SolidityBridge.RoadmapV15.P10.CallInAgreement.depth_disagreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }
