@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/modal-refutation-roles-v57/semantic-roles-reviewed.json",
-    "bytes": 1679729,
-    "sha256": "8591d38b61f6d965ad2017388540bbca8a07dd1b53061cc311f05e3a3e58936c"
+    "path": "/workspace/h62-successor-bulk/rule-exists-roles-v58/semantic-roles-reviewed.json",
+    "bytes": 1695110,
+    "sha256": "cfd050b1331c2050f7e29a904a719504c9f03bb9bc050c14399c654194b1c9e1"
   }
 }
