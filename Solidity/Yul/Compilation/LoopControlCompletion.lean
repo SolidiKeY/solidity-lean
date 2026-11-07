@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.LoopControlCompilation
 /-! Reverse normal-success transport through the existing recursive compiler.
 Actual target successes derive source horizons/intermediate locals; no source
@@ -121,24 +122,9 @@ theorem completion_iff {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run code {m with stack := (newer.toList++locals.toList).map coreWord++caller} =
  .ok {m with stack := (newer.toList++out.toList).map coreWord++caller} 0 := by
- constructor
- · rintro ⟨horizon,source⟩
-   obtain ⟨actual,same,target⟩ := LoopControlCompilation.source_to_model compiled depth block code
-     emitted selected horizon locals ⟨sourceLocals out,.normal⟩ source newer m caller
-   have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
-   cases equal
-   exact target
- · intro ran
-   obtain ⟨horizon,actual,source,_,frame⟩ := model_to_source compiled depth block code emitted selected
-     locals newer m {m with stack := (newer.toList++out.toList).map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : (newer.toList++out.toList).map coreWord =
-     (newer.toList++actual.toList).map coreWord := List.append_cancel_right stacks
-   have lists : newer.toList++out.toList = newer.toList++actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp (List.append_cancel_left lists)
-   cases equal
-   exact ⟨horizon,source⟩
+ exact CompletionControls.completion_iff_of_transport stmt compiled.profile code
+   (LoopControlCompilation.source_to_model compiled depth block code emitted selected)
+   (model_to_source compiled depth block code emitted selected) locals out newer m caller
 
 /-- Selected artifact consumer with all actual emission/selection equations
 stored by the original visitor. No new assumed simulation interface. -/
