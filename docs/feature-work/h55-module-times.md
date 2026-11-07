@@ -1351,3 +1351,23 @@ not cryptographic implementation equality proofs. Independent read-only
 finder and skeptic checked the mapping without Lean, server or builds. The
 skeptic requested the historical exit failure be recorded in the individual
 boundary row; it was added. No H56 measurement, production acceptance or candidate exclusion is inferred.
+
+## Automation control candidates
+
+`automation_controls.py` records nine supplied census rows with source
+hashes. Four have explicit Pages CI references; the corrupted-plugin
+rejection test and replay helper have separate candidate drivers. Remaining
+current drivers and inputs are unresolved. Subsets are accepted and this
+static index does not establish coverage or execution acceptance.
+
+Pending and refuted rows are intentional results in several controls. The
+corrupted native proposal must be rejected, but its test requires a successful
+Lean exit and rejection/fallback markers. ImportedAudit uses a temporary
+directory and restores synthetic declarations. The residue and replay
+helpers write diagnostic outputs and do not prove the whole source
+specification. The runtime admission observations are distinct from kernel
+proofs. Result JSON, plugin artifacts and logs require owned writable state.
+
+Independent read-only finder and skeptic reviews identified the temporary
+directory and rejection success condition, which were added to the records.
+No Lean, server, build, production timing or H56 acceptance is inferred.
