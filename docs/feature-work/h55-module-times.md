@@ -2162,3 +2162,23 @@ checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in
 `tests/h55/module-times/counterexample-migration-evidence.sha256`. This
 non-atomic observation does not establish current runtime acceptance.
+
+## SolcValidation migration probe observations
+
+`solc_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover compiler-
+only operation/data-resolution controls, frozen declaration/axiom checks and a
+test-only imported kernel inventory. Raw cross-version inventory differences
+require classification; current invocation, inputs, effects and outcomes remain
+unresolved. This supplied subset does not establish full acceptance.
+
+At merge head `5fb1f5ad7970f9f72753caaa87e8e90a5b81e062`, the refreshed
+static index has 767 candidates, 540 with supplied current references and 227
+without; seven retain historical references for review. One candidate was added
+and the previously referenced LoopSelectorAudit changed. Its old compiler-audit
+reference and old source identity are retained as historical, bound to the
+prior lineage and committed compiler-followup checksum manifest; it is not
+counted current. Independent read-only finder and skeptic checked roles, hashes
+and history preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/solc-migration-evidence.sha256`. This non-atomic
+observation does not establish runtime acceptance.
