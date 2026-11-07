@@ -1,0 +1,19 @@
+{
+ "Solidity/Lowering/P8/SourceAstStatementCorrespondence.lean:Solidity.Lowering.P8.SourceAstStatementCorrespondence.block_statement_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstStatementCorrespondence.lean:Solidity.Lowering.P8.SourceAstStatementCorrespondence.expression_statement_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstStatementCorrespondence.lean:Solidity.Lowering.P8.SourceAstStatementCorrespondence.local_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstStatementCorrespondence.lean:Solidity.Lowering.P8.SourceAstStatementCorrespondence.return_exact": [
+  "Quot.sound",
+  "propext"
+ ]
+}
