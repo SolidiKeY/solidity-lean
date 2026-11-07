@@ -89,7 +89,7 @@ async function captureTrace(client,directory,metadata){
  const menuDir=join(directory,'menu');require('node:fs').mkdirSync(menuDir,{recursive:true});observed.menu=await contextSubmenu(client,menuDir,{label:'Dafny',expected:'Build with Custom Arguments'});
  const rendered=await capture(client,directory,true);if(metadata.observeOnly){if(observed.activeUri!==metadata.binding.uri)throw Error('Native observation active URI mismatch');}else require('./trace-presentation.cjs').assertPresentation(observed,metadata);return{...rendered,tracePresentation:{...observed,binding:metadata.binding,asserted:!metadata.observeOnly,scope:metadata.observeOnly?'Native upstream state recorded without a lifecycle-success claim':'Exact content/style/disappearance/menu asserted'}};
 }
-async function buildKeybinding(client,{custom=false,input,cancel=false,dismissOnSubmit=false,directory}={}) {
+async function buildKeybinding(client,{custom=false,input,cancel=false,dismissOnSubmit=false,onPrompt,directory}={}) {
   const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
   if(!focused.result.value)throw Error('No focused source editor for build keybinding');
   const started=Date.now(),keyEvents=[],inputEvents=[];
@@ -102,6 +102,7 @@ async function buildKeybinding(client,{custom=false,input,cancel=false,dismissOn
     const deadline=Date.now()+3000;let before;
     while(Date.now()<deadline){before=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(before?.focused)break;await new Promise(r=>setTimeout(r,20));}
     if(!before?.focused)throw Error('Actual F6 input prompt is not focused');
+    if(onPrompt)await onPrompt({before,deadline});
     if(input!==undefined){for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2},true);await send('Input.insertText',{text:input},true);}
     const submitted=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!submitted?.focused||input!==undefined&&submitted.value!==input)throw Error('F6 prompt contents did not match requested input');
     const rendered=await capture(client,directory,true);prompt={before,submitted,rendered};
@@ -181,4 +182,10 @@ async function captureOutput(client,directory,metadata){
   }finally{clearTimeout(timer);cleanup.finished=performance.now();writeFileSync(join(directory,'output-observer-cleanup.json'),JSON.stringify(cleanup,null,2));}
  }
 }
-module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput};
+async function captureCompilerConfiguration(client,directory,metadata){
+ const read=async()=>{const result=await client.request('Runtime.evaluate',{expression:`(()=>{const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none';};const active=[...document.querySelectorAll('.monaco-editor[data-uri]')].find(e=>visible(e)&&e.closest('.editor-group-container.active'));const rows=[...document.querySelectorAll('[data-key="solidityLean.compilerOutputDir"]')].filter(visible).map(e=>({key:e.getAttribute('data-key'),text:e.innerText,values:[...e.querySelectorAll('input')].map(i=>i.value)}));return{activeUri:active?.getAttribute('data-uri'),text:active?[...active.querySelectorAll('.view-line')].map(e=>e.textContent).join('').replace(/\u00a0/g,' '):null,rows};})()`,returnByValue:true});return result.result.value;};
+ const valid=s=>metadata.presentation==='default-ui'?s.rows.some(r=>r.key==='solidityLean.compilerOutputDir'&&r.values.includes('bin')):s.activeUri===metadata.settingsUri&&s.text?.includes(JSON.stringify('solidityLean.compilerOutputDir'))&&s.text.includes(JSON.stringify(metadata.effective));
+ const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);writeFileSync(join(directory,'configuration-before.json'),JSON.stringify(before,null,2));const rendered=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'configuration-after.json'),JSON.stringify(after,null,2));
+ if(!valid(before)||!valid(after)||JSON.stringify(before)!==JSON.stringify(after))throw Error('Rendered output directory configuration/source changed or missing');return{...rendered,configuration:{before,after,metadata,scope:'Actual Settings UI default or resource JSON DOM/AX/PNG; not full glyph/raster equivalence.'}};
+}
+module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
