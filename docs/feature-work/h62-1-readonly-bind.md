@@ -252,3 +252,47 @@ frozen statement, premise, budget, axiom or exclusion changed. No held Lean job
 was rerun; historical +80.254966536% STOP and full acceptance obligations remain.
 Evidence and reproduction ledger are under
 `/workspace/h62-audit-readonly-calls/bind-case-ledger/`.
+
+
+## Fresh current-source fixture closure (2026-11-07)
+
+`scripts/h62/item1/readonly-bind/check_capture_fixtures.py` recompiles the full
+current import closure for FullCaptureControls, CaptureFailureControls and
+EnvironmentCreditControls, then the inherited PhaseControls, BindControls and
+EncodingFailureControls tests. All77 project modules and three test modules
+compiled. The axiom probe checked38 existing declarations: ten migrated public
+laws and28 controls. Every observed set contains only propext, Classical.choice
+and Quot.sound. This validates current fixture proofs and the changed-local,
+return-byte, encoding-failure and environment-credit observations they state;
+it does not prove generalized feasibility or source/compiler correspondence.
+
+The driver has no project-cache scaffold. It strips inherited Lean/Elan root
+variables, pins the SDK root/private library/one thread and checks compiler
+prefix before and after. A real negative control temporarily removes the
+fresh private Hoare object: Lean must return the exact private-path missing
+object error. The original object is restored and its digest checked. Original
+source bytes/import graph are pinned before compilation; final checks cover all
+original/staged sources, objects, probe, logs, compiler and driver/helper inputs.
+SDK-provided modules are not independently source-certified.
+
+The final bounded run passed in389.118s at1602379776bytes aggregate peak RSS.
+An earlier run passed in406.356s before the root-isolation hardening; its evidence
+is retained separately. These are two gate observations with different driver
+configuration, not a matched speed comparison or a timing rebaseline. The held
+Premises module is refused during dependency traversal, before compilation;
+its historical +80.254966536% STOP remains. Actual tools remain Lean4.24.0
+(797c613) and Lake5.0.0-src+797c613,12GiB cap,4GiB reserve,no swap,-j1.
+Current KeySort compiled successfully as part of this fresh closure. No runtime
+pass, full repository gate or full inherited migration acceptance is claimed.
+
+Seven external controls passed: dependency order/pins, held-module refusal,
+cycle/missing/foreign imports, unsupported import syntax, root override removal,
+object restoration on normal/error paths and current theorem inventory.
+Independent read-only finder and skeptic confirmed the final fixes and saved
+77/38 evidence; neither executed Lean or wrote files. No Lean source or proof,
+statement, premise, exclusion, axiom or budget changed in this checkpoint.
+All792 original obligations and three removed private identities stay accounted
+for separately. Remaining work includes formal joint-witness/fidelity integration,
+other guard/gas/fork boundaries, broader binding/live ownership and the full RO
+source/callee outcome plus physical-frame producer. Bulk evidence is off Git:
+`/workspace/h62-audit-readonly-calls/capture-current-closure/`.
