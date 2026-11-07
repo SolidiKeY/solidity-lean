@@ -711,3 +711,62 @@ theorem role_refusal_mixed_history :
 
 #print axioms role_refusal_mixed_history
 end Solidity.Lowering.V08.H55Agreements
+
+namespace Solidity.Lowering.V08.H55Agreements
+open ContractWorld
+
+section CanonicalContextComponent
+open LibraryFrameTransport
+variable {K : Type} [DecidableEq K] {contracts : K → Contract}
+
+/-- Actual Source sender/value reads paired with the existing intrinsic
+context-read body, on the canonical frame. Its input agreement is constructed,
+not supplied. Source admission, dispatch and general body lowering stay separate. -/
+theorem canonical_context_transport {E : Source.Env} {Γ : Source.RCtx}
+    (g : Source.Glob E) (template : Source.Fr) (fuel : Nat)
+    (locals : Source.Locals E.layout Γ) (state : Source.St E)
+    (w : World contracts) (caller kind : K) (self : Handle caller) (address : Address)
+    (ctx : Context) (runtime : RuntimeInputs w caller kind self address) :
+    let f := EnvironmentProjection.frameForContext template self.address ctx
+    (Source.evalPair g f (fuel+2)
+      (.magic .msg "sender" rfl : Source.RExpr E Γ (.address false))
+      (.magic .msg "value" rfl : Source.RExpr E Γ (.int Source.IntTy.u256))).run (locals,state) =
+      (.ok (.val (.address f.sender),.val (SourceEnvironment.sourceWord f.value)),(locals,state)) ∧
+    w.libraryCall self (library caller kind address) ctx =
+      .ok (w,((f.sender.val : Int),(f.value.val : Int),(f.this.val : Int))) :=
+by
+  let f := EnvironmentProjection.frameForContext template self.address ctx
+  have agreement : FrameInputs f self ctx :=
+    ofFrameAgreement (EnvironmentProjection.frameForContext_agrees template self.address ctx)
+  exact context_transport g f fuel locals state w caller kind self address ctx runtime agreement
+
+end CanonicalContextComponent
+
+/-- Guards field-only substitution being mistaken for execution: actual Source
+reads preserve a populated machine in either pipeline, while the real target
+context body preserves its world. This is not a Source library dispatch theorem. -/
+theorem populated_canonical_context (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    let f := EnvironmentProjection.frameForContext ConstructorScalarTransport.frame
+      Controls.self Controls.paidCtx
+    (Source.evalPair (ConstructorScalarTransport.global pipeline) f 2
+      (.magic .msg "sender" rfl : Source.RExpr ConstructorScalarTransport.E [] (.address false))
+      (.magic .msg "value" rfl : Source.RExpr ConstructorScalarTransport.E [] (.int Source.IntTy.u256))).run
+      (Source.L0 ConstructorScalarTransport.E, ConstructorScalarTransport.initial bytes) =
+      (.ok (.val (.address f.sender),.val (SourceEnvironment.sourceWord f.value)),
+       (Source.L0 ConstructorScalarTransport.E, ConstructorScalarTransport.initial bytes)) ∧
+    LibraryHandlerControls.outer.libraryCall (⟨Controls.self⟩ : Handle false)
+      (LibraryFrameTransport.library false true LibraryHandlerControls.link) Controls.paidCtx =
+      .ok (LibraryHandlerControls.outer,(1,7,2)) := by
+  obtain ⟨runtime⟩ := LibraryFrameTransport.runtime_of_success
+    (contracts := LibraryHandlerControls.Catalog)
+    LibraryHandlerControls.outer LibraryHandlerControls.handled (⟨Controls.self⟩ : Handle false)
+    LibraryHandlerControls.library Controls.paidCtx LibraryHandlerControls.expected
+    LibraryHandlerControls.delegated_reached
+  exact canonical_context_transport
+    (ConstructorScalarTransport.global pipeline) ConstructorScalarTransport.frame 0
+    (Source.L0 ConstructorScalarTransport.E) (ConstructorScalarTransport.initial bytes)
+    LibraryHandlerControls.outer false true (⟨Controls.self⟩ : Handle false)
+    LibraryHandlerControls.link Controls.paidCtx runtime
+
+#print axioms populated_canonical_context
+end Solidity.Lowering.V08.H55Agreements
