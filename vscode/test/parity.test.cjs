@@ -87,20 +87,20 @@ test('empty, unfinalized and corrupt recordings cannot certify an observed proto
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('independent audit keeps all upstream registration sites explicitly unexamined',()=>{
-  const {validate}=require('../parity/audit.cjs');
+  const {validate,validateIndex}=require('../parity/audit.cjs');
   const audit=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-audit.json'),'utf8'));
-  assert.deepEqual(validate(audit),[]);audit.testFiles[0].cases.push({id:'fake',status:'complete',runtimeEvidence:[]});
-  assert.ok(validate(audit).length);
+  assert.deepEqual(validateIndex(audit),[]);if(require('../parity/inventory.cjs').checkOffline().mode==='full')assert.deepEqual(validate(audit),[]);else assert.throws(()=>validate(audit),/Full parity inventory unavailable/);audit.testFiles[0].cases.push({id:'fake',status:'complete',runtimeEvidence:[]});
+  assert.ok(validateIndex(audit).length);
 });
 test('unsupported and untested capabilities cannot be marked complete',()=>{
-  const inventory=require('../parity/inventory.cjs').loadInventory();
+  const inventory=require('./parity-fixture.cjs').inventoryFixture();
   assert.deepEqual(validate(inventory),[]);
   inventory.features[0].assessment.status='complete';assert.ok(validate(inventory).some(e=>e.includes('unsupported completeness')));
   inventory.features[0].assessment.testEvidence=[{status:'skipped',assertion:'something',artifact:'fake.json'}];
   assert.ok(validate(inventory).some(e=>e.includes('unsupported completeness')));
 });
 test('inventory shrinkage and invented upstream evidence fail the offline gate',()=>{
-  const original=require('../parity/inventory.cjs').loadInventory();
+  const original=require('./parity-fixture.cjs').inventoryFixture();
   const fewer=structuredClone(original);fewer.features.pop();assert.ok(validate(fewer).some(e=>e.includes('feature set changed')));
   const tampered=structuredClone(original);tampered.features[0].upstream[0].sha256='0'.repeat(64);
   assert.ok(validate(tampered).some(e=>e.includes('unregistered upstream evidence')));

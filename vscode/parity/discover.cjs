@@ -147,7 +147,9 @@ function validate(inventory) {
 function main(args=process.argv.slice(2)) {
   const path=join(root,'docs/dafny-editor-features.json');
   if(args[0]==='--check') {
-    const inventory=require('./inventory.cjs').loadInventory(path),errors=validate(inventory);
+    const checked=require('./inventory.cjs').checkOffline(path);
+    if(checked.mode==='digest-only'){process.stdout.write('Digest-only: committed inventory/restore manifest agree; full feature/source/evidence validation NOT run (H44 bundle absent). Mandatory inventory-check/parity-gate still require the full bundle.\n');return;}
+    const inventory=checked.inventory,errors=validate(inventory);
     if(errors.length)throw new Error(errors.join('\n'));process.stdout.write(`Validated ${inventory.features.length} editor features; no untested completeness claims.\n`);return;
   }
   const extension=args[args.indexOf('--extension')+1],server=args[args.indexOf('--server')+1];

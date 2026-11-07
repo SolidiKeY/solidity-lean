@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "repository": "/workspace/solidity-lean",
+  "branch": "codex/solidity-h62-6-20261106/migrate-roadmap",
+  "original_write_globs": [
+    "tests/h62/item6/migrate-roadmap/**",
+    "scripts/h62/item6/migrate-roadmap/**"
+  ],
+  "original_doc": "docs/feature-work/h62-6-migrate-roadmap.md",
+  "original_production_files": [
+    "Solidity/Roadmap/Contracts.lean",
+    "Solidity/Roadmap/Controls.lean",
+    "Solidity/Roadmap/Evm.lean",
+    "Solidity/Roadmap/Frontend.lean",
+    "Solidity/Roadmap/TypedRun.lean",
+    "Solidity/Roadmap/V16/CreationLibrarySpec.lean",
+    "Solidity/Roadmap/V16/CreationReturnConsumer.lean",
+    "Solidity/Roadmap/V16/H24Input.lean",
+    "Solidity/Roadmap/V16/NativeParentConsumer.lean",
+    "Solidity/Roadmap/V16/NativeRevertConsumer.lean",
+    "Solidity/Roadmap/V16/RelationalGuardSpec.lean",
+    "Solidity/Roadmap/V16/SSCP2/NewAllocation.lean",
+    "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean",
+    "Solidity/Roadmap/V16/SourceSizeControls.lean",
+    "Solidity/Roadmap/V16/SourceTransactionConsumer.lean"
+  ],
+  "H82_update": "Standing agreement permits statement-preserving proof-only/additive/module-split/import/doc edits without exact-file permission; changed statements, depended-on definition bodies, interfaces, budgets, axiom sets or exclusions still require owner, frozen ones H57 versioned pairs. Retirement limits this turn to handoff; no source edits.",
+  "prohibited_original_edits": [
+    "generated roots",
+    "central module maps",
+    "axiom pins",
+    "tracked lean-toolchain"
+  ],
+  "migration_only": true,
+  "ownership_transfer": "No takeover until final stopped/head acknowledgement; successor migrate-root-gate handles integration."
+}
