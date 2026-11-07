@@ -21,7 +21,8 @@ each proof iteration. Documentation-only edits need path and link checks.
 | `lake build Solidity` | The library without the examples: a lane checkpoint (`scripts/coord-tools/gate.sh checkpoint`) |
 | `lake build SolidityExamples SolkeyTestSuite` | The examples and the TestSuite: a checkpoint touching `Syntax`, `Semantics` or `Calculus` adds them |
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |
-| `node scripts/check-layers.mjs` | No core module reaches an elaborator, printer or tactic front end; no Lean |
+| `node scripts/check-layers.mjs` | No new core import boundary beyond the pinned107 snapshot; elaborator/parser bans remain unconditional; no Lean |
+| `bash scripts/coord-tools/gate.sh touched` | Merge pre-gate: check layers first on the prospective merged tree, then build touched modules; fail before build on new boundary edges |
 | `./scripts/check-doc-paths.sh` | Backticked Lean file references in tracked prose; five exact historical/fixture pairs carry explicit reasons, with no basename-wide exemption |
 | `node scripts/check-axiom-pins.mjs` | Original axiom-policy errors plus new unrecorded pin changes; exact existing H112 drift uses a SHA256-pinned, shrink-only baseline |
 | `solidity-lean rules check --key FILE` | Sort annotations against a SolKey rules file; manual, not part of any gate (H89) |
