@@ -1,0 +1,46 @@
+{
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.plainB_complete": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.newReadyB_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.exprB_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.argsB_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.parentB_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.stmtAccepted_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.itemsB_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.boundB_of_itemsB": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean:Solidity.Source.Calls.Recognize.boundB_complete": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}
