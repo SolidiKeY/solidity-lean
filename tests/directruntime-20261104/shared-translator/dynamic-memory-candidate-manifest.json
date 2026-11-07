@@ -43,24 +43,6 @@
       "mcp.log": "b7063cb47105afe9254b3c05bd24fa0dbe0e3f53451fcc8a72c8d7f379ed12a8"
     }
   },
-  "sourceFiles": [
-    {
-      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
-      "sha256": "ba76ab232fe9768541f6966178a55e51e8ff62bd3c78e81cc2956a4e38895cb7"
-    },
-    {
-      "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
-      "sha256": "a55846f0a588094b9e8fab308ca2923001cd9f755825c894c4f246141d0d8e24"
-    },
-    {
-      "path": "tests/directruntime-20261104/shared-translator/DynamicBytesBoundaryControls.lean",
-      "sha256": "c47a60157be3748514379d30434e328802104e6dc71b400f7b9babd61c055f16"
-    },
-    {
-      "path": "tests/directruntime-20261104/shared-translator/DynamicBytesLocalControls.lean",
-      "sha256": "9ea02d4b0b07e12780a357fd1aa91ab2851942f0ea32e08627fcb758b4285067"
-    }
-  ],
   "censusBefore": {
     "parsedUnits": 78,
     "functions": 1655,
@@ -80,5 +62,28 @@
   "changedCensusRefusals": 17,
   "changedProfileRefusals": 6,
   "acceptance": "Candidate preserved only; not integrated, frozen checks unchanged, validation-contract decision pending.",
-  "semanticLimit": "Two bare-declaration positive fixtures check construction/termination and marker syntax, not observable empty length/content or source default-memory adequacy."
+  "semanticLimit": "Two bare-declaration positive fixtures check construction/termination and marker syntax, not observable empty length/content or source default-memory adequacy.",
+  "archivedCandidateSourceFiles": [
+    {
+      "archiveMember": "candidate-source/Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "intendedRepositoryRelative": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sha256": "ba76ab232fe9768541f6966178a55e51e8ff62bd3c78e81cc2956a4e38895cb7"
+    },
+    {
+      "archiveMember": "candidate-source/Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "intendedRepositoryRelative": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "sha256": "a55846f0a588094b9e8fab308ca2923001cd9f755825c894c4f246141d0d8e24"
+    },
+    {
+      "archiveMember": "candidate-source/tests/directruntime-20261104/shared-translator/DynamicBytesBoundaryControls.lean",
+      "intendedRepositoryRelative": "tests/directruntime-20261104/shared-translator/DynamicBytesBoundaryControls.lean",
+      "sha256": "c47a60157be3748514379d30434e328802104e6dc71b400f7b9babd61c055f16"
+    },
+    {
+      "archiveMember": "candidate-source/tests/directruntime-20261104/shared-translator/DynamicBytesLocalControls.lean",
+      "intendedRepositoryRelative": "tests/directruntime-20261104/shared-translator/DynamicBytesLocalControls.lean",
+      "sha256": "9ea02d4b0b07e12780a357fd1aa91ab2851942f0ea32e08627fcb758b4285067"
+    }
+  ],
+  "sourcePinBoundary": "These four hashes identify archived, unintegrated candidate members only. Intended repository paths describe draft destinations, not current checkout bytes or accepted production code."
 }
