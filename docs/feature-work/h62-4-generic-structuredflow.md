@@ -159,7 +159,7 @@ The inherited `gate.py`/`measure.py` protocol requires a pinned4.35 runtime and 
 
 ## Ten original positive propositions checked
 
-One off-Git `ExactInstances.lean` combines the checked helper with the original import/namespace contexts and ten exact extracted proposition headers from the six proposed control files. Each proof uses `emitted_snapshot` at its original base0/base128. `bindings.json` records each original declaration name and statement SHA256. Production controls were not modified.
+One off-Git ExactInstances.lean fixture (external evidence, not a repository module) combines the checked helper with the original import/namespace contexts and ten exact extracted proposition headers from the six proposed control files. Each proof uses `emitted_snapshot` at its original base0/base128. `bindings.json` records each original declaration name and statement SHA256. Production controls were not modified.
 
 The actual cache-aware bounded check generic-mapped-instances-1107-01 exits0 in112.261seconds, including changed import-closure compilation. This is an importing-consumer check, not a per-module timing or paired performance result. Replayed dependency and unused-simp warnings remain retained. Printed helper theorem axiom sets are standard-only; a complete per-instance/declaration axiom comparison remains open.
 
