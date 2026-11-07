@@ -1410,6 +1410,55 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean:SolidityBridge.RoadmapV15.P10.CallInAgreement.callIn_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean:SolidityBridge.RoadmapV15.P10.CallInAgreement.core_ignores_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean:SolidityBridge.RoadmapV15.P10.CallInAgreement.depth_disagreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean:SolidityBridge.RoadmapV15.P10.CallInAgreement.reference_depth_limit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean:SolidityBridge.RoadmapV15.P10.CallReturndata.absent_call": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean:SolidityBridge.RoadmapV15.P10.CallReturndata.absent_then_size": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean:SolidityBridge.RoadmapV15.P10.CallReturndata.invalid_call": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean:SolidityBridge.RoadmapV15.P10.CallReturndata.outcome_needs_callee": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean:SolidityBridge.RoadmapV15.P10.CallReturndataLaw.call_returnData": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean:SolidityBridge.RoadmapV15.P10.CallReturndataLaw.fetched_call_returnData": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean:SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.dup": [
   "Classical.choice",
   "Quot.sound",
