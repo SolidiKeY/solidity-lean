@@ -1456,3 +1456,22 @@ semantics, complete historic inventory, runnable Lake contexts or execution
 inputs. The earlier worktree observation remains non-atomic. Independent
 read-only finder and skeptic checked all 81 paths and hashes; no Lean, server
 or build ran, and no production acceptance follows.
+
+## Checkpoint document provenance for 40b1838ca
+
+The checkpoint manifest `40b1838ca-SHA256SUMS` used a relative path to this
+document. Its expected SHA-256
+`50224c8268eaea7025bc6dc1fadac7df01bdbc7b24250324db8fca13e366b02e` matches
+the document bytes committed at `40b1838ca5702935a711448ddac15591637576c1`.
+Commit `933a940adcf28e576b0345448911d57ad9d6445d` appended the Git-tree
+reconciliation section; its document hash is
+`15389ba5e21df9bec580a8c54ec6d15c7acbb152755b54fafe7e149d61d2f981`. Thus
+the old manifest's relative document entry cannot authenticate later bytes.
+
+Both exact committed documents, their diff and history, the old manifest and
+its full successful verification from a directory containing the historical
+relative path are preserved in the absolute VM directory
+`/workspace/h55-module-times-evidence/provenance-40b/` and checksum-bound by
+`tests/h55/module-times/provenance-40b.sha256`. Independent read-only finder
+and skeptic checked the commit history and both hashes. This provenance
+reconciliation does not establish runtime or full-assignment acceptance.
