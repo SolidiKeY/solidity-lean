@@ -754,3 +754,30 @@ No stopped timing benchmark was rerun;RUNTIME_GATE_PASS remains pending.
 The new exclusion script is committed byte-identical to its tested private
 copy. Current archives and32incremental cache artifacts stay off Git with
 per-file indexes and SHA256;cache delivery remains coordinator-pending.
+
+
+## Environment frontier delivery and source-ID preparation
+
+The H71environment packet pins producer44d89439 and an eight-module frontier.
+Seven current file hashes match;Translate90479 is missing. The advertised branch
+fetch succeeds,but exact-SHA fetch returns128/notourref,and packet/evidence paths
+are absent. The [exact delivery request](../../tests/directruntime-20261104/native-browser/environment-source-request.json)
+records hashes and required bytes;no decoder/source fixture is reconstructed.
+The requested16environment cases and15metadata negatives remain unqualified.
+
+Independent [source-ID preparation](../../tests/directruntime-20261104/native-browser/request-identity/preparation-manifest.json)
+now binds actual positive unique compiler function IDs into fixture and guard
+requests,then checks returned IDs on native and real Chromium. Sixteen retained
+address fixtures plus2guards perbackend pass unchanged verdict/tag expectations,
+with18identity checks. Four intentionally mismatched/malformed selectors per
+backend fail closed with exact gaps. Positive guards prevent counting an
+always-gap implementation as success. Four fresh external compiler runs occur;
+the existing0eb native/WASM/site are retained,with343runtime sourcepins each still
+matching current04c6context. These are selector API regressions,not freshbinary,
+newenvironment,source/ABI orperformance qualification. No cachedverdict is used.
+
+Allthree bounded gates pass12GiB/swap0/CPU1,threads1 and4GiB reserve;Node syntax
+passes. No Lean/productionruntime source or proof budget changed,so no new
+Lean/axiom/cache gate is claimed. Existing stack,cost,startup andfour storage
+holds remain;no stopped timing benchmark was rerun. Independent finder/skeptic
+review covers these limits. Bulk ASTs/logs remain off Git with per-file hashes.
