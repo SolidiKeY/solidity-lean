@@ -24,7 +24,8 @@
     ],
     "allTenFrameOffsetsInIndexedBodies": true,
     "nameSectionPresent": false,
-    "sourceAttribution": "Unresolved; exact function-index symbol map required."
+    "sourceAttribution": "Follow-up authenticated symbol map identifies LTm.fitsM/LFml.fitsM ReadBounds frames; no rootcause or algorithmrepair established.",
+    "followupManifest": "stack-symbols-manifest.json"
   },
   "timing": {
     "savedSummaries": {
@@ -63,5 +64,5 @@
     "bytes": 3839
   },
   "boundary": "Static authenticated saved evidence only.343source hashes match0140; no206object-byte verification, source/compiler/native correctness, current957e freshness, new runtime acceptance or benchmark execution.",
-  "remaining": "Fresh native/WASM validation957e, exact symbol mapping before stack repair, causal cost investigation, CRH68/H102 landing and original independent queues/final gates."
+  "remaining": "Freshruntimevalidation957e/fixed-bytefeature; ReadBounds ownerdiagnosis; causalcostinvestigation; CRlanding and originalqueues/finalgates."
 }
