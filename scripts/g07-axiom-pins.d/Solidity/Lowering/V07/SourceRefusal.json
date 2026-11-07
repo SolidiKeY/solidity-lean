@@ -1,0 +1,67 @@
+{
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.decl_inversion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.envLocOK_conservative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.envLocOK_eq_patch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.envLocOK_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.envLocOK_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.mapping_env_not_nameable_free": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.mapping_env_repair_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.not_refuses_of_mapping_struct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.plain_env_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.refuses_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.refuses_of_decls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.refuses_of_mapping_free": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.tys_maps_free": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

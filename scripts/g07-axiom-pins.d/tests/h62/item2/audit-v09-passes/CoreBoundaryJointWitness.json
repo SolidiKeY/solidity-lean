@@ -1,0 +1,45 @@
+{
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.bound": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.joint_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.mapped_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.over_limit_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.reached_suffix_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.rep_projection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.resource_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/CoreBoundaryJointWitness.lean:Solidity.Backend.Passes.AuditCoreBoundary.suffix_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

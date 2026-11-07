@@ -1,13 +1,5 @@
 {
- "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.wmod_small": [
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.prefix_run": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.callIn_input": [
+ "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.call_run": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -17,12 +9,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.call_run": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.returndata_holds": [
+ "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.callIn_input": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -32,7 +19,17 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.transported": [
+ "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.prefix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.returndata_any": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.returndata_holds": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -42,9 +39,12 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.returndata_any": [
+ "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.transported": [
   "Classical.choice",
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerV2.lean:Solidity.Backend.Passes.SourceCallProducerV2.wmod_small": [
   "propext"
  ]
 }
