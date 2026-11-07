@@ -1,0 +1,110 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/HeapBoundaryControls.lean",
+  "interface_sha256": "ac894a20c9d836118a6bfaba7be5e816e28300d39e71cbded4203ad3052b3013",
+  "joint_witness": "Solidity.Backend.Passes.AuditHeapBoundary.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditHeapBoundary",
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.HeapBoundaryControls.0.",
+  "checked_private_names": [
+    "first_some",
+    "second_some",
+    "third_some"
+  ],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.empty_heap",
+      "signature_sha256": "5cc8bbfaf4a2dc7d7985181dd4ac9959b9a10cecc1e1db881026fa6fe7f7e432",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.physical",
+      "signature_sha256": "19d837eb5221a17d162ba0c1061cc35ac0eb768d098b2434498e3aecd49e88a4",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.allocator",
+      "signature_sha256": "3619fc6c3dceea87480d5e89400d80350048da0277b87eb39b4d46001d907c21",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.cost",
+      "signature_sha256": "d18bd6dd6351f050dd9288a4a0e73b123ab6d03be8c73959304b46c353ac3ced",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.input",
+      "signature_sha256": "7bf37842aec1dd2c276ab1f04d3d966fc501617b96972ebab90887e83ddee0e9",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.first_some",
+      "signature_sha256": "24d045ccea28ba1049b02c9be55636909b57df7b7fec4952058162e916035888",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.allocation_source",
+      "signature_sha256": "34e1e994b730f6d1ed326acae9dda20bcd435b8d30a18b1c7bad4373d2ec6538",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.second_some",
+      "signature_sha256": "03cbdbdad76506d35fec8573595cf1a1807b8ce2651b1cc53a5dfc3424dda5e1",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.mutation_source",
+      "signature_sha256": "94174c9e40dfc0ad2f03cf00f551482440a90282055368dc74c272c1dd704870",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.third_some",
+      "signature_sha256": "4c69197458662641345ef564354557f02922c7ebb0ab37b11ef64b0a254c2c83",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.observation_source",
+      "signature_sha256": "30e0b2dfa5a1181f030546968cc507372bb9ce6e4a188429a948be76a060257f",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.reached_link",
+      "signature_sha256": "83593bf68e240acb834d6760dc6de04e6b8ad830b74bd5fce9a442c5d3bc317c",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.success",
+      "signature_sha256": "59154caf61f18d34ef514dc85b14e9b0c79f77ff744c77031121107f7759c48f",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.source_answer",
+      "signature_sha256": "f523b448b3ef92c03b448867a6f0a6999f6feb71cb9b1c9952bcd8bf514638c5",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "uncovered_private_names": [
+    "Solidity.Backend.Passes.HeapBoundaryControls.noRefs"
+  ],
+  "aggregate_selected": 395,
+  "aggregate_remaining": 864,
+  "limits": "Eleven public and three private heap-boundary model controls. Original success has per-tail existential maps, not a new uniform-map theorem. Intentional empty-heap refutation receives no joint-witness credit. No native ByteWorld/emission, resources or full Source/G24 adequacy.",
+  "private_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "intentional_refutations": [
+    {
+      "name": "Solidity.Backend.Passes.HeapBoundaryControls.noRefs",
+      "signature_sha256": "7a2e78878ce9b4593a62bbfeada3540afd167cb2f4d8ee3b8afdbf876c116c49",
+      "kernel_name": "_private.Solidity.Backend.Passes.HeapBoundaryControls.0.Solidity.Backend.Passes.HeapBoundaryControls.noRefs",
+      "classification": "checked-intentional-empty-heap-refutation",
+      "premise_impossibility": "Solidity.Backend.Passes.AuditHeapBoundary.noRefs_premises_impossible",
+      "joint_witness": null,
+      "selected_witness_credit": 0,
+      "axioms": [
+        "propext"
+      ]
+    }
+  ]
+}
