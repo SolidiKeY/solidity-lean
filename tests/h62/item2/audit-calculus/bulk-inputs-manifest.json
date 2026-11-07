@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/model-runs-classification-v29/semantic-roles-reviewed.json",
-    "bytes": 857861,
-    "sha256": "ad83fe728a34733453bb68494e7051b9fe942fc9856c160a6721bf0828739049"
+    "path": "/workspace/h62-successor-bulk/model-validity-classification-v30/semantic-roles-reviewed.json",
+    "bytes": 909936,
+    "sha256": "78e1474f30b364b07b8b2ac5f6e591af82db58e36d0c4fe4a463f178f88ad987"
   }
 }
