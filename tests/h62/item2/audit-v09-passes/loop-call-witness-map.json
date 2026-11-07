@@ -1,0 +1,69 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/LoopCallControls.lean",
+  "interface_sha256": "156472aa0ea23117a4cb98738a92fcff0ba5139bde196a725fb8aa02083f0db7",
+  "joint_witness": "Solidity.Backend.Passes.AuditLoopCall.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditLoopCall",
+  "checked_private_names": [],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.free",
+      "signature_sha256": "2516dd0a2d8c8fa0421758939ab73a77956149079a2e6387ae5971f06dc56e8b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.source",
+      "signature_sha256": "846f768c04b3c4c09ea3e7a262c0d7d34b0efd3923791f0050fffe7e61ebdc73",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.cost",
+      "signature_sha256": "f9cc92136b1efe32b088e4844e0578087a050923af84875f6150f6e0291420c7",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.expanded_frame",
+      "signature_sha256": "bf737a5917242723a4dad3a9f4e23cdafc9d7044821d477223c970494c5258e3",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.public_recognizer",
+      "signature_sha256": "b3238cdbe3166dca12ed8bb101ce3fc26fe5dc0f95f7a457425027e65616a56e",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.whole_recognizer_refused",
+      "signature_sha256": "2123774752cb0dc38ed9a17573c1d264f6c81f957c78668ea2a6f024f45832c1",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.joined_source",
+      "signature_sha256": "fe0953661eab9ddfb20d7d54f363a293a288ff820bc80c3ba7132ba1e66c1d4d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.receiving",
+      "signature_sha256": "4eeab20c509c9baacbe6392d5252a9ff88dc83ae46e5e6f4f769850fb017bed9",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopCallControls.private_frame_refused",
+      "signature_sha256": "78df7e8ad98cbc0d57b057619dda011eb669f9ef3f08aa4a2ff96266d2517ea7",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 458,
+  "aggregate_remaining": 801,
+  "joint_contract": "actual-preparation-input-and-shared-loop-selected-maps-for-call-input",
+  "limits": "Nine original public controls. Actual rebound alias, expanded call frame and cost retained; staged success does not imply whole-mixture recognition. No independent Source dispatch/admission, native ByteWorld/emission, gas/resource or full Source/G24 adequacy.",
+  "checked_axioms": {
+    "free": [
+      "propext"
+    ],
+    "joint_and_other_aliases": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  }
+}
