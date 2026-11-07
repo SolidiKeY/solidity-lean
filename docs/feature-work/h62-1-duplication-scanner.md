@@ -1441,3 +1441,64 @@ not an authenticated producer. The replay does not invoke opt-in signature
 binding or establish complete Lean census, semantic duplication, or live
 ownership. Evidence is outside Git in
 `/workspace/h62-duplication-scanner-evidence/postmerge-replay/`.
+
+
+## Guarded command boundary
+
+`#guard_msgs` headers are scanned with balanced parentheses across lines.
+A same-line declaration, modifier, attribute or recognized nested wrapper is
+refused as an incomplete input instead of silently omitting the declaration.
+Malformed or ambiguous headers are also refused. Following-line declarations
+and ordinary `#eval` payloads remain lexical observations. This narrow guard
+is not an exhaustive parser for custom commands, macros or generated names.
+
+Independent finder and skeptic reviews without Lean identified and rechecked
+multiline options and nested wrappers. The combined Python suite passed 205
+tests. A same-tree, fixed-selection scan took 111.077 seconds before and
+115.082 seconds after (+3.61%); both had the same 7,544 input hashes and
+126,304 lexical rows, no errors or unmatched patterns. Both used an 8 GiB
+address-space cap and sampled local cgroup 4 GiB reserve and zero-swap guard
+without a stop. Cache advice and sampling do not prove identical operating
+system caches or continuous system-wide reserve. Matching group counts do not
+prove equal group members. Evidence, including two superseded intermediate
+measurements, is outside Git in
+`/workspace/h62-duplication-scanner-evidence/guard-msgs/`.
+
+
+## Shared physical file warning
+
+Selected paths retain their independent names. The reader observes descriptor
+metadata before and after reading and compares the resolved target afterward;
+when two distinct paths in a candidate group share the observed device and
+inode, the group receives `shared-file-identity`. Existing resolved-path,
+signature and ownership refusal reasons remain. This is a local observation,
+not proof of ownership, provenance or race-free confinement; adversarial ABA
+replacement is not ruled out.
+
+Finder and skeptic reviewed without Lean. Hard-link, independent identical
+file, replacement and repeat-output controls passed, as did the full 206-test
+Python suite. An earlier run failed because the preexisting simulated read
+failure control still mocked `read_bytes` after the reader switched to an open
+descriptor; that control was updated and the suite passed. Matched bounded
+scans on the same 7,544 input hashes took 115.082 seconds before and 115.588
+after (+0.44%), with no file errors, unmatched patterns or sampled resource
+stop. Both used the same 8 GiB cap and 4 GiB sampled cgroup and zero-swap
+guard. These observations do not establish equal cache state or continuous
+system-wide reserve. Evidence is in
+`/workspace/h62-duplication-scanner-evidence/guard-msgs/`. The documentation
+path gate failed on an unrelated missing ExecutionTransport.lean reference
+in `docs/feature-work/h62-4-generic-v08.md`; see `doc-paths.log` there.
+
+
+### Shared-file report replay
+
+A second scan using the same scanner, selected source bytes, registry and
+pinned prior produced a byte-identical complete report, SHA256
+`286f1fb39ee4f5b2cf4dac6a6d33b368cc37997dba1c3d9179e414c4b4b0aca1`.
+The runs took 115.588 and 115.586 seconds, with no resource stop. Finder and
+skeptic reviewed without Lean. Content hashes alone do not establish stable
+hard-link topology, and identity equivalence classes were not independently
+captured across runs. Matching reports establish repeatability for these
+observed runs only. The registry and prior pin do not prove live ownership or
+authenticated producer history. The evidence is outside Git under the
+`guard-msgs` evidence directory described above.
