@@ -1445,3 +1445,35 @@ a build. Coverage remains 72 mapped of 3281 conservative rows, 3209 uncovered;
 these conversion laws add no audit witness rows. Original/consolidated queues,
 Y04 physical and separate 4.35 trust/timing waits, all prior STOPs and required
 full final gates remain open. No Source adequacy or whole-lane completion claim.
+
+### C261 — state and function declaration correspondence
+
+The existing declaration correspondence module now proves state_exact and
+function_exact. State syntax retains the declared type, visibility, transient
+flag, name and optional initializer, with the existing mutable/default-location
+checks and override refusal. Function syntax retains argument/result lists,
+name, visibility, mutability, virtual flag and optional original body, with the
+existing function-kind, modifier and override checks. Child conversion results
+are exact premises; no resolved Source program is invented. Both new axiom
+guards use propext, Classical.choice and Quot.sound. No reader, Source body,
+existing statement, dependent definition body, interface or budget changed.
+
+Existing resolution controls additionally guard initialized transient state,
+constant-state refusal, named Bool parameters/string-memory results, function
+qualifiers and absent versus nonempty retained bodies. These deliberately
+syntax-only inputs establish no typing or execution success. Both actual
+LibraryTry pipeline inputs retain the same eight declarations. The initial
+proof attempt rejected a reserved binder; the unused simp argument was removed
+and both corrected proofs pass. Failed diagnostic evidence remains off Git.
+C261 lane history records independent read-only finder and skeptic reviews
+with no findings; neither ran Lean, its server or builds.
+
+Actual Source admission/origin/lifecycle, S03-PANIC41 and accepted artifact
+binding remain local H121b duties. H125 vy1-words supplies the pending protected
+Source library-try/Error(string memory) and H57 environment-aware typing repairs.
+C246's manual full-elaboration failure remains outside automated gates until
+that actual producer lands. No duplicate issue, Source case copy or phase folder
+is added. The 19-signature transport evidence request is still outstanding.
+Coverage stays 72 mapped of 3281 conservative rows, 3209 uncovered. Original and
+consolidated work/backfill/proof queues, Y04 physical and separate 4.35 waits,
+all STOPs and required final gates remain open. No semantic producer is claimed.

@@ -1,8 +1,8 @@
 import Solidity.Lowering.P8.SourceAstTryCorrespondence
 
-/-! Struct and using-directive structural correspondence.
+/-! Declaration structural correspondence.
 Regression purpose: retain member names/types/order and using-library/type/global
-syntax. These laws are not Source validity, name resolution or artifact binding. -/
+syntax, state initializers and function signatures/bodies. These laws are not Source validity, name resolution or artifact binding. -/
 namespace Solidity.Lowering.P8.SourceAstDeclarationCorrespondence
 open Lean Solidity.Source
 open SourceAstParameters SourceAstCorrespondence SourceAstExpressionCorrespondence
@@ -63,6 +63,79 @@ theorem using_path_exact (fuel : Nat) (node library rawType : Json) (lib : IdPat
     simp only [kind, functions, libraryField, libraryKind, nameField, pathValue,
       typeField, typeValue, globalField, ok_bind, beq_self_eq_true, ite_true, pure_bind]
     rfl
+
+/-- Preserve the supported mutable state declaration without discarding its initializer. -/
+theorem state_exact (fuel : Nat) (node rawType : Json) (ty : Syn .typeName)
+    (visibility : String) (vis : Option StateVis) (name : String) (transient : Bool)
+    (value : Syn (.opt .expr))
+    (kind : node.getObjValAs? String "nodeType" = .ok "VariableDeclaration")
+    (state : node.getObjValAs? Bool "stateVariable" = .ok true)
+    (constant : node.getObjValAs? Bool "constant" = .ok false)
+    (mutable : node.getObjValAs? String "mutability" = .ok "mutable")
+    (location : node.getObjValAs? String "storageLocation" = .ok "default")
+    (overrides : SourceAstUnit.absentOrEmpty node "overrides" = .ok ())
+    (typeField : node.getObjVal? "typeName" = .ok rawType)
+    (typeValue : SourceAstCompoundTypes.typeName fuel rawType = .ok ty)
+    (visField : node.getObjValAs? String "visibility" = .ok visibility)
+    (visValue : SourceAstUnit.stateVisibility visibility = .ok vis)
+    (transientField : SourceAstUnit.optionalBool node "transient" = .ok transient)
+    (nameField : node.getObjValAs? String "name" = .ok name)
+    (initializer : SourceAstUnit.optionalExprField fuel node "value" = .ok value) :
+    SourceAstUnit.part fuel node = .ok (.stateVar ty vis none none transient name value) := by
+  rw [SourceAstUnit.part]
+  simp only [kind, state, constant, mutable, location, overrides, typeField, typeValue,
+    visField, visValue, transientField, nameField, initializer, ok_bind,
+    beq_self_eq_true, Bool.not_false, Bool.and_true, ite_true, pure_bind]
+  rfl
+
+/-- Preserve function signatures and the optional original body under exact child conversions. -/
+theorem function_exact (fuel : Nat) (node rawArgs rawResults rawBody : Json)
+    (args results : Syn (.list .param)) (body : Syn (.opt (.block .body)))
+    (name visibility mutability : String) (vis : Option Visibility)
+    (mutabilityValue : Option Mutability) (virtual : Bool)
+    (kind : node.getObjValAs? String "nodeType" = .ok "FunctionDefinition")
+    (functionKind : node.getObjValAs? String "kind" = .ok "function")
+    (modifiers : SourceAstUnit.absentOrEmpty node "modifiers" = .ok ())
+    (overrides : SourceAstUnit.absentOrEmpty node "overrides" = .ok ())
+    (argsField : node.getObjVal? "parameters" = .ok rawArgs)
+    (argsValue : SourceAstCompoundTypes.parametersWith (SourceAstCompoundTypes.typeName fuel)
+      rawArgs = .ok args)
+    (resultsField : node.getObjVal? "returnParameters" = .ok rawResults)
+    (resultsValue : SourceAstCompoundTypes.parametersWith (SourceAstCompoundTypes.typeName fuel)
+      rawResults = .ok results)
+    (bodyField : node.getObjVal? "body" = .ok rawBody)
+    (bodyValue : (match rawBody with
+      | .null => (Except.ok Syn.none : Except String (Syn (.opt (.block .body))))
+      | _ => (SourceAstStatements.block fuel rawBody).map Syn.some) = .ok body)
+    (nameField : node.getObjValAs? String "name" = .ok name)
+    (visField : node.getObjValAs? String "visibility" = .ok visibility)
+    (visValue : SourceAstUnit.functionVisibility visibility = .ok vis)
+    (mutField : node.getObjValAs? String "stateMutability" = .ok mutability)
+    (mutValue : SourceAstCompoundTypes.mutability mutability = .ok mutabilityValue)
+    (virtualField : SourceAstUnit.optionalBool node "virtual" = .ok virtual) :
+    SourceAstUnit.part fuel node =
+      .ok (.function (.ident name) args vis mutabilityValue .nil virtual none results body) := by
+  cases rawBody
+  case null =>
+    change Except.ok Syn.none = Except.ok body at bodyValue
+    cases bodyValue
+    rw [SourceAstUnit.part]
+    simp only [kind, functionKind, modifiers, overrides, argsField, argsValue,
+      resultsField, resultsValue, bodyField, nameField, visField, visValue, mutField,
+      mutValue, virtualField, ok_bind, beq_self_eq_true, ite_true, pure_bind]
+    rfl
+  all_goals
+    simp only [] at bodyValue
+    rw [SourceAstUnit.part]
+    simp only [kind, functionKind, modifiers, overrides, argsField, argsValue,
+      resultsField, resultsValue, bodyField, bodyValue, nameField, visField, visValue,
+      mutField, mutValue, virtualField, ok_bind, beq_self_eq_true, ite_true, pure_bind]
+    rfl
+
+/-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.state_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms state_exact
+/-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.function_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms function_exact
 
 /-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.member_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms member_exact

@@ -51,7 +51,52 @@ def declarationChecks : Except String Unit := do
   | .usingPart (.usingPath ⟨"L", []⟩ (.some (.userType ⟨"L", ["S"]⟩)) false) => pure ()
   | _ => throw "typed using identity changed"
 
+/-- Guard initializer/transience and function signature/body retention.
+The inputs exercise syntax boundaries, without asserting typing or execution. -/
+def stateFunctionChecks : Except String Unit := do
+  let leaf (name : String) := Json.mkObj [("nodeType", .str "ElementaryTypeName"), ("name", .str name)]
+  let identifier (name : String) := Json.mkObj [("nodeType", .str "Identifier"), ("name", .str name)]
+  let stateNode (constant : Bool) := Json.mkObj [("nodeType", .str "VariableDeclaration"),
+    ("stateVariable", .bool true), ("constant", .bool constant), ("mutability", .str "mutable"),
+    ("storageLocation", .str "default"), ("typeName", leaf "uint256"),
+    ("visibility", .str "public"), ("transient", .bool true), ("name", .str "saved"),
+    ("value", identifier "seed")]
+  match ← part 8 (stateNode false) with
+  | .stateVar (.elem (.int false 256 _)) (some .pub) none none true "saved"
+      (.some (.ident "seed")) => pure ()
+  | _ => throw "state initializer or qualifier changed"
+  match part 8 (stateNode true) with
+  | .error "mutable state declaration required" => pure ()
+  | _ => throw "constant state refusal changed"
+  let param (name ty loc : String) := Json.mkObj [("nodeType", .str "VariableDeclaration"),
+    ("name", .str name), ("typeName", leaf ty), ("storageLocation", .str loc)]
+  let params (entries : Array Json) := Json.mkObj [("nodeType", .str "ParameterList"),
+    ("parameters", .arr entries)]
+  let fnNode (body : Json) := Json.mkObj [("nodeType", .str "FunctionDefinition"),
+    ("kind", .str "function"), ("parameters", params #[param "flag" "bool" "default"]),
+    ("returnParameters", params #[param "message" "string" "memory"]),
+    ("body", body), ("name", .str "f"), ("visibility", .str "external"),
+    ("stateMutability", .str "view"), ("virtual", .bool true)]
+  let checkFunction (body : Json) : Except String (Syn (.opt (.block .body))) := do
+    match ← part 8 (fnNode body) with
+    | .function (.ident "f") (.cons (.param (.elem .bool) none (some "flag")) .nil)
+        (some .external) (some .view) .nil true none
+        (.cons (.param (.elem .string) (some .memory) (some "message")) .nil) converted =>
+        pure converted
+    | _ => throw "function signature or qualifiers changed"
+  match ← checkFunction .null with
+  | .none => pure ()
+  | _ => throw "absent function body changed"
+  let body := Json.mkObj [("nodeType", .str "Block"), ("statements", .arr #[Json.mkObj [
+    ("nodeType", .str "Return"), ("expression", identifier "flag")]])]
+  match ← checkFunction body with
+  | .some (.block (.cons (.stmtItem (.returnStmt (.some (.ident "flag")))) .nil)) => pure ()
+  | _ => throw "function body was discarded or rewritten"
+
 #eval do
+  match stateFunctionChecks with
+  | .ok () => pure ()
+  | .error why => throw (IO.userError why)
   match declarationChecks with
   | .ok () => pure ()
   | .error why => throw (IO.userError why)
