@@ -1,0 +1,36 @@
+{
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.empty_head_no_fuel": [],
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.empty_signature_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.height_refusal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.huge_is_short": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.inhabited_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.mixed_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.one_word_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.passed_head_not_entry": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheckControls.lean:Solidity.Backend.AbiEntry.HeadCheckControls.short_before_fuel": [
+  "propext"
+ ]
+}

@@ -1,0 +1,65 @@
+{
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.assignment_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.bridge_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.context_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.equal_content_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.frame_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.operand_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.pair_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.pass_client": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.payable_bridge_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.self_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressComparisonControls.lean:Solidity.Lowering.V07.AddressComparisonControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

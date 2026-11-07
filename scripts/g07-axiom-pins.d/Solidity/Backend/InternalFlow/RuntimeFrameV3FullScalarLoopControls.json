@@ -1,0 +1,10 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoopControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.Controls.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoopControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.Controls.native_state": [
+  "propext"
+ ]
+}

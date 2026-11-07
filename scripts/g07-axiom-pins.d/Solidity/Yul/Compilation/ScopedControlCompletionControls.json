@@ -1,0 +1,32 @@
+{
+ "Solidity/Yul/Compilation/ScopedControlCompletionControls.lean:Solidity.Yul.Compilation.ScopedControlCompletion.Controls.branch_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompletionControls.lean:Solidity.Yul.Compilation.ScopedControlCompletion.Controls.last_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompletionControls.lean:Solidity.Yul.Compilation.ScopedControlCompletion.Controls.recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompletionControls.lean:Solidity.Yul.Compilation.ScopedControlCompletion.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompletionControls.lean:Solidity.Yul.Compilation.ScopedControlCompletion.Controls.skipped_recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompletionControls.lean:Solidity.Yul.Compilation.ScopedControlCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

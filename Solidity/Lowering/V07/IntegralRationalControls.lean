@@ -115,7 +115,7 @@ def check (p : Roadmap.Pipeline) (checked : Bool) (t : Source.IntTy) (z : Int)
       (IntegerConstants.operand t r.toInt (by decide)).run tgt with
   | .error (.stuck why),.ok (_,.prim wrong) => why == "fractional constant at an integer type" &&
       PrimTy.num? wrong == some (-2) && r.trunc == -1 &&
-      !(Source.STy.rational r).implicit E.isBase (.int t)
+      !(Source.STy.rational r).implicit E.isBase E.mapFree (.int t)
   | _,_ => false))
 
 -- The integral quotient 256 is out of range for uint8; unchecked target truncation is a wrong conversion.
@@ -126,7 +126,7 @@ def check (p : Roadmap.Pipeline) (checked : Bool) (t : Source.IntTy) (z : Int)
   match Source.constVal r (.int .u8) (D := E.layout),
       (UnsignedCasts.castValue 8 (IntegerConstants.value .u256 r.toInt (by decide))).evalT tgt with
   | .error (.stuck why),.ok wrong => why == "integer out of range" && wrong.val == 0 &&
-      !(Source.STy.rational r).implicit E.isBase (.int .u8)
+      !(Source.STy.rational r).implicit E.isBase E.mapFree (.int .u8)
   | _,_ => false))
 /-- info: 'Solidity.Lowering.V07.IntegralRationalControls.allowed_client' does not depend on any axioms -/
 #guard_msgs in

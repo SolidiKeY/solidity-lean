@@ -14,7 +14,7 @@ inductive BoundParentItems (A : Decl → Prop) (R : List STy) (M : Bool) :
       ReadyItems A R M items → BoundParentItems A R M items
   | initialized {k Γ Δ τ} {e : RExpr E Γ τ}
       {rest : RItems E R M k (τ :: Γ) Δ}
-      (same : τ.implicit E.isBase τ = true) :
+      (same : τ.implicit E.isBase E.mapFree τ = true) :
       PlainResultType τ → AllocationParent A e → BoundParentItems A R M rest →
       BoundParentItems A R M (.stmt (.declInit e same) rest)
 
