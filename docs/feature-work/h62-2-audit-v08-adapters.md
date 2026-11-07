@@ -960,3 +960,30 @@ native component certificates do not discharge those obligations.
 Read-only finder and skeptic found no issue with the local typed-domain joint,
 negative-model/admission distinction, historical receipt or production boundary.
 Neither ran Lean or a server; review evidence remains off Git.
+
+### Eight event component links (2026-11-07)
+
+All eight original SourceEmit targets now have unique frozen-ID/type-hash links:
+four checked conditional applications and four existing observation references.
+The latter are logged_erasure, three_static, three_words_transport and
+logged_payload_injective. Total layout/word identities do not supply typed event
+admission or argument/layout correspondence. Log erasure keeps all other fields
+and is not rollback. Payload injectivity retains its actual full logged-state
+equality premise with the same global/frame/event/types/prestate; it is not
+unconditional log equality or hash injectivity.
+
+The index preserves all original saved types, flags and unresolved feasibility,
+ownership and fidelity obligations. It adds zero witnesses, fixtures or fidelity
+acceptances. Earlier four application checks remain tied to their recorded heads;
+this metadata-only index claims no new Lean/current import gate or timing result.
+Current original SourceEmit bytes match the checked source binding. Bulk table is
+off Git, sealed by source-emit-component-index-manifest.json.
+
+Master 81f77e5a7 was adopted before this item. Its memory-reference checkpoint
+and the conditional reference bridge do not supply complete actual-Source/session
+provenance or the full production P1/G42.04 factory. Existing producer waits and
+assigned H68 world-phase work remain open; H124 stays closed.
+
+Independent read-only finder and skeptic found no issue in the eight-law
+partition, exact conditional premise, observation boundaries or historical-gate
+qualifications. Neither ran Lean or a server; review receipt remains off Git.
