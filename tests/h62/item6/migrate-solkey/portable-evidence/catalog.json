@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "integration_base": "ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6",
+  "boundary": "Repository files checkable from checkout. H44 bulk supplied separately using archive-relative names; absence is unavailable, not verified. No VM path assumed.",
+  "repository_files": [
+    {
+      "path": "tests/h62/item6/migrate-solkey/portable-evidence/old-api-summary.json",
+      "sha256": "d2c695899dbdc3ac7c90ab4a2cb6f4e6bf2a6ed3f040ad977ad9fdd5a41e2b9a"
+    },
+    {
+      "path": "tests/h62/item6/migrate-solkey/portable-evidence/sdk-summary.json",
+      "sha256": "b6b45e6ef3463cffebabae36705955dc6aa0b0d0df265c1575687fe74cf46fc6"
+    },
+    {
+      "path": "scripts/h62/item6/migrate-solkey/consolidate-existing-api.py",
+      "sha256": "3c6a1a5cb7f1a776e92e85bb027af0630bb6008f0e3603b83f6559a853d7a867"
+    },
+    {
+      "path": "scripts/h62/item6/migrate-solkey/std-import-footprint.py",
+      "sha256": "888f4fde29c3291dbf83cb98562d17a0328cff724e890fb59623e17a57a56b12"
+    }
+  ],
+  "bulk_archives": [
+    {
+      "filename": "original-evidence.tar.gz",
+      "sha256": "f8ef7af114cf2cb4f4f1c8057321266036d88b02cf5ec2221f67e3667ac39d67",
+      "required_members": [
+        {
+          "path": "old-interface-2/measurement.json",
+          "sha256": "643abbd65446ecc91aba596c2a8385dbc6b7ea2f84f2d1bc3189b0d1960aa127"
+        },
+        {
+          "path": "old-interface-2/tests.h62.item6.migrate-solkey.FrozenInterfaces.log",
+          "sha256": "233315fb789b1cb63bd24b7206707d4b4c963ee6dbf89782d3d4e6c442e0efd8"
+        },
+        {
+          "path": "old-interfaces.json",
+          "sha256": "6df9e0740f1ecb00025b44a27fce70437939c0674e446d03c40689c0866692a2"
+        }
+      ]
+    },
+    {
+      "filename": "static-backfill.tar.gz",
+      "sha256": "7d7349a8934dc3f5d616462e44fd09cc8f178c69c35c59689e0ed6427193f369",
+      "required_members": [
+        {
+          "path": "api-verified-summary.json",
+          "sha256": "50ba42a94a931e3069971da273f744dab96982d0acb87be0ab0b046ede175e96"
+        },
+        {
+          "path": "old-sdk-imports.json",
+          "sha256": "e603c21382ede37594c92c3ab6ce8e96accc2a9e066421e0b931f741abff3b28"
+        },
+        {
+          "path": "new-sdk-imports.json",
+          "sha256": "5ea0f22729288840348cf51853ade092eb101f0af403d77fa2217c6d53e61416"
+        },
+        {
+          "path": "existing-old-api-verified.json",
+          "sha256": "030f93764abb2f271a7811566b9853b14113af18ee556eb167e08ec6b5e7a201"
+        }
+      ]
+    }
+  ],
+  "public_inventory_complete": false,
+  "implemented_shims": []
+}

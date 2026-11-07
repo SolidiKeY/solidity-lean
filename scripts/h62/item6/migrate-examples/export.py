@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Export committed overlay and small evidence; keep build/cache bulk off Git."""
 import argparse,fcntl,gzip,hashlib,io,json,pathlib,subprocess,tarfile
+def file_sha256(path):
+    with path.open("rb") as stream:return hashlib.file_digest(stream,"sha256").hexdigest()
+
 p=argparse.ArgumentParser();p.add_argument("--evidence",type=pathlib.Path,required=True);a=p.parse_args();e=a.evidence.resolve()
 lock=open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","a")
 fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -27,7 +30,8 @@ files=sorted(x for x in e.iterdir() if x.is_file() and x.name not in ("SHA256SUM
 # Normalized tar metadata makes a snapshot reproducible given its input bytes.
 with (e/"evidence.tar.gz").open("wb") as raw_archive, gzip.GzipFile(filename="",mode="wb",fileobj=raw_archive,mtime=0) as gz, tarfile.open(fileobj=gz,mode="w") as tar:
     for f in files:
-        raw=f.read_bytes();info=tarfile.TarInfo(f.name);info.size=len(raw);info.mode=0o644;info.mtime=0;tar.addfile(info,io.BytesIO(raw))
+        info=tarfile.TarInfo(f.name);info.size=f.stat().st_size;info.mode=0o644;info.mtime=0
+        with f.open("rb") as stream:tar.addfile(info,stream)
 files.append(e/"evidence.tar.gz")
-(e/"SHA256SUMS").write_text("".join(hashlib.sha256(f.read_bytes()).hexdigest()+"  "+str(f)+"\n" for f in sorted(files)))
+(e/"SHA256SUMS").write_text("".join(file_sha256(f)+"  "+f.name+"\n" for f in sorted(files)))
 print(json.dumps({"head":head,"base":base,"patch":str(e/"original.patch"),"bundle":str(bundle),"archive":str(e/"evidence.tar.gz"),"checksums":str(e/"SHA256SUMS")}))

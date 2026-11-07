@@ -1,0 +1,71 @@
+{
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.address_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.bool_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.empty_word_not_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.enum_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.malformed_word_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.raw_bool_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.raw_enum_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.raw_uint8_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.raw_uint8_kept": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.raw_uint8_value": [
+  "Quot.sound"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.uint256_all_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.uint8_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.wide_bound_all_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UnsignedGateControls.lean:Solidity.Backend.AbiEntry.UnsignedGateControls.wide_no_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

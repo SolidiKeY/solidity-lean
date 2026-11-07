@@ -1,0 +1,82 @@
+{
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.ancestor_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.ancestor_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.entry_stop_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.missing_code_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.own_cut0": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.own_cut0_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.own_cut1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.own_cut1_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.panic_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.request_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.request_propagates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.stuck_full_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.uncut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.FailureExecution.TransactionControls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.runTx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureTransactionControls.lean:Solidity.Source.runTxWithPlan": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

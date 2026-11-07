@@ -1,0 +1,232 @@
+{
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteCase": [],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.capacity_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.first_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.fuel_precedes_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.gas_precedes_stack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.gas_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.image_index_requires_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.last_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.maximum_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.maximum_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.middle_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.ordered_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.ordered_word_bytes": [
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.outside_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.penultimate_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.scalar_refusal_control": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.second_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.stack_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.stack_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.typed_image_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.wrong_endian": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.zero_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteFixture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.capacity_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.first_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.fuel_precedes_gas": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.gas_precedes_stack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.gas_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.image_index_requires_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.last_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.maximum_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.maximum_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.middle_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.ordered_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.ordered_word_bytes": [
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.outside_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.penultimate_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.scalar_refusal_control": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.second_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.stack_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.stack_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.typed_image_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.wrong_endian": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.zero_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.execute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.fixture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.fixture_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.fixtureValues": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

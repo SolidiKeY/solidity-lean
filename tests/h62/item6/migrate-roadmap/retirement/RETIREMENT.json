@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "status": "partial",
+  "retirement": "H82 stop-and-handoff; no implementation continuation authorized after final acknowledgement. Generic later standing-rule messages recorded without treating them as explicit rescission of retirement.",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "repository": "/workspace/solidity-lean",
+  "branch": "codex/solidity-h62-6-20261106/migrate-roadmap",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "previous_head": "beb233a2f393ddb825909cab95b4010e51f67073",
+  "final_head_location": "/workspace/migrate-roadmap-evidence/h82-retirement/HANDOFF.json (generated after final commit)",
+  "environment_id": "ccarenv_b64_Y2NhcmVudl9iYTBiMTQwNTZlYzg4MTkxYjQ2MzgwZDAwYjFjY2UzYw",
+  "original_goal": {
+    "historical_objective_sha256": "71335b00c701811fd071a6d471ce30303066d242b9917095f67e1d7585292a83",
+    "created_or_reset": false,
+    "requested_state": "PAUSED",
+    "pause_result": "UNAVAILABLE: ALL_TOOLS exposes no pause/get_goal operation. stop_goal only accepts complete or blocked; neither represents requested PAUSED, so no substitute mutation invoked. Actual goal state unverified; worker stops.",
+    "completion_claimed": false
+  },
+  "push": {
+    "performed": false,
+    "reason": "No H71 authorization permitting an original lane branch push was supplied here. Original assignment explicitly forbids pushes; retirement says push only if H71 permits. No master push."
+  },
+  "checkpoints": [
+    {
+      "name": "1 census imports/API and clean old4.24 baseline",
+      "status": "done",
+      "remaining": "None for baseline; old API2077 declarations from15 assigned modules. Census navigation is lexical, not a public-visibility proof."
+    },
+    {
+      "name": "2 official4.35 migration preserving exact types/semantics/budgets",
+      "status": "partial",
+      "remaining": "Production adaptation, all generated public compatibility including H78, exact-base Contracts proof and axiom checks; dependency overlays."
+    },
+    {
+      "name": "3 all assigned new modules and clean same-settings before/after",
+      "status": "blocked",
+      "remaining": "Full15 assigned modules and374 closure, original guard/axiom/refusal gates, matched clean timings after STOP disposition. No full after build."
+    },
+    {
+      "name": "4 reviewable migration patch/bundle, frozen hashes, cross-directory handoff",
+      "status": "partial",
+      "remaining": "Partial tooling/fixture/evidence artifacts supplied; final production migration patch and successful full acceptance gates absent."
+    }
+  ],
+  "backfill_queue": [
+    {
+      "item": "Scanner/census and original declaration/case accounting",
+      "state": "Existing15/374 census and2077 old declaration exports saved; full generated-public H78 visibility and new14-module coverage unfinished."
+    },
+    {
+      "item": "Negative controls and deterministic acceptance",
+      "state": "Existing Python controls/reviews passed; no new tests required for retirement metadata. Future controls for complete public shim coverage pending."
+    },
+    {
+      "item": "Isolated fixture proofs",
+      "state": "Existing six fixture theorems/two aliases and19 enum guards checked, not production shims or a full migration proof; no new proof implementation."
+    },
+    {
+      "item": "Reproduction/timing tooling",
+      "state": "Existing bounded generator/results archived. New direct universe controls and final compatible clean timings pending; no unchanged timing STOP rerun."
+    },
+    {
+      "item": "Continuous cleanup",
+      "state": "Only explicitly unclaimed registry candidates could be taken; none newly assigned or adopted. No scope expansion."
+    }
+  ],
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "B-PERF-INSPECTION: supplemental old/new inspection wall +48.568879%, sampled RSS +156.378946%; retain STOP. Not full directory timing. No unchanged rerun."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate and live Contracts producer",
+      "item": "B-CONTRACTS-TRUST: exact-base v4.35 reproduction and proof preserving PublicCorrectness.transfer, original empty axiom guard at1104, trust policy and budgets. Locally unresolved; consumer reports standard three axioms. H30 is not a guard waiver."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78 Evm public API: 3 missing names; 64 debug-type deltas (45 alpha-only,9 binder-visibility,10 structural); exhaustive original generated-public visibility/signature/shim inventory remains unfinished. No production shim implemented. Existing candidates are not an API exclusion."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Original new-toolchain closure failed Solidity/Syntax/Raw.lean String API. Await compatible producer overlay and final gates."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-backend",
+      "item": "Original new-toolchain closure failed Solidity/Backend/Creation/Linking.lean:109. Await compatible producer overlay and final gates."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-source",
+      "item": "Original new-toolchain closure failed Solidity/Source/Ctor.lean:641 and715; original heartbeat budget must remain. Await compatible producer overlay and final gates."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "Exact CollisionBound staged overlay exists, and isolated consumer clearance is reported; NOT the current reported Contracts consumer import blocker. Full Hash/fleet gates remain pending; no new local compilation after STOP."
+    }
+  ],
+  "H82_standing_agreement": "Withdraw obsolete proof-only exact-file permission waits; statement-preserving edits need no exact-file agreement. Holds for changed statement/definition/interface/budget/axiom/exclusion still apply. No edit permission alone clears performance STOP or retirement.",
+  "current_generic_yul_consumer_report": {
+    "requester": "solidity-h62-4-20261106/generic-yul-views",
+    "head": "ae94cbd3cae96bc8b966a876676fcbe5b8ba59ad",
+    "handoff_sha256_as_relayed": "9038d06d58515124b110c6becd73946fc26a2d64453a3d74f2ebd992289dfb7a",
+    "reported_failure": "Contracts1104 plus Storage.HashedLayout failures; Language and VY2 waits. Hash isolated targeted pass only.",
+    "raw_verified_locally": false,
+    "scope_boundary": "Only Contracts is this lane result; do not adopt Storage/Language/Yul producer duties."
+  },
+  "H78_root_request": {
+    "head": "16d7e371a1e013f492784b596397cf500dbd7543",
+    "request_sha256_as_relayed": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+    "ids": [
+      "H78-ROADMAP-PUBLIC-API",
+      "H78-COMPLETE-PUBLIC-INVENTORY"
+    ],
+    "implemented_shims": [],
+    "remaining": "Existing individual canonical/debug type evidence retained; visibility and exact old/new/shim public signatures need consolidation and preserving shims. No blanket generated declaration exclusion.",
+    "other_owner_and_host_delivery_requests": "Remain with named source/sortcheck/hash/COORD owners; coordinator-local paths are provenance only, not assumed accessible."
+  },
+  "production_files_touched": 0,
+  "new_sorry": 0,
+  "new_axioms": 0,
+  "raised_budgets": 0,
+  "frozen_statements_touched": 0,
+  "new_lean_runs": 0,
+  "proof_boundary": "Existing Lean checks prove only their exact compiled conditional declarations/fixtures; Python census/classification/provenance and timing are external metadata, not semantic equivalence or full migration proof. Reported consumer results are not local reproductions.",
+  "timing": {
+    "full_before_wall_s": 1777.4742658929995,
+    "full_before_sampled_peak_rss_bytes": 1704960000,
+    "full_after_wall_s": null,
+    "full_delta_percent": null,
+    "inspection_wall_delta_percent": 48.568879317,
+    "inspection_sampled_rss_delta_percent": 156.378945617
+  },
+  "versions": {
+    "old_lean": "4.24.0 797c613eb9b6d4ec95db23e3e00af9ac6657f24b Release",
+    "old_lake": "5.0.0-src+797c613",
+    "new_lean": "4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc Release",
+    "new_lake": "5.0.0-src+eb6cafb"
+  },
+  "toolchain_archive_sha256": "7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d",
+  "prior_handoffs": [
+    "/workspace/migrate-roadmap-evidence/HANDOFF.json",
+    "/workspace/migrate-roadmap-evidence/h70/HANDOFF.json",
+    "/workspace/migrate-roadmap-evidence/h70-contracts-producer/HANDOFF.json",
+    "/workspace/migrate-roadmap-evidence/h71-contracts-producer/HANDOFF.json"
+  ],
+  "preservation": "Original VM, branch, all prior seals and evidence retained; H44 bulk off Git. No source fix, full closure, performance acceptance or RUNTIME_GATE_PASS. H68 full PassCorrect bridges and H69 distinctions stay with existing owners; H80 editor/H81 resource obligations not waived.",
+  "questions": []
+}

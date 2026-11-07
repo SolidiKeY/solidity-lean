@@ -21,7 +21,7 @@ def address : Roadmap.Address := ⟨7,by decide⟩
 def storage : Source.Storage env.layout env.cellTy :=
  (((Source.Storage.empty : Source.Storage env.layout env.cellTy).write left (.int 11 (by decide))).write flag (.bool false)).write sentinel (.int 97 (by decide))
 def state : Source.St env :=
- {ex:={world:=⟨fun a=>if a=address then {balance:=⟨19,by decide⟩,nonce:=3,code:=some 0,storage:=storage} else Source.Account.empty _⟩
+ {ex:={world:=⟨fun a=>if a=address then {balance := 19,nonce:=3,code:=some 0,storage:=storage} else Source.Account.empty _⟩
        transient:=Source.Transient.empty.set address ((Source.Storage.empty : Source.Storage env.layout env.cellTy).write scratch (.int 41 (by decide)))
        journal:=[]}
   heap:=Source.Heap.empty,events:=[],logs:=[],fnLocals:=⟨[.bool],.cons (.bool false) .nil⟩}
@@ -51,12 +51,12 @@ def wordOf (st : Source.Storage env.layout env.cellTy) (p : Source.SPath) := (st
 
 def entryView : Source.Entry env.layout env.lay env.lay →
  Bool × Nat × List (Option Nat) × Option (Nat × Nat × Option Nat)
- | .account a old => (true,a.val,[wordOf old.storage left,wordOf old.storage flag,wordOf old.storage sentinel],some (old.balance.val,old.nonce,old.code))
+ | .account a old => (true,a.val,[wordOf old.storage left,wordOf old.storage flag,wordOf old.storage sentinel],some (old.balance,old.nonce,old.code))
  | .transient a old => (false,a.val,[wordOf old left,wordOf old flag,wordOf old sentinel],none)
 def journalView (s : Source.St env) := s.ex.journal.map entryView
 def view (s : Source.St env) :=
  ([wordOf (s.ex.world.accounts address).storage left,wordOf (s.ex.world.accounts address).storage flag,wordOf (s.ex.world.accounts address).storage sentinel],
- wordOf (s.ex.transient.cells address) scratch,s.ex.journal.length,(s.ex.world.accounts address).balance.val,
+ wordOf (s.ex.transient.cells address) scratch,s.ex.journal.length,(s.ex.world.accounts address).balance,
  (s.ex.world.accounts address).nonce,(s.ex.world.accounts address).code,
  s.heap.next,(s.heap.cells 0).isNone,s.events.length,s.logs.length,s.fnLocals.1)
 

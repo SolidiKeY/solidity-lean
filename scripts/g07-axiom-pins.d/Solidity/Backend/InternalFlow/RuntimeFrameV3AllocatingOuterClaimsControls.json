@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaimsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.Controls.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaimsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.Controls.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaimsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterClaims.Controls.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

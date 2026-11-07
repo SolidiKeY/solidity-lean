@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "ticket": "OT-W0-WITNESS",
+  "logs": [
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/build-theorems.log",
+      "bytes": 538,
+      "sha256": "d993ff80bbc8382f497ec06c342f1165d92125997aa901217d6dd879dfc8e09a"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/owned-build-theorems.log",
+      "bytes": 9658,
+      "sha256": "6bd262952c8bfdd8894d52247f3db04d90db6d7094bc51eca37e21b75f628dd8"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/owned-build-tmp.log",
+      "bytes": 44420,
+      "sha256": "d1d2ec4496cee43fc9863e5cb76f92650bb49bad0268f1ee8138ef221dc56ec2"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/owned-cache-seed.log",
+      "bytes": 68,
+      "sha256": "d35d475752546bf24a3697162b5d235a2d248363e7e0edbf80a57360f6496d6b"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/owned-restore-complete.log",
+      "bytes": 62,
+      "sha256": "ad6c8f7fea7445587aa9872816bf3c03dc8e63d8807b165890a5fdae38d97f26"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/owned-restore.log",
+      "bytes": 63,
+      "sha256": "f861cf4d5846123f753e063a4e1127766ffc4816bc24a19283f0294684326ae5"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/owned-suite-complete.log",
+      "bytes": 468035,
+      "sha256": "90daf28e008f9814f382c382bf55941bf1484a9a5748893b0254fb8b3923d2a4"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/owned-suite-prerequisites.log",
+      "bytes": 43185,
+      "sha256": "63df9c5f8033dccd4c03fd41cd66f2dd01f27327b3ae95f870e9c993e9c91f08"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/owned-suite.log",
+      "bytes": 24165,
+      "sha256": "cff4154a0559b888d9ae80472a9e0a23c300f126844fba1b491dbccdc1fbe731"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/restore-writable.log",
+      "bytes": 19181,
+      "sha256": "3abc5620b756fe01d7c14fb8c945b43285e133752de092416d5c661a723f3495"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/restore.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/suite-after-restore.log",
+      "bytes": 955,
+      "sha256": "23f9ffd4c2822597c7159799736fb3b232af632c6797dd006aa4f307a2444af1"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/suite-writable-restore.log",
+      "bytes": 955,
+      "sha256": "23f9ffd4c2822597c7159799736fb3b232af632c6797dd006aa4f307a2444af1"
+    },
+    {
+      "path": "/workspace/scratch/h107-nonvacuity-ci/suite.log",
+      "bytes": 941,
+      "sha256": "73f01f085fec6193c6a5ef8afb4dd9e8de3ca5c46e7c15c2cd82b8d28ad979b8"
+    }
+  ],
+  "localSuite": "PASS:26/26fresh modules in owned worktree at e04e0b8e6cc8b15a28d51922a697112e6d19ee6c",
+  "workflowDispatch": "PENDING coordinator run URL; reviewed e04e0b8e6cc8b15a28d51922a697112e6d19ee6c verified published on original lane branch",
+  "reviews": "finder and skeptic PASS for wiring only",
+  "witnessesChanged": false,
+  "checkPyChanged": false,
+  "budgetsChanged": false,
+  "generatedBuildPreserved": "/workspace/scratch/h107-nonvacuity-ci/private-build",
+  "localResult": {
+    "schema_version": 1,
+    "ticket": "OT-W0-WITNESS",
+    "testedHead": "e04e0b8e6cc8b15a28d51922a697112e6d19ee6c",
+    "worktree": "/workspace/v17-witness",
+    "command": "lake env python3 tests/h28-sol/non-vacuity/kernel.py --all --fresh",
+    "exit": 0,
+    "requestedModules": 26,
+    "freshCompiledModules": 26,
+    "compilerHeadlines": [
+      "Main.compiler_correct",
+      "Main.compiler_net",
+      "Main.compiler_checked"
+    ],
+    "suiteLogSha256": "90daf28e008f9814f382c382bf55941bf1484a9a5748893b0254fb8b3923d2a4",
+    "LAKE_CACHE_DIR": "/tmp/v17-witness-owned/cache",
+    "cacheBoundary": "Existing agent-owned artifacts read via symlinks; new cache entries and build outputs in owned temporary storage. Cache seed stopped at staging-capacity reserve and fell back.",
+    "addressSpaceCapBytes": 12884901888,
+    "LEAN_NUM_THREADS": "1",
+    "leanSubprocessFlag": "-j1",
+    "checkPyChanged": false,
+    "witnessesChanged": false,
+    "workflowDispatch": "PENDING coordinator run URL",
+    "kernelValidated": "H28 suite only; not whole lane or historical audit acceptance",
+    "releaseClosed": false
+  },
+  "resultArtifact": {
+    "path": "/workspace/scratch/h107-nonvacuity-ci/owned-suite-result.json",
+    "sha256": "47eafb1a0bb69ae439333100cc2e36099d176784a1b4f9ea87e12f2d4fd14206"
+  }
+}

@@ -6,7 +6,7 @@ from collections import Counter
 import argparse,hashlib,json,sys
 sys.dont_write_bytecode=True
 from corpus_packet import verified_corpus,sha
-parser=argparse.ArgumentParser();parser.add_argument('--cases-only',action='store_true');args=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('--cases-only',action='store_true');parser.add_argument('--capture-summary',action='store_true');args=parser.parse_args()
 ROOT=Path(__file__).resolve().parents[3];OWNED=Path(__file__).resolve().parent
 source,packet=verified_corpus();out=OWNED/'artifacts/occurrence-readers'
 casePacket=json.loads((out/'cases.json').read_text());cases=casePacket['cases']
@@ -47,5 +47,6 @@ if not args.cases_only:
   if pair[0]['natural']!=pair[1]['natural']:changes[pair[0]['natural']['status']+'->'+pair[1]['natural']['status']]+=1
  assert refusals==[sum(c['route']!='none' for c in cases)]*2
  result.update(default=dict(Counter(r['natural']['status'] for r in matrices[0])),composed=dict(Counter(r['natural']['status'] for r in matrices[1])),unknownRootRefusalsEachReader=refusals[0],changes=dict(changes),perDocument={name:[dict(x) for x in rows] for name,rows in perDocument.items()},inputs={name:sha(out/name) for name in ['cases.json','default.json','composed.json']})
- (out/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
+ if args.capture_summary:(out/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
+ else:assert json.loads((out/'summary.json').read_text())==result, 'occurrence frozen summary mismatch'
 print(json.dumps({key:value for key,value in result.items() if key not in {'perDocument','inputs'}}))

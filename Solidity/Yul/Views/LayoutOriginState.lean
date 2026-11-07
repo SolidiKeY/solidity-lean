@@ -20,7 +20,7 @@ def originResidual := initialPackedComplement originRegistry originTempRegistry 
 def originState : Source.EMState originEnv [] :=
   ⟨.nil,⟨⟨⟨fun a => if a = account then
     {Source.Account.empty (D := originEnv.layout) (originEnv.lay account) with storage := originInitialStore}
-    else Source.Account.empty (D := originEnv.layout) (originEnv.lay a)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+    else Source.Account.empty (D := originEnv.layout) (originEnv.lay a)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem origin_initial_MemOK : Source.MemOK originEnv originState.2.heap.ty originState :=
   ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "sourceHead": "fdd46539a2f75f1c26442d547b4f35c4cb766bde",
+  "status": "partial",
+  "native": {
+    "archive": {
+      "path": "/workspace/dafny-parity-hover-proof-20261106/committed-validation.tar.gz",
+      "bytes": 1430205,
+      "sha256": "4d5c61b026cc2292c61241b3649d71410d202dae8ff660384f0a97d862d98ed0"
+    },
+    "index": {
+      "path": "/workspace/dafny-parity-hover-proof-20261106/committed-validation-files.json",
+      "bytes": 10775,
+      "sha256": "c17a08bf046fa4858dcf9f1a0751e4b84251c55a64ed2ab2c227cac53c9447f4"
+    },
+    "fileCount": 60,
+    "uncompressedBytes": 4889834
+  },
+  "ci": {
+    "archive": {
+      "path": "/workspace/dafny-parity-fresh-ci-20261107/ci-failures-and-repair.tar.gz",
+      "bytes": 37287,
+      "sha256": "f38abcc9eb4fd5e12907c43592620eed6248824dfa3e279796c770116d1723f0"
+    },
+    "index": {
+      "path": "/workspace/dafny-parity-fresh-ci-20261107/ci-failures-and-repair-files.json",
+      "bytes": 2555,
+      "sha256": "f8d31eaed236304dd06de46f81cd28ecef592442b06035dc7a61b4a89ed39e1c"
+    },
+    "fileCount": 18,
+    "uncompressedBytes": 118726
+  },
+  "boundaries": [
+    "Native exact hover payload/range current source/session/wire response precedes genuine certified terminal/response; not renderedhover, pairedDafny, macOS or fullfixture.",
+    "Exact current CI commands localNode24 fresh checkout fail9 withoutcompiler; suppliedcompiler then resource-marker and closure failure/stall retained. Explicit cancellation is not pass or original15minute timeout.",
+    "New deterministic overdue notification regression before1;23targetedpass after. Separate closure failure unproved repaired; hostedNode22 pending.",
+    "No row complete, gate/judge/frozenIDs/semantic/profile/budget change; full mandatory proof/performance/judgment queue unfinished."
+  ]
+}

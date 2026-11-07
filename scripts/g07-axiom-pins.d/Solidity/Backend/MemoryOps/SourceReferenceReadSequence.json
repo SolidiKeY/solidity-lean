@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceReadSequence.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_reference_delete_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceReadSequence.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_reference_delete_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -160,7 +160,9 @@ The archive and every file hash were verified before extraction outside Git.
 All newer sections above are retained. The H55 work record is
 [h55-g49-final-theorem.md](h55-g49-final-theorem.md).
 
-[CalculusConsumer](../../Solidity/Roadmap/V16/CalculusConsumer.lean) keeps the original six theorem signatures. Its checked
+[CalculusConsumer](../../tests/h55/g49-final-theorem/staging/CalculusConsumer.lean)
+(staged outside the library until its absent `Solidity.Roadmap.V16.CompilerConsumer`
+prerequisite lands; see the H55 work record) keeps the original six theorem signatures. Its checked
 compiler Input rules out exhausted execution; the genuine calculus diamond
 then gives a successful source postcondition. General target alternatives retain
 payment refusal and candidate representation. The nonpaying theorem removes

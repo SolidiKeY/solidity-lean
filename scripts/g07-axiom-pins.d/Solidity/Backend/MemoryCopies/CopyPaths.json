@@ -1,19 +1,4 @@
 {
- "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.mirror_path": [
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.CopyPathMirrors.contents": [
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copy_path_contents": [
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copy_path_bounds": [
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copiedPaths": [
   "Quot.sound",
   "propext"
@@ -22,7 +7,12 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copyPathObserver_keeps": [
+ "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copy_path_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copy_path_contents": [
+  "Quot.sound",
   "propext"
  ],
  "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copy_path_contents_keeps": [
@@ -31,6 +21,16 @@
  ],
  "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copy_paths_separated": [
   "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.CopyPathMirrors.contents": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.copyPathObserver_keeps": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CopyPaths.lean:Solidity.Backend.MemoryCopies.mirror_path": [
   "propext"
  ]
 }

@@ -1,0 +1,49 @@
+{
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.absent_receive_fallback_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.absent_receive_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.actual_source_rows": [],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.empty_receive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.malformed_length_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.no_special": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.nonempty_fallback_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.payable_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.source_absence_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean:Solidity.Backend.AbiEntry.SpecialRoutesControls.source_rejection_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,26 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {check,load} from './check-p6-memory.mjs';
+const original=load(resolve(dirname(fileURLToPath(import.meta.url)),'..'));
+function mutated(f){const x=structuredClone(original);f(x);return check(x.manifest,x.sources);}
+const first=Object.keys(original.sources)[0],last=Object.keys(original.sources).find(f=>f.endsWith('/PhysicalMemoryControls.lean'));
+test('exact checked producer inputs accepted',()=>assert.deepEqual(check(original.manifest,original.sources),[]));
+test('missing physical module rejected',()=>assert.ok(mutated(x=>delete x.sources[first]).length));
+test('sorry rejected',()=>assert.ok(mutated(x=>x.sources[first]+='\nexample : False := by sorry\n').length));
+test('native proof substitution rejected',()=>assert.ok(mutated(x=>x.sources[first]+='\nexample : True := by native_decide\n').length));
+test('new axiom rejected',()=>assert.ok(mutated(x=>x.sources[first]+='\naxiom favorable : False\n').length));
+test('budget increase rejected',()=>assert.ok(mutated(x=>x.sources[first]+='\nset_option maxHeartbeats 99999999\n').length));
+test('changed physical scaling rejected',()=>assert.ok(mutated(x=>x.sources[first]=x.sources[first].replace('32*cell','cell')).length));
+test('dropped neighbor observation rejected',()=>assert.ok(mutated(x=>x.sources[last]=x.sources[last].replace('Semantics.wordBytes 9','Semantics.wordBytes 8')).length));
+test('unsafe axiom report rejected',()=>assert.ok(mutated(x=>x.sources[first]=x.sources[first].replace('[propext]','[sorryAx]')).length));
+test('wrong target with unchanged count rejected',()=>assert.ok(mutated(x=>{const m=x.manifest.modules[first];const ns=m.namespace;const n=m.declarations[0];x.sources[first]=x.sources[first].replace('#print axioms '+n,'#print axioms '+m.declarations[1]);}).length));
+test('duplicate guard cannot hide omitted guard',()=>assert.ok(mutated(x=>{const text=x.sources[first];const guards=[...text.matchAll(/\/-- info:[\s\S]*?-\/\s*#guard_msgs[^\n]*/g)];x.sources[first]=text.replace(guards[1][0],guards[0][0]);}).length));
+test('renamed observed declaration rejected',()=>assert.ok(mutated(x=>x.sources[first]=x.sources[first].replace('Physical.word_bytes_length','Physical.other_name')).length));
+
+test('weakened reached Source world frame rejected',()=>assert.ok(mutated(x=>{const f=Object.keys(x.sources).find(f=>f.endsWith('/PhysicalUintWrite.lean'));x.sources[f]=x.sources[f].replace('z.2={y.2 with heap := z.2.heap}','z.2=z.2');}).length));
+test('wrong indexed target operation rejected',()=>assert.ok(mutated(x=>{const f=Object.keys(x.sources).find(f=>f.endsWith('/PhysicalUintWrite.lean'));x.sources[f]=x.sources[f].replace('Evm.Memory.writeArrayCode','Evm.Memory.readArrayCode');}).length));
+
+test('dropped invocation key frame rejected',()=>assert.ok(mutated(x=>{const f=Object.keys(x.sources).find(f=>f.endsWith('/PhysicalFrameImage.lean'));x.sources[f]=x.sources[f].replace('(store32 μ a w).key=μ.key','(store32 μ a w).key=(store32 μ a w).key');}).length));
+test('wrong unaligned span offset rejected',()=>assert.ok(mutated(x=>{const f=Object.keys(x.sources).find(f=>f.endsWith('/PhysicalFrameImageControls.lean'));x.sources[f]=x.sources[f].replace('lenU 31','lenU 32');}).length));

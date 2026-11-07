@@ -1,0 +1,38 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean:SolidityBridge.AccessBridge.AbiWordControls.bool_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean:SolidityBridge.AccessBridge.AbiWordControls.empty_access": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean:SolidityBridge.AccessBridge.AbiWordControls.fetched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean:SolidityBridge.AccessBridge.AbiWordControls.fetched_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean:SolidityBridge.AccessBridge.AbiWordControls.large_offset": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean:SolidityBridge.AccessBridge.AbiWordControls.unaligned": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean:SolidityBridge.AccessBridge.AbiWordControls.validator_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean:SolidityBridge.AccessBridge.AbiWordControls.zero_fuel_not_revert": []
+}

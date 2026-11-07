@@ -1,0 +1,36 @@
+{
+ "Solidity/Backend/PrimitivePackets/BitNot/Selected.lean:Solidity.Backend.PrimitivePackets.BitNot.compilable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Selected.lean:Solidity.Backend.PrimitivePackets.BitNot.compiled_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Selected.lean:Solidity.Backend.PrimitivePackets.BitNot.full_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Selected.lean:Solidity.Backend.PrimitivePackets.BitNot.narrow_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Selected.lean:Solidity.Backend.PrimitivePackets.BitNot.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Selected.lean:Solidity.Backend.PrimitivePackets.BitNot.rawSelected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Selected.lean:Solidity.Backend.PrimitivePackets.BitNot.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

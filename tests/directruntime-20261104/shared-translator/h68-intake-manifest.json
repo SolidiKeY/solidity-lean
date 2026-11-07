@@ -1,0 +1,31 @@
+{
+  "regression": "H68 metadata-only migration and shared fixture hash re-pins",
+  "apply": "c0c53877f279964b86d55f56ea0bba4ec440a788",
+  "corrected": "e13535d56684c196ba011ad1f07f373314ee1105",
+  "observedCrHead": "19a7a1a9f764b19e75b16a9f941618a33a1678cf",
+  "parent": "82da8c0822e255893f944769b08ddaff115130cd",
+  "fixtureCount": 34,
+  "sharedPinEntries": 44,
+  "sharedPinOccurrences": 861,
+  "sharedFiles": [
+    "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+    "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+    "tests/directruntime-20261104/shared-translator/fixture-census.json",
+    "tests/directruntime-20261104/shared-translator/fixture-variants.json",
+    "tests/directruntime-20261104/shared-translator/reader-comparison.json"
+  ],
+  "leanPinModules": 20,
+  "changedLeanHashLiterals": 128,
+  "metadataFieldsPresentAfter": {
+    "tryCall": 1256,
+    "typeIdentifier": 13475
+  },
+  "boundary": "Git-blob identity/metadata/hash-only verification. Not compiler replay, Lean proof checking, reader-outcome re-observation, importer migration or H102 acceptance.",
+  "archive": {
+    "archiveRelative": "artifacts/h68-intake-3a28b0d05b6f29b7.tar.gz",
+    "sha256": "3a28b0d05b6f29b7157dd6f9b1124b582d6abd45056a26040bdf2e682532c189",
+    "bytes": 4626
+  },
+  "controls": "Six external Python integrity controls pass; no Lean/source proof changes.",
+  "pending": "Re-observe frozen outcomes after reviewed fixture landing, including7selector-drift/4no-source H102fixtures. Actual importer migration and fullH90parity remain open."
+}

@@ -1,0 +1,64 @@
+{
+  "state": "development-not-frozen",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "Two distinct mutations: clear a recycled reference slot after append; swap compound-push length and element updates. Actual dirty/clean outputs and inhabited successful intermediate typed states. Development only.",
+  "cases": [
+    {
+      "id": "push.reference-tail-cleared",
+      "kind": "mutant",
+      "family": "push-tail-length",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": ".app2 .pushSlot s q",
+      "new": ".app2 .delAt (.app2 .pushSlot s q) (.app1 .next q)",
+      "source_symbol": "Tms.STerm.pushSlot",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PushTailBaseline.lean",
+      "oracle_sha256": "f8884d84ac056c19f493d1cc5f90dc345aa12bd1c2fb1534c35a5bb47be5349c",
+      "oracle_declarations": [
+        "H28.PushTailBaseline.source_link",
+        "H28.PushTailBaseline.input_inhabited",
+        "H28.PushTailBaseline.clean_run",
+        "H28.PushTailBaseline.dirty_run",
+        "H28.PushTailBaseline.actual_inner_length",
+        "H28.PushTailBaseline.clean_post",
+        "H28.PushTailBaseline.actual_rejects_post"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PushTailClearKill.lean",
+      "witness_sha256": "b813788f044c3e7b7fb86b51d14884e44ca5ac12df8bd1ba7905fc3421f59395",
+      "witness_declarations": [
+        "H28.PushTailClearKill.source_link",
+        "H28.PushTailClearKill.input_inhabited",
+        "H28.PushTailClearKill.checked_kill",
+        "H28.PushTailClearKill.typed_landing",
+        "H28.PushTailClearKill.clean_update_returns"
+      ]
+    },
+    {
+      "id": "push.compound-updates-swapped",
+      "kind": "negative-control",
+      "family": "push-tail-length",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storagePushAddAssign :\n      dl{ \u27e8[ sp.push() += se; ]\u27e9 \u21dd\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } \u27e8[ ]\u27e9 }",
+      "new": "  | storagePushAddAssign :\n      dl{ \u27e8[ sp.push() += se; ]\u27e9 \u21dd\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) }\n        { storage := save(storage, sp.length, sp.length + 1) } \u27e8[ ]\u27e9 }",
+      "source_symbol": "Taclet.storagePushAddAssign",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PushOrderBaseline.lean",
+      "oracle_sha256": "a80cda87cbfbe10b940740335d890c62c893e7f1725acc5cf63937e363016510",
+      "oracle_declarations": [
+        "H28.PushOrderBaseline.source_link",
+        "H28.PushOrderBaseline.input_inhabited",
+        "H28.PushOrderBaseline.empty_run",
+        "H28.PushOrderBaseline.populated_run"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PushOrderSwappedKill.lean",
+      "witness_sha256": "ad4b4bf25e014c1ecef419a5bd85800b183689586b59546db709798e6420dff5",
+      "witness_declarations": [
+        "H28.PushOrderSwappedKill.source_link",
+        "H28.PushOrderSwappedKill.input_inhabited",
+        "H28.PushOrderSwappedKill.checked_kill",
+        "H28.PushOrderSwappedKill.typed_landing",
+        "H28.PushOrderSwappedKill.first_not_exhausted"
+      ]
+    }
+  ]
+}

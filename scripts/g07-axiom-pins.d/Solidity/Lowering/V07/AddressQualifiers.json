@@ -1,0 +1,43 @@
+{
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.allowed_erase": [],
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.copy_alignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.erase_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.erase_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.erase_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.erase_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.payable_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.payable_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressQualifiers.lean:Solidity.Lowering.V07.AddressQualifiers.payable_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

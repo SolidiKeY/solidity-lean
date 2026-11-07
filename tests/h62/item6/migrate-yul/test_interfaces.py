@@ -60,4 +60,33 @@ class Snapshots(unittest.TestCase):
     def test_failed_probe_rejected(self):
         probe=self.probe();report=json.loads(probe.read_text());report['status']='fail';probe.write_text(json.dumps(report))
         with self.assertRaises(ValueError):m.seal(self.raw,probe,self.mod,self.root/'sealed.json')
+    def use_dag(self):
+        self.header.update(schema=3,expression_encoding='canonical expr-dag-v1 JSON text, metadata erased only')
+        self.row['type']=m.canonical(m.expr_dag.from_tree(self.row['type']))
+        self.row['payload']['proof']=m.canonical(m.expr_dag.from_tree(self.row['payload']['proof']))
+        self.write([self.header,self.row,self.footer])
+    def dag_probe(self):
+        probe=self.probe();report=json.loads(probe.read_text())
+        helper=self.root/'tests/h62/item6/migrate-yul/ExportInterfacesDag.lean';helper.write_text('unit-test DAG source binding')
+        report['modules'][0]['command']=['lean','--run',str(helper),self.mod,str(self.raw)]
+        report['probe_sources_before']={str(helper):m.digest(helper)};report['probe_sources_after']=dict(report['probe_sources_before'])
+        probe.write_text(json.dumps(report));return probe
+    def test_dag_helper_schema_binding(self):
+        self.use_dag();probe=self.probe()
+        with self.assertRaises(ValueError):m.seal(self.raw,probe,self.mod,self.root/'sealed.json')
+    def test_tree_schema_rejects_dag_helper(self):
+        probe=self.dag_probe()
+        with self.assertRaises(ValueError):m.seal(self.raw,probe,self.mod,self.root/'sealed.json')
+    def test_passing_bound_dag_snapshot(self):
+        self.use_dag();probe=self.dag_probe();result=m.seal(self.raw,probe,self.mod,self.root/'sealed.json')
+        self.assertEqual(result['schema'],3);self.assertEqual(len(result['declarations']),1)
+    def test_dag_type_cycle_rejected(self):
+        self.use_dag();self.row['type']='["expr-dag-v1",0,[["app",0,0]]]';self.write([self.header,self.row,self.footer])
+        with self.assertRaises(ValueError):m.inspect_snapshot(self.raw,self.mod)
+    def test_dag_recursor_rule_validated(self):
+        self.use_dag();self.row['kind']='recursor';self.row['payload']={'rules':[{'rhs':'["expr-dag-v1",0,[["fvar","bad"]]]'}]};self.write([self.header,self.row,self.footer])
+        with self.assertRaises(ValueError):m.inspect_snapshot(self.raw,self.mod)
+    def test_cross_encoding_comparison_rejected(self):
+        old=m.inspect_snapshot(self.raw,self.mod);self.use_dag();new=m.inspect_snapshot(self.raw,self.mod)
+        with self.assertRaises(ValueError):m.compare_snapshots(old,new)
 if __name__=='__main__':unittest.main()

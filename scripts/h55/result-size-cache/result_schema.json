@@ -1,21 +1,224 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "H97 minimum envelope with separate unversioned legacy compatibility; not proof or deployment approval.",
+  "$defs": {
+    "head": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "minLength": 40,
+      "maxLength": 40
+    },
+    "legacyRules": {
+      "required": [
+        "batch",
+        "slug",
+        "status",
+        "branch",
+        "base",
+        "head",
+        "repository",
+        "checkpoints",
+        "gates",
+        "reviews",
+        "limitations",
+        "questions",
+        "artifacts",
+        "waits"
+      ],
+      "not": {
+        "required": [
+          "schema_version"
+        ]
+      },
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "sources",
+              "question",
+              "options"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^Q[0-9]+$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              },
+              "question": {
+                "type": "string",
+                "minLength": 1
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 2,
+                "maxItems": 3,
+                "uniqueItems": true
+              }
+            }
+          }
+        },
+        "owner_tickets": false,
+        "artifacts": {
+          "required": [
+            "original_patch",
+            "handoff",
+            "evidence",
+            "checksums"
+          ],
+          "propertyNames": {
+            "enum": [
+              "original_patch",
+              "handoff",
+              "evidence",
+              "checksums"
+            ]
+          }
+        },
+        "waits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "lane",
+              "item"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "lane": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "item": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "status": {
+            "const": "done"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "checkpoints": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "h97Rules": {
+      "required": [
+        "batch",
+        "slug",
+        "status",
+        "branch",
+        "head",
+        "gates",
+        "reviews",
+        "limitations",
+        "questions",
+        "waits"
+      ],
+      "properties": {
+        "head": {
+          "$ref": "#/$defs/head"
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "question",
+              "options"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "question": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              },
+              "options": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 3,
+                "uniqueItems": true,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "label",
+                    "consequence"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "consequence": {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "waits": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
   "type": "object",
-  "required": [
-    "batch",
-    "slug",
-    "status",
-    "branch",
-    "base",
-    "head",
-    "repository",
-    "checkpoints",
-    "gates",
-    "reviews",
-    "limitations",
-    "questions",
-    "artifacts",
-    "waits"
-  ],
   "additionalProperties": false,
   "properties": {
     "batch": {
@@ -46,10 +249,7 @@
     "head": {
       "oneOf": [
         {
-          "type": "string",
-          "pattern": "^[0-9a-f]{40}$",
-          "minLength": 40,
-          "maxLength": 40
+          "$ref": "#/$defs/head"
         },
         {
           "type": "null"
@@ -122,58 +322,10 @@
       "minLength": 1
     },
     "questions": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "sources",
-          "question",
-          "options"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^Q[0-9]+$",
-            "not": {
-              "pattern": "[\\r\\n]"
-            }
-          },
-          "sources": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            },
-            "minItems": 1
-          },
-          "question": {
-            "type": "string",
-            "minLength": 1
-          },
-          "options": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1
-            },
-            "minItems": 2,
-            "maxItems": 3,
-            "uniqueItems": true
-          }
-        }
-      }
+      "type": "array"
     },
     "artifacts": {
       "type": "object",
-      "required": [
-        "original_patch",
-        "handoff",
-        "evidence",
-        "checksums"
-      ],
-      "additionalProperties": false,
       "properties": {
         "original_patch": {
           "oneOf": [
@@ -224,24 +376,7 @@
     "waits": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": [
-          "lane",
-          "item"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "lane": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "\\S"
-          },
-          "item": {
-            "type": "string",
-            "minLength": 1,
-            "pattern": "\\S"
-          }
-        }
+        "type": "object"
       }
     },
     "handoff_to": {
@@ -251,9 +386,11 @@
     "schema_version": {
       "type": "integer",
       "const": 1
+    },
+    "owner_tickets": {
+      "description": "Optional opaque coordinator metadata; no owner agreement is inferred."
     }
   },
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "allOf": [
     {
       "if": {
@@ -266,10 +403,7 @@
       "then": {
         "properties": {
           "head": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{40}$",
-            "minLength": 40,
-            "maxLength": 40
+            "$ref": "#/$defs/head"
           },
           "artifacts": {
             "properties": {
@@ -302,7 +436,6 @@
             }
           },
           "checkpoints": {
-            "minItems": 1,
             "items": {
               "properties": {
                 "status": {
@@ -319,6 +452,14 @@
           }
         }
       }
+    }
+  ],
+  "anyOf": [
+    {
+      "$ref": "#/$defs/h97Rules"
+    },
+    {
+      "$ref": "#/$defs/legacyRules"
     }
   ]
 }

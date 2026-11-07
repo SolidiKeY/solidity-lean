@@ -1,0 +1,26 @@
+{
+  "partial_helpers": {
+    "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.Supported._unsafe_rec": "moved4 review: compiler-generated executable helper of a structurally recursive (terminating, kernel-checked) public definition in NormalizationAdequacy.lean; no source partial/unsafe keyword",
+    "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.erase._unsafe_rec": "moved4 review: compiler-generated executable helper of a structurally recursive (terminating, kernel-checked) public definition in NormalizationAdequacy.lean; no source partial/unsafe keyword",
+    "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList._unsafe_rec": "moved4 review: compiler-generated executable helper of a structurally recursive (terminating, kernel-checked) public definition in NormalizationAdequacy.lean; no source partial/unsafe keyword",
+    "Solidity.Frontend.QualifiedUnits.SignatureHiding.externalKey._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureHiding.nominalIds._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureHiding.nominalIdsList._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureMembers.linearize._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureMembers.mergeOwners._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureMembers.select._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureMembers.unhidden._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureMembers.walk._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.same._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.sameList._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureNormalization.instReprTypeKey.repr._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureNormalization.types._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.SignatureResolution.checkSuffix._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.TypePaths.tail._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.checkSuffix._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.expressionPathAnyM._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.referencesM._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.through._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)",
+    "Solidity.Frontend.QualifiedUnits.unitTail._unsafe_rec": "previously pinned compiler-generated structural-recursion helper (Codex lane review)"
+  }
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/AbiEntry/CoreJoin.lean:Solidity.Backend.AbiEntry.CoreJoin.branch_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreJoin.lean:Solidity.Backend.AbiEntry.CoreJoin.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

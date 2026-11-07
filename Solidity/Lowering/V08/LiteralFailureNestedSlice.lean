@@ -26,7 +26,7 @@ theorem after_first {E : Env} {Γ} (G : Glob E) (F : Fr) (n off len : Nat)
  have head := SliceFailureLowering.accepted G F n (.bytes .calldata) rfl rfl
   off len s e ordered bounded
   (.cons (SourceEnvironment.sourceWord u) (.cons (SourceEnvironment.sourceWord v) older)) state
- simp only [Nat.one_mul] at head
+ simp only [STy.cdStride,Nat.one_mul] at head
  simp only [expression]
  rw [evalE]
  dsimp only [ExceptT.run] at head
@@ -48,7 +48,7 @@ theorem accepted {E : Env} {Γ} (G : Glob E) (F : Fr) (n off len : Nat)
  (.ok (.val (.cdRef rfl (off+s.val+u.val) (v.val-u.val))),
   (caller off len s e u v older,state)) := by
  rw [after_first G F n off len s e u v ordered bounded older state]
- simp only [sliceR,Bool.false_eq_true,↓reduceIte,Nat.one_mul,
+ simp only [sliceR,STy.cdStride,Bool.false_eq_true,↓reduceIte,Nat.one_mul,
   if_neg (Nat.not_lt.mpr ordered2),if_neg (Nat.not_lt.mpr bounded2)]
  rfl
 

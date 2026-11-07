@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/LoopControlCompilationControls.lean:Solidity.Yul.Compilation.LoopControlCompilation.Controls.artifact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LoopControlCompilationControls.lean:Solidity.Yul.Compilation.LoopControlCompilation.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LoopControlCompilationControls.lean:Solidity.Yul.Compilation.LoopControlCompilation.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

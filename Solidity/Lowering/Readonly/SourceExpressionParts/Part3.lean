@@ -264,7 +264,7 @@ theorem evalE_assign_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history
      | split
      | dsimp only
 
-theorem evalE_compound_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) {Γ : RCtx} {τ σ : STy} (op : AssignOp) (l : RLVal E Γ τ) (e : RExpr E Γ σ) (h : op.fits E.isBase σ τ = true) :
+theorem evalE_compound_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) {Γ : RCtx} {τ σ : STy} (op : AssignOp) (l : RLVal E Γ τ) (e : RExpr E Γ σ) (h : op.fits E.isBase E.mapFree σ τ = true) :
     Effect F.static (evalE G F (fuel+1) (RExpr.compound (E := E) (Γ := Γ) op l e h)) := by
   simp only [Solidity.Source.evalE]
   repeat' first

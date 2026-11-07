@@ -40,7 +40,7 @@ theorem conversion : ∀ (layout : Solidity.Source.Layout) (ty : Solidity.Source
 
 theorem admissible : ∀ (env : Solidity.Source.Env) (ty : Solidity.Source.IntTy) (value : Int)
  (_inRange : ty.lo ≤ value ∧ value ≤ ty.hi),
- Solidity.Source.STy.implicit env.isBase (.rational (Solidity.Source.Q.ofInt value)) (.int ty) = true := by
+ Solidity.Source.STy.implicit env.isBase env.mapFree (.rational (Solidity.Source.Q.ofInt value)) (.int ty) = true := by
   intro env ty value inRange; rw [Solidity.Source.STy.implicit_rational_int]; exact decide_eq_true ((Solidity.Yul.RawIntegerInitialization.fits ty value).2 inRange)
 
 

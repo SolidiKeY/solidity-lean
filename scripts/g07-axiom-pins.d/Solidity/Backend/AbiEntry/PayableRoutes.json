@@ -1,0 +1,39 @@
+{
+ "Solidity/Backend/AbiEntry/PayableRoutes.lean:Solidity.Backend.AbiEntry.PayableRoutes.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutes.lean:Solidity.Backend.AbiEntry.PayableRoutes.branchBody_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutes.lean:Solidity.Backend.AbiEntry.PayableRoutes.branchBody_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutes.lean:Solidity.Backend.AbiEntry.PayableRoutes.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutes.lean:Solidity.Backend.AbiEntry.PayableRoutes.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutes.lean:Solidity.Backend.AbiEntry.PayableRoutes.run_route": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutes.lean:Solidity.Backend.AbiEntry.PayableRoutes.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/PayableRoutes.lean:Solidity.Backend.AbiEntry.PayableRoutes.test_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

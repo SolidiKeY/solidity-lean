@@ -14,7 +14,7 @@
 | `Lowering/V08/WorldCatalogue.lean`, `Lowering/V08/WorldCatalogueTransport.lean`, `Lowering/V08/WorldImageAccess.lean` (+`Controls`) | Initial world assembly from installed code; `assembled_image`; typed store lookup. |
 | `Lowering/V08/LibraryFrameTransport.lean`, `Lowering/V08/LibraryIntegerTransport.lean`, `Lowering/V08/WorldContextComposition.lean` | Library call frames for fixed observer entries; repeated/failing transactions. |
 | `Lowering/V08/ConstructorScalarTransport.lean`, `Lowering/V08/ConstructorContinuations.lean` | Scalar `Cell` constructor fixture; `tryCreate` continuations. |
-| `Lowering/V08/CreationPremises.lean`, `Lowering/V08/LibraryPremises.lean` | Producer-premise consumers (vacuous until P8-SPEC-LAW1). |
+| `Lowering/V08/CreationPremises.lean`, `Lowering/V08/LibraryPremises.lean` | Producer-premise consumers (non-vacuous only over plan-carrying resources; model witness `P8/PlanWitness.lean`). |
 | `Lowering/V08/{Integer,PureArgument,Tuple}Callable.lean`, `Lowering/V08/{Local,Scalar}CallableTransport.lean`, `Lowering/V08/Source{Session,SessionCredit,Deployment,DeploymentSession,PayableDeployment,FailedDeployment,Transaction,ConstructorArguments}Controls.lean` | Callable transports and source session/deployment controls. |
 | `Lowering/V08/Controls.lean` | Funded, failure-byte, rollback, reset and caught constructor controls. |
 | `Lowering/V08/AbiControls.lean` | Exact catch positives and malformed/wrong-code negatives. |
@@ -392,7 +392,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 
 | Module | Role |
 |---|---|
-| `Lowering/P8/FrozenInterface.lean` | Frozen P8a producer obligations (`FailureProjection`, `SourceRealization`, `Producer`); no inhabitant. |
+| `Lowering/P8/FrozenInterface.lean` | Frozen P8a producer obligations (`FailureProjection`, `SourceRealization`, `Producer`); inhabited only by the model witness `P8/PlanWitness.lean`. |
 | `Frontend/Admission/Profile.lean` | Exact classification of extracted uses; features and failures kept. |
 | `Frontend/Admission/RootObservations.lean` | Typed traversal of local observation sites over supplied roots; no callee closure. |
 | `Frontend/Admission/Controls.lean` | Root, refusal, combination and `NoFail` controls. |
@@ -414,7 +414,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8/ProducerAssembly.lean` | Conditional `assemble`, component pipeline closure and `checked_glue`; actual `AdmissionHalf` and concrete source Producer remain open. |
 | `Lowering/P8/ResourceBoundary.lean` | `FailureResource`; unchanged Source language cannot carry failure choices. |
 | `Source/FailureResources.lean` | G06 failure-point bound algebra; `no_horizon_retraction`; not wired into execution. |
-| `Lowering/P8b/Frozen.lean`, `Lowering/P8b/P8aInterface.lean` | Frozen P8b consumer signatures over G01 `Lowering` and P8a `Producer`; no inhabitant. |
+| `Lowering/P8b/Frozen.lean`, `Lowering/P8b/P8aInterface.lean` | Frozen P8b consumer signatures over G01 `Lowering` and P8a `Producer`; model instance `planLowering` in `P8/PlanWitness.lean`. |
 | `Lowering/P8b/Domain.lean` | Structural pass/dom/agrees for a given emitter; `assemble`; wrong-emitter refutation. |
 | `Lowering/P8b/Controls.lean` | Toy identity certificate, wrong-emitter refusal, loop divergence. |
 | `Lowering/P8/ResourceContractLaw1.lean` | `nat_encodable_resource_impossible`: the frozen V1 failure projection has no inhabitant over a `Nat`-encodable resource (P8-SPEC-LAW1). |
@@ -820,6 +820,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
+| `Backend/InternalFlow/RuntimeFrameP1LangV2.lean` | Canonical P1 `Lang Event Outcome` pair, version 2, over the V2 machine: revert data, call events from the journal, frame classes. |
+| `Backend/InternalFlow/RuntimeFrameP1BridgeV2.lean` | `p1_frame_bridge` (V2) for the guarded revert-with-data family: actual source/target runs, full `PassCorrect`, per-input `Local`. |
+| `Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean` | Admitted witnesses of both classes, observed payload, refused mismatch, other-payload disagreement, call events, satisfiability. |
+| `Backend/InternalFlow/RuntimeFrameP1LangV2Migration.lean` | V2 → V12 `P1Lang` migration: `coarse` (forget events/data), `source_coarse`, `target_coarse`, `lift_coarse`, input conversions. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Source.lean` | Checked int256 `*` Source evaluation on arbitrary locals: exact value or `Panic(0x11)`. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Selected.lean` | The public compiler selects `binaryCode .int .mul`, with the literal `sTail .mul` guard. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Target.lean` | Selected checked int256 `*` execution on any represented machine and saved stack: product or coarse revert. |
@@ -890,6 +894,14 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ForReturnCompiler.lean`, `Backend/StructuredFlow/ForReturnCompilerControls.lean` | Actual for-loop Source outcome/captured-flag compiler connection, full physical snapshots and capture/base/outcome negatives ([scope](../feature-work/roadmap-g36-for-return-compiler.md)). |
 | `Backend/StructuredFlow/ForBreakCompiler.lean`, `Backend/StructuredFlow/ForBreakCompilerControls.lean` | Actual mapped for-initializer/break to scoped-prefix compilation, exact exit fragment, full snapshots and initializer/base/post negatives ([scope](../feature-work/roadmap-g36-for-break-compiler.md)). |
 
+### P8 Producer merge (H57, H60)
+
+| Module | Purpose |
+|---|---|
+| `Lowering/P8/PlanWitness.lean` | Inhabitant `planProducer` of the unchanged frozen `P8a.Producer` (H60) over a G07-model source whose resources carry full EVM failure plans, plus the P8b `planLowering`; model reference, not actual-Source adequacy. |
+| `Lowering/P8b/Merged.lean` | Merged P8a+P8b `Producer` (H57): additive pairing of both frozen types at one `S`, projections, `nonempty_iff`, H24 variant. |
+| `Lowering/P8b/MergedControls.lean` | Merged witness (receipt, execution, failing plan, lowered success) and negative controls (Nat-resource toy, wrong reference, empty source, wrong emitter). |
+
 ### P1 paired allocating scalar transport
 
 | Module | Purpose |
@@ -953,5 +965,21 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean` | Concrete scoped-return instances, restored result/counter/older-frame observations, frame refusal and zero-cost return without allocator ownership. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransport.lean` | Actual scoped-checker success yields frozen success/bare-revert claims for every original Entry, caller, frame and runtime cursor at fixed C/A; no approved-profile or selector claim. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransportControls.lean` | Checked scoped-call argument-underflow transport preserves complete ordered bare-revert/non-success/panic/exhaustion distinctions without failed-State/world claims. |
+| `Backend/InternalFlow/RuntimeFrameV3GeneralBoundary.lean` | General P1 boundary: `callRec_run` and generic recursive `callRec` transport `of_unrolled`/`unrolled_returns` into the frozen V3 recursive structure; dual-outcome V3 structures are empty for sources that never bare-revert, so the unrestricted closure is false (`no_unrestricted_closure`). |
+| `Backend/InternalFlow/RuntimeFrameV3GeneralBoundaryControls.lean` | Controls: `of_unrolled` rebuilds the scoped scalar-family V3 producer with the same plan; the trivial uniform family succeeds at index one, exhausts at zero and has no V3 producer. |
+| `Backend/InternalFlow/RuntimeFrameInterfaceV4.lean` | Frozen P1 interface V4: success-only companion of V3 (H57 pair); every V3 field but the reverting witness. Signatures only. |
+| `Backend/InternalFlow/RuntimeFrameV4Migration.lean` | V3→V4 (`*_ofV3`) and V4+reverting entry→V3 (`*_toV3`) for call, fixed-thunk and recursive producers; V4 `of_unrolled`; V4 boundary: no producer for never-succeeding families (`no_success_producer`, `exhausting_empty`), coherence retained. |
+| `Backend/InternalFlow/RuntimeFrameV4TrivialFamily.lean` | Real V4 recursive producer for the never-reverting empty-body family over the populated CompileExamples caller (one selected void-call image, index-1 success); joint satisfiability; controls: V3 empty for it, exhausting family empty, exhausted index 0 covered, wrong frame refused. |
+| `Backend/InternalFlow/RuntimeFrameV4MigrationControls.lean` | Migration control: the scoped scalar-family V3 producer moves to V4 and back to V3 with its own reverting entry, same plan. |
+| `Backend/InternalFlow/RuntimeFrameP1Lang.lean` | Coarse G01 `Lang Event Outcome` pair for one P1 context: source over quotation depth, target over the emitted image, same admitted inputs; frame-boundary outcome classes only (no events or revert data). |
+| `Backend/InternalFlow/RuntimeFrameP1Bridge.lean` | H68 family 3 `p1_frame_bridge` shape check (G49 `BridgeGoal`, `beta := id`) for the degenerate V4 trivial family over the producer's admitted domain, `Local` the actual V4 producer; controls. |
+| `Backend/Executable/ConstructorArgumentControls.lean` | Inhabited argument-preparation controls, not constructor/runtime closure. |
+| `Backend/Executable/ConstructorArgumentFailure.lean` | Effectful local-argument failure at the native constructor boundary. |
+| `Backend/Executable/ConstructorBaseArgumentControls.lean` | Native inherited-argument clients with declaration-derived constructor contexts. |
+| `Backend/Executable/ConstructorBaseArguments.lean` | Actual inherited-constructor argument binding. |
+| `Backend/Executable/ConstructorStorageFailure.lean` | Storage-effect argument failure at the native constructor boundary. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean` | Frozen-API CALL controls: absent and INVALID-body callees clear the stale return buffer, the following RETURNDATASIZE reads the new buffer, and the same caller frame gives callee-dependent CALL flags. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean` | General post-CALL law: a non-erroring fetched CALL leaves the return buffer of the exact `Θ` run `EVM.call` makes (all inputs pinned) when its entry condition holds, and an empty buffer otherwise. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean` | Core `CALLIN` (`Evm.callIn_returndata`) against the reference CALL buffer: case alignment under explicit entry-test, depth-below-1024 and exact-`Θ`-oracle premises, and `depth_disagreement` at depth 1024. |

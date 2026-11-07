@@ -51,10 +51,10 @@ theorem from_uint_related {D : Source.Layout} (x : Int) (hx : ty.lo ≤ x ∧ x 
   rw [addressOfInteger_observe]
 
 theorem direct_int_rule (E : Source.Env) (t : Source.IntTy) (p : Bool) :
-    (Source.STy.int t).explicit E.isBase (.address p) = (!p && !t.signed && t.bits == 160) := rfl
+    (Source.STy.int t).explicit E.isBase E.mapFree (.address p) = (!p && !t.signed && t.bits == 160) := rfl
 
-theorem allowed_from (E : Source.Env) : (Source.STy.int ty).explicit E.isBase (.address false) = true := rfl
-theorem allowed_to (E : Source.Env) : (Source.STy.address false).explicit E.isBase (.int ty) = true := rfl
+theorem allowed_from (E : Source.Env) : (Source.STy.int ty).explicit E.isBase E.mapFree (.address false) = true := rfl
+theorem allowed_to (E : Source.Env) : (Source.STy.address false).explicit E.isBase E.mapFree (.int ty) = true := rfl
 
 theorem source_from_uint {D : Source.Layout} (x : Int) (hx : ty.lo ≤ x ∧ x ≤ ty.hi) :
     Source.convExplicitVal (.address false) (.int x hx : Source.Val D (.int ty)) =

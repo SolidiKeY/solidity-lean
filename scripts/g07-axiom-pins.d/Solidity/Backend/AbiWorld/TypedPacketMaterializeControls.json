@@ -1,0 +1,24 @@
+{
+ "Solidity/Backend/AbiWorld/TypedPacketMaterializeControls.lean:Solidity.Backend.AbiWorld.TypedPacketMaterialize.execute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/TypedPacketMaterializeControls.lean:Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/TypedPacketMaterializeControls.lean:Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.empty_baseline": [],
+ "Solidity/Backend/AbiWorld/TypedPacketMaterializeControls.lean:Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.exact_limit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/TypedPacketMaterializeControls.lean:Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.one_over_limit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/TypedPacketMaterializeControls.lean:Solidity.Backend.AbiWorld.TypedPacketMaterializeControls.wrong_head_offset": []
+}

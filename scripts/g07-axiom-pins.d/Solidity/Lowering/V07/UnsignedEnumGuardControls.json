@@ -1,0 +1,68 @@
+{
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.allowed_client": [],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.bridge_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.equal_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.failed_run_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.failed_value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.failure_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.related_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.run_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.self_failure_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedEnumGuardControls.lean:Solidity.Lowering.V07.UnsignedEnumGuardControls.word_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

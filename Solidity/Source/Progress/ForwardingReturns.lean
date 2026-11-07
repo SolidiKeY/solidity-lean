@@ -10,7 +10,7 @@ variable {E : Env}
 theorem return_composed_nsp {A : Decl → Prop} {G : Glob E} {c : String} {ds : List Decl}
     {n : Nat} (context : CompositionAt A G c ds n) (F : Fr) (contract : F.contract = c)
     (nps : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
-    (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ)
     (ready : ComposedExpr A (fun d => d ∈ ds) e) (l : Locals E.layout Γ)
     (frame : BodyFrame nps [τ] Γ) :
     NSP (execS G F (n+1) nps none (.retVal (M := false) (k := .body) rfl e same) l)
@@ -33,7 +33,7 @@ theorem return_composed_nsp {A : Decl → Prop} {G : Glob E} {c : String} {ds : 
 theorem return_composed_mem {A : Decl → Prop} {G : Glob E} {c : String} {ds : List Decl}
     {n : Nat} (context : CompositionAt A G c ds n) (F : Fr) (contract : F.contract = c)
     (nps : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ)
-    (same : τ.implicit E.isBase τ = true) (ready : ComposedExpr A (fun d => d ∈ ds) e)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (ready : ComposedExpr A (fun d => d ∈ ds) e)
     (l : Locals E.layout Γ) (H : HeapTy) :
     Hoare (fun y => MemOK E H y ∧ LocalsOK E y.2.heap.ty l)
       (execS G F (n+1) nps none (.retVal (M := false) (k := .body) rfl e same) l)
@@ -58,7 +58,7 @@ theorem return_composed_mem {A : Decl → Prop} {G : Glob E} {c : String} {ds : 
 theorem forwarding_items {A : Decl → Prop} {G : Glob E} {c : String} {ds : List Decl}
     (compositions : ∀ n, CompositionAt A G c ds n) (F : Fr) (contract : F.contract = c)
     (ps : List STy) (τ : STy) (e : RExpr E (returnContext ps τ) τ)
-    (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ)
     (ready : ComposedExpr A (fun d => d ∈ ds) e)
     (l : Locals E.layout (returnContext ps τ)) (H : HeapTy) :
     ∀ n, NSP (execItems G F n ps.length none (singleReturningBody ps τ e same).items l)
@@ -94,7 +94,7 @@ theorem forwarding_items {A : Decl → Prop} {G : Glob E} {c : String} {ds : Lis
 theorem forwarding_body {A : Decl → Prop} {G : Glob E} {c : String} {ds : List Decl}
     (compositions : ∀ n, CompositionAt A G c ds n) (F : Fr) (contract : F.contract = c)
     (ps : List STy) (τ : STy) (e : RExpr E (returnContext ps τ) τ)
-    (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ)
     (ready : ComposedExpr A (fun d => d ∈ ds) e)
     (l : Locals E.layout (returnContext ps τ)) (H : HeapTy) :
     ∀ n, NS (runMods G F n (singleReturningBody ps τ e same) [] l) ∧
@@ -116,7 +116,7 @@ theorem forwarding_body {A : Decl → Prop} {G : Glob E} {c : String} {ds : List
 theorem forwarding_call {A : Decl → Prop} {G : Glob E} {c : String} {ds : List Decl}
     (compositions : ∀ n, CompositionAt A G c ds n) (F : Fr) (contract : F.contract = c)
     (d : Decl) (ps : List STy) (τ : STy) (e : RExpr E (returnContext ps τ) τ)
-    (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ)
+    (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ)
     (ready : ComposedExpr A (fun d => d ∈ ds) e) (defaults : ZeroReady E τ)
     (body : G.prog.body (G.dispatchFn F.contract d) = some (singleReturningBody ps τ e same))
     (vs : Vals E.layout ps) (H : HeapTy) :
@@ -146,7 +146,7 @@ theorem forwarding_call {A : Decl → Prop} {G : Glob E} {c : String} {ds : List
 theorem extend_forwarding_calls {A : Decl → Prop} {G : Glob E} {c : String} {ds : List Decl}
     (values : CallsOK A G c) (prior : ReadyMemoryCalls G c ds) (d : Decl)
     (ps : List STy) (τ : STy) (signature : d.fnSig E = some (ps,[τ]))
-    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase τ = true)
+    (e : RExpr E (returnContext ps τ) τ) (same : τ.implicit E.isBase E.mapFree τ = true)
     (plain : PlainResultType τ) (ready : ComposedExpr A (fun d => d ∈ ds) e) (defaults : ZeroReady E τ)
     (body : G.prog.body (G.dispatchFn c d) = some (singleReturningBody ps τ e same)) :
     ReadyMemoryCalls G c (d :: ds) := by
@@ -165,7 +165,7 @@ theorem forwarding_from_elaborate (res : Resolution)
     (catalogue : ReadyMemoryCatalogue (fun d => d ∈ values) G c memory)
     (F : Fr) (contract : F.contract = c) (ps : List STy) (τ : STy)
     (d : {d : Decl // d ∈ Solidity.Lowering.P9.WholeProgram.functions res ∧ d.fnSig res.env = some (ps,[τ])})
-    (e : RExpr res.env (returnContext ps τ) τ) (same : τ.implicit res.env.isBase τ = true)
+    (e : RExpr res.env (returnContext ps τ) τ) (same : τ.implicit res.env.isBase res.env.mapFree τ = true)
     (plain : PlainResultType τ) (ready : ComposedExpr (fun d => d ∈ values) (fun d => d ∈ memory) e)
     (defaults : ZeroReady res.env τ)
     (body : G.prog.body (G.dispatchFn F.contract d.val) = some (singleReturningBody ps τ e same))

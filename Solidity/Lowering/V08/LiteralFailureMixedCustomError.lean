@@ -10,7 +10,7 @@ inductive LocalArgs {E : Env} {Γ : RCtx} (locals : Locals E.layout Γ) :
  {types : RCtx} → RConvArgs E Γ types → Source.Vals E.layout types → Prop
  | nil : LocalArgs locals .nil .nil
  | cons {τ types arguments values} (index : Source.Idx Γ τ)
-   (typed : τ.implicit E.isBase τ=true)
+   (typed : τ.implicit E.isBase E.mapFree τ=true)
    (tail : @LocalArgs E Γ locals types arguments values) :
    LocalArgs locals (.cons (.local index) typed arguments) (.cons (locals.get index) values)
 

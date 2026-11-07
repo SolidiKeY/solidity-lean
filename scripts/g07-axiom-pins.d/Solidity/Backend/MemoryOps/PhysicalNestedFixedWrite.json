@@ -1,0 +1,11 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalNestedFixedWrite.lean:Solidity.Backend.MemoryOps.Physical.nested_fixed_word_byte_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalNestedFixedWrite.lean:Solidity.Backend.MemoryOps.Physical.PointerFrame.numeric_write": [
+  "Quot.sound",
+  "propext"
+ ]
+}

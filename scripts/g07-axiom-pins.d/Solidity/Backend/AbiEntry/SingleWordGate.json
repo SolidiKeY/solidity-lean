@@ -1,0 +1,44 @@
+{
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.entry_form": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.entry_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.entry_success": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.insufficient_fuel": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.run_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGate.lean:Solidity.Backend.AbiEntry.SingleWordGate.short_before_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

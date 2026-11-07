@@ -5,7 +5,7 @@ Existing Source rational meaning and implicit range typing determine the value. 
 namespace Solidity.Lowering.V07.IntegralRationalConstants
 
 theorem allowed (E : Source.Env) (q : Source.Q) (t : Source.IntTy) (h : q.FitsInt t) :
-    (Source.STy.rational q).implicit E.isBase (.int t) = true := by
+    (Source.STy.rational q).implicit E.isBase E.mapFree (.int t) = true := by
   rw [Source.STy.implicit_rational_int]
   exact decide_eq_true h
 
@@ -95,7 +95,7 @@ theorem integral_outside_refused {D : Source.Layout} (q : Source.Q) (t : Source.
   rfl
 
 theorem not_allowed (E : Source.Env) (q : Source.Q) (t : Source.IntTy) (refused : ¬ q.FitsInt t) :
-    (Source.STy.rational q).implicit E.isBase (.int t) = false := by
+    (Source.STy.rational q).implicit E.isBase E.mapFree (.int t) = false := by
   rw [Source.STy.implicit_rational_int]
   exact decide_eq_false refused
 

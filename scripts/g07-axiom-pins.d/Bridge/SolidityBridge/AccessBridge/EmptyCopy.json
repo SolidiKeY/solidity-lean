@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopy.lean:SolidityBridge.AccessBridge.EmptyCopy.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopy.lean:SolidityBridge.AccessBridge.EmptyCopy.empty_touch_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopy.lean:SolidityBridge.AccessBridge.EmptyCopy.payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopy.lean:SolidityBridge.AccessBridge.EmptyCopy.post_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopy.lean:SolidityBridge.AccessBridge.EmptyCopy.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

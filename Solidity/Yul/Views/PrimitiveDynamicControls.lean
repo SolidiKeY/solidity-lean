@@ -68,7 +68,7 @@ def pcRaw : SlotView := fun q => if q = 0 ∨ q = 1 ∨ q = 2 ∨ q = 3 ∨ q = 
   if q = 6000 then pcZ0 else if q = 6001 then pcZ1 else if q = 7 then 999 else 77
 
 def pcState : Source.EMState pcEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := pcEnv.layout) (pcEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := pcEnv.layout) (pcEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def pcResidual : ResidualJournal complementCarrierOwnership :=
   ⟨fun k => if k.transient then 0 else packedMask pcLayout.registrations pcRaw k.slot,[]⟩
 

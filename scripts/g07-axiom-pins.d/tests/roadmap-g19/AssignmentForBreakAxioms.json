@@ -1,0 +1,52 @@
+{
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.Controls.no": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.Controls.non_boolean_post_skipped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.Controls.post_is_effectful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.Controls.post_write_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.Controls.same_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.Controls.yes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentForBreakAxioms.lean:Solidity.Lowering.G19.AssignmentForBreak.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

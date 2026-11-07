@@ -1,0 +1,72 @@
+{
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.argument_incomplete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.argument_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.different_payloads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.encoding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.old_selector_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.p7_nonempty_still_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.packet_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.timeout_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.world_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.wrong_encoding_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedErrorControls.lean:Solidity.Backend.FailurePaths.EncodedError.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

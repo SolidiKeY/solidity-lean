@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/AbiEntry/CalldataWord.lean:Solidity.Backend.AbiEntry.CalldataWord.certificate": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CalldataWord.lean:Solidity.Backend.AbiEntry.CalldataWord.load": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CalldataWord.lean:Solidity.Backend.AbiEntry.CalldataWord.window": [
+  "Quot.sound",
+  "propext"
+ ]
+}

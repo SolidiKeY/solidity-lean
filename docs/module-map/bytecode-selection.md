@@ -234,3 +234,6 @@
 | `Backend/AbiEntry/CoreJoin/Shared.lean` | Existing represented join proof shared independently of selector/decoder imports. |
 | `Backend/AbiEntry/SizeBranches.lean` | Public short/full typed-body compilation and exact raw/represented branch outcomes. |
 | `Backend/AbiEntry/SizeBranchesControls.lean` | Inhabited size boundaries, heterogeneous body execution, malformed input, terminal failure and escaping skip controls. |
+| `Backend/CalldataPackets/RawBytesN/Interface.lean` | Intrinsic bytesN array packet types and exact existing-decoder certificate interface. |
+| `Backend/CalldataPackets/RawBytesN/Execution.lean` | Raw low-byte validation, ordered calldata entry guards, exact Source allocation and complete-state refusal outcomes. |
+| `Backend/CalldataPackets/RawBytesN/Controls.lean` | Unequal bytes1 values, dirty-tail rollback, nonempty heap preservation, all entry refusals and bytes31/bytes32 boundary controls. |

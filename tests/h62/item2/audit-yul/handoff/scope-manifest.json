@@ -1,0 +1,15 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "original_write_globs": [
+    "tests/h62/item2/audit-yul/**",
+    "scripts/h62/item2/audit-yul/**",
+    "docs/feature-work/h62-2-audit-yul.md"
+  ],
+  "selected_files": 1960,
+  "selection": "module-map explicit patterns plus local Yul import closure",
+  "module_map_sha256": "dabbf4e3a0b7e528f3a21fbb63a098fd344afc386acb51433e5aa4952a060c4d",
+  "complete_scope_artifact": "full-scope-manifest.json (embedded in retirement handoff.tar.gz; H44 bulk off git)",
+  "complete_scope_sha256": "afdcd2996c3ec9c593bbe6af316ec6e1a823db928a3cf6f75b090c44db6d7cbd",
+  "census_sha256": "1a6f4f9352a0004aa3cfcc67e8e3abd313e5c83864dfe436880aeeb0cb2adcde",
+  "ownership": "Area-derived owners in census are provisional; exact live-owner reconciliation unfinished. H82 standing statement-preserving permission superseded by retirement no-new-implementation instruction."
+}

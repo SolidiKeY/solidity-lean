@@ -1,0 +1,47 @@
+{
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.branch_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.branch_target_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.branch_target_true": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.branch_true": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.last_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.last_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.oversized_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean:Solidity.Yul.Compilation.ScopedControlCompilation.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

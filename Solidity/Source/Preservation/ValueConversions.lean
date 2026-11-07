@@ -7,7 +7,7 @@ namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}
 
-theorem convRV_pres {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBase σ τ)
+theorem convRV_pres {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBase E.mapFree σ τ)
     (hσ : σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k)) (v : RVal E.layout σ) :
     MemPres (convRV (Γ := Γ) F n τ v) := by
   have hl := loc_of_frag hσ

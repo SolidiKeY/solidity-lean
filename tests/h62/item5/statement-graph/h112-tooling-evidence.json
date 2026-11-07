@@ -1,0 +1,140 @@
+{
+  "authorization": "H112",
+  "baselineChanges": 99,
+  "baselineInventorySha256": "6695909a0a96494b60559f002419f1bcb51c4b8325d34a1634e839e22a2a7105",
+  "baselineSha256": "4d98b1810853c54992feb064f1a7b028e23d8212fd2aad8b8b65e81895d7c701",
+  "baselineSourceCommit": "7dbf2748b5b0a02e42cccd6cf25c91fa77c9aade",
+  "boundary": "Static source annotation gate only; axiom-policy errors unchanged, actual pin inventory/fragments unchanged, no Lean source or theorem/guard/budget/axiom-set changes.",
+  "foundSourcePins": 16140,
+  "gates": {
+    "baseline-sha": {
+      "command": [
+        "sha256sum",
+        "-c",
+        "scripts/g07-unrecorded-baseline.sha256"
+      ],
+      "exit": 0,
+      "seconds": 0.0029330680044949986
+    },
+    "bash-syntax": {
+      "command": [
+        "bash",
+        "-n",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 0,
+      "seconds": 0.0020159039995633066
+    },
+    "ciWorkflow": {
+      "checksFetchDepth": 0,
+      "command": "Parse workflow YAML; compare every non-checks job to implementation parent; validate full-history checkout and gate commands",
+      "exit": 0,
+      "hostedExecution": "not run; local equivalent controls and gates pass",
+      "nonChecksJobsUnchanged": true
+    },
+    "doc-after": {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 0,
+      "seconds": 33.501829872999224
+    },
+    "doc-before": {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1,
+      "seconds": 34.646257184002025
+    },
+    "fragments": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/fragments.sh",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.3558520949954982
+    },
+    "helper-syntax": {
+      "command": [
+        "node",
+        "--check",
+        "scripts/axiom-pin-drift-baseline.mjs"
+      ],
+      "exit": 0,
+      "seconds": 0.023921651001728605
+    },
+    "node-syntax": {
+      "command": [
+        "node",
+        "--check",
+        "scripts/check-axiom-pins.mjs"
+      ],
+      "exit": 0,
+      "seconds": 0.02668003500002669
+    },
+    "pins-after": {
+      "command": [
+        "node",
+        "scripts/check-axiom-pins.mjs"
+      ],
+      "exit": 0,
+      "seconds": 17.595591957004217
+    },
+    "pins-before": {
+      "command": [
+        "node",
+        "scripts/check-axiom-pins.mjs"
+      ],
+      "exit": 1,
+      "seconds": 18.36450095699547
+    },
+    "register": {
+      "command": [
+        "bash",
+        "scripts/coord-tools/register.sh",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.1309540609945543
+    }
+  },
+  "historicalDocPairs": 5,
+  "implementationParent": "7dbf2748b5b0a02e42cccd6cf25c91fa77c9aade",
+  "masterCommit": "8dbbb58e6eda3d7a8e7e55fbb31e24acf5eb5990",
+  "observedSingleRunDeltaPercent": {
+    "docPaths": -3.303177324248585,
+    "pins": -4.18693108945255
+  },
+  "policyErrorsAtIntake": 0,
+  "reproduction": {
+    "byteIdentical": true,
+    "command": "python3 -B scripts/h62/item5/statement-graph/reproduce_pin_drift.py",
+    "exit": 0,
+    "optimizedModeRefused": true,
+    "sha256": "4d98b1810853c54992feb064f1a7b028e23d8212fd2aad8b8b65e81895d7c701"
+  },
+  "reviews": "Independent read-only finder/skeptic, no Lean/server. Linked-worktree absolute graft path and optimized Python verification bypass fixed, with controls; no outstanding static H112 blocker. Both reviewers confirmed checks-only full-history CI integration and fail-on-error sequence; non-checks/Lean audit jobs unchanged. Hosted CI not run.",
+  "sourcePins": {
+    ".github/workflows/lean.yml": "deac68ca6d9ca45f9ee31cad5cf1c653f5a8ad54d9412ed223e122c57a089125",
+    "docs/contributing.md": "14f2acfd1b315dc93111dc340bb446354df52c30faf2d7315b9c083b7b9b5a2b",
+    "scripts/axiom-pin-drift-baseline.mjs": "47a37b446e26e82fcf76a7b2e895bf50312590ae998376458a7fe608de8532aa",
+    "scripts/check-axiom-pins.mjs": "021370aa5cd99833e15763b17ce435ac364516fff257fd67e9ae9d4319071cdc",
+    "scripts/check-doc-paths.sh": "1f0d51628bd947b9e7419d0bfe8b604580a39c67a935322e9233eeb04a05b873",
+    "scripts/g07-unrecorded-allowlist.json": "80f0572cb10fc0fb246031bb59668d26b47df97606860106fcfc58881c4fb3d0",
+    "scripts/g07-unrecorded-baseline.json": "4d98b1810853c54992feb064f1a7b028e23d8212fd2aad8b8b65e81895d7c701",
+    "scripts/g07-unrecorded-baseline.sha256": "8991bce5259b358b9cd53903011e4db57afcd0c056757446f741aa68aad21594",
+    "scripts/h62/item5/statement-graph/reproduce_pin_drift.py": "b27146809a7e246ab6db8a2daf4d6b9e4b243ab27d6e24c3aad17344cb935e17",
+    "tests/h62/item5/statement-graph/h112-tooling.test.mjs": "19619d9035a269d67c787868795a8c44c74e93ac18363c1b0ba2b8c4f1f39dc1"
+  },
+  "tests": {
+    "command": "node --test scripts/check-axiom-pins.test.mjs tests/h62/item5/statement-graph/h112-tooling.test.mjs",
+    "failed": 0,
+    "fixtureBoundary": "Fixtures seed immutable initial99 epoch independently of later legitimate production active-subset shrinking.",
+    "passed": 14
+  },
+  "ticket": "OT-W0B-GATES",
+  "timingBoundary": "Single serial locked gate observations, not a multi-run performance benchmark or Lean speed claim. No observed slowdown."
+}

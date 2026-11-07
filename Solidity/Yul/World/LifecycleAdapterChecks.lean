@@ -47,7 +47,7 @@ theorem old_self_control :
        (p.1.execution.world.accounts (addr 1)).nonce,
        (p.1.execution.world.accounts (addr 1)).storage.read countPath,
        p.1.doomed (addr 1), p.2)) =
-      some (toWord 100, some 7, 3, some eight, false, Outcome.success []) := rfl
+      some (100, some 7, 3, some eight, false, Outcome.success []) := rfl
 
 /-- A fresh account pays a distinct funded known beneficiary, schedules only
 itself, retains its code until finalization, then disappears. -/
@@ -59,7 +59,7 @@ theorem distinct_control :
        p.doomed (addr 2), p.doomed (addr 1),
        (p.finish.execution.world.accounts (addr 2)).code,
        (p.finish.execution.world.accounts (addr 1)).code)) =
-      some (toWord 0, toWord 123, toWord 41, true, false, none, some 7) := rfl
+      some (0, 123, 41, true, false, none, some 7) := rfl
 
 def oldPaid : Lifecycle D₀ LW LW :=
   ⟨paid, unscheduledLife.created, fun other =>
@@ -106,7 +106,7 @@ survivor in a new transaction is not eligible for deferred deletion. -/
 theorem reset_control :
     (unscheduledLife.finish.destructKnown false (addr 2) (addr 2)).map (fun p =>
       (p.created (addr 2), p.doomed (addr 2), (p.execution.world.accounts (addr 2)).balance,
-       (p.finish.execution.world.accounts (addr 2)).code)) = some (false, false, toWord 23, some 8) := rfl
+       (p.finish.execution.world.accounts (addr 2)).code)) = some (false, false, 23, some 8) := rfl
 
 theorem destruction_negatives :
     (burned.execution.world.accounts (addr 2)).balance ≠ toWord 23 ∧
@@ -137,7 +137,7 @@ theorem delegated_destruction :
        p.1.doomed (addr 1), p.1.doomed (addr 2),
        (p.1.finish.execution.world.accounts (addr 1)).code,
        (p.1.finish.execution.world.accounts (addr 2)).code, p.2)) =
-      some (toWord 0, toWord 23, toWord 141, false, false, some 7, some 8, Outcome.success []) := rfl
+      some (0, 23, 141, false, false, some 7, some 8, Outcome.success []) := rfl
 
 theorem nested_static_destruction :
     let frame := childContext fundedPrefix { parent with static := true } .delegatecall (addr 2) (toWord 0) [17]

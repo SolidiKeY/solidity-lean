@@ -49,7 +49,7 @@ theorem sb_target_self :
   rfl
 
 /-- A stored external account balance is NOT the owner's external observation. -/
-theorem sb_not_stored_external : sourceObservedBalance sbGlob sbExternal sbAddress≠(sbExternal.2.ex.world.accounts sbAddress).balance := by decide
+theorem sb_not_stored_external : sourceObservedBalance sbGlob sbExternal sbAddress≠Source.Monetary.wordView (sbExternal.2.ex.world.accounts sbAddress).balance := by decide
 
 theorem sb_not_stale_history : sourceObservedBalance sbGlob sbExternal sbAddress≠sourceObservedBalance sbGlob sbHistory sbAddress := by decide
 
@@ -59,4 +59,29 @@ theorem sb_code_not_catalog : sbGlob.prog.contracts=[] ∧ (sbSystem.2.ex.world.
 theorem sb_timeout :
     (Source.evalE sbGlob sbFrame 0 (sourceBalanceExpr Source.Idx.here)).run sbSystem=(.error .timeout,sbSystem) := rfl
 
+/-- Synthetic out-of-range account: representable Source money, not an EVM
+reachable-state witness. The observed Word is deliberately a separate view. -/
+def sbWide : Source.EMState Source.SemanticsExamples.E0 [.address false] :=
+  ⟨sbSystem.1,{sbSystem.2 with ex := (sbSystem.2.ex.apply
+    (.account sbAddress (fun account => account.withBalance Source.Monetary.wide)))}⟩
+
+theorem sb_wide_exact_state_and_word_view :
+    (sbWide.2.ex.world.accounts sbAddress).balance = 2^256 ∧
+    sourceObservedBalance sbGlob sbWide sbAddress = 0 ∧
+    ¬ Source.Monetary.Fits (sbWide.2.ex.world.accounts sbAddress).balance := by decide
+
+/-- Actual evaluator law in either pipeline, without treating Word zero as
+an exact-money equality or inventing a reachable-EVM range invariant. -/
+theorem sb_actual_wide (pipeline : Roadmap.Pipeline) (n : Nat) :
+    (Source.evalE {sbGlob with pipeline := pipeline} sbFrame (n+2)
+      (sourceBalanceExpr Source.Idx.here)).run sbWide =
+      (.ok (.val (uintValueOfWord Source.SemanticsExamples.E0.layout 0)),sbWide) :=
+  sourceBalanceLocal_run {sbGlob with pipeline := pipeline} sbFrame n sbWide .here sbAddress rfl
+
 end Solidity.Yul.Views.Controls
+
+/-- info: 'Solidity.Yul.Views.Controls.sb_wide_exact_state_and_word_view' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.Controls.sb_wide_exact_state_and_word_view
+
+/-- info: 'Solidity.Yul.Views.Controls.sb_actual_wide' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.Controls.sb_actual_wide

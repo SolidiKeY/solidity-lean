@@ -23,7 +23,9 @@ This module proves, for that fragment:
   covered (`decodeArg_entry_ok`, `decodeArgs_entry_ok`);
 - **reads**: an element read, a byte read and a slice are never `stuck`
   (`readLoc_cd_ok`, `cdByte_ok`, `sliceR_ok`);
-- **copies keep the memory invariant** (`cdToMem_ok`);
+- **copies keep the memory invariant** (`cdToMem_ok`), including the
+  statically encoded element copies at the head stride (`cdStaticToMem_ok`,
+  `cdToMem_static_ok`, G18.05);
 - **the evaluation arms on `calldata` locals** (closed):
   `evalE_cdLength_ok` (`x.length`), `evalE_cdIndex_ok` (`x[j]`),
   `evalE_cdSlice_ok` (`x[s:e]`) keep `MemOK` and halt only without `stuck`.
@@ -33,10 +35,12 @@ call data is read only, and reads past its end return zeros (as
 `calldataload`); no invariant ties a reference's offset and length to
 `Fr.cd`, which entry decoding respects but the theorems do not need.
 
-Not modelled (named, `stuck` or refused): `calldata` structs, static
-arrays and nested arrays (dispatch refuses them as before), a `calldata`
-argument of a constructor (solc refuses one), `string` slices (solc
-refuses them).
+The owned `CalldataAggregates.lean` extension covers nested dynamic reads,
+strings and represented inline static-array elements; its layout predicates
+also admit string slices and statically encoded reference-element slices.
+Direct static-array entry parameters, structs and unrepresented fixed shapes
+remain open. Constructor calldata and slices of dynamically encoded base
+elements remain refused. Memory-copy generalisation is separate G18.05 work.
 -/
 
 namespace Solidity.Source
@@ -67,7 +71,7 @@ theorem cdArg_ok (D : Layout) (data : Bytes) (i stride : Nat) {τ : STy} (h : τ
 /-- A `calldata` parameter type dispatch keeps as a reference. -/
 def STy.calldataArg : STy → Bool
   | .bytes .calldata | .string .calldata => true
-  | .array .calldata σ none => σ.isValueTy
+  | .array .calldata σ none => σ.cdElement
   | _ => false
 
 /-- **The types dispatch decodes without `stuck`**: the decoder's
@@ -102,7 +106,7 @@ theorem decodeArg_cd_ok {P : EMState E Γ → Prop} (data : Bytes) (i : Nat) {τ
   case array l σ k =>
     cases l <;> cases k <;> simp only [STy.calldataArg, reduceCtorEq] at hτ
     simp only [decodeArg, if_pos hτ]
-    exact hl rfl 32
+    exact hl rfl σ.cdHeadBytes
   all_goals simp only [STy.calldataArg, reduceCtorEq] at hτ
 
 /-- **Every type dispatch decodes**: `MemOK` is kept, the value agrees, no
@@ -172,14 +176,97 @@ theorem cdToMem_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
     exact Hoare.bind (Hoare.conseq (allocRef_memX _ rfl (by trivial) (by trivial)
       (X := fun e y => MemOK E H y ∧ NotStuck e)) (fun y hy => ⟨hy, .string _⟩) (fun _ _ h => h) (fun _ _ h => h))
       fun _ => Hoare.pure' fun _ h => h
-  · simp only [cdToMem, STy.loc?, reduceCtorEq, dite_false]
-    refine Hoare.bind (List.mapM_ok _ (fun _ => Hoare.lift_ns (decodeWord_ok _ hσ)) _) fun xs => ?_
-    exact Hoare.bind (Hoare.conseq (allocRef_memX _ rfl (by trivial) (by exact fun _ => ⟨_, rfl⟩)
-        (X := fun e y => MemOK E H y ∧ NotStuck e))
-      (fun y hy => ⟨hy, .array fun _ => .val (Val.refOK_of_loc (STy.decodableElem_loc hσ) _)⟩)
-      (fun _ _ h => h) (fun _ _ h => h)) fun _ => Hoare.pure' fun _ h => h
+  · cases σ
+    case array l e k => simp only [STy.decodableElem, STy.wordElem, Bool.false_eq_true] at hσ
+    all_goals
+      simp only [cdToMem, STy.loc?, reduceCtorEq, dite_false]
+      refine Hoare.bind (List.mapM_ok _ (fun _ => Hoare.lift_ns (decodeWord_ok _ hσ)) _) fun xs => ?_
+      exact Hoare.bind (Hoare.conseq (allocRef_memX _ rfl (by trivial) (by exact fun _ => ⟨_, rfl⟩)
+          (X := fun e y => MemOK E H y ∧ NotStuck e))
+        (fun y hy => ⟨hy, .array fun _ => .val (Val.refOK_of_loc (STy.decodableElem_loc hσ) _)⟩)
+        (fun _ _ h => h) (fun _ _ h => h)) fun _ => Hoare.pure' fun _ h => h
   · simp only [cdToMem, dif_pos hc]
     exact Hoare.pure' fun _ h => ⟨h, trivial⟩
+
+/-- **A statically encoded element `cdStaticToMem` copies** (G18.05): a
+one-word value the decoder reads, or a static memory array of such
+elements with a statically encoded element. -/
+def STy.cdCopyElem (E : Env) : STy → Bool
+  | .array .memory e (some _) => decide (0 < e.cdStaticWords) && e.cdCopyElem E
+  | σ => σ.decodableElem E
+
+theorem finCons_vals {H : HeapTy} {σ : STy} {m : Nat} {x : Val E.layout σ}
+    {f : Fin m → Data E.layout σ} (hx : x.RefOK E H)
+    (hf : ∀ i, ∃ v, f i = Data.val v ∧ v.RefOK E H) :
+    ∀ i, ∃ v, finCons (Data.val x) f i = Data.val v ∧ v.RefOK E H := by
+  intro i
+  unfold finCons
+  split
+  · exact ⟨x, rfl, hx⟩
+  · exact hf _
+
+/-- **The copied elements are bare values whose references are live**, for
+any element copy keeping the memory invariant. -/
+theorem cdElems_ok {σ : STy} {go : Nat → EM E Γ (Val E.layout σ)} (stride : Nat)
+    (hgo : ∀ (H : HeapTy) (off : Nat), Hoare (MemOK E H) (go off)
+      (fun v y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (fun e y => MemOK E H y ∧ NotStuck e)) :
+    ∀ (H : HeapTy) (off m : Nat), Hoare (MemOK E H) (cdElems go stride off m)
+      (fun f y => MemOK E H y ∧ ∀ i, ∃ v, f i = Data.val v ∧ v.RefOK E y.2.heap.ty)
+      (fun e y => MemOK E H y ∧ NotStuck e)
+  | _, _, 0 => Hoare.pure' fun _ h => ⟨h, fun i => i.elim0⟩
+  | H, off, m + 1 => by
+    unfold cdElems
+    refine Hoare.bind (hgo H off) fun x y hxy => ?_
+    obtain ⟨hy, hx⟩ := hxy
+    exact Hoare.conseq (Hoare.bind (cdElems_ok stride hgo y.2.heap.ty (off + stride) m) fun f =>
+        Hoare.pure' (a := finCons (Data.val x) f)
+          (Q := fun g y' => MemOK E y.2.heap.ty y' ∧
+            ∀ i, ∃ v, g i = Data.val v ∧ v.RefOK E y'.2.heap.ty)
+          fun y' hf => ⟨hf.1, finCons_vals (hx.mono hf.1.le) hf.2⟩)
+      (fun _ h => h) (fun _ _ h => ⟨h.1.weaken hy.le, h.2⟩) (fun _ _ h => ⟨h.1.weaken hy.le, h.2⟩)
+      y (MemOK.self hy)
+
+/-- **A static element copy keeps the memory invariant** and is never
+`stuck` (G18.05). -/
+theorem cdStaticToMem_ok (F : Fr) (σ : STy) (hσ : σ.cdCopyElem E = true) (H : HeapTy) (off : Nat) :
+    Hoare (MemOK E H) (cdStaticToMem F σ off : EM E Γ (Val E.layout σ))
+      (fun v y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (fun e y => MemOK E H y ∧ NotStuck e) := by
+  unfold cdStaticToMem
+  split
+  · rename_i e m
+    simp only [STy.cdCopyElem, Bool.and_eq_true, decide_eq_true_eq] at hσ
+    rw [if_pos hσ.1]
+    refine Hoare.bind (cdElems_ok _ (fun H' o => cdStaticToMem_ok F e hσ.2 H' o) H off m) fun xs y hy => ?_
+    exact allocRef_memX (Data.array _ _ xs) rfl (by trivial) (by exact fun j => (hy.2 j).imp fun _ h => h.1)
+      (X := fun e y => MemOK E H y ∧ NotStuck e) y
+      ⟨hy.1, .array fun j => by obtain ⟨v, hv, hr⟩ := hy.2 j; rw [hv]; exact .val hr⟩
+  · rename_i notArray
+    have hd : σ.decodableElem E = true := by
+      unfold STy.cdCopyElem at hσ
+      split at hσ
+      · exact (notArray _ _ rfl).elim
+      · exact hσ
+    exact Hoare.conseq (Hoare.lift_ns (decodeWord_ok _ hd)) (fun _ h => h)
+      (fun v _ h => ⟨h, Val.refOK_of_loc (STy.decodableElem_loc hd) v⟩) (fun _ _ h => h)
+
+/-- **A copy of statically encoded elements keeps the memory invariant**
+and is never `stuck`: a dynamic array of static arrays, or a static
+array (G18.05). -/
+theorem cdToMem_static_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
+    (hτ : (∃ e m, τ = .array .memory (.array .memory e (some m)) none ∧
+        (STy.array .memory e (some m)).cdCopyElem E = true) ∨
+      (∃ σ m, τ = .array .memory σ (some m) ∧ σ.cdCopyElem E = true)) :
+    Hoare (MemOK E H) (cdToMem F τ off len : EM E Γ (RVal E.layout τ))
+      (fun v y => MemOK E H y ∧ RValOK E y.2.heap.ty v) (fun e y => MemOK E H y ∧ NotStuck e) := by
+  rcases hτ with ⟨e, m, rfl, hσ⟩ | ⟨σ, m, rfl, hσ⟩
+  all_goals
+    simp only [cdToMem, STy.loc?, reduceCtorEq, dite_false]
+    refine Hoare.bind (cdElems_ok _ (fun H' o => cdStaticToMem_ok F _ hσ H' o) H off _) fun xs => ?_
+    refine Hoare.bind ?_ fun _ => Hoare.pure' fun _ h => h
+    intro y hy
+    exact allocRef_memX (Data.array _ _ xs) rfl (by trivial) (by exact fun j => (hy.2 j).imp fun _ h => h.1)
+      (X := fun e y => MemOK E H y ∧ NotStuck e) y
+      ⟨hy.1, .array fun j => by obtain ⟨v, hv, hr⟩ := hy.2 j; rw [hv]; exact .val hr⟩
 
 /-! ## The evaluation arms on `calldata` locals -/
 
@@ -229,7 +316,7 @@ theorem evalE_cdIndex_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {σ : STy}
     | int v hv =>
       simp only [indexNat, RVal.amount]
       rw [show (lift (pure v.toNat) : EM E Γ Nat) = pure v.toNat from rfl, pure_bind]
-      simp only [indexLoc, lengthOf, pure_bind]
+      simp only [indexLoc, lengthOf, pure_bind, if_pos (STy.decodableElem_isValueTy hσ)]
       refine Hoare.bind (R := fun loc y => MemOK E H y ∧ ∃ o, loc = Loc.cd o) ?_ fun loc => ?_
       · exact Hoare.ite' (fun _ => Hoare.pure' fun _ hy => ⟨hy, _, rfl⟩)
           (fun _ => Hoare.lift' fun _ hy => show MemOK E H _ ∧ NotStuck _ from ⟨hy, trivial⟩)
@@ -243,6 +330,7 @@ theorem evalE_cdIndex_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {σ : STy}
 theorem STy.sliceable_loc {τ : STy} (h : τ.sliceable = true) : τ.loc? = some .calldata := by
   cases τ <;> simp only [STy.sliceable, reduceCtorEq] at h
   case bytes l => cases l <;> simp only [reduceCtorEq] at h; rfl
+  case string l => cases l <;> simp only [reduceCtorEq] at h; rfl
   case array l σ k => cases l <;> cases k <;> simp only [reduceCtorEq] at h; rfl
 
 /-- An index local's value as a number. -/
@@ -297,6 +385,10 @@ theorem evalE_cdSlice_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {τ : STy}
 #guard_msgs in #print axioms Solidity.Source.readLoc_cd_ok
 /-- info: 'Solidity.Source.cdToMem_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.cdToMem_ok
+/-- info: 'Solidity.Source.cdStaticToMem_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.cdStaticToMem_ok
+/-- info: 'Solidity.Source.cdToMem_static_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Source.cdToMem_static_ok
 /-- info: 'Solidity.Source.evalE_cdLength_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.evalE_cdLength_ok
 /-- info: 'Solidity.Source.evalE_cdIndex_ok' depends on axioms: [propext, Classical.choice, Quot.sound] -/

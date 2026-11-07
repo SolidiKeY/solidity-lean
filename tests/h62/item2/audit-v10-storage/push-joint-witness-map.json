@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "7d3a2ce62a4d21f659ab56eea72553a6420c5f746907e86d1a561bc8d6a62d90",
+  "kind": "joint-premise",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/OperationPush.lean:30:operationPush_header",
+      "theorem": "Solidity.Backend.StorageOps.operationPush_header",
+      "signature": "theorem operationPush_header {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (old result : Value G (.array E)) (pushed : operationPush old = some result) :\n    result.length.val = old.length.val + 1 \u2227 result.extent.val = max old.extent.val (old.length.val + 1)",
+      "signature_sha256": "5931ef8120668aecd5148b1e37c159888dcc58c37ea5b58d76d0d4420c52ef80",
+      "witness": "H62.StorageAudit.PushWitnesses.header_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/OperationPush.lean:39:operationPush_keeps",
+      "theorem": "Solidity.Backend.StorageOps.operationPush_keeps",
+      "signature": "theorem operationPush_keeps {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (old result : Value G (.array E)) (pushed : operationPush old = some result)\n    (i : Index) (preserve : E.isPrimitive = false \u2228 i.val \u2260 old.length.val)\n    (allocated : i.val < old.extent.val) :\n    TypeGraph.Step.get Value.dflt (.index i) result = TypeGraph.Step.get Value.dflt (.index i) old",
+      "signature_sha256": "d979e2000fc7aafa980f9fd80c2d05cd499e11a208ae1f6ba59b540099024d69",
+      "witness": "H62.StorageAudit.PushWitnesses.kept_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/OperationPush.lean:48:operationPush_fresh",
+      "theorem": "Solidity.Backend.StorageOps.operationPush_fresh",
+      "signature": "theorem operationPush_fresh {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (old result : Value G (.array E)) (fresh : old.extent.val = old.length.val)\n    (pushed : operationPush old = some result) :\n    TypeGraph.Step.get Value.dflt (.index old.length) result = some (Value.dflt E)",
+      "signature_sha256": "73b8aeee857a149fa2e9a3dfbf63f83053e196ff060201a839b3a78f748e3cb6",
+      "witness": "H62.StorageAudit.PushWitnesses.fresh_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/OperationPush.lean:56:operationPush_reset",
+      "theorem": "Solidity.Backend.StorageOps.operationPush_reset",
+      "signature": "theorem operationPush_reset {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (old result : Value G (.array E)) (primitive : E.isPrimitive = true)\n    (pushed : operationPush old = some result) :\n    TypeGraph.Step.get Value.dflt (.index old.length) result = some (Value.dflt E)",
+      "signature_sha256": "518c13794efdf874f50ef5da716c06970ab551bfd805469e20d22a8cbfcb8be8",
+      "witness": "H62.StorageAudit.PushWitnesses.reset_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-6-20261106",
+  "lane": "migrate-stipend",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-stipend",
+  "original_write_scope": [
+    "tests/h62/item6/migrate-stipend/**",
+    "scripts/h62/item6/migrate-stipend/**",
+    "docs/feature-work/h62-6-migrate-stipend.md",
+    "Solidity/Stipend/Rule.lean"
+  ],
+  "migration_directory": "Solidity/Stipend/ ONLY",
+  "originals_outside_scope": "READ ONLY; external migrations remain owner requests",
+  "generated_roots_central_maps_axiom_pins": "Do not edit; supply registration fragments",
+  "new_additive_lean_helpers": "tests directory until approved module registration",
+  "live_ownership": "isolated migration overlay; no transfer from proving lanes",
+  "frozen_surface": "exact types, semantics, statement premises/exclusions, observations, axiom sets and proof budgets",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "official_archive_sha256": "7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d",
+  "prohibitions": [
+    "no push absent separate authorization",
+    "no merge/master change/PR/pre-gate/deployment",
+    "no systemd-run",
+    "no new sorry/axiom/native_decide/trust shortcut",
+    "no raised maxHeartbeats",
+    "no weakening",
+    "no competing goal or VM",
+    "no duplicate H55 work"
+  ],
+  "later_policy": "H82 standing agreement supersedes original exact-file permission protocol for statement-preserving work; statement/definition/interface/budget/axiom/exclusion changes retain owner and H57 obligations. This does not override explicit retirement.",
+  "retirement": "H82 stop-and-handoff takes precedence; no new proof implementation",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "push": "No H71 permission text is available in this thread or supplied decisions. Original no-push restriction retained; no push attempted."
+}

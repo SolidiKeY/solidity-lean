@@ -1,0 +1,18 @@
+{
+ "tests/sol-override-validation/GraphControls.lean:Solidity.Frontend.OverrideValidation.Controls.cut_cycle_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/GraphControls.lean:Solidity.Frontend.OverrideValidation.Controls.different_implemented_bodies": [
+  "propext"
+ ],
+ "tests/sol-override-validation/GraphControls.lean:Solidity.Frontend.OverrideValidation.Controls.distinct_positions": [
+  "propext"
+ ],
+ "tests/sol-override-validation/GraphControls.lean:Solidity.Frontend.OverrideValidation.Controls.nested_frontiers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,9 @@
+{
+  "existing_core_byte_identical": true,
+  "core_sha256": "2498211701c7a33d8f7c3756a374ce6af89cfbce783abe6413bdbb52f5562879",
+  "beforeSeconds": 2.2950331669999287,
+  "repeatSeconds": 2.323567097002524,
+  "newModuleSeconds": 0.45873444799508434,
+  "held_factoringSeconds": 2.4364301270034048,
+  "boundary": "Factored core candidate held, not landed. Actual original core and its import closure unchanged."
+}

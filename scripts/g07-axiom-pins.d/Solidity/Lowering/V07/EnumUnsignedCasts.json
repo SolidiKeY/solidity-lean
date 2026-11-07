@@ -1,0 +1,33 @@
+{
+ "Solidity/Lowering/V07/EnumUnsignedCasts.lean:Solidity.Lowering.V07.EnumUnsignedCasts.allowed": [],
+ "Solidity/Lowering/V07/EnumUnsignedCasts.lean:Solidity.Lowering.V07.EnumUnsignedCasts.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumUnsignedCasts.lean:Solidity.Lowering.V07.EnumUnsignedCasts.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumUnsignedCasts.lean:Solidity.Lowering.V07.EnumUnsignedCasts.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumUnsignedCasts.lean:Solidity.Lowering.V07.EnumUnsignedCasts.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumUnsignedCasts.lean:Solidity.Lowering.V07.EnumUnsignedCasts.value_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/EnumUnsignedCasts.lean:Solidity.Lowering.V07.EnumUnsignedCasts.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

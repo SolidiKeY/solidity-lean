@@ -1,0 +1,27 @@
+{
+ "tests/v14-constructor/InitializationAxioms.lean:Solidity.Backend.Executable.ConstructorInitialization.append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/InitializationAxioms.lean:Solidity.Backend.Executable.ConstructorInitialization.Controls.different_states": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/InitializationAxioms.lean:Solidity.Backend.Executable.ConstructorInitialization.Controls.legacy_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/InitializationAxioms.lean:Solidity.Backend.Executable.ConstructorInitialization.Controls.split_init_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/InitializationAxioms.lean:Solidity.Backend.Executable.ConstructorInitialization.Controls.viaIR_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

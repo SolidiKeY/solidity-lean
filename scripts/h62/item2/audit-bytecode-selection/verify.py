@@ -17,7 +17,7 @@ from census import BASE, mask
 import hashlib
 
 DEFAULT_ROOTS = ["tests/h62/item2/audit-bytecode-selection/" + name + ".lean"
-                 for name in ["Witnesses", "LiteralSuccess", "RuntimePremiseWitness", "ValueGateSuccess", "HypothesisDomains"]]
+                 for name in ["Witnesses", "LiteralSuccess", "RuntimePremiseWitness", "ValueGateSuccess", "HypothesisDomains", "BoolBindingSuccess", "FailurePathsWitnesses"]]
 
 
 def import_path(module):

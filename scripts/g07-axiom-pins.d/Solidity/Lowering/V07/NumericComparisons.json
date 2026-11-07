@@ -1,0 +1,46 @@
+{
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.classified": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.code_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.metadata": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.pass_exact": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.tail_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/NumericComparisons.lean:Solidity.Lowering.V07.NumericComparisons.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

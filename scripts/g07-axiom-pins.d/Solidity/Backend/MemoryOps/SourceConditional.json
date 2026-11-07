@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/SourceConditional.lean:Solidity.Backend.MemoryOps.source_cond_select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceConditional.lean:Solidity.Backend.MemoryOps.word_cond_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceConditional.lean:Solidity.Backend.MemoryOps.word_cond_true": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceConditional.lean:Solidity.Backend.MemoryOps.word_cond_true_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

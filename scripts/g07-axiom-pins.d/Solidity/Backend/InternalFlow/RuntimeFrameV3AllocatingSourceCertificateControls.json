@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.certified": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.nil_uncertifiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceCertificate.Controls.wrong_index_uncertifiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

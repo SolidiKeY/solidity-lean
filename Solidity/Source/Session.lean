@@ -50,11 +50,13 @@ def sessionGoEvents (P : SrcProg E) (env : SessionEnv) (n : Nat) : Nat → Nat �
         if (← instanceAt (P.glob env) t).isSome then credit t v) s 0).2
       sessionGoEvents P env n k (i + 1) { s' with events := s.events ++ [.credit t v] } last
     | some (.request q) =>
-      match firstDone (runAt (fun f => runTx (P.glob env) f q) s) n with
-      | some (_, (.ok o, s')) =>
-        sessionGoEvents P env n k (i + 1) { s' with events := s.events ++ s'.events.drop s.events.length } o
-      | some (_, (.error _, s')) => ⟨s'.events, none⟩
-      | none => ⟨(runAt (fun f => runTx (P.glob env) f q) s n).2.events, none⟩
+      if requestFunded P.fixed env.balance s.events q then
+        match firstDone (runAt (fun f => runTx (P.glob env) f q) s) n with
+        | some (_, (.ok o, s')) =>
+          sessionGoEvents P env n k (i + 1) { s' with events := s.events ++ s'.events.drop s.events.length } o
+        | some (_, (.error _, s')) => ⟨s'.events, none⟩
+        | none => ⟨(runAt (fun f => runTx (P.glob env) f q) s n).2.events, none⟩
+      else sessionGoEvents P env n k (i + 1) s last
 
 theorem sessionGoEvents_extends (P : SrcProg E) (env : SessionEnv) (n : Nat) :
     ∀ k i (s : St E) last, s.events <+: (sessionGoEvents P env n k i s last).events
@@ -67,15 +69,17 @@ theorem sessionGoEvents_extends (P : SrcProg E) (env : SessionEnv) (n : Nat) :
       exact List.prefix_append _ _
     · rename_i q _
       split
-      · rename_i j o s' hf
-        refine List.IsPrefix.trans ?_ (sessionGoEvents_extends P env n k _ _ _)
-        exact List.prefix_append _ _
-      · rename_i j h s' hf
-        obtain ⟨_, hr, _⟩ := firstDone_spec hf
-        have := runTx_extends (P.glob env) q s j
-        rw [← hr] at this
-        exact this
-      · exact runTx_extends (P.glob env) q s n
+      · split
+        · rename_i j o s' hf
+          refine List.IsPrefix.trans ?_ (sessionGoEvents_extends P env n k _ _ _)
+          exact List.prefix_append _ _
+        · rename_i j h s' hf
+          obtain ⟨_, hr, _⟩ := firstDone_spec hf
+          have := runTx_extends (P.glob env) q s j
+          rw [← hr] at this
+          exact this
+        · exact runTx_extends (P.glob env) q s n
+      · exact sessionGoEvents_extends P env n k (i + 1) s last
 
 /-- The events a completed transaction leaves are its run's. -/
 theorem events_drop {s s' : St E} (h : s.events <+: s'.events) :
@@ -97,51 +101,81 @@ theorem sessionGoEvents_mono (P : SrcProg E) (env : SessionEnv) :
     · exact sessionGoEvents_mono P env k k' n n' _ _ _ (by omega) hn
     · rename_i q _
       split
-      · rename_i j o s' hf
-        rw [firstDone_mono _ hn hf]
-        exact sessionGoEvents_mono P env k k' n n' _ _ _ (by omega) hn
-      · rename_i j h s' hf
-        rw [firstDone_mono _ hn hf]
-        exact Prefix.Le.refl _
-      · rename_i hf
-        have hdn := firstDone_none_le hf n (Nat.le_refl _)
-        refine ⟨?_, .inl rfl⟩
-        show (runAt (fun f => runTx (P.glob env) f q) s n).2.events <+: _
-        split
-        · rename_i j o s' hf'
-          obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
-          have hnj : n ≤ j := by
-            by_cases h' : j ≤ n
-            · rw [firstDone_none_le hf j h'] at hd; cases hd
-            · omega
-          have hm := runTx_events_mono (P.glob env) q s hnj hdn
-          rw [← hr] at hm
-          have hx := runTx_extends (P.glob env) q s j
-          rw [← hr] at hx
-          refine hm.trans ?_
-          have := sessionGoEvents_extends P env n' k' (i + 1)
-            { s' with events := s.events ++ s'.events.drop s.events.length } o
-          refine List.IsPrefix.trans ?_ this
-          show s'.events <+: s.events ++ s'.events.drop s.events.length
-          rw [events_drop hx]
-          exact List.prefix_refl _
-        · rename_i j h s' hf'
-          obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
-          have hnj : n ≤ j := by
-            by_cases h' : j ≤ n
-            · rw [firstDone_none_le hf j h'] at hd; cases hd
-            · omega
-          have hm := runTx_events_mono (P.glob env) q s hnj hdn
-          rw [← hr] at hm
-          exact hm
-        · exact runTx_events_mono (P.glob env) q s hn hdn
+      · split
+        · rename_i j o s' hf
+          rw [firstDone_mono _ hn hf]
+          exact sessionGoEvents_mono P env k k' n n' _ _ _ (by omega) hn
+        · rename_i j h s' hf
+          rw [firstDone_mono _ hn hf]
+          exact Prefix.Le.refl _
+        · rename_i hf
+          have hdn := firstDone_none_le hf n (Nat.le_refl _)
+          refine ⟨?_, .inl rfl⟩
+          show (runAt (fun f => runTx (P.glob env) f q) s n).2.events <+: _
+          split
+          · rename_i j o s' hf'
+            obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
+            have hnj : n ≤ j := by
+              by_cases h' : j ≤ n
+              · rw [firstDone_none_le hf j h'] at hd; cases hd
+              · omega
+            have hm := runTx_events_mono (P.glob env) q s hnj hdn
+            rw [← hr] at hm
+            have hx := runTx_extends (P.glob env) q s j
+            rw [← hr] at hx
+            refine hm.trans ?_
+            have := sessionGoEvents_extends P env n' k' (i + 1)
+              { s' with events := s.events ++ s'.events.drop s.events.length } o
+            refine List.IsPrefix.trans ?_ this
+            show s'.events <+: s.events ++ s'.events.drop s.events.length
+            rw [events_drop hx]
+            exact List.prefix_refl _
+          · rename_i j h s' hf'
+            obtain ⟨hj, hr, hd⟩ := firstDone_spec hf'
+            have hnj : n ≤ j := by
+              by_cases h' : j ≤ n
+              · rw [firstDone_none_le hf j h'] at hd; cases hd
+              · omega
+            have hm := runTx_events_mono (P.glob env) q s hnj hdn
+            rw [← hr] at hm
+            exact hm
+          · exact runTx_events_mono (P.glob env) q s hn hdn
+      · exact sessionGoEvents_mono P env k k' n n' (i + 1) s last (by omega) hn
 
-/-- The deployment as a session runs it: its outcome recorded as an event. -/
-def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat) : EM E [] Outcome := do
-  let o ← deploy (P.glob env) f P.main addr env.deployer env.deployValue env.deployArgs
-  emitEvent (.deploy env.deployer env.deployValue env.deployArgs o
+/-- The deployment as a session runs it: its completed outcome recorded as an
+event. An explicit failure plan reaches actual initcode execution; an exceptional
+request/ancestor stop propagates without a deployment receipt. The default path
+and its horizon laws below remain unchanged. This does not install a post-fee
+balance or consume the deployment transaction-fate ordinal. The terminal
+receipt is deliberately outside the body-event budget, as in FailureCursor. -/
+def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat)
+    (plan : FailureExecution.RuntimePlan := none) : EM E [] Outcome := do
+  let o ← deploy (plan := plan) (P.glob env) f P.main addr env.deployer env.deployValue env.deployArgs
+  emitEvent (plan := none) (.deploy env.deployer env.deployValue env.deployArgs o
     (match o with | .success _ => some addr | .revert _ => none))
   pure o
+
+/-- Exact full-state receipt boundary: completion appends only the terminal
+event; every exceptional halt retains the entire resulting state without a
+receipt. In particular receipt emission does not tick body-event budgets. -/
+theorem deployRun_run {E : Env} (P : SrcProg E) (env : Roadmap.SessionEnv)
+    (addr : Roadmap.Address) (f : Nat) (plan : FailureExecution.RuntimePlan)
+    (l : Locals E.layout []) (s : St E) :
+    (deployRun P env addr f plan).run (l,s) =
+      match (deploy (plan := plan) (P.glob env) f P.main addr env.deployer env.deployValue env.deployArgs).run (l,s) with
+      | (.ok o,(l',s')) =>
+        (.ok o,(l',{ s' with events := s'.events ++
+          [.deploy env.deployer env.deployValue env.deployArgs o
+            (match o with | .success _ => some addr | .revert _ => none)] }))
+      | (.error why,post) => (.error why,post) := by
+  unfold deployRun
+  rw [ExceptT.run_bind]
+  show StateT.bind (ExceptT.run (deploy (plan := plan) (P.glob env) f P.main addr
+    env.deployer env.deployValue env.deployArgs)) _ (l,s) = _
+  simp only [StateT.bind]
+  cases h : (deploy (plan := plan) (P.glob env) f P.main addr env.deployer
+    env.deployValue env.deployArgs).run (l,s) with
+  | mk result post => cases result <;> cases post <;> rfl
 
 theorem deployRun_grow (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat) :
     Grow (deployRun P env addr f) := by

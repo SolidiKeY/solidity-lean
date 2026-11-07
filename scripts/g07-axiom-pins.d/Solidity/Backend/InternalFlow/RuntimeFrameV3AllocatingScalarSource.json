@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.allocated_parameters": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.scoped_allocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.source_positive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

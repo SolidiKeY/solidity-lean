@@ -1,5 +1,12 @@
 # H62 item 2: precompile empty-statement audit
 
+**Successor update (2026-11-06):** the retired member's authenticated final head is now
+merged on the original precompile-agreement branch. Fresh frozen-v4.24 evidence
+accounts for 97/138 cases, with 41 pending; details are in the successor checkpoint
+below. The retirement notice immediately below applies to the retired member,
+whose goal remains paused. The successor continues its existing original goal.
+
+
 **H82 retirement: STOPPED / PAUSED BY USER INSTRUCTION.** No implementation continuation
 is authorized in this worker. Handoff target: solidity-sol-20261103/precompile-agreement.
 Successor integrates final committed head after the final stopped/head acknowledgement.
@@ -270,3 +277,128 @@ finish 30 joint proof-premise cases, 56 data-domain cases and 28 closed fidelity
 complete exact kernel types/private names,
 Bridge/gas/fork/compiler boundaries, independent milestone reviews and all final passing gates.
 The assignment remains blocked, not complete; the 8-10 hour useful queue has not been exhausted.
+
+## Successor checkpoint: authenticated intake and frozen-v4.24 evidence
+
+The exact final head `bd86434e0f193422309f15bad579c171cac2eb3b` was fetched from its
+published lane branch and merged as `b6019bd1a3b9908af3d74700ae62660c6e3ce6cc`.
+Frozen rendered prompt SHA25639585f8ffb6629c51fc8d1e0fca1808807d9cb06983d0c558dcdc019112450f3
+and scope SHA25630e1b7cf905fbd4915b265ffd0acdbb5241bdaaa6213f51016d9d4aa199e67c4
+match the final relay. All 557 H82b metadata-file hashes and the archive/manifest
+hashes match. Final stop/pause/quiescence is authenticated; the retirement barrier
+is resolved. Historical off-git executable/cache/evidence artifacts were not
+received, and their old gates are not claimed reverified from those bytes.
+
+Five completed work items are: final-member intake; fresh reproduction of the
+24 existing applicability cases; ten IDENTITY applicability cases; whole-type
+fidelity for all 73 Bridge declarations; and the existing abstract Stipend
+negative controls. The latter needed four missing core products and a stale
+Scoped object refreshed from unchanged sources. Cache-enabled and no-cache Lake
+commands returned0 while leaving products absent; those mechanical exits are
+not treated as successful imports. Actual direct materialization and final
+Stipend control elaboration succeeded. No producer source or frozen statement,
+definition, interface, budget, axiom set or exclusion was edited.
+
+The new IDENTITY cases construct all data and each hypothesis jointly for the
+same input: six proof-premise witnesses and four data-domain samples. They retain
+the full original conclusions. Nonempty input, exact/short gas and a reject-all
+flag-function control are checked. The huge-array case is symbolic mathematical
+inhabitance, not a claim of executable allocation or practical feasibility.
+The reject-all flag function is not an actual compiler; G43's separate actual
+compiler-success theorem remains required. The two Stipend controls are also
+abstract parameterized controls, not twelve new original-case witnesses.
+
+[BridgeFidelity.lean](../../tests/h62/item2/audit-precompiles/BridgeFidelity.lean) directly checks all 73 full frozen types. Four private terms
+resolve the unique actual imported kernel constants and undergo ordinary term
+checking at the entire expected type; no axiom or declaration is substituted.
+Twenty-five closed statements receive fidelity checks, not fabricated exists-True
+witnesses. Cumulative fresh accounting is 13 joint-premise cases,21 data samples,
+25 closed-fidelity cases:59 distinct accounted cases,79 pending. Full-type checks
+cover97 declarations; that is a separate measure, not97 applicability witnesses.
+
+A fresh focused axiom audit also passes all204 imported Bridge declarations,
+including private helpers, against only propext,Classical.choice andQuot.sound.
+All results here target the unchanged Lean4.24.0/Lake5.0.0 frozen setup. They do
+not establish v4.35 migration compatibility, accept the partial Raw receipt or
+its30reported axiom-growth entries, supply native crypto/FFI equality, or discharge
+H45/full-build/owner-success waits. No RUNTIME_GATE_PASS or full-audit claim.
+KeySort passes freshly; no new module exceeds60s. The small proof cleanup measured
+2.538s to2.542s under the same guard (+0.16%); different-monitor or different-version
+runs are not used as a regression baseline. No proof budget was increased.
+
+Acceptance checks the exact pinned executable/argv, tool hashes/versions, complete
+input closures, log hashes/markers and measured resource bounds. Finder/skeptic
+found optional closure and permissive receipt checks; these were fixed. Twenty-one
+mutation tests reject omitted/substituted closures, query commands, altered logs,
+wrong tools and resource failures. Six inherited receipt and eight census tests
+pass freshly. Bulk output is off git under successor-evidence/, with generators
+and checksum-bound summaries in git. See [successor-summary.json](../../tests/h62/item2/audit-precompiles/successor-summary.json),
+[successor-intake.json](../../tests/h62/item2/audit-precompiles/successor-intake.json),
+[successor-registration.json](../../tests/h62/item2/audit-precompiles/successor-registration.json)
+and the final successor handoff.
+
+Continue the same VM/branch/goal in a fresh thread after this five-item milestone,
+as the frozen handoff policy requires. Ready work remains: Bytes10,Gas11,Header16,
+malformed-membership1,BLS/PointEval/Osaka29 and Stipend12 original cases at the frozen
+pin. Do not mark blocked or complete while these independent cases remain.
+No retired goal is woken, recreated or reset. No Claude source edit/message, master
+push or host cache shipment occurred.
+
+## Bytes/Gas and Header/membership continuation, 2026-11-06
+
+The next 38 original cases now pass at the unchanged frozen4.24 pin: Bytes10,
+Gas11,Header16 and malformed-membership1. These construct12joint-premise and
+26data-domain witnesses; the general word-rounding lemma is not counted as an
+extra original case. Current exactly-once totals are25joint,47data,25closed
+fidelity =97accounted/138,41pending. Full-type coverage remains97, a separate
+measure. No source statement, body, interface, budget, axiom set or exclusion
+was changed. New modules name the guarded regressions in their docstrings (H90),
+and no roadmap/phase folder or core dependency was added.
+
+[BridgeBytesGasWitnesses.lean](../../tests/h62/item2/audit-precompiles/BridgeBytesGasWitnesses.lean)
+retains both word-size/affordability bounds, all original conclusions, private
+list-loop data and actual success flags in error-capable gas projections.
+Its general rounding lemma applies to every n. All22 public axiom guards pass.
+[BridgeHeaderWitnesses.lean](../../tests/h62/item2/audit-precompiles/BridgeHeaderWitnesses.lean)
+uses17guards and keeps padding, four-byte common domain and one-byte zero-header
+exception distinct. Validation size/flag/gas are constructed together for one
+input; flags0/1,flag2,insufficient gas,invalid size and membership are inhabited.
+A general header decoding lemma avoids opaque computation. Compression outputs
+are not equated to crypto implementations. Actual private constants are reused
+through ordinary term checking. Final checks took2.762s and4.520s respectively,
+no resource stop or budget increase. Initial failures and passing receipts remain
+off git; none is an unchanged timing STOP.
+
+Acceptance requires both new genuine receipts, exact commands/tool identity,
+complete frozen input closure, log hashes/markers and measured resource bounds.
+Twenty-five failed/stale/missing/query receipt mutations pass. Finder/skeptic
+read-only proof reviews found no meaning, vacuity, scope or H90 issue.
+
+H70 updated disposition: H85/H86 replace the old H45 blanket hold with the fixed
+host bridge-build.sh package/user allow rule and unchanged lane budget. These
+have not been verified or executed by this worker. All Raw/BLS/Bridge migration
+waits now belong to migrate-root-gate; retired producer goals are not contacted.
+Historical raw-evidence absence is a regeneration limitation underH86. Actual
+G43 compiler success remains staged for forwarding; Exp integration is separate.
+Current continuation/handoff: BYTES-GAS-HEADER-HANDOFF.md under the audit tests.
+Ready work remains29 BLS/PointEval/Osaka and12Stipend cases; no full-goal,
+full-build, migration435, native-crypto or actual-compiler claim is made.
+
+
+## Frozen v4.24 applicability completion; final integration blocked
+
+The successor now accounts for all138 original statements exactly once:
+37joint witnesses,73data-domain samples,28closed fidelity cases. All138 full
+types are checked separately. PointEval has an actual infinity input decoder
+and verification proof, with gas price and malformed controls; no crypto equality
+or actual compiler-success premise was added. General public-law composition
+avoided four preserved memory-exhaustion attempts without budget increases.
+
+Finder and skeptic read-only reviews pass; skeptic gas-price wording correction
+is applied.26receipt-mutation tests and14inherited census/coverage tests pass.
+Full validation remains open: core cache targets out-of-date, host Bridge wrapper
+execution/allow rule unverified, actual G43 compiler-success missing, migration435
+API/axiom evidence pending and five external documentation references missing.
+No whole-goal completion or RUNTIME_GATE_PASS is claimed. Exact commands,
+failures, limits and remaining producer/setup waits are in
+`tests/h62/item2/audit-precompiles/ALL-CASES-HANDOFF.md`.

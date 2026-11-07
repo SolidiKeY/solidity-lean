@@ -1,0 +1,6 @@
+{
+ "Solidity/Lowering/Readonly/StaticJournal.lean:Solidity.Lowering.Readonly.StaticJournal.balance_storage_word": [
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/StaticJournal.lean:Solidity.Lowering.Readonly.StaticJournal.History.balance_word": []
+}

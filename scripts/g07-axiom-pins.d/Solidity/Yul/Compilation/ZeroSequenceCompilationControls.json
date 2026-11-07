@@ -1,0 +1,57 @@
+{
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.body_fuel_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.body_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.dirty_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.final_height": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.old_scope_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.one_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.one_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.source_recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.two_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilationControls.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Controls.two_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

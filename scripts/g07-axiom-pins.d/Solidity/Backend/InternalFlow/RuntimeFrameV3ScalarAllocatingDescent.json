@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.guard_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.positive_turn": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.public_guard": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running_with_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running_with_inventory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.zero_turn": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

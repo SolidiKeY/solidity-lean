@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadExecution.lean:SolidityBridge.AccessBridge.MemoryLoadExecution.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadExecution.lean:SolidityBridge.AccessBridge.MemoryLoadExecution.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

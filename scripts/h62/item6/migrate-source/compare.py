@@ -6,11 +6,14 @@ from pathlib import Path
 import sys
 
 PROFILE=("lean_threads","lean_heap_mib","sampled_rss_stop_bytes","reserve_bytes","stack_kib","parent_rlimit_as","cgroup_memory_max","cpu_quota","cpuset")
-def compare(old,new,expected,base,pin):
+def compare(old,new,expected,base,pin,revision=None):
     for r in (old,new):
         if r.get("status")!="pass" or r.get("clean") is not True: raise ValueError("complete passing clean builds required")
         if [x["module"] for x in r["modules"]]!=expected or any(x.get("exit")!=0 for x in r["modules"]): raise ValueError("complete identical module order required")
     if old["base"]!=base or new["base"]!=base: raise ValueError("reports differ from census pinned base")
+    revision = base if revision is None else revision
+    if any(r.get("census_revision") != revision for r in (old,new)):
+        raise ValueError("reports must match the exact census revision; original base alone is insufficient")
     for r,version,commit in ((old,"4.24.0","797c613"),(new,"4.35.0","eb6cafb")):
         v=r.get("versions",{})
         if not v.get("lean","").startswith("Lean (version "+version+",") or commit not in v["lean"] or not v.get("lake","").startswith("Lake version 5.0.0-src+"+commit):
@@ -28,7 +31,7 @@ def compare(old,new,expected,base,pin):
 if __name__=="__main__":
     try:
         a,b,c,pin=map(lambda p:json.loads(Path(p).read_text()),sys.argv[1:])
-        result=compare(a,b,c["serial_build_order"],c["base"],pin)
+        result=compare(a,b,c["serial_build_order"],c["base"],pin,c.get("revision",c["base"]))
     except (ValueError,KeyError) as e:
         print(json.dumps({"status":"blocked","reason":str(e)}));sys.exit(4)
     print(json.dumps(result));sys.exit({"pass":0,"escalate":2,"stop":3}[result["status"]])

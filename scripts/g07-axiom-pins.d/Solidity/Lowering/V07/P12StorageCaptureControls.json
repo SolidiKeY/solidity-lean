@@ -1,0 +1,68 @@
+{
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.alias_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.binding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.drop_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.exact_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.initial_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.live_refs_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.repeated_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.source_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.storage_index": [],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.wrong_resolution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12StorageCaptureControls.lean:Solidity.Lowering.V07.P12StorageCaptureControls.wrong_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

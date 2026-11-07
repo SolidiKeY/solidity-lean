@@ -727,8 +727,8 @@ theorem payload_clients (p : Roadmap.Pipeline) :
 /-- These populated input fields are retained by the complete Source result
 above, not inferred from a smaller balance-only projection. -/
 theorem populated_fields (bytes : Roadmap.Bytes) :
-    ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.sender).balance.val = 93 ∧
-    ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.this).balance.val = 12 ∧
+    ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.sender).balance = 93 ∧
+    ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.this).balance = 12 ∧
     ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.sender).nonce = 3 ∧
     ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.this).nonce = 1 ∧
     ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.this).code = some 0 ∧

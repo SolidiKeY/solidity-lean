@@ -1,0 +1,46 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.default_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.exact_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.frame_room": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.native_entry": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.observations": [],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.ownership": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.source_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.wrong_cursor": [],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarTarget.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarTarget.wrong_result": []
+}

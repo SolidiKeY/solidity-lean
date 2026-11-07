@@ -1,0 +1,8 @@
+{
+  "regression": "H90 narrow-local decoder, controls, immutable census and occurrence provenance",
+  "archiveRelative": "artifacts/h90-checkpoint-evidence.tar.zst",
+  "bytes": 10393142,
+  "sha256": "04653523d0328d949c5e606daebee052a38852a55cf78afa98aa4cbaf78653d9",
+  "files": 190,
+  "boundary": "Bulk remains off git; includes failed setup/proof attempts and final exit0 evidence. No source/native adequacy or whole-assignment gate claim."
+}

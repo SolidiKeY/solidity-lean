@@ -1,0 +1,12 @@
+{
+ "Solidity/Source/FailureEventLaws.lean:Solidity.Source.emitEvent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventLaws.lean:Solidity.Source.FailureExecution.emit_stopped_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

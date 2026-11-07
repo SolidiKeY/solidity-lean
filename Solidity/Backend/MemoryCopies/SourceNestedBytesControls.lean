@@ -19,7 +19,7 @@ private def storage (populated : Bool) : Source.Storage E.layout E.cellTy :=
   else Source.Storage.empty.write path (.int 0 (by decide))
 private def state (store : Source.Storage E.layout E.cellTy) : Source.EMState E [.bool] :=
   (.cons (.bool true) .nil,
-    {ex := ⟨⟨fun _ => ⟨⟨17,by decide⟩,3,some 9,store⟩⟩,Source.Transient.empty,[]⟩,
+    {ex := ⟨⟨fun _ => ⟨17,3,some 9,store⟩⟩,Source.Transient.empty,[]⟩,
      heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,
      events := [],logs := [(⟨13,by decide⟩,[1,2])],fnLocals := ⟨[.bool],.cons (.bool false) .nil⟩})
 private def before (populated : Bool) : Source.EMState E [.bool] := state (storage populated)

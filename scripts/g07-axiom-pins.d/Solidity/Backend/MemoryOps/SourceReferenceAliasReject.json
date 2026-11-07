@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceAliasReject.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_alias_delete_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "status": "stopped-partial",
+  "baselineSourceCommit": "24a38c534b25d50f830052a7b7fa0f4bc743e514",
+  "coordinatorMasterIntegrated": "ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6",
+  "sourceSha256": {
+    "scripts/h55/result-size-cache/result_schema.json": "e2382b84e508c63922516fbadf6feeb061ac0c56269a7ebccbd36d1e1ad5c617",
+    "scripts/h55/result-size-cache/validate_result.py": "ac344e5880a1c6df84f5a43a5cb452e57eff858119a6000c5a8a9611b8652b07",
+    "scripts/h55/result-size-cache/measure_result_validation.py": "2d74e645825f0a3e3e00fabf9b8ae821182a05edbb0013424ecd358d1013a2e7",
+    "tests/h55/result-size-cache/test_validate_result.py": "7054d061af94c899a0fc1724867668e8a4748e077b6bf9da372019ec37aa973e"
+  },
+  "functionalTests": {
+    "run": 23,
+    "pass": 20,
+    "skip": 3,
+    "skipReason": "Host poll.py snapshot unavailable; no regeneration claimed."
+  },
+  "finalPerformance": {
+    "command": [
+      "python3",
+      "-B",
+      "scripts/h55/result-size-cache/validate_result.py",
+      "/workspace/h62-statement-graph-evidence/h97-validation/legacy-report.txt"
+    ],
+    "inputs": {
+      "/workspace/h62-statement-graph-evidence/h97-validation/legacy-report.txt": "83945b332aa1c3b49989fbdfce558b7e7b438c1c934e86fb74b4682846750adb",
+      "/workspace/solidity-h62-statement-graph/scripts/h55/result-size-cache/validate_result.py": "ac344e5880a1c6df84f5a43a5cb452e57eff858119a6000c5a8a9611b8652b07",
+      "/workspace/solidity-h62-statement-graph/scripts/h55/result-size-cache/result_schema.json": "e2382b84e508c63922516fbadf6feeb061ac0c56269a7ebccbd36d1e1ad5c617"
+    },
+    "warmSecondsPerCall": [
+      0.00034057527998811567,
+      0.0005528544000117108,
+      0.00036915664008120076,
+      0.00025289387995144354,
+      0.0002508779200434219,
+      0.00022788247995777055,
+      0.00023536576001788488
+    ],
+    "warmMedian": 0.00025289387995144354,
+    "warmMaxRssKiB": 49284,
+    "cliWarmup": {
+      "seconds": 0.12172084499979974,
+      "maxRssKiB": 18044,
+      "outputSha256": "12af908038dc3629598c7491ab3cf64e3603968e4f957ae79fd079754a9dd474",
+      "log": "factored-after-cli-0.log"
+    },
+    "cli": [
+      {
+        "seconds": 0.11646168800143641,
+        "maxRssKiB": 18172,
+        "outputSha256": "12af908038dc3629598c7491ab3cf64e3603968e4f957ae79fd079754a9dd474",
+        "log": "factored-after-cli-1.log"
+      },
+      {
+        "seconds": 0.1160062070011918,
+        "maxRssKiB": 18172,
+        "outputSha256": "12af908038dc3629598c7491ab3cf64e3603968e4f957ae79fd079754a9dd474",
+        "log": "factored-after-cli-2.log"
+      },
+      {
+        "seconds": 0.12116096499812556,
+        "maxRssKiB": 18172,
+        "outputSha256": "12af908038dc3629598c7491ab3cf64e3603968e4f957ae79fd079754a9dd474",
+        "log": "factored-after-cli-3.log"
+      },
+      {
+        "seconds": 0.11822459399991203,
+        "maxRssKiB": 18172,
+        "outputSha256": "12af908038dc3629598c7491ab3cf64e3603968e4f957ae79fd079754a9dd474",
+        "log": "factored-after-cli-4.log"
+      },
+      {
+        "seconds": 0.11687715600055526,
+        "maxRssKiB": 18172,
+        "outputSha256": "12af908038dc3629598c7491ab3cf64e3603968e4f957ae79fd079754a9dd474",
+        "log": "factored-after-cli-5.log"
+      },
+      {
+        "seconds": 0.11259025199979078,
+        "maxRssKiB": 18172,
+        "outputSha256": "12af908038dc3629598c7491ab3cf64e3603968e4f957ae79fd079754a9dd474",
+        "log": "factored-after-cli-6.log"
+      },
+      {
+        "seconds": 0.12153870199836092,
+        "maxRssKiB": 18172,
+        "outputSha256": "12af908038dc3629598c7491ab3cf64e3603968e4f957ae79fd079754a9dd474",
+        "log": "factored-after-cli-7.log"
+      }
+    ],
+    "cliMedian": 0.11687715600055526,
+    "boundary": "Synthetic report only; no host/API/Lean proof. WarmRSS is process high-water; CLIRSS is per-invocation wait4.",
+    "comparison": {
+      "warmDeltaPercent": -98.27461243698863,
+      "cliDeltaPercent": 12.760247782120327,
+      "sameCliOutput": true,
+      "thresholdPercent": 10,
+      "stop": true
+    }
+  },
+  "earlierStops": [
+    {
+      "record": "after.json",
+      "coldDeltaPercent": 13.602987133395516
+    },
+    {
+      "record": "layout-after.json",
+      "coldDeltaPercent": 11.77219486777663
+    },
+    {
+      "record": "dedup-after.json",
+      "coldDeltaPercent": 11.327604972372395
+    }
+  ],
+  "archive": {
+    "handoffDirectory": "/workspace/h62-statement-graph-handoff-h97",
+    "file": "evidence.tar.gz",
+    "sha256": "a5ca0cc2c4b9c4c868536e9ee7a785bdf9fb340b9137c0ef17fb0a9ad005a179",
+    "manifestWithinArchive": "payload-manifest.json",
+    "recordPathsAreArchiveRelative": true
+  },
+  "reviews": {
+    "finder": "No new static validation blocker; exclusive version dispatch, complete profile diagnostics, source-content cache. Measurement needs caller lock/comparable inputs.",
+    "skeptic": "No new union/cache blocker. Optional metadata is not owner agreement; performanceSTOP decisive, no deployment. Helper does not attest runtime/resource identity or enforce subprocess bounds."
+  },
+  "boundaries": [
+    "H97 supersedes earlier version1 nullable-head/string-option behavior; unversioned legacy remains separate.",
+    "Owner ticket payload is opaque because the notice specifies no inner schema; no authority inferred.",
+    "H97 waits are object arrays; own H82 output still uses typed lane/item records.",
+    "No host deployment, completed goal or RuntimeGatePass.",
+    "No H55 size or pin STOP rerun; size source hash matches its stopped candidate.",
+    "No Lean/core/frozen interface/axiom/premise/budget/exclusion changes."
+  ]
+}

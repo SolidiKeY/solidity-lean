@@ -1,0 +1,67 @@
+# H14 routine glue — P8a-SPEC
+
+These are statements for separate Terra commits, not Lean axioms or placeholders.
+No frozen `Producer` or realization inhabitant is supplied. Producer and
+soundness arguments, actual failure execution, origins and SourceSpec remain
+with VY5; CR owns admission/extraction and final Producer assembly.
+
+| Module | Lemma statement | Why routine |
+|---|---|---|
+| `Solidity/Lowering/P8/FailureProjection.lean` | `points_withPoints (r : Resource) (p : Choices) : points (withPoints r p) = p` | Existing transferred `Bound.failures_with`/field projections. |
+| same | `horizon_withPoints (r : Resource) (p : Choices) : (withPoints r p).horizon = r.horizon` | Existing transferred `Bound.horizon_with`. |
+| same | `failureFree_noFail (n : Nat) (balances : Nat → Nat) : NoFail (points (failureFree n balances))` | Existing transferred `noFailures_noFail`. |
+| `Solidity/Lowering/P8/SourceRealization.lean` | `machineAgreement : MachineAgreement` — completed | Actual definitional equality proved; no resource adequacy asserted. |
+
+Actual failure schedules are NOT consulted by the current bare-horizon Source
+session. Do not fill this gap by ignoring schedules, choosing a favorable
+operational reference, or weakening the frozen resource-point law. These routine
+facts do not construct `FailureProjection S` or `SourceRealization` for a real S.
+
+## Independent failure-plan routine glue
+
+| Module | Lemma statement | Why routine |
+|---|---|---|
+| `Solidity/Lowering/P8/FailureProjection.lean` | `(points (requestCut h balances i b cut)).tx i = .runs b (some cut)` | Unfold requestCut/points, simp only if_pos rfl. |
+| same | `j ≠ i → (points (requestCut h balances i b cut)).tx j = .runs (balances j) none` | One if_neg branch, no runtime adequacy. |
+| same | `(points (requestCut h balances i b cut)).frame k = none` | Record projection. |
+| same | `(requestCut h balances i b cut).horizon = h` | Record projection. |
+| same | `¬ NoFail (points requestCutWitness)` — completed | Actual requestCutWitness_not_noFail theorem reuses request_cut_not_noFail. |
+| same | `(frameDiagonal extract).tx i = .runs 0 none` | Definitional projection; makes minimal-counterexample request side explicit. |
+
+These statements do not change Source resources or the frozen interface.
+The request-cut and diagonal soundness arguments remain with VY5.
+
+## H16 cursor interface routine facts
+
+- `Source/FailureCursor.lean`: projection lemmas for nextRequest after
+  enterRequest, nextFrame after enterFrame, and unchanged counters after
+  leaveFrame/leaveRequest; constructor/record reductions.
+- FrameBudget.grow preserves ordinal.val and emitted/cut; Fin.castSucc
+  projections. Stop.growFrame/growRequest preserve kind and numeric owner.
+- Prove new frame IDs exceed every existing frame ID using Fin.isLt;
+  prove pop never reuses an ordinal. Resource execution, unwind soundness,
+  actual hooks and horizon consistency remain VY5's producer obligations.
+
+## H16 explicit-plan frame identities (routine; no placeholders in Lean)
+
+Module `Solidity.Source.FailureMachine`, namespace `Source.FailureExecution`:
+- `frame_none {E Γ α} (body : Source.EM E Γ α) : frame none body = body`.
+- `check_none {E Γ} : check (E := E) (Γ := Γ) none = pure ()`.
+- `pending_none {E Γ} : pending (E := E) (Γ := Γ) none = pure false`.
+- `emit_none {E Γ} (event : Roadmap.Event) : emit (E := E) (Γ := Γ) none event = Source.emitEvent event`.
+All are definitionally the None branch, routine `rfl`; immutable-plan execution
+and owner/error soundness remain with Sol. Do not alter the Source evaluator.
+
+## Actual Source event hook (routine glue; no Lean placeholders)
+
+- `Source/FailureEventLaws`, `emit_disabled_run`: for arbitrary E/Γ/event/l/s, `(Source.emitEvent event none).run (l,s) = (.ok (), (l,{s with events := s.events ++ [event]}))`. Routine definitional compatibility, including stale cursor metadata.
+- `Source/FailureEventLaws`, `emit_facade_eq`: `FailureExecution.emit plan event = Source.emitEvent event plan`. Routine facade identity.
+
+The general reached-stop/full-state soundness law remains Sol-owned and is proved in the module. These routine statements are not assumed by any proof.
+
+## Explicit-plan runtime compatibility (routine statements only)
+
+- `Source/FailurePrimitives`, `preflight_none`: for every typed EM body, `preflight none body = body`; definitional None branch.
+- `Source/FailurePrimitives`, `preflight_some`: `preflight (some points) body = (do check (some points); body)`; definitional enabled branch.
+
+No placeholder theorem or assumption is used. The Source CALL-prefix reduction/entered-child proof and fixed-plan horizon soundness remain Sol-owned, not delegated as routine glue.

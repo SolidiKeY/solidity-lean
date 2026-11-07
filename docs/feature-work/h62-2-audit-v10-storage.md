@@ -289,3 +289,443 @@ canonical checksum/context/new blob and 65 unchanged source headers, without Lea
 application. The ledger now carries the same SC/LS plan definitions as its companion
 candidate artifact, so shared aliases remain available in either static output.
 The canonical/initial-transcription receipts remain distinct. No witness is promoted.
+
+## H82 retirement: final preservation only
+
+Human-approved stop-and-handoff and the explicit H70/H82 ordering correction override
+all concurrent continue receipts. Successor: solidity-v07-v11-20261030/v10-storage-operations.
+No new proof implementation or automatic continuation is authorized. This checkpoint
+adds only the full original assignment/goal/queue, exact original ownership and
+322-file scope manifests, retirement directives and complete open-queue state under
+[retirement/](../../tests/h62/item2/audit-v10-storage/retirement/OPEN-QUEUE.md).
+The predecessor work head was b99808cca35e0cee53df6aa3d11f79616cf35b58; the final
+preservation head is recorded in the exported result/bundle to avoid circular hashes.
+
+The complete assignment transcript was read from the original thread; both read-only
+reviewers found no omitted requirement, queue content or owner-map entry (123 entries).
+Its file hash differs from the reported original renderer fingerprint, explicitly
+recorded in prompt-provenance.json; renderer-byte identity is not claimed. The exact
+queue and all three original write scopes plus 322 frozen paths/hashes are preserved
+as files in the committed patch/bundle, not merely coordinator-local references.
+
+No pause operation is exposed. The only goal tool supports complete or blocked, so
+PAUSED cannot be requested through its schema. No completion/block transition is used
+as a substitute, and no goal is created/reset. Worker implementation stops; coordinator
+must persist the authorized PAUSED state. The prior trusted-context errors remain
+historical evidence. Original VM/branch/artifacts are preserved without deletion.
+No H71 push authorization was available in thread/files; no push, merge, PR, master
+change, source edit, Lean/MCP/build or timing rerun occurred. All four checkpoints and
+all open proof/backfill obligations remain as listed in retirement/OPEN-QUEUE.md.
+
+## H82 successor: checked loop premise bundles
+
+The additive LoopWitnesses test checks joint witnesses for all hypotheses of
+LoopLaws.turn_step, turn_exit and run_single_loop on actual condition/body
+programs and the existing populated intrinsic machine. The same frozen loop
+module is byte-identical to the original audit base. A companion map records
+its exact declaration signatures and witness names without rewriting the
+conservative frozen census. These are three checked premise bundles, not a
+claim that all 3281 rows have been audited.
+
+The positive step changes the stack; the zero-condition witness skips an actual
+REVERT body. Separate controls preserve body-revert propagation, the distinction
+between a nonzero returned control index and a fault, and the failed nonzero
+premise at zero. The declarations pass Lean 4.24.0 with only the existing
+standard logical axioms. The original scratch attempt confused the pending
+jump body's nonzero index with a direct fault; that failed attempt is retained.
+
+No production interface, representation, heartbeat or Source implementation
+changed. There is no arbitrary compiler/reject-all compiler contract proof,
+physical gas/fork result or v4.35 migration hold release. Full elaborated census,
+remaining joint witnesses, compiler totality controls and final validation stay
+open. The existing inventory and earlier failed gates remain unchanged.
+
+The finished-loop premise also has a positive-iteration witness: the existing
+populated store starts at header 11, the body writes zero, and the second
+condition exits. The actual loop program returns that changed machine. A direct
+monolithic reduction exceeded the original heartbeat limit; composing three
+checked instruction equations through the existing turn laws passes without
+a budget change. The concrete 11-to-zero observation uses no axioms. This is
+one supported terminating program, not arbitrary positive-loop termination
+or a compiler totality theorem.
+
+## Checked slot-key premise bundles
+
+KeyBoundsWitnesses adds six joint premise bundles for the unchanged frozen
+TargetOperations slot roundtrip, injectivity, offset, typed-step, path and query
+key-bound adapters. A nested hash/data location with key 7 supplies the same
+concrete inputs throughout. The typed path crosses a Boolean mapping key and
+a dynamic-array index using the existing schema fixture. The injectivity
+witness selects the same location on both sides; it does not claim distinct
+locations can have equal slots or that every input pair is feasible.
+
+A key equal to the word modulus fails the exact bound. A separate control
+shows that the fitting address still has an unavailable live graph read in
+the default value. That observation is not a Source or compiler refusal. All
+nine proof declarations are axiom-free. The companion map preserves six exact
+frozen signatures; the original conservative census is unchanged. These six
+bundles plus the earlier three loop bundles do not close the full audit,
+compiler totality, physical separation or migration obligations.
+
+## Populated representation and agreement witnesses
+
+RepresentedWitnesses checks all joint premises of the frozen represented_read,
+write_agreement and represented_copy adapters using the existing concrete scalar
+endpoint. The reached target state contains the true word; the unwritten target
+fails that initial cell agreement. Actual SLOAD returns the populated word,
+SSTORE changes it from one to zero while the covered agreement is derived, and
+actual scalar self-copy preserves the whole machine.
+
+The self-copy witness uses dst=src and an explicitly empty query frame; its
+apartness and nonalias frame predicates are vacuous on that empty list. It does
+not cover a nonempty disjoint frame. FiniteRun and transport come from the
+existing concrete local endpoint, with their original parameters and fields.
+This is not a universal Producer or a physical/source/compiler bridge.
+
+All eleven declarations and their axiom guards pass with only the standard
+logical axioms. An intermediate malformed record update was rejected, and its
+error-recovery axiom guards failed as intended; that receipt is retained, never
+accepted as a proof or pin. The corrected source passes without recovery axioms.
+The companion map records three exact frozen signatures. Twelve premise bundles
+are now checked across these three audit packets; the full conservative census
+and compiler totality/failure/gas/fork obligations remain open.
+
+## Deterministic witness reference accounting
+
+The witness_registry tool exports the exact frozen Git inputs to a temporary
+tree and reuses the original conservative census, including all byte checks.
+The live census and its drift rejection remain unchanged. At checkpoint C198 the registry accounted
+for all 3281 rows exactly once: 12 mapped witness references and 3269 unmapped
+rows. It checks unchanged mapped interface files, exact signatures and context
+hashes, witness declarations and the three kernel-checked test source hashes.
+The source lexer is not a complete elaborated-type or semantic fidelity checker;
+manual reviews and separately executed Lean/axiom-guard checks remain necessary.
+
+All twelve audit tooling tests pass, including seven corruption variants for
+duplicate/unknown rows, changed signatures, missing witness names, altered proof
+sources, changed interface files and stale kernel-source pins. Bulk registry
+output remains outside Git; only its deterministic generator, small source pins
+and tests are committed. No global axiom inventory is rewritten.
+
+During the preceding packet, an empty-list lemma refinement was committed before
+its failed check result was inspected. Commit f5010fe17 is not an accepted proof
+checkpoint. The corrective commit 4e83a94a3 followed a passing kernel and axiom
+guard check; its repaired source is the one pinned here. The failed receipt and
+history are retained. Full lane, compiler-totality and migration gates remain
+open.
+
+## Actual Source cell-read premise witnesses
+
+SourceReadWitnesses reuses the published Source fixture and concrete read
+certificate. Ordinary-root, raw cell presence and target-word coherence hold
+jointly at the same typed inputs. Readonly/static Source reading preserves the
+whole input state. Missing ordinary cells keep their Source stuck result; a
+transient root cannot meet the ordinary premise. Wrong-slot SLOAD still runs
+but violates raw word coherence, so this is not a target-refusal claim.
+
+The Source path and target slot remain independent parameters of the frozen
+adapter, coupled here only by its existing word observation. No Source address
+compiler, general world relation or physical adequacy is supplied. No Source
+implementation or frozen interface changed. Two more exact frozen premise
+bundles are checked; the original conservative ledger remains unchanged.
+
+The updated registry has fourteen mapped references and 3267 unmapped rows,
+with unchanged original row identities. Kernel-source pins include this fourth
+checked test module. Source paths and target slots remain independently chosen
+inputs; the new certificate reuse does not establish their compilation relation.
+
+## Actual Source write premise witnesses
+
+SourceWriteWitnesses reuses the published Source fixture and complete write
+certificate. Its writable/ordinary flags and int53 word observation jointly
+inhabit source_write, storeVal_word and complete at the same typed inputs,
+with actual storeVal fuel one. Standard decide discharged the full raw bundle.
+Static, zero-fuel and type failures retain their distinct outcomes. A static
+zero-fuel call times out before write refusal; a scalar Boolean word observation
+does not make it compatible with the fixture's uint destination. A different
+target operand still executes, while violating the selected word agreement.
+
+The source path and target slot remain independent as the frozen statement
+specifies. No address compiler, value lowering, world relation or general
+preservation theorem follows. Three additional frozen premise bundles are
+checked without Source implementation or interface changes. Registry source
+pins and exact original row identities are extended, not replaced.
+
+The current reference ledger has seventeen mapped bundles and 3264 unmapped
+rows, with five kernel-checked test modules. The earlier counts are historical
+checkpoints; no original census row or failed receipt has been discarded.
+
+## Nonempty finite layout and operation-family witnesses
+
+LayoutWitnesses checks all six LayoutAccess premise bundles using a mapping
+to a fixed two-word array, repeated left requests and a nonempty separate right
+family. Existing fit/placement conditions remain exact. Actual clear/set families
+commute; both selected cells change under the combined families, while the
+left family alone preserves the separately resolved right/outside query. A later invalid offset rejects the complete request list.
+
+The hash is a concrete finite-model function, not Keccak or a globally injective
+function. Its complete stated run contains one repeated preimage; adding a
+different preimage breaks the region premise. No global crypto premise or new
+Source cap is introduced. Request resolution and operation indices are explicit;
+no actual emitted-access, Source/layout, liveness, packing or physical bridge is
+inferred. All original frame/coverage/region premises are retained.
+
+Six more frozen signatures are mapped to checked joint inputs. The original
+conservative census and pending compiler/world/migration obligations remain open.
+
+The current reference ledger maps twenty-three bundles, leaving 3258 original
+rows unmapped. Six kernel-checked test modules supply those references. Both
+layout-family selected cells change in the positive control; left-only execution
+preserves the outside cell. This is a finite layout/operation-family result,
+not physical execution or a general Source storage compiler.
+
+## Data-only statements kept separate
+
+Five remaining statements in the original 25 source plans have no logical
+hypotheses: the reverse slot roundtrip and the four target read/write/copy
+execution equations. TargetInputWitnesses checks Nonempty input tuples using
+existing slots, the published populated machine and word. These do not certify
+arbitrary compiler success or supply new logical-premise bundles. Registry
+counts now distinguish data inhabitance from joint-premise evidence explicitly.
+
+The original 25 source-planned statements have 20 checked joint-premise bundles
+and five data-only classifications; three additional Source-write bundles were
+checked separately. This remains a small reviewed subset of the conservative
+3281-row ledger, not a completed elaborated census or full assignment acceptance.
+
+## Bounded checkpoint after the witness packet
+
+At source head 5a12b4c8adcb6367b37f32bea33e4da63e69624e, the shared checkpoint
+affected-module build exited 124 after 600.66 seconds under its existing
+600-second limit. Peak sampled aggregate RSS was 1137885184 bytes, with no
+resource stop or OOM. This is a timeout, not a diagnosed source proof failure.
+The prerequisite guard refused the subsequent library build; no unchanged
+retry or larger limit was used. Full affected validation remains unfinished.
+
+The initial trust, orphan, layer, fragment and inventory commands lacked Node
+in the checkpoint PATH. Separate checks with the installed Node directory
+restored passed trust, orphans, layers and fragments. Roots passed in the
+original checkpoint. The inventory check still fails with zero errors and
+4552 unrecorded changes; pins were not rewritten. Raw documentation checking
+fails with five missing and 126 ambiguous references. These receipts remain
+separate from historical baseline failures and do not establish a checkpoint
+or whole-lane pass. Independent read-only finder and skeptic confirmed the
+timeout/infrastructure distinction without running Lean or changing files.
+
+## Generated nonempty operation families
+
+GeneratedFamilyWitnesses checks both original OperationTransport contracts at
+the same finite inputs. The left touched list contains two repeated addresses
+(stride zero, count two); the separate right list is a singleton. Every bound,
+recursive preimage, region, separation and performed-result premise is retained
+in its joint bundle. Both selected cells change under the combined effects,
+and the left-only successful effect preserves the outside query. A distinct
+additional preimage breaks the constant-hash region premise. This supplies no
+global injectivity, physical execution or Source compiler bridge.
+
+All 17 theorem axiom guards passed at the unchanged Lean4.24 resource limits.
+Independent read-only finder and skeptic found no semantic or coverage issue.
+The frozen reference ledger now maps 30 of 3281 conservative rows: 25 joint
+bundles and five data inhabitants, leaving 3251 unmapped. This is additive
+test-only progress; the failed C203 full checkpoint is not superseded.
+
+## Exact touched-set transport inputs
+
+The same finite generated-family packet now witnesses the six logical-premise
+contracts in Touched and classifies its two data-only contracts separately.
+Numeric membership retains query bounds and query preimages. Nodup uses a
+nonempty singleton; the repeated left list and its numeric duplicates are
+explicitly retained, rather than passed to the distinctness contract.
+Cross-family numeric separation and individual write commutation retain the
+original per-run region and footprint coverage premises. A positive-stride
+visit changes index zero and preserves index two outside its footprint.
+
+The extended module passes all 32 theorem axiom guards under unchanged limits.
+The initial strengthened conjunction proof failed elaboration; that recovery
+artifact was rejected, and the corrected explicit tuple passed before guard
+acceptance. Independent read-only finder and skeptic found no fidelity issue.
+The frozen registry now records 38 mapped rows: 31 joint bundles and seven
+data inhabitants, with 3243 rows unmapped. These finite test witnesses do not
+close general compiler success, physical adequacy, migration STOP holds or the
+failed C203 full validation. Existing production statements remain unchanged.
+
+## Push lifecycle premise witnesses
+
+PushWitnesses maps the six original OperationPush contracts: four checked
+joint-premise bundles and two data-only inputs. Primitive reuse resets the
+newly live scalar from true to false while an older retained slot remains
+true. Aggregate reuse preserves the captured child identity and changes the
+selected live read from unavailable to available; another retained raw child
+remains nonlive. Fresh allocation supplies the existing primitive default.
+A saturated length of 2^256−1 fails the original push capacity check, while
+the fresh case succeeds; no new admitted-source cap is introduced.
+
+The initial Extent/Index mismatch and reflexivity-tactic failure are retained
+as rejected elaborations. The corrected source passes all 14 axiom guards at
+unchanged limits. Both independent read-only reviews found no fidelity issue.
+The frozen reference ledger now maps 44 of 3281 conservative rows: 35 joint
+bundles and nine data inhabitants, with 3237 unmapped and nine pinned witness
+modules. These graph lifecycle inputs do not establish Source allocation
+identity, physical target lifecycle, compiler adequacy or world rollback.
+The failed full checkpoint and all original producer holds remain open.
+
+## Semantic push and pop inputs
+
+The lifecycle extension retains the semantic push premises separately from the
+operation adapter: nonprimitive retained reuse and fresh defaults share the
+same original values and actual successful results. Pop uses the exact former
+last index of a populated child. Its successful result keeps allocated extent,
+clears the retained raw word and invalidates the live read. One pop succeeds
+and the second fails; this Option result supplies no world rollback theorem.
+
+All 22 guards in the combined push/lifecycle test module pass. Independent
+read-only finder and skeptic found no fidelity issue. Five more frozen rows
+are mapped: three joint bundles and two data-only failure-iff inputs. The
+conservative registry now maps 49 of 3281 rows, with 38 joint bundles, eleven
+data inhabitants and 3232 unmapped rows. Original Source/physical/compiler
+obligations and broad validation remain unfinished.
+
+## New-head bounded checkpoint and exact documentation baselines
+
+At source head 3eb4734bdcc4da2f3b0b5cbab9368d3edf795229, C210's affected
+build exited 124 after 600.36 seconds under the existing 600-second limit.
+Peak sampled aggregate RSS was 1593192448 bytes, with no resource stop. The
+prerequisite guard blocked the library build. Trust, orphan, layer, root and
+fragment checks passed; this is not checkpoint acceptance. Raw documentation
+checking still fails with five missing and 127 ambiguous references; the
+axiom inventory reports zero errors and 4611 unrecorded changes. Pins were
+not rewritten, and all prior failed receipts remain separate.
+
+compare_doc_trees.py runs the same current strict checker against exact
+committed current, published and frozen trees. Only checker working-directory
+selection is adapted; exclusions and strict logic remain unchanged. Snapshot
+tracked paths are checked, with no untracked cache or rescue files imported.
+The current and published-master trees have identical five-missing/127-ambiguous
+findings, with zero new findings between them. The frozen tree has zero missing
+and twelve ambiguous references under that same checker; its comparison still
+FAILS with 129 new formatted findings and nine removed findings. The published
+comparison does not replace the frozen requirement or make raw strict PASS.
+
+Five helper tests cover root adaptation, unsafe archives, formatted findings,
+committed-tree isolation and infrastructure failure. An independent skeptic
+found that absent checker completion could masquerade as no new findings.
+The helper now validates recognized strict exit status and the matching final
+summary, retaining raw logs before rejecting infrastructure failures. The fix
+was independently confirmed and all three recorded completions validated.
+No production Lean source changed during this tooling/disposition checkpoint.
+
+## Operation-level totality and rejecting generators
+
+TargetTotality proves existential successful runs of the existing readCode,
+writeCode and copyCode for every typed slot/machine (and typed word for writes),
+using their unchanged public run equations. An always-reverting code generator
+and an empty-code generator cannot match the full public read equation for
+any machine. The empty-code refutation observes actual finite stack-length
+growth. Concrete populated machines establish that the quantified domain is
+inhabited, and write/copy controls observe changed cells with context preserved.
+A revert prefix skips the following write; no after-state or rollback is
+inferred from the revert outcome. The final zero is a jump index, not gas.
+
+All twelve theorem axiom guards passed; independent read-only finder/skeptic
+reviews found no issue. The initial namespace-qualification error is retained
+as a rejected elaboration. This is totality for the existing symbolic-slot
+operation code, not Source compiler admission, packed/physical expansion or
+EVM gas/fork adequacy. The 49 mapped premise/data references and 3232 unmapped
+rows are unchanged. The published Source changes required separate revalidation of Source-dependent
+historical witnesses; the C213 section below records that completed check.
+
+## Revalidation after the published Source update
+
+C213 rechecked all nine pinned witness modules against the adopted owner
+publication. Seven Source-free files passed first, then the Source read file
+built its updated shared imports and passed, followed by the Source write file.
+All 126 theorem axiom guards passed with unchanged witness source bytes and
+unchanged proof limits. Reference corruption tests also passed. Kernel-source
+metadata now points to the fresh receipts and their dependency head.
+
+Coverage remains 49 mapped references (38 joint bundles and eleven data inputs),
+with 3232 unmapped. This establishes current compatibility of those selected
+witnesses, not general Source compiler admission, numeric/physical adequacy,
+world rollback or release of the separate v4.35 timing/trust STOP holds. No
+Source producer, frozen contract or witness statement was edited.
+
+## Dependency routing after published Source proof updates
+
+C217 compares the exact Git trees at the C213 kernel-receipt head and the
+adopted master head. Seven of the nine witness source/import closures have
+identical bytes. SourceReadWitnesses and SourceWriteWitnesses each reach one
+changed file, Source/Ctor.lean. This is a lexical one-line import routing aid,
+not an elaborated dependency certificate. It records external imports without
+comparing toolchain/package objects or generated artifacts. Equal source bytes
+do not transfer kernel, axiom, performance or resource acceptance. Historical
+kernel pins remain unchanged, and current-head Lean validation remains pending.
+
+The two additive tool files were initially created without the required writer
+flock. No concurrent modification was observed; unobserved activity cannot be
+ruled out. Subsequent edits, checks and commit preparation used the lock. The
+C216 resource-stop receipt is retained; no unchanged Lean retry was performed.
+
+Coordinator option 1 for V10-R217 authorized recovery of the same bounded
+runtime. It recovered with the original 12 GiB memory cap, zero swap and serial
+threads. The fresh unchanged preflight exited 1 before Lean started because
+other parent-cgroup usage exceeded the existing headroom allowance. The
+prospective command sets only the stack limit as authorized by H111; the
+preflight refused before that shell or Lean executed. No proof budget,
+memory cap, guard or historical failed receipt was changed.
+
+## Focused Source witness revalidation after H113
+
+C222 freshly kernel-checks the two unchanged Source witness files after adopting
+the published Source/Ctor proof update. SourceReadWitnesses passes after rebuilding
+its changed imports (235.99 seconds); SourceWriteWitnesses then passes serially
+(1.85 seconds). All sixteen existing axiom guards pass. Peak sampled aggregate
+RSS is 1696296960 bytes, with no resource stop under the H113 accounting formula.
+These are separate import/cache states, not a matched performance comparison.
+
+Only the two source-specific checked_head/kernel_log receipts change. The
+validated_dependency_head field continues to name the historical complete
+nine-module check; seven unaffected modules retain their original receipts.
+No source-identity comparison is promoted to a fresh kernel run. The reference
+ledger remains 49 mapped rows (38 joint bundles,11 data inputs),3232 unmapped.
+This checks the selected Source word-read/write premises and existing controls,
+not general Source compiler admission, physical adequacy, world rollback, or
+release of any separate v4.35 timing/trust/compatibility hold. No Source producer
+or witness statement was edited.
+
+## Populated target reuse joint witnesses
+
+C223 adds a Source-free TargetReuseWitnesses fixture. The same populated Machine
+simultaneously satisfies capacity and the selected empty-child-header premise
+for both TargetRetainedCycle.after_reuse and run_reuse. Its retained child payload
+is71 despite the zero header. Existing generic laws establish whole-Machine
+execution and repeated reuse, rather than only sampled stores. The premise-free
+run_pop_regrow_pop input is classified separately as data inhabitance.
+
+Fifteen measured axiom guards pass. Positive observations retain payload71 and
+outside99. An uncleared child actually executes but changes the Machine; a
+saturated header refuses at push, an empty initial header refuses at pop, and
+an always-reverting program differs from the successful reuse program. The
+initial-pop cycle changes header1 to0 while preserving older payload71, so it
+is not restoration of the original state. These are existing symbolic-slot
+Evm.run endpoints; the final zero is an execution index, not a gas bound. No
+Source compiler admission, physical-word bridge or world rollback follows.
+Both independent read-only reviewers found the joint premises non-circular,
+inhabited and faithful to the exact frozen hypotheses. Production interfaces,
+definitions, statements, budgets and axiom inventories remain unchanged.
+
+The C223 reference ledger adds exactly three frozen rows: two joint-premise
+bundles and one data input. It now records52 mapped rows (40 joint,12 data) and
+3229 unmapped rows. The new module has15 measured guards; source-specific pins
+record its actual checked source commit. Earlier complete/partial validation
+heads remain unchanged. Twelve additional success/negative/observation controls
+are not counted as extra mapped interfaces. Full semantic/elaborated census,
+compiler totality, gas/fork boundaries and original Source/physical/world
+composition remain incomplete.
+
+The corrected C223 registry checks pass, including targeted new-source and
+new-pin corruption controls. The initial stale nine-module expectation failed
+and its receipt is retained; the ledger now has ten witness modules. Trust and
+roots pass. The current strict axiom-inventory check remains FAIL:16301 pinned
+theorems,zero errors,260 unrecorded changes. No inventory write or trust-policy
+change was made; H30 coordinator reconciliation remains separate. Local measured
+guards establish only their recorded axiom sets, not global inventory acceptance.

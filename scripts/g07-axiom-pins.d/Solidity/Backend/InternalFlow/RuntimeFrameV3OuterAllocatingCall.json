@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OuterAllocatingCall.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OuterAllocatingCall.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

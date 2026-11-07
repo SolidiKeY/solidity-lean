@@ -30,7 +30,7 @@ def storage : Source.Storage env.layout env.cellTy :=
  s.write (child (child right 0) 0) (.fixedBytes [17] rfl)
 def state : Source.St env :=
  {ex:={world:=⟨fun a=>if a=address then
-   {balance:=⟨19,by decide⟩,nonce:=3,code:=some 0,storage:=storage}
+   {balance:=19,nonce:=3,code:=some 0,storage:=storage}
    else Source.Account.empty _⟩,transient:=Source.Transient.empty,journal:=[]}
   heap:=(Source.Heap.empty.alloc ⟨.bytes .memory,Source.Data.bytes [9,8]⟩).1,
   events:=[],logs:=[(address,[9,8])],fnLocals:=⟨[.bool],.cons (.bool false) .nil⟩}
@@ -75,7 +75,7 @@ def row (s : Source.St env) :=
  ([left,right,child left 0,child left 1,child left 3,child right 0,child right 1].map (word s),
   [child (child left 0) 0,child (child left 1) 0,child (child left 3) 0,child (child right 0) 0].map (raw s))
 def context (s : Source.St env) :=
- ((s.ex.world.accounts address).balance.val,(s.ex.world.accounts address).nonce,
+ ((s.ex.world.accounts address).balance,(s.ex.world.accounts address).nonce,
   (s.ex.world.accounts address).code,s.events.length,
   s.logs.map (fun (a,bs)=>(a.val,bs.map UInt8.toNat)),s.fnLocals.1)
 def ordered : Prop := runs.map (fun r=>(r.2.1,row r.2.2,heapView r.2.2,r.2.2.ex.journal.length,context r.2.2))=
@@ -90,7 +90,7 @@ def journalRows (s : Source.St env) := s.ex.journal.map fun e=>
  match e with
  | .account a old =>
    (a.val,[right,child right 0,child right 1].map (fun p=>((old.storage.cell p).bind Source.Val.word).map Fin.val),
-    (old.storage.cell (child (child right 0) 0)).bind bytes,old.balance.val,old.nonce,old.code)
+    (old.storage.cell (child (child right 0) 0)).bind bytes,old.balance,old.nonce,old.code)
  | .transient a _ => (a.val,[],none,0,0,none)
 def oldJournal := [(7,[some 1,some 1,none],some [17],19,3,some 0)]
 def successJournal :=

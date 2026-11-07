@@ -1,0 +1,31 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.advance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.advanceCode": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.rhs": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.selected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.value": [
+  "Quot.sound",
+  "propext"
+ ]
+}

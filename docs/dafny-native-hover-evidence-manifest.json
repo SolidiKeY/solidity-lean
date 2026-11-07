@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "95d1e9cb29dc5a34d1db68af3ca47e47b75e293f",
+  "status": "partial",
+  "fileCount": 210,
+  "uncompressedBytes": 9927300,
+  "archive": {
+    "path": "/workspace/dafny-parity-native-hover-20261107/evidence/bulk.tar.gz",
+    "bytes": 2174964,
+    "sha256": "753f6011e933b943d0417cba370e0e946850d32a8e42c35f1e027699a38e6c01"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-native-hover-20261107/evidence/files.json",
+    "bytes": 48233,
+    "sha256": "ca1673062f6335ff2407cd262ab54f449ea6f12e1f76b80051a1bc8486e68046"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-native-hover-evidence-manifest.json --restore",
+  "boundaries": [
+    "All original failed exits retained, including native exit1 followed by successful unchanged-result envelope recheck.",
+    "One actual Linux popup and recorded-instant Escape disappearance, no paired Dafny/macOS/full lifecycle parity.",
+    "Genuine certified failure does not establish full kernel/compiler/EVM correctness or full mandatory gates."
+  ]
+}

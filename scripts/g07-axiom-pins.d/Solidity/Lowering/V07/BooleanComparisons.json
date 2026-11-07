@@ -1,0 +1,52 @@
+{
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.answer_commutes": [],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.capture_relation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.code_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.pass_exact": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.source_value": [],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.tail_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.tail_swap_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisons.lean:Solidity.Lowering.V07.BooleanComparisons.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

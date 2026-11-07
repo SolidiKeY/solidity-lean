@@ -13,7 +13,7 @@ private def before : Source.EMState E [.bool] :=
   (.cons (.bool true) .nil,
     ⟨⟨⟨fun _ => Source.Account.empty _⟩,Source.Transient.empty,[]⟩,
       (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,[],
-      [(⟨13,by decide⟩,[1,2])],⟨[.bool],.cons (.bool false) .nil⟩⟩)
+      [(⟨13,by decide⟩,[1,2])],⟨[.bool],.cons (.bool false) .nil⟩,Source.FailureExecution.Cursor.empty⟩)
 private def fields : SourceFieldsConstruction E (E.layout.fields name) :=
   .cons (dynamicLeaf E (.struct .memory name)).construction.value
     (.cons ((bytesLeaf E).construction.fixed 2).value

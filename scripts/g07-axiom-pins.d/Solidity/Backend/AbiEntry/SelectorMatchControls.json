@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/AbiEntry/SelectorMatchControls.lean:Solidity.Backend.AbiEntry.SelectorMatchControls.capacity_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatchControls.lean:Solidity.Backend.AbiEntry.SelectorMatchControls.empty_not_source_match": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatchControls.lean:Solidity.Backend.AbiEntry.SelectorMatchControls.inhabited_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatchControls.lean:Solidity.Backend.AbiEntry.SelectorMatchControls.low_payload_ignored": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatchControls.lean:Solidity.Backend.AbiEntry.SelectorMatchControls.padded_partial_collision": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatchControls.lean:Solidity.Backend.AbiEntry.SelectorMatchControls.raw_match": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatchControls.lean:Solidity.Backend.AbiEntry.SelectorMatchControls.raw_mismatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

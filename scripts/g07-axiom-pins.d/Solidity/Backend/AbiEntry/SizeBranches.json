@@ -1,0 +1,44 @@
+{
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.branch_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.branch_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.condition_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.test_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranches.lean:Solidity.Backend.AbiEntry.SizeBranches.whole_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

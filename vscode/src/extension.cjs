@@ -12,6 +12,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   const diagnostics = vscode.languages.createDiagnosticCollection('solidity-lean');
   const controller = vscode.tests.createTestController('solidityLean', 'Solidity Lean');
   const output = vscode.window.createOutputChannel('Solidity Lean');
+  let outputClosed=false;const outputOwner={dispose(){if(!outputClosed){outputClosed=true;output.dispose();}}};
   const active = new Map(), saving = new Map(), reports = new Map(), metadata = new Map(), documents = new Map();
   let editorServices;
   const testingTree=require('./testing-tree.cjs').install(vscode,controller,metadata),symbolSnapshots=new Map();
@@ -22,7 +23,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   context.subscriptions.push({dispose:disposeTesting});
   const testRunCancellations=new Set();
   let discoveryVersion = 0;
-  let disposed=false,restartGeneration=0;
+  let disposed=false,restartGeneration=0,disposal;
   const documentGenerations=new Map();
   const key = uri => uri.toString();
   const isSolidity = doc => doc?.uri.scheme === 'file' && extname(doc.uri.fsPath).toLowerCase() === '.sol';
@@ -34,11 +35,13 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     if (!configured && !workspace) throw new Error('Set solidityLean.backendPath to the Solidity Lean repository directory');
     const automatic = cfg.get('verifyOnSave', false) ? 'onsave' : cfg.get('automaticVerification', 'onchange');
     return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false), counterexamples: cfg.get('counterexamples', false),
-      projectRoot:workspace||dirname(doc.uri.fsPath),includePaths:cfg.get('includePaths',[]),remappings:cfg.get('remappings',[]),
+      projectRoot:workspace||dirname(doc.uri.fsPath),includePaths:cfg.get('includePaths',[]),remappings:cfg.get('remappings',[]),compilerOutputDir:cfg.get('compilerOutputDir','bin'),
       workers: cfg.get('workers', 1), automaticVerification: {onchange:'change',onsave:'save',never:'never'}[automatic] || 'never' };
   }
   const sourceCommands=require('./source-commands.cjs').install(vscode,context,{settings,output,cancelVerification:uri=>cancel(uri,true)});
+  const tracePresentation=require('./trace-presentation.cjs').install(vscode,context,{notify:message=>{output.appendLine(message);vscode.window.showInformationMessage?.(message);}});
   function cancel(uri,preserveSource=false) {
+    for(const [id,snapshot]of symbolSnapshots)if(snapshot.compilerOnly&&(!uri||id===key(uri))){snapshot.abort.abort();symbolSnapshots.delete(id);}
     if(!preserveSource)sourceCommands.cancel(uri?key(uri):undefined);
     automaticTests.stop(uri);
     service?.cancel(uri);
@@ -96,6 +99,13 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     Promise.resolve().then(()=>{if(current())return service.request('textDocument/documentSymbol',doc,{}, {signal:snapshot.abort.signal});}).then(symbols=>{
       if(!current())return;const validated=require('./testing-tree.cjs').currentSymbols(symbols,snapshot.text);snapshot.symbols=validated;testingTree.render(doc,report,validated);
     }).catch(error=>{if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED')output.appendLine('Testing symbols unavailable: '+error.message);});
+  }
+  async function compilerTesting(doc){
+    if(!service?.request||disposed||doc.isClosed||!isSolidity(doc)||!vscode.workspace.isTrusted||reports.has(key(doc.uri))||!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true))return;
+    const id=key(doc.uri),previous=symbolSnapshots.get(id);if(previous?.compilerOnly&&previous.doc===doc&&previous.version===doc.version&&previous.text===doc.getText())return;
+    previous?.abort.abort();const snapshot={doc,version:doc.version,text:doc.getText(),compilerOnly:true,abort:new AbortController()};symbolSnapshots.set(id,snapshot);
+    const current=()=>!disposed&&!doc.isClosed&&!snapshot.abort.signal.aborted&&documents.get(id)===doc&&doc.version===snapshot.version&&doc.getText()===snapshot.text&&symbolSnapshots.get(id)===snapshot&&!reports.has(id)&&vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true);
+    try{const symbols=await service.request('textDocument/documentSymbol',doc,{}, {signal:snapshot.abort.signal});if(current())testingTree.renderCompiler(doc,symbols);}catch(error){if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){symbolSnapshots.delete(id);output.appendLine('Compiler Testing symbols unavailable: '+error.message);}}
   }
   function accept(doc, report, config, options = {}) {
     const identities=report.results.map(row=>require('./testing-tree.cjs').rowId(key(doc.uri),row));if(new Set(identities).size!==identities.length)throw new Error('Verifier report has duplicate obligation identities');
@@ -172,9 +182,9 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       catch (error) { showError(error); }
     }
   }
-  controller.resolveHandler = async item => { if (!item) await discover(); };
+  controller.resolveHandler = async item => { if (!item){if(service?.request)await Promise.all([...documents.values()].map(compilerTesting));else await discover();} };
   controller.refreshHandler = discover;
-  controller.createRunProfile('Verify', vscode.TestRunProfileKind.Run, async (request, profileToken) => {
+  const verifyProfile=controller.createRunProfile('Verify', vscode.TestRunProfileKind.Run, async (request, profileToken) => {
     const run=controller.createTestRun(request),cancellation=new vscode.CancellationTokenSource();
     testRunCancellations.add(cancellation);
     const tokens=[profileToken,run.token].filter(Boolean);
@@ -222,16 +232,17 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       releaseAutomatic();registrations.forEach(registration=>registration.dispose());testRunCancellations.delete(cancellation);cancellation.dispose();run.end();
     }
   },true);
+  if(testingTree.obligationTag)verifyProfile.tag=testingTree.obligationTag;
   context.subscriptions.push(
-    diagnostics, controller, output,
+    diagnostics, controller, outputOwner,
     vscode.commands.registerCommand('solidityLean.verify', () => activeCommand(false)),
     vscode.commands.registerCommand('solidityLean.list', () => activeCommand(true)),
-    vscode.commands.registerCommand('solidityLean.cancel', () => {for(const cancellation of testRunCancellations)cancellation.cancel();cancel();}),
+    vscode.commands.registerCommand('solidityLean.cancel', () => {tracePresentation.reset();for(const cancellation of testRunCancellations)cancellation.cancel();cancel();}),
     vscode.commands.registerCommand('solidityLean.showOutput', () => output.show(true)),
     vscode.workspace.onDidChangeConfiguration(event=>{
       for(const doc of documents.values())if(event.affectsConfiguration('solidityLean.displayVerificationAsTests',doc.uri)){
         if(!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true)){automaticTests.visible(doc,false);clearTests(doc.uri,true);}
-        else {automaticTests.visible(doc,true);const report=reports.get(key(doc.uri));if(report&&!doc.isClosed)publish(doc,report);}
+        else {automaticTests.visible(doc,true);const report=reports.get(key(doc.uri));if(report&&!doc.isClosed)publish(doc,report);else compilerTesting(doc);}
       }
     }),
     vscode.workspace.onDidSaveTextDocument(doc => {
@@ -269,7 +280,10 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   );
   if(service) {
     editorServices=require('./editor-services.cjs').install(vscode,context,service,showError);
-    const open=doc=>{if(!disposed&&!doc.isClosed&&isSolidity(doc)){documents.set(key(doc.uri),doc);const generation=documentGenerations.get(key(doc.uri))||0;service.open(doc).catch(error=>{if(generation===(documentGenerations.get(key(doc.uri))||0)&&!doc.isClosed)showError(Object.assign(error,{uris:error.uris||[key(doc.uri)]}));});}};
+    const open=(doc,again=false)=>{if(!disposed&&!doc.isClosed&&isSolidity(doc)){documents.set(key(doc.uri),doc);const generation=documentGenerations.get(key(doc.uri))||0;
+      const current=()=>!disposed&&!doc.isClosed&&documents.get(key(doc.uri))===doc&&generation===(documentGenerations.get(key(doc.uri))||0);
+      return service.open(doc).then(client=>{if(current()&&client?.serverInfo?.name){const feedback=again?require('./status-summary.cjs').issueURL(client):null;output.appendLine(`Solidity Lean is ready${again?' again':''} for ${key(doc.uri)} (language services; version ${client.serverInfo.version||'unknown'}).`+(feedback?'\nIf you have time, please let us know why you needed to restart by filing an issue:\n'+feedback:''));}}).catch(error=>{if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){output.appendLine(`Language server startup failed for ${key(doc.uri)}: ${error.message}`);showError(Object.assign(error,{uris:error.uris||[key(doc.uri)]}));}});
+    }};
     const receive=params=>{
       const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version||hash(doc.getText())!==params.sourceHash)return;
       try{accept(doc,params.report,settings(doc),params.selection);}catch(error){showError(error);}
@@ -277,6 +291,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     const receiveStatus=params=>{
       const doc=documents.get(params.uri);if(disposed||!doc||doc.isClosed||doc.version!==params.version||hash(doc.getText())!==params.sourceHash)return;
       if(!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true))return;
+      if(params.state==='ready'&&!reports.has(key(doc.uri)))void compilerTesting(doc);
       if(!Array.isArray(params.functions)||params.functions.some(row=>!row||!model.validRange(row.range)||typeof row.status!=='string'||row.name!==undefined&&typeof row.name!=='string'))return;
       automaticTests.status(doc,params);
     };
@@ -284,26 +299,28 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version)return;
       diagnostics.set(doc.uri,params.diagnostics.map(row=>{const d=new vscode.Diagnostic(toRange(row.range),row.message,row.severity-1);d.source=row.source;d.code=row.code;if(row.relatedInformation)d.relatedInformation=row.relatedInformation.map(r=>new vscode.DiagnosticRelatedInformation(new vscode.Location(vscode.Uri.parse(r.location.uri),toRange(r.location.range)),r.message));return d;}));
     };
-    const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version)clear(doc.uri,false);};
+    const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version){tracePresentation.reset(doc.uri);clear(doc.uri,false);}};
     service.on('invalidated',invalidated);
     const serverError=error=>{
       if(disposed||[-32800,-32801].includes(error.code)||error.code==='CANCELLED')return;
       if(error.uris&&!error.uris.some(uri=>{const doc=documents.get(uri);return doc&&!doc.isClosed;}))return;
       const affected=error.uris?new Set(error.uris):null;
       for(const [id,doc]of documents)if(!affected||affected.has(id)){
-        saving.delete(id);active.get(id)?.abort();clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);
+        tracePresentation.reset(doc.uri);saving.delete(id);active.get(id)?.abort();clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);
       }
       showError(error);
     };
     const log=message=>output.appendLine(message);
     service.on('status',receiveStatus);service.on('report',receive);service.on('diagnostics',receiveDiagnostics);service.on('serverError',serverError);service.on('log',log);
     const restart=async selected=>{
-      ++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
+      if(disposed)return;
+      if(selected)for(const doc of selected)tracePresentation.reset(doc.uri);else tracePresentation.reset();const operation=++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
       if(!selected)cancel();
       for(const doc of targets){const id=key(doc.uri),generation=(documentGenerations.get(id)||0)+1;documentGenerations.set(id,generation);generations.set(id,generation);if(selected)cancel(doc.uri);clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);}
       const current=doc=>!disposed&&!doc.isClosed&&documentGenerations.get(key(doc.uri))===generations.get(key(doc.uri));
-      try{await service.restart(selected?targets.map(doc=>doc.uri):undefined);}catch(error){if(targets.some(current))showError(error);return;}
-      for(const doc of targets)if(current(doc))open(doc);
+      output.appendLine('Terminating Solidity Lean language services...');
+      try{await service.restart(selected?targets.map(doc=>doc.uri):undefined);}catch(error){if(targets.some(current)||!disposed&&!selected&&!targets.length&&restartGeneration===operation){output.appendLine('Language server stop failed: '+error.message);showError(error);}return;}
+      await Promise.all(targets.filter(current).map(doc=>open(doc,true)));
     };
     const serverSettings=['backendPath','nodePath','timeoutMs','workers','automaticVerification','verifyOnSave','includePaths','remappings','counterexamples','auditPreconditions'];
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(open),
@@ -313,7 +330,20 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     for(const doc of vscode.workspace.textDocuments)open(doc);
   }
   return { verify, cancel, controller, diagnostics, reports, service,
-    async dispose(){if(disposed)return;disposed=true;disposeTesting();for(const cancellation of testRunCancellations)cancellation.cancel();cancel();for(const item of context.subscriptions)item.dispose();const sourceRetirement=sourceCommands.dispose();try{await service?.dispose();}finally{await sourceRetirement;}} };
+    dispose(){
+      if(disposal)return disposal;disposed=true;
+      let resolveDisposal,rejectDisposal;disposal=new Promise((resolve,reject)=>{resolveDisposal=resolve;rejectDisposal=reject;});
+      const cleanup=async()=>{
+        const errors=[],pending=[];
+        const attempt=fn=>{try{const result=fn();if(result!==disposal&&result&&typeof result.then==='function')pending.push(Promise.resolve(result).catch(error=>{errors.push(error);}));}catch(error){errors.push(error);}};
+        attempt(disposeTesting);for(const cancellation of testRunCancellations)attempt(()=>cancellation.cancel());attempt(cancel);
+        for(const item of context.subscriptions)if(item!==outputOwner)attempt(()=>item.dispose());
+        attempt(()=>service?.dispose());attempt(()=>sourceCommands.dispose());
+        try{await Promise.all(pending);}finally{attempt(()=>outputOwner.dispose());}
+        const failures=[...new Set(errors)];if(failures.length)throw failures.length===1?failures[0]:new AggregateError(failures,'Extension cleanup failed');
+      };
+      cleanup().then(resolveDisposal,rejectDisposal);return disposal;
+    } };
 }
 let runtime;
 function activate(context) {

@@ -1,0 +1,52 @@
+{
+  "scope": "Complete13 fact-elimination theorem roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 901,
+    "pending": 4382,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/fact-elimination-roles-v75/evidence.tar.gz",
+      "bytes": 291143,
+      "sha256": "f81e9cfaa8e3df16870d1da546b701361d80be704d2eb3156c71f3a085fb6bf1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/fact-elimination-roles-v75/inputs.json",
+      "bytes": 1457,
+      "sha256": "550b69e7bd3c1fc35d70f2e0c794c760173738a9ddcf779c701200bd79756956"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/fact-elimination-roles-v75/gates.json",
+      "bytes": 2868,
+      "sha256": "1766e0a9298763fc4cf2faa6b80f06c64b24a20e6faefc3cb2b3c2a13971353b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/fact-elimination-roles-v75/reviews.md",
+      "bytes": 1298,
+      "sha256": "e5fcd456c6ca95fba855acc446c109ee73f44a065a8ddd28dd4d942a7895c763"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/fact-elimination-roles-v75/case-rosters.json",
+      "bytes": 1804,
+      "sha256": "2d66ae92382071db9d0cfc675dd650d2098bb23b494ce7c7f4e9364f8f321601"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/fact-elimination-roles-v75/doc-master-repair-binding.json",
+      "bytes": 416,
+      "sha256": "1496ffdef91f2181747441ad9328d02dd5a3c3f1b6d8f2355291747576859fb6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/fact-elimination-roles-v75/external-retention.json",
+      "bytes": 254120,
+      "sha256": "87538bdf67f5ece01002e4fc34838a9289bcc797b54798804bc02a05fd98cc00"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/fact-elimination-roles-v75/semantic-roles-reviewed.json",
+      "bytes": 2426199,
+      "sha256": "813c69920786b93b2a47026e35b6005d87d98aa8950a2afaf874b82a4abdde6c"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.actual_head": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.canonical_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.guarded_continuation": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.malformed_base": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.missing_destination": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.next_checked": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.result_checked": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_alias_name": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_argument_literal": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_argument_operator": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_argument_slot": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_child": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_count_name": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_destination": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_function_name": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_index": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_result_name": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_signature": [
+  "Quot.sound",
+  "propext"
+ ]
+}

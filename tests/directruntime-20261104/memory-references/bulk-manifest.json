@@ -2,8 +2,7 @@
   "schema": "memory-references-h44-bulk-v1",
   "repository": "/workspace/solidity-lean",
   "available_source_head": "7ae5607c9ecfff4078162115eaaaa48a1ff46eb0",
-  "reported_missing_worker_head": "618dda88b2096d807508090a81fe54e8b440b96d",
-  "status": "available published bulk preserved; full original head split still requires recovery",
+  "status": "authenticated 618dda88 merged; all cumulative committed bulk archived and removed from current index",
   "archives": [
     {
       "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/h82-h44/available-bulk-7ae5607c.tar.zst",
@@ -12,6 +11,15 @@
       "payload_files": 479,
       "payload_bytes": 4079938,
       "member_manifest": "tests/directruntime-20261104/memory-references/runtime/h82-h44/FILES.jsonl",
+      "verified_complete_readback": true
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/h82-h44/recovered-bulk-618dda88.tar.zst",
+      "bytes": 669919,
+      "sha256": "5651f5fb7ce7a6bd9a3e78ac409c375cac468250de3ffea6738d99d721178fd9",
+      "payload_files": 814,
+      "payload_bytes": 7259140,
+      "member_manifest": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/h82-h44/RECOVERED-FILES.jsonl",
       "verified_complete_readback": true
     }
   ],
@@ -30,13 +38,52 @@
     "tests/directruntime-20261104/memory-references/prepare-checks.py": "9463289b924ce7e4c5ff75be09d2e36aca52b1ac82cb03ed411332841a6f64fd",
     "tests/directruntime-20261104/memory-references/registration.json": "a066d48d8ae0ea79923423b575346a1cef92ddbada3d6fd5746aeb9092cf0473",
     "tests/directruntime-20261104/memory-references/source-transport.mjs": "4ee674018c91dbf8350a0f4b55cba64a193868683d7f831e8948e6b7e2752f92",
-    "Solidity/Frontend/ExecutableAst/Memory/Reader.lean": "9d1a8e15551e979a347a267585f373a814cc5f877de94b073d3cc13bf1349350"
+    "Solidity/Frontend/ExecutableAst/Memory/Reader.lean": "9d1a8e15551e979a347a267585f373a814cc5f877de94b073d3cc13bf1349350",
+    "tests/directruntime-20261104/memory-references/native-boundary-audit.py": "7b779c6e195851e78e985f53a93ee08de03cab04c0eb203ed58ef20cb4b88a12",
+    "tests/directruntime-20261104/memory-references/native-closure-evidence.py": "489145463919ce84c7a1c5b397d0cad7e770bf3618b5ac55071fae8d5b51af35",
+    "tests/directruntime-20261104/memory-references/native-refusal-controls.py": "e8c1c04126733c62a3ac9132dd406777642ea7af34fcda1a0498c4e4902f8bd4",
+    "tests/directruntime-20261104/memory-references/native-source-controls.mjs": "eff5f27017d9737ab570ee42d817372dab24d8159572d4666e45a9ef8818d327"
   },
   "gates_unchanged": true,
   "theorems_and_budgets_unchanged": true,
   "missing": [
-    "Original worker commit618dda88 and its four native scripts/evidence packet",
-    "Original runtime/consumer-708/native-isolated/direct-check and native browser handoff evidence"
+    "Original untracked native-isolated/direct-check binary",
+    "Original runtime/consumer-708/cache-c9230cc9/cache.tar.zst executable cache"
   ],
-  "restore": "Verify archive SHA256, then tar --zstd -xf ARCHIVE -C a fresh checkout root; paths remain unchanged. Existing fixtures.cjs and prepare-admission.cjs regenerate fixture/admission files. Gates are not skipped if data is absent."
+  "restore": "Verify archive SHA256, then tar --zstd -xf ARCHIVE -C a fresh checkout root; paths remain unchanged. Existing fixtures.cjs and prepare-admission.cjs regenerate fixture/admission files. Gates are not skipped if data is absent.",
+  "recovered_worker_head": "618dda88b2096d807508090a81fe54e8b440b96d",
+  "retained_config_note": "The newer branch .gitattributes is retained; recovered additions only relaxed whitespace checks on now-untracked bulk and are unnecessary.",
+  "authenticated_metadata_receipt": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/intake-receipt.json",
+  "historical_untracked_artifacts": [
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check",
+      "status": "UNVERIFIABLE",
+      "reportedSha256": "5f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01",
+      "bytesLocallyPresent": false,
+      "sha256LocallyVerified": false,
+      "policy": "H30/H86:original untracked bytes not recovered;not a recovery wait."
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/cache-c9230cc9/cache.tar.zst",
+      "status": "UNVERIFIABLE",
+      "reportedSha256": "5a25d13aab46396562e7adcf9a2aa4f0bf6ce5f82ba193b0e1c68d43e6953be5",
+      "bytesLocallyPresent": false,
+      "sha256LocallyVerified": false,
+      "policy": "H30/H86:original untracked bytes not recovered;not a recovery wait."
+    }
+  ],
+  "source_hash_scope": "Historical source fingerprints captured during H44 recovery of618dda88;later reviewed source/helper changes have separate receipts. These are not current-tree trust pins.",
+  "gates_unchanged_scope": "H44 tracking/archival operation only;subsequent owned helper changes are recorded in their checkpoint receipts.",
+  "regenerated_evidence": [
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/native/direct-check",
+      "sha256": "a3f920a74d53ea9f5201cbafa166900efd2495c65b1bd98e7c7ef26990bd8c6a",
+      "boundary": "Regenerated independent native evidence;not verification of missing original bytes."
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/native-cache-pickup/cache.tar.zst",
+      "sha256": "a13e6ccdd984c1c150e25564c3df3be5242faa07967da101a6f48ea44c8e2976",
+      "boundary": "Regenerated verified pack retained locally;not the missing original cache and no delivery/new freshness claim."
+    }
+  ]
 }

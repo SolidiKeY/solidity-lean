@@ -65,6 +65,9 @@ The latest isolated fixture adds a generated lane import and theorem: its module
 
 Human instruction requests retirement and handoff to `solidity-h62-5-20261106/statement-graph`. The complete original rendered prompt bytes were not available through any exposed tool or located file; `tests/h62/item1/trust-fragments/handoff/original-prompt-provenance.md` records the missing SHA-verified artifact. The scope manifest and coordinator-provided decisions, audit and toolchain pin are committed under that handoff directory; the full ownership snapshot remains outside Git in the evidence directory, with checksums. H71 is absent from the available decisions snapshot, and the original explicit no-push rule remains in force. No push was made.
 
+## Post-merge standalone check
+
+After the coordinator reported `ff650f670` integrated and the lane was fast-forwarded to `20e492ee99a3fa8679aa526de0b6e731d85e4134`, the original audit bytes and standalone acceptance still matched. A new external test checks the strict installed gate against the real committed Git tree using a temporary candidate file; after successor hardening it confirms that an uncommitted candidate is refused and makes no edit to `TrustAudit.lean`. The test uses the frozen base only as a fixture, not as the coordinator's authoritative prior commit for production registration. The syntax migration is not present in the merged tree, so the real Lean audit and timing remain open. The coordinator separately reported its touched/Bridge gates and finder/skeptic review passed for the merged commit; this document does not independently reproduce those gate receipts.
 ## H82b successor: snapshot and resource hardening
 
 The survivor verified the authenticated full assignment/scope and stopped/head

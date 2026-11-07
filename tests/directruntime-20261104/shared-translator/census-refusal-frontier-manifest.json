@@ -1,0 +1,19 @@
+{
+  "guardedRegression": "Guard H90 residual parity accounting against lost rows and invented blockers.",
+  "inputHead": "e0a5ac26ed521bde70e3ce4da5120d05a991d9ca",
+  "censusManifestSha256": "720ce5c7bbda3162dd54d4962b3c42fc35fcb458fa18891bf95fa8c01c1f52c3",
+  "generatorSha256": "dc21ad0414bf06d022bdd1fc9292b6d47d4eb89aad40917223592348d9c2ce49",
+  "partitions": {
+    "both": 241,
+    "printed-only": 1245,
+    "canonical-only": 4,
+    "neither": 165
+  },
+  "diagnostics": 66,
+  "archive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/refusal-frontier-4233c0585c733b01.json.gz",
+    "sha256": "4233c0585c733b012656e8542d3b9dc13a0e06060c2b350de8ec83165cd4238e",
+    "bytes": 68357
+  },
+  "boundary": "Saved canonical first refusals for existing-printed functions only. Type occurrences do not identify the failing node or later blockers. Printed success is not elaboration, source transport, intrinsic closure or runtime correctness."
+}

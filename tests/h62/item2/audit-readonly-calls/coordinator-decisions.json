@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "source": "Coordinator user message in this continuation",
+  "decisions": [
+    {
+      "id": "COMPILER-SUCCESS",
+      "verbatim": "Answer (coordinator, from H62 item 2): the totality obligation is met by a SEPARATE compiler-success theorem proved for the owner's compiler (it does not reject everything / always revert on the stated inputs); do not change any frozen interface statement. Record which owner lane must supply it in your audit report, add it as a pending item, and continue."
+    },
+    {
+      "id": "H69-DISPATCH",
+      "verbatim": "Answer to Q-DISPATCH (H69, human): the RO owner (compiler10/readonly-external) publishes a new versioned interface (H57 versioned pairs) with a reachable dispatch split and an explicit migration; consumers re-prove. Record the two unreachable frozen cases as \"pending RO v2\" in your audit, apply H69's witness rule to the rest, and continue."
+    },
+    {
+      "id": "H70-WITNESS-RULE",
+      "verbatim": "H69 exact witness rule: for intentional negative controls/separation/refutations, a checked joint-impossibility proof IS the audit result; ordinary interfaces still need joint witnesses; no statement changes. H69 directs RO to version the reachable dispatch split and migrate consumers; separate compiler-success theorem belongs to V13 with V15/P10 fixed outcomes."
+    },
+    {
+      "id": "Q-CALLBACK-INTENT-RO",
+      "verbatim": "Q-CALLBACK-INTENT: RO reports these are intentional no-callback specialization controls; accept checked callback-choice impossibility as the audit result under H69; never count them as positive callback witnesses. Statements remain unchanged."
+    }
+  ],
+  "witness_rule_text": "H70 supplied exact H69 rule; no longer awaiting clarification.",
+  "relay_acceptance": [
+    "solidity-compiler10-20261028/readonly-external",
+    "solidity-v12-v17-20261031/v13-abi-world",
+    "solidity-v12-v17-20261031/v15-evm-agreement"
+  ]
+}

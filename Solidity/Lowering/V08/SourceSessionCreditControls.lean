@@ -32,14 +32,14 @@ theorem next_actual (p : Roadmap.Pipeline) (extra : Nat) (bytes : Roadmap.Bytes)
       (.ok (.success (wordBytes (toWord 12))),(Source.L0 EB,next bytes)) := by cases p <;> rfl
 
 theorem complete_vector (bytes : Roadmap.Bytes) :
-    ((credited bytes).ex.world.accounts thisC).balance.val = 16 ∧
-    ((credited bytes).ex.world.accounts user).balance.val = 93 ∧
+    ((credited bytes).ex.world.accounts thisC).balance = 16 ∧
+    ((credited bytes).ex.world.accounts user).balance = 93 ∧
     (credited bytes).ex.journal.length = 1 ∧
     (credited bytes).heap = (success bytes).heap ∧
     (credited bytes).logs = (success bytes).logs ∧
     (credited bytes).fnLocals = (success bytes).fnLocals ∧
-    ((next bytes).ex.world.accounts thisC).balance.val = 16 ∧
-    ((next bytes).ex.world.accounts user).balance.val = 93 ∧
+    ((next bytes).ex.world.accounts thisC).balance = 16 ∧
+    ((next bytes).ex.world.accounts user).balance = 93 ∧
     readX (next bytes) = some 5 ∧ readT (next bytes) = some 0 ∧
     (next bytes).ex.journal = [] ∧ (next bytes).logs = (success bytes).logs ∧
     (next bytes).events = (success bytes).events ++ [.credit thisC (word 9)] ++
@@ -49,7 +49,7 @@ theorem complete_vector (bytes : Roadmap.Bytes) :
 theorem wrong_event_only (bytes : Roadmap.Bytes) :
     (credited bytes).ex.world ≠ (success bytes).ex.world := by
   intro same
-  have balances := congrArg (fun w => (w.accounts thisC).balance.val) same
+  have balances := congrArg (fun w => (w.accounts thisC).balance) same
   change 16 = 7 at balances
   cases balances
 

@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "scope": "local helper witness bundles only; full assignment incomplete",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "owner": "area producer unresolved; no live ownership transfer",
+  "proof_file": "tests/h62/item2/audit-exact-verification/VisitedSetAudit.lean",
+  "proof_log": "bounded-audit.log",
+  "entries": [
+    {
+      "original": "Solidity.Linear.HSet.mem_toList",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:56",
+      "source_signature_sha256": "cecefbe5a13af4cd5b418233531c960ac3e5a64f039b41faae36ff799364567f",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.mem_toList_inputs",
+      "classification": "joint_input_bundle",
+      "status": "kernel_checked_local_bundle"
+    },
+    {
+      "original": "Solidity.Linear.HSet.find?_some",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:66",
+      "source_signature_sha256": "cd2c10ee8b140ac7be19271eb9b77099c7514503c1e0270ac873ca3dae2e63d5",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.find_some_inputs",
+      "classification": "joint_input_bundle",
+      "status": "kernel_checked_local_bundle"
+    },
+    {
+      "original": "Solidity.Linear.HSet.mem_of_contains",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:77",
+      "source_signature_sha256": "54c45fda61ed5a8d62441bc7f368447a2a20b9d5ade780b7e884d10567ddfdba",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.contains_inputs",
+      "classification": "joint_input_bundle",
+      "status": "kernel_checked_local_bundle"
+    },
+    {
+      "original": "Solidity.Linear.HSet.mem_insert",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:87",
+      "source_signature_sha256": "44ac94ee17fe16afc29e847e96ab5ce8264d0ad14f4d6549b9bb40e26c7dd2a5",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.insert_inputs",
+      "classification": "joint_input_bundle",
+      "status": "kernel_checked_local_bundle"
+    },
+    {
+      "original": "Solidity.Linear.pushNew_spec",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:137",
+      "source_signature_sha256": "a174519a72a378dc78aec5a9d72a634650e570757afa9cfd0433ab521641b45b",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.push_inputs",
+      "classification": "joint_input_bundle",
+      "status": "kernel_checked_local_bundle"
+    },
+    {
+      "original": "Solidity.Linear.walkInv_initial",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:184",
+      "source_signature_sha256": "14f451067cbfd8911e82301324fdb5e37ab690209db61e7f7a18ff6dac376b52",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.initial_inputs",
+      "classification": "joint_input_bundle",
+      "status": "kernel_checked_local_bundle"
+    },
+    {
+      "original": "Solidity.Linear.walk_closed",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:193",
+      "source_signature_sha256": "b8f1606c3ddea4b2adab1cb2cef7f781c5773cc349d3061d25d2dcd692e2d99f",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.closed_inputs",
+      "classification": "joint_input_bundle",
+      "status": "kernel_checked_local_bundle"
+    },
+    {
+      "original": "Solidity.Linear.walk_refuted",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:224",
+      "source_signature_sha256": "f96bb83db9150662943b629457c242f84f9f17abdee09b7a23b6468210e7f0db",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.refuted_inputs",
+      "classification": "joint_input_bundle",
+      "status": "kernel_checked_local_bundle"
+    },
+    {
+      "original": "Solidity.Linear.walkC_eq",
+      "source_id": "Solidity/Calculus/VisitedSet.lean:250",
+      "source_signature_sha256": "ddefab300b7ebb60d4d95e3f1ca2772d75d03081ec27310c6fdcfdaecde5221d",
+      "helper": "Solidity.H62.ExactAudit.VisitedSet.cache_inputs",
+      "classification": "inhabited_global_contract_and_same_feasible_input",
+      "status": "kernel_checked_local_bundle"
+    }
+  ],
+  "proof_receipt": "bounded-audit.receipt.json"
+}

@@ -28,12 +28,12 @@ def saved : Source.SPath := ⟨⟨some "C", "saved"⟩, []⟩
 def scratch : Source.SPath := ⟨⟨some "C", "scratch"⟩, []⟩
 def empty : Source.St E :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩, Source.Transient.empty, []⟩,
-    Source.Heap.empty, [], [], ⟨[], .nil⟩⟩
+    Source.Heap.empty, [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩
 def populated : Source.St E :=
   { empty with
     ex := empty.ex.run [
-      .account sender (fun a => { a with balance := ⟨93, by decide +kernel⟩ }),
-      .account self (fun a => { a with balance := ⟨7, by decide +kernel⟩, nonce := 1, code := some 0, storage := a.storage.write saved (.bool true) }),
+      .account sender (fun a => { a with balance := 93 }),
+      .account self (fun a => { a with balance := 7, nonce := 1, code := some 0, storage := a.storage.write saved (.bool true) }),
       .transient self (fun t => t.write scratch (.bool true))]
     heap := (Source.Heap.empty.alloc ⟨.bytes .memory, .bytes [0, 0xff]⟩).1
     events := [.call self ⟨7, by decide +kernel⟩ [0, 0xff] false]
@@ -53,8 +53,8 @@ def frame : Source.Fr :=
 def locals : Source.Locals E.layout [.bool] := .cons (.bool true) .nil
 
 theorem populated_snapshot :
-    (populated.ex.world.accounts sender).balance.val = 93 ∧
-    (populated.ex.world.accounts self).balance.val = 7 ∧
+    (populated.ex.world.accounts sender).balance = 93 ∧
+    (populated.ex.world.accounts self).balance = 7 ∧
     (populated.ex.world.accounts self).nonce = 1 ∧
     (populated.ex.world.accounts self).code = some 0 ∧
     (populated.ex.world.accounts self).storage.read saved = some (.bool true) ∧

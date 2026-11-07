@@ -1,0 +1,98 @@
+{
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.computed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.joint8": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.low_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.mask_present": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.missing_mask_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.nat_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.protected_frame": [],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.result_range": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.uint16_regular": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.uint256_max": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.uint256_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.uint8_max": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.uint8_regular": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.uint8_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.unmasked_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.wide_bound": [],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.wrong_index_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Controls.lean:Solidity.Backend.PrimitivePackets.BitNot.Controls.Fixture.wrong_value_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

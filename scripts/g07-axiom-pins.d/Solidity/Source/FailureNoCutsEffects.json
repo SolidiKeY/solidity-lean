@@ -1,0 +1,7 @@
+{
+ "Solidity/Source/FailureNoCutsEffects.lean:Solidity.Source.FailureExecution.emitEvent_cutFree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

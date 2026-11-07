@@ -11,7 +11,7 @@ def recursiveRaw13 : Roadmap.Word := ⟨0xdddddddddddddddddddddddddddddddd000000
 def recursiveInitialRaw (q : Roadmap.Word) : Roadmap.Word := if q = 14 then 55 else ⟨0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,by decide⟩
 def recursiveResidual := initialPackedComplement recursiveRegistry recursiveRegistry (fun k => recursiveInitialRaw k.slot)
 def recursiveState : Source.EMState recursiveDeclEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := recursiveDeclEnv.layout) (recursiveDeclEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := recursiveDeclEnv.layout) (recursiveDeclEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem recursive_initial_MemOK : Source.MemOK recursiveDeclEnv recursiveState.2.heap.ty recursiveState :=
   ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩

@@ -192,7 +192,7 @@ theorem caller_run (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   rw [evalE,Hoare.run_bind,arguments_run]
   dsimp only
   rw [Hoare.run_bind]
-  have inner : callInternal (globals p fixed) frame 21 d parameters [Aty] (L0 E,initial) =
+  have inner : callInternal (plan := none) (globals p fixed) frame 21 d parameters [Aty] (L0 E,initial) =
       (.ok (.val (.memRef rfl 2)),(L0 E,reached)) := by
     change (callInternal (globals p fixed) frame 21 d parameters [Aty]).run (L0 E,initial) = _
     have hb : (globals p fixed).prog.body d = some body := source_body

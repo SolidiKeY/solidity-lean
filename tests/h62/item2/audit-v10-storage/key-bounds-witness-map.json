@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "ff5594d1dc41a90777a5fbef081dd62be4ca07723848c68a1372102fdf59e2ce",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:23:ofSlot_toSlot",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.ofSlot_toSlot",
+      "signature": "theorem ofSlot_toSlot (l : Solidity.Storage.Loc) (fits : KeysFit l) : Solidity.Storage.ofSlot (toSlot l fits) = l",
+      "signature_sha256": "8c3c30106eaaf195b717b8609c70a8abc5b652b52f23db7e2aa7a17eb4535a26",
+      "witness": "H62.StorageAudit.KeyBoundsWitnesses.conversion_joint",
+      "status": "kernel-checked joint key-bound premise witness; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:34:toSlot_injective",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.toSlot_injective",
+      "signature": "theorem toSlot_injective (a b : Solidity.Storage.Loc) (fa : KeysFit a) (fb : KeysFit b)\n    (equal : toSlot a fa = toSlot b fb) : a = b",
+      "signature_sha256": "2515adc4096e6d3ec12ca4f7c3217990fe1cbe15d525f127d355370036557bf9",
+      "witness": "H62.StorageAudit.KeyBoundsWitnesses.injective_joint",
+      "status": "kernel-checked joint key-bound premise witness; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:39:add_keysFit",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.add_keysFit",
+      "signature": "theorem add_keysFit (l : Solidity.Storage.Loc) (fits : KeysFit l) (offset : Nat) : KeysFit (l.add offset)",
+      "signature_sha256": "0f639f8622609713be9a2bfff531a4a3c519df6f4040feb066527ca0a062232f",
+      "witness": "H62.StorageAudit.KeyBoundsWitnesses.addition_joint",
+      "status": "kernel-checked joint key-bound premise witness; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:42:step_keysFit",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.step_keysFit",
+      "signature": "theorem step_keysFit {n : Nat} {G : Schema n} {A B : TypeGraph.Ty n}\n    (step : TypeGraph.Step G A B) (base : Solidity.Storage.Loc) (fits : KeysFit base) : KeysFit (stepLoc step base)",
+      "signature_sha256": "54ef3764f169b9de4a84ab35ec1da16d3f6c65bdc8a2f4ff9994496aac7b567d",
+      "witness": "H62.StorageAudit.KeyBoundsWitnesses.step_joint",
+      "status": "kernel-checked joint key-bound premise witness; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:52:path_keysFit",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.path_keysFit",
+      "signature": "theorem path_keysFit {n : Nat} {G : Schema n} {A B : TypeGraph.Ty n}\n    (path : TypeGraph.Path G A B) (base : Solidity.Storage.Loc) (fits : KeysFit base) : KeysFit (pathLoc path base)",
+      "signature_sha256": "e78022702f8613079682852c9ea7b2ada18541acbdceba0da9df971afe39f200",
+      "witness": "H62.StorageAudit.KeyBoundsWitnesses.path_joint",
+      "status": "kernel-checked joint key-bound premise witness; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetOperations.lean:58:query_keysFit",
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.query_keysFit",
+      "signature": "theorem query_keysFit {n : Nat} {G : Schema n} {A : TypeGraph.Ty n}\n    (query : Query G A) (base : Solidity.Storage.Loc) (fits : KeysFit base) : KeysFit (query.location base)",
+      "signature_sha256": "0100352d9280e452cff966bdc3c939a1ff96d8f8c5ddfc4402bd29fe3916e0c6",
+      "witness": "H62.StorageAudit.KeyBoundsWitnesses.query_joint",
+      "status": "kernel-checked joint key-bound premise witness; independent fidelity reviews passed"
+    }
+  ],
+  "scope": "Six finite key-bound premise bundles only; injectivity witness chooses the same nested location for both arguments. No liveness, Source, physical separation or arbitrary-input feasibility claim."
+}

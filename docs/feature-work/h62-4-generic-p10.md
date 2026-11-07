@@ -364,3 +364,88 @@ bundle; bulk evidence stays off git with SHA256SUMS. The exposed goal tool
 cannot set PAUSED, and no available H71 permission authorizes a lane push.
 
 Coordinator resolution: KEEP RETIREMENT AND HANDOFF to solidity-parallel-20261103/executable-bytecode. Generic Continue now broadcasts do not revoke retirement. No human decision pending. Coordinator will set existing goal PAUSED after final head report and idle turn because worker lacks pause tool. No further proof implementation.
+
+
+## H82 successor source acceptance
+
+The authenticated final member head `dcb2efa56558cfd7c056b8c8fcda724b9683750a`
+is merged into the successor branch
+`codex/solidity-parallel-20261103/executable-bytecode`. The retired worker is
+stopped; this does not establish its historical gates or finish the queue.
+The successor retains the original branch-bound acceptance entry point unchanged.
+
+The additive `scripts/h62/item4/generic-p10/successor_accept.py` checks the exact
+retired receipt and scanner, final-head ancestry, all 198 original family files
+against the frozen Git base and current bytes, staged family fidelity, inventory
+checksum and byte-identical reproduction. It requires the assigned successor
+branch. The inherited census is byte-identical to the committed receipt, including
+all 2,068 declaration records. The current-head identifier and verifier hash are
+saved separately from the inherited historical `base` field.
+
+This is source reproduction only. It does not certify the successor's entire
+merge diff, kernel checking, correspondence, runtime, gas/fork, migration or
+performance. Twelve adversarial tests include changed premises with unchanged
+counts, forged statements and hashes, missing or additional files, changed
+receipt/scanner, wrong branch or ancestry, symlinked sources and staged-only
+corruption. The scanner is authenticated before any of its code executes; a
+modified-scanner regression confirms executable tampering is refused without
+executing it. An initial missing-source test reported the scanner's empty-family
+error; the gate now checks the exact file set first. Both receipts are retained.
+
+Run from the successor checkout, with fresh off-Git output:
+
+```sh
+python3 -B -m unittest discover -s tests/h62/item4/generic-p10 -p test_successor_accept.py -v
+python3 -B scripts/h62/item4/generic-p10/successor_accept.py \
+  --inventory /workspace/parallel-20261103/executable-bytecode/h82-integration/evidence/generic-p10-current-source-census.json \
+  --output /workspace/parallel-20261103/executable-bytecode/h82-p10-source/evidence/source-acceptance-FRESH.json
+```
+
+The original no-push rule, live production partition and overlay-only migration
+restriction remain. H82 removes obsolete proof-only exact-file permission waits;
+it does not authorize live production edits outside the partition. BYTE production
+integration, inherited families, affected Lean/Bridge gates and final performance
+acceptance remain open. Four historical MCP evidence files are absent locally;
+their dependent tests are not replaced with fabricated fixtures. Current H81
+resource-policy text remains requested before new heavy work. No runtime pass or
+whole-assignment completion is claimed.
+
+Independent read-only finder and skeptic reviewed this successor check without
+Lean or builds. The finder requested binding the final committed verifier to the
+receipt. The skeptic found and prompted the pre-authentication import repair
+described above; original acceptance and all production statements remain unchanged.
+
+
+## H126 authorized production application (2026-11-07)
+
+H126 freezes the former Claude V15 lane and transfers the staged P10 production
+body/signature application to this successor. Merged the exact authorized
+90153461127d8d0f1f188021e79bc1ccb256e1e5 producer snapshot after master; this
+adds CallInAgreement/depth_disagreement and its published companions without
+changing a frozen interface. Its instruction-lowering coverage remains the
+existing push/pop/jump/jumpi/loop and storage subset: no InstrV2 fixed-cell
+MLOAD/MSTORE, CALL or V2 data-instruction lowering is supplied by this adoption.
+
+Applied the existing single-file BYTE proposal to ByteObservationControls.
+The source hash is ae0f960bf933aca562e15eaeb90586d081ea90943e87752f38e0d6d1cf5e729b,
+exactly the preserved proposal. All32 original signatures and unchanged fixture
+and negative-control bodies remain; the generic fetched-execution lemma, typed
+nine-row table and original exact instances add eight helpers. Closed fixture
+arithmetic does not decide native execution. No statement, premise, exclusion,
+proof budget or axiom set was weakened. Original overlay tests now explicitly
+read the frozen original source; an added production test checks the actual
+applied bytes, all32 contracts, unchanged bodies and nine table instances.
+
+Current kernel/axiom/meaning checks, paired production measurements and full
+Bridge gates remain pending. The local Bridge has no ByteObservation.olean,
+no built Mathlib import products and an empty package directory; historical
+retired proof receipts are not a current pass. Preserve those historical
+receipts and recover exact pinned dependencies/artifacts before current proof
+validation. No Lean workload, prerequisite allowance or new proof epoch has
+been consumed by this source application. Source-only acceptance is not proof
+acceptance or full-lane completion.
+
+Independent read-only finder and skeptic pass the source application and test
+updates, with no statement weakening found. Source checks and trust/orphans/
+roots/fragments/whitespace pass. These results do not discharge the pending
+kernel, axiom, meaning, timing, touched-build or full Bridge gates.

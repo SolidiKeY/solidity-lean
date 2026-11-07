@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataMixedCopy.lean:Solidity.Backend.MemoryOps.source_cd_uint_bind_bool_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

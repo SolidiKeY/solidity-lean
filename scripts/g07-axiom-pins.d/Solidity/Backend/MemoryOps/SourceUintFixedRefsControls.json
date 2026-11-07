@@ -1,0 +1,115 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.empty_parent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.initial_tables": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.mutation_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_byte_initial": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_delete_zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_late_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_late_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_mutation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_mutation_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_physical_byte_tables": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_physical_clear_table": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_physical_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_physical_write_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_physical_wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_typed_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_late_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_late_tables": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_tables": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.rejecting_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.selected_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.wrong_child_and_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

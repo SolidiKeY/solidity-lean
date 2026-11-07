@@ -1,0 +1,57 @@
+{
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.literal_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.literal_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.literalProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.live_refs_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.local_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.local_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.localProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.negated_literal_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.negated_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AtomicConditionControls.lean:Solidity.Lowering.V07.P12AtomicConditionControls.negatedLocalProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

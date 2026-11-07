@@ -82,7 +82,7 @@ def extension_client := DeferredSource.Operand.run_wk (assignLocalOperand .here 
 -- separate Source constructor, not a proof that address(e) accepts true.
 /-- info: true -/
 #guard_msgs in
-#eval IO.println (reprStr (!(Source.STy.address false).explicit E.isBase (.address true)))
+#eval IO.println (reprStr (!(Source.STy.address false).explicit E.isBase E.mapFree (.address true)))
 
 -- Both conversions and their actual Source composition preserve the reached
 -- assignment. Capture happens before the private native local is dropped.

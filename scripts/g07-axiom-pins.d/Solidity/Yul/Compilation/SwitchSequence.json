@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/SwitchSequence.lean:Solidity.Yul.Compilation.SwitchSequence.Artifact.join_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchSequence.lean:Solidity.Yul.Compilation.SwitchSequence.Artifact.normal_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchSequence.lean:Solidity.Yul.Compilation.SwitchSequence.Artifact.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchSequence.lean:Solidity.Yul.Compilation.SwitchSequence.Artifact.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

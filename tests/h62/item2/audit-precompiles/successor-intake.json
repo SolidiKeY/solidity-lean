@@ -1,0 +1,43 @@
+{
+  "packet": "/workspace/h82-handoffs/h82b-20261106T180909Z",
+  "all_packet_files_verified": 557,
+  "manifest_sha256": "39fb14a45e1e34042b75922e8d60da77f4b6a3555bcae718a8f95e4c37d3055b",
+  "member": {
+    "chain": "precompiles",
+    "threadId": "01a1b0eb-6c24-763e-8581-82c8a9cd405e",
+    "environmentId": "ccarenv_b64_Y2NhcmVudl83YjM2Yzc3YzA3Njg4MTkxODg3Yjc3MTBhZWVkNzdhMg",
+    "state": "paused-verified",
+    "verified_final_stop_head_pause": true,
+    "head": "bd86434e0f193422309f15bad579c171cac2eb3b",
+    "head_file": "members/solidity-h62-2-20261106__audit-precompiles/final-head.txt",
+    "final_report": "members/solidity-h62-2-20261106__audit-precompiles/final-handoff.txt",
+    "final_message_id": "msg_0579d9585d4c72d0016aee187445dc87d2911023e3c13de595",
+    "final_message_time_ms": 1793988739117,
+    "final_text_sha256": "a7be95fceab2a96ffd04f418810ac8dc2d5c02d10713f083e16fd121641e02c5",
+    "assignment": "assignments/precompiles/solidity-h62-2-20261106__audit-precompiles.json",
+    "scope": "assignments/precompiles/scope.json",
+    "receipt": "members/solidity-h62-2-20261106__audit-precompiles/receipt.json",
+    "stop_receipt": {
+      "chain": "precompiles",
+      "phase": "retire",
+      "lane": "solidity-h62-2-20261106/audit-precompiles",
+      "messageFile": "/home/guilherme/.local/state/cloudvm-coord/receipts/h82-20261106T174134Z/messages/precompiles-retire-audit-precompiles.txt",
+      "sha256": "c8d9dc5b92d3abe7f1998c024425f19868a3f2fd3f97b0a2e9c06a12d0d94a59",
+      "state": "accepted",
+      "send_receipt": "/home/guilherme/.local/state/cloudvm-coord/sends/a0ec4f59-4bbf-4a15-a60f-9662d43407c9.json",
+      "turnId": "01a1b1f8-e0e1-70a2-b42c-b51b8c613416",
+      "acceptedAt": "2026-11-06T17:49:22.685972+00:00"
+    }
+  },
+  "git_merge_head": "b6019bd1a3b9908af3d74700ae62660c6e3ce6cc",
+  "frozen_prompt_sha256": "39585f8ffb6629c51fc8d1e0fca1808807d9cb06983d0c558dcdc019112450f3",
+  "scope_sha256": "30e1b7cf905fbd4915b265ffd0acdbb5241bdaaa6213f51016d9d4aa199e67c4",
+  "boundary": "Authenticated metadata and published Git verified; historical executable caches and off-git evidence archive not delivered.",
+  "authenticated_packet_hashes": {
+    "/workspace/h82-handoffs/h82b-20261106T180909Z.tar.gz": "fab677d3e4ccbf57410c175c9665ac0fd689ddf574869e24d431e28de16f9ed4",
+    "/workspace/h82-handoffs/h82b-20261106T180909Z/manifest.json": "39fb14a45e1e34042b75922e8d60da77f4b6a3555bcae718a8f95e4c37d3055b",
+    "/workspace/h82-handoffs/h82b-20261106T180909Z/SHA256SUMS": "ce406a8143f535f3ad79f501072f685a3a23dd5b21447eefe0e03f480931f5d3"
+  },
+  "retirement_barrier": "resolved: authenticated paused/quiescent final head merged",
+  "historical_artifacts": "Off-git retirement evidence archive, Git bundle and original exported patch are not present; no verification of their advertised hashes claimed. Published Git source and fresh local checks are independently verified."
+}

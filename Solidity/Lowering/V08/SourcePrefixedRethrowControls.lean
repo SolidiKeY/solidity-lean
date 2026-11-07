@@ -60,8 +60,8 @@ theorem memory_complete (pipeline : Roadmap.Pipeline) (static : Bool) :
 
 /-- This vector retains the allocated string identity, not a bytes stand-in. -/
 theorem memory_vector (pipeline : Roadmap.Pipeline) :
-    ((memoryAfter pipeline).ex.world.accounts sender).balance.val = 93 ∧
-    ((memoryAfter pipeline).ex.world.accounts self).balance.val = 7 ∧
+    ((memoryAfter pipeline).ex.world.accounts sender).balance = 93 ∧
+    ((memoryAfter pipeline).ex.world.accounts self).balance = 7 ∧
     ((memoryAfter pipeline).ex.world.accounts self).code = some 0 ∧
     ((memoryAfter pipeline).ex.world.accounts self).nonce = 1 ∧
     ((memoryAfter pipeline).ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -77,8 +77,8 @@ theorem memory_vector (pipeline : Roadmap.Pipeline) :
 
 theorem selector_vector (pipeline : Roadmap.Pipeline) :
     let final := after SourceAbiControls.selectorBytes pipeline
-    (final.ex.world.accounts sender).balance.val = 93 ∧
-    (final.ex.world.accounts self).balance.val = 7 ∧
+    (final.ex.world.accounts sender).balance = 93 ∧
+    (final.ex.world.accounts self).balance = 7 ∧
     (final.ex.world.accounts self).code = some 0 ∧ (final.ex.world.accounts self).nonce = 1 ∧
     (final.ex.world.accounts self).storage.read saved = some (.bool true) ∧
     (final.ex.transient.cells self).read scratch = some (.bool true) ∧

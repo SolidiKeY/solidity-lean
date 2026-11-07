@@ -11,7 +11,7 @@ def paidOut := (selfDestruct oldEntry false (addr 1) (addr 2)).get (by decide)
 
 theorem old_self_keeps_balance : (selfDestruct oldEntry false (addr 1) (addr 1)).map (fun out =>
     ((out.execution.world.accounts (addr 1)).balance, out.created (addr 1),out.doomed (addr 1))) =
-      some (toWord 100,false,false) := by
+      some (100,false,false) := by
   first | rfl | decide
 
 theorem fresh_self_deferred : (freshOut.execution.world.accounts (addr 1)).balance = toWord 0 ∧
@@ -47,7 +47,7 @@ theorem fresh_distinct_credit : (freshPaid.execution.world.accounts (addr 2)).ba
   first | decide | exact ⟨rfl,rfl,rfl,rfl⟩
 
 def overflowEntry : Lifecycle D₀ LW LW :=
-  {oldEntry with execution := {fundedPrefix with world := fundedPrefix.world.set (addr 2) {fundedPrefix.world.accounts (addr 2) with balance := ⟨2^256-1,by decide⟩}}}
+  {oldEntry with execution := {fundedPrefix with world := fundedPrefix.world.set (addr 2) {fundedPrefix.world.accounts (addr 2) with balance := 2^256-1}}}
 theorem overflow_refused : selfDestruct overflowEntry false (addr 1) (addr 2) = none := by
   first | rfl | decide
 end Solidity.Yul.World.SelfDestructControls

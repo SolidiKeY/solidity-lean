@@ -179,6 +179,10 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/ConstantDepth/Controls.lean` | SOL-CB controls, decided on the real `evalConst`/`nconstP`/`rank`/`acyclicB`: a chain whose rank is the declaration count and one just below it (one level fewer refuses), a shared diamond, contract scopes with inheritance and shadowing, duplicates, used and unused cycles, a qualified member reference and `uint8` overflow; clash-free acyclic units are tied to `TEval` through `evalConst_iff`/`evalConst_none_iff`. Ends with the lane's exact axiom pins. |
 | `Frontend/ConstantDepth/Correspondence.lean` | SOL-CB backfill: a declared constant's graph edges are exactly the resolved constant paths of its initializer; rank decreases on each and along every path; typed evaluation, named constants and array lengths are functional under the clash-free acyclic contract. |
 | `Frontend/ConstantDepth/Determinism.lean` | SOL-CB backfill: `TEval`, `NamedConst` and `ArrayLenOK` are deterministic in every environment (no clash-freedom or acyclicity premise), by mutual recursion on the derivations. |
+| Module | Role |
+| --- | --- |
+| `Frontend/SpecOriginsV1.lean` | Additive source-pinned NatSpec directive origins, exact legacy clause-field agreement and forget lemmas; unsupported layouts have no origin. |
+| `Frontend/CounterexampleMetadataV1.lean` | Opt-in exact-fixture importer companion and no-second-search retained-certificate ingress; canonical failed-clause attribution remains unimplemented. |
 | `Frontend/ExpressionUniqueness/Accepted.lean` | Accepted expression trees equal every certified tree of their actual tokens The original parseCat_sound certificate supplies the lexical tokens, complete layout witness and precedence. |
 | `Frontend/ExpressionUniqueness/AddControls.lean` | Inhabited arbitrary prefix and additive-root controls The old raw-marker countercontrol is handled by the new unfinished-state scan. |
 | `Frontend/ExpressionUniqueness/AddFreeAlgebra.lean` | Operand-sensitive additive algebra Expression freedom starts unfinished. |
@@ -272,6 +276,38 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/ExpressionUniqueness/YieldBalance.lean` | Balance algebra for the intrinsic expression printer These token and success-predicate lemmas support the recursive expression/type/ argument category closure. |
 | `Frontend/ExpressionUniqueness/YieldShape.lean` | Structural facts about successful intrinsic expression yields A small success-predicate calculus for the existing state printer proves facts about arbitrary inputs and arbitrary remaining layouts. |
 | `Frontend/ExpressionUniqueness/YieldSplit.lean` | Invert actual printer executions into successful child executions These are state-printer inversion facts. |
+| `Frontend/LiteralGrammarH28/BodyPins.lean` | String-body theorem signatures and axiom reports. |
+| `Frontend/LiteralGrammarH28/BoundaryPins.lean` | Quote/scanner theorem signatures and axiom reports. |
+| `Frontend/LiteralGrammarH28/Classification.lean` | Hex/unicode literal relations and exact classification/refusal boundaries; keeps the raw unicode line/bidi guards. |
+| `Frontend/LiteralGrammarH28/EncodingValue.lean` | `CodepointBytes`: independent `\u` escape byte arithmetic (surrogates included); hex pair/quad value bounds. |
+| `Frontend/LiteralGrammarH28/FragmentCompleteness.lean` | Classification inversions extended to arbitrary fragment lists of every kind. |
+| `Frontend/LiteralGrammarH28/Fragments.lean` | `Fragments`/`FragmentValue`: fragment sequences, byte concatenation and per-fragment splitting. |
+| `Frontend/LiteralGrammarH28/FullControls.lean` | Kernel controls for every nonnumeric classification arm and fragment sequence, independent of compiler outcomes. |
+| `Frontend/LiteralGrammarH28/FullPins.lean` | All public lane theorem signatures and axiom reports (the audit's pin source). |
+| `Frontend/LiteralGrammarH28/Global.lean` | Literal classification inversion over unrestricted raw input. |
+| `Frontend/LiteralGrammarH28/Lengths.lean` | Scanner split uniqueness and strictly shorter suffix; byte-length bounds for plain, hex and unicode literals and fragment sequences. |
+| `Frontend/LiteralGrammarH28/ModeGrammar.lean` | All-mode (sol/yul/asm/pragma) literal and fragment grammar relation. |
+| `Frontend/LiteralGrammarH28/ProofSafety.lean` | Safety report for the word-table proof tactic's generated declarations. |
+| `Frontend/LiteralGrammarH28/Roundtrips.lean` | Constructive encode/classify round trips in every literal-bearing mode. |
+| `Frontend/LiteralGrammarH28/Split.lean` | Exact literal splitting in each admitted lexer mode, any suffix kept. |
+| `Frontend/LiteralGrammarH28/TaggedEncoding.lean` | Constructive hex/unicode literal encodings passing the line/bidi guards. |
+| `Frontend/LiteralGrammarH28/Utf8Shape.lean` | `\u` escape byte shape (lead/continuation, non-overlong) and code-point recovery; no scalar check. |
+| `Frontend/LiteralGrammarH28/WordTable.lean` | Exhaustive word-table return classes, proved by a checked proof-producing tactic. |
+
+### SOL-QN final target, C3 and normalization adequacy
+
+| Module | Purpose |
+|---|---|
+| `Frontend/QualifiedUnits/Linearization.lean` | Independent C3 hierarchy judgment on original declaration identities; `order_iff` (the `idUniverse` bound never refuses a hierarchy), precedence and acyclicity. |
+| `Frontend/QualifiedUnits/Target.lean` | The final SOL-QN target relation, including inherited overloads; `target_iff` against the public signature-aware resolver. |
+| `Frontend/QualifiedUnits/NormalizationAdequacy.lean` | Structural adequacy of signature normalization against Source elaboration on every supported signature category. |
+| `Frontend/QualifiedUnits/TargetControls.lean` | Kernel controls for the independent C3 judgment, the final target relation and normalization adequacy. |
+| `Frontend/QualifiedUnits/ConstructorFixtures.lean` | One typed specimen and literal expected traversal per existing Source constructor (all 112). |
+| `Frontend/QualifiedUnits/Layout.lean` | Original owner-body layout: universal frozen source-layout theorem and actual owner-body member correspondence. |
+| `Frontend/QualifiedUnits/MergeSpecification.lean` | Independent deterministic C3 merge judgment on original declaration identities; `merge_iff` against `mergeOwners`. |
+| `Frontend/QualifiedUnits/ReferenceCoverage.lean` | Universal preservation of frozen explicit references and all finite identifier/member paths. |
+| `Frontend/QualifiedUnits/SignatureResolution.lean` | Signature-aware declaration resolution over original Source identities (the public consumer `resolve`). |
+| `Frontend/QualifiedUnits/SignatureResolutionControls.lean` | Kernel observations for the actual signature-aware resolver, paired with each main compiler query. |
 | `Frontend/StatementGrammarH28/G0Nodes.lean` | Gate G0 twin of `Syn.nodes` constructors (`g0NodeCtors`, `Syn.casesOn` with structural recursion) read by the fixture observers, linked by `g0NodeCtors_eq_nodes`. |
 | `Frontend/StatementGrammarH28/AtomConditional.lean` | Statement-grammar `if`/`while`/`do`/empty-`for` coverage with arbitrary expression conditions under the exposed atom premise `ExprAtomRparen`; nearest else and token uniqueness inside the fragment. |
 | `Frontend/StatementGrammarH28/AtomNested.lean` | Mutual `AtomStmt`/`AtomItems`/`AtomCatch`/`AtomCatches` fragment: arbitrarily nested blocks, control leaves, `return e;`, `unchecked` items, atom-condition `if`/`while`/`do`/`for`, `for` initialisers, simple statements, `emit`/`revert`, contextual `revert` expression statements, `try`/`catch` and `assembly` (stated sub-parser premises); coverage by mutual structural recursion with syntax-derived budgets under the else and catch frames, nearest else, token and prefix uniqueness. |

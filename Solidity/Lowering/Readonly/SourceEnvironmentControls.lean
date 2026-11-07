@@ -20,7 +20,7 @@ def run (mode requested : Bool) (value : Solidity.Roadmap.Word := word 0)
   let base := GB (scripted thisC value requested input)
   let program := if readonly then readProgram else PB
   (envLoop {base with prog := program, pipeline := pipeline} fuel depth mode).run (L0 EB, state)
-def balance (s : St EB) := (s.ex.world.accounts thisC).balance.val
+def balance (s : St EB) := (s.ex.world.accounts thisC).balance
 def ordinary := run false false
 def inherited := run true false
 def reading := run true false (readonly := true)

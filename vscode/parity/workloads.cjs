@@ -110,3 +110,11 @@ function hoverWorkload(target,text){
   return{text,cases:[entry('helper-declaration',def.helper,'helper',helper),entry('helper-use',range('this.helper','helper'),'helper',helper),entry('parameter-use',range(local?'return a;':'{ a }','a'),'param',declaration('a',local?'uint256':'int')),entry('field-declaration',def.field,'field',local?declaration('x','uint256'):'```dafny\nvar HoverCases.x: int\n```'),entry('outer-declaration',def.outer,'outer',declaration('x','bool')),entry('inner-use',range(local?'inside = x':'inside := x','x'),'inner',declaration('x',local?'uint256':'int')),entry('scope-exit-use',range(local?'outside = x':'outside := x','x'),'outer',declaration('x','bool')),entry('explicit-field-use',range(local?'this.x()':'this.x)','x'),'field',local?declaration('x','uint256'):'```dafny\nvar HoverCases.x: int\n```')]};
 }
 module.exports.hoverWorkload=hoverWorkload;
+
+/** Separate compiler-only import scenario. Never replaces the annotated proof workload. */
+function customImportWorkload(target){
+ if(target==='local')return{source:'// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\nimport "alias/Dependency.sol";\ncontract Parity { function f0() public pure returns (uint256) { return 1; } }\n',dependency:'pragma solidity ^0.8.34; contract Dependency {}\n',path:'vendor with spaces/lib/Dependency.sol'};
+ if(target==='dafny')return{source:'include "vendor with spaces/Dependency.dfy"\nmethod f0() returns (r: int) { r := Dependency.one(); }\n',dependency:'module Dependency { function one(): int { 1 } }\n',path:'vendor with spaces/Dependency.dfy'};
+ throw Error('Unknown custom import target');
+}
+module.exports.customImportWorkload=customImportWorkload;

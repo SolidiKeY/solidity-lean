@@ -168,5 +168,13 @@ result['directCheckerObservations']={'path':'tests/directruntime-20261104/shared
 result['modalityControls']=json.loads((owned/'modality-ledger.json').read_text())
 result['modalityControls']['gate']='tests/directruntime-20261104/shared-translator/evidence/adoption-8bf/modality-frozen.log'
 result['nativeControls']={'receipt':'tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/native-controls.json','binarySha256':'1d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d','fixtureComparisons':18,'failClosedRequests':2,'boundary':'Native functional parity and observed runtime access only;14origin-name candidates independently reviewed generic/empty. Exhaustive binary closure,WASM and source preservation remain pending.'}
+# H90 scope/proof/backend facets are explicit reviewed inputs, not inferred
+# semantic support from a successful decoder or printer.
+ledger=owned/'h90-support-ledger.json'
+if ledger.exists():
+ facet=json.loads(ledger.read_text());result['h90NarrowLocalIncrement']=facet
+ for row in result['constructs']:
+  if row['nodeType'] in ['ElementaryTypeName','VariableDeclarationStatement','TupleExpression']:
+   row['h90LocalFacet']=facet
 (owned/'coverage-inventory.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps({'counts':result['counts'],'rawConstructorCounts':{k:len(v) for k,v in raw.items()},'localSharedImportModules':len(seen),'localIntrinsicImportModules':len(intrinsicClosure),'status':result['status']},sort_keys=True))

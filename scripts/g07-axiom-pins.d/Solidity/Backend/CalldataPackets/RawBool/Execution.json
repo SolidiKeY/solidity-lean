@@ -1,0 +1,69 @@
+{
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:_private.Solidity.Backend.CalldataPackets.RawBool.Execution.0.Solidity.Backend.CalldataPackets.RawBool.decode_indices": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.copy_dirty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.copy_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.copy_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.decode_bool": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.dirty_at": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.eval_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.guarded_frame_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.guarded_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.payload_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.payload_length": [
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.table_bools": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.transfer": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.valid_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawBool/Execution.lean:Solidity.Backend.CalldataPackets.RawBool.valid_iff": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "rule": "H69/H70: checked joint impossibility is audit result only for reviewed intentional negative controls/separation/refutations; ordinary interfaces still need joint witnesses.",
+  "review": "Independent read-only finder/skeptic reviewed these 42 exact control identities and their source intent; no arbitrary future Not/Ne is auto-approved.",
+  "allowed_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "rigid_logical_result_heads": [
+    "Eq",
+    "HEq",
+    "And",
+    "Or",
+    "Exists",
+    "True"
+  ],
+  "limitations": "Rigid-result classification means no top-level input hypotheses only. It does not discharge nested semantic guards or compiler-success/representation obligations.",
+  "intentional_controls": [
+    {
+      "source_name": "Solidity.Backend.Passes.SourceCallControls.argument_not_precapture",
+      "signature_sha256": "0f04cd29729cd8eeb5ddb2867f154283986721e3a0d7af74b9321f2cfbe06223",
+      "raw_type_sha256": "551f6cb9db716d348d2292242332865e996cefefbe430977e4c3e002d6160c43"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ClosedConsumerControls.unrelated_bytes_refused",
+      "signature_sha256": "9ae323fbfe27015b471770cdd2b41b5e20d17d3e37c8193b5aff42cd6e808031",
+      "raw_type_sha256": "6246625c885755203c38de93315cc675a32d175c07a706311d8489d90eec6fab"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.PaymentControl.spoofed_mode_refused",
+      "signature_sha256": "e6c090ff3b98fd5571e063d947954593364b3389a4a9a7aa417e9c18d65178fa",
+      "raw_type_sha256": "4f801b7c91762c16d5e3b721bd0c64aea07d561601530a5777fde06c7e9ce642"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.PaymentControl.unrelated_raw_refused",
+      "signature_sha256": "518f2bea39cacda559c44f4bf6be1d83657b6ac88d8a14e7ecf956d1bf8abade",
+      "raw_type_sha256": "32344e19710575835ab4244c0ae7570b230e9d1e04312da85b5314d9281f3b65"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SelfControls.unknown_receiver_not_self",
+      "signature_sha256": "b07cafb95c5d2f9af36e86698274a1f779c867c4c3ff6c017779712fbd611464",
+      "raw_type_sha256": "337efe312ba53c8b4f48005199bbb2c7ab91563c7ee1887d54a3d960bc0299b5"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceBridgeControls.wrong_bytes_refused",
+      "signature_sha256": "660497f1f495c79a1a7b9ff99a74ef1507026ad3d7673bfd7cb088317c1cccab",
+      "raw_type_sha256": "cf7b52afaf1d11426ea6e8ec458243a5b2a3499def526cecde66a223ca23603b"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceCallHistoryControls.known_nonself",
+      "signature_sha256": "6a3a7507b22b3b4ede12b88820c0082dd6ac099e5175bbc4c7d3af350b1a96c4",
+      "raw_type_sha256": "c99f902b12f6621b768d659afe0e251d5c3908329ebd0dba3578f4e13d34ad87"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceCallHistoryControls.spoofed_code_rejected",
+      "signature_sha256": "80091899e35e1b5702c7433e00dffe967b986f3327d199384ead59af86e92675",
+      "raw_type_sha256": "659f000364f4422e1916860e0506c0f2bce8df62c2a1cdd0136fdecdd0a6ac93"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceCallHistoryControls.unknown_nonself",
+      "signature_sha256": "f470d7ab863d20fd35b06f22297c77ca8f0d1c0cce9e6e9c5a16a9e4975fd4b1",
+      "raw_type_sha256": "49755743b84f2e5ca25433d6bd84f379a12bfecce6fbfa01c0881842b7303f6d"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceCallHistoryControls.ordinary_false_preservation",
+      "signature_sha256": "ca512e35ff28d654e853c4acae1b656e137be1946205e37973ba003814b59abb",
+      "raw_type_sha256": "b1947be68fd6dc1116af036c037deab9da53398a562b787c12627bf809fac1af"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceExpressionControls.precapture_storage_not_restored",
+      "signature_sha256": "537c11e1cef3c33e7b757d75ba28c921387336622d5a546c2cecd3657d2b7112",
+      "raw_type_sha256": "abe26e4d2a28d8b9b4669e86d19b4d4a8cb73b5bdb2d2998655107488dbb0317"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.SourceIssuerControls.forged_not_registered",
+      "signature_sha256": "23b92b238ade3f8d1b27c866047140815a478397eb54114952c876cc68275e3e",
+      "raw_type_sha256": "789d911c830e64816415f3013020a7da27cbce79e8cb8d9229d077a0f1ded6b5"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.UnknownSourceControls.false_bytes",
+      "signature_sha256": "f5d3caf99f2ffcf2dc78362d84b9aff6623dc4442380e8125da66a49eafcaf4b",
+      "raw_type_sha256": "94e8e51b3ee22117c9ff040d9c26a2ced3ab7c32e9c32b131aed2ce385265ea5"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.ArgumentControls.no_reevaluation",
+      "signature_sha256": "b57bf57063bae5e2191a8655d9419a271c6ec334f5562d660588d42600653a8a",
+      "raw_type_sha256": "990174d2ab95a3adc39627f5d18e12f3e90adafc3a712b9b11e1931b958c5081"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.Controls.ordinary_not_preserved",
+      "signature_sha256": "ae07cf536ab413286002a8205ecfd552bb8239312d9ef8ddc9525ebbe76e2190",
+      "raw_type_sha256": "206df9b2ec79b5578c5476224f0c5f57fb8d1383edf8320d917bbd788f2b78c3"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.Controls.static_cannot_write",
+      "signature_sha256": "ce2ee45c3a6a216800441c2e5f12d1fffde70fc02eded995206559d5e9e9bb2c",
+      "raw_type_sha256": "9a750ae2b9dd462c233fa7811fdbc15c8056950281ecbb373876482a8da09858"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.Controls.spoof_rejected",
+      "signature_sha256": "b9407d3692608934910e9cf7bb6b937e8e5db927f7eb5d62197f774437514eec",
+      "raw_type_sha256": "4cebb9ec33fd06bcc6e66af9f2d7e0f04f11ab65d68ffecdc4ea771935b6f8db"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.Controls.wrong_raw_rejected",
+      "signature_sha256": "d1e619fe5e227e8674bdd99e629d12818f242435e5239695eea05c84d69e2882",
+      "raw_type_sha256": "2947b65aef13b5be8834ee127780de1b5050d787b98f656c18dcd9dd363283b7"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.CopyControls.ordinary_changes",
+      "signature_sha256": "ddde7df784875a639859fc99249a5cdb7c84ca48d72d944cfd892d130ddf9a49",
+      "raw_type_sha256": "057ba1501e0b5bffeaaf20298be0f1b40314dd3340340d7c9b972a40d23462cd"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.DeleteControls.ordinary_changes",
+      "signature_sha256": "e0f5f04b6b054c4276842c42489999e7141a720e03c9331dfdf6656aa1b3cac0",
+      "raw_type_sha256": "93709a3d6e79906a98da164bba0c8338949272e3a19b29adac8bd2399ce6a711"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentHistoryControls.balance_frame_false",
+      "signature_sha256": "c1a5aed2d3bb8a70ed5ab422ff62a1edf0f9878cbb5bba0a32f3aaa470a048bc",
+      "raw_type_sha256": "df9484beef75416ee680f2f130e233e0a4548a13c55ed3eafe8c15d1ac78033d"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.HelperControls.failure_keeps_event",
+      "signature_sha256": "0367b2e2b51008d140f49cf29f8ee7444b94ab3183aa93fe2d2bcdb17a7405fe",
+      "raw_type_sha256": "ffc2f95960bdf760c05ee1b76d6103fe980595bf16dad1538436c69b6038e1c1"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.LocationControls.ordinary_changes",
+      "signature_sha256": "cb0aaf7b0fbbbb1e739a83b02421d685f8ce89f1c762f1af3eaa093b7bdc3b03",
+      "raw_type_sha256": "01e58e11728345ff385cd2759ae3b0f25fb6743d27f60b7c69abf2a28551da42"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.LoweringControls.unrelated_storage_refused",
+      "signature_sha256": "4e9f7f8aca5a7199db71386e49f0b1425988e1017ef2498f6bb7983f0771cf15",
+      "raw_type_sha256": "667b6d175e0610e6efc0821bbf79d879a85b8acfa0cf7ae5d2b6c83ccd0bb985"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.LoweringControls.parameter_permutation_refused",
+      "signature_sha256": "7ab30f02b1050f49a39cbf0fc16ecb286486b17b7bf0760076f302c114b80bf5",
+      "raw_type_sha256": "d7ac113100ab87c3f062eda039792e192edbebe9c64229d2377217f232383fd3"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.MachineEffectControls.ordinary_cannot_upgrade",
+      "signature_sha256": "6fb92a0e205e8c7e334109d8fea85a65886d5ff21b9b53c85ff46e7609360edd",
+      "raw_type_sha256": "14520d37a49525896389f924697b2df40ea3501ea7d9395a79901b2035a3cd4b"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.ReceiverControls.receiver_not_self",
+      "signature_sha256": "a26103c5d552b0741af976c3a994d9c62de62718bcaf8de0fe5bf5e1f890fe6a",
+      "raw_type_sha256": "140863382f45907980273a4bfdeee54753379120099d0c1488604ae733e8a398"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.ReceiverControls.receiver_not_retargeted",
+      "signature_sha256": "50164da96f95b2b4f90ff99568796b082fd39efee6e72f199b9fb0f44d705a45",
+      "raw_type_sha256": "b5197ffc2d727e1cdb9f4efbe5bcffb87c2ed6ceb61a33653182439a619372ea"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.ReceiverControls.target_receiver_not_new_local",
+      "signature_sha256": "56f01b7aa9e89760b417eb9cfaad21030be45fe9e7ba8ee14a0cef86de6978df",
+      "raw_type_sha256": "28dbbbecbbc28d28d350784cd9199e10fbb2d51f4900612e1d57f05b64aef7a5"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.RootControls.tail_not_head",
+      "signature_sha256": "9b6f70fb88f4c7f37ddd9b09a73fd68d3207b9ee1c27c1ae6ccc81f33c1cc770",
+      "raw_type_sha256": "77b721a857c213623a3aa78661271ac1b3f3901740929c66702885f5281ba432"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceBodyControls.local_update_not_frozen",
+      "signature_sha256": "7d7ad26ebd01d03a9d96cfc1f01171f741b842a29f91080b12239fa1e59d6b31",
+      "raw_type_sha256": "05b563a29b05cd011edf97086b7776e453176f42b3929f2cb5d63de29a435401"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceDispatchControls.ordinary_false_preservation",
+      "signature_sha256": "e86d2185d20e173814d418d737bc2eae6313be084cc0569d50d2a6a6a1b51203",
+      "raw_type_sha256": "241d950b391ab05805bf6f7e8db33e620f6af9a8c15a4af30829735cd5f42c7a"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceEnvironmentControls.static_balance_not_frozen",
+      "signature_sha256": "a1f55f362922e1f0a1feb0bb018c2ffb5b329babee467b17d7cedf67c5c87a93",
+      "raw_type_sha256": "c90310cf07f140ba38e6da10286355a59f8f6506eda51d6079d81c34fdedb0b3"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceLoopControls.break_skips_post",
+      "signature_sha256": "170dbe720a4f521058c1ed52636b5b91902c71b244e06e90f537869f8621d748",
+      "raw_type_sha256": "6a433d33a3e9d16e2ab5da830613b7d3884c2984268390d7dd571e5a6450bb60"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceLvalueCallControls.caller_halt_not_child_revert",
+      "signature_sha256": "72de90d96f210bca62a393099c87f268ec33f9e0d85931e1bf27e9658ded7e47",
+      "raw_type_sha256": "cad00720d754894ac0eb06ab9a9befc5ea1dbf3d2e284253e813bc548be27f5f"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceReadBuiltinControls.gas_refused",
+      "signature_sha256": "965924672c9a87297bf0ca8c1ba3ec28f8c575d636240d0062fc028f43a1657a",
+      "raw_type_sha256": "88a5bbfa8ae3142fca634d93602df8425d13e7dbe0d8688af35082d96a583d1a"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceStatementControls.ordinary_not_frozen",
+      "signature_sha256": "9953b3f11d64dd2b3d91d4966fe16c0a6373d40f666898152160726d642241d2",
+      "raw_type_sha256": "7e2ffd284bfabe50bd54e8d90f2d6d84c3daddb0507681c43820789d1db60317"
+    },
+    {
+      "source_name": "Solidity.Lowering.V08.SourceCallPhaseControls.wrong_order",
+      "signature_sha256": "f42d84d4c455d287bd34048b54f389db58dfae47e0706cb253a202b856e16aa5",
+      "raw_type_sha256": "3421581acf607e9a33c8027df2f95b6604a9a8fcfd17944ce51900926dc53f17"
+    },
+    {
+      "source_name": "Solidity.Lowering.V08.SourceCallPhaseControls.wrong_mode",
+      "signature_sha256": "17f450408df9f1d52d161573cbfbc8b0bcc49bc37f0d38db60a05d5e5c784f73",
+      "raw_type_sha256": "53ee770f00469b426873c969012773b4bfdb803490e0225a74753877961b6d1e"
+    },
+    {
+      "source_name": "Solidity.Lowering.V08.SourceCallPhaseControls.wrong_outcome",
+      "signature_sha256": "f1cfec0e723ea6fc8d5bf3e077925cd3bf3bea97020f2ecc811a77c1fa51dc2a",
+      "raw_type_sha256": "584a5515f35ca1509a3b2087a5e395936fb6c6f45737e10b0ffaa4ea41f849e6"
+    },
+    {
+      "source_name": "Solidity.Lowering.V08.SourceClockTransactions.wrong_global_bytes",
+      "signature_sha256": "641abc8f256b1752d329d87ebe2b8638fee7558a995bdf713038fc4c0cc38b9d",
+      "raw_type_sha256": "a45bab2386fdada37f86af7c44d600ce582b3e54f4ab9d474f15947fe363262a"
+    },
+    {
+      "source_name": "Solidity.Lowering.V08.SourceClockTransactions.wrong_target_clock",
+      "signature_sha256": "332d240a8ed5d7287771a596e06cbacf09b7dab6a8e7ab4ac688caaadc240670",
+      "raw_type_sha256": "b17e0a823e9c9b6002d5bf3d632f04c023e64e0c079704d43c30a6831ea7875b"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+68b047c7f0c45e7fe9680228f305545c918dcc2271bb6b411f0154f4a621d7f6  Bridge/tests/precompile-agreement/H70BridgeProbe.lean
+604d020ea2c278abe7af162398a1a8ccb7c4b25ebf619177225e0d6e8b2549a0  Bridge/tests/precompile-agreement/evidence/H70-bridge-probe.log
+143cf5068b1c94681d87cb6224b46289cccb6eba05aa64b69f51222eed3a0fda  Bridge/tests/precompile-agreement/evidence/H70-bridge-receipt.json
+00dc7fb19d653cbd21f79972706529a5a664f79d0bafe8556807b76d36e50b54  Bridge/tests/precompile-agreement/evidence/HANDOFF-H70-bridge.md
+e6045ed937bc398bf535d5b1411e8649bd6c293927e8a1cbe73f7b64c36028e6  docs/feature-work/precompile-agreement.md

@@ -60,7 +60,7 @@ theorem source_agrees :  ∀ (env : Solidity.Source.Env) (returns : List Solidit
         have sub : (Solidity.Source.EM.sub (Γ := []) locals
           (Solidity.Source.evalE glob frame fuel condition)).run (Solidity.Source.L0 env,world) =
           (.error halt,(Solidity.Source.L0 env,nextWorld)) := by
-          have actualRun : Solidity.Source.evalE glob frame fuel condition (locals,world) =
+          have actualRun : Solidity.Source.evalE (plan := none) glob frame fuel condition (locals,world) =
             (.error halt,(nextLocals,nextWorld)) := actual
           simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
         simp only [Solidity.Yul.LocalDefaultPostIter.run,expression,Solidity.Yul.LocalBoolItems.project]
@@ -77,7 +77,7 @@ theorem source_agrees :  ∀ (env : Solidity.Source.Env) (returns : List Solidit
             have sub : (Solidity.Source.EM.sub (Γ := []) locals
               (Solidity.Source.evalE glob frame fuel condition)).run (Solidity.Source.L0 env,world) =
               (.ok (.val (.bool value),nextLocals),(Solidity.Source.L0 env,nextWorld)) := by
-              have actualRun : Solidity.Source.evalE glob frame fuel condition (locals,world) =
+              have actualRun : Solidity.Source.evalE (plan := none) glob frame fuel condition (locals,world) =
                 (.ok (.val (.bool value)),(nextLocals,nextWorld)) := actual
               simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
             cases value with
@@ -145,7 +145,7 @@ theorem source_agrees :  ∀ (env : Solidity.Source.Env) (returns : List Solidit
                       have subPost : (Solidity.Source.EM.sub (Γ := []) finalLocals
                         (Solidity.Source.evalE glob frame fuel post)).run (Solidity.Source.L0 env,final.2) =
                         (.error halt,(Solidity.Source.L0 env,afterWorld)) := by
-                        have actualRun : Solidity.Source.evalE glob frame fuel post (finalLocals,final.2) =
+                        have actualRun : Solidity.Source.evalE (plan := none) glob frame fuel post (finalLocals,final.2) =
                           (.error halt,(afterLocals,afterWorld)) := postRun
                         simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
                       rw [postAgreement,Solidity.Source.Hoare.run_bind]
@@ -163,7 +163,7 @@ theorem source_agrees :  ∀ (env : Solidity.Source.Env) (returns : List Solidit
                           have subPost : (Solidity.Source.EM.sub (Γ := []) finalLocals
                             (Solidity.Source.evalE glob frame fuel post)).run (Solidity.Source.L0 env,final.2) =
                             (.ok (.val (.bool flag),afterLocals),(Solidity.Source.L0 env,afterWorld)) := by
-                            have actualRun : Solidity.Source.evalE glob frame fuel post (finalLocals,final.2) =
+                            have actualRun : Solidity.Source.evalE (plan := none) glob frame fuel post (finalLocals,final.2) =
                               (.ok (.val (.bool flag)),(afterLocals,afterWorld)) := postRun
                             simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
                           rw [postAgreement,Solidity.Source.Hoare.run_bind]

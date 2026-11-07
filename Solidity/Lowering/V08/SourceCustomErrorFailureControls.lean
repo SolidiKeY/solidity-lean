@@ -117,12 +117,12 @@ def recordError : Source.Decl :=
 def E2 : Source.Env := ⟨[savedDecl,scratchDecl,recordDecl,recordError]⟩
 def empty2 : Source.St E2 :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩, Source.Transient.empty, []⟩,
-    Source.Heap.empty, [], [], ⟨[], .nil⟩⟩
+    Source.Heap.empty, [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩
 def populated2 : Source.St E2 :=
   { empty2 with
     ex := empty2.ex.run [
-      .account sender (fun a => { a with balance := ⟨93, by decide +kernel⟩ }),
-      .account self (fun a => { a with balance := ⟨7, by decide +kernel⟩, nonce := 1, code := some 0, storage := a.storage.write saved (.bool true) }),
+      .account sender (fun a => { a with balance := 93 }),
+      .account self (fun a => { a with balance := 7, nonce := 1, code := some 0, storage := a.storage.write saved (.bool true) }),
       .transient self (fun t => t.write scratch (.bool true))]
     heap := (Source.Heap.empty.alloc ⟨.bytes .memory, .bytes [0, 0xff]⟩).1
     events := [.call self ⟨7, by decide +kernel⟩ [0, 0xff] false]
@@ -142,8 +142,8 @@ def frame2 : Source.Fr :=
 def locals2 : Source.Locals E2.layout [.bool] := .cons (.bool true) .nil
 
 theorem record_populated_snapshot :
-    (populated2.ex.world.accounts sender).balance.val = 93 ∧
-    (populated2.ex.world.accounts self).balance.val = 7 ∧
+    (populated2.ex.world.accounts sender).balance = 93 ∧
+    (populated2.ex.world.accounts self).balance = 7 ∧
     (populated2.ex.world.accounts self).nonce = 1 ∧
     (populated2.ex.world.accounts self).code = some 0 ∧
     (populated2.ex.world.accounts self).storage.read saved = some (.bool true) ∧

@@ -83,7 +83,7 @@ def simpleRes {k : SCtx} (L : Locals) : (i : Syn .simple) → List (Σ L', StmtD
     | Option.some τ =>
       if hl : locOK τ l true = true then
         (tysOf (C.at L) (infer (C.at L) e)).filterMap fun p =>
-          if hc : p.1.implicit C.isBase τ = true then Option.some ⟨(x, τ) :: L, .declInit ht hl p.2 hc⟩
+          if hc : p.1.implicit C.isBase C.mapFree τ = true then Option.some ⟨(x, τ) :: L, .declInit ht hl p.2 hc⟩
           else Option.none
       else []
     | Option.none => []
@@ -93,7 +93,7 @@ def simpleRes {k : SCtx} (L : Locals) : (i : Syn .simple) → List (Σ L', StmtD
       (tysOf (C.at L) (infer (C.at L) e)).filterMap fun p =>
         match p with
         | ⟨.tuple σs, de⟩ =>
-          if hf : slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true then
+          if hf : slotsFit C.isBase C.mapFree (slots.map (Option.map Prod.snd)) σs = true then
             Option.some ⟨pushSlots slots L, .declTuple hs de hf⟩
           else Option.none
         | _ => Option.none
@@ -121,7 +121,7 @@ def returnRes {k : SCtx} (L : Locals) : (o : Syn (.opt .expr)) → List (SRes C 
   | .some e =>
     (match hr : C.rets with
      | [τ] => (tysOf (C.at L) (infer (C.at L) e)).filterMap fun p =>
-         if hc : p.1.implicit C.isBase τ = true then Option.some (.stmt (.retVal hr p.2 hc)) else Option.none
+         if hc : p.1.implicit C.isBase C.mapFree τ = true then Option.some (.stmt (.retVal hr p.2 hc)) else Option.none
      | _ => []) ++
     (match e with
      | .tuple (.some e0) s0 =>
@@ -129,7 +129,7 @@ def returnRes {k : SCtx} (L : Locals) : (o : Syn (.opt .expr)) → List (SRes C 
          (slotsOf (C.at L) (infer (C.at L) s0)).filterMap fun q =>
            match q with
            | ⟨σ' :: σs', ds⟩ =>
-             if hf : argsFit C.isBase (p.1 :: σ' :: σs') C.rets = true then
+             if hf : argsFit C.isBase C.mapFree (p.1 :: σ' :: σs') C.rets = true then
                Option.some (.stmt (.retTuple p.2 ds (List.cons_ne_nil _ _) hf))
              else Option.none
            | ⟨[], _⟩ => Option.none
@@ -140,7 +140,7 @@ def emitRes {k : SCtx} (L : Locals) : (ev : Syn .expr) → (a : Syn .callArgs) �
     List (SRes C (.stmt k) (.emit ev a) L)
   | .ident ev, .positional args =>
     (argsOf (C.at L) (infer (C.at L) args)).flatMap fun p =>
-      match hf : ((C.at L).declsOf .event ev).filter (·.fitsParams C.env C.isBase p.1) with
+      match hf : ((C.at L).declsOf .event ev).filter (·.fitsParams C.env C.isBase C.mapFree p.1) with
       | [_] => [.stmt (.emit p.2 hf)]
       | _ => []
   | _, _ => []
@@ -150,7 +150,7 @@ def revertRes {k : SCtx} (L : Locals) : (er : Syn .expr) → (a : Syn .callArgs)
     List (SRes C (.stmt k) (.revert er a) L)
   | .ident er, .positional args =>
     (argsOf (C.at L) (infer (C.at L) args)).flatMap fun p =>
-      match hf : ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase p.1) with
+      match hf : ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase C.mapFree p.1) with
       | [_] => [.stmt (.revertError p.2 hf)]
       | _ => []
   | _, _ => []
@@ -182,11 +182,11 @@ def tryRes {k : SCtx} (L : Locals) (c : Syn .expr) (f : String) (args : Syn (.li
   match pc with
   | ⟨.contract dn, dc⟩ =>
     (argsOf (C.at L) (infer (C.at L) args)).flatMap fun pa =>
-    match ho : extOverloads C.env C.isBase dn f pa.1 with
+    match ho : extOverloads C.env C.isBase C.mapFree dn f pa.1 with
     | [d] =>
       match hs : d.fnSig C.env with
       | Option.some (ps, rs) =>
-        if hf : argsFit C.isBase pa.1 ps = true then
+        if hf : argsFit C.isBase C.mapFree pa.1 ps = true then
           match ht : rets.tys C.env C.scope .memory with
           | Option.some tys =>
             if hsame : (tys.isEmpty || STy.sameList tys rs) = true then

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorage.lean:Solidity.Backend.InternalFlow.RuntimeFrame.OrderedEffectfulStorage.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

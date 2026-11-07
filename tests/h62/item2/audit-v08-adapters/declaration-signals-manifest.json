@@ -1,0 +1,45 @@
+{
+  "status": "LEXICAL_WORKLIST_ONLY",
+  "checked_head": "e15c50a4b8431ade4ac425044f8da0daf2beaa82",
+  "module_count": 881,
+  "keyword_counts": {
+    "abbrev": 534,
+    "constant": 3,
+    "def": 4041,
+    "example": 34,
+    "inductive": 59,
+    "instance": 43,
+    "structure": 136,
+    "theorem": 7951
+  },
+  "new_witnesses": 0,
+  "fidelity_acceptances": 0,
+  "complete_interface_inventory": false,
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/declaration-signals-20261107/signals.json",
+      "bytes": 2080482,
+      "sha256": "cd8411428b4b623ebc61b102e70b1417f1bf6fa22b07fb2eaa9435188bff2f4c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/declaration-signals-20261107/tests-optimized.log",
+      "bytes": 106,
+      "sha256": "698d16d7b93c4bd9707d3cfacda6fb1e0fea99ed0cda6e69bedc42772940540a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/declaration-signals-20261107/tests.log",
+      "bytes": 106,
+      "sha256": "75ff54e727b57e4bd7b88956ed0c92c4b9a416e6f0976707e8fb54aa385ac0bd"
+    }
+  ],
+  "limitations": [
+    "Keywords may be syntax quotations or false positives.",
+    "Generated declarations, proof fields, inherited binders and namespace semantics require kernel inventory.",
+    "Frozen snapshot blobs only; current-source validation is not claimed."
+  ],
+  "snapshot": {
+    "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/census/census.json",
+    "sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03"
+  },
+  "reviews": "Finder and skeptic accepted conservative scope; requested refusal tests added for duplicate, unknown and mismatched snapshot inputs. Main worker ran eight tests normal and optimized; reviewers ran no tests/Lean."
+}

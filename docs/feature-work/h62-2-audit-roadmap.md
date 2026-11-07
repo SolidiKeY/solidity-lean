@@ -1,3 +1,28 @@
+# H82 retirement: worker stopped, assignment unfinished
+
+Explicit human retirement overrides implementation continuation. Successor:
+solidity-v12-v17-20261031/v16-correctness-transfer. This worker stops after
+the preservation checkpoint; no automatic implementation continuation is
+authorized. The tool cannot set PAUSED: only complete/blocked outcomes are
+exposed, and neither is substituted. No goal is created/reset/completed.
+No H71 push authorization is available, so no push is performed.
+
+Complete original assignment/objective, original work/backfill queue, frozen
+46-module scope, current open queue/waits, addenda and pause capability record
+are committed under tests/h62/item2/audit-roadmap/retirement. Their source
+manifest binds actual file hashes. The original launcher-rendered byte stream
+was unavailable; the complete thread-copy assignment has its own SHA256 and
+is not claimed to match the reported rendered-prompt hash.
+
+Cumulative patch, bundle and portable H44 evidence archive are exported under
+/workspace/audit-roadmap-evidence/retirement-final. FINAL.json and HANDOFF.md
+record the exact final committed head and clean/dirty state; SHA256SUMS binds
+exports. Bundle requires exact base c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
+No takeover is effective before the final stopped/head acknowledgement.
+
+The earlier checkpoint documentation below remains historical work evidence;
+its unfinished queue is transferred, not completed.
+
 # H62 item 2 audit-roadmap — H70 result-family handoff
 
 Batch `solidity-h62-2-20261106`, worker `audit-roadmap`.

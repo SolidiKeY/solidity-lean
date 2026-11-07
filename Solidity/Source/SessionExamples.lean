@@ -164,7 +164,7 @@ def payCallbackIn (el : Elaborated) (pstatic : Bool) : Option Outcome × Nat :=
     let _ ← deploy G n "P" ElaborateExamples.thisC SemanticsExamples.user (word 0) []
     envLoop G n 3 pstatic) (St.init _) 40
   (r.2.events.findSome? (fun e => match e with | .reentered o => some o | _ => none),
-    (r.2.ex.world.accounts ElaborateExamples.thisC).balance.val)
+    (r.2.ex.world.accounts ElaborateExamples.thisC).balance)
 
 -- **With value from a static frame the callback is refused** (EIP-214): no
 -- credit; outside a static frame `p()` runs and keeps the value.

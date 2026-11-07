@@ -5,10 +5,11 @@ const childProcess=require('node:child_process');
 const {appendFileSync}=require('node:fs');
 const {LspFrames}=require('./core.cjs');
 const {sep}=require('node:path');
+const {createHash,randomUUID}=require('node:crypto');
 
 /** Observe calls on real VS Code objects. No mocked renderer or verifier. */
 function observe(vscode, record, extensionPath, tracePath,workspacePath) {
-  const controllers = [], profiles = [], decorations = [], finalizers=[];
+  const controllers = [], profiles = [], decorations = [], outputs=[], finalizers=[];
   function instrument(object, handlers) {
     return new Proxy(object, {get(target,key) {
       if (handlers[key]) return handlers[key];
@@ -16,7 +17,21 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
       return typeof value === 'function' ? value.bind(target) : value;
     }});
   }
+  const sessions=new WeakMap();let commandSequence=0,outputSequence=0;
+  const diagnostic=value=>{try{return value instanceof Error?value.message:String(value);}catch{return 'Unprintable observation error';}};
+  const commandSource=()=>{try{const doc=vscode.window.activeTextEditor?.document;if(!doc)return null;if(!sessions.has(doc))sessions.set(doc,randomUUID());return{uri:doc.uri.toString(),version:doc.version,session:sessions.get(doc),textHash:createHash('sha256').update(doc.getText()).digest('hex'),dirty:doc.isDirty,closed:doc.isClosed,trusted:vscode.workspace.isTrusted};}catch(error){return{unavailable:true,reason:diagnostic(error)};}};
   const api = {...vscode,
+    env:vscode.env&&instrument(vscode.env,{clipboard:instrument(vscode.env.clipboard,{writeText(text){record('clipboard.write',{sha256:createHash('sha256').update(text).digest('hex'),source:commandSource()});return vscode.env.clipboard.writeText(text);}})}),
+    commands:vscode.commands&&instrument(vscode.commands,{registerCommand(id,handler,thisArg){
+      return vscode.commands.registerCommand(id,function(...args){
+        if(restored)return handler.apply(this,args);
+        const invocationId=++commandSequence;record('command.start',{id,invocationId,source:commandSource()});
+        const end=value=>{if(!restored)record('command.end',{id,invocationId,source:commandSource(),result:typeof value==='boolean'?value:null});return value;};
+        const error=error=>{if(!restored)record('command.error',{id,invocationId,source:commandSource(),message:diagnostic(error)});throw error;};
+        let result;try{result=handler.apply(this,args);}catch(e){return error(e);}
+        return result&&typeof result.then==='function'?result.then(end,error):end(result);
+      },thisArg);
+    }}),
     tests:instrument(vscode.tests, {createTestController(...args) {
       const controller = vscode.tests.createTestController(...args); controllers.push(controller);
       return instrument(controller, {
@@ -41,9 +56,11 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
         decorations.push({key:type.key,options}); record('decoration.register',{key:type.key,options}); return type;
       },
       createOutputChannel(...args) {
-        const channel = vscode.window.createOutputChannel(...args);
-        return instrument(channel, {appendLine(text) {record('output',{channel:args[0],text}); return channel.appendLine(text);}});
+        const channel = vscode.window.createOutputChannel(...args),channelId=++outputSequence;
+        record('output.create',{channel:args[0],channelId});
+        const observed=instrument(channel, {appendLine(text) {record('output',{channel:args[0],channelId,text}); return channel.appendLine(text);},show(...values){record('output.show',{channel:args[0],channelId});return channel.show(...values);},dispose(){record('output.dispose',{channel:args[0],channelId});return channel.dispose();}});outputs.push({name:args[0],channelId,channel:observed});return observed;
       },
+      showInformationMessage(...args){record('information',{message:args[0],source:commandSource()});return vscode.window.showInformationMessage(...args);},
       showErrorMessage(...args) {record('error',{message:args[0]}); return vscode.window.showErrorMessage(...args);}
     })
   };
@@ -52,7 +69,7 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
   const ownedTerminals=new Set(),relevant=(execution,terminal)=>ownedTerminals.has(terminal)||workspacePath&&execution.commandLine.value.includes(workspacePath);
   const terminalSubscriptions=[];
   if(terminalSupported){
-    terminalSubscriptions.push(vscode.window.onDidStartTerminalShellExecution(event=>{if(!relevant(event.execution,event.terminal))return;if(restored)return;const commandLine=event.execution.commandLine.value,executionId=identity(event.execution);record('terminal.start',{commandLine,executionId});(async()=>{try{let bytes=0;for await(const data of event.execution.read()){if(restored)break;bytes+=Buffer.byteLength(data);if(bytes>32*1024*1024){record('terminal.output.error',{commandLine,executionId,message:'Terminal observation exceeds existing32MiB output bound'});return;}record('terminal.output',{commandLine,executionId,data});}if(!restored)record('terminal.output.end',{commandLine,executionId});}catch(error){if(!restored)record('terminal.output.error',{commandLine,executionId,message:error.message});}})();}));
+    terminalSubscriptions.push(vscode.window.onDidStartTerminalShellExecution(event=>{if(!relevant(event.execution,event.terminal))return;if(restored)return;const commandLine=event.execution.commandLine.value,executionId=identity(event.execution);record('terminal.start',{commandLine,executionId});(async()=>{try{let bytes=0;for await(const data of event.execution.read()){if(restored)break;bytes+=Buffer.byteLength(data);if(bytes>32*1024*1024){record('terminal.output.error',{commandLine,executionId,message:'Terminal observation exceeds existing32MiB output bound'});return;}record('terminal.output',{commandLine,executionId,data});}if(!restored)record('terminal.output.end',{commandLine,executionId});}catch(error){if(!restored)record('terminal.output.error',{commandLine,executionId,message:diagnostic(error)});}})();}));
     terminalSubscriptions.push(vscode.window.onDidEndTerminalShellExecution(event=>{if(!restored&&relevant(event.execution,event.terminal))record('terminal.end',{commandLine:event.execution.commandLine.value,executionId:identity(event.execution),exitCode:event.exitCode});}));
   }
   const original = Module._load;
@@ -88,6 +105,6 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
   const registration = vscode.languages.onDidChangeDiagnostics(event => {
     for (const uri of event.uris) record('diagnostics',{uri:uri.toString(),diagnostics:vscode.languages.getDiagnostics(uri)});
   });
-  return {controllers,profiles,decorations,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
+  return {controllers,profiles,decorations,outputs,terminalSupported,ownTerminal:terminal=>ownedTerminals.add(terminal),restore() { restored=true;for(const subscription of terminalSubscriptions)subscription.dispose(); finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
 }
 module.exports = {observe};

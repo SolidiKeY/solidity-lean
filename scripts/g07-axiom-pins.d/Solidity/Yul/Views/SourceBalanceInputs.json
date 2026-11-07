@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Views/SourceBalanceInputs.lean:Solidity.Yul.Views.sourceObservedBalance_system": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Views/SourceBalanceInputs.lean:Solidity.Yul.Views.sourceObservedBalance_system_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

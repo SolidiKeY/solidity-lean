@@ -1,0 +1,99 @@
+{
+  "guardedRegression": "Guard isolated reference-fixture proofs against producer edits and false acceptance.",
+  "checkpointBase": "a10b60f23315b62e3ebf6ef925f87516ce7bca69",
+  "report": {
+    "baselineAxioms": {
+      "BindingRel": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "initial": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    "guardedRegression": "Guard isolated reference-fixture proofs against producer edits and false acceptance.",
+    "checkpointBase": "a10b60f23315b62e3ebf6ef925f87516ce7bca69",
+    "originalUnchanged": {
+      "head": "a10b60f23315b62e3ebf6ef925f87516ce7bca69",
+      "original": "Solidity/Lowering/V07/P12Controls.lean",
+      "originalSha256": "c62269e9eb79c411fcdfa96544681cf54c19093e9471a109ae90a6116c59ebbf"
+    },
+    "testModule": {
+      "repositoryRelative": "tests/h62/item1/binding-fixtures/ReferenceFixtureControls.lean",
+      "sha256": "d4cc8f38d81ca808effaa9123da5e58ae85dd5c219cc59a39012c5341470ba27"
+    },
+    "axioms": {
+      "memory_pair_unique": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "storage_pair_unique": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "memory_absent_refused": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "storage_absent_refused": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "reference_pairs_inhabited": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    "theorems": [
+      "memory_pair_unique",
+      "storage_pair_unique",
+      "memory_absent_refused",
+      "storage_absent_refused",
+      "reference_pairs_inhabited"
+    ],
+    "productionEdits": false,
+    "scope": "Five isolated P12 reference-branch controls at fixed target.H; all four extraction checkpoints remain open.",
+    "timingBoundary": "New additive test file has no pre-work equivalent. Gate wall times are checking evidence only; before/after extraction timings remain pending.",
+    "boundary": "Existing fixture properties and explicit inhabited pairs only; no source/world/compiler/native transport or arbitrary heap/content equivalence."
+  },
+  "archive": {
+    "repositoryRelative": "tests/h62/item1/binding-fixtures/artifacts/reference-fixture-evidence.tar.gz",
+    "sha256": "cdac20d72b1e6aeabb26072ec3d1d815b7dfe5966f7a72295b92628da1d36d31",
+    "bytes": 17454,
+    "regularMembers": 27
+  },
+  "sourceFiles": [
+    {
+      "repositoryRelative": "tests/h62/item1/binding-fixtures/ReferenceFixtureControls.lean",
+      "sha256": "d4cc8f38d81ca808effaa9123da5e58ae85dd5c219cc59a39012c5341470ba27"
+    },
+    {
+      "repositoryRelative": "scripts/h62/item1/binding-fixtures/validate_reference.py",
+      "sha256": "886d38dd41dab3cdc60f0a5b85b8124fc0b642200b2ac858ff7c44ed67d7abf1"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/ownership-baseline.json",
+      "sha256": "7719bef6a71e62c4fc0422fc4d3fd3687e51bdcc6427f721a52ffcda2229fdd1"
+    }
+  ],
+  "reviews": {
+    "finder": "Read-only: fixed-heap uniqueness/refusal/inhabited witness statements checked; stale-log finding fixed by fresh explicit GATE_LOGS routing. Git/hash bootstrap strict; no remaining confirmed helper blocker. No Lean/server/build/writes.",
+    "skeptic": "Read-only: no remaining confirmed proof/helper/scope blocker. Existing producer bytes and allowlists preserved; new metadata pin explicit. Missing extraction/timing/adequacy/runtime obligations remain. No Lean/server/build/writes."
+  },
+  "registration": "Test-only module candidate; no generated root, module map or production import changed.",
+  "initialVerifier": "Multiline theorem-name pattern failed before the Lean gate; exit1 retained in inventory-parser-failure.log. Parser fixed; statements unchanged.",
+  "initialMcp": "Incomplete response during cold dependency setup; exit2 retained. Explicit bounded P12 build then cached MCP passed.",
+  "limits": [
+    "No original/producer/relation/frozen statement edits. No extraction checkpoint or timing delta claimed.",
+    "Original whole assignment and all runtime/source/compiler/performance obligations remain unfinished."
+  ],
+  "sourceFilesAtCommit": "16c7ecb40198fb62187f4adf8dcaee6733e4990f"
+}

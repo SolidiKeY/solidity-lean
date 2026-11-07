@@ -1,0 +1,337 @@
+[
+  {
+    "id": "loops",
+    "source": "pragma solidity ^0.8.38; contract C { function f() external pure returns(uint r) { uint z; do { ++z; } while(z<2); for(uint j;j<z;++j) { uint i; while(i<5) { ++i; if(i==1) continue; if(i==5) break; assembly (\"memory-safe\") { r := add(r,7) } } } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "modifiers",
+    "source": "pragma solidity ^0.8.38; contract C { uint x; modifier m() { assembly (\"memory-safe\") { sstore(x.slot,1) } _; x+=2; } function f() external m returns(uint r) { r=x+41; } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "storage": {
+        "0": "0x0000000000000000000000000000000000000000000000000000000000000003"
+      },
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "try-catch",
+    "source": "pragma solidity ^0.8.38; contract C { uint x; function g() external { assembly (\"memory-safe\") { sstore(0,99) log0(0,0) revert(0,0) } } function f() external returns(uint r) { try this.g() { r=9; } catch { assembly (\"memory-safe\") { r := add(sload(0),42) } } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "storage": {
+        "0": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "unchecked",
+    "source": "pragma solidity ^0.8.38; contract C { function f() external pure returns(uint r) { uint x=type(uint).max; unchecked { ++x; assembly (\"memory-safe\") { r := add(x,42) } } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "constructors",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\ncontract C { uint x; constructor() { uint r; assembly (\"memory-safe\") { r := 42 } x=r; } function f() external view returns(uint) { return x; } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "libraries",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\nlibrary L { function h() internal pure returns(uint r) { assembly (\"memory-safe\") { r := 42 } } } contract C { function f() external pure returns(uint) { return L.h(); } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "always-revert",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\ncontract C { function f() external pure { assembly (\"memory-safe\") { revert(0,0) } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": true,
+      "returnData": "0x",
+      "logs": [],
+      "exception": "revert"
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "incorrect-opcode",
+    "source": "pragma solidity ^0.8.38; contract C { function f() external pure returns(uint r) { assembly (\"memory-safe\") { r := add(41,1) } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate",
+    "negativeControl": "must-mismatch",
+    "targetMutation": "incorrect-opcode"
+  },
+  {
+    "id": "compiler-dependent",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\ncontract C { function f() external view returns(uint r) { assembly (\"memory-safe\") { r := gas() } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": null,
+    "policy": "refuse:gas"
+  },
+  {
+    "id": "non-memory-safe",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\ncontract C { function f() external pure returns(uint r) { assembly { r := 42 } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "refuse:non-memory-safe"
+  },
+  {
+    "id": "unsupported-callcode",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\ncontract C { function f() external returns(uint r) { assembly (\"memory-safe\") { r := callcode(1,0,0,0,0,0,0) } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": null,
+    "policy": "refuse:callcode"
+  },
+  {
+    "id": "dirty-bits",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\ncontract C { function f() external pure returns(uint r) { uint8 x; assembly (\"memory-safe\") { x := 0x142 r := x } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x0000000000000000000000000000000000000000000000000000000000000142",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "allocation",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\ncontract C { function f() external pure returns(uint r) { bytes memory x = new bytes(32); assembly (\"memory-safe\") { r := x } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": null,
+    "policy": "candidate",
+    "allocationLayout": {
+      "minimum": 128,
+      "alignment": 32,
+      "note": "Reference layout sanity only. YQ3 source refinement is pending; no cross-pipeline pointer equality."
+    }
+  },
+  {
+    "id": "memory-storage-logs",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\ncontract C { uint x; function f() external returns(uint r) { assembly (\"memory-safe\") { mstore(0,42) sstore(0,mload(0)) log1(0,32,7) r := sload(0) } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "storage": {
+        "0": "0x000000000000000000000000000000000000000000000000000000000000002a"
+      },
+      "logs": [
+        {
+          "topics": [
+            "0x0000000000000000000000000000000000000000000000000000000000000007"
+          ],
+          "data": "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "emitter": "self"
+        }
+      ],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "malformed-import",
+    "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.38;\nimport \"missing.sol\"; contract C {}\n",
+    "compilerError": true,
+    "policy": "compiler-reject",
+    "expected": null,
+    "expectedDiagnostics": [
+      {
+        "type": "ParserError",
+        "code": "6275",
+        "message": "Source \"missing.sol\" not found: File not supplied initially."
+      }
+    ]
+  },
+  {
+    "id": "constructor-failure",
+    "source": "pragma solidity ^0.8.38; contract C { constructor() { assembly (\"memory-safe\") { revert(0,0) } } }\n",
+    "deploymentOnly": true,
+    "args": [],
+    "expected": {
+      "failed": true,
+      "returnData": "0x",
+      "logs": [],
+      "exception": "revert"
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "dirty-bits-cleaned",
+    "source": "pragma solidity ^0.8.38; contract C { function f() external pure returns(uint r) { uint8 x; assembly (\"memory-safe\") { x := 0x142 } return x; } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x0000000000000000000000000000000000000000000000000000000000000042",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "try-body",
+    "source": "pragma solidity ^0.8.38; contract C { function g() external pure returns(uint) { return 41; } function f() external returns(uint r) { try this.g() returns(uint x) { assembly (\"memory-safe\") { r := add(x,1) } } catch { r=9; } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "try-error",
+    "source": "pragma solidity ^0.8.38; contract C { function g() external pure { revert(\"bad\"); } function f() external returns(uint r) { try this.g() { r=9; } catch Error(string memory) { assembly (\"memory-safe\") { r := 42 } } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "try-bytes",
+    "source": "pragma solidity ^0.8.38; contract C { function g() external pure { assembly (\"memory-safe\") { revert(0,0) } } function f() external returns(uint r) { try this.g() { r=9; } catch(bytes memory) { assembly (\"memory-safe\") { r := 42 } } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "try-panic",
+    "source": "pragma solidity ^0.8.38; contract C { function g(uint x) external pure returns(uint) { return 1/x; } function f() external returns(uint r) { try this.g(0) returns(uint x) { r=x; } catch Panic(uint code) { require(code==0x12); assembly (\"memory-safe\") { r := 42 } } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "mixed-logs",
+    "source": "pragma solidity ^0.8.38; contract C { event E(uint x) anonymous; function f() external returns(uint) { assembly (\"memory-safe\") { mstore(0,42) log0(0,32) } emit E(43); return 42; } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [
+        {
+          "emitter": "self",
+          "topics": [],
+          "data": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        },
+        {
+          "emitter": "self",
+          "topics": [],
+          "data": "0x000000000000000000000000000000000000000000000000000000000000002b"
+        }
+      ],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "new-constructor",
+    "source": "pragma solidity ^0.8.38; contract D { uint public x; constructor() { assembly (\"memory-safe\") { sstore(0,42) } } } contract C { function f() external returns(uint) { D d=new D(); return d.x(); } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate"
+  },
+  {
+    "id": "always-revert-target",
+    "source": "pragma solidity ^0.8.38; contract C { function f() external pure returns(uint r) { assembly (\"memory-safe\") { r := 42 } } }\n",
+    "signature": "f()",
+    "args": [],
+    "expected": {
+      "failed": false,
+      "returnData": "0x000000000000000000000000000000000000000000000000000000000000002a",
+      "logs": [],
+      "exception": null
+    },
+    "policy": "candidate",
+    "targetMutation": "always-revert",
+    "negativeControl": "must-reject-always-revert"
+  }
+]

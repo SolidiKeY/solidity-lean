@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintSliceCompound.lean:Solidity.Backend.MemoryOps.source_uint_slice_bind_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceCompound.lean:Solidity.Backend.MemoryOps.source_uint_slice_bind_add_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceCompound.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.compound_add_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

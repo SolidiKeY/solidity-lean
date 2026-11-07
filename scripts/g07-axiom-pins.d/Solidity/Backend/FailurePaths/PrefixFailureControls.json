@@ -1,0 +1,44 @@
+{
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.compiler_refusal_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.early_not_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.early_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.final_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.public_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.saved_tail": [],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.swapped_operands_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.timeout_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailureControls.lean:Solidity.Backend.FailurePaths.PrefixFailure.Controls.unsupported_refused": []
+}

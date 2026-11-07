@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/AbiEntry/ShortRoutes.lean:Solidity.Backend.AbiEntry.ShortRoutes.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ShortRoutes.lean:Solidity.Backend.AbiEntry.ShortRoutes.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ShortRoutes.lean:Solidity.Backend.AbiEntry.ShortRoutes.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ShortRoutes.lean:Solidity.Backend.AbiEntry.ShortRoutes.run_route": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ShortRoutes.lean:Solidity.Backend.AbiEntry.ShortRoutes.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ShortRoutes.lean:Solidity.Backend.AbiEntry.ShortRoutes.source_executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/ShortRoutes.lean:Solidity.Backend.AbiEntry.ShortRoutes.source_short": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

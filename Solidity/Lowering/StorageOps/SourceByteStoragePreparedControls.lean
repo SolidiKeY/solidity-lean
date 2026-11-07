@@ -31,7 +31,7 @@ def storage (n old : Nat) : Source.Storage env.layout env.cellTy :=
  s.write (child right 6) (byte 97)
 def state (n old : Nat) : Source.St env :=
  {ex:={world:=⟨fun a=>if a=address then
-   {balance:=⟨19,by decide⟩,nonce:=3,code:=some 0,storage:=storage n old}
+   {balance:=19,nonce:=3,code:=some 0,storage:=storage n old}
    else Source.Account.empty _⟩,transient:=Source.Transient.empty,journal:=[]}
   heap:=Source.Heap.empty,events:=[],logs:=[(address,[9,8])],fnLocals:=⟨[.bool],.cons (.bool false) .nil⟩}
 def seed (n old : Nat) : Source.St env :=
@@ -80,7 +80,7 @@ def observations : Prop :=
   (locals,(some 2,some 5,[some [7],some [17],some [23],some [71],some [73],some [97]],[some [53],some [59],some [61]]),1)]
 def journalRows (s : Source.St env) := s.ex.journal.map fun e=>
  match e with
- | .account a old => (a.val,row old.storage,old.balance.val,old.nonce,old.code)
+ | .account a old => (a.val,row old.storage,old.balance,old.nonce,old.code)
  | .transient a _ => (a.val,(none,none,[],[]),0,0,none)
 def journals := journalRows (run 2 5 6).2.2
 def journal_order : Prop := journals=
@@ -108,7 +108,7 @@ def aliases : Prop :=
   (.ok (byte 0),(locals,after 2 5 0 [53,59])),
   (.ok (byte 97),(locals,after 2 5 1 [53,59])))
 def context (s : Source.St env) :=
- ((s.ex.world.accounts address).balance.val,(s.ex.world.accounts address).nonce,
+ ((s.ex.world.accounts address).balance,(s.ex.world.accounts address).nonce,
   (s.ex.world.accounts address).code,s.heap.next,(s.heap.cells 0).isNone,
   s.events.length,s.logs.map (fun (a,bs)=>(a.val,bs.map UInt8.toNat)),s.fnLocals.1)
 def contexts : Prop :=

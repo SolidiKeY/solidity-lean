@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataMutation.lean:Solidity.Backend.MemoryOps.source_idx_type_of_position": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataMutation.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.write_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataMutation.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.bind_cd_bool_assign": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

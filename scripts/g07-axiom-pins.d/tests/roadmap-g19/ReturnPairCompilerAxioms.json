@@ -1,0 +1,87 @@
+{
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.Controls.core": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.Controls.emitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.Controls.omitted_second_native_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.Controls.omitted_second_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.Controls.stale_second_donor_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.Controls.stale_second_native_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ReturnPairCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.callerAfter": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.reached": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.sourceAfter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ReturnPairCompilerAxioms.lean:Solidity.Lowering.G19.ReturnPair.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,4 +1,5 @@
 import Solidity.Source.World
+import Solidity.Source.Machine
 import Solidity.Semantics.ContractWorld
 import Solidity.Semantics.TransientWorld
 
@@ -20,6 +21,11 @@ def liftWord (word : Roadmap.Word) : Semantics.Word :=
     simp only [PrimTy.inRange, decide_eq_true_eq]
     exact ⟨Int.natCast_nonneg _, Int.ofNat_lt.mpr word.isLt⟩⟩
 
+/-- Explicit modular observation of exact Source money. Lossless equality
+requires a separately established range invariant; this is not a ledger. -/
+def liftBalance (balance : Source.Monetary.Balance) : Semantics.Word :=
+  liftWord (Source.Monetary.wordView balance)
+
 def lowerWord (word : Semantics.Word) : Roadmap.Word :=
   ⟨word.1.toNat, by
     have bound := word.2
@@ -30,6 +36,14 @@ def lowerWord (word : Semantics.Word) : Roadmap.Word :=
 theorem lower_lift_word (word : Roadmap.Word) : lowerWord (liftWord word) = word := by
   apply Fin.ext
   exact Int.toNat_natCast _
+
+theorem lower_lift_balance (balance : Source.Monetary.Balance) :
+    lowerWord (liftBalance balance) = Source.Monetary.wordView balance :=
+  lower_lift_word _
+
+theorem lower_lift_balance_exact (balance : Source.Monetary.Balance)
+    (fit : Source.Monetary.Fits balance) : (lowerWord (liftBalance balance)).val = balance := by
+  simp only [lower_lift_balance, Source.Monetary.wordView_exact _ fit]
 
 theorem lift_lower_word (word : Semantics.Word) : liftWord (lowerWord word) = word := by
   apply Subtype.ext
@@ -86,11 +100,11 @@ is not the external session ledger; this is NOT a universal balance semantics.
 Use sessionFunds below to include the supplied G01 external ledger. -/
 def fundsOf {D : Source.Layout} {L : Roadmap.Address → Source.SPath → Source.STy}
     (world : Source.World D L) : ContractWorld.Address → Semantics.Word :=
-  fun address => liftWord (world.accounts (lowerAddress address)).balance
+  fun address => liftBalance (world.accounts (lowerAddress address)).balance
 
 theorem funds_at_source_address {D : Source.Layout} {L : Roadmap.Address → Source.SPath → Source.STy}
     (world : Source.World D L) (address : Roadmap.Address) :
-    fundsOf world (liftAddress address) = liftWord (world.accounts address).balance := by
+    fundsOf world (liftAddress address) = liftBalance (world.accounts address).balance := by
   unfold fundsOf
   rw [lower_lift_address]
 
@@ -105,7 +119,7 @@ theorem balance_projection {D : Source.Layout} {L : Roadmap.Address → Source.S
     {K : Type} {contracts : K → Contract} (source : Source.World D L)
     (target : ContractWorld.World contracts) (address : Roadmap.Address) :
     (withSourceFunds source target).balance (liftAddress address) =
-      liftWord (source.accounts address).balance := funds_at_source_address source address
+      liftBalance (source.accounts address).balance := funds_at_source_address source address
 
 /-- Installed source accounts supply their own balance. Other addresses use
 G01's supplied fixed external ledger and session opening balances/history.
@@ -116,7 +130,7 @@ def sessionFunds {D : Source.Layout} {L : Roadmap.Address → Source.SPath → S
     (history : List Roadmap.Event) : ContractWorld.Address → Semantics.Word := fun address =>
   let sourceAddress := lowerAddress address
   if (source.accounts sourceAddress).code.isSome then
-    liftWord (source.accounts sourceAddress).balance
+    liftBalance (source.accounts sourceAddress).balance
   else liftWord (fixed.ledger environment.balance history sourceAddress)
 
 /-- Installed-account reads never substitute an external-ledger value. -/
@@ -125,7 +139,7 @@ theorem session_funds_installed {D : Source.Layout}
     (fixed : Roadmap.Fixed) (environment : Roadmap.SessionEnv) (history : List Roadmap.Event)
     (address : Roadmap.Address) (installed : (source.accounts address).code.isSome = true) :
     sessionFunds source fixed environment history (liftAddress address) =
-      liftWord (source.accounts address).balance := by
+      liftBalance (source.accounts address).balance := by
   unfold sessionFunds
   dsimp only
   rw [lower_lift_address]
@@ -170,7 +184,7 @@ def stateEnvironment {D : Source.Layout} {L : Roadmap.Address → Source.SPath �
     (state : State C Γ) : State C Γ :=
   { state with
     tx := ((requestContext request responses).tx (target.atTime (liftWord request.timestamp)) (liftAddress request.target))
-    selfBalance := liftWord (source.accounts request.target).balance }
+    selfBalance := liftBalance (source.accounts request.target).balance }
 
 /-- The actual typed environment expressions expose exactly the five projected
 observations; no source-expression evaluation equation is assumed. -/
@@ -189,7 +203,7 @@ theorem expression_observations {D : Source.Layout}
     (Val.simple (.env .selfAddress rfl) : Val C Γ .uint).evalT projected =
       .ok (liftAddress request.target).1 ∧
     (Val.simple (.env .selfBalance rfl) : Val C Γ .uint).evalT projected =
-      .ok (liftWord (source.accounts request.target).balance) :=
+      .ok (liftBalance (source.accounts request.target).balance) :=
   ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 /-- Source endTx and actual intrinsic transactionEntry commute with this
@@ -236,4 +250,75 @@ theorem source_outer_rollback_funds {D : Source.Layout}
 #print axioms state_environment_reset
 #print axioms source_rollback_funds
 #print axioms source_outer_rollback_funds
+
+/-- Shared input relation, indexed by the reached storage address. Guarded
+regression: constructor Nat projections must not clip a negative intrinsic
+word, and delegated library agreement must use caller storage, not code identity.
+This certifies frame inputs only, not body or post-state preservation. -/
+structure FrameAgreement (f : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : Prop where
+  address : (f.this.val : Int) = address.1.1
+  sender : (f.sender.val : Int) = ctx.sender.1.1
+  value : (f.value.val : Int) = ctx.value.1
+  static : f.static = ctx.isStatic
+
+/-- Exact Nat/Int correspondence over the existing unsigned intrinsic word.
+No additional fit premise or changed word representation is introduced. -/
+theorem frame_nat_int_exact (n : Nat) (word : Semantics.Word) :
+    n = word.1.toNat ↔ (n : Int) = word.1 := by
+  have bound := word.2
+  simp only [PrimTy.inRange, decide_eq_true_eq] at bound
+  rw [← Int.natCast_inj, Int.toNat_of_nonneg bound.1]
+
+/-- A total witness of the shared input relation. Only its four observed
+fields change; this constructs no admission, code identity or body producer. -/
+def frameForContext (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : Source.Fr :=
+  { template with
+    this := lowerAddress address
+    sender := lowerAddress ctx.sender
+    value := lowerWord ctx.value
+    static := ctx.isStatic }
+
+/-- Guarded regression: individually representable projections must have ONE
+joint frame witness, including read-only and maximum-word contexts. -/
+theorem frameForContext_agrees (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : FrameAgreement (frameForContext template address ctx) address ctx :=
+  ⟨(frame_nat_int_exact _ address.1).mp rfl,
+    (frame_nat_int_exact _ ctx.sender.1).mp rfl,
+    (frame_nat_int_exact _ ctx.value).mp rfl, rfl⟩
+
+/-- Unobserved Source fields are retained, rather than reset by the witness. -/
+theorem frameForContext_preserves (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) :
+    (frameForContext template address ctx).contract = template.contract ∧
+    (frameForContext template address ctx).checked = template.checked ∧
+    (frameForContext template address ctx).depth = template.depth ∧
+    (frameForContext template address ctx).cd = template.cd :=
+  ⟨rfl, rfl, rfl, rfl⟩
+
+/-- Guarded regression: rebuilding an already agreeing frame must preserve
+its ENTIRE Source value, rather than just four observed projections. -/
+theorem frameForContext_eq_self (frame : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) (agreement : FrameAgreement frame address ctx) :
+    frameForContext frame address ctx = frame := by
+  have sameAddress : lowerAddress address = frame.this :=
+    Fin.ext ((frame_nat_int_exact _ address.1).mpr agreement.address).symm
+  have sameSender : lowerAddress ctx.sender = frame.sender :=
+    Fin.ext ((frame_nat_int_exact _ ctx.sender.1).mpr agreement.sender).symm
+  have sameValue : lowerWord ctx.value = frame.value :=
+    Fin.ext ((frame_nat_int_exact _ ctx.value).mpr agreement.value).symm
+  unfold frameForContext
+  rw [sameAddress, sameSender, sameValue, ← agreement.static]
+
+/-- Exact fixed points exclude treating reconstruction of a mismatched frame
+as preservation. This is an input correspondence, not an execution theorem. -/
+theorem frameForContext_fixed_iff (frame : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) :
+    frameForContext frame address ctx = frame ↔ FrameAgreement frame address ctx :=
+  ⟨fun same => same ▸ frameForContext_agrees frame address ctx,
+    frameForContext_eq_self frame address ctx⟩
+
+#print axioms frame_nat_int_exact
+
 end Solidity.Lowering.V08.EnvironmentProjection

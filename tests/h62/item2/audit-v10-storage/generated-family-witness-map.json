@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "a8f2e556dae232f27b66c6d2d01057990cd5ebdd97725a8cf2d9493d93357080",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/OperationTransport.lean:14:generated_families_commute",
+      "theorem": "Solidity.Backend.StorageOps.generated_families_commute",
+      "signature": "theorem generated_families_commute {n N L R : Nat} {G : Schema n}\n    {E : TypeGraph.Ty n} {H : Pre \u2192 Nat} {P : List Pre}\n    (hH : \u2200 p, H p < N) (hL : L \u2264 N) (hR : R \u2264 N)\n    (regions : RegionsDisjoint N L H (List.range R) P)\n    (a b : Solidity.Storage.Loc) (sa ca sb cb : Nat)\n    (boundedA : \u2200 l \u2208 touched a sa ca, l.Bounded L R)\n    (boundedB : \u2200 l \u2208 touched b sb cb, l.Bounded L R)\n    (hashedA : \u2200 l \u2208 touched a sa ca, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (hashedB : \u2200 l \u2208 touched b sb cb, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (separate : \u2200 l \u2208 touched a sa ca, \u2200 q \u2208 touched b sb cb, l \u2260 q)\n    (slots : Nat \u2192 Slot G E) (f g : Nat \u2192 Value G E \u2192 Option (Value G E)) :\n    (modifyMany f ((touched a sa ca).map (Solidity.Storage.Loc.word N H)) slots).bind\n        (modifyMany g ((touched b sb cb).map (Solidity.Storage.Loc.word N H))) =\n      (modifyMany g ((touched b sb cb).map (Solidity.Storage.Loc.word N H)) slots).bind\n        (modifyMany f ((touched a sa ca).map (Solidity.Storage.Loc.word N H)))",
+      "signature_sha256": "8b635c385671d96a47dd0fa2a99670ec52d31fd5167c6368e050c39662bb097b",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.families_joint",
+      "status": "kernel-checked nonempty generated-family premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/OperationTransport.lean:39:generated_family_outside",
+      "theorem": "Solidity.Backend.StorageOps.generated_family_outside",
+      "signature": "theorem generated_family_outside {n N L R : Nat} {G : Schema n}\n    {E : TypeGraph.Ty n} {H : Pre \u2192 Nat} {P : List Pre}\n    (hH : \u2200 p, H p < N) (hL : L \u2264 N) (hR : R \u2264 N)\n    (regions : RegionsDisjoint N L H (List.range R) P)\n    (base query : Solidity.Storage.Loc) (stride count : Nat)\n    (bounded : \u2200 l \u2208 touched base stride count, l.Bounded L R)\n    (hashed : \u2200 l \u2208 touched base stride count, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (queryBounded : query.Bounded L R)\n    (queryHashed : \u2200 p \u2208 query.pres N H, p \u2208 P)\n    (outside : query \u2209 touched base stride count)\n    (slots result : Nat \u2192 Slot G E)\n    (effect : Nat \u2192 Value G E \u2192 Option (Value G E))\n    (performed : modifyMany effect\n      ((touched base stride count).map (Solidity.Storage.Loc.word N H)) slots = some result) :\n    result (query.word N H) = slots (query.word N H)",
+      "signature_sha256": "35b7d0304a6741057df771126fd856f8ca62428979f67511ef11a0eb1e97b0a7",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.outside_joint",
+      "status": "kernel-checked nonempty generated-family premise bundle; independent fidelity reviews passed"
+    }
+  ]
+}

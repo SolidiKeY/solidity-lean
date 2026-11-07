@@ -1,0 +1,10 @@
+{
+  "guardedRegression": "Fixed-byte decoder marker guards remain a standalone test driver,with no generated root edits.",
+  "modules": [
+    {
+      "path": "tests/directruntime-20261104/native-browser/fixed-byte/MarkerControls.lean",
+      "role": "Standalone per-file 32-spelling/strict-decoder guards and exact signatures/axioms",
+      "centralRegistration": "Proposal only;do not add to generated production roots"
+    }
+  ]
+}
