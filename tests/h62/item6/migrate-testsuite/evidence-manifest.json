@@ -1,0 +1,18 @@
+{
+  "schema_version": 2,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "detail_manifest": {
+    "path": "detailed-manifest.json",
+    "bytes": 64216,
+    "sha256": "898e273e19f5ad5a3f70326193aa4d7aca608701bb1914ae3cad53392440f26d",
+    "vm_path": "/workspace/h62-migrate-testsuite/h44-split-01/detailed-manifest.json"
+  },
+  "bulk_archive": {
+    "path": "evidence.tar.gz",
+    "bytes": 166605283,
+    "sha256": "874af17f1c099f62c0ca9220be47af698690566be5f86f79d8f2f205ef4e9b69",
+    "vm_path": "/workspace/h62-migrate-testsuite/resume-01/evidence.tar.gz"
+  },
+  "availability": "Supply the pinned detailed manifest and external evidence. VM paths are location hints only; files may be relocated. Missing inputs remain pending.",
+  "boundary": "Old evidence integrity only; all new-toolchain compatibility/parity/final gates remain pending."
+}
