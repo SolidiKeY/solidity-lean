@@ -1923,3 +1923,23 @@ preservation of historical records; neither used Lean or a server. The scan is
 non-atomic and its source bindings and supplied static references do not prove
 execution context, generated-input coverage, runtime provenance or timing
 acceptance. H93 continues to defer h55b cold timing.
+
+## Precompile migration fixture observations
+
+`migration_fixture_controls.py` binds eight previously unreferenced isolated
+precompile migration fixtures to their snapshot source hashes and to the
+historical migration document. The rows describe their individual proof or
+axiom-print roles. The document reports historical isolated fixture passes;
+current driver, exact inputs, side effects and outcomes remain unresolved.
+No current execution, producer provenance or production acceptance is inferred.
+The classifier accepts supplied snapshot subsets and does not establish group
+coverage.
+
+At `d3ae4379ec7ab7f73158fc713cb9d3460d0c7cc4`, the refreshed static index
+has 738 candidates, 479 with supplied current static references and 259 without;
+five retain historical references requiring review. Since the previous snapshot
+three candidates were added and one changed, with none removed. Independent
+read-only finder and skeptic checked the eight roles, hashes and index
+preservation without Lean or a server. Evidence hashes are recorded in
+`tests/h55/module-times/migration-fixtures-evidence.sha256`. The observation
+remains non-atomic and does not establish runtime coverage or acceptance.
