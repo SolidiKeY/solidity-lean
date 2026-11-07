@@ -13,8 +13,15 @@ ROOT=Path(__file__).resolve().parents[4]
 PROBE_SHA='164ad815748f277e78d3b16451fe1df43bf8159fd9a4e233753469335463e469'
 CANONICAL='532234a73caefaadee0ef39a75108d9392b6de99e05fcbd763ce9634642c9077'
 def sha(raw):return hashlib.sha256(raw).hexdigest()
+def private_output(path):
+    output=path.resolve()
+    if output.is_relative_to(ROOT):
+        raise ValueError('evidence output must remain outside public checkout')
+    return output
+
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--proof-root',type=Path,required=True);p.add_argument('--ledger',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
+    a.output=private_output(a.output)
     ledger=a.ledger.read_bytes();raw=(a.proof_root/'probe.log').read_bytes()
     if sha(ledger)!=CANONICAL or sha(raw)!=PROBE_SHA:raise ValueError('unadmitted census/probe')
     spec=importlib.util.spec_from_file_location('statement_drift_gate',Path(__file__).with_name('check_read_statements.py'))

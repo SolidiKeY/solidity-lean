@@ -49,8 +49,8 @@ def apply(frozen,coverage,pair,types,pins):
         entry={'source_name':name,'signature_sha256':row['signature_sha256'],'status':'joint-witness','proof':gate.PREFIX+proof,
           'global_premises':'Same inhabited two-declaration Env and nonempty Fields structure; all declaration/type/persistence/nonconst proofs supplied together.',
           'per_input':'Same a=true/b=default-false Source store, two-field intrinsic store and nonempty Bool locals. Relation, read/lookup premises and original applications checked jointly.',
-          'evidence':'primitive-reads/validated/frozen-accepted/receipt.json and primitive-reads/validated/current-accepted/receipt.json',
-          'evidence_manifest':'tests/h62/item2/audit-readonly-calls/primitive-reads.sha256',
+          'evidence':'Private coordination archive: primitive-reads/validated/{frozen,current}-accepted/receipt.json',
+          'evidence_manifest':'Private coordination archive (historical path): tests/h62/item2/audit-readonly-calls/primitive-reads.sha256',
           'frozen_receipt_sha256':pins['frozen'],'current_receipt_sha256':pins['current'],
           'proof_boundary':'Joint premise satisfiability and primitive evaluator outcomes only; not compiler/Source body/call/native-frame adequacy.'}
         entry.update(ENTRY_DETAILS)

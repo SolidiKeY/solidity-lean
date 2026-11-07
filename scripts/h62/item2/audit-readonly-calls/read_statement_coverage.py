@@ -19,7 +19,7 @@ collector.CREDIT_PROOFS=module.NEW_NAMES
 collector.ENTRY_DETAILS={
  'global_premises':'Same explicitly constructed Glob, nonempty fields/source/typed locals and exact field relation; no callee execution inferred.',
  'per_input':'Actual intrinsic second-field read at the same nonempty typed locals and target state; following assignment/revert continuations retained. Four Source-facing original type drifts receive no credit.',
- 'evidence':'read-statements/validated/frozen-accepted/receipt.json and read-statements/validated/current-accepted/receipt.json',
- 'evidence_manifest':'tests/h62/item2/audit-readonly-calls/read-statements.sha256',
+ 'evidence':'Private coordination archive: read-statements/validated/{frozen,current}-accepted/receipt.json',
+ 'evidence_manifest':'Private coordination archive (historical path): tests/h62/item2/audit-readonly-calls/read-statements.sha256',
  'proof_boundary':'Joint actual primitive expression/read-statement inputs and typed continuation results only; no compiled call/Source-world/native-frame/gas adequacy.'}
 if __name__=='__main__':collector.main()

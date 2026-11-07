@@ -1831,3 +1831,10 @@ Full owned H121 Source/callee/selected compiler-world/physical-frame production,
 external compiler-success/G42.04 and all nineteen H57 transports, inherited
 queues and final acceptance remain open. Next work remains original joint
 inputs/exact bindings and that owned producer, with all existing STOPs retained.
+
+Coordinator review corrections: primitive-read and read-statement active coverage
+references identify the private coordination archive. Historical receipt hashes
+remain unchanged. The drift reporter rejects checkout-contained output paths,
+including paths reached through a symlink, before reading private inputs. Direct
+and symlink output regressions guard this boundary. These changes add no proof
+credit or new acceptance of historical receipts.
