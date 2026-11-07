@@ -10,7 +10,7 @@
       "signature": "theorem run_writes (updates : List (Solidity.Storage.Loc \u00d7 Semantics.Word))\n (fits : \u2200 op \u2208 updates, TargetOperations.KeysFit op.1) (machine : Evm.Machine) :\n Evm.run (writeProgram updates fits) machine=.ok (afterWrites updates fits machine) 0",
       "signature_sha256": "eefaba3383c7bf27767a23a1628797dca2d0ec09679fec3bfbd5d4a28e9586fa",
       "witness": "H62.StorageAudit.TargetWriteSequenceWitnesses.run_joint",
-      "status": "Kernel-check and independent semantic fidelity review pending final source head"
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
     },
     {
       "frozen_id": "Solidity/Backend/StorageOps/TargetDefaultInit.lean:39:context_writes",
@@ -18,7 +18,7 @@
       "signature": "theorem context_writes (updates : List (Solidity.Storage.Loc \u00d7 Semantics.Word))\n (fits : \u2200 op \u2208 updates, TargetOperations.KeysFit op.1) (machine : Evm.Machine) :\n {afterWrites updates fits machine with store := machine.store}=machine",
       "signature_sha256": "249ae29bf394767dd293dd7adc439776bec1b9720f457a309a3264ebb386a225",
       "witness": "H62.StorageAudit.TargetWriteSequenceWitnesses.context_joint",
-      "status": "Kernel-check and independent semantic fidelity review pending final source head"
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
     },
     {
       "frozen_id": "Solidity/Backend/StorageOps/TargetDefaultInit.lean:51:agreement_writes",
@@ -26,7 +26,7 @@
       "signature": "theorem agreement_writes (updates : List (Solidity.Storage.Loc \u00d7 Semantics.Word))\n (fits : \u2200 op \u2208 updates, TargetOperations.KeysFit op.1)\n (captured : Store) (machine : Evm.Machine) (locations : List Solidity.Storage.Loc)\n (fitting : \u2200 l \u2208 locations, TargetOperations.KeysFit l)\n (before : \u2200 l (member : l \u2208 locations), machine.store.cells (TargetOperations.toSlot l (fitting l member))=TargetOperations.encodeWord (captured l)) :\n \u2200 l (member : l \u2208 locations), (afterWrites updates fits machine).store.cells (TargetOperations.toSlot l (fitting l member))=\n TargetOperations.encodeWord ((updates.foldl (fun store op => Representation.write store op.1 op.2) captured) l)",
       "signature_sha256": "cb876bce3a0eb64827ab0df9efb8ffda80a7373c08e988fd199c670a5cac1a07",
       "witness": "H62.StorageAudit.TargetWriteSequenceWitnesses.agreement_joint",
-      "status": "Kernel-check and independent semantic fidelity review pending final source head"
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
     },
     {
       "frozen_id": "Solidity/Backend/StorageOps/TargetDefaultInit.lean:66:outside_writes",
@@ -34,7 +34,7 @@
       "signature": "theorem outside_writes (updates : List (Solidity.Storage.Loc \u00d7 Semantics.Word))\n (fits : \u2200 op \u2208 updates, TargetOperations.KeysFit op.1) (machine : Evm.Machine) (observer : Evm.Slot)\n (apart : \u2200 op (member : op \u2208 updates), observer \u2260 TargetOperations.toSlot op.1 (fits op member)) :\n (afterWrites updates fits machine).store observer=machine.store observer",
       "signature_sha256": "e68d9ba1383225ca958dae9bfd7ee015942e04baec8581ba4a10243cf995c0a3",
       "witness": "H62.StorageAudit.TargetWriteSequenceWitnesses.outside_joint",
-      "status": "Kernel-check and independent semantic fidelity review pending final source head"
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
     }
   ]
 }

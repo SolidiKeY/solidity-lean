@@ -445,3 +445,40 @@ Evidence: `/workspace/v10-storage-operations-evidence/checkpoint225-interruption
 `checkpoint226-rejected.patch` in the same directory. Original producer, physical
 adequacy, audit coverage, full validation and trust/documentation gate obligations
 remain open. Independent reviews are recorded in the checkpoint handoff.
+
+
+### Checkpoint 227: nonempty target write-sequence audit witnesses
+
+The additive audit module supplies simultaneous inputs for four exact frozen
+TargetDefaultInit laws: run_writes, context_writes, agreement_writes and
+outside_writes. One populated machine and the ordered writes root0:=7,
+root1:=23, root0:=0 expose overwrite order. Both covered roots agree with the
+captured store initially; a distinct outside root and complete non-store context
+frame. Actual execution and agreement reuse the frozen laws. Omitting the last
+write changes root0, and an always-reverting program disagrees with the actual
+successful sequence. No Source, schema compiler, physical hash, gas/fork or world
+adequacy is asserted.
+
+Exact source commit `f869a9173e50390a3f88f8444453b42fb73fb6ce` passed the bounded
+serial kernel check in 1.84 seconds, peak aggregate RSS 682602496 bytes, without a
+resource stop. All eleven measured local axiom guards use only propext,
+Classical.choice and Quot.sound. The first check failed on a local reduction
+before finite inequality checking; the corrected proof and subsequent exact-head
+guards pass. The mapping generator's initial wrong census-field lookup also
+failed and was corrected without changing the census or interfaces.
+
+The frozen registry now contains 56 mapped rows: 44 joint-premise bundles and
+12 data inhabitants; 3225 of 3281 conservative rows remain unmapped. Additional
+execution/negative controls do not increase that interface count. Registry tests
+include rejection of drift in this module and its source pin. Historical checked
+heads and the prior complete-validation marker remain historical; only the new
+module has a fresh exact-head receipt.
+
+The corrected repository trust wrapper reports 6614 sources, 289 inventoried
+sites and zero findings. Direct scanner invocation without its required file
+list failed and is retained. Strict axiom pins remain FAIL: 16411 pinned,
+zero errors, 251 unrecorded and 99 baselined changes. The eleven new declarations
+are all standard-only entries; no shared axiom inventory was written. Independent
+read-only finder and skeptic found no semantic fidelity issue; metadata review
+and sealed evidence accompany this checkpoint. Full lane validation and all
+previous producer, timing and documentation gate holds remain open.
