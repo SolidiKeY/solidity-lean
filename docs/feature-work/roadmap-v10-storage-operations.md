@@ -854,3 +854,115 @@ packet integration question is resolved. Source/Typing remains untouched.
 Actual Source resource/session realization, canonical origins, general graph
 admission, Source/lifecycle correspondence and original proof/final gates remain
 locally open. Separate Y04 and 4.35 producer waits are unchanged.
+
+
+## Checkpoint 238: model H24 record after authenticated re-baseline
+
+Fresh fetch verifies published d93f6839c613468610ea488356b174cd183e3772; the
+model-only PlanGraphAdmission module is absent there. The previously withheld
+proposal is now integrated through the existing shared empty-environment helper.
+producer fixes all four PlanWitness models, base_exact preserves planProducer,
+and inhabited supplies this model record only. No refusal proof or per-case
+implementation is copied. Actual Source/session/library/lifecycle adequacy and
+the locally owned producer obligations remain open; this is not their delivery.
+
+The affected build fetches 142 cached jobs, so its 0.64-second success is not
+presented as fresh elaboration. A distinct per-file check at committed source
+3b4440440d9e668041b4b8d530788e683b962f96 passes all three standard-three guards:
+1.86 seconds, aggregate RSS peak 772624384 bytes, no resource stop. Finder and
+skeptic independently reviewed source/scope without Lean/server and found no
+findings. The historical checkpoint-237 auth failure and withdrawn candidate
+receipt remain unchanged; this is a distinct freshly verified adoption.
+
+## Checkpoint 239: premise-free retained-array input domains
+
+Two input inhabitants reuse the existing populated retained fixture for the
+logical live-word/none equivalences and primitive write-failure equivalence.
+Their three original conclusions are exercised directly, keeping raw retained
+access distinct from live refusal. No new fixture or production statement is
+introduced. These rows have data parameters only: they add three DATA entries,
+not joint logical-premise bundles. Counts become 72 mapped = 57 joint + 15 data,
+with 3209 of 3281 conservative rows uncovered. Complete audit/totality and all
+original goals remain unfinished. Historical complete-validation markers stay
+historical; the source-specific receipt is updated only after kernel success.
+
+All 59 guards pass at source2212d6770a5ed8a4c712957564cccdec1767abe2 in 3.63s,
+aggregate RSS peak724922368bytes, no resource stop. Two new guards are axiom-free,
+three use only propext/Classical.choice/Quot.sound. The module totals12empty,
+5propext-only and42standard-three guards. The first diagnostic failed on missing
+explicit Boolean primitive annotation; its receipt is retained, no failing
+artifact accepted, and no statement/premise/budget weakening used.
+
+Same-condition focused pre-change check3.62s versus exact committed3.63s is
+about0.28percent slower, below the10percent STOP threshold; guarded precommit
+check was3.58s. This is no whole-build comparison or statistical speedup claim.
+Finder and skeptic independently confirmed the data-only classification and
+original-law fidelity without Lean/server; no findings remained.
+
+Published DirtyReadback now provides actual selected-read capture/agreement
+and bounded integer/Boolean cleanup roundtrips. Those APIs are reused as
+boundaries, not duplicated or promoted to complete Source session adequacy.
+Frontend.SpecOriginsV1 is editor/NatSpec provenance, not P8a.SourceOrigins for an
+actual Source program. H16/H57 question V10-H121-H24-REFUSAL stays pending for the
+mapping-bearing accepted-origin case. No Source typing or frozen interface edit
+is made; Y04 and separate4.35 trust/timing waits remain distinct.
+
+
+## Checkpoint 240: concrete LibraryTry identity intake
+
+The H71 ticket from memory-reference-structs at
+7bd9a5d3d06f58ec429312281768bab6e255a484 identifies the existing legacy/via-IR
+LibraryTry AST fixtures and retains G42.04 body/result work with that requester.
+After fresh fetch, master3a5b9de41 is adopted in merge
+5d6b0df2b9fe5b8c7888e72113cbcb22f971f531. No Source implementation or P8 frozen
+interface changes arrive in that merge. The new read-only intake tool records
+identities for Source construction without implementing a second parser or
+pretending an intrinsic ContractWorld import is Source.SrcProg.
+
+Observed input hashes are legacy
+7ce034177434e147b9768a6eb10b7be384864cb060161fc0b2546be0a9377784 and via-IR
+205b02e0fd5a46728191a1b4da3e841bb6652f204ae5cfbb087817a793bd06b1. Both canonical
+JSON AST values are identical. Local raw Source bytes hash to
+4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384, matching both
+recorded header digests. This establishes local byte availability, not an
+independent compiler reproduction or actual P8 origin/realization proof. The
+requester's separate provenance manifest is not locally delivered, so matching
+its expected values is not claimed. Header validationStage remains analysis,
+and neither AST is represented as a bytecode artifact.
+
+All 26 declaration records and four functions retain AST IDs, owner/scope,
+parameter/result type strings, storage locations and body hashes. Library L is
+AST46, L.S is3, L.integer is23, L.stru is45, C is131 and C.t is53. The existing
+using directive links46/3; C.g's call targets45 through receiver53. C.f/C.g retain
+uint256 and string-memory results, and L.stru retains its struct-storage formal.
+AST IDs are explicitly not Source declaration positions or runtime code indexes.
+No code-account installation, dispatch body or delegated frame is manufactured.
+
+Five tests pass, including mutations for storage/string identity loss, duplicate
+IDs, pipeline/compiler drift and missing provenance. Reports stay off Git;
+inputs are not rewritten. Finder and skeptic independently reviewed tools and
+reports without Lean/server or edits and found no findings. The intake records
+the concrete mapping-free AST shape but is not the formal Source.Env admission
+proof; the general mapping-bearing H16/H57 question remains separate.
+
+Next local obligations are actual Source syntax/environment and typed body
+construction, canonical accepted-source/artifact binding, full failure-resource
+realization and reached caller/library catalogue/frame installation. String
+signatures, caller storage aliases, no second payment and all four existing
+native observations must be preserved; those observations are requirements,
+not a Source adequacy proof. No toy/model substitution, profile narrowing,
+frozen weakening or Source single-writer violation is authorized by this intake.
+
+At post-adoption source8e7f0883c83d15862f3e42e1f961ff788e65cc6d, fresh checks
+pass the model's3guards in1.81s/639221760bytes aggregate RSS and the audit's
+59guards in3.65s/726745088bytes, no resource stops. Actual Lean4.24.0/Lake versions
+and KeySort prerequisite pass. The audit source-specific pin records this
+new receipt; earlier receipts and complete markers remain historical.
+
+Static trust passes6635sources/289sites/0findings; registration/layers pass
+6618reachable/0orphans/0newforbiddenedges. Strict pins remain FAIL:16782pins,
+0errors,192unrecorded,0baselined; shared inventories are not rewritten. Exact
+raw strict docs at8e7f0883c83d15862f3e42e1f961ff788e65cc6d retain1missing/139ambiguous,
+identical to published3a5b9de412b84a13777b6fbf8c8f310e10b3448e (0new/0removed).
+Frozen comparison remains FAIL137new/9removed. No raw failure or historical
+timing STOP is waived. Entire original/consolidated queues remain incomplete.
