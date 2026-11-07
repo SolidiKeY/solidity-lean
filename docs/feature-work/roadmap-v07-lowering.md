@@ -135,7 +135,8 @@ the inline-self environment. `LocationGraphInterface.Admission` and
 Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
 resource, where `Producer` is uninhabited (P8-SPEC-LAW1,
 [P8 admission](p8-admission.md#failure-projection-conflict)). The only known
-inhabitant is the model witness `P8.PlanWitness.planProducer` (G07 toy, empty Source) (CP77). `scalar_value` and
+inhabitant is the model witness `P8.PlanWitness.planProducer` (G07 toy, empty Source; CP78,
+`PlanGraphAdmission`). `scalar_value` and
 `source_assignment_run` ignore the producer; they only rename the environment
 and are proved by `integer_related` and `source_assign_local_run`.
 
@@ -162,7 +163,8 @@ and are proved by `integer_related` and `source_assign_local_run`.
 - Elaborator agreement: relate `captureExpr`/`captureBefore`
   (`Syntax/Elab/Values.lean`) to these prefixes via a `Source.RExpr` to
   `DeferredSource.Operand` producer.
-- G18.01: a total accepted-source producer (needs an inhabited `P8a.Producer`);
+- G18.01: a total accepted-source producer (needs a `P8a.Producer` over real accepted Source;
+  the only inhabitant, `planProducer`, is a G07 toy with empty Source);
   bytes/string/function/fixed-point fields; a valid rank from admitted Source;
   the Source refusal fix; parameter/return and whole-program admission.
 - G18.06: blocked until ordered G18.02–G18.05 child certificates exist.
@@ -550,8 +552,9 @@ three-standard-axiom guards cover the new headlines and closed clients.
 
 The published H24 companion is `Lowering.P8.DeclarationGraphAdmission.Producer`,
 with the unchanged frozen producer as `base` and H15 graph/refusal evidence as
-`declarationGraphs`. Its existence is a typed prerequisite, not a concrete
-inhabitant or Source-to-EVM adequacy result. Foundational interfaces stay below
+`declarationGraphs`. Its only inhabitant is the degenerate model instance
+`PlanGraphAdmission.planDeclarationGraphProducer` (G07 toy, empty Source,
+CP78), not a real-Source inhabitant or a Source-to-EVM adequacy result. Foundational interfaces stay below
 the companion to preserve the import DAG. Concrete P8/H16 realization and
 ordered admitted-source aggregate applications remain open. G16/G17, G18.01,
 G18.06 and both backfills remain partial or blocked; delegated G18 children
@@ -616,7 +619,8 @@ general operands/updates/tuples, accepted-Source graph completeness and whole
 production remain open. G18.02/.03 belong to V16, G18.04/.05 to V14 and G19 to
 V17. G18.06 awaits their ordered admitted-source applications, recursive copy,
 delete/lifetime and representation certificates. The published H24 companion
-is a typed premise without a concrete P8 inhabitant; H16/P8-SPEC remains VY5.
+has no real-Source P8 inhabitant (the only inhabitant is the degenerate
+model instance, CP78); H16/P8-SPEC remains VY5.
 Constructor coverage is zero. Private rank proposals remain unproved.
 
 ## Unsigned local increment/decrement
@@ -1210,6 +1214,10 @@ resources; CP77 corrects the earlier wording).
 
 ### CP77: master merge and the H24 instance at the P8 model producer
 
+(Kept as history. CP78 supersedes its off-master and scratch-module wording:
+the p8-producer branch merged into master by `2102e024a`, and the instance is
+`PlanGraphAdmission`.)
+
 Merged master `fea090bf9` (V14 and VY5 `Env.mapFree`). VY5 changes implicit
 conversion only, not `Source.locOK`, so the CP75 refusal witnesses still
 hold. The module-map rows moved into `docs/module-map/v07-lowering.d/v07-lowering.md`
@@ -1275,3 +1283,20 @@ check is superseded by this module. The record is degenerate as described in
 CP77: it inhabits the additive `DeclarationGraphAdmission.Producer` and says
 nothing about structs in real accepted Source. The "off master" wording is
 updated in the V07 docstrings.
+
+The three `⟨[]⟩` constants (`GraphAdmissionAssembly.emptyEnv`,
+`P8.PlanWitness.emptyEnv`, `Backend.Aggregates.Controls.emptyEnv`) are left
+separate. Sharing one would make `GraphAdmissionAssembly` import the G07 toy
+witness or a backend control module, so deduplication is deferred.
+`accepted_empty` relates them by `rfl`.
+
+Gates and reviews: Lean MCP diagnostics show no errors on
+`PlanGraphAdmission.lean`, `GraphAdmissionAssembly.lean` and the four V07
+modules whose docstrings changed. `register.sh --check` passes;
+`check-axiom-pins.mjs` reports 0 errors (85 unrecorded changes, none in
+V07); `check-layers.mjs` passes on this head. A read-only finder found no
+false Lean claims and no missing registration or pins. Fixed: stale "typed
+prerequisite, no inhabitant" and "needs an inhabited `P8a.Producer`"
+wording, the CP77 citation, the CP77 history note, the deferred `emptyEnv`
+deduplication, this gates paragraph, and the module-map row now naming
+`Admission`.
