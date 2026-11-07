@@ -1587,3 +1587,23 @@ The refreshed axiom-pin check at `8cf4611566710c83685eeb255e89454d189c0ddf`
 exited 1 with zero policy errors, 172 unrecorded changes and 99 baselined
 changes (`/workspace/h55-module-times-evidence/pins-8cf.log`). This supersedes
 the earlier 11-change observation for that branch state, not a pin fix.
+
+## H109 historical proposed-key collisions
+
+`pin_collision_report.py` groups the checksum-verified historical proposal
+from `33eb46304cdb536e6c8b686223c6d8e456b703ae`, retaining every original
+file-qualified key, source and block hash, target, axiom list and byte span.
+Its 34 suggested-key collisions cover 68 occurrences: 26 suggested keys
+under `tests/roadmap-g19`, three under `tests/h62`, three under
+`Bridge/SolidityBridge`, and two under `Solidity/Backend`. Thirty-one pairs
+have identical observed block hashes; three GenericP10 pairs have differing
+qualified versus short target spelling. All parsed axiom lists agree within
+the pairs. These are parser-relative historical observations, not current pin
+coverage; this report does not independently verify source blobs or spans.
+
+The broad area heuristic collapses distinct original keys and can cross Lake
+package boundaries. Equal text or parsed axioms do not establish Lean name
+resolution, import/namespace context, ownership, multiplicity preservation
+or safe deduplication. Every occurrence remains unresolved; no pin, checker
+inventory or source was changed. Independent read-only finder and skeptic
+reviewed the collision analysis without Lean, server or builds.
