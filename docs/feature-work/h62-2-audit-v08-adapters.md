@@ -788,3 +788,30 @@ this metadata-only accounting; previous diagnostic gate receipts are unchanged.
 Independent read-only finder and skeptic verified the three artifact bindings,
 complete record partition and binder counts with no findings; neither ran Lean
 or a server. Their receipt is retained with the accounting evidence.
+
+### Source rethrow joint premises (2026-11-07)
+
+The new additive SourceRethrowJoint audit consumes the existing allocation and
+heap laws to establish the two expression-rethrow premises on the same returned
+pointer/final heap, then applies the original conditional theorem. An existing
+populated fixture supplies concrete parameters for both pipelines, static flags
+and all sufficient fuel. Zero expression fuel separately discharges the original
+expression-failure premise for any later statement horizon. These link two
+original conditional targets; no new evaluator or body fixture is introduced.
+
+A whole-result negative proof distinguishes statement timeout after allocation
+from allocation timeout before it through heap.next 2 versus 1. Neither result
+implies rollback. Seven other original SourceRethrow targets and all residual
+provenance/fidelity work remain open. This is independent Source component
+execution, not selected compiler code, physical frame correspondence, canonical
+admission/session/lifecycle or the H68 world bridge.
+
+The final serial per-file check passed in 1.379 seconds with one Lean, peak
+sampled aggregate RSS 732,459,008 bytes and no STOP. All five printed declarations
+use only the existing standard axiom set; registration and whitespace checks
+passed. This is not a full-root gate or matched timing acceptance. Source and
+receipt hashes are in source-rethrow-joint-manifest.json; bulk logs remain off Git.
+
+Independent read-only finder and skeptic found no issue in the same-pointer/heap
+premises, existing concrete fixture, complete timeout-state inequality or limited
+acceptance claims. Neither ran Lean or a server; receipt retained with evidence.
