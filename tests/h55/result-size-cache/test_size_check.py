@@ -215,6 +215,53 @@ class SizeCheck(unittest.TestCase):
         p = subprocess.run(["python3", str(SCRIPT), self.base], cwd=self.root, capture_output=True, timeout=3)
         self.assertEqual(p.returncode, 2)
 
+    def test_staged_unusual_path_and_binary_cannot_bypass(self):
+        name = "nested\nline\tdata.py"
+        (self.root / name).write_bytes(b"\0" * 102401)
+        self.git("add", name)
+        status, rows = self.run_gate()
+        self.assertEqual(status, 1)
+        self.assertTrue(any(r.get("scope") == "staged" and r.get("path") == name and
+                            r.get("kind") == "data" and r.get("result") == "fail" for r in rows))
+
+    def test_forced_ignored_file_is_checked_when_staged(self):
+        (self.root / ".gitignore").write_text("ignored.bin\n")
+        (self.root / "ignored.bin").write_bytes(b"x" * 102401)
+        self.git("add", "-f", "ignored.bin")
+        status, rows = self.run_gate()
+        self.assertEqual(status, 1)
+        self.assertTrue(any(r.get("scope") == "staged" and r.get("path") == "ignored.bin" and
+                            r.get("result") == "fail" for r in rows))
+
+    def test_skip_worktree_is_rejected(self):
+        self.git("update-index", "--skip-worktree", "old.json")
+        p = subprocess.run(["python3", str(SCRIPT), self.base], cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("skip-worktree or assume-unchanged", p.stderr)
+
+    def test_non_utf8_leading_dash_path_is_censused(self):
+        name = os.fsdecode(b"-raw-\xff.bin")
+        (self.root / name).write_bytes(b"x" * 102401)
+        self.git("add", "--", name)
+        status, rows = self.run_gate()
+        self.assertEqual(status, 1)
+        self.assertTrue(any(r.get("scope") == "staged" and r.get("path") == name and
+                            r.get("result") == "fail" for r in rows))
+
+    def test_oversized_renamed_content_is_checked(self):
+        (self.root / "old.json").write_bytes(b"x" * 102401)
+        self.git("add", "old.json")
+        self.git("commit", "-qm", "oversized baseline")
+        self.base = self.git("rev-parse", "HEAD").strip()
+        self.git("mv", "old.json", "renamed.json")
+        self.assertIn("R100", self.git("diff", "--cached", "--name-status", "-M"))
+        status, rows = self.run_gate()
+        self.assertEqual(status, 1)
+        self.assertTrue(any(r.get("scope") == "staged" and r.get("path") == "renamed.json" and
+                            r.get("result") == "fail" for r in rows))
+        self.assertTrue(any(r.get("scope") == "staged" and r.get("path") == "old.json" and
+                            r.get("status") == "D" and r.get("prior_bytes") == 102401 for r in rows))
+
 
 if __name__ == "__main__":
     unittest.main()

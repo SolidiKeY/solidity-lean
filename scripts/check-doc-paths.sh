@@ -45,6 +45,16 @@ FIXTURE_SRC='^tests/terra-20261103/gate/test_cases\.py$'
 FIXTURE_REF='^Solidity/(A|MissingFixture)\.lean$'
 CAPTURED='(\.log|validation\.json)$'
 
+# H112: exact source/reference pairs from historical proposals or fixtures.
+# No basename or directory-wide exemption: another source citing one still fails.
+declare -A HISTORICAL=(
+  ["docs/feature-work/h62-1-infer-helpers.md:Solidity/Source/InferHelpers.lean"]="Historical unadopted migration destination; the existing candidate is tests/h62/item1/infer-helpers/Shared.lean."
+  ["docs/feature-work/h62-6-migrate-theory.md:StringApiWitness.original-unproved.lean"]="Historical failed experiment retained off git; explicitly excluded from accepted coverage."
+  ["scripts/h62/item2/audit-abi-world/test_census.py:Backend/A.lean"]="Synthetic duplicate-row input in a negative census fixture, not a production module."
+  ["tests/h62/item4/generic-structuredflow/registration.md:Backend/StructuredFlow/GenericMapped.lean"]="Historical proposed registration destination, never adopted; candidate remains under tests/h62/item4/generic-structuredflow."
+  ["tests/h62/item4/generic-structuredflow/registration.md:Solidity/Backend/StructuredFlow/GenericMapped.lean"]="Historical proposed module move, never adopted; no production module existence is claimed."
+)
+
 lean_files=$(git ls-files '*.lean')
 
 missing=0
@@ -55,6 +65,10 @@ while IFS=$'\t' read -r src ref; do
   [[ "$ref" =~ $EXTERNAL ]] && continue
   [[ "$src" =~ $FIXTURE_SRC && "$ref" =~ $FIXTURE_REF ]] && continue
   [[ "$src" =~ $CAPTURED ]] && continue
+  if [ -n "${HISTORICAL["$src:$ref"]-}" ]; then
+    echo "historical: $src cites \`$ref\`: ${HISTORICAL["$src:$ref"]}"
+    continue
+  fi
 
   dir=$(dirname "$src")
   if [ -f "$dir/$ref" ] || [ -f "Solidity/$ref" ] || [ -f "$ref" ]; then
