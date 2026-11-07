@@ -1,1 +1,3 @@
 | `Backend/InternalFlow/RuntimeFrameP1V2Lift.lean` | Exact canonical V2 observation of actual lifted frozen execution, including arbitrary existing call journals and every frozen outcome; no frame, admission, payload-producing or full P1 adequacy claim. |
+| `Backend/InternalFlow/RuntimeFrameP1V2FramedRevert.lean` | Actual V2 bare-revert execution and exact canonical prefix agreement for certified save/body/restore code under unchanged physical Entry. |
+| `Backend/InternalFlow/RuntimeFrameP1V2FramedRevertControls.lean` | Selected callee-OOB importing consumer with arbitrary journal/buffer, physical Entry, nonempty input stack, wrong-cursor and payload-misclassification refusals. |

@@ -847,3 +847,25 @@ applied: its predeclared fresh Target/Agreement/Controls timing metric measured
 file is retained unchanged. Raw candidate, failed attempts, matched measurements
 and disposition are preserved off Git under /workspace/mrs-runtime-pair; this
 result neither clears that STOP nor replaces historical timing evidence.
+
+### H121 captured bare-revert branch
+
+RuntimeFrameP1V2FramedRevert now derives actual V2 execution of the certified
+save/body/restore image under every original physical Entry field. It retains
+L/frame/caller/base/machine/start, selected code and source failure, and arbitrary
+preexisting V2 journal. The canonical target/source prefix equation is exact.
+The source failure is a branch antecedent, never a new Approved filter. This
+supplies neither full producer packaging nor other-outcome or H68 adequacy.
+
+Its importing controls use the existing Mutation.compileCall callee-OOB fixture,
+including the source write before OOB, real physical coverage and nonempty input
+saved stack. Journal and return buffer are arbitrary. Wrong cursor and nonempty
+payload relabeling are refused. No post-revert machine/tail state is asserted:
+OutV2.revert exposes only the journal and bytes.
+
+Fresh kernel times: general0.727s; final controls0.763s, sampled workload peaks
+754192/744604 KiB. No module in the focused closure exceeded60s. Independent
+read-only finder/skeptic found no defect, without Lean/server/builds. MCP's
+separate diagnostic attempt hit its120s guard with no returned diagnostics;
+it is a retained failure, not a pass or kernel counterexample, and is not retried
+unchanged. Original full gates, fidelity debt and timing STOPs remain open.
