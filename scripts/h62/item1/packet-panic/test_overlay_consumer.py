@@ -20,7 +20,7 @@ class OverlayConsumerTest(unittest.TestCase):
         self.assertTrue(all("-j1" in item["weakLeanArgs"] for item in libs.values()))
         self.assertEqual((PROJECT / "lean-toolchain").read_text().strip(), "leanprover/lean4:v4.35.0")
         with tempfile.TemporaryDirectory() as tmp:
-            result = subprocess.run(["/workspace/solidity-lean/.venv/bin/python", str(SCRIPT), "--project", tmp], capture_output=True, text=True)
+            result = subprocess.run([sys.executable, str(SCRIPT), "--project", tmp], capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("outside the two authorized isolated diagnostic paths", result.stderr)
             self.assertFalse((pathlib.Path(tmp) / ".lake").exists())

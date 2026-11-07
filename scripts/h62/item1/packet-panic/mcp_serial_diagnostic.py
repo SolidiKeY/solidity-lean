@@ -14,8 +14,6 @@ from pathlib import Path
 import signal
 import sys
 import time
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import get_default_environment, stdio_client
 from diagnostic_policy import validated_target
 
 root = Path(__file__).resolve().parents[4]
@@ -31,6 +29,8 @@ allowed_projects = {
 if project not in allowed_projects:
     raise SystemExit("project is outside the two authorized isolated diagnostic paths")
 target = validated_target(project, args.diagnostic) if args.diagnostic else None
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import get_default_environment, stdio_client
 print(f"isolated project: {project}", flush=True)
 if (project / ".lake").exists():
     raise SystemExit("isolated cache already exists; preserve it and use a fresh isolated project")

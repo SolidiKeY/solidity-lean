@@ -209,3 +209,7 @@ The run used the official archive SHA-256 `7289597a44543246c9227b8cae501767e095c
 ## Roadmap owner snapshot inspection
 
 The advertised `codex/solidity-h62-6-20261106/migrate-roadmap` branch pointed to `78a6f8047c48d19a783f2e49bc71830e706b5d93` when inspected. `inspect_roadmap_owner.py` compares committed Git blobs read-only and reports that its `Solidity/Roadmap/Contracts.lean` bytes equal those in the tested Hash overlay, with SHA-256 `96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79` and the same literal transfer guard context at line 1104. The fetched owner handoff records that the empty-axiom guard remains binding. Independent read-only finder and skeptic checked the comparison without Lean. This one-file equality does not establish matching imports, a successful owner build, absence of unpublished work, current remote status after inspection or authorization to alter a statement or guard. The remote-ref observation and generated JSON remain off Git.
+
+## Overlay test interpreter follow-up
+
+`test_overlay_consumer.py` now uses the invoking `sys.executable`; the diagnostic checks the isolated-project and target policy before importing optional MCP dependencies. Tests passed with both the system interpreter and the existing MCP virtualenv. Independent read-only finder and skeptic reviewed the ordering without Lean. Actual diagnostic execution still requires the configured MCP environment; this does not validate the helper or dependency closure.
