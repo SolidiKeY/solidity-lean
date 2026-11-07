@@ -1925,3 +1925,33 @@ H121b actual production, 3209 uncovered rows and strict/full gates remain open.
 Next priority follows the coordinator: inspect original Backfill B finite
 operation-generated transport, reuse completed laws and preserve all aliases
 and per-run region premises. External library-try/Y04/4.35 waits remain distinct.
+
+### C278: Backfill B resolved finite-footprint membership transport
+
+Existing touched_word_iff handles arithmetic touched sets; LayoutAccess already
+supplies checked recursive-path bounds, resolved-family commutation and outside
+queries. Its new resolved_word_membership fills the exact resolved-list gap:
+a checked query belongs to the numeric word image iff it belongs to the original
+resolved accesses. It reuses word_inj only under the existing bounded placements
+and complete per-run RegionsDisjoint over addresses plus the query preimages.
+Repeated accesses and aliases remain; no global hash premise, live-only filter
+or deduplication. resolved_family_outside now reuses this law with its statement
+and all original premises unchanged. Existing shrink/regrow and live/retained
+semantics and controls are untouched; this is no whole-Backfill completion.
+
+The existing nested LayoutControls fixture now proves repeated-address
+membership and distinct sibling nonmembership through the new generic law.
+Both exact guards use the standard trio. First baseline failed on an absent
+cache-fetched OperationFamilies object; repository restore helper materialized
+66 local outputs, zero missing hashes. Raw failure retained. Fresh unchanged
+control checks before/after proof integration passed at 1.82/1.85 s (+1.65%),
+with warm imports and identical limits; this single pair is not a statistically
+stable benchmark. Final guarded extended controls pass 1.83 s, sampled peak RSS
+645230592 bytes, no resource stop. No existing STOP is released.
+
+Independent read-only finder/skeptic found no defect in the complete query
+preimages, aliases, proof reuse or final controls/guards; neither ran Lean/server
+or edited. Actual Source/P8 origin/admission/lifecycle, broader emitted-access
+alignment, remaining original/consolidated obligations, strict pins/docs and
+final gates remain open. Coverage stays 72/3281, 3209 uncovered. External waits
+remain library-try, Y04 physical and separate 4.35 trust/timing disposition.

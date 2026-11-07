@@ -127,6 +127,32 @@ theorem resolved_families_commute {n N L R : Nat} {G : TypeGraph.Schema n}
     (fun p hp => mem_runPreimages (List.mem_append_right a hsy) hp) equal
   exact separate sx hsx sy hsy same
 
+/-- Exact finite footprint transport for checked operation paths. Repeated
+accesses and aliases are retained; only this run's bounded recursive preimages
+are used. No distinction between live and retained aliases is erased. -/
+theorem resolved_word_membership {N L R : Nat} {hash : Pre → Nat}
+    {ty : STy} {base : Solidity.Storage.Loc}
+    (hH : ∀ p, hash p < N) (hL : L ≤ N) (hR : R ≤ N)
+    (fits : ty.Fits L) (placed : Placed L R ty base)
+    (requests : List (List Solidity.Storage.Step × Nat)) (addresses : List Solidity.Storage.Loc)
+    (accepted : resolveMany ty base requests = some addresses)
+    (queryPath : List Solidity.Storage.Step) (queryOffset : Nat) (query : Solidity.Storage.Loc)
+    (queryAccepted : resolve ty base queryPath queryOffset = some query)
+    (regions : RegionsDisjoint N L hash (List.range R) (runPreimages N hash (addresses ++ [query]))) :
+    query.word N hash ∈ addresses.map (Solidity.Storage.Loc.word N hash) ↔ query ∈ addresses := by
+  constructor
+  · intro member
+    obtain ⟨address, access, equal⟩ := List.mem_map.mp member
+    have same := Solidity.Storage.Loc.word_inj hH hL hR regions address query
+      (resolveMany_bounded fits placed requests addresses accepted address access)
+      (resolve_bounded fits placed queryAccepted)
+      (fun p hp => mem_runPreimages (List.mem_append_left [query] access) hp)
+      (fun p hp => mem_runPreimages (List.mem_append_right addresses (List.mem_singleton_self query)) hp)
+      equal
+    exact same ▸ access
+  · intro member
+    exact List.mem_map.mpr ⟨query, member, rfl⟩
+
 /-- A separately resolved outside query remains unchanged by a successful
 family. Its preimages are included in the same run premise automatically. -/
 theorem resolved_family_outside {n N L R : Nat} {G : TypeGraph.Schema n}
@@ -145,13 +171,9 @@ theorem resolved_family_outside {n N L R : Nat} {G : TypeGraph.Schema n}
     result (query.word N hash) = slots (query.word N hash) := by
   apply modifyMany_outside effect _ slots result (query.word N hash) _ performed
   intro member
-  obtain ⟨address, access, equal⟩ := List.mem_map.mp member
-  have same := Solidity.Storage.Loc.word_inj hH hL hR regions address query
-    (resolveMany_bounded fits placed requests addresses accepted address access)
-    (resolve_bounded fits placed queryAccepted)
-    (fun p hp => mem_runPreimages (List.mem_append_left [query] access) hp)
-    (fun p hp => mem_runPreimages (List.mem_append_right addresses (List.mem_singleton_self query)) hp)
-    equal
-  exact outside (same ▸ access)
+  exact outside ((resolved_word_membership hH hL hR fits placed requests addresses accepted
+    queryPath queryOffset query queryAccepted regions).mp member)
 
+/-- info: 'Solidity.Backend.StorageOps.LayoutAccess.resolved_word_membership' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms resolved_word_membership
 end Solidity.Backend.StorageOps.LayoutAccess
