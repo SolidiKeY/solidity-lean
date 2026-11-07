@@ -1,0 +1,115 @@
+{
+  "sourceBuildHead": "0140eb13b2f122d421deb07a19575a6801b21dfc",
+  "repository": "/workspace/solidity-lean",
+  "evidence": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-h81-evidence/h81-evidence.tar.gz",
+    "bytes": 841027,
+    "sha256": "6d6489e8502c26876199d8a5a4fc3f84498782376b51cf5eb4f9800652eb2ea9",
+    "index": {
+      "path": "/workspace/solidity-lean/.lake/native-browser-h81-evidence/files.json",
+      "sha256": "39be447dfdbfdc9593c194b1dc2c0206df6d102dfe0e515ee15f9ff9e492a845"
+    },
+    "evidenceFiles": 453,
+    "archiveMembers": 454,
+    "payloadUncompressedBytes": 11484122,
+    "archiveUncompressedBytes": 11577805
+  },
+  "native": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-h81/native/direct-check",
+    "sha256": "cc51c3f74936e174a36fd9fd1d6aa969db9b112483a1f9e7ec16590ee611bc69"
+  },
+  "wasm": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-h81/direct/direct.wasm",
+    "sha256": "6ae1d6db106102dc38725cb32cb1ba7996c537d1948b156d4acae1cd9139b563"
+  },
+  "cache": {
+    "archive": "/workspace/solidity-lean/.lake/native-browser-h81-lean-cache/build-cache.tar.zst",
+    "sha256": "9adf4969e015316713fccaaa824d75fe2bd81ccc8290b794ee61c699e0d1a941",
+    "bytes": 406120409,
+    "manifest": "/workspace/solidity-lean/.lake/native-browser-h81-lean-cache/manifest.json",
+    "manifestSha256": "00d46cd345a614e38b94a2fb9359f754dddf9f90dfdac8b828877d608e8fa4b7",
+    "modules": 343,
+    "filesVerified": 2401,
+    "passed": true,
+    "delivery": "coordinator-pending",
+    "format": "relative build-cache snapshot; no Lake artifact catalog",
+    "boundary": "Scoped relative build-cache snapshot, not a Lake artifact-cache catalog/delta. Build artifacts only; never an ordinary request input. No transport or coordinator adoption is claimed."
+  },
+  "observations": {
+    "memoryCasesPerBackend": 84,
+    "exactResultParity": true,
+    "provedPerBackend": 64,
+    "refutedPerBackend": 16,
+    "pendingPerBackend": 4,
+    "requiredPositiveCasesPerBackend": 64,
+    "identityDiamondBothCompilerModesBothBackends": true,
+    "native83FunctionRequests": 249,
+    "browser83FunctionRequests": 249,
+    "selectedCModules": 206,
+    "compiledCParityDifferences": 0,
+    "CConstructUnsupportedPerBackend": 13,
+    "browserNegativeVerdicts": "13/14; stack overflow retained"
+  },
+  "stops": {
+    "comparisons": {
+      "nativeAst": {
+        "before": {
+          "functions": 83,
+          "rounds": 3,
+          "requests": 249,
+          "medianMs": 0.8389050000000111,
+          "p95Ms": 4.069481999999994,
+          "startupMs": 7.561709000000008
+        },
+        "current": {
+          "medianMs": 1.0177800000001298,
+          "p95Ms": 4.11926399999993,
+          "startupMs": 6.334632000000056
+        },
+        "ratios": {
+          "medianMs": 1.2132243817835349,
+          "p95Ms": 1.0122330065595415,
+          "startupMs": 0.837724911127901
+        },
+        "stopMetrics": [
+          "medianMs"
+        ]
+      },
+      "browser": {
+        "before": {
+          "functions": 83,
+          "rounds": 3,
+          "requests": 249,
+          "medianMs": 185.92237800000294,
+          "p95Ms": 224.38692400000218,
+          "startupMs": 3428.200938
+        },
+        "current": {
+          "medianMs": 191.49797799999942,
+          "p95Ms": 235.34401600000092,
+          "startupMs": 4531.930874
+        },
+        "ratios": {
+          "medianMs": 1.0299888591140782,
+          "p95Ms": 1.0488312411644747,
+          "startupMs": 1.3219560218205622
+        },
+        "stopMetrics": [
+          "startupMs"
+        ]
+      }
+    },
+    "gate": "STOP retained; no unchanged candidate rerun or threshold relaxation",
+    "boundary": "Three rounds83functions each; median/p95 of per-function medians. Startup is one fresh page/process observation, not machine-cold. H68 payload and new runtime/UI changes confounded."
+  },
+  "limitations": [
+    "Four storage diamond cases pending; all13 C constructs unsupported: plain return obligation.",
+    "Browser invariantCountsToBound stack overflow; native median and browser startup timing STOP.",
+    "Exact A H44 bulk and exact B ticket journal remain undelivered.",
+    "Selected C/object/import/export inventory and observed request parity are not compiler/source preservation or universal native correctness.",
+    "Existing12 intrinsic model proofs are not source transport. No worker Lean changes/new axioms.",
+    "Full original assignment and final gates remain open; RUNTIME_GATE_PASS pending."
+  ],
+  "auditLineage": "Original executed audit archived; label/direct-jump hardening checked against retained exact disassembly, no rewritten execution.",
+  "reviews": "Final independent read-only finder and skeptic PASS with limits; archive denominator clarification fixed (453 payload files plus index,454 archive members). No Lean server or build used."
+}

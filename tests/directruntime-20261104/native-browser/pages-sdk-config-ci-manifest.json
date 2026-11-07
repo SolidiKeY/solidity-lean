@@ -1,0 +1,31 @@
+{
+  "guardedRegression": "OT-PAGES-IDE/H100 explicit pinned Emscripten config must allow real Pages IDE build while local strictguard remains.",
+  "ticket": "OT-PAGES-IDE",
+  "reviewedFixHead": "39d914b72eb31f116fe628282026437346a70deb",
+  "workflowRun": 42300556762,
+  "workflowUrl": "https://github.com/SolidiKeY/solidity-lean/actions/runs/42300556762",
+  "event": "workflow_dispatch",
+  "headBranch": "codex/solidity-directruntime-20261104/native-browser",
+  "ideJob": 128176919315,
+  "ideConclusion": "success",
+  "ideAllReportedStepsSuccessful": 16,
+  "wrapperSha256": "4754da7470728ecde243f63362a621855d188869db0e892568f2f8075734e7c8",
+  "strictBuilderSha256": "64f94d591c7ce15b9e9eea8683e7b91fc07e2c400ec914c0517f7c41909dd33e",
+  "archive": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-pages-sdk-config/ci-42300556762/ci-evidence.tar.gz",
+    "sha256": "c3beaeaff6528b28a7eb996bb47bf73e86c406cfc15c5b1bd6b247010cb22ab6",
+    "bytes": 137633,
+    "members": 6
+  },
+  "jobLog": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-pages-sdk-config/ci-42300556762/ide.log",
+    "sha256": "64a4303be51746426fdb209cc59536ebe839f9d1807235c895f13a339fccdfcf",
+    "characters": 751795
+  },
+  "reviews": {
+    "finder": "Independent live GitHub read PASS:exacthead,ideall16stepssuccess;wholeworkflowstillinprogress,notdeployment/wholeassignment.",
+    "skeptic": "Independent live GitHub read PASS:exacthead,WASM/offlineproof/reopenstepssuccess;overallworkflowprogressandoriginalSTOPsnotresolved."
+  },
+  "boundary": "H100 IDE job acceptance only. Overallworkflowwasstillinprogress at read;nondefaultbranchdoesnotdeploy. No originalruntimeSTOP/semantic/sourceproof or wholeassignmentcompletion.",
+  "localControls": "3realwrapperfixturecontrols+8strictbuilderprovenance tests pass;actualCI includes native/WASMbuild,offlineHTML and fresh offlineproof/reopening success."
+}

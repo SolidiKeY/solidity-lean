@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "scope": "Reviewed master-history source-baseline provenance and lexical census only; full audit/production-frame work unfinished",
+  "files": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/trace.json",
+      "bytes": 141107,
+      "sha256": "5a88d4caf3a445e6aeb3c083688169cc93d9444ede245a82ca7ab6338e1bda6e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/authorized-notes.json",
+      "bytes": 33054,
+      "sha256": "6dd4c55ddb42538f48e8f0f5b433e386c2c054e60604580c48d65619b8844760"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/paths.json",
+      "bytes": 4601,
+      "sha256": "80ae83ca508be8e36b3bb2eed70097b3c517152edca23419ac64de0d94e5adbb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/census-result.json",
+      "bytes": 249,
+      "sha256": "cadc2a92f88e30aeb202dabd367a1721ed98202d136152802aca719e3a99741b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/census/summary.json",
+      "bytes": 50383,
+      "sha256": "0bd10facb1215fccbfc89dbd0c99f7a950694cc0a2f3a0ed3bbeb4a97c9a9e4e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/census/census.json",
+      "bytes": 8189593,
+      "sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/guards-normal.log",
+      "bytes": 102,
+      "sha256": "10d44c2e32d05bdd33c194458deeb57624637dc889393baaea8646644710d211"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/guards-optimized.log",
+      "bytes": 102,
+      "sha256": "41286c523958120106134495816348a2563413f5a01f870251c50f1d978de77f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/trace-tests-normal.log",
+      "bytes": 102,
+      "sha256": "a2ab8ef4e10d2f950488a6615428a51d8601b428a3c76796a131faac1c19087e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/trace-tests-optimized.log",
+      "bytes": 102,
+      "sha256": "88b56a305437d17a8a53a5505169a8746c28031669b9c600c9a352580bb29cde"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/production-frame-agreement-20261106/before-sources.json",
+      "bytes": 374,
+      "sha256": "9366a1c77579299fd6b5d876617a077a093765c045497a6cd5c37b8e25c8838d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/production-frame-agreement-20261106/replica-cleanup.json",
+      "bytes": 4838,
+      "sha256": "d85762778134a5d577d4398b6909871ef1169e5ec9e0b38d42a7fe847d6497a3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/production-frame-agreement-20261106/replica-seal-verification.log",
+      "bytes": 111,
+      "sha256": "518cac977d96e338a95451f8f4f47f90d3542829a8128e379e11ba608786ffe3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/production-frame-agreement-20261106/before-EnvironmentProjection/results.json",
+      "bytes": 388,
+      "sha256": "cc545500016bdcf7885720ae3022c901e8a723c0fcd6b9705facdfd9298077eb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/production-frame-agreement-20261106/before-ConstructorScalarTransport/results.json",
+      "bytes": 395,
+      "sha256": "319c716851e0ca87201536f8edb59c14411c5405112f3347791826b691984787"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/production-frame-agreement-20261106/before-LibraryFrameTransport/results.json",
+      "bytes": 390,
+      "sha256": "163c96780fb423af79fda2e35075f8a814d64c00a81fbdbb892d18ee67f76937"
+    }
+  ]
+}

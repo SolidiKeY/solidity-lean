@@ -9,6 +9,7 @@ from collections import Counter
 from pathlib import Path
 from census import ROOT,BASE
 import verify_census as verification
+from pending_impossibility import PENDING
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -49,6 +50,10 @@ def main():
         elif oldrow["status"]=="no-inputs":row["status"]="historical-empty-input-telescope"
         else:
             row["status"]="private-witness-pending" if row["visibility"]=="private"else "public-witness-pending"
+            if name in PENDING:
+                item=PENDING[name]
+                assert name not in verification.IMPOSSIBLE and name not in verification.WITNESSES
+                row["pending_joint_impossibility"]={"certificate":verification.certificate(proof/"serial",item["module"],item["helper"]),"question":item["question"],"reason":item["reason"],"accepted_H69":False}
             gaps.append({"theorem":oldrow["elaborated"]["name"],"source_name":name,
               "file":row["file"],"line":row["line"],"status":row["status"],
               "documented_producing_lane":row["documented_producing_lane"],"proving_owner":row["proving_owner"]})
@@ -63,7 +68,7 @@ def main():
       "historical_typed_snapshot_sha256":sha(historical),"original_explicit_counts":counts,
       "original_explicit_declarations":rows,"original_generated_candidates_pending":len(generated),
       "current_generated_inventory":"Not refreshed; original986 candidates retained without exclusion.",
-      "remaining_original_records":len(gaps),"changed_frozen_files":sorted(f for f,s in file_status.items()if s!="byte-unchanged"),
+      "remaining_original_records":len(gaps),"pending_impossibility_questions":[dict(theorem=n,question=i["question"],accepted_H69=False)for n,i in PENDING.items()],"changed_frozen_files":sorted(f for f,s in file_status.items()if s!="byte-unchanged"),
       "version_fidelity_boundary":"Current joint proof receipts and historical signature accounting are separate. No equivalence claim for changed files or definitions; original full census remains fail-closed pending Q-FROZEN-REBASE.","full_assignment_acceptance":False}
     out.mkdir(parents=True,exist_ok=True)
     (out/"original-coverage-ledger.json").write_text(json.dumps(payload,indent=2)+"\n")
