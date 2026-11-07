@@ -1,4 +1,5 @@
 import Solidity.Lowering.V08.LibraryPremises
+import Solidity.Lowering.V08.WorldContextComposition
 import Solidity.Lowering.V08.SourceDispatchControls
 
 /-! Original H55 migration candidate with additive production-frame correspondence
@@ -660,4 +661,27 @@ theorem library_frame_rebuild {K : Type} {caller : K}
 #print axioms constructor_frame_rebuild
 #print axioms library_frame_rebuild
 #print axioms EnvironmentProjection.frameForContext_fixed_iff
+end Solidity.Lowering.V08.H55Agreements
+
+namespace Solidity.Lowering.V08.H55Agreements
+open ContractWorld
+
+/-- Guards repeated-call observation collapse: paid and read-only contexts
+must keep their distinct ordered values at actual reset boundaries. -/
+theorem mixed_context_history :
+    transactPrefix LibraryHandlerControls.outer
+      ([Controls.paidCtx, {Controls.paidCtx with mode := .readOnly}].map
+        (WorldContextComposition.frame false true (⟨Controls.self⟩ : Handle false)
+          LibraryHandlerControls.link)) =
+      (LibraryHandlerControls.outer.resetTransient, [.ok (1,7,2), .ok (1,0,2)]) := by
+  obtain ⟨runtime⟩ := LibraryFrameTransport.runtime_of_success
+    (contracts := LibraryHandlerControls.Catalog)
+    LibraryHandlerControls.outer LibraryHandlerControls.handled (⟨Controls.self⟩ : Handle false)
+    LibraryHandlerControls.library Controls.paidCtx LibraryHandlerControls.expected
+    LibraryHandlerControls.delegated_reached
+  exact WorldContextComposition.context_history LibraryHandlerControls.outer false true
+    (⟨Controls.self⟩ : Handle false) LibraryHandlerControls.link runtime
+    [Controls.paidCtx, {Controls.paidCtx with mode := .readOnly}]
+
+#print axioms mixed_context_history
 end Solidity.Lowering.V08.H55Agreements

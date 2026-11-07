@@ -59,6 +59,25 @@ theorem finite_history (w : World contracts) (caller kind : K) (reference : Hand
     | zero => rfl
     | succ n => simp only [Nat.succ_ne_zero,if_false,resetTransient_idem,List.replicate_succ]
 
+/-- Actual context transactions for arbitrary varying contexts. Every result
+keeps its position; the empty list retains the raw world and nonempty lists
+normalize at real boundaries. No frame-execution premise is supplied. -/
+theorem context_history (w : World contracts) (caller kind : K) (reference : Handle caller)
+    (address : Address) (inputs : RuntimeInputs w caller kind reference address)
+    (contexts : List Context) :
+    transactPrefix w (contexts.map (frame caller kind reference address)) =
+      (if contexts.isEmpty then w else w.resetTransient,
+       contexts.map (fun ctx => .ok (ctx.sender.1.1,ctx.value.1,reference.address.1.1))) := by
+  induction contexts generalizing w with
+  | nil => rfl
+  | cons ctx rest ih =>
+    rw [List.map_cons, transact_prefix_cons, transaction w caller kind reference address ctx inputs]
+    rw [ih w.resetTransient (reset_inputs w caller kind reference address inputs)]
+    cases rest with
+    | nil => rfl
+    | cons next rest =>
+      simp only [List.isEmpty_cons, Bool.false_eq_true, if_false, resetTransient_idem, List.map_cons]
+
 theorem later_failure {α : Type} (w : World contracts) (caller kind : K) (reference : Handle caller)
     (address : Address) (ctx : Context) (inputs : RuntimeInputs w caller kind reference address)
     (later : World contracts → Observation → TRes (World contracts × α)) (halt : THalt)
