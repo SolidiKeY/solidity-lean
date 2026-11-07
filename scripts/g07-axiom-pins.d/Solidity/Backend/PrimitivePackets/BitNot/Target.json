@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/PrimitivePackets/BitNot/Target.lean:Solidity.Backend.PrimitivePackets.BitNot.target_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/BitNot/Target.lean:Solidity.Backend.PrimitivePackets.BitNot.value_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -49,7 +49,7 @@ theorem evalE_balance_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_histor
      | split
      | dsimp only
 
-theorem evalE_builtin_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) {Γ : RCtx} {σs : List STy} {τ : STy} (b : Builtin) (args : RArgs E Γ σs) (h : b.callTy E.isBase σs = some τ) :
+theorem evalE_builtin_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) {Γ : RCtx} {σs : List STy} {τ : STy} (b : Builtin) (args : RArgs E Γ σs) (h : b.callTy E.isBase E.mapFree σs = some τ) :
     Effect F.static (evalE G F (fuel+1) (RExpr.builtin (E := E) (Γ := Γ) b args h)) := by
   simp only [Solidity.Source.evalE]
   repeat' first

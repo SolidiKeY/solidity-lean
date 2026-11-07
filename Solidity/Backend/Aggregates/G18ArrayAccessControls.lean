@@ -19,7 +19,7 @@ def live : Source.Storage E.layout E.cellTy :=
   elements.write arrayPath (.int 2 (by decide))
 
 def state (storage : Source.Storage E.layout E.cellTy) : Source.St E :=
-  {ex := ⟨⟨fun a => ⟨⟨(a.val+17) % 2^256,Nat.mod_lt _ (by decide)⟩,3,some 9,storage⟩⟩,
+  {ex := ⟨⟨fun a => ⟨((a.val+17) % 2^256),3,some 9,storage⟩⟩,
       Source.Transient.empty,[.account ⟨99,by decide⟩ (Source.Account.empty _)]⟩,
    heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,
    events := [], logs := [(⟨13,by decide⟩,[1,2])],

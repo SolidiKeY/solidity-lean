@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "W-STORAGE-PROOF: technical STy.locate_bounded failure HashedLayout.lean:376; exact unapplied proof-only proposal and isolated proofs ready. Historical O-STORAGE-001 agreement request withdrawn underH82."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "W-HASH-AFFECTED: exact owner Hash patch passes privatecomponent only; fullowner affected validation/integration remains pending."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "G-ROOT-001: completecandidate21modules,newtypehashcomparison,matchedCLEANwall/RSS/resource disposition,currentH81,1576affectedmodules andrun-lean.sh;timingdelta null;partialKeySort wall+25.4841%/RSS+99.9655% escalated; do not rerun knownSTOP unchanged."
+    },
+    {
+      "lane": "coordinator",
+      "item": "W-GOAL-PAUSE: no pause API exposed; coordinator explicitly will set existing goalPAUSED after finalhead/idle. No goalcreate/reset/complete or automaticcontinuation."
+    }
+  ]
+}

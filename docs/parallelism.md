@@ -9,7 +9,7 @@ The tools: `node scripts/import-fanout.mjs` prints each module's rebuild
 fan-out (how many modules import it transitively) and the longest import
 chain, `--path A B` one import path from `A` to `B`;
 `node scripts/check-layers.mjs` fails when a core module reaches the
-elaborator.
+elaborator or introduces an unapproved core-to-non-core import boundary.
 
 ## P1. The core apart from the elaborator
 
@@ -43,11 +43,36 @@ elaborator.
 `Tools.SolCases` is an external-source printer and is explicitly included in
 the forbidden frontend set checked from the core.
 
-The list is closed under imports: no core module imports a module outside
-it.  The elaborator is `Syntax/{Elab,Quote,Splice}` and
-`Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`.  Source
-extraction for the core's composed models stays above it
-(`Frontend/WorldImport`, `Examples/Tactics/TransientStorage.lean`).
+The list is meant to be closed under imports. The architecture audit
+(`cloud/audit-20261106/architecture`, fa5acebd43214bbe642258d862f903bcf08d3f89)
+found 95 direct core-to-non-core boundary edges. Those exact edges are pinned in
+`scripts/core-import-baseline.json`, SHA256
+`d202b21ddde800b40237b9c4a95482c17b8d5ea8d2c78c1b42e4bad7344ac80b`
+(also recorded in `scripts/core-import-baseline.sha256`). Reproduce the audited
+bytes with `python3 -B scripts/h62/item5/statement-graph/audit_core_baseline.py`.
+They are existing debt, not proof that the core is already closed.
+
+`scripts/check-layers.mjs` now checks the Solidity-package import closure as well
+as the existing elaborator/parser restrictions. It follows paths through core
+modules and rejects each new boundary to a non-core module, printing a witness
+path. Paths through a pinned boundary are grandfathered; the downstream modules
+are not promoted into CORE. This is a boundary-edge policy, not a baseline of
+all transitive module pairs. Standard Lean library imports remain outside this
+package-layer graph. The scanner handles comments, indented imports, and multiple
+modules on one import line; unsupported quoted or multiline import syntax fails
+closed. Existing elaborator/parser bans still apply even to an allowed edge.
+
+The active subset is `scripts/core-import-allowlist.json`. Remove obsolete entries
+when fixing debt. It can only shrink: additions outside the audited set, duplicate
+edges, re-adding a previously removed edge, and delete/recreate histories are
+rejected. Validation checks committed change history and the working tree;
+shallow histories, grafts and custom history overrides are refused. The immutable
+95-edge snapshot and its checksum must not be enlarged to silence a new failure.
+
+The elaborator is `Syntax/{Elab,Quote,Splice}` and
+`Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`. Source extraction for
+the core's composed models stays above it (`Frontend/WorldImport`,
+`Examples/Tactics/TransientStorage.lean`).
 
 **A new module** that only states or proves (no `sol{}`, `dl!{}`, `#wp`,
 `#guard_msgs` of a printer) belongs in the core if what it imports is: add
@@ -141,7 +166,7 @@ file per new arm (`Calculus/Sound/README.md`; the template is in
    (`Calculus/RuleShapes.lean`) and `PrintedRules.printedOrigins`
    (`Calculus/PrintedRules.lean`); `#check_constructor_table` fails on a
    missing row.  A taclet that reads storage or memory also gets its row in
-   `SortCheck/Annotations.lean`, checked by `lake exe solkeycheck`.
+   `SortCheck/Annotations.lean` (`solidity-lean rules check` compares it with SolKey's rules on demand; no gate runs it since H89).
    `taclets_partitioned`/`printed_rules_partitioned` and the claimed and
    unclaimed counts move with the rows.
 

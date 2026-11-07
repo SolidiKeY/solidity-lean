@@ -1,0 +1,21 @@
+{
+ "Solidity/Backend/MemoryOps/SourceGuardedUintDelete.lean:Solidity.Backend.MemoryOps.source_guarded_uint_bind_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceGuardedUintDelete.lean:Solidity.Backend.MemoryOps.source_guarded_uint_bind_delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceGuardedUintDelete.lean:Solidity.Backend.MemoryOps.source_guarded_uint_delete_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceGuardedUintDelete.lean:Solidity.Backend.MemoryOps.source_uint_entry_tail": [
+  "Quot.sound",
+  "propext"
+ ]
+}

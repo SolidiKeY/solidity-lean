@@ -1,0 +1,11 @@
+--- a/Solidity/Yul/ReservedNames.lean
++++ b/Solidity/Yul/ReservedNames.lean
+@@ -40,7 +40,7 @@
+     "loadimmutable"
+   ]
+ 
+-theorem reservedNames_count : reservedNames.length = 157 := rfl
++theorem reservedNames_count : reservedNames.length = 157 := by decide +kernel
+ 
+ theorem slotnum_not_reserved : "slotnum" ∉ reservedNames := by decide
+ 

@@ -71,9 +71,14 @@ history is in git.
 | [feature-work/primitive-return-projection.md](feature-work/primitive-return-projection.md) | Primitive return-byte validation before binding/discard, checked controls and the remaining O1 operational boundary. |
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
+| [feature-work/abstraction-pilot.md](feature-work/abstraction-pilot.md) | Anti-unification deduplication pilot: helper lemmas, measured line/token/check-time savings vs au.py predictions, redesign proposals and rollout shape. |
 | [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
 | [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
 | [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
+| [feature-work/h28-mutation-testing.md](feature-work/h28-mutation-testing.md) | H28 semantic rule mutation testing: whole-family census, toStep proof oracle, checked kill witnesses and score. |
+| [feature-work/source-s04-funds.md](feature-work/source-s04-funds.md) | S04.04: actual request-boundary sender-funds validation, invalid-drop laws, measured current Source release and remaining H19 boundary. |
+| [feature-work/vy5-composition.md](feature-work/vy5-composition.md) | VY5: scoped composition proofs, actual Source catch binding and explicit remaining full-lane obligations. |
 
 **The calculus and its proofs**
 
@@ -88,6 +93,7 @@ history is in git.
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
 | [lifetime.md](lifetime.md) | Transaction traces from the constructor, whole-contract safety, invariant induction. |
 | [automation.md](automation.md) | The deciding closer: M0–M8, the decision theorem's features and gaps, M7-next. |
+| [feature-work/m7-next.md](feature-work/m7-next.md) | M7-next lane handoff: the route-refusal `Fml.Residue`, `DecisionTheorem'` (not a completeness result), fixtures, reviews and gates. |
 | [complete-verification.md](complete-verification.md) | The exact-reduction pipeline, its stages, tools and limits. |
 | [assurance.md](assurance.md) | Trust gates, the memory compiler's invariants, remaining assurance work. |
 | [rule-repair.md](rule-repair.md) | How to repair a broken rule: semantics first, rejection gates, soundness. |
@@ -171,3 +177,16 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
 
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
+V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
+- [Core EVM revert/return data (machine V2)](feature-work/evm-machine-v2.md): versioned `OutV2`/`MachineV2` with revert/return data, return buffer and CALL input bytes; migration to the frozen machine.
+- [Canonical P1 languages V2](feature-work/p1-lang-v2.md): `P1LangV2` with revert data, call events and frame classes over the V2 machine; `p1_frame_bridge` for a guarded revert-with-data family.
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+- [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
+- V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+| Assembly lane | Document |
+|---|---|
+| VY5 raw-local/physical, indexed-write/emit composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |
+- [P8a SourceSpec and failure resources](feature-work/p8-source-spec.md): actual Source execution anchor, unchanged failure-resource transfer, and the proved bare-horizon obstruction; full producer remains open.
+
+H16: [typed failure interface, current-master measurements and deferred runtime migration](feature-work/source-failure-execution.md).

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsLate.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.resolved_write_late_bounds_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

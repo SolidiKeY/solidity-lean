@@ -126,8 +126,8 @@ theorem retained_machine (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
   exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
 
 theorem complete_populated_vector (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
-    ((afterClear pipeline bytes).ex.world.accounts sender).balance.val = 93 ∧
-    ((afterClear pipeline bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((afterClear pipeline bytes).ex.world.accounts sender).balance = 93 ∧
+    ((afterClear pipeline bytes).ex.world.accounts self).balance = 7 ∧
     ((afterClear pipeline bytes).ex.world.accounts self).code = some 0 ∧
     ((afterClear pipeline bytes).ex.world.accounts self).nonce = 1 ∧
     ((afterClear pipeline bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧

@@ -1,0 +1,7 @@
+{
+ "Solidity/Yul/Compilation/CaseCompletion.lean:Solidity.Yul.Compilation.CaseCompletion.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
