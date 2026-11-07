@@ -137,6 +137,9 @@ theorem loop_reconstruct {C : Contract} {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P
     (compiled : Compiler.Compilation b F P) (path : compiled.isMemoryLoops = true) :
     Compiler.Compilation.memoryLoops (compiled.memoryLoopsResult path) = compiled := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -153,6 +156,9 @@ theorem loop_public_diamond {C : Contract} {b : Nat} {Γ Δ : Ctx} {F : Frag Γ}
     ∃ o m', P.run σ = .ok o ∧ run compiled.code m = .ok m' 0 ∧ m'.stack = m.stack ∧
       compiled.Rep L frame base σ m o.st m' ∧ Spec.sat o.st φ := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -169,6 +175,9 @@ theorem scoped_loop_reconstruct {C : Contract} {b : Nat} {Γ Δ : Ctx} {F : Frag
     (compiled : Compiler.Compilation b F P) (path : compiled.isMemoryLoopScopes = true) :
     Compiler.Compilation.memoryLoopScopes (compiled.memoryLoopScopesResult path) = compiled := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
@@ -185,6 +194,9 @@ theorem scoped_loop_public_diamond {C : Contract} {b : Nat} {Γ Δ : Ctx} {F : F
     ∃ o m', P.run σ = .ok o ∧ run compiled.code m = .ok m' 0 ∧ m'.stack = m.stack ∧
       compiled.Rep L frame base σ m o.st m' ∧ Spec.sat o.st φ := by
   cases compiled with
+  | memoryCopy _ => cases path
+  | fixedMemory _ => cases path
+  | copyConstruction _ => cases path
   | core _ _ => cases path
   | memory _ => cases path
   | referenceArrays _ => cases path
