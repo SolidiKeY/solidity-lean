@@ -30,7 +30,7 @@ def body : Source.RBody E :=
     (.stmt (.expr (.assign (.state capturedDecl rfl rfl) (.local .here))) .nil)),[]⟩
 def program : Source.Program E :=
   {body:=fun _ => none,consts:=fun _ => none,
-    inits:=fun c => if c="Cell" then [⟨savedDecl,uint,rfl,.conv (.const (Source.Q.ofInt 7)) (.inl (Source.SemanticsExamples.lit_ok _ 7 (by decide +kernel)))⟩] else [],
+    inits:=fun c => if c="Cell" then [⟨savedDecl,uint,rfl,.conv (.const (Source.Q.ofInt 7)) (.inl (Source.SemanticsExamples.lit_ok _ _ 7 (by decide +kernel)))⟩] else [],
     ctor:=fun c => if c="Cell" then some body else none,
     ctorLocals:=fun _ => [uint],baseArgs:=fun _ => [],contracts:=["Cell"]}
 

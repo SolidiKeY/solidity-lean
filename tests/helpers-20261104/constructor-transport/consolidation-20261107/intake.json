@@ -1,0 +1,43 @@
+{
+  "retired_head": "0d92f861b42ecc8f81c1ff303de288cbd532fbc5",
+  "published_head": "a0c09d3f709f511df817ab0b83623f09c33e64c7",
+  "publication_delta": "One artifact-manifest.json-only successor commit",
+  "merge_commit": "3df80159e29a10ee82782a624df154e74988719b",
+  "integration_base": "65e69b6426a9a4fc3fb5541f41726a4bfefda5d0",
+  "heads_ancestors_of_survivor": true,
+  "bundle_manifest_expected_sha256": "58bdca1349302b62e56326b2f55e5bcf199028087a1676735fb62bb3274b9e2d",
+  "bundle_manifest_matches": true,
+  "raw_historical_bundle": "UNVERIFIABLE: not copied; authenticated Git objects used for intake. No regenerated archive claimed identical.",
+  "metadata_package": "/workspace/h82-handoffs/h82b-20261106T180909Z/manifest.json",
+  "verified_retirement_files": [
+    {
+      "file": "handoff.json",
+      "sha256": "5c55d8723736999f47aa1acf1e978c120acbc6f220738dc0ae82af589f6e4af8",
+      "bytes": 1840
+    },
+    {
+      "file": "original-assignment.txt",
+      "sha256": "e9f68224810c85e2039c742c80792df08c796765a0407b9059d2c13a28367062",
+      "bytes": 13147
+    },
+    {
+      "file": "reviews.md",
+      "sha256": "97d1b532e0ceee868839d9beecfbb0209dd8c1696a5e0c84362dfb2657c7a952",
+      "bytes": 421
+    },
+    {
+      "file": "scope-and-queue.md",
+      "sha256": "2fe4f0217e8c0797cb56162fb34e01855526ccb51a1ab5ac4fcf20e51479629a",
+      "bytes": 2618
+    }
+  ],
+  "retirement_checksum_entries_verified": 4,
+  "unaltered_helper_modules": [
+    "Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean",
+    "Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean",
+    "Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Target.lean"
+  ],
+  "proof_only_fix": "Source.lean program initializer: add missing inferred M argument to lit_ok proof witness, no executable initializer change.",
+  "pending_relation_decision": "CTOR-NAT-1: MachineRel.balance still .balance.val, current Nat has no val. Existing relation body unchanged pending owner decision.",
+  "frozen_source_files": "No diff against adopted master."
+}

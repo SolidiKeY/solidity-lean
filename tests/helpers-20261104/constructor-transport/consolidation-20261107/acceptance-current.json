@@ -1,0 +1,205 @@
+{
+  "integration_base": "65e69b6426a9a4fc3fb5541f41726a4bfefda5d0",
+  "current_kernel_pass": 16,
+  "pending": 12,
+  "exact_registered_pins": 28,
+  "compiler_controls": "Both legacy and viaIR pinned-solc controls pass; no EVM execution claim.",
+  "rows": [
+    {
+      "module": "Source",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.initialization_actual",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Source",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_actual",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Source",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_saved",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Source",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_captured",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Source",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_retained",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Source",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_static",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Source",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_timeout",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.frame_inputs",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.entry_actual",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.target_body_actual",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.settlement_actual",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.finish_actual",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.creation_actual",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.target_saved",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.target_captured",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Target",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.target_static",
+      "current_kernel_status": "pass",
+      "evidence": "independent/axiom-comparison.json",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Producer",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.initial_related",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Producer",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.reached_related",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Producer",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.concrete_ssNew_body",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Producer",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.complete_transport",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Producer",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.creation_from_inputs",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Controls",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.wrong_order_actual",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Controls",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.wrong_order_counterexample",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Controls",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.boundary_zero",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Controls",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.boundary_max",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Controls",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.boundary_seven",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Controls",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.nondefault_actual",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    },
+    {
+      "module": "Controls",
+      "theorem": "Solidity.Lowering.V08.HelperPackets.ConstructorTransport.nondefault_capture",
+      "current_kernel_status": "pending",
+      "evidence": "attempt2/packet.log: Producer.lean:25 Invalid field val, Nat.val absent",
+      "historical_pin": "tests/helpers-20261104/constructor-transport/AxiomPins.lean"
+    }
+  ]
+}

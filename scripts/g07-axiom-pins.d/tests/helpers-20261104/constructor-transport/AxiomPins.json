@@ -1,0 +1,134 @@
+{
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.boundary_max": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.boundary_seven": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.boundary_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.complete_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.concrete_ssNew_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.creation_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.creation_from_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.entry_actual": [
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.finish_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.frame_inputs": [],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.initial_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.initialization_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.nondefault_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.nondefault_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.reached_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.settlement_actual": [
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_captured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_saved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.source_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.target_body_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.target_captured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.target_saved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.target_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.wrong_order_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/AxiomPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.wrong_order_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

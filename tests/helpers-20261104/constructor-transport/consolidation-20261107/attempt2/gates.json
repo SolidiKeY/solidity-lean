@@ -1,0 +1,32 @@
+[
+  {
+    "name": "packet",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml build ConstructorTransportAudit",
+    "status": "fail",
+    "exit": 1,
+    "seconds": 5.764,
+    "minimum_effective_available_bytes": 15305482240,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/attempt2/packet.log"
+  },
+  {
+    "name": "per-file",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Source.lean; lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Target.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Target.lean; lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean; lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean",
+    "status": "fail",
+    "exit": 1,
+    "seconds": 5.263,
+    "minimum_effective_available_bytes": 15332106240,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/attempt2/per-file.log"
+  },
+  {
+    "name": "axiom-pins",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/AxiomPins.setup.json tests/helpers-20261104/constructor-transport/AxiomPins.lean",
+    "status": "fail",
+    "exit": 1,
+    "seconds": 1.002,
+    "minimum_effective_available_bytes": 15505403904,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/attempt2/axiom-pins.log"
+  }
+]

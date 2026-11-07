@@ -1,0 +1,2 @@
+COMMAND: node scripts/check-orphans.mjs
+6670 reachable, 0 orphaned, 0 not allowed

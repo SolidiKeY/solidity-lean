@@ -820,6 +820,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/Source.lean` | Explicit saved7 initialization and actual resolved constructor execution with complete reached Source machines, static refusal and timeout. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/Target.lean` | Intrinsic saved/captured constructor execution and full create outcome with actual entry, settlement and precise reached world. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean` | Concrete ssNew_body from actual executions, independent machine relation and conditional CreationPremises consumer; no fabricated admission instance. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean` | Wrong-order counterexample, admitted Word boundaries and same-case explicit nondefault initialization controls. |
 | `Backend/InternalFlow/RuntimeFrameP1LangV2.lean` | Canonical P1 `Lang Event Outcome` pair, version 2, over the V2 machine: revert data, call events from the journal, frame classes. |
 | `Backend/InternalFlow/RuntimeFrameP1BridgeV2.lean` | `p1_frame_bridge` (V2) for the guarded revert-with-data family: actual source/target runs, full `PassCorrect`, per-input `Local`. |
 | `Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean` | Admitted witnesses of both classes, observed payload, refused mismatch, other-payload disagreement, call events, satisfiability. |

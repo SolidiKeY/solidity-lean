@@ -1,0 +1,4 @@
+| `Lowering/V08/HelperPackets/ConstructorTransport/Source.lean` | Explicit saved7 initialization and actual resolved constructor execution with complete reached Source machines, static refusal and timeout. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/Target.lean` | Intrinsic saved/captured constructor execution and full create outcome with actual entry, settlement and precise reached world. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean` | Concrete ssNew_body from actual executions, independent machine relation and conditional CreationPremises consumer; no fabricated admission instance. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean` | Wrong-order counterexample, admitted Word boundaries and same-case explicit nondefault initialization controls. |
