@@ -1251,3 +1251,28 @@ automated gates, not replaced by these proofs. H16 library try support, separate
 mapping-bearing H24, Y04 physical,4.35 trust/timing waits and all STOPs remain.
 Original/consolidated coverage, child/declaration/statement correspondence,
 accepted-artifact binding and full final gates remain open.
+
+### C251 — remaining supported literal values
+
+Adopted published7de6f66ad29488d70e3c31c6b2a4798b72a0a209, preserving in-flight
+work. SourceAstLiteralCorrespondence proves supported ordinary/Unicode/hex
+string constructor and byte preservation, canonical integer value under all
+three existing no-unit field encodings, both Boolean values and exact literal
+expression wrapping. All four measured guards use propext+Quot.sound. Input
+field/decoder premises describe existing reader behavior; they are not Source
+feasibility assumptions, independent compiler fidelity or provenance evidence.
+No reader, Source file, existing statement/interface/premise/budget/exclusion,
+axiom declaration, trust policy or resource limit was changed.
+
+Existing expression controls keep all37actual expressions per pipeline and
+all previous boundary checks. Generic controls add string-kind byte distinctions,
+both Booleans, each no-unit spelling, malformed Boolean and noncanonical-number
+refusals. No per-case Source fixture copies or new phase folders. Initial and
+guarded focused checks pass. Finder and skeptic reviewed code read-only without
+Lean/server/build and found no findings. The literal laws do not supply actual
+Source origin/H24/lifecycle/S03-PANIC41 or artifact binding; those H121b duties
+remain local and open. The C246 elaboration probe remains historical manual
+failure evidence outside automated gates. Protected inference/typing/elaboration/
+resolved files have no published changes releasing its hold. H16 exact try
+support, separate mapping-bearing H24, Y04 physical and4.35 trust/timing waits,
+all prior STOPs, inherited proofs/coverage and full final gates remain open.
