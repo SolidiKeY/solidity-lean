@@ -2058,3 +2058,29 @@ unchanged 300-second bound. That failed attempt remains retained. Selected
 failed-clause/source correspondence, span publication, full dependent gates
 and all parity judgments remain unfinished. Detailed evidence stays off the
 code branch under H145.
+
+
+### Isolated compiler-equation control repair
+
+The control fixture now proves the existing parser, named-context lookup,
+unsigned-sort distinction, literal range, membership and missing old-state
+equations explicitly. All 39 expressions and three contexts, their order,
+expected observations and genuine wrong-literal rejection are unchanged.
+Helpers are generic over the intrinsic contract/context where applicable.
+The numeric patterns use the actual Nat-to-Int coercion emitted by the source
+compiler; lookup equations apply before dependent context names are rewritten.
+
+A second simplification pass had incorrectly rejected unchanged goals before
+the existing reflexivity fallback. It now leaves those goals for mandatory
+closure. Helper and generated declarations are checked synchronously with
+`debug.skipKernelTC=false`; closedness, the 100000 kernel ceiling and
+standard-only axiom audit remain enforced. No shared compiler, producer or
+trust-inventory declaration changes in this increment.
+
+Finder and skeptic found no soundness or budget issue; their wording finding
+was repaired to distinguish a missing old storage snapshot binding from a
+memory heap. Changed-family smoke checks pass; the complete matrix must be
+regenerated at the committed head, retaining the original 96/21 failed run.
+Compiler-output equations do not establish selected-clause failure at a
+retained candidate, source-span attribution, rendered parity or EVM behavior.
+Publication remains fail-closed and all original parity/final gates remain.

@@ -10,6 +10,9 @@ retained old compiled artifact and the new total artifact. Quoted formulas are
 operational observations, not kernel certificates or source-span evidence.
 -/
 open Solidity Lean
+-- Helper declarations, as well as generated case certificates, are checked synchronously.
+set_option debug.skipKernelTC false
+set_option Elab.async false
 namespace TypedSpecCompilerProbe
 
 def C : Contract := { vars := [("count", .uint), ("items", .ref (.array (.prim .uint)))] }
@@ -18,6 +21,249 @@ def ctx : SpecCtx C := {
  locals := [("from", .uint), ("flag", .bool)], refs := [("memory", .mem (.array (.prim .uint)))] }
 def names : NCtx := [(.ofName "from", .val .uint), (.ofName "flag", .val .bool),
  (.ofName "result", .val .uint), (.ofName "memory", .mem (.array (.prim .uint)))]
+/-- Guards the existing structural string-parser equations at each byte position. -/
+theorem flagTakeWhileV1 :
+    Substring.takeWhileAux "flag" ⟨4⟩ (!·.isDigit) ⟨0⟩ = ⟨4⟩ := by
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_neg (by decide)]
+  rfl
+
+theorem flagEndV1 : "flag".endPos = ⟨4⟩ := rfl
+
+/-- Guards exact source-name resolution, without native proof reduction. -/
+theorem flagNameV1 : Var.ofName "flag" = Var.user "flag" := by
+  simp only [Var.ofName, FreshNames.parse, instFreshNames, FreshNames.ofPrefixes,
+    String.takeWhile, Substring.takeWhile, String.toSubstring, flagEndV1, flagTakeWhileV1]
+  rfl
+
+/-- Guards the first, distinct local name through the unchanged parser. -/
+theorem fromTakeWhileV1 :
+    Substring.takeWhileAux "from" ⟨4⟩ (!·.isDigit) ⟨0⟩ = ⟨4⟩ := by
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_neg (by decide)]
+  rfl
+
+theorem fromEndV1 : "from".endPos = ⟨4⟩ := rfl
+
+theorem fromNameV1 : Var.ofName "from" = Var.user "from" := by
+  simp only [Var.ofName, FreshNames.parse, instFreshNames, FreshNames.ofPrefixes,
+    String.takeWhile, Substring.takeWhile, String.toSubstring, fromEndV1, fromTakeWhileV1]
+  rfl
+
+/-- Guards the real four-entry named context's Boolean local lookup. -/
+theorem flagReadV1 (D : Contract) :
+    NRead.bool (C := D) (NTerm.pv (Var.ofName "flag")) names =
+      .ok (.eq (.pvV (.there .here)) (.app0 (.lit (p := .bool) true))) := by
+  simp only [NRead.bool, NRead.eq, NTm.resolvePairV, NTm.resolveV,
+    NTerm.pv, NTerm.bool, NTerm.lit, NTm.pvV, NTm.app0, NTm.syn,
+    NTm.check, NTm.widen, NCtx.findAny,
+    names, flagNameV1, fromNameV1, Var.user.injEq, String.reduceEq, if_true, if_false,
+    Bool.false_eq_true, NTm.VSort.srt,
+    pure_bind, Option.isSome, Option.isNone, Bool.false_and]
+  rfl
+
+/-- Guards a Boolean local after one distinct unsigned local, including dependent indices. -/
+theorem boolSecondReadV1 (D : Contract) (x y : Var) (tail : NCtx) (hne : y ≠ x) :
+    NRead.bool (C := D) (NTerm.pv x) ((y, .val .uint) :: (x, .val .bool) :: tail) =
+      .ok (.eq (.pvV (.there .here)) (.app0 (.lit (p := .bool) true))) := by
+  simp only [NRead.bool, NRead.eq, NTm.resolvePairV, NTm.resolveV,
+    NTerm.pv, NTerm.bool, NTerm.lit, NTm.pvV, NTm.app0, NTm.syn,
+    NTm.check, NTm.widen, NCtx.findAny, if_neg hne, if_true, if_false,
+    Bool.false_eq_true, NTm.VSort.srt, pure_bind, Option.isSome, Option.isNone, Bool.false_and]
+  rfl
+
+/-- Guards the exact malformed-field refusal through existing compiler equations. -/
+theorem malformedReadV1 (D : Contract) (context : SpecCtx D) :
+    SpecExpr.read D context (.field (.num 1) "x") =
+      .error "not a storage path: a state variable, `e.f` or `e[k]`" := by
+  unfold SpecExpr.read
+  split
+  · rename_i e h
+    simp only [SpecExpr.field.injEq, String.reduceEq, and_false] at h
+  · simp only [SpecExpr.memPath, SpecExpr.path]
+    rfl
+
+/-- Guards the existing non-reserved binder decision, not a new admission rule. -/
+theorem xNotReservedV1 : reservedSpecName "x" = false := by decide
+
+theorem xPrefixV1 : "x".startsWith "result_" = false := by decide
+
+/-- Guards the one-byte binder through the actual default source-name parser. -/
+theorem xTakeWhileV1 :
+    Substring.takeWhileAux "x" ⟨1⟩ (!·.isDigit) ⟨0⟩ = ⟨1⟩ := by
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_neg (by decide)]
+  rfl
+
+theorem xEndV1 : "x".endPos = ⟨1⟩ := rfl
+
+theorem xNameV1 : Var.ofName "x" = Var.user "x" := by
+  simp only [Var.ofName, FreshNames.parse, instFreshNames, FreshNames.ofPrefixes,
+    String.takeWhile, Substring.takeWhile, String.toSubstring, xEndV1, xTakeWhileV1]
+  rfl
+
+/-- Guards dependent lookup at the freshly introduced Boolean binder. -/
+theorem boolHeadReadV1 (D : Contract) (x : Var) (tail : NCtx) :
+    NRead.bool (C := D) (NTerm.pv x) ((x, .val .bool) :: tail) =
+      .ok (.eq (.pvV .here) (.app0 (.lit (p := .bool) true))) := by
+  simp only [NRead.bool, NRead.eq, NTm.resolvePairV, NTm.resolveV,
+    NTerm.pv, NTerm.bool, NTerm.lit, NTm.pvV, NTm.app0, NTm.syn,
+    NTm.check, NTm.widen, NCtx.findAny, if_true, if_false,
+    Bool.false_eq_true, NTm.VSort.srt, pure_bind, Option.isSome, Option.isNone, Bool.false_and]
+  rfl
+
+/-- Guards the concrete value-sort distinction used by source equality compilation. -/
+theorem uintNotBoolV1 : NTm.VSort.prim .uint ≠ NTm.VSort.prim .bool := by
+  intro h
+  cases h
+
+/-- Guards source return-name parsing at all six actual byte positions. -/
+theorem resultTakeWhileV1 :
+    Substring.takeWhileAux "result" ⟨6⟩ (!·.isDigit) ⟨0⟩ = ⟨6⟩ := by
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_neg (by decide)]
+  rfl
+
+theorem resultEndV1 : "result".endPos = ⟨6⟩ := rfl
+
+theorem resultNameV1 : Var.ofName "result" = Var.user "result" := by
+  simp only [Var.ofName, FreshNames.parse, instFreshNames, FreshNames.ofPrefixes,
+    String.takeWhile, Substring.takeWhile, String.toSubstring, resultEndV1, resultTakeWhileV1]
+  rfl
+
+/-- Guards exact first/third local indices in the original four-entry context. -/
+theorem fromResultReadV1 (D : Contract) :
+    NRead.eq (C := D) (NTerm.pv (Var.ofName "from")) (NTerm.pv resultVar) names =
+      .ok (.eq (.pvV .here) (.pvV (.there (.there .here)))) := by
+  simp only [NRead.eq, NTm.resolvePairV, NTm.resolveV, NTerm.pv, NTm.pvV,
+    NTm.check, NTm.widen, NCtx.findAny, names, resultVar,
+    fromNameV1, flagNameV1, resultNameV1, Var.user.injEq, String.reduceEq,
+    if_true, if_false, Bool.false_eq_true, NTm.VSort.srt,
+    pure_bind, Option.isSome, Option.isNone, Bool.false_and]
+  rfl
+
+/-- Guards typed source equality under a new unsigned binder without changing its context. -/
+theorem uintHeadEqReadV1 (D : Contract) (x : Var) (tail : NCtx) :
+    NRead.eq (C := D) (NTerm.pv x) (NTerm.pv x) ((x, .val .uint) :: tail) =
+      .ok (.eq (.pvV .here) (.pvV .here)) := by
+  simp only [NRead.eq, NTm.resolvePairV, NTm.resolveV, NTerm.pv, NTm.pvV,
+    NTm.check, NTm.widen, NCtx.findAny, if_true, if_false,
+    Bool.false_eq_true, NTm.VSort.srt, pure_bind, Option.isSome, Option.isNone, Bool.false_and]
+  rfl
+
+/-- Guards the original numeric admission facts, without changing the bounds. -/
+theorem zeroInRangeV1 : PrimTy.uint.inRange ((0 : Nat) : Int) = true := by decide
+theorem oneInRangeV1 : PrimTy.uint.inRange ((1 : Nat) : Int) = true := by decide
+
+theorem numZeroCheckV1 (D : Contract) (scope : NCtx) :
+    NTm.check (C := D) (NTerm.num ((0 : Nat) : Int)) (.val .uint) scope =
+      .ok (.app0 (.lit (PrimTy.ofLit .uint 0 zeroInRangeV1))) := by
+  simp only [NTm.check, NTerm.num, numLit, zeroInRangeV1, dif_pos]
+  rfl
+
+theorem numOneCheckV1 (D : Contract) (scope : NCtx) :
+    NTm.check (C := D) (NTerm.num ((1 : Nat) : Int)) (.val .uint) scope =
+      .ok (.app0 (.lit (PrimTy.ofLit .uint 1 oneInRangeV1))) := by
+  simp only [NTm.check, NTerm.num, numLit, oneInRangeV1, dif_pos]
+  rfl
+
+/-- Guards the actual filtered predicate's typed binder/literal equality. -/
+theorem uintHeadEqOneReadV1 (D : Contract) (x : Var) (tail : NCtx) :
+    NRead.eq (C := D) (NTerm.pv x) (NTerm.num ((1 : Nat) : Int)) ((x, .val .uint) :: tail) =
+      .ok (.eq (.pvV .here) (.app0 (.lit (PrimTy.ofLit .uint 1 oneInRangeV1)))) := by
+  simp only [NRead.eq, NTm.resolvePairV, NTm.resolveV, NTerm.pv, NTm.pvV,
+    NTerm.num, NTm.check, NTm.widen, NCtx.findAny, numLit, oneInRangeV1,
+    if_true, if_false, Bool.false_eq_true, NTm.VSort.srt,
+    pure_bind, Option.isSome, Option.isNone, Bool.false_and]
+  rfl
+
+/-- Guards the actual `memory` source-name parser path used by old-state refusal. -/
+theorem memoryTakeWhileV1 :
+    Substring.takeWhileAux "memory" ⟨6⟩ (!·.isDigit) ⟨0⟩ = ⟨6⟩ := by
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_neg (by decide)]
+  rfl
+
+theorem memoryEndV1 : "memory".endPos = ⟨6⟩ := rfl
+
+theorem memoryNameV1 : Var.ofName "memory" = Var.user "memory" := by
+  simp only [Var.ofName, FreshNames.parse, instFreshNames, FreshNames.ofPrefixes,
+    String.takeWhile, Substring.takeWhile, String.toSubstring, memoryEndV1, memoryTakeWhileV1]
+  rfl
+
+/-- Guards the actual `old` source-name parser path used by old-state refusal. -/
+theorem oldTakeWhileV1 :
+    Substring.takeWhileAux "old" ⟨3⟩ (!·.isDigit) ⟨0⟩ = ⟨3⟩ := by
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_neg (by decide)]
+  rfl
+
+theorem oldEndV1 : "old".endPos = ⟨3⟩ := rfl
+
+theorem oldNameV1 : Var.ofName "old" = Var.user "old" := by
+  simp only [Var.ofName, FreshNames.parse, instFreshNames, FreshNames.ofPrefixes,
+    String.takeWhile, Substring.takeWhile, String.toSubstring, oldEndV1, oldTakeWhileV1]
+  rfl
+
+/-- Guards the actual `oldNet` source-name parser path used by old-state refusal. -/
+theorem oldNetTakeWhileV1 :
+    Substring.takeWhileAux "oldNet" ⟨6⟩ (!·.isDigit) ⟨0⟩ = ⟨6⟩ := by
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_pos (by decide), if_pos (by decide)]
+  rw [Substring.takeWhileAux, dif_neg (by decide)]
+  rfl
+
+theorem oldNetEndV1 : "oldNet".endPos = ⟨6⟩ := rfl
+
+theorem oldNetNameV1 : Var.ofName "oldNet" = Var.user "oldNet" := by
+  simp only [Var.ofName, FreshNames.parse, instFreshNames, FreshNames.ofPrefixes,
+    String.takeWhile, Substring.takeWhile, String.toSubstring, oldNetEndV1, oldNetTakeWhileV1]
+  rfl
+
+/-- Guards refusal of an absent old storage snapshot binding before reading any path. -/
+theorem oldStorageReadV1 (D : Contract) (path : NPTerm D) :
+    NRead.not (NRead.eq (NTerm.find (NSTerm.pv oldVar) path)
+      (NTerm.num ((0 : Nat) : Int))) names = .error "unknown name old" := by
+  simp only [NRead.not, NRead.eq, NTm.resolvePairV, NTm.resolveV,
+    NTerm.find, NSTerm.pv, NTm.pvS, NTm.syn, NTerm.num, NCtx.findAny,
+    names, oldVar, oldNameV1, fromNameV1, flagNameV1, resultNameV1, memoryNameV1,
+    Var.user.injEq, String.reduceEq, if_true, if_false, Bool.false_eq_true,
+    NTm.VSort.srt, pure_bind, Option.isSome, Option.isNone, Bool.false_and]
+  rfl
+
+/-- Guards that a valid key cannot invent a missing old ledger binding. -/
+theorem oldNetReadV1 (D : Contract) :
+    NRead.eq (C := D) (NTerm.netOf oldNetVar (NTerm.num ((0 : Nat) : Int)))
+      (NTerm.num ((0 : Nat) : Int)) names = .error "unknown name oldNet" := by
+  simp only [NRead.eq, NTm.resolvePairV, NTm.resolveV, NTerm.netOf, NTm.netOf,
+    NTerm.num, NTm.check, numLit, zeroInRangeV1, NCtx.findAny,
+    names, oldNetVar, oldNetNameV1, fromNameV1, flagNameV1, resultNameV1, memoryNameV1,
+    Var.user.injEq, String.reduceEq, if_true, if_false, Bool.false_eq_true,
+    NTm.VSort.srt, pure_bind, Option.isSome, Option.isNone, Bool.false_and]
+  rfl
+
 def cases : List (String × SpecExpr) := [
  ("num", .num 0), ("uintLit", .uintLit 1), ("true", .bool true), ("false", .bool false),
  ("local", .name "flag"), ("missing", .name "missing"), ("storage", .name "count"),
@@ -99,16 +345,40 @@ elab_rules : command
   let limit := if current == 0 then 100000 else min current 100000
   let result ← try
    let proposedProof ← Term.withoutErrToSorry <| Term.elabTerm (← `(by
-    simp only [Except.pure, Except.bind, map_pure, pure_bind, bind_pure_comp, decide_true, decide_false, Bool.true_or,
+    simp only [TypedSpecCompilerProbe.flagReadV1, TypedSpecCompilerProbe.xNotReservedV1, TypedSpecCompilerProbe.uintNotBoolV1, reduceCtorEq,
+      Except.pure, Except.bind, map_pure, pure_bind, bind_pure_comp, decide_true, decide_false, Bool.true_or,
       String.reduceEq, String.reduceBEq, if_true, if_false,
       Solidity.Semantics.lookupBy, Solidity.reservedSpecName,
-      List.getElem?_cons_zero, List.getElem?_cons_succ,
+      List.getElem?_cons_zero, List.getElem?_cons_succ, List.mapM_cons, List.mapM_nil,
       TypedSpecCompilerProbe.compileAt, TypedSpecCompilerProbe.contexts,
       TypedSpecCompilerProbe.cases, TypedSpecCompilerProbe.ctx, TypedSpecCompilerProbe.names,
       TypedSpecCompilerProbe.C, Solidity.SpecCtx.old, Solidity.SpecExpr.fml,
       Solidity.SpecExpr.fml.iff, Solidity.SpecExpr.fml.cond, Solidity.SpecExpr.term,
       Solidity.SpecExpr.termPair, Solidity.SpecExpr.read, Solidity.SpecExpr.memPath,
       Solidity.SpecExpr.path]
+    -- Resolve the equation at the original named context before rewriting names.
+    all_goals
+      first
+      | exact TypedSpecCompilerProbe.flagReadV1 _
+      | exact TypedSpecCompilerProbe.fromResultReadV1 _
+      | exact TypedSpecCompilerProbe.oldStorageReadV1 _ _
+      | exact TypedSpecCompilerProbe.oldNetReadV1 _
+      | skip
+    all_goals simp (config := { failIfUnchanged := false }) only [
+      TypedSpecCompilerProbe.boolSecondReadV1, Solidity.Var.user.injEq, String.reduceEq,
+      TypedSpecCompilerProbe.flagReadV1, TypedSpecCompilerProbe.malformedReadV1,
+      TypedSpecCompilerProbe.xNotReservedV1, TypedSpecCompilerProbe.xPrefixV1,
+      TypedSpecCompilerProbe.uintNotBoolV1, Bool.false_or, Bool.false_and,
+      Bool.false_eq_true, decide_false, if_false,
+      List.mapM_cons, List.mapM_nil,
+      TypedSpecCompilerProbe.numZeroCheckV1, TypedSpecCompilerProbe.numOneCheckV1,
+      TypedSpecCompilerProbe.zeroInRangeV1, TypedSpecCompilerProbe.oneInRangeV1,
+      TypedSpecCompilerProbe.uintHeadEqOneReadV1,
+      Solidity.Fml.finiteMember, Solidity.Fml.filteredMember, Solidity.SpecExpr.domainLiteral, Solidity.numLit,
+      TypedSpecCompilerProbe.boolHeadReadV1, TypedSpecCompilerProbe.uintHeadEqReadV1,
+      Solidity.NRead.not, Solidity.NRead.all,
+      Except.pure, Except.bind, map_pure, pure_bind]
+    all_goals simp (config := { failIfUnchanged := false }) only [TypedSpecCompilerProbe.xNameV1]
     all_goals with_unfolding_all rfl)) (some proposedType)
    Term.synthesizeSyntheticMVarsNoPostponing
    let proposedProof ← instantiateMVars proposedProof
