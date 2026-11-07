@@ -2294,3 +2294,22 @@ finder and skeptic checked roles, hashes and history preservation without Lean
 or a server. Evidence hashes are in
 `tests/h55/module-times/inference-helper-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Primitive arithmetic fixture observations
+
+`primitive_arithmetic_controls.py` records six previously unreferenced typed
+arithmetic fixtures with source hashes and the primitive-packets document hash.
+They classify addition, subtraction, multiplication, signed overflow and
+unsigned zero-divisor cases. The fixture layer alone does not establish Source
+or EVM execution; separate correspondence modules state those bridges. Current
+invocation, inputs, effects and outcomes remain unresolved; this is supplied-
+subset evidence.
+
+At `66d920db769240109a5703e508dde596c79ae09c`, the refreshed static index
+has 779 candidates, 566 with supplied current references and 213 without; seven
+retain historical references for review. Four candidates were added and one
+previously unreferenced candidate changed since the preceding snapshot.
+Independent read-only finder and skeptic checked roles, hashes and history
+preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/primitive-arithmetic-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
