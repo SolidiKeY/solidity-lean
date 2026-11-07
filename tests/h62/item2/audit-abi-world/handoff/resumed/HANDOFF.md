@@ -4,7 +4,7 @@ Repository: /workspace/solidity-lean
 Branch: codex/solidity-h62-2-20261106/audit-abi-world
 Original base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4
 Validated snapshot: 902e87762e5c3fb863bc3a592892f2dc09dfa979
-Documentation correction base: a282a282003a992eb334acefd1ef8f5490e0fe71
+Documentation correction base: c97738bd5edac625ff696e3ce4480406810477ba
 
 The validated snapshot contains prior head afea1aeae0907f0c3f2cbf7ff1f2b2f08522cc83.
 Ancestry and the fetched remote were verified; the rebase fast-forwarded cleanly.
@@ -38,7 +38,8 @@ failed or cancelled attempts remain failures; no solkeycheck CLI pass is claimed
 
 The 902e snapshot recorded two acceptance waits. Their current disposition:
 
-- Coordinator/G07 inventory owners: historical PIN-902e8776 contains 247 unique
+- Coordinator/G07 inventory owners: blocked (open; count from 902e).
+  Historical PIN-902e8776 contains 247 unique
   missing registrations with existing standard axioms only. The 902e checker
   covered 16,837 theorems with zero errors. This count is not a fresh a282
   inventory result. The original central-pin edit prohibition remains.
@@ -78,7 +79,7 @@ Independent read-only finder and skeptic reviews: PASS, no substantive findings.
 Both verified the fresh 8070-source receipts, 177/439/7/10 acceptance, exact
 frozen 24 files/map, full 6654-job stdout hash/receipt/resources, post-build
 source identity and +0.635697349% timing. The skeptic independently checked all
-247 unique standard-only ticket entries against the current central hash.
+247 unique standard-only ticket entries against the 902e central hash.
 Both confirmed the 902e P20 missing-path error and its two historical owner waits,
 unfinished goal and proof versus archived external-test boundaries. Neither
 used Lean, a server, builds or edits. Packaging pointers were excluded while
@@ -100,3 +101,13 @@ inventory or timing claim. Only the four owned documents changed. Neither
 reviewer used Lean, servers, builds or edits. No remaining review finding.
 
 Current a282 documentation check: exit 1, unrelated missing citation SelectedHeapBoundaryWitness.lean in docs/feature-work/h62-2-audit-v09-passes.md. P20 is absent from missing references. That owner document is unchanged.
+
+Follow-up on c977: G07 remains blocked (open; count from 902e). The count is 247 at 902e, not a fresh c977 inventory result. No new Lean build or timing run is claimed.
+
+Independent read-only finder and skeptic reviews accepted the c977 wording
+checkpoint. Both verified the explicit G07 status "blocked (open; count from
+902e)", the 902e central-hash wording, preserved receipt fields and four-document
+scope. The finder identified two remaining "24ABI" typos; both were fixed and
+the finder closed the findings. Inline code, path notation and thousands
+separators remain intact. No residual findings. Neither reviewer used Lean,
+servers, builds or edits. No fresh Lean, inventory or timing result is claimed.
