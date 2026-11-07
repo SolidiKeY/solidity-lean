@@ -90,7 +90,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/ArrayScans.lean` | Pinned-solc unsigned and signed ABI array scans, later loop-counter instances, box safety and a diamond termination proof with a supplied variant. |
 | `Examples/Tactics/Rigid.lean` | A memory-writing diamond loop proved by bounded rigid branch pruning; forty self-doublings refuse before exponential substitution, contradictory unused premises conservatively retain both branches, and a division-by-zero prefix stays invalid. |
 | `Examples/Tactics/SymbolicCounterexample.lean` | Counterexamples past every storage the search builds: a counting loop over a `2^255`-element array run in closed form (`Prog.runA` against `Prog.runF`), refuted by `sol_refute` where it overflows and where it ends late; a true property of the same loop not refuted. |
-| `Examples/Tactics/OpenLoops.lean` | The original pinned-solc open-loop source; its three-row nested-memory binomial has a checked public-strategy proof within the default budget, and its nine-row one a proof in chunks (`sol_prove (chunk := 128)`, about four minutes). |
+| `Examples/Tactics/OpenLoops.lean` | The original pinned-solc open-loop source and its three-row nested-memory binomial; the retained nine-row obligation is in `Examples/Tactics/OpenLoops/RowsNine.lean`, in the H109 slow library. |
 | `Examples/Tactics/Nonlinear.lean` | Symbolic/strict/coefficient multiplication order for both signs, four-variable product bounds, compound and difference squares, budget/noise regressions and checked Solidity multiplication order. |
 | `Examples/Tactics/Symex.lean` | `symex` on three programs, checked by the kernel (`Eq.refl`), printed. |
 | `Examples/Tactics/Step.lean` | The arms of `Stmt.step` by rule family (storage, memory structs and arrays, arrays of mapping-holding structs, operators, payments, loops, calls, `try`): each program's `symex` kernel-checked (`Eq.refl`). |
@@ -154,3 +154,9 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/StaticStorageCompatibility.lean` | Inhabited conditional frame, changed balance, reentry refusal and malformed decoder controls; no opaque static preservation assertion. |
 | `Examples/DecisionResidue.lean` | M7-next: residue members (halting `||` APF guard valid and false; VA1 mapping-field and normalization-budget labels; a leaf every hash try refuses), witness controls (in-target non-residue feature fixtures of earlier milestones answered through `DecisionTheorem'`; the answering route is not pinned) and the negative control (a valid and a false residue leaf, neither claimed). |
+
+## H109 slow loop obligations
+
+| Module | Its examples |
+|---|---|
+| `Examples/Tactics/OpenLoops/RowsNine.lean` | Existing `binomialRowsNine` obligation, preserved in the non-default H109 slow library and CI/full/lane-end/axiom-audit closure. Scoped CI acceptance uses 600 s; the 300 s default/VM STOP remains. |
