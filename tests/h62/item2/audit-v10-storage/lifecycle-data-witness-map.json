@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "48adeb83c21c5dc16bf1e6191c1efa30e5362652e077e659d6c6a95c4b7668a4",
+  "kind": "data-inhabitance",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Lifecycle.lean:13:push_fails_iff",
+      "theorem": "Solidity.Backend.StorageOps.push_fails_iff",
+      "signature": "theorem push_fails_iff {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (v : Value G (.array E)) : v.push = none \u2194 2 ^ 256 \u2264 v.length.val + 1",
+      "signature_sha256": "ae3b249b4a4183bac9e4020b718918fdc9b33b54d506015c3e532eb6fbdd5cdb",
+      "witness": "H62.StorageAudit.PushWitnesses.capacity_input",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Lifecycle.lean:27:pop_fails_iff",
+      "theorem": "Solidity.Backend.StorageOps.pop_fails_iff",
+      "signature": "theorem pop_fails_iff {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (v : Value G (.array E)) : v.pop = none \u2194 v.length.val = 0",
+      "signature_sha256": "3e42d5caff21d8472f9670327dfb5aa6c35d00d9959c0b8082ade9cb184fc176",
+      "witness": "H62.StorageAudit.PushWitnesses.data_input",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}
