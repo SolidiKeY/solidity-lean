@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/leaf-split-roles-v59/semantic-roles-reviewed.json",
-    "bytes": 1726199,
-    "sha256": "863bdb6ed74866d8d51b5bacf5426e56025c52d0d794533182e53ca02e4b7809"
+    "path": "/workspace/h62-successor-bulk/joined-execution-roles-v60/semantic-roles-reviewed.json",
+    "bytes": 1753984,
+    "sha256": "f97b58b91d8028cb9d4c4d6e3c697070ac4385fcdc8ccfe4ba3e83a6b92aa922"
   }
 }
