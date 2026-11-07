@@ -281,3 +281,34 @@ def selected_domains(rows, targets):
                        "statement_correspondence": "not established by roster/type observation",
                        "witness_ledger_linked": False, "establishes_original_conclusion": False})
     return result
+
+
+def partition_records(rows, source_candidate_names):
+    """Account for every supplied record without inventing auxiliary ownership.
+
+    Candidate names are supplied by a separate source matcher, not revalidated
+    here. Even a unique candidate or direct field remains without statement
+    correspondence, instantiated inherited obligations, or witness coverage.
+    """
+    validate_rows(rows)
+    if not isinstance(source_candidate_names, (list, tuple)) or any(not text(n) for n in source_candidate_names):
+        raise ValueError("invalid source candidate roster")
+    if len(set(source_candidate_names)) != len(source_candidate_names):
+        raise ValueError("duplicate source candidate name")
+    by_name = {row["name"]: row for row in rows}
+    for name in source_candidate_names:
+        row = by_name.get(name)
+        if row is None or not row["is_theorem"] or row["declaration_range"] is None:
+            raise ValueError("source candidate lacks ranged original theorem: " + name)
+    candidates = set(source_candidate_names)
+    groups = {key: [] for key in ("supplied_source_candidate", "direct_field", "unattributed_no_range", "unmatched_range")}
+    for row in sorted(rows, key=lambda r: r["name"]):
+        category = ("supplied_source_candidate" if row["name"] in candidates else
+                    "direct_field" if row["is_projection"] else
+                    "unattributed_no_range" if row["declaration_range"] is None else "unmatched_range")
+        snapshot = json.loads(json.dumps(row, sort_keys=True, separators=(",", ":")))
+        groups[category].append({"record": snapshot,
+            "record_sha256": hashlib.sha256(json.dumps(snapshot, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
+            "source_identity_established": False, "statement_correspondence_established": False,
+            "inherited_obligations_established": False, "witness_ledger_linked": False})
+    return groups

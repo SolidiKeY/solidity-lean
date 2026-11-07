@@ -1495,3 +1495,39 @@ A.lean/B.lean; external files preserved, failure retained, no green full gate.
 No module in this checkpoint exceeded60s; native inspection10.325s is not a
 paired performance result. Existing scoped pin registration remains coordinator
 work and is not rerun or waived by this checkpoint.
+
+
+## Lossless selected-record classification
+
+Published05d2c2587 packet-panic ledgers adopted via merge17005a3fabb41ee845b09992756143804e17190e; no bytecode producer delivery. Reuse the sealed
+14module metadata checkpoint without any new Lean execution or PowerBounds
+retry. Generic partition_records validates all input metadata and returns each
+record exactly once, preserving detached full records and hashes. Explicit
+priority is supplied source candidate, direct field, unattributed without range,
+then unmatched range. Names alone never imply generated origin or source owner;
+reported import-module attribution is not source-definition provenance.
+
+Actual294records partition into66suppliedsourcecandidates,16directfields,
+135unattributednoranges and77unmatchedranges. These counts do not reduce the
+global uncovered ledger. Every record retains private/type/body/binder/parent
+metadata and false source-identity/statement-correspondence/inherited-obligation/
+witness-linkage flags. Supplied candidates must be unique ranged original
+theorems; missing/duplicate/corrupt candidates and duplicate records refuse.
+Tests cover exactly-once accounting, input-order independence, alias isolation,
+field precedence and unknown names remaining unattributed.
+
+Reproducer verifies every file against the prior sealed manifest, reparses
+actual native log records and requires equality to the parent report before
+partitioning. Parent source/raw inspector and238import bindings remain recorded
+at the prior seal; no fresh kernel, global inspection or provenance acceptance
+is inferred. Prior PowerBounds STOP, doc-path fixture failure and original
+producer/final-gate waits remain unchanged. No statements/interfaces/definitions
+in production, budgets, axioms, exclusions or semantic premises changed.
+Evidence: /workspace/parallel-20261103/executable-bytecode/gate-record-partition/.
+
+Independent readonly finder/skeptic PASS with no findings; supplied candidate
+provenance stays with the separate matcher.82discoverytests/23directmetadata
+tests, trust, orphans, roots/fragments and whitespace allPASS. Prior global
+doc-path failure remains retained at gate-kernel-metadata/evidence/gate-6.log;
+unchanged failing check not rerun. No new kernel build or runtime/performance
+pass is implied by pure bookkeeping/tests.

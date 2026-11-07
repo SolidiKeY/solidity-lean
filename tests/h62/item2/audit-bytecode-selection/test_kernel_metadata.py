@@ -219,5 +219,41 @@ class ExpandedMetadataTests(unittest.TestCase):
         with self.assertRaises(ValueError): selected_domains([row], {"a": row["name"]})
 
 
+class RecordPartitionTests(unittest.TestCase):
+    row = MetadataSchemaTests.row
+
+    def records(self):
+        candidate=self.row()
+        field=self.row();field.update(name="field",user_name="field",kind="field",is_projection=True)
+        auxiliary=self.row();auxiliary.update(name="odd_auxiliary_name",user_name="odd_auxiliary_name",declaration_range=None)
+        ranged=self.row();ranged.update(name="other",user_name="other")
+        return [candidate,field,auxiliary,ranged]
+
+    def test_exact_once_lossless_and_order_independent(self):
+        rows=self.records();groups=partition_records(rows,[rows[0]["name"]])
+        self.assertEqual({key:len(value) for key,value in groups.items()},
+            {"supplied_source_candidate":1,"direct_field":1,"unattributed_no_range":1,"unmatched_range":1})
+        flattened=[entry for group in groups.values() for entry in group]
+        self.assertEqual({entry["record"]["name"] for entry in flattened},{row["name"] for row in rows})
+        self.assertEqual(groups,partition_records(list(reversed(rows)),[rows[0]["name"]]))
+        for entry in flattened:
+            for flag in ("source_identity_established","statement_correspondence_established","inherited_obligations_established","witness_ledger_linked"):
+                self.assertFalse(entry[flag])
+        rows[0]["type_expr"]="mutated"
+        self.assertEqual(groups["supplied_source_candidate"][0]["record"]["type_expr"],"closed type expression")
+
+    def test_invalid_candidates_and_duplicate_records_refused(self):
+        rows=self.records()
+        for candidates in (["absent"],[rows[0]["name"]]*2,[rows[2]["name"]],"not a list"):
+            with self.subTest(candidates=candidates),self.assertRaises(ValueError):partition_records(rows,candidates)
+        with self.assertRaises(ValueError):partition_records(rows+[rows[0]],[])
+
+    def test_projection_precedes_range_and_unknown_names_remain_unattributed(self):
+        rows=self.records();rows[1]["declaration_range"]=None
+        groups=partition_records(rows,[])
+        self.assertEqual([e["record"]["name"] for e in groups["direct_field"]],["field"])
+        self.assertEqual([e["record"]["name"] for e in groups["unattributed_no_range"]],["odd_auxiliary_name"])
+
+
 if __name__ == "__main__":
     unittest.main()
