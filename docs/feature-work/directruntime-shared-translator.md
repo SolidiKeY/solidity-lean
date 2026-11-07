@@ -1074,3 +1074,49 @@ contains that ticket and report, not native-browser's missing runtime payloads.
 No duplicate delivery ticket was issued. Fresh environment qualification,
 CR fixture/importer migration, ReadBounds production-owner resolution and the
 original stack/cost/performance holds remain open.
+
+
+### Shared environment decoder proofs
+
+`environmentMember?_guards` performs one general successful-decoder inversion
+for the existing map entry, negative builtin reference and result spelling.
+The existing `environmentMember?_guard` keeps its exact statement and projects
+its first two facts; `environmentMember?_resultType` projects the type fact.
+`environmentMember?_of_metadata` proves successful decoding from the explicit
+root/name/map/magic/reference/result guards for arbitrary JSON. These are
+metadata decoder facts, not compiler identity authentication, source/world
+adequacy or intrinsic semantics transport. All four theorem axiom reports are
+only `propext` and `Quot.sound`.
+
+The initial independent proofs checked correctly but failed the paired local
+checking limit: baseline median3.9615s, head6.3626s (+60.61%). That STOP, its
+source snapshot, failed proof attempts and tactic trials remain in the H44
+archive. Sharing guard inversion and replacing the positive proof's `simp_all`
+with explicit rewrites preserves all existing statements and brings three
+interleaved same-path checking medians to3.9282s/4.1776s (+6.35%, below10%).
+This local proof-checking result releases no native/browser performance hold.
+
+The final serial12GiB/no-swap gate passes nine requested owned module builds
+and six affected per-file checks, including 32 existing environment/address
+model requests, axiom/signature inventories and KeySort. Gate wall time39.9118s,
+child maximum RSS1261764KiB, cgroup peak230342656bytes, minimum outer available
+memory11480817664bytes. Lean4.24.0/Lake5.0.0-src+797c613 and threads1/-j1 remain
+unchanged. Final source and inventory MCP diagnostics report zero errors.
+Inherited dependency warnings are retained. This is checking evidence, not
+matched whole-build or runtime performance acceptance.
+
+Normalization verifies the old guard statement byte for byte, removes only
+three added theorem/doc blocks and restores its former proof; the resulting
+Translate file exactly matches immutable pre-work88a946c78971. Executable
+bodies, imports, Reader signatures, entry premises and exclusions are unchanged.
+Historical census/profile outcomes are retained, with only the proof-source
+SHA refreshed; no fresh census capture is claimed. The pre-work head preserves
+the existing clean published3a5b9de41 merge and prior66268454b intake checkpoint.
+The ownership allowlists are unchanged.
+
+Manifest: `environment-decoder-proof-manifest.json`; bulk logs, source snapshots,
+paired checking script/results and checksums are outside Git in its recorded
+archive. Independent read-only finder/skeptic found no confirmed proof or
+normalization defect; neither used Lean/server/builds or writes. Original H90
+forms/importer migration, inherited queues, absent address runtime payloads,
+environment qualification and all stack/native/browser holds remain open.
