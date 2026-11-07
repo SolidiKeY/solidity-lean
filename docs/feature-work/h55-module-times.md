@@ -1566,3 +1566,24 @@ read-only finder and skeptic checked the drift without Lean, server or builds.
 The skeptic found empty artifact labels could count as references; all old
 rows, including removed rows, now require unique normalized absolute labels;
 this lexical check does not authenticate the referenced artifact bytes.
+
+## Theories audit candidates from the merged-tree delta
+
+`theories_audit_controls.py` records ten supplied source-hashed delta rows;
+the subset is not complete inventory coverage. FiniteBoundary is an
+intentional impossibility, not a joint witness. The other selected joint
+inputs establish model-level feasibility under their original premises;
+they do not establish physical EVM gas, fork or general compiler adequacy.
+
+ElaboratedCensus requires an absolute off-checkout `H62_AUDIT_CENSUS_OUT`
+and writes its output. The historical serial driver has a 300-second control,
+but its address-space limit is not an RSS cap or H55 runtime attestation.
+A historical timing STOP was followed by a separately authorized matched
+comparison; neither proves a current gate. Independent read-only finder and
+skeptic reviewed the scope without Lean, server or builds. Current inputs
+and execution remain unresolved.
+
+The refreshed axiom-pin check at `8cf4611566710c83685eeb255e89454d189c0ddf`
+exited 1 with zero policy errors, 172 unrecorded changes and 99 baselined
+changes (`/workspace/h55-module-times-evidence/pins-8cf.log`). This supersedes
+the earlier 11-change observation for that branch state, not a pin fix.
