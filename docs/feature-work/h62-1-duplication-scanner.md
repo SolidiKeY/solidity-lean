@@ -1328,3 +1328,30 @@ initial resource refusal is recorded as a transcription of the visible tool
 response, not an independently captured runner log. Cache advice was applied
 to the prior report before each scan, but the receipts do not prove identical
 operating-system cache state.
+
+## Initializer inventory boundaries
+
+Line-initial `initialize` and `builtin_initialize` commands now terminate a
+preceding declaration body and appear in the lexical inventory. The optional
+named form is recognized only when a source-spelled identifier and type are
+followed by a top-level left arrow; anonymous initializer bodies remain
+anonymous. All initializer statements and bodies are explicitly rejected as
+unsupported, and inline scoped initializer declarations make a scan
+incomplete. This is not an elaboration of initializer semantics or a complete
+parser for every layout and macro form.
+
+Finder and skeptic independently reviewed the implementation without Lean;
+they identified and rechecked the scoped-wrapper omission. The combined
+Python suite passed 202 tests. A matched bounded scan took 118.075 seconds
+before and 118.580 seconds after (+0.43%); both used the same 7,445 inputs,
+8 GiB address-space cap and sampled reserve monitor, with no resource stop,
+file error or unmatched glob. The prior report cache was re-advised before
+each scan, but the receipts do not prove identical operating-system cache
+state. Recognized declarations increased from 124,796 to 124,822, including
+26 initializer rows, all explicitly rejected. The checked real source rows
+include nextAuditOrigin, auditOrigin and importedAudit. Equal group counts do
+not establish equal members or semantics. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/initializer-inventory/`.
+
+The repository documentation-path gate remains failed on the same missing
+witness reference in the upstream audit-v09-passes document noted above.

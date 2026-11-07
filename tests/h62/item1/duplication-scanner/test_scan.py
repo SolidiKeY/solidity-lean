@@ -242,6 +242,42 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(names[name]["reject_reason"], "unsupported-instance-priority")
             self.assertEqual(names[name]["body_reject_reason"], "unsupported-instance-priority")
 
+    def test_initializer_inventory_is_rejected_and_bounded(self):
+        root = Path("/virtual")
+        source = ("def before : Nat := 0\n"
+                  "private initialize named : IO.Ref (Option Nat) ←\n  IO.mkRef none\n"
+                  "builtin_initialize other : IO.Ref Nat <- IO.mkRef 0\n"
+                  "initialize registerTraceClass `Foo\n"
+                  "def after : Nat := 1\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["kind"], r["name"]) for r in rows],
+                         [("def", "before"), ("initialize", "named"),
+                          ("builtin_initialize", "other"), ("initialize", "<anonymous>"), ("def", "after")])
+        self.assertEqual(rows[0]["body"], ["0"])
+        self.assertEqual(rows[-1]["body"], ["1"])
+        self.assertEqual(rows[1]["qualifiers"], ["private"])
+        for row in rows[1:4]:
+            self.assertEqual(row["reject_reason"], "unsupported-declaration-form")
+            self.assertIsNone(row["statement"])
+            self.assertEqual(row["body"], [])
+        fixture = ROOT / "Solidity/Frontend/Testing.lean"
+        names = {r["name"]: r for r in scanner.scan(fixture, ROOT)}
+        for name in ("nextAuditOrigin", "auditOrigin", "importedAudit"):
+            self.assertEqual(names[name]["reject_reason"], "unsupported-declaration-form")
+        for keyword in ("initialize", "builtin_initialize"):
+            for wrapper in ("open Nat", "set_option autoImplicit false"):
+                scoped = f"{wrapper} in {keyword} hidden : IO.Ref Nat <- IO.mkRef 0\ndef visible : Nat := 0\n"
+                with self.subTest(keyword=keyword, wrapper=wrapper):
+                    with self.assertRaisesRegex(ValueError, "unsupported same-line scoped"):
+                        scanner.scan(root / "B.lean", root, scoped.encode())
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_text("open Nat in initialize hidden : IO.Ref Nat <- IO.mkRef 0\n")
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))
