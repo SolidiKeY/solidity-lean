@@ -674,3 +674,39 @@ Both final fresh captures are byte-identical:6,454 source headers parsed;31 SDK 
 All 130 external scanner controls pass. Independent read-only finder/skeptic findings on snapshot/config binding, overlapping roots and equivalent primary-root spellings were fixed and reviewed. Neither reviewer executed Lean/server, tests or benchmarks or wrote files. Three development API/JSON compiler diagnostics and superseded captures are preserved; only accepted-four/accepted-five are final acceptance. Evidence:/workspace/h62-audit-readonly-calls/header-dependencies/. No proof budgets, frozen statements, axioms, production files, roots or maps changed. Original +80.254966536% Lean STOP remains and its workload was not rerun; no RUNTIME_GATE_PASS.
 
 Final layout admission explicitly supports the normalized default package srcDir; other package-level roots fail rather than receive a guessed mapping. The existing V08 helper remains an unchanged lexical build-orchestration tool; its supported input shape does not replace compiler grammar/flag/source-snapshot capture. Final inventories name the immutable source tree bb9a9c899b3719db8940cb3b4dc66f04c0c764b5; its extra tracked test probe is outside core selection, so the excluded tracked count is now 1,011. Both final inventories still contain 6,454 parsed core headers and the same 129 frozen targets. The 104 no-path rows do not clear any hold or grant compilation permission.
+
+## Fresh intrinsic AST dependency closure
+
+The additive `scripts/h62/item1/duplication-scanner/bind_project_closure.py`
+compiles unchanged pinned KeySort and AST sources in dependency order into a
+fresh isolated library, then enumerates AST types and direct declaration ranges.
+The probe checks that exactly those two fresh project objects extend the fixed
+fixture/SDK imports. Existing objects, missing/extra/preloaded dependencies,
+changed source hashes, stale dependency objects and companion drift reject.
+The lexical join reads the exact staged AST buffer checked against its compile
+pin; parsed probe bytes must match the checked process output hash.
+
+Two final captures export identical metadata and source bindings: 135 lexical
+rows, 98 direct source/type links and 37 unresolved rows. All 781 visible AST
+constants remain in the census, including 683 without lexical links. Every
+visible type serialized; this establishes neither general coverage nor semantic
+or body equality. Anonymous instances and unsupported lexical binder forms stay
+unresolved. The unchanged AST emits one existing unused-variable warning.
+KeySort is a fresh checked dependency, not an additional type census in this probe.
+
+All 140 scanner controls pass, including nine new closure/refusal controls.
+Independent read-only finder and skeptic reviews corrected staged-source and
+probe-log provenance and the dependency docstring; final reviews are clear.
+Original production sources, intrinsic representations, statements and budgets
+remain unchanged. The new test probe is staged and unregistered; no production
+root or map was edited. No new axiom, sorry or native decision was introduced.
+
+The scanner CLI still consumes the earlier KeySort producer; AST consumption
+and general dependency admission remain independent queue work. Live ownership,
+private/unloaded coverage, all 792 original audit obligations and owner compiler
+success remain open. This isolated check does not rerun the held WorldCalls
+workload or clear its +80.254966536% timing STOP. Actual Lean is 4.24.0, Lake
+5.0.0-src+797c613; fresh bounded KeySort prerequisites pass. New-workflow timings
+are observations, not a matched production timing gate or RUNTIME_GATE_PASS.
+Raw outputs and manifests remain under
+`/workspace/h62-audit-readonly-calls/project-closure-binding/` on the original VM.
