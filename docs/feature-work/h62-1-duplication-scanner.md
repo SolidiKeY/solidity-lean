@@ -1419,3 +1419,25 @@ continuous reserve. Evidence is outside Git in
 `/workspace/h62-duplication-scanner-evidence/example-binders/`. Complete
 Lean declaration and case accounting, authenticated source/dependency binding,
 current ownership and final gates remain open.
+
+
+### Merged-tree report replay
+
+At merged tree `fc17f01e229480bda02baa4394be0157efb0e8a4`, two
+serial default-mode scans used identical selection, historical registry and
+caller-pinned prior report. Both exited successfully and produced SHA256
+`9eb5b90bc8b86c7efbcea04e5cdb434f0862d03b0dce0198ea5bc12aeb08172f`;
+they selected 7,497 files and recorded 125,729 lexical declarations, 4,503
+statement groups and 5,665 body groups, with no errors or unmatched patterns.
+All recorded owners are unknown. Times were 122.090 and 128.599 seconds.
+Both used an 8 GiB process cap and a sampled 4 GiB local cgroup reserve
+monitor without a stop; cache equality and continuous system-wide reserve are
+not established.
+
+Finder and skeptic independently reviewed the replay without Lean. The
+prior report predates both scanner and source changes, so its incremental
+deltas combine their effects. Its digest identifies caller-supplied bytes,
+not an authenticated producer. The replay does not invoke opt-in signature
+binding or establish complete Lean census, semantic duplication, or live
+ownership. Evidence is outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-replay/`.
