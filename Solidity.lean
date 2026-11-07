@@ -3256,6 +3256,7 @@ import Solidity.Lowering.P8.ScalarSchemaControls
 import Solidity.Lowering.P8.ShapeSchema
 import Solidity.Lowering.P8.ShapeSchemaControls
 import Solidity.Lowering.P8.SourceAllSettings
+import Solidity.Lowering.P8.SourceAstParameters
 import Solidity.Lowering.P8.SourceAstTypes
 import Solidity.Lowering.P8.SourceMetadata
 import Solidity.Lowering.P8.SourceMetadataControls

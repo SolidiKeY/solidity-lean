@@ -1009,3 +1009,28 @@ Affected import build and generated registration/layers pass. Trust reports
 72mapped/3209uncovered; these new conversion controls are not frozen-row
 witness additions. All original Source/program/lifecycle, physical, coverage
 and final-gate requirements and historical STOPs remain open.
+
+### C242 — ordered Source parameter containers
+
+SourceAstParameters converts compiler ParameterList children through the existing
+leaf converter into intrinsic Source lists. A generalized-index proof-only
+eliminator avoids fixed-index matching: its roundtrip is axiom-free; the exact
+mapM order/error theorem and parameterList have measured propext-only guards.
+The executable converter does not depend on the noncomputable proof eliminator.
+Both unchanged LibraryTry AST fixtures pass input/result container checks and
+retain all 12 leaf conversions each, storage formals and string-memory returns.
+This supplies no declarations, Env/SrcProg, resolution, admission or lifecycle
+adequacy. Recursive types and expression/statement/declaration conversion remain
+local implementation work; the mapped audit ledger remains 72/3281.
+
+Prior generated-cache cleanup left a dangling build target; the original target
+was recreated and the repository artifact restorer placed four fetched objects.
+Failed fixed-index, generic-match, recursive-unfold and executable-recursor
+attempts are retained in checkpoint242 evidence. Only the final noncomputable
+specification plus executable conversion passes; rejected recovery sorryAx and
+compiler panic artifacts are not accepted. No statement, premise, axiom policy,
+exclusion or budget was changed. H111 stack and H113 accounting remain unchanged.
+Independent read-only finder and skeptic reviewed the final code without Lean
+or its server and reported no findings. Registration, fragments, orphans and
+layers pass; trust has 6649 sources, 289 sites and zero findings. Shared strict
+pin drift and full lane/final-gate requirements remain open; no pin rewrite.

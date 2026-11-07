@@ -1,4 +1,5 @@
-import Solidity.Lowering.P8.SourceAstTypes
+import Solidity.Lowering.P8.SourceAstParameters
+import Solidity.Source.Ctor
 
 /-! Runtime conversion checks over the unchanged LibraryTry compiler fixtures.
 These are not Source program/admission/semantics proofs. Regression purpose:
@@ -29,8 +30,15 @@ def inspect (doc : Json) : Except String Nat := do
     if (← text top "nodeType") == "ContractDefinition" then
       for node in ← array top "nodes" do
         if (← text node "nodeType") == "FunctionDefinition" then
-          let args ← array (← get node "parameters") "parameters"
-          let returns ← array (← get node "returnParameters") "parameters"
+          let inputNode ← get node "parameters"
+          let returnNode ← get node "returnParameters"
+          let args ← array inputNode "parameters"
+          let returns ← array returnNode "parameters"
+          let inputSyntax ← Solidity.Lowering.P8.SourceAstParameters.parameterList inputNode
+          let returnSyntax ← Solidity.Lowering.P8.SourceAstParameters.parameterList returnNode
+          unless (inputSyntax.nodes.filter (fun n => n.ctor == .param)).length == args.size &&
+              (returnSyntax.nodes.filter (fun n => n.ctor == .param)).length == returns.size do
+            throw "parameter length lost"
           for arg in args ++ returns do
             let _ ← parameter arg
             count := count + 1
