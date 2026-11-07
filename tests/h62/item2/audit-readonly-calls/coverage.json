@@ -922,6 +922,45 @@
       "frozen_receipt_sha256": "77dabe72f101e76e7f06b1138333ef8891048768db33eb92c33557633b31cfb6",
       "current_receipt_sha256": "de296db73898608cd3062f15a4e8a2d9c734fb17ed7cbebe425f104e596df1e8",
       "proof_boundary": "Joint actual primitive expression/read-statement inputs and typed continuation results only; no compiled call/Source-world/native-frame/gas adequacy."
+    },
+    {
+      "source_name": "Solidity.Backend.Passes.SourceCallBoundary.static_operation",
+      "signature_sha256": "1c7b43f19f124e6215d5d540be7e91c6c44e15f404d2d2f1391b24bef6af53ed",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.CallBoundaryWitnesses.static_joint",
+      "global_premises": "No assumed compiler/model record. Explicit Env, static frame, account-balance operation and inhabited Source state.",
+      "per_input": "Same static=true frame and balance-changing operation; one Bool declared return with exactly 31 bytes and checked 31<32; supplied nonempty callee revert bytes [7,9].",
+      "evidence": "Private coordination archive: call-boundaries/authenticated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: call-boundaries/SHA256SUMS",
+      "frozen_receipt_sha256": "e92e8cba6614e154fe465f3f7f53886c55bbbbb661daac2e3bb32daf05e2466c",
+      "current_receipt_sha256": "18a9c21dcef161171aff285ea39a60a7369d63c365d2601280517797addc9b78",
+      "proof_boundary": "Joint Source boundary inputs and actual extReturn/applyOp runs only; supplied outcomes do not establish callee execution or compiler/world/native-frame/gas/fork adequacy."
+    },
+    {
+      "source_name": "Solidity.Backend.Passes.SourceCallBoundary.return_short",
+      "signature_sha256": "222ed8790a6d2a1775bee3a79b2766c8ecd9647b5c66e80f9c6c308ed8cba407",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.CallBoundaryWitnesses.short_joint",
+      "global_premises": "No assumed compiler/model record. Explicit Env, static frame, account-balance operation and inhabited Source state.",
+      "per_input": "Same static=true frame and balance-changing operation; one Bool declared return with exactly 31 bytes and checked 31<32; supplied nonempty callee revert bytes [7,9].",
+      "evidence": "Private coordination archive: call-boundaries/authenticated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: call-boundaries/SHA256SUMS",
+      "frozen_receipt_sha256": "e92e8cba6614e154fe465f3f7f53886c55bbbbb661daac2e3bb32daf05e2466c",
+      "current_receipt_sha256": "18a9c21dcef161171aff285ea39a60a7369d63c365d2601280517797addc9b78",
+      "proof_boundary": "Joint Source boundary inputs and actual extReturn/applyOp runs only; supplied outcomes do not establish callee execution or compiler/world/native-frame/gas/fork adequacy."
+    },
+    {
+      "source_name": "Solidity.Backend.Passes.SourceCallBoundary.return_revert",
+      "signature_sha256": "111d9fce55b27b4d59557065e557c2377dc6aebd1e7bcf69efe8c083b97733de",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.CallBoundaryWitnesses.revert_joint",
+      "global_premises": "No assumed compiler/model record. Explicit Env, static frame, account-balance operation and inhabited Source state.",
+      "per_input": "Same static=true frame and balance-changing operation; one Bool declared return with exactly 31 bytes and checked 31<32; supplied nonempty callee revert bytes [7,9].",
+      "evidence": "Private coordination archive: call-boundaries/authenticated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: call-boundaries/SHA256SUMS",
+      "frozen_receipt_sha256": "e92e8cba6614e154fe465f3f7f53886c55bbbbb661daac2e3bb32daf05e2466c",
+      "current_receipt_sha256": "18a9c21dcef161171aff285ea39a60a7369d63c365d2601280517797addc9b78",
+      "proof_boundary": "Joint Source boundary inputs and actual extReturn/applyOp runs only; supplied outcomes do not establish callee execution or compiler/world/native-frame/gas/fork adequacy."
     }
   ]
 }

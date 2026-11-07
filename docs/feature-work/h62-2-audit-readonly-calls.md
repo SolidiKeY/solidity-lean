@@ -1618,3 +1618,47 @@ evidence/solidity-h62-2-20261106/audit-readonly-calls/private-upload/.
 Its LARGE-VM-ARTIFACTS.json records fifteen larger VM archives by path/hash.
 The upload changed only the private evidence repository; the code branch
 was not pushed.
+
+
+### Joint Source boundary inputs (2026-11-07)
+
+CallBoundaryWitnesses supplies the SAME explicit inputs to the original
+SourceCallBoundary.static_operation, return_short and return_revert interfaces.
+The static frame rejects an account-balance operation, one declared Bool return
+rejects a 31-byte buffer with the checked 31<32 premise, and a supplied callee
+revert preserves its nonempty [7,9] bytes. Actual runs preserve the input state.
+Negative controls reject successful static acceptance and erased revert data.
+These supplied outcomes do not establish actual callee execution, compiler/world
+binding, physical frames, gas/fork behavior or a compiler-success theorem.
+
+The SAME additive module elaborates at C6 and current source. Exact original
+raw kernel types match for all three interfaces, and all eight theorem axiom
+sets match the existing propext/Classical.choice/Quot.sound set. The checker
+reuses dependency objects from the exact already-admitted read-statement
+pair, authenticating every source/object/log and historical Python tool byte.
+The older primitive cache correctly refused current-source drift; that refusal
+remains recorded. H145's b099 historical tools are data, never executed.
+
+The shared collector verifies both sealed receipts and all source/log/object
+bindings before credit. All 792 original identities remain, with only these
+three pending rows changed. Counts are now 70 joint, 416 ordinary pending
+(including three private identity gaps), 3 target-failure joint, 45 intentional
+impossibility, 256 no-input and 2 frozen-v1 refutation/migration results.
+Frozen statements, definitions, premises, exclusions, budgets and axiom pins
+remain unchanged. No private identity, drift or unloaded row is discarded.
+
+Serial bounded frozen/current gates and axiom checks pass; exact commands,
+versions and resource measurements remain in private evidence. This is not a
+before/after performance comparison. The +80.254966536% Premises STOP remains
+unchanged and was not rerun. There is no runtime or full-assignment pass.
+
+Independent read-only finder and skeptic reviewed Source premise fidelity and
+negative controls without Lean servers or execution. The finder corrected the
+runner's missing-dependency description; final accounting review found no further issue and is recorded
+in the private handoff. Evidence, admission JSON, receipts and checksums stay
+outside this code branch under the H145 private coordination archive. The
+existing generic-v08 documentation citation failure remains owner-pending.
+
+Next independent work remains the other original joint inputs and full owned
+H121 Source/callee execution, selected compiler/world binding and physical-frame
+producer. External transport/G42.04 and historical artifact waits are unchanged.
