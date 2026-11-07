@@ -124,4 +124,70 @@ theorem preparation_image_roundtrip {E : Type} {encode : E → Option (Artifact 
   rcases a with ⟨original, artifact, agrees⟩
   cases agrees
   rfl
+/-- Result-polymorphic two-stage preparation. The dependent payload retains
+its original source/profile indices; neither emission nor selection is erased. -/
+def prepareResult {E A B : Type} {P : E → Type} (first : E → Option A)
+    (second : A → Option B)
+    (certify : ∀ original payload, first original = some payload →
+      ∀ output, second payload = some output → P original) (original : E) : Option (P original) :=
+  match emitted : first original with
+  | none => none
+  | some payload =>
+    match selected : second payload with
+    | none => none
+    | some output => some (certify original payload emitted output selected)
+
+theorem prepareResult_none {E A B : Type} {P : E → Type} (first : E → Option A)
+    (second : A → Option B)
+    (certify : ∀ original payload, first original = some payload →
+      ∀ output, second payload = some output → P original)
+    (original : E) (refused : first original = none) :
+    prepareResult first second certify original = none := by
+  unfold prepareResult
+  split
+  next observed => rfl
+  next payload observed => cases observed.symm.trans refused
+
+theorem prepareResult_some {E A B : Type} {P : E → Type} (first : E → Option A)
+    (second : A → Option B)
+    (certify : ∀ original payload, first original = some payload →
+      ∀ output, second payload = some output → P original)
+    (original : E) (payload : A) (output : B) (emitted : first original = some payload)
+    (selected : second payload = some output) :
+    prepareResult first second certify original = some (certify original payload emitted output selected) := by
+  unfold prepareResult
+  split
+  next observed => cases observed.symm.trans emitted
+  next actual observed =>
+    have same : actual = payload := Option.some.inj (observed.symm.trans emitted)
+    subst actual
+    split
+    next observed => cases observed.symm.trans selected
+    next actual observed =>
+      have same : actual = output := Option.some.inj (observed.symm.trans selected)
+      subst actual
+      rfl
+
+/-- Exact image for dependent typed result preparations, including None. -/
+structure ResultImage {E : Type} {P : E → Type} (encode : ∀ original, Option (P original)) where
+  original : E
+  payload : Option (P original)
+  agrees : payload = encode original
+
+def toResultImage {E : Type} {P : E → Type} (encode : ∀ original, Option (P original))
+    (original : E) : ResultImage encode := ⟨original, encode original, rfl⟩
+
+def recoverResult {E : Type} {P : E → Type} {encode : ∀ original, Option (P original)}
+    (image : ResultImage encode) : E := image.original
+
+theorem result_source_roundtrip {E : Type} {P : E → Type}
+    (encode : ∀ original, Option (P original)) (original : E) :
+    recoverResult (toResultImage encode original) = original := rfl
+
+theorem result_image_roundtrip {E : Type} {P : E → Type}
+    {encode : ∀ original, Option (P original)} (image : ResultImage encode) :
+    toResultImage encode (recoverResult image) = image := by
+  rcases image with ⟨original, payload, agrees⟩
+  cases agrees
+  rfl
 end Solidity.Yul.Compilation.Artifact

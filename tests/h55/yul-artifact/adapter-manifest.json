@@ -198,6 +198,15 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.OpenStatement",
       "adapter_kind": "preselection_provenance",
       "boundary": "Contextual preparation of the original WordAdapter packed closed program, retaining the entire open producer and policy/support evidence through exact PreparationImage. Actual open evaluation/projected state and exact packed machine update are proved in both directions. No repack-after-projection identity or direct semantic Artifact for the open AST is claimed; depth16 refusal remains preparation None while source completes."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ProducerExpressions.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Expressions",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates shared Artifact.Realization for the actual fixed-fuel expression evaluator, profile and original arity-one witness. Actual emission/selection proofs certify result push and complete machine/newer/locals/caller frame. Dependent ResultImage retains all raw producer evidence, including source-completing depth16 emission None. No wrapper statement, arbitrary-arity admission, inverse encoding or native/runtime-failure claim."
     }
   ]
 }

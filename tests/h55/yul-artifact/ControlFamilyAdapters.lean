@@ -792,3 +792,109 @@ end Controls
 #print axioms Controls.refused_original
 #print axioms Controls.source_completes
 end Solidity.Yul.Compilation.H55ControlFamilies.OpenStatement
+
+/-! Expressions instantiate the shared typed-result certificate. The original
+expression evaluator is retained, including its arity witness and profile;
+no assignment wrapper or alternative source computation is substituted. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.Expressions
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {n r fuel depth : Nat} {expr : Expr [] [] n r}
+
+abbrev Frame (depth : Nat) := Vector Scalar.Word depth × Evm.Machine × List Evm.Word
+
+def inputFrame (locals : Vector Scalar.Word n) (frame : Frame depth) : Evm.Machine :=
+  {frame.2.1 with stack := (frame.1.toList ++ locals.toList).map coreWord ++ frame.2.2}
+
+def outputFrame (a : Compiled fuel expr) (locals : Vector Scalar.Word n)
+    (result : Values r) (frame : Frame depth) : Evm.Machine :=
+  {frame.2.1 with stack := coreWord (BitVec.ofFin (result (Fin.cast a.one.symm 0))) ::
+    ((frame.1.toList ++ locals.toList).map coreWord ++ frame.2.2)}
+
+def certify (a : Compiled fuel expr) (depth : Nat) (program : Backend.Program)
+    (code : List Evm.Instr) (emitted : a.lowered.code depth = some program)
+    (selected : WordMachine.selectCode program = some code) :
+    Artifact.Realization
+      (fun locals => evalExpr fuel .nil True.intro expr a.profile (sourceLocals locals))
+      (inputFrame (depth := depth)) (outputFrame a) :=
+  Artifact.Realization.ofTotalRun code (fun locals _ => (a.value locals).toFin) a.source
+    (fun locals frame => WordExecution.loweredExpr_machine a.lowered depth program code
+      emitted selected locals frame.1 frame.2.1 frame.2.2)
+
+def prepare (depth : Nat) (a : Compiled fuel expr) :=
+  Artifact.prepareResult (fun a : Compiled fuel expr => a.lowered.code depth)
+    WordMachine.selectCode
+    (fun a program emitted code selected => certify a depth program code emitted selected) a
+
+abbrev Preparation (fuel depth : Nat) (expr : Expr [] [] n r) :=
+  Artifact.ResultImage (prepare (fuel := fuel) (expr := expr) depth)
+
+theorem prepared (a : Compiled fuel expr) (program : Backend.Program)
+    (code : List Evm.Instr) (emitted : a.lowered.code depth = some program)
+    (selected : WordMachine.selectCode program = some code) :
+    prepare depth a = some (certify a depth program code emitted selected) :=
+  Artifact.prepareResult_some _ _ _ a program code emitted selected
+
+theorem emission_none (a : Compiled fuel expr) (refused : a.lowered.code depth = none) :
+    prepare depth a = none :=
+  Artifact.prepareResult_none
+    (fun a : Compiled fuel expr => a.lowered.code depth) WordMachine.selectCode
+    (fun a program emitted code selected => certify a depth program code emitted selected) a refused
+
+namespace Controls
+def source : Expr [] [] 1 1 :=
+  .builtin (.pure .add) (Fin.cases (.local 0) (fun _ => .literal 3))
+def producer : Compiled 2 source := (ProducerExpressions.compile 2 source).get (by rfl)
+def program := (producer.lowered.code 2).get (by rfl)
+def code := (WordMachine.selectCode program).get (by rfl)
+def artifact := certify producer 2 program code rfl rfl
+
+theorem selected : prepare 2 producer = some artifact := prepared _ _ _ rfl rfl
+
+theorem effectful (locals : Vector Scalar.Word 1) (newer : Vector Scalar.Word 2)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run artifact.code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+      .ok {m with stack := coreWord (producer.value locals) ::
+        ((newer.toList ++ locals.toList).map coreWord ++ caller)} 0 :=
+  artifact.source_to_model locals (fun _ => (producer.value locals).toFin)
+    (producer.source locals) (newer, m, caller)
+
+theorem reflected (locals : Vector Scalar.Word 1) (frame : Frame 2)
+    (final : Evm.Machine) (skip : Nat)
+    (ran : Evm.run artifact.code (inputFrame locals frame) = .ok final skip) :
+    ∃ result, evalExpr 2 .nil True.intro source producer.profile (sourceLocals locals) = some result ∧
+      skip = 0 ∧ final = outputFrame producer locals result frame :=
+  artifact.model_to_source locals frame final skip ran
+
+#guard producer.value #v[7] = 10
+
+theorem refused_emission : producer.lowered.code 16 = none := rfl
+theorem refused_preparation : (Artifact.toResultImage (prepare 16) producer).payload = none :=
+  emission_none producer refused_emission
+theorem refused_original : Artifact.recoverResult
+    (Artifact.toResultImage (prepare 16) producer) = producer :=
+  Artifact.result_source_roundtrip (prepare 16) producer
+
+theorem source_completes (locals : Vector Scalar.Word 1) :
+    evalExpr 2 .nil True.intro source producer.profile (sourceLocals locals) =
+      some (fun _ => (producer.value locals).toFin) := producer.source locals
+#guard (ProducerExpressions.compile 0 source).isNone
+end Controls
+
+#print axioms certify
+#print axioms prepare
+#print axioms prepared
+#print axioms emission_none
+#print axioms Controls.selected
+#print axioms Controls.effectful
+#print axioms Controls.reflected
+#print axioms Controls.refused_emission
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_original
+#print axioms Controls.source_completes
+#print axioms Artifact.Realization.ofTotalRun
+#print axioms Artifact.prepareResult
+#print axioms Artifact.prepareResult_none
+#print axioms Artifact.prepareResult_some
+#print axioms Artifact.result_source_roundtrip
+#print axioms Artifact.result_image_roundtrip
+end Solidity.Yul.Compilation.H55ControlFamilies.Expressions

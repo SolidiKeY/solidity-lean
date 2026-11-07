@@ -120,5 +120,41 @@ theorem image_roundtrip {E : Type} {encode : E → Artifact depth stmt} (image :
   rcases image with ⟨original,artifact,agrees⟩
   cases agrees
   rfl
+/-- Typed result certificates extend the common interface to computations whose
+stack effect differs from normal statement completion. Source, input and output
+observations are the actual existing typed evaluators and machine frames; this
+interface introduces no source syntax, state or compiler. -/
+structure Realization {Input Output Frame : Type}
+    (source : Input → Option Output) (before : Input → Frame → Evm.Machine)
+    (after : Input → Output → Frame → Evm.Machine) where
+  code : List Evm.Instr
+  source_to_model : ∀ input output, source input = some output → ∀ frame,
+    Evm.run code (before input frame) = .ok (after input output frame) 0
+  model_to_source : ∀ input frame final skip,
+    Evm.run code (before input frame) = .ok final skip →
+    ∃ output, source input = some output ∧ skip = 0 ∧ final = after input output frame
+
+namespace Realization
+variable {Input Output Frame : Type} {source : Input → Option Output}
+    {before : Input → Frame → Evm.Machine} {after : Input → Output → Frame → Evm.Machine}
+
+/-- The result is constrained by the actual source evaluator. Full target
+result injectivity reflects the complete machine and pending-skip observation. -/
+def ofTotalRun (code : List Evm.Instr) (value : Input → Output)
+    (sourceRun : ∀ input, source input = some (value input))
+    (modelRun : ∀ input frame, Evm.run code (before input frame) =
+      .ok (after input (value input) frame) 0) : Realization source before after where
+  code := code
+  source_to_model := by
+    intro input output ran frame
+    have same : value input = output := Option.some.inj ((sourceRun input).symm.trans ran)
+    cases same
+    exact modelRun input frame
+  model_to_source := by
+    intro input frame final skip ran
+    have same := Evm.Out.ok.inj ((modelRun input frame).symm.trans ran)
+    exact ⟨value input, sourceRun input, same.2.symm, same.1.symm⟩
+
+end Realization
 end Artifact
 end Solidity.Yul.Compilation
