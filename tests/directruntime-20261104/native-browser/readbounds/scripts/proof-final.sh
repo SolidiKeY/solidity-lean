@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
-bash .lake/native-browser-readbounds-6513/proof-gates-post-rebase.sh
-bash .lake/native-browser-readbounds-6513/axiom-gates-post-rebase.sh
+bash tests/directruntime-20261104/native-browser/readbounds/scripts/proof-gates-post-rebase.sh
+bash tests/directruntime-20261104/native-browser/readbounds/scripts/axiom-gates-post-rebase.sh

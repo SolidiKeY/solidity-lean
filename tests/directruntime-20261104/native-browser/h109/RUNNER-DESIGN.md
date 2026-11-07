@@ -44,7 +44,8 @@ prepare-plan.py binds bytes to Git blobs/tree and SHA256 without executing
 anything. Unknown entries, target drift, source changes and unsupported root
 syntax fail closed. The worker receives a sealed read-only source snapshot;
 untracked and ignored source files cannot enter through the live checkout.
-This phase does not yet implement snapshot creation or its mount verification.
+The raw Git materialization helper is available; production capacity enforcement
+and read-only snapshot mount verification remain incomplete.
 The snapshot must include isolated Git metadata because per-file gate.sh invokes
 Git. Construct it from a pinned sealed bundle into a private clone, never by
 pointing at live .git or a shared worktree common directory. Disable system and

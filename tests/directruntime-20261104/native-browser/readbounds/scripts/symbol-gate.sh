@@ -5,4 +5,4 @@ export EM_CONFIG=/emsdk/.emscripten EMCC_CORES=1 BINARYEN_CORES=1 LEAN_NUM_THREA
 export EM_CACHE="$PWD/.lake/native-browser-wasm/direct-toolchain-cache"
 exec 9>/tmp/solidity-lean-feature-groups-20261025/writer.lock
 flock 9
-timeout --kill-after=10s 300s python3 .lake/native-browser-readbounds-6513/stack-symbols.py
+timeout --kill-after=10s 300s python3 tests/directruntime-20261104/native-browser/readbounds/scripts/stack-symbols.py

@@ -4,6 +4,8 @@ Read-only point-in-time PID/cgroup-v2 observer. Kernel PID membership identifies
 its group even when a cgroup namespace reports '/'. Visible ancestor constraints
 are upper bounds, never complete host-lineage/CI/ownership authentication. No
 worker, cgroup creation, budget authorization or cleanup operation is exposed.
+Actual hierarchy-root budget files may be absent; those fields stay unknown,
+not zero. Delegated/view roots with controller files retain ordinary validation.
 """
 import importlib.util
 import json
@@ -155,7 +157,11 @@ def locate(rootfd, pid, max_groups=4096, max_depth=32):
         seen += 1
         if seen > max_groups or depth > max_depth:
             raise ObservationError('cgroup search bound exceeded')
-        if _read(fd, 'cgroup.type') != 'domain':
+        try:kind=_read(fd,'cgroup.type')
+        except FileNotFoundError:
+            if depth!=0 or not constraints(fd,root=True)['hierarchyRootProfile']:raise
+            kind='hierarchy-root'
+        if kind not in ('domain','hierarchy-root'):
             raise ObservationError('unsupported threaded cgroup layout')
         members = [number(x) for x in _read(fd, 'cgroup.procs').splitlines()]
         if members.count(pid) > 1:
@@ -191,12 +197,37 @@ def locate(rootfd, pid, max_groups=4096, max_depth=32):
         raise
 
 
-def constraints(fd):
-    kind = _read(fd, 'cgroup.type')
+def optional_root_read(fd,name,parser,root_profile=False):
+    try:return parser(_read(fd,name))
+    except FileNotFoundError:
+        if root_profile:return None
+        raise
+
+
+def constraints(fd,root=False):
+    try:kind=_read(fd,'cgroup.type')
+    except FileNotFoundError:
+        if not root:raise
+        # A real hierarchy root has no non-root controller budget interfaces.
+        # A delegated/view root with cgroup.type still takes the ordinary path.
+        for name in ('cgroup.controllers','cgroup.subtree_control'):
+            if any(not re.fullmatch(r'[a-z][a-z0-9_]*',field) for field in _read(fd,name).split()):
+                raise ObservationError('invalid hierarchy-root controller list')
+        absent=('memory.max','memory.high','memory.swap.max','cpu.max','cpu.max.burst','cpu.weight')
+        for name in absent:
+            try:_read(fd,name)
+            except FileNotFoundError:continue
+            raise ObservationError('inconsistent hierarchy-root profile')
+        return {'cgroupType':'hierarchy-root','hierarchyRootProfile':True,
+            'memoryMaxBytes':None,'memoryHighBytes':None,'swapMaxBytes':None,
+            'cpuMax':{'quota':None,'period':None},'cpuBurstMicroseconds':None,'cpuWeight':None,
+            'effectiveCpuIntervals':optional_root_read(fd,'cpuset.cpus.effective',cpu_set,True),
+            'absentControllerFiles':list(absent),
+            'limitBoundary':'Root controller budgets are not exposed here; absent values are unknown/not applicable, never zero. Hidden ancestors are not authenticated.'}
     weight = number(_read(fd, 'cpu.weight'))
     if kind != 'domain' or not 1 <= weight <= 10000:
         raise ObservationError('unsupported cgroup type or CPU weight')
-    return {'cgroupType': kind, 'memoryMaxBytes': limit(_read(fd, 'memory.max')),
+    return {'cgroupType': kind, 'hierarchyRootProfile':False, 'memoryMaxBytes': limit(_read(fd, 'memory.max')),
             'memoryHighBytes': limit(_read(fd, 'memory.high')),
             'swapMaxBytes': limit(_read(fd, 'memory.swap.max')),
             'cpuMax': cpu_limit(_read(fd, 'cpu.max')),
@@ -238,7 +269,8 @@ def cpu_configuration(rows):
     Quota credit, period boundaries and burst allow short-interval parallelism.
     This is not a complete scheduling-policy or serial-execution attestation.
     """
-    concurrency = min(sum(b-a+1 for a,b in row['constraints']['effectiveCpuIntervals']) for row in rows)
+    sets=[row['constraints']['effectiveCpuIntervals'] for row in rows if row['constraints']['effectiveCpuIntervals'] is not None]
+    concurrency = min(sum(b-a+1 for a,b in intervals) for intervals in sets) if sets else None
     rates = [Fraction(row['constraints']['cpuMax']['quota'], row['constraints']['cpuMax']['period'])
              for row in rows if row['constraints']['cpuMax']['quota'] is not None]
     rate = min(rates) if rates else None
@@ -272,27 +304,29 @@ def observe(pid=None):
         hierarchy = locate(rootfd, pid)
         rows = []
         for path, fd in hierarchy:
-            rows.append({'path': path, 'identity': _identity(fd), 'constraints': constraints(fd),
-                         'memoryCurrentBytes': number(_read(fd, 'memory.current')),
-                         'memoryPeakBytes': number(_read(fd, 'memory.peak')),
-                         'swapCurrentBytes': number(_read(fd, 'memory.swap.current')),
-                         'memoryEvents': counters(_read(fd, 'memory.events'), ['oom', 'oom_kill']),
-                         'cpuStat': counters(_read(fd, 'cpu.stat'), ['usage_usec'])})
-        for (_, fd), row in zip(hierarchy, rows):
-            if constraints(fd) != row['constraints']:
+            observed=constraints(fd,root=(path=='/'));profile=observed['hierarchyRootProfile']
+            rows.append({'path': path, 'identity': _identity(fd), 'constraints': observed,
+                         'memoryCurrentBytes': optional_root_read(fd,'memory.current',number,profile),
+                         'memoryPeakBytes': optional_root_read(fd,'memory.peak',number,profile),
+                         'swapCurrentBytes': optional_root_read(fd,'memory.swap.current',number,profile),
+                         'memoryEvents': optional_root_read(fd,'memory.events',lambda value:counters(value,['oom','oom_kill']),profile),
+                         'cpuStat': optional_root_read(fd,'cpu.stat',lambda value:counters(value,['usage_usec']),profile)})
+        for (path, fd), row in zip(hierarchy, rows):
+            if constraints(fd,root=(path=='/')) != row['constraints']:
                 raise ObservationError('resource constraints changed during capture')
         if pid not in [number(x) for x in _read(hierarchy[-1][1], 'cgroup.procs').splitlines()]:
             raise ObservationError('PID moved out of observed cgroup')
         if _process(process, pid) != identity or mount_record(Path('/proc/self/mountinfo').read_text()) != primary:
             raise ObservationError('process, affinity, namespace or mount identity changed')
         intervals = rows[-1]['constraints']['effectiveCpuIntervals']
-        if any(not any(low <= cpu <= high for low, high in intervals) for cpu in identity['affinity']):
+        if intervals is not None and any(not any(low <= cpu <= high for low, high in intervals) for cpu in identity['affinity']):
             raise ObservationError('process affinity lies outside observed effective CPU set')
         end = _sample(clock)
         if start['bootId'] != end['bootId']:
             raise ObservationError('boot identity changed')
         return {'status': 'observed', 'process': identity, 'mount': primary,
                 'captureStart': start, 'captureEnd': end, 'ancestors': rows,
+                'affinityCpusetChecked':intervals is not None,
                 **cpu_configuration(rows),
                 'completeHostLineageAuthenticated': False, 'dockerOwnershipAuthenticated': False,
                 'memoryMetric': 'charged cgroup memory; not aggregate process RSS',

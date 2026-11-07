@@ -87,12 +87,48 @@ class ResourceControls(unittest.TestCase):
         dev=self.root.stat().st_dev
         return {'point':str(self.root),'device':[os.major(dev),os.minor(dev)]}
 
+    def hierarchy_root_fixture(self,cpuset=True):
+        for p in self.root.iterdir():p.unlink()
+        (self.root/'cgroup.procs').write_text('777\n')
+        (self.root/'cgroup.controllers').write_text('cpu memory cpuset\n')
+        (self.root/'cgroup.subtree_control').write_text('cpu memory\n')
+        if cpuset:(self.root/'cpuset.cpus.effective').write_text('0-4\n')
+        dev=self.root.stat().st_dev
+        return {'point':str(self.root),'device':[os.major(dev),os.minor(dev)]}
+
+    def test_actual_hierarchy_root_has_no_manufactured_controller_budgets(self):
+        primary=self.hierarchy_root_fixture()
+        clock=SimpleNamespace(capture=lambda:{'bootId':'fixture'},ClockError=RuntimeError)
+        with mock.patch.object(m,'_directory',side_effect=lambda path:os.dup(self.fd)),mock.patch.object(m,'mount_record',return_value=primary),mock.patch.object(m,'_process',return_value={'pid':777,'affinity':[0]}),mock.patch.object(m,'_clock_module',return_value=clock):
+            observed=m.observe(777)
+        root=observed['ancestors'][0]
+        self.assertTrue(root['constraints']['hierarchyRootProfile'])
+        self.assertEqual(root['constraints']['cgroupType'],'hierarchy-root')
+        for key in ('memoryCurrentBytes','memoryPeakBytes','swapCurrentBytes','memoryEvents','cpuStat'):
+            self.assertIsNone(root[key])
+        self.assertIsNone(root['constraints']['cpuWeight'])
+        self.assertEqual(observed['visibleCpusetConcurrentCpuUpperBound'],5)
+        self.assertIsNone(observed['visibleConfiguredSustainedQuotaRate'])
+
+    def test_root_without_cpuset_is_unknown_not_zero_or_process_affinity(self):
+        self.hierarchy_root_fixture(cpuset=False)
+        row={'constraints':m.constraints(self.fd,root=True)}
+        self.assertIsNone(row['constraints']['effectiveCpuIntervals'])
+        self.assertIsNone(m.cpu_configuration([row])['visibleCpusetConcurrentCpuUpperBound'])
+        with self.assertRaises(FileNotFoundError):m.constraints(self.fd)
+
+    def test_nonroot_missing_controller_and_inconsistent_root_fail_closed(self):
+        self.observation_fixture();(self.root/'memory.max').unlink()
+        with self.assertRaises(FileNotFoundError):m.constraints(self.fd,root=True)
+        self.hierarchy_root_fixture();(self.root/'memory.max').write_text('max\n')
+        with self.assertRaisesRegex(m.ObservationError,'inconsistent hierarchy-root'):m.constraints(self.fd,root=True)
+
     def test_constraint_drift_rejected_without_descriptor_leak(self):
         primary=self.observation_fixture();identity={'pid':777,'affinity':[0]}
         clock=SimpleNamespace(capture=lambda:{'bootId':'fixture'},ClockError=RuntimeError)
         real=m.constraints;calls=[0]
-        def drift(fd):
-            data=real(fd);calls[0]+=1
+        def drift(fd,**kwargs):
+            data=real(fd,**kwargs);calls[0]+=1
             if calls[0]==2:data['swapMaxBytes']=1
             return data
         before=len(list(Path('/proc/self/fd').iterdir()))

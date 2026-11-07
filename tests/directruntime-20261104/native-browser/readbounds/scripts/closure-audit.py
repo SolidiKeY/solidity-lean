@@ -1,5 +1,13 @@
 """External exhaustive selected-C/object inventory; not semantic preservation."""
-import hashlib,json,pathlib,re,subprocess,types
+import argparse,hashlib,importlib.util,json,pathlib,re,subprocess,types
+if not __debug__:raise RuntimeError("closure validation requires Python assertions enabled")
+arguments=argparse.ArgumentParser(description=__doc__)
+arguments.add_argument('--baseline-evidence-dir',type=pathlib.Path,required=True)
+options=arguments.parse_args()
+baseline_path=pathlib.Path(__file__).resolve().parents[1]/'baseline-inputs.py'
+spec=importlib.util.spec_from_file_location('closure_baseline',baseline_path)
+baseline_module=importlib.util.module_from_spec(spec);spec.loader.exec_module(baseline_module)
+baseline=baseline_module.load(options.baseline_evidence_dir)
 root=pathlib.Path.cwd();out=pathlib.Path('/workspace/scratch/browser-chain/readbounds-6513/closure');assert not out.exists();out.mkdir()
 native=root/'.lake/native-browser-readbounds-6513/native';wasm=root/'.lake/native-browser-readbounds-6513/direct';prefix=root/'.lake/native-browser-prefix'
 def sha(p):
@@ -26,8 +34,8 @@ save('selected-C-objects.json',records)
 symbols=subprocess.check_output(['nm','-C','--defined-only',str(native/'direct-check')],text=True);(out/'native-symbols.txt').write_text(symbols)
 blocked=re.compile(r"\b(?:lean_initialize|lean_import_modules|l_Lean_importModules|l_Lean_(?:Elab|Meta|Environment|Kernel)_\w*|initialize_Lean_(?:Elab|Meta|Environment|Kernel)\w*)\b|lean::(?:environment|type_checker|module_mgr)\b")
 coarse=[line for line in symbols.splitlines() if blocked.search(line)];save('coarse-origin-scan.json',{'binarySha256':n['executable'],'flags':coarse,'passed':not coarse,'boundary':'Conservative origin-name scan, retained separately from exact-body classification.'})
-before=root/'docs/benchmarks/directruntime-2026-11-04/before';old=json.loads((before/'native-stub-classification.json').read_text());assert old['passed'];oldCoarse=json.loads((before/'native-audit.json').read_text());assert sha(before/'native-audit.json')==old['coarseReceiptSha256'];assert oldCoarse['binarySha256']==old['binarySha256']
-oldIdent=json.loads((before/'native-input-identities.json').read_text())
+old=baseline['native-stub-classification.json']['data'];assert old['passed'];oldCoarse=baseline['native-audit.json']['data'];assert baseline['native-audit.json']['sha256']==old['coarseReceiptSha256'];assert oldCoarse['binarySha256']==old['binarySha256']
+oldIdent=baseline['native-input-identities.json']['data']
 for path,digest in oldIdent['headers'].items():assert sha(prefix/path)==digest
 machine_calls={'lean_dec_ref_cold','lean_nat_big_lt','lean_string_utf8_get','lean_string_utf8_next','lean_nat_big_eq','lean_notify_assert','lean_inc_heartbeat','lean_internal_panic_out_of_memory','mi_malloc_small'}
 classified=[];failures=[];modules={r['module']:r for r in records};actualFlags={line.split()[-1] for line in coarse};expectedFlags={'initialize_'+r['module'].replace('.','_') for r in old['records']}
@@ -49,5 +57,5 @@ if leanUndefined:failures.append('unresolved Lean imports')
 dynamic=subprocess.check_output(['readelf','-d',str(native/'direct-check')],text=True);(out/'native-dynamic.txt').write_text(dynamic)
 if re.search(r'NEEDED.*(?:liblean|libLean)',dynamic):failures.append('dynamic Lean library')
 node='/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node';js="const fs=require('fs');const m=new WebAssembly.Module(fs.readFileSync(process.argv[1]));console.log(JSON.stringify({imports:WebAssembly.Module.imports(m),exports:WebAssembly.Module.exports(m)}));";interface=json.loads(subprocess.check_output([node,'-e',js,str(wasm/'direct.wasm')],text=True));save('wasm-interface.json',interface)
-save('origin-classification.json',{'binarySha256':n['executable'],'baselineClassificationSha256':sha(before/'native-stub-classification.json'),'coarseReceiptSha256':sha(out/'coarse-origin-scan.json'),'records':classified,'unresolvedLeanImports':leanUndefined,'failures':failures,'passed':not failures,'boundary':'Exact compiled C bodies of all frontend-origin modules equal independently reviewed baseline; current machine callees checked. No namespace exemption or general purity/semantic theorem.'})
+save('origin-classification.json',{'binarySha256':n['executable'],'baselineClassificationSha256':baseline['native-stub-classification.json']['sha256'],'coarseReceiptSha256':sha(out/'coarse-origin-scan.json'),'records':classified,'unresolvedLeanImports':leanUndefined,'failures':failures,'passed':not failures,'boundary':'Exact compiled C bodies of all frontend-origin modules equal independently reviewed baseline; current machine callees checked. No namespace exemption or general purity/semantic theorem.'})
 report={'nativeSha256':n['executable'],'wasmSha256':w['wasm'],'bridgeSha256':bridge,'closureScriptSha256':sha(source),'closure':stats,'selectedModulesInventoried':len(records),'compiledCParityDifferences':differences,'originClassificationPassed':not failures,'staticSelectedCParityPassed':not differences,'wasmInterface':interface,'newOrChangedWorkerTheorems':[],'boundary':'Exhaustive inventory of selected extracted C modules/objects and static imports/exports, plus exact-body classification and request-specific runtime traces elsewhere. Not exhaustive source grammar, intrinsic/source preservation or universal native correctness.'};save('summary.json',report);print(json.dumps({k:report[k] for k in ['selectedModulesInventoried','compiledCParityDifferences','originClassificationPassed','staticSelectedCParityPassed']}));assert not failures and not differences

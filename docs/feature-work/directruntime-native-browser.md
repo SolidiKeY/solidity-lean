@@ -1005,7 +1005,8 @@ closure has matching native/WASM compiled bodies and an off-Git raw C archive.
 Browser negatives remain FAIL 13/14: a byte-identical diagnostic symbol map
 identifies repeated frame 2388 as BEnv.set in DecideScoped. No runtime or timing
 STOP is cleared. See tests/directruntime-20261104/native-browser/readbounds/README.md
-and its results-manifest.json for commands, resources, wrappers and sealed data.
+for tracked wrappers. Commands, resources and sealed records are in the private
+coordination repository under `evidence/solidity-directruntime-20261104/native-browser/`.
 
 The rebased branch preserves the 15-member slow-library registration. H127 has
 reviewed source-inventory and runtime dependency-order components, not a complete

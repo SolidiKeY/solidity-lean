@@ -260,7 +260,7 @@ class ReserveMonitor:
 
     def add(self,path,fd,worker):
         with self.lock:
-            identity=resources._identity(fd);constraints=resources.constraints(fd)
+            identity=resources._identity(fd);constraints=resources.constraints(fd,root=(path=='/'))
             duplicate=os.dup(fd)
             try:self.entries.append({'path':path,'fd':duplicate,'identity':identity,
                 'constraints':constraints,'worker':worker,'removed':False})
@@ -275,13 +275,13 @@ class ReserveMonitor:
                 if entry['removed']:continue
                 if os.fstat(fd).st_nlink==0 and entry['worker']:
                     entry['removed']=True;rows.append({'path':entry['path'],'removedPinnedGroup':entry['identity']});continue
-                constraints=resources.constraints(fd)
+                constraints=resources.constraints(fd,root=(entry['path']=='/'))
                 if constraints!=entry['constraints'] or resources._identity(fd)!=entry['identity']:
                     raise ProbeError('monitored kernel constraints or identity changed')
-                current=resources.number(resources._read(fd,'memory.current'))
+                current=resources.optional_root_read(fd,'memory.current',resources.number,constraints.get('hierarchyRootProfile',False))
                 maximum=constraints['memoryMaxBytes']
                 row={'path':entry['path'],'identity':entry['identity'],'memoryCurrentBytes':current,'memoryMaxBytes':maximum}
-                if maximum is not None and not entry['worker']:
+                if maximum is not None and current is not None and not entry['worker']:
                     row['availableBytes']=maximum-current;available.append(maximum-current)
                 rows.append(row)
             self.samples.append({'monotonicNs':time.monotonic_ns(),'groups':rows})
