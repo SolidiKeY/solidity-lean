@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/constructor-immutable-roles-v114/semantic-roles-reviewed.json",
-    "bytes": 3900288,
-    "sha256": "d6f91b944783f985170ee2b65db918351870fe48b219496d68a4af9a6af75cc1"
+    "path": "/workspace/h62-successor-bulk/failure-emission-roles-v115/semantic-roles-reviewed.json",
+    "bytes": 3953325,
+    "sha256": "a87b0c51ac91beddbb31bf49f92d93187e43baf6dd5d78295405309a11ca7e52"
   }
 }
