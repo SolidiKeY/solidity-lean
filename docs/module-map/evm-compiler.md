@@ -139,6 +139,11 @@
 | `Backend/PrimitivePackets/Bitwise/Source.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/SolcJson/TryPanicCallMetadata.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Payments/CoreExact.lean` | G43: the core compiler with no refused-payment outcome (`compile_paid`, `compile_success`, `compile_revert`, `compile_storage_paid`); `Sim` carries the joint world/payment relation. |
+| `Backend/Payments/CompilerExact.lean` | G43: `AgreesExact`, `correct_exact` and the compiler-success theorem `compile_success` over every `Compilation` result. |
+| `Backend/Payments/Versioned.lean` | G43 V2 (H57/H98): `Compilation.AgreesV2`/`correct_v2`, `compile_correct_v2`, `_of_v2` migration lemmas to the frozen statements, empty payment branches. |
+| `Backend/Payments/VersionedControls.lean` | G43 V2 witnesses and controls on `payOwner`: joint satisfiability, success and refusal on both sides, the oracle premise carrying the weight. |
+| `Backend/Payments/Headlines.lean` | G43 V2 of `Theorems.compiler_correct`/`compiler_checked` in their notation, with migration lemmas and pinned axioms. |
 | `Evm/MemoryLoopHorizonObjectHeapGrowth.lean` | Actual allocating-body heap extension and exact initial-length-plus-count growth through scope exit. |
 | `Evm/MemoryLoopHorizonObjectHeapControls.lean` | Existentially witnessed selected-loop execution with matched object count and cursor observations. |
 | `Evm/MemoryLoopHorizonObjectHeapKeeps.lean` | Original typed objects survive actual empty-array allocation prefixes. |

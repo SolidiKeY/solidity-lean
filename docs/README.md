@@ -179,6 +179,8 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
 V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+- [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
+- V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 
 - [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical codecs, finite storage/selected byte-heap writeback and retained-allocation resizing/supported byte/mixed aggregate heap views and selected word/dynamic uint256 retained-capacity/simultaneous heterogeneous struct and canonical bool/reference array writeback with retained-capacity resizing and canonical scalar-memory extension with exact legacy compatibility, real alias controls and joint ordinary-memory source/placement composition and arbitrary finite canonical owned-inventory writeback, registered residual journals, actual selected-step MemOK and outstanding concrete integration.

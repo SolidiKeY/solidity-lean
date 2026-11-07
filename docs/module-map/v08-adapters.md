@@ -953,5 +953,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedEndpointControls.lean` | Concrete scoped-return instances, restored result/counter/older-frame observations, frame refusal and zero-cost return without allocator ownership. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransport.lean` | Actual scoped-checker success yields frozen success/bare-revert claims for every original Entry, caller, frame and runtime cursor at fixed C/A; no approved-profile or selector claim. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScopedTransportControls.lean` | Checked scoped-call argument-underflow transport preserves complete ordered bare-revert/non-success/panic/exhaustion distinctions without failed-State/world claims. |
+| `Backend/Executable/ConstructorArgumentControls.lean` | Inhabited argument-preparation controls, not constructor/runtime closure. |
+| `Backend/Executable/ConstructorArgumentFailure.lean` | Effectful local-argument failure at the native constructor boundary. |
+| `Backend/Executable/ConstructorBaseArgumentControls.lean` | Native inherited-argument clients with declaration-derived constructor contexts. |
+| `Backend/Executable/ConstructorBaseArguments.lean` | Actual inherited-constructor argument binding. |
+| `Backend/Executable/ConstructorStorageFailure.lean` | Storage-effect argument failure at the native constructor boundary. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
