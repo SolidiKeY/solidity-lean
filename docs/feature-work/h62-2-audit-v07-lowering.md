@@ -69,3 +69,27 @@ V07 census. Production sources, frozen statements and budgets are unchanged.
 Independent read-only finder and skeptic reviews passed with no findings; neither
 reviewer used Lean or a server. The global documentation check retains the three
 previously routed Theory/StructuredFlow missing references.
+
+
+## Reached-RHS separation boundary
+
+PairSeparationBoundary.lean guards removal of the existing pair separation
+premise by executing the actual assignAssignPrefix with the first destination
+equal to the second RHS. For arbitrary legal integer widths/signs and bounded
+values, viaIR captures x twice after overwriting the RHS; legacy captures its
+initial z twice. When x differs from z, the completed prefix runs differ by an
+observable captured local. The premise is inhabited, for example by u8 values
+7 and 9. This is a boundary of the operational prefix theorem, not a claim that
+IntegerLocalFamily.assign_pair itself fails without separation.
+
+Master 94f9862b6 was fetched, inspected and merged before implementation; no
+corresponding audit was present. The final serial Lean 4.24.0 per-file check
+passed in 1.583s under the unchanged 12GiB/no-swap/4GiB-reserve policy. Four
+printed theorem axiom sets use only propext, Classical.choice and Quot.sound.
+An intermediate output-projection type error was repaired by supplying the
+explicit intrinsic output type; its failed log remains preserved. Independent
+read-only finder and skeptic reviews passed without findings or Lean/server use.
+Logs are /workspace/sol-numeric-literals-gate-output/v07-pair-separation-checked.json
+and the corresponding checked-files/1.log. These local completed-prefix results
+do not establish gas, compiler totality, or a full interface census. No producer,
+frozen statement, budget, axiom set or exclusion was changed.
