@@ -2367,3 +2367,30 @@ comparison now rejects those substitutions; regression cases cover private and
 proof-type flags. Both reviewers pass the correction and final provenance join.
 All original 703-source, source/statement/owner, joint-witness/supported-success,
 Source/physical, gas/fork, Bridge/runtime and performance obligations remain.
+
+### Projection registry and raw type metadata
+
+A supplemental native inspector observes the actual projection registry, constructor
+and inductive types for all 130 projection records in the existing 150-module
+metadata prefix. It retains missing-metadata statuses explicitly and preserves the
+original inspector schema and template. The 130 records span 42 modules and 50
+constructors; parameter counts, field indices and structure membership agree in
+all records. RawTailGuardCertificate is the sole parent-bearing structure in this
+subset. These are uninstantiated type expressions, not inherited-type proofs,
+source ownership, field feasibility or joint witnesses.
+
+Two serial native checks took 6.718 and 7.429 seconds. Repeated metadata is
+identical apart from receipt fingerprints; the second source adds class-flag and
+wrong-module controls. Four hundred thirty-two frozen import products are
+rechecked against the earlier source/product receipt. The parser rejects stale
+types, modules, fingerprints, malformed Boolean/natural fields and incomplete
+streams. All 115 Python tests pass. The failed initial Name-qualification probe
+is retained alongside both passing runs. Independent finder and skeptic pass
+the generator, parser and provenance verifier. No census, source correspondence,
+inherited instantiation, global ledger or runtime acceptance is inferred.
+
+Evidence and non-mutating replay: /workspace/parallel-20261103/executable-bytecode/
+projection-registry-inspection/verify-inspection.py --check. H1 cleanup records
+retain SHA256-identical frozen products while removing owned live build copies;
+shared caches and earlier seals are unchanged. Original source closure and
+PowerBounds STOP remain binding.
