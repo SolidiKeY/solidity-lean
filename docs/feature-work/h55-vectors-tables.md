@@ -330,3 +330,21 @@ Fresh operand data, emitted sources, provenance hashes and object cache are
 under `/workspace/scratch/words-oracle-recheck-71c5963/`, off Git.
 The object pack is `oracle-objects.tar.gz`, SHA-256
 `2c34c1a8bca044687e5a2dadf4d38a392e993ee7c070ebcfc531c55e9d5ad3c9`; it is left for coordinator pull, not shipped.
+
+## Additive typed-scope closure slice (gh#77 option A)
+
+The coordinator approved additive generic lemmas over existing context-indexed
+RawFrame and RawTypedScope operations. No stronger element abstraction, new
+state file, representation rewrite or H58 hold release is supplied.
+RawTypedScope now exposes generic clean-tail/world preservation, full captured
+closure metadata, and `project_close`: existing clean-backup projection
+commutes with typed closure without a coherence premise. The original
+`close_correct` signature and coherence premise are unchanged; its proof
+reuses the new generic projection lemma.
+
+`tests/h55/vectors-tables/typed-scope-case-ledger.json` accounts for exactly
+the scope projection's semantic cases: arbitrary halt, normal, break, continue
+and intrinsically impossible leave. An arbitrary halt covers every halt value
+parametrically; the impossible branch claims no joint inhabitant. This ledger
+does not count all Raw files as covered. These are existing clean-backup
+projections, not H109 dirty-readback or general Source execution semantics.
