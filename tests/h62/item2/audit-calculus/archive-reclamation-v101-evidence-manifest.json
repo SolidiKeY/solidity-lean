@@ -1,0 +1,62 @@
+{
+  "scope": "Four exact archive-backed duplicate working reports reclaimed; no role credit; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1252,
+    "pending": 4031,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/evidence.tar.gz",
+      "bytes": 301056,
+      "sha256": "61faa17f0124a2166937d6a7ed957b85088c02c1edfed742874ca12699827d39"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/inputs.json",
+      "bytes": 441,
+      "sha256": "0adec663e947e6a9a3897176a32e6577343918d6157a41fcbbc979d8ac1a3620"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/gates.json",
+      "bytes": 2768,
+      "sha256": "43999d250658bbcd819f6affbd06a0ffafc3c5e98d09409e6dd36c9047ec2923"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/reviews.md",
+      "bytes": 971,
+      "sha256": "75f903579287ee3f5a63726a3e4070b89a8808d8f9bb4af01e998ec6420bfdff"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/case-rosters.json",
+      "bytes": 2493,
+      "sha256": "e4b8041a9f1a56d2ceb5e88e64de117d33eccf3d80d42364764bc6c6356a01ce"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "f69281e7355ffe531bd6e66ba59a148555e5053367c5d275bba3c626085e3cbc"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/external-retention.json",
+      "bytes": 323623,
+      "sha256": "0dc950b344258e8dddef5d02c3ae373c0b6bbc8b834b487ffb48516be82e18cb"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/receipt.json",
+      "bytes": 2700,
+      "sha256": "57049a2b22e6b9b98e7811a59ce09da508208c30cfdc8218907a7a415e7ad2b6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v101/plan.json",
+      "bytes": 2493,
+      "sha256": "e4b8041a9f1a56d2ceb5e88e64de117d33eccf3d80d42364764bc6c6356a01ce"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/sequent-walk-roles-v100/semantic-roles-reviewed.json",
+      "bytes": 3343304,
+      "sha256": "02610915ab563f8b54da2709c70ec2df0990e2c81aca511afaa362e1fa220f4b"
+    }
+  ]
+}
