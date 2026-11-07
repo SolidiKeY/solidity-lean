@@ -1,0 +1,48 @@
+{
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.initial_observations": [],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.prefix_saved_head": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.prefix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.reached_budget_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.reached_input_refused_near_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.reached_observations": [],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.skipped_assignment_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PositiveAllocationWitness.lean:Solidity.Backend.Passes.AuditPositiveAllocationFailure.stale_budget_fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/P8/PlanGraphAdmission.lean:Solidity.Lowering.P8.PlanGraphAdmission.base_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/PlanGraphAdmission.lean:Solidity.Lowering.P8.PlanGraphAdmission.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/PlanGraphAdmission.lean:Solidity.Lowering.P8.PlanGraphAdmission.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

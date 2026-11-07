@@ -1,0 +1,20 @@
+{
+ "Solidity/Lowering/P8/SourceAstTupleCorrespondence.lean:Solidity.Lowering.P8.SourceAstTupleCorrespondence.empty_tuple_rejected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTupleCorrespondence.lean:Solidity.Lowering.P8.SourceAstTupleCorrespondence.optional_hole": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTupleCorrespondence.lean:Solidity.Lowering.P8.SourceAstTupleCorrespondence.optional_reader_agrees": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTupleCorrespondence.lean:Solidity.Lowering.P8.SourceAstTupleCorrespondence.string_bytes_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTupleCorrespondence.lean:Solidity.Lowering.P8.SourceAstTupleCorrespondence.tuple_ok_iff_each": [
+  "Quot.sound",
+  "propext"
+ ]
+}
