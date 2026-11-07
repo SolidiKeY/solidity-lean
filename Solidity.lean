@@ -1440,8 +1440,13 @@ import Solidity.Backend.Passes.SourceAdditionValue
 import Solidity.Backend.Passes.SourceAdditionValueControls
 import Solidity.Backend.Passes.SourceAdditionValuePins
 import Solidity.Backend.Passes.SourceCallBoundary
+import Solidity.Backend.Passes.SourceCallBytes
 import Solidity.Backend.Passes.SourceCallControls
 import Solidity.Backend.Passes.SourceCallFrame
+import Solidity.Backend.Passes.SourceCallProducer
+import Solidity.Backend.Passes.SourceCallProducerControls
+import Solidity.Backend.Passes.SourceCallProducerV2
+import Solidity.Backend.Passes.SourceCallProducerV2Controls
 import Solidity.Backend.Passes.SourceNarrowingValue
 import Solidity.Backend.Passes.SourceNarrowingValueControls
 import Solidity.Backend.Passes.SourceNarrowingValuePins
@@ -1494,6 +1499,7 @@ import Solidity.Backend.Passes.ValueSequencePins
 import Solidity.Backend.Passes.WidthApplication
 import Solidity.Backend.Payments.CompilerExact
 import Solidity.Backend.Payments.CoreExact
+import Solidity.Backend.Payments.EntrySuccess
 import Solidity.Backend.Payments.Headlines
 import Solidity.Backend.Payments.Versioned
 import Solidity.Backend.Payments.VersionedControls
@@ -2719,6 +2725,7 @@ import Solidity.Frontend.ConstantDepth.Correspondence
 import Solidity.Frontend.ConstantDepth.Determinism
 import Solidity.Frontend.ConstantDepth.Lookup
 import Solidity.Frontend.ConstantDepth.Rank
+import Solidity.Frontend.CounterexampleMetadataV1
 import Solidity.Frontend.CreationTryImport
 import Solidity.Frontend.ExecutableAst.ControlTuple.Adapter
 import Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls
@@ -3001,6 +3008,7 @@ import Solidity.Frontend.SolcJson.YulWalkPath
 import Solidity.Frontend.SolcJson.YulWords
 import Solidity.Frontend.Source
 import Solidity.Frontend.SourceUnits
+import Solidity.Frontend.SpecOriginsV1
 import Solidity.Frontend.StatementGrammarH28.AtomAsm
 import Solidity.Frontend.StatementGrammarH28.AtomCall
 import Solidity.Frontend.StatementGrammarH28.AtomConditional
@@ -3214,6 +3222,7 @@ import Solidity.Lowering.P8.CheckedSyntax
 import Solidity.Lowering.P8.ConditionalAssembly
 import Solidity.Lowering.P8.DeclarationGraphAdmission
 import Solidity.Lowering.P8.DeclarationGraphCheck
+import Solidity.Lowering.P8.DeclarationGraphConstraints
 import Solidity.Lowering.P8.DeclarationGraphControls
 import Solidity.Lowering.P8.DispatchCoverage
 import Solidity.Lowering.P8.DispatchCoverageControls
@@ -3225,6 +3234,7 @@ import Solidity.Lowering.P8.FieldAdmission
 import Solidity.Lowering.P8.FrozenInterface
 import Solidity.Lowering.P8.GraphSchema
 import Solidity.Lowering.P8.GraphSchemaControls
+import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
 import Solidity.Lowering.P8.ResourceBoundary
 import Solidity.Lowering.P8.ResourceContractLaw1
@@ -3249,6 +3259,8 @@ import Solidity.Lowering.P8.SourceSize
 import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen
+import Solidity.Lowering.P8b.Merged
+import Solidity.Lowering.P8b.MergedControls
 import Solidity.Lowering.P8b.P8aInterface
 import Solidity.Lowering.P9.AdmissionControls
 import Solidity.Lowering.P9.CallControls
@@ -3317,6 +3329,7 @@ import Solidity.Lowering.Readonly.ResumeControls
 import Solidity.Lowering.Readonly.RootControls
 import Solidity.Lowering.Readonly.SourceAggregateReadEffects
 import Solidity.Lowering.Readonly.SourceAllHistories
+import Solidity.Lowering.Readonly.SourceAllHistoriesV2
 import Solidity.Lowering.Readonly.SourceBodyControls
 import Solidity.Lowering.Readonly.SourceBodyEffects
 import Solidity.Lowering.Readonly.SourceBuiltinEffects
@@ -3325,6 +3338,8 @@ import Solidity.Lowering.Readonly.SourceCallPrefix
 import Solidity.Lowering.Readonly.SourceCallUnknown
 import Solidity.Lowering.Readonly.SourceDispatchControls
 import Solidity.Lowering.Readonly.SourceDispatchEffects
+import Solidity.Lowering.Readonly.SourceDispatchInterfaceV2
+import Solidity.Lowering.Readonly.SourceDispatchInterfaceV2Controls
 import Solidity.Lowering.Readonly.SourceEnvironmentControls
 import Solidity.Lowering.Readonly.SourceEnvironmentEffects
 import Solidity.Lowering.Readonly.SourceExpressionEffects
@@ -3496,6 +3511,7 @@ import Solidity.Lowering.V07.FixedBytesAssignment
 import Solidity.Lowering.V07.FixedBytesAssignmentControls
 import Solidity.Lowering.V07.FixedBytesComparisonControls
 import Solidity.Lowering.V07.FixedBytesComparisons
+import Solidity.Lowering.V07.GraphAdmissionAssembly
 import Solidity.Lowering.V07.GraphAdmissionBoundary
 import Solidity.Lowering.V07.GraphControls
 import Solidity.Lowering.V07.GraphIdentityControls
@@ -3577,6 +3593,7 @@ import Solidity.Lowering.V07.SignedWordAddition
 import Solidity.Lowering.V07.SignedWordMultiplication
 import Solidity.Lowering.V07.SignedWordSubtraction
 import Solidity.Lowering.V07.SourceReads
+import Solidity.Lowering.V07.SourceRefusal
 import Solidity.Lowering.V07.UdvtAddressAssignment
 import Solidity.Lowering.V07.UdvtAddressAssignmentControls
 import Solidity.Lowering.V07.UdvtAssignment
@@ -4530,6 +4547,7 @@ import Solidity.Yul.Checks.DirectBindings
 import Solidity.Yul.Checks.DirectControl
 import Solidity.Yul.Checks.DirectUpdates
 import Solidity.Yul.Checks.DirectWords
+import Solidity.Yul.Checks.DirtyReadbackControls
 import Solidity.Yul.Checks.EvmArithmetic
 import Solidity.Yul.Checks.EvmBitwise
 import Solidity.Yul.Checks.EvmSigned
@@ -5015,6 +5033,7 @@ import Solidity.Yul.DirectBindings
 import Solidity.Yul.DirectControl
 import Solidity.Yul.DirectUpdates
 import Solidity.Yul.DirectWords
+import Solidity.Yul.DirtyReadback
 import Solidity.Yul.EvmArithmetic
 import Solidity.Yul.EvmBitwise
 import Solidity.Yul.EvmSigned

@@ -12,14 +12,18 @@ Original base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Branch: `codex/solidity-h62-2-20261106/audit-evm-compiler`.
 Repository: `/workspace/audit-evm-compiler`; old clean checkout
 `/workspace/solidity-lean` preserved.
-Authorized origin/master merge fast-forwarded to
-`ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`, containing the reviewed audit head
-`b299b15d79815ec00ebb81cb74e4ca57acc207c9` and retirement head
-`eaaaee17fe61e71ac3b5052839c0cf146eae3072` and coordinator checkpoint
-`20e492ee9`. All 160 original mapped files and their module map remain identical
-to the frozen base. All 321 files in the original core dependency closure are
-also unchanged. Other master changes arrived through the authorized merge;
-this lane's new writes remain in its tests/scripts/document scope.
+Authorized origin/master: `806a972a4f1eefc367f7fe21078e56469447ce13`.
+The saved checkpoint `5fdc14800c129792e7a8f1fc8d7e8aa8288ac3c0` and its
+coordinator-rebased commit `2102e024aadba4290de064c56b4e973d1855a496`
+have the same stable patch ID. Preserving merge
+`c1bc712a9e5c07b8d5ea10d6d9511173463fa1af` integrates master without resetting
+or dropping either history. Its tracked tree matches the authorized master.
+All 160 originally assigned source files remain byte-identical to original
+base. Added module-map rows remain outside that frozen scope. The original
+321-file dependency closure is also unchanged since the previous integration;
+its ten dependency-sensitive captures are retained, including three pending
+raw-type differences from original base. Core and Bridge freshness checks pass.
+No original source or dependency definition was edited by this lane.
 
 H82 permits statement-preserving edits without exact-file agreement; changing
 existing statements, dependent definitions, signatures, budgets, axiom sets or
@@ -39,9 +43,9 @@ master mutation, generated-root/map/axiom-pin edit or new goal was performed.
    and kernel expression. Producer owner master is established for 37 Opcode/
    Jumpdest records by G45.05 and their headers; 1,793 owners remain unresolved.
    The 570 snapshot write-owner candidates and migration overlays are separate.
-2. Joint hypotheses remain partial: 300 unique exact-signature links comprise
-   40 joint witnesses, 23 H69 intentional impossibilities and 237 closed equality
-   statements. The remaining 1,530 rows await classification or witnesses. The
+2. Joint hypotheses remain partial: 340 unique exact-signature links comprise
+   51 joint witnesses, 52 H69 intentional impossibilities and 237 closed equality
+   statements. The remaining 1,490 rows await classification or witnesses. The
    committed 65-link manual ledger is combined with a separately manifested
    235-link closed-equality ledger; both require exact-once reconciliation.
    JumpdestAudit adds exactly one full-telescope witness for each of its 19
@@ -81,7 +85,7 @@ the ledger and audit sources. Ordinary statements still require joint witnesses.
 SCOPE1 and TC1 are resolved; no premise, exclusion or statement was weakened.
 Syntactic is_prop_binder never establishes feasibility by itself.
 
-There are now 92 checked additive theorem declarations: the previous 63, 25
+At the preceding checkpoint there were 92 checked additive theorem declarations: the previous 63, 25
 Jumpdest declarations (19 generated witnesses, two scan helpers, four controls)
 and four closure/alias regression declarations. The closed-equality classifier
 adds zero theorem declarations and retains each unchanged original proof. Printed axiom sets use only
@@ -151,7 +155,7 @@ A fresh-thread handoff after 3–5 completed items never completes the full goal
 
 ## Checkpoint gates and outstanding validation
 
-All eight audit modules pass on the merged tree; all 92 printed theorem axiom
+At that checkpoint all eight audit modules passed; all 92 printed theorem axiom
 sets contain no sorryAx. Freshness checks for all 156 mapped core targets and
 four mapped Bridge targets pass with Lake --no-build, separately from extraction.
 Dependency layers pass (859 core modules, zero elaborator/parser reachability),
@@ -162,7 +166,7 @@ external artifact StringApiWitness.original-unproved in the migration-theory
 report; a synthetic Backend/A fixture in the ABI-world census test; proposed
 PanicBytes in the packet-panic candidate; and two proposed GenericMapped module
 paths in the structured-flow registration fragment. These files are byte-identical
-to the latest authorized integration base ac9d8db2a. No missing reference belongs to
+to that checkpoint integration base ac9d8db2a. No missing reference belongs to
 this lane's changed files. The global gate is reported FAIL, not waived or
 counted as a pass. Resolving it remains an outstanding repository validation
 item, alongside full-library/root checks and the incomplete proof/owner queue.
@@ -182,7 +186,7 @@ bounded Lean process. All 36 module checks passed. Exactly 235 candidates are
 literal equality propositions with no inputs after definition-aware telescope
 expansion and standard axiom sets. Their canonical identities, source names,
 frozen signatures and full raw kernel types match the original census. The
-other 320 candidates remain pending; zero explicit binders alone is insufficient.
+other 320 candidates remained pending at that checkpoint; zero explicit binders alone is insufficient.
 
 The classifier generates no replacement True lemmas. Each new closed record
 retains the original compiled proof. Closed-input accounting establishes neither
@@ -202,7 +206,7 @@ Bulk records stay outside Git and are regenerated with the committed classifier
 and manifest tools. The original 65-link ledger remains unchanged; an actual
 duplicate additional ledger is rejected before output.
 
-The current result is 300 accounted statements and 1,530 pending, with producer
+The closed-equality checkpoint result was 300 accounted statements and 1,530 pending, with producer
 ownership still 37 known and 1,793 unknown. All four original checkpoints remain
 partial. The original full goal is preserved, not reset or declared complete.
 
@@ -221,3 +225,195 @@ retained. Archive verification retains every prior source/artifact check and
 adds authentication of the transported full manifest. Source-only verification
 now needs the external full manifest, explicitly reflecting H44 storage policy.
 The original full assignment remains partial with the same outstanding queue.
+
+## Joint refutations and unified entry witness
+
+The new RefutationAudit module classifies 29 original negative controls and
+observation-separation statements under H69. Every command is preceded by its
+exact source location and intentional reason. JointRefutation reduces the
+entire original telescope, including hypotheses hidden by Not, and proves the
+full existential input package impossible using the unchanged original proof.
+Its positive/negative guards reject ordinary non-refutations. In particular,
+calleeFailure_not_panic separates empty revert from Panic(1); it does not imply
+that its successful input certificate is impossible.
+
+EntryAudit witnesses the complete input package of Compilation.correct using
+the existing closed mutation_input certificate. The fixture allocates an array
+and performs an internal call. JointFromCertificate matches only the final
+original proof input to that closed certificate, requires every data and proof
+argument to become closed, then kernel-checks the complete nested existential.
+No original conclusion supplies an assumption. Conditional certificates and
+undetermined extra data are rejected by checked regression controls.
+
+The enrollment generator reproduces exactly 30 new links from these reviewable
+commands and successful final receipts. Combined with the original 65 links and
+235 closed equalities, this yields 330 unique records: 41 joint, 52 intentional
+impossibilities and 237 closed statements. The remaining 1,500 records, producer
+owner gaps (1,793 unknown), general supported-source success/totality, complete
+negative compiler controls and failure/gas/fork coverage remain unfinished.
+This checkpoint adds 35 checked declarations including helper regressions;
+all 127 additive declarations pass with only the standard three axioms, no
+sorry, new axiom, native_decide or increased proof budget. All twelve modules
+were checked serially after refreshing the merged dependency tree.
+
+Finder and skeptic independently accepted the new proof methods, full tuple
+construction, classifications and duplicate-free counts. Both required the
+three dependency-sensitive type changes to remain explicit and pending.
+The external owner ticket records evalE_selected, evalE_operand and evalE_two
+with original/current expressions and versioned-pair or isolated-dependency
+repair options. No statement repair or scope decision is inferred here.
+
+Lean is 4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b), Lake
+5.0.0-src+797c613. The bounded KeySort prerequisite passes. The refreshed core
+build took 181.09 seconds, peak sampled group RSS 1.67 GB, with at least
+12.47 GB available. These are observations on changed dependencies, not a
+same-tree before/after speed comparison; no timing improvement claim is made.
+No RUNTIME_GATE_PASS or full assignment completion is declared.
+
+At the preceding checkpoint, global static gates were reported independently from proof checks.
+The layer gate fails on twelve newly unallowed core-to-non-core edges already
+present in integration cc1; its 901 core modules still reach neither elaborators
+nor checked parser adapters. This lane changes no original core module, root,
+central map or layer allowance. Scanner/corruption controls and fragment checks
+pass. Full run-lean/root gates and resolution of the inherited layer gate
+failure remain outstanding. No failure is waived or relabeled as a pass.
+
+The current documentation-path gate passes: every backticked Lean reference
+resolves, with 132 ambiguity warnings. Earlier documentation-path failures above
+are historical and have been resolved on the authorized integration baseline.
+
+## Previous checkpoint handoff (cc1 integration)
+
+The next worker retains the original goal, branch and VM. The cumulative patch,
+integration patch, branch bundle, exact committed head and checksum manifest are
+exported under /workspace/audit-evm-compiler-evidence/continuation-3-handoff/.
+The authenticated compact index points to the full bulk archive and manifest;
+expanded data remains off Git. The original rendered assignment, entire
+work/backfill queue and exact scope manifest remain in the committed handoff
+folder and cumulative patch/bundle. Their historical hashes are retained.
+
+All four original checkpoints remain partial: reconcile producer ownership and
+three dependency-sensitive frozen types; jointly witness or classify 1,500
+remaining statements; finish supported-program totality, trivial compiler
+controls and observable failure/gas/fork boundaries; then complete the full
+statement-fidelity census and required final repository gates. The baseline
+layer failure requires coordinator integration repair. Independent scanner,
+additional witnesses, isolated fixtures, acceptance and timing backfill remain
+available within the assigned scope; no new queue or replacement goal is made.
+
+This checkpoint has no original statement/dependent-definition edits, new
+axioms, sorry, trust shortcuts, proof-budget changes, push or master mutation.
+It does not mark the persistent assignment complete or paused. A fresh-thread
+handoff goes through the coordinator after this bounded group of work items.
+
+## Five backend selector joint witnesses
+
+[SelectorAudit](../../tests/h62/item2/audit-evm-compiler/SelectorAudit.lean)
+checks the ordinary memory_input, referenceArray_input, object_input,
+construction_input and memoryCalls_input interfaces in Compiler.Compilation.
+Each witness supplies every actual telescope input together, including the
+backend-selector proof, one correlated result/program, contexts, resource
+values, state and machine. These originals are equivalences; their Input
+expression is on the conclusion side and is not an extra assumed premise.
+This establishes feasibility of each selector interface, not compiler totality.
+
+[InputFixture](../../tests/h62/item2/audit-evm-compiler/InputFixture.lean)
+recovers all twelve arguments and the existing proof from an exact closed
+public Input certificate. It rejects conditional certificates and other closed
+propositions. The resulting safe definition is kernel-checked and carries only
+standard axioms. Five populated fixtures cover legacy memory, separated reference
+arrays, populated objects, object construction and an internal allocation/call.
+No defaults, invented assumptions or original statement changes are used.
+
+The enrollment script's selectors-only mode checks exactly five joint records
+and their final receipt markers. The prior thirty-case mode retains exactly its
+old output. Reconciliation preserves all prior 330 entries and accounts for
+335 original statements: 46 joint witnesses, 52 intentional impossibilities,
+237 closed equalities, with 1,495 still pending. New helpers add six printed
+theorem declarations, for 133 total across fourteen audit modules. Generated
+record projections/recursors and five fixture definitions are not counted as
+new original authored theorem coverage.
+
+Finder and skeptic independently accepted the fixture method and each exact
+selector mapping. The full four-checkpoint queue and all previously recorded
+scope, owner, totality, failure/gas/fork and fidelity obligations remain open.
+The three frozen-type owner tickets remain pending. New module-map additions
+are unassigned registry candidates, not additions to this lane's scope.
+
+The current checkpoint handoff retains the original VM/branch/goal, original
+rendered prompt, full work/backfill queue and exact scope manifest. Its external
+export directory is continuation-4-handoff under the evidence root. The compact
+committed index authenticates all bulk data; new scripts resolve repository
+paths from their own location and receive evidence paths as command arguments.
+No push, replacement goal, pause or completion is performed.
+
+At the preceding checkpoint, the unchanged strict census command failed its
+whole-map byte-identity check after seven coordinator-added rows. That failure is retained in the
+gate report. The separate original-scope rescan does not waive it: it verifies
+original map preservation, all 160 source blobs against the frozen Git base,
+and exactly re-parses the original 1,830 records. Sequence edit validation
+rejects non-row insertions, removals, changes and duplicate module paths. A
+finder-discovered duplicate-line gap was fixed and covered by regression checks.
+
+On integration 4f0a2d6ab the current layer gate passes: 901 core modules,
+no elaborator/parser reachability and zero unallowed edges (107 allowances).
+The earlier twelve-edge wait is resolved by coordinator integration. The current
+documentation-path gate passes with 135 ambiguity warnings. Strict historical
+map identity still fails as recorded above; original-scope verification and all
+fourteen per-file proof checks pass. Full root/library gates remain pending.
+
+## Copy selectors and output-equivalence premises
+
+[CopySelectorAudit](../../tests/h62/item2/audit-evm-compiler/CopySelectorAudit.lean)
+adds exact joint input packages for memory_copy_input, fixed_input,
+copyConstruction_input, memory_copy_free_input and object_rep in
+Compiler.Compilation. These are premise-satisfiability results for unchanged
+original equivalences. They establish neither conclusion-side representation
+truth nor source execution success. The output-equivalence witness instantiates
+both entry and output data; it does not assert that the program leaves its
+entry state unchanged.
+
+The copy-free witness explicitly supplies the defaulted hasArrayCopy=false
+hypothesis together with its backend guard. Its existing closed Input
+certificate admits a real destination-check failure, so the source reverts.
+This is an ordinary jointly inhabited input, not a contradictory H69 package
+or an always-success claim. The other fixtures exercise populated fixed memory,
+copying and construction. Three supporting example modules are read-only imports
+outside the frozen module-map census; none of their declarations is enrolled.
+
+The enrollment mode for these five cases is mutually exclusive with the old
+modes and requires exactly five joint records. Prior thirty-case and five-case
+outputs remain byte-identical. All previous 335 records remain accounted exactly
+once. The current result is 340 accounted statements (51 joint, 52 intentional
+impossibilities, 237 closed equalities), with 1,490 pending. Fifteen audit modules
+check 138 printed theorem declarations with standard axioms only. Five additional
+fixture definitions remain separate from theorem and original-census counts.
+
+The original full four-checkpoint queue remains partial. Unknown producer owners,
+three frozen-type owner tickets, general supported-program totality, complete
+negative compiler controls, failure/gas/fork boundaries and final root/library
+gates remain open. No Source adequacy or success theorem is claimed by this
+increment. Finder and skeptic reviewed the complete tuples, explicit defaulted
+guard and semantic boundaries independently without using Lean/server.
+
+The checkpoint handoff retains the original VM, branch and persistent goal,
+original rendered assignment, whole work/backfill queue and exact scope manifest.
+Its external export directory is continuation-5-handoff under the evidence root.
+The committed compact index authenticates a portable archive: downloaded-archive
+verification does not require the original VM paths. New code derives repository
+paths from its own location and accepts evidence paths as arguments. No push,
+master mutation, goal reset, replacement, pause or completion is performed.
+
+The current rescan retains exactly 160 original modules and 1,830 declarations;
+eight coordinator-added map rows remain unassigned and unenrolled. Strict map
+identity still fails, with the unchanged gate retained. The current fragment gate
+also fails because the combined documentation index is out of order relative to
+its fragments on the merged baseline; this lane leaves that generated file for
+coordinator repair. Synthetic scope-test paths were replaced with real repository
+paths so their map snippets remain meaningful and the documentation-path check
+can resolve every quoted Lean filename. No original proof or statement changed.
+
+After the owned fixture-path fix, the final scope controls pass (six tests) and
+the documentation-path gate passes with 137 ambiguity warnings. Layer checks
+pass with zero unallowed edges. Fragment synchronization and strict map identity
+remain failed separately; neither is waived by the passing proof checks.

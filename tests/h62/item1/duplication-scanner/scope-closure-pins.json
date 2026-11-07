@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "modules": [
+    {
+      "path": "Solidity/KeySort.lean",
+      "module": [
+        "Solidity",
+        "KeySort"
+      ],
+      "sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0",
+      "project_dependencies": []
+    },
+    {
+      "path": "Solidity/AST.lean",
+      "module": [
+        "Solidity",
+        "AST"
+      ],
+      "sha256": "d5463f24e3b12577a04099593cf2640b68a1ccb14cb3db513254d633c849c54b",
+      "project_dependencies": [
+        "Solidity/KeySort.lean"
+      ]
+    },
+    {
+      "path": "Solidity/Scope.lean",
+      "module": [
+        "Solidity",
+        "Scope"
+      ],
+      "sha256": "d37a9e4393e9b9da12bcd85beb428965becc2d3947838b1d11f510b07170c4ff",
+      "project_dependencies": [
+        "Solidity/AST.lean"
+      ]
+    }
+  ],
+  "probe_sha256": "cec1b65eb7dcef355a8acdd00ef07f2f753b7ab7f31a576e49ce31c992e89e18",
+  "fixture_contract_sha256": "fbbf557d615e7475e6993e5fd1d24586bd925560e3082c5d20a2954a8d587077"
+}

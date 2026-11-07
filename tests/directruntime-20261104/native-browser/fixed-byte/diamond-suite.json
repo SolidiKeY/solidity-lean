@@ -1,0 +1,52 @@
+{
+  "guardedRegression": "Fixed-byte locals need successful completion/negative assertions in both modalities while parameter and positive-length gaps stay explicit.",
+  "source": "tests/directruntime-20261104/native-browser/fixed-byte/FixedByteLocals.sol",
+  "sourceSha256": "15f6b991e61340cb928a56379b54adcba45c37c6c0ef289901678e6d3c6fa8b8",
+  "contract": "FixedByteLocals",
+  "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+  "expectedTag": "diamond",
+  "expected": [
+    {
+      "name": "zero",
+      "status": "proved"
+    },
+    {
+      "name": "complement",
+      "status": "proved"
+    },
+    {
+      "name": "wideComplement",
+      "status": "proved"
+    },
+    {
+      "name": "tupleSwap",
+      "status": "proved"
+    },
+    {
+      "name": "repeated",
+      "status": "proved"
+    },
+    {
+      "name": "wrong",
+      "status": "refuted"
+    },
+    {
+      "name": "length",
+      "status": "unsupported",
+      "reason": "4294967296 does not fit uint32"
+    },
+    {
+      "name": "wrongLength",
+      "status": "refuted"
+    },
+    {
+      "name": "widening",
+      "status": "proved"
+    },
+    {
+      "name": "parameter",
+      "status": "unsupported",
+      "reason": "compact verifier: unsupported type bytes4"
+    }
+  ]
+}

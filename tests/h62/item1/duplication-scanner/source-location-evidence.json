@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "guarded_regression": "Namespace guesses, generated aliases, ambiguous source locations and unchecked child artifacts promoted to source/signature binding",
+  "predecessor_head": "bd5a8061025d2ab13edf127ea5f3efa515029f66",
+  "observed_origin_master": "e8247d9277190b71488387dac594e82b2b191942",
+  "source_sha256": {
+    "scripts/h62/item1/duplication-scanner/bind_source_locations.py": "94b2de40f35b0e3bef05d043f10abf8789faa5a0fef96d14363cb9cd332a224a",
+    "tests/h62/item1/duplication-scanner/SignatureSourceLocations.lean": "f77817ebc6bc099f17f429a705c89fa924fbfa4127cf2b5ffaff3beb10501320",
+    "tests/h62/item1/duplication-scanner/source-location-pins.json": "a347b660fb2566ce30e452a01b30bf3cfc13143f4a4f0d37bb77d0e69c9cd407",
+    "tests/h62/item1/duplication-scanner/test_source_locations.py": "c081735a4dfda42bdacc518a57e6bacc8586d5a2c7df3887b4ac944471fb3b67"
+  },
+  "accepted": {
+    "accepted-two": {
+      "receipt_sha256": "76907fe0097e2a85f035a42e1db6566cd502339f69a72785f7cf5e8f7e96b02b",
+      "bindings_sha256": "57d11bd4533cc67ac27d2b680effbda43d0e80c3ecfff48b700a3de5b172c26f"
+    },
+    "accepted-three": {
+      "receipt_sha256": "3318de542b49c47c27f7ce9df685799fd3dbf4a681ac9a131dbcabdd81af55a4",
+      "bindings_sha256": "57d11bd4533cc67ac27d2b680effbda43d0e80c3ecfff48b700a3de5b172c26f"
+    }
+  },
+  "evidence_sha256": {
+    "evidence/acceptance.json": "98bac8dc89951042266fbab82682456a2a0cb719b69ba8a48c4db9f8296c9f1a",
+    "evidence/development-failures.json": "a7ce3301c9d41f1639a9c4a0b7e230f8da9ac51bdf283e73dbc6f1c41a750a8b",
+    "evidence/doc-paths.log": "9b9d1eeb362a394a3d960c0c3f6d76786217dd8cde0bd81d7345a051bdf769e0",
+    "evidence/gates.json": "6fea19edeb109517716018aac16fd5ce1a33014cd2c2037257fdd9ca06230d57",
+    "evidence/lake-version.log": "c85e307da5a93d910b4e69f751e292f34737a4dda56f275387c4309c31fca131",
+    "evidence/lean-version.log": "36c0bbaf090c97bc8217c6ff497ff9144fd83d9003f12cd505162b943aaaee77",
+    "evidence/reviews.md": "f4ea2ca190f37b8953aa3b1ad4232d2e94e71b2f0906dcf09f80da50d3cefa2a",
+    "evidence/tests.log": "9c11cdca54d6cd4c44d789519cacc7837f012a77f4ed4207d5073ca2f48875aa"
+  },
+  "external_controls_passed": 94,
+  "lexical_links": 20,
+  "visible_kernel_constants": 46,
+  "kernel_constants_without_lexical_link": 26,
+  "new_theorems_axioms_sorry": 0,
+  "frozen_statements_changed": 0,
+  "scope": "Only pinned fixture source/name/type linkage; no proof-body equality, general coverage, unloaded/private artifact coverage or ownership.",
+  "original_timing_stop_retained": true,
+  "stopped_workload_rerun": false
+}

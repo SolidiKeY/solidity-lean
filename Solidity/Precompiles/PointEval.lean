@@ -138,7 +138,7 @@ theorem bind_check_eq_none {α β : Type} (o : Option α) (f : α → Bool) (v :
 theorem bind_check_eq_some {α β : Type} {o : Option α} {f : α → Bool} {v w : β}
     (h : (o >>= fun i => if f i = true then some v else none) = some w) : w = v := by
   cases o with
-  | none => exact Option.noConfusion h
+  | none => cases h
   | some i =>
     cases hf : f i
     · simp only [Option.bind_eq_bind, Option.bind_some, hf, Bool.false_eq_true, ↓reduceIte,

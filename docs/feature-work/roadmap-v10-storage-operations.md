@@ -411,3 +411,446 @@ per-run premise. Generic recursive emitted selection, ordinary Source aggregate
 lifecycle and physical/P8/caller-world composition remain producer obligations.
 Existing intrinsic leaves and the 52-row audit reference ledger do not close
 G27-G30, the backfills or any consolidated proof/acceptance queue.
+
+
+### Checkpoints 225–226: interrupted diagnostic and rejected false-loop backfill
+
+C225 tested source head `139f09acbb231b26237fafd55a937ef79f9cc8f5`.
+The host monitor was lost across session restart while the capped runtime build
+continued. The verified task-owned runtime was stopped under the existing
+interruption policy. Build exit and complete resource measurements are unknown;
+this is not a passing full gate. Cache seeding had failed extraction with ENOSPC
+and installed no pack. Raw logs and interruption receipts remain off Git.
+
+Before C226, the existing lane fast-forwarded to published master
+`2a917f7329f06c3fa4b15ebea1608b4c2caa3826`. GitHub #71 authorized a shared
+false-loop success lemma and proof-only rewrites in the two allocation controls,
+conditional on checking being no slower. No existing statement or definition was
+changed. The candidate affected build passed; the baseline warm-up passed 222
+jobs. An initial timing prerequisite failed on an unmaterialized cache object;
+the repository restore helper corrected it before a fresh fixed measurement set.
+
+Three serial warm samples per file used identical H111 stack and H113 resource
+settings. Median seconds before/after were SimLemmas 7.89/7.94, mixed allocation
+2.42/2.43, and recursive allocation 3.02/3.01. The predefined per-file and summed
+median rule rejected the change. Every sample is retained; no sample was selected
+away. All three source files were restored byte-for-byte to the committed master
+version. This is a rejected bounded backfill attempt, not a completed production
+extraction or a general performance result. No unchanged retry is authorized.
+The rejected candidate was not accepted into the axiom inventory.
+
+Evidence: `/workspace/v10-storage-operations-evidence/checkpoint225-interruption.json`,
+`checkpoint225-interruption-last20.log`, `checkpoint226-plan.json`,
+`checkpoint226-timing.json`, `checkpoint226-restoration.json`, and
+`checkpoint226-rejected.patch` in the same directory. Original producer, physical
+adequacy, audit coverage, full validation and trust/documentation gate obligations
+remain open. Independent reviews are recorded in the checkpoint handoff.
+
+
+### Checkpoint 227: nonempty target write-sequence audit witnesses
+
+The additive audit module supplies simultaneous inputs for four exact frozen
+TargetDefaultInit laws: run_writes, context_writes, agreement_writes and
+outside_writes. One populated machine and the ordered writes root0:=7,
+root1:=23, root0:=0 expose overwrite order. Both covered roots agree with the
+captured store initially; a distinct outside root and complete non-store context
+frame. Actual execution and agreement reuse the frozen laws. Omitting the last
+write changes root0, and an always-reverting program disagrees with the actual
+successful sequence. No Source, schema compiler, physical hash, gas/fork or world
+adequacy is asserted.
+
+Exact source commit `f869a9173e50390a3f88f8444453b42fb73fb6ce` passed the bounded
+serial kernel check in 1.84 seconds, peak aggregate RSS 682602496 bytes, without a
+resource stop. All eleven measured local axiom guards use only propext,
+Classical.choice and Quot.sound. The first check failed on a local reduction
+before finite inequality checking; the corrected proof and subsequent exact-head
+guards pass. The mapping generator's initial wrong census-field lookup also
+failed and was corrected without changing the census or interfaces.
+
+The frozen registry now contains 56 mapped rows: 44 joint-premise bundles and
+12 data inhabitants; 3225 of 3281 conservative rows remain unmapped. Additional
+execution/negative controls do not increase that interface count. Registry tests
+include rejection of drift in this module and its source pin. Historical checked
+heads and the prior complete-validation marker remain historical; only the new
+module has a fresh exact-head receipt.
+
+The corrected repository trust wrapper reports 6614 sources, 289 inventoried
+sites and zero findings. Direct scanner invocation without its required file
+list failed and is retained. Strict axiom pins remain FAIL: 16411 pinned,
+zero errors, 251 unrecorded and 99 baselined changes. The eleven new declarations
+are all standard-only entries; no shared axiom inventory was written. Independent
+read-only finder and skeptic found no semantic fidelity issue; metadata review
+and sealed evidence accompany this checkpoint. Full lane validation and all
+previous producer, timing and documentation gate holds remain open.
+
+
+### Checkpoint 228: live-array access and retained refusal audit
+
+The additive ArrayAccessWitnesses module supplies six exact frozen premise
+bundles: TargetArrayRead.run_current and failure_matches, plus
+TargetArrayWrite.run_current, success, failure_matches and header_frame.
+One existing intrinsic Bool array has length 1 and retained extent 3, with true
+payloads; the populated symbolic-slot machine has the same current header.
+The successful index-0 write stores false. Actual read/write execution reuses
+the frozen laws, including the complete machine context and stack tail. The
+selected header representation is supplied jointly with actual adapter success.
+
+Retained index 1 has a raw present cell and permits raw save, while live access
+and the write adapter refuse it. Index 3 is separately out of extent and also
+reverts. The observations retain the header, untouched retained cell and outside
+slot. Reject-all disagrees with the successful read. These controls establish
+no Source lowering, numeric/physical hash, gas/fork or world adequacy.
+
+Source commit `c4484a7dc292c1cf547a99e8f48bcfeb1763e8d7` passed its exact-head
+serial check in 1.84 seconds, peak aggregate RSS 701554688 bytes, without a
+resource stop. Sixteen measured axiom guards pass: seven axiom-free and nine
+using only propext, Classical.choice and Quot.sound. Initial local extent
+construction, dependent record syntax, and header compatibility proof failures
+are retained; corrected definitions use the existing intrinsic types and
+explicit length/extent bounds, without producer statement or budget changes.
+
+The frozen registry now maps 62 rows: 50 joint-premise bundles and 12 data
+inhabitants. 3219 of the 3281 conservative rows remain unmapped. Six new rows
+are counted once; additional execution/refusal controls add no interface count.
+New source/pin corruption checks pass. Prior complete and per-source validation
+heads stay historical; only this additive module has a fresh receipt.
+
+The repository trust wrapper passes 6614 sources and 289 inventoried sites with
+zero findings. Strict pins remain FAIL: 16532 pinned, zero errors, 372 unrecorded
+and 99 baselined changes. The sixteen new declarations are standard-only;
+shared inventories and gate policies are unchanged. Independent read-only
+finder and skeptic found no source fidelity defects; metadata reviews and
+strict committed-tree documentation comparisons accompany the sealed handoff.
+All original producer, full-validation, timing and documentation holds remain.
+
+
+### Checkpoint 229: represented live-array numeric readback
+
+The existing ArrayAccessWitnesses fixture now jointly inhabits the exact frozen
+TargetArrayRead.represented_read and complete_read premises. Both use the same
+populated length-1/extent-3 array, machine and live index 0. Selected queries are
+nonempty: the current header and the live element. The index support bound,
+header compatibility bounds, logical representation and target observations are
+proved together. Numeric completion additionally supplies Transport over a
+nonempty header/child location list and selected-child coverage. Its constant
+true-word stores and explicit local hash satisfy that read-only interface; no
+finite-region injectivity, physical hash adequacy or Source compiler is inferred.
+
+Both successful conclusions apply the unchanged original laws. Negative controls
+show an all-false numeric store violates Transport and a zeroed target child
+violates initial target agreement. These are refused premise bundles, not new
+compiler or execution-totality claims. Existing definitions, statements and
+sixteen earlier guards remain unchanged.
+
+Exact source commit `3695698ee4e9806353038c773409dc0182e781c6` passed all 24 local
+guards in 2.42 seconds, peak aggregate RSS 710434816 bytes, without a resource
+stop. Eight new guards use only propext, Classical.choice and Quot.sound.
+The first check failed on a missing explicit support-bound proof and a local
+word-type mismatch; its rejected diagnostics are retained separately. The
+corrected and final guarded source passes without unfinished proof artifacts.
+
+The frozen registry maps 64 rows: 52 joint-premise bundles and 12 data
+inhabitants; 3217 of 3281 conservative rows remain unmapped. Only two new
+interface statements are counted. Source pin metadata retains the earlier
+ArrayAccessWitnesses identity and receipt in historical_checks; all unrelated
+and complete-validation receipts remain historical. Registry drift controls pass.
+
+Trust scanning passes 6614 sources and 289 inventoried sites with zero findings.
+Strict axiom pins remain FAIL: 16540 pinned, zero errors, 380 unrecorded and
+99 baselined changes. Only the eight new standard-only entries are classified
+for this increment; no shared inventory is written. Independent read-only
+finder/skeptic source and metadata reviews and strict committed-tree document
+comparisons accompany the handoff. Earlier producer, performance, documentation
+and full-validation holds remain open.
+
+
+### Checkpoint 230: complete numeric write with a retained frame
+
+After adopting published master, the existing ArrayAccessWitnesses module
+supplies every exact frozen TargetArrayWrite.complete_numeric premise together.
+The same populated array, successful index-0 false write and machine are used.
+The selected frame is nonempty: raw retained index 1, distinct from written
+index 0. Logical apartness and symbolic nonaliasing are proved. The explicit
+FiniteRun uses N=16, L=2, R=1, local hash 8, preimage data0 and covered locations
+root0, child0 and child1. Initial header/frame representation, Transport, key
+fitting and every covered target cell agree on these same inputs.
+
+The actual theorem destructs this joint bundle and applies the original law,
+retaining successful whole-machine execution, postrepresentation, numeric
+Transport and all covered target observations. Observations distinguish numeric
+addresses 0/8/9 and target header/written/retained cells as 1/0/1, preserving the
+outside slot and non-store context. A hash-zero negative control refutes the
+finite-run premise via two covered colliding addresses and the existing
+word_inj law. This is a finite-model premise refusal, not a physical hash
+collision or global injectivity claim. Source/compiler/world adequacy stays open.
+
+Corrected source commit `f2189455bb6c61b10022b6d81e5a49cb241c4461` passed all
+39 guards in 3.02 seconds, peak aggregate RSS 717266944 bytes, with no resource
+stop. Fifteen new proofs use two empty axiom sets, three propext-only sets and
+ten standard-three sets. Initial local hash/boundedness reductions failed and
+were corrected. Guard generation also matched a theorem-name prefix, nesting
+an accidental duplicate guard; commit 833a5ed14779235e3ffaae6abc09c6ce4e7ddaea
+and its exact-head check FAIL are retained. The corrected guard preserves all
+measured expectations and the passing receipt names only the corrected source.
+
+Only one new frozen statement is counted. The registry maps 65 rows: 53 joint
+bundles and 12 data inhabitants, with 3216 of 3281 conservative rows uncovered.
+Prior source identities remain in historical_checks; complete and unrelated
+source receipts remain historical. Registry corruption controls pass.
+
+Trust scanning passes 6616 sources and 289 inventoried sites with zero findings.
+Strict pins remain FAIL: 16559 pinned, zero errors, 384 unrecorded and zero
+baselined changes. The fifteen new entries are standard-only; no shared
+inventory or gate policy was edited by this increment. Independent read-only
+finder and skeptic reviews, exact committed-tree documentation comparisons and
+all rejected diagnostics accompany the sealed handoff. Original producer,
+performance, full-validation and documentation holds remain open.
+
+
+### Checkpoint 231: complete default initialization over dirty retained cells
+
+Three exact frozen laws now have simultaneous witnesses: TargetDefaultInit.complete,
+CopyDefaults.represented and CopyDefaults.numeric_transport. The same populated
+array fixture supplies a checked CopyPermit, nonempty supported header/child
+queries, a concrete finite run, numeric Transport, demand/selected coverage and
+all target agreements. Each law is applied directly to its corresponding bundle.
+The complete initializer retains all five conclusions, including successful
+selected SLOAD readback. Default logical element reads are None, while raw dirty
+child words remain 1; only the header becomes zero. A genuinely successful header
+read and noop/reject-all counterexamples prevent an empty success story. This is
+not a Source allocation or physical/world/compiler adequacy result.
+
+Exact source commit `e90ef087062dc975455b436c63b7b292329f7a2e` passed all 51 guards
+in 3.64 seconds, peak aggregate RSS 723103744 bytes, without a resource stop.
+Twelve new proofs use two propext-only and ten standard-three axiom sets. The
+initial check passed with an unused existential-binder warning; that binder was
+renamed without changing the proposition. Existing statements, definitions and
+39 previous guards remain unchanged apart from the added local import. This is
+new audit work, not a matched proof-refactor or whole-build timing comparison.
+
+The registry maps 68 rows: 56 joint bundles and 12 data inhabitants; 3213 of
+3281 conservative rows remain uncovered. Only three new interface statements
+are counted. Historical source identities/receipts and the complete-validation
+marker remain historical. Registry corruption controls pass.
+
+Trust scanning passes 6616 sources and 289 inventoried sites with zero findings.
+After adopting published inventory reconciliation, strict pins remain FAIL:
+16571 pinned, zero errors, 62 unrecorded and zero baselined changes. All 62 are
+new standard-only entries in the two guarded audit modules: nine axiom-free,
+five propext-only and 48 standard-three. Per-entry source/head/log classification
+is exported for coordinator integration; no shared inventory is written here.
+
+Checkpoint 230's oversized sealed HANDOFF.md remains unchanged. A separate
+1811-byte compact relay was locally verified against its original sealed manifest
+and its own checksum list. A first relative-checksum invocation used the wrong
+working directory and read no files; the corrected verification passes. New
+handoffs use a bounded checkpoint history summary while retaining the full
+original-base patch and bundle. Original scope and goal identity are unchanged.
+Read-only finder/skeptic reviews and raw strict/frozen documentation comparisons
+accompany the sealed packet. All broader producer and final-gate work remains.
+
+
+### Checkpoint 232: H121 producer ownership and checked dependency intake
+
+H121 transfers the staged VY5 Source-origin/lifecycle and P8 aggregate-lifecycle
+items to this lane. They are local open work, not waits on the frozen Claude
+lanes. Original goal identity, observations and remaining obligations are
+unchanged. No frozen interface or new per-case source implementation is added.
+
+Fresh master was adopted first, then the exact P8 head
+809f6d7f8efd8067d76402f5207e0fb04ecd0bc7 was merged. Its PlanWitness, Merged and
+MergedControls focused build passes 142 jobs in 44.21 seconds, peak aggregate
+RSS 795566080 bytes, without a resource stop. This producer is an inhabited
+MODEL reference over empty Source programs; Merged is a pair of frozen halves.
+It is not actual Source.sessionAt or aggregate-lifecycle adequacy. Six frozen
+P8/P8b interface files retain their exact bytes.
+
+The VY5 composition and dirty-readback commits e8247d927 and a0cdc0bec are already
+on master. CorrectnessPublic and DirtyReadbackControls pass a 124-job focused
+build in 89.76 seconds, peak aggregate RSS 2235285504 bytes, no resource stop.
+Composition retains its explicit producer inputs; dirty readback declares a
+local cleanup boundary and supplies no Source semantics call. Presence and
+focused checking do not finish the locally owned Source-origin producer.
+
+The existing V07 head 8ab717749c4dcf4cd5932e7fea800af1ddca5a87 already has the
+shared GraphAdmissionAssembly.declarationGraphProducerOfEmpty helper. Only
+SourceRefusal and GraphAdmissionAssembly are missing from master. H112 forbids
+a duplicate per-case proof, so question V10-H121-V07 asks whether to publish the
+existing packet or extend H121 to integrate those two unchanged files here.
+No live V07 source file is edited or integrated while that route is pending.
+
+A minimal P8 consumer proposal reuses that helper. The exact fetched V07 files
+and the proposal passed isolated kernel checks; the proposal's three measured
+standard-three axiom guards also pass. This is a checked UNAPPLIED proposal,
+not a live producer instance or master evidence. The first isolated attempt
+failed before elaboration on prerequisite object lookup; the published imports
+were built and a read-only object view prepared before successful checks. No
+failed artifact is accepted. Exact input hashes and receipts accompany the
+portable packet; compiled object views are not shipped as evidence of source.
+
+After these checks, this lane re-baselined on published master
+806a972a4f1eefc367f7fe21078e56469447ce13. Selected API bytes are unchanged, but
+focused receipts retain their actual pre-rebaseline source head
+79e400cb9cf07b5e6a23efa4adfcfd2a291a7134; this is no fresh whole-build claim.
+The original V10 and consolidated queues, real Source adequacy, physical Y04 and
+separate 4.35 validation remain open. Checkpoint 231's bounded handoff and the
+compact checkpoint-230 relay remain separate sealed/historical receipts.
+
+
+Checkpoint-232 static checks at the latest baseline: trust passes 6628 sources
+and 289 inventoried sites with zero findings; registration reports 6612 reachable,
+zero orphaned and zero disallowed modules. Strict pins remain FAIL: 16675 pinned,
+zero errors, 85 unrecorded and zero baselined changes. The isolated consumer's
+three axiom guards use only propext, Classical.choice and Quot.sound. No shared
+inventory is written. Kernel/source-head receipts and portable relative artifact
+references distinguish prior focused validation from the later baseline merge.
+The V07 integration question remains pending; neither isolated compatibility nor
+a locally checked model proposal authorizes live integration or Source adequacy.
+
+
+## H121b actual-Source H24 intake
+
+The memory-reference-structs ticket at
+85b3741d0ac578696e147cf5d455e38c4f8671b6 requests the locally owned P8
+admission/origin producer, not transfer of its G42.04 body/result obligation.
+LibraryPremises.Inputs requires admission, origin and program/environment,
+pipeline and fixed-parameter agreements for the same library-containing Source
+program. A producer over empty environments cannot discharge libraryDeclared.
+The checked PlanWitness and P8b.Merged model results remain separate evidence.
+
+Source.Semantics.sessionAt is the existing actual evaluator. Its sourceLang uses
+Nat horizons and explicitly leaves resource failures, the hash premise and
+stipend rule uninstantiated. ResourceContractLaw1.nat_encodable_resource_impossible
+refutes the full failure replacement/projection contract when the resource
+retracts into Nat; it does not refute all non-Nat resources or all possible
+LibraryPremises.Inputs. LibraryPremises currently describes all such inputs as
+uninhabited: that blanket documentation claim is not justified by this theorem.
+This intake records the correction without editing the consumer-owned module.
+
+Source.FailureResources.Bound already supplies horizon plus full failure choices
+and replacement laws. Reuse this resource interface rather than duplicating it;
+its module explicitly does not make the evaluator consult those choices.
+Remaining local work is an actual-Source operational reference with justified
+failure resources, canonical frontend-derived origins, root/feature extraction
+and declaration admission for the same program, followed by lifecycle
+correspondence. Neither a caller-supplied execution equality nor an origin chosen
+from the producer itself completes those duties. No new instance, Source edit,
+frozen signature change or completed adequacy proof is claimed here.
+
+The protected V07 packet remains a separate pending integration route, not a
+reason to substitute its empty-environment model for actual library admission.
+Y04 physical adequacy/reached-state delivery and the separate 4.35 trust/timing
+disposition remain external waits. Existing proof/coverage and final-gate gaps
+remain open. Fresh master 05d2c2587 was inspected and merged before this intake;
+no kernel check is claimed for this documentation-only change.
+
+Independent read-only finder and skeptic checked this intake against the frozen
+P8 interface, ResourceContractLaw1, LibraryPremises and Source semantics; neither
+found an inaccuracy or ran Lean. The initial documentation append and master
+merge omitted the writer lock; subsequent edits and commit checks used it.
+No concurrent writer was observed in status; unobserved activity is not ruled out.
+
+
+## Checkpoint 234: generated default-update fitting witness
+
+The existing populated array fixture supplies the sole logical base-fitting
+premise of TargetDefaultInit.updates_fit; the original law proves simultaneous
+fitting of every generated update. A nonempty-list control excludes an empty
+generated replacement. No new per-case fixture or production theorem is added.
+Four sequence laws already have witness rows, so additional trial applications
+were removed and none is counted again. The initial trial passed with an unused
+binder warning; its receipt remains historical, separate from the final source.
+
+All 54 guards pass at source head 83ca445d1aed1e9099d398193543abe4643e2561:
+3.04 seconds, peak aggregate RSS 723800064 bytes, no resource stop. Of three new
+guards, the base premise is axiom-free and the application and nonempty control
+use propext, Classical.choice and Quot.sound. Original guard expectations remain.
+The complete module has 10 axiom-free, 5 propext-only and 39 standard-three guards.
+
+The reference ledger adds exactly one frozen row: 69 mapped, comprising 57 joint
+bundles and 12 data inhabitants, with 3212 of 3281 conservative rows uncovered.
+Historical complete-validation and source receipts remain historical; only this
+module was freshly checked. Finder and skeptic independently reviewed the
+narrowed source without Lean or its server and found no remaining findings.
+This is symbolic-slot coverage, not actual Source or physical adequacy. H121
+producer implementation, original proofs/coverage and final gates remain open.
+
+Checkpoint-234 static trust reports 6628 sources, 289 inventoried sites and
+zero findings; registration reports 6612 reachable and no orphans or disallowed
+modules. Strict pins remain FAIL: 16678 pins, zero errors, 88 unrecorded and zero
+baselined changes. The three new entries match their measured guards; no shared
+inventory is rewritten. The bounded prerequisite records Lean 4.24.0 commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake 5.0.0-src+797c613 and a passing
+KeySort build. Prior full-build, strict-doc and timing failures remain retained.
+
+
+## Checkpoint 235: authorized unchanged H24 assembly packet
+
+Coordinator approval resolves V10-H121-V07. Fresh published master
+05d2c25872c4bb963a0ca7f605905e6e1e99eedc has neither SourceRefusal nor
+GraphAdmissionAssembly. Only those two files are integrated from the verified
+V07 branch commit 8ab717749c4dcf4cd5932e7fea800af1ddca5a87, not its unrelated
+branch history. Their SHA256 values remain respectively
+2b7ed2b93dd8064086673b198d12c426931b01c9ca2a080fd9bf8cfe0cd5c0a0 and
+1abed888a138c2c58c21bed309a0a9369d48a1e7ea5e211f761b70ca42dc362c.
+Generated module registration accompanies the exact packet; no master push or
+claim of coordinator publication is made. Six frozen P8/P8b files and all Source
+implementation files remain unchanged. H16 single-writer restrictions remain.
+
+The serial affected build passes 138 jobs in 6.65 seconds, aggregate RSS peak
+830517248 bytes, no resource stop. Existing unused-simp warnings belong to the
+unchanged packet/imports; no warning suppression or budget change is introduced.
+Finder and skeptic independently verified provenance and scope without Lean or
+its server, finding no proof/provenance issue. Both identified inherited prose
+requiring qualification: the blanket P8-vacuity sentence is not justified by
+the Nat-only resource obstruction, and PlanWitness's absent-from-master note is
+historical. Those sentences are retained to preserve authorized exact bytes;
+this paragraph records their current disposition rather than endorsing them.
+
+This is generic conditional H24 assembly plus current-Source refusal laws. Its
+empty-environment application is a model result, not actual Source/session or
+library lifecycle adequacy. The MRS request at
+85b3741d0ac578696e147cf5d455e38c4f8671b6 requires admission and independently
+justified origins for the same library-containing Source program/environment
+and the same pipeline/fixed parameters. MRS retains G42.04 body/result
+implementation. Actual P8 producer/origin and VY5 lifecycle work remain locally
+owned unfinished duties; Y04 and separate 4.35 timing/trust remain external.
+
+The exact committed packet head 117f003291195801d295a93dca9d31927cb60d04 also
+passes fresh per-file checks: SourceRefusal 3.04 seconds / 835960832 peak aggregate
+RSS, GraphAdmissionAssembly 4.88 seconds / 821784576 bytes. All 29 guards pass.
+Trust reports 6630 sources and zero findings; registration/layers pass with
+6614 reachable modules. Strict pins remain FAIL with 16707 pinned theorems,
+zero errors, 117 unrecorded and zero baselined changes. Raw strict docs retain
+3 missing / 137 ambiguous references; the same checker on exact published
+05d2c25872c4bb963a0ca7f605905e6e1e99eedc has identical findings, zero new/removed.
+The frozen comparison remains FAIL with 137 new and 9 removed findings.
+
+## Checkpoint 236: exact-origin H24 necessary constraint
+
+DeclarationGraphConstraints reuses the integrated refusal characterization.
+accepted_mapping_free retains input, resolved result, frontend derivation and
+artifact; program_mapping_free carries equality of the whole dependent Source
+program, preserving environment, pipeline and fixed parameters. The third law
+refutes only an accepted origin whose same environment has the supplied nameable
+mapping-bearing struct. It is a conditional contradiction, not a simultaneous
+positive witness, actual producer or claim that every library input is impossible.
+No Nat-resource premise, new failure assumption or per-case copy is introduced.
+
+The three measured guards use only propext, Classical.choice and Quot.sound.
+An affected-import build passes 139 jobs. Fresh per-file validation at committed
+source head a1d573b61303417756e44df307c35b6feeacbf4f passes in 1.85 seconds,
+aggregate RSS peak 579579904 bytes, no resource stop. Finder and skeptic reviewed
+the generic statements and proofs without Lean/server and found no findings.
+The audit ledger remains 69 mapped / 3212 uncovered; these new P8 constraints
+are not counted as new witnesses of frozen audit rows.
+
+Question V10-H121-H24-REFUSAL was sent through coord-ask at
+coord-q/codex/solidity-v07-v11-20261030/v10-storage-operations/20261107T055502Z.
+It requests the controlled H16/H57 route for the environment-aware Source typing
+repair, or exact consumer program/environment evidence for a supported local
+case; it never authorizes narrowing the original profile. The earlier V07
+packet integration question is resolved. Source/Typing remains untouched.
+Actual Source resource/session realization, canonical origins, general graph
+admission, Source/lifecycle correspondence and original proof/final gates remain
+locally open. Separate Y04 and 4.35 producer waits are unchanged.

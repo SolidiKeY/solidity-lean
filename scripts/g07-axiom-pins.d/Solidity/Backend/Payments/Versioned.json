@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/Payments/Versioned.lean:Solidity.Evm.compile_correct_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/Versioned.lean:Solidity.Evm.Compiler.Compilation.correct_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

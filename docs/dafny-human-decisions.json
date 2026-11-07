@@ -27,6 +27,30 @@
       "question": "Q-CLI-01",
       "authorization": "Build produces compiler artifacts only; runtime/test equivalence remains incomplete. Existing concrete-model observations are not equivalence evidence.",
       "decision": "H80"
+    },
+    {
+      "question": "Q-REL-HOOK-01",
+      "decision": "Incoming user answer #72,2026-11-07",
+      "status": "implementation-partial",
+      "authorization": "Additive SourceCounterexample.lean companion allowed; preserve old proof/report fields and all old declarations/premises/signatures/budgets. Real clause/span and wrong-span controls remain required."
+    },
+    {
+      "question": "Q-REL-IMPORT-01",
+      "decision": "Incoming user answer #73,2026-11-07",
+      "status": "implementation-pending",
+      "authorization": "Additive span companions in Solidity/Frontend/SolcJson/Contract.lean, Body.lean, Import.lean and Testing.lean authorized with forget lemmas per layer; old normalization/results/signatures unchanged. No source span may be inferred where not carried."
+    },
+    {
+      "question": "Q-REL-MODULE-01",
+      "decision": "Incoming user answer #76,2026-11-07",
+      "status": "implementation-partial",
+      "authorization": "New isolated SpecOriginsV1 and CounterexampleMetadataV1; import/reuse existing declarations, explicit new consumers and registered roots/module-map; legacy frontend unchanged; forget and real/wrong span/ordinal controls required."
+    },
+    {
+      "question": "Q-TESTSUITE-ARTIFACT-01",
+      "decision": "Incoming user answer #75,2026-11-07",
+      "status": "artifact-no-build-validated",
+      "authorization": "Refetch exact4f0 lake-cache through H88; verify official sha256; no cold Derived20/21 build. Exact published isolated index resolves five conflicting preserved mappings; requested no-build targets exit0."
     }
   ]
 }
