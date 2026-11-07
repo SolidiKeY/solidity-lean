@@ -1,4 +1,4 @@
-import Solidity.Lowering.P8.SourceAstParameters
+import Solidity.Lowering.P8.SourceAstTypeCorrespondence
 import Solidity.Source.Ctor
 
 /-! Runtime conversion checks over the unchanged LibraryTry compiler fixtures.
@@ -53,7 +53,45 @@ def inspect (doc : Json) : Except String Nat := do
   unless storageSeen && stringSeen && count == 12 do throw "incomplete fixture conversion"
   return count
 
+/-- Guard qualified-path precedence, malformed-node refusal and leaf distinctions.
+These are conversion boundaries, not Source acceptance or storage validity. -/
+def leafChecks : Except String Unit := do
+  let user (fields : List (String × Json)) := Json.mkObj
+    (("nodeType", .str "UserDefinedTypeName") :: fields)
+  let explicitPath := user [("pathNode", Json.mkObj [("name", .str "L.S")]),
+    ("namePath", .str "Wrong.Fallback")]
+  match ← typeNameLeaf explicitPath with
+  | .userType ⟨"L", ["S"]⟩ => pure ()
+  | _ => throw "explicit qualified path lost precedence"
+  match ← typeNameLeaf (user [("namePath", .str "L.S")]) with
+  | .userType ⟨"L", ["S"]⟩ => pure ()
+  | _ => throw "fallback qualified spelling changed"
+  if (typeNameLeaf (user [("pathNode", .bool false), ("namePath", .str "L.S")])).isOk then
+    throw "malformed present path silently used fallback"
+  if (typeNameLeaf (user [("namePath", .str "L..S")])).isOk then
+    throw "empty qualified path component accepted"
+  let leaf (name : String) (fields : List (String × Json)) := Json.mkObj
+    (("nodeType", .str "ElementaryTypeName") :: ("name", .str name) :: fields)
+  match ← typeNameLeaf (leaf "string" []) with
+  | .elem .string => pure ()
+  | _ => throw "string leaf changed"
+  match ← typeNameLeaf (leaf "bytes" []) with
+  | .elem .bytes => pure ()
+  | _ => throw "bytes leaf changed"
+  match ← typeNameLeaf (leaf "address" [("stateMutability", .str "payable")]) with
+  | .elem .addressPayable => pure ()
+  | _ => throw "payable address lost"
+  for fields in [[], [("stateMutability", Json.str "nonpayable")]] do
+    match ← typeNameLeaf (leaf "address" fields) with
+    | .elem .address => pure ()
+    | _ => throw "plain address encoding changed"
+  if (typeNameLeaf (leaf "address" [("stateMutability", .bool false)])).isOk then
+    throw "malformed address mutability accepted"
+
 #eval do
+  match leafChecks with
+  | .ok () => pure ()
+  | .error why => throw (IO.userError why)
   for file in ["tests/solc/LibraryTry.ast.json", "tests/solc/LibraryTryIR.ast.json"] do
     let contents ← IO.FS.readFile file
     let result := do inspect (← Json.parse contents)
