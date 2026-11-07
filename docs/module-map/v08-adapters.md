@@ -820,6 +820,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
+| `Backend/InternalFlow/RuntimeFrameP1LangV2.lean` | Canonical P1 `Lang Event Outcome` pair, version 2, over the V2 machine: revert data, call events from the journal, frame classes. |
+| `Backend/InternalFlow/RuntimeFrameP1BridgeV2.lean` | `p1_frame_bridge` (V2) for the guarded revert-with-data family: actual source/target runs, full `PassCorrect`, per-input `Local`. |
+| `Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean` | Admitted witnesses of both classes, observed payload, refused mismatch, other-payload disagreement, call events, satisfiability. |
+| `Backend/InternalFlow/RuntimeFrameP1LangV2Migration.lean` | V2 → V12 `P1Lang` migration: `coarse` (forget events/data), `source_coarse`, `target_coarse`, `lift_coarse`, input conversions. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Source.lean` | Checked int256 `*` Source evaluation on arbitrary locals: exact value or `Panic(0x11)`. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Selected.lean` | The public compiler selects `binaryCode .int .mul`, with the literal `sTail .mul` guard. |
 | `Backend/PrimitivePackets/SignedCheckedMul/Target.lean` | Selected checked int256 `*` execution on any represented machine and saved stack: product or coarse revert. |

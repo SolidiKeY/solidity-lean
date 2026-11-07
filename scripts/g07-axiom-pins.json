@@ -9929,6 +9929,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1BridgeV2.p1_frame_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingActivation.Checks.whole": [
   "Classical.choice",
   "Quot.sound",
@@ -38616,6 +38621,20 @@
   "propext"
  ],
  "Solidity/Counterexamples/DiamondTry.lean:Solidity.Counterexamples.DiamondTry.callback_diamond_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Evm/MachineV2Controls.lean:Solidity.Evm.callIn_returndata": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Evm/MachineV2Controls.lean:Solidity.Evm.forget_run_lift": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Evm/MachineV2Controls.lean:Solidity.Evm.MachineV2Controls.joint_witness": [
   "Classical.choice",
   "Quot.sound",
   "propext"
