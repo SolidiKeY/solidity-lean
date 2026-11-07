@@ -1772,3 +1772,18 @@ resolved invocation, proof or execution acceptance. Unreferenced rows are
 not excluded. The join checks candidate consistency, not the content or
 authority of each supplied reference. Independent read-only finder and skeptic
 checked the join without Lean, server or builds.
+
+## EVM compiler audit snapshot candidates
+
+`evm_compiler_audit_controls.py` records seven unreferenced source-hashed
+rows from the supplied snapshot. Layout and intentional refutation audits
+represent impossible joint inputs, not positive witnesses. Success and
+headline fixtures cover selected intrinsic cases; opcode and jump-destination
+controls do not establish global producer, gas or historical-fork adequacy.
+
+The historical measurement script names only LayoutAudit, SuccessAudit and
+HeadlineAudit; current individual drivers for the other four are unresolved.
+Six additional group files appeared after the snapshot and are not included
+in this report. Current inputs, invocation and results remain unverified.
+Independent read-only finder and skeptic reviewed these boundaries without
+Lean, server or builds. No production timing or runtime acceptance is inferred.
