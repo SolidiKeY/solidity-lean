@@ -1509,3 +1509,34 @@ Source case copy. The 19-signature H19/H60 transport evidence remains requested.
 Original/consolidated proof, backfill, coverage and final gates remain open:
 72 mapped of 3281 conservative rows, 3209 uncovered. Y04 physical and separate
 4.35 trust/timing waits, all prior STOPs and strict inventory failures remain.
+
+### C263 — qualified and elementary leaf correspondence
+
+The existing type correspondence module now proves explicit pathNode priority,
+namePath fallback only on lookup failure, non-address elementary conversion,
+payable address conversion and both supported plain-address encodings. The
+first three guards use propext/Quot.sound; address guards use the standard trio.
+Existing readers, statements, definition bodies, interfaces, budgets, exclusions
+and axiom declarations are unchanged. No compiler-ID resolution or semantic
+meaning is inferred from spelling conversion.
+
+Existing leaf controls guard a conflicting fallback spelling, malformed present
+pathNode refusal, empty path-component refusal, string versus bytes, payable
+versus plain address and malformed mutability refusal. All prior lexical kernel
+controls remain. Both actual LibraryTry pipeline inputs still convert all 12
+parameters/results, including storage formals and string-memory returns. No
+Source case copy or new phase folder. C263 lane history records independent
+read-only finder and skeptic reviews with no findings; neither ran Lean, its
+server or builds. Initial proof and control checks pass without repair.
+
+These laws are syntax correspondence only. Remaining lexical/path-validity and
+compound-to-leaf correspondence, accepted-source/artifact binding and actual
+Source Env/SrcProg/H24/origin/lifecycle/S03-PANIC41 remain open H121b work here.
+H125/H128 vy1-words is the protected Source producer for library try/Error(string
+memory) and additive v2 envLocOK typing, with v1 negative H24 refusals frozen.
+No published repair was consumed here; historical C246 full-elaboration failure
+remains manual evidence outside automated gates. The exact-19 H19/H60 transport
+evidence request remains assigned and unfulfilled. All original/consolidated
+proof/backfill/coverage/final gates, Y04 physical and separate 4.35 waits and
+STOPs remain. Coverage is still 72 mapped / 3281 rows, 3209 uncovered; these
+conversion laws add no witness rows or whole-lane completion credit.
