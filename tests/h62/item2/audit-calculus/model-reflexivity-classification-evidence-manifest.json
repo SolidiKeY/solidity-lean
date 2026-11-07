@@ -1,0 +1,47 @@
+{
+  "scope": "sole named CallerModel static role after full537-line inspection; constructor rosters static only; neighbouring33 pending",
+  "counts": {
+    "role_reviewed": 302,
+    "role_pending": 4981,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/model-reflexivity-classification-v28/evidence.tar.gz",
+      "bytes": 975294,
+      "sha256": "fdea194099a2eb45d8adb0dc63ae8a3a484ae3fa4115f1bae6a3e0748ee0c42c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-reflexivity-classification-v28/inputs.json",
+      "bytes": 1040,
+      "sha256": "775a3a4e17e752012d3aa3587c23510146e6cdbe5e52ba0d40f1b05ba1521f8c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-reflexivity-classification-v28/gates.json",
+      "bytes": 3090,
+      "sha256": "5ccecf0adab54586804fe286712561da19d8c89ba84dbb51ff2877d1324d8ff1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-reflexivity-classification-v28/reviews.md",
+      "bytes": 599,
+      "sha256": "ab6b0a8d06b05c895e67ac085742427d9b9e7a79316a35e6e51430a617d20fc4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-reflexivity-classification-v28/constructor-roster.json",
+      "bytes": 1264,
+      "sha256": "8d9034cea365e989b6e041bd787b520edf2679e1ff7db921a48cc6a68c916fa7"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-reflexivity-classification-v28/pending-neighbours.json",
+      "bytes": 2837,
+      "sha256": "b1071d3b5def92440021c8e8b849d5992a58bb1e7b870de45f46c8ebeb1bd6b5"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/model-reflexivity-classification-v28/semantic-roles-reviewed.json",
+      "bytes": 826731,
+      "sha256": "d516411f9793e41cb6316ebf47c6a195cc2e5e3fc0300bd5217014b5bfb96229"
+    }
+  ]
+}
