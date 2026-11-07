@@ -602,3 +602,63 @@ dependent definition, premise, exclusion, axiom or budget changed; no new
 sorry/native_decide. Full original/inherited acceptance and RO G42.02 execution
 plus source/callee and physical-frame correspondence remain open. No runtime
 pass, goal completion, publication or master merge is claimed.
+
+
+## Complete encoding and composition inputs (2026-11-07)
+
+Rebased the clean assigned branch onto master
+80c156bf13d1900acf9cdae1556496ee3473e0cd. Its intervening changes did not
+supply these witnesses or alter the relevant readonly sources. The authenticated
+current parent still matches its complete source/import graph after the rebase.
+
+Two more original laws have simultaneous witnesses: CaptureFailures.encoding_failed
+and CapturePhases.compose. The encoding conjunction includes signature, integer
+bounds and all four actual phase runs. Its typed array argument points to an
+allocated heap object, and the encoder actually reports not ABI-encodable. The
+composition conjunction includes signature, integer bounds, all five phase runs
+and admission: receiver/value start at before, arguments mutate before to after,
+and encoding/lookup/admission use after. The unchanged law produces CapturedAt;
+its client resumes at after with the original receiver rather than the assigned
+local address. Seven supplementary theorems cover two original obligations.
+Capture success is not callee success or an owner's compiler-success theorem.
+
+The existing fixed-suite checker now compiles the unchanged allocated-array
+helper separately in its isolated library. Its source, staged source, object and
+logs are sealed, and imports must belong to the authenticated project closure or
+trusted SDK; held, unverified and foreign dependencies are refused. The default
+credit suite remains unchanged. Frozen validation still compiles 11 missing
+unheld original modules and copies 54 authenticated reused objects into one
+private namespace; 58 parent objects are verified. Current validation reuses
+its independently source-bound 80-object parent. No equality of frozen/current
+model definitions or independent SDK source certification follows from reuse.
+
+The final frozen gate passed in 22.618 seconds at 811257856 bytes peak aggregate
+RSS; current passed in 5.540 seconds at 799129600 bytes. Default credit regression
+passed in 5.029 seconds at 792158208 bytes. These are bounded individual checks,
+not a matched before/after speed comparison or a performance STOP release.
+The initial frozen pass preceded a state-sequence comment correction; the final
+frozen/current gates check the corrected bytes. Finder and skeptic both requested
+that comment correction and otherwise found no defect. Final independent reviews
+also confirm the two-row coverage addition; neither reviewer executed Lean or
+wrote files. Ten external refusal controls and five census tests passed.
+
+All seven new axiom sets contain only propext, Classical.choice and Quot.sound.
+Actual tools are Lean 4.24.0 and Lake 5.0.0-src+797c613, serial -j1 with 12 GiB
+cap, 4 GiB reserve and no swap; passing KeySort remains in admitted parent
+evidence. No original statement, dependent definition, premise, exclusion, axiom
+or budget changed; no new sorry/native_decide. No held Premises workload ran.
+
+All 792 original obligations remain: 35 joint, 3 target-failure joint,
+45 intentional impossibility, 256 no-top-level-input, 2 refuted-V1 migration
+and 451 ordinary pending. Exactly two records changed; the other 790 retain
+prior evidence. All three current private identity gaps remain. Strict original
+source accounting covers 129 modules/792 names with 749 source-only pending;
+it does not replace the fuller semantic ledger. Ten raw evidence pins are in
+`tests/h62/item1/readonly-bind/capture-composition.sha256`. Raw gates, helper
+provenance and the handoff are under
+`/workspace/h62-audit-readonly-calls/capture-composition/`.
+
+Whole original/inherited acceptance, broader binding/live ownership, actual
+compiler success and full RO G42.02 source/callee execution plus physical-frame
+correspondence remain unfinished. Historical +80.254966536% Premises STOP remains;
+no runtime pass, goal completion or master publication is claimed.

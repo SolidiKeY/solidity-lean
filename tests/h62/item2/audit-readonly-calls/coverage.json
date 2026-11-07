@@ -476,6 +476,36 @@
       "evidence_manifest": "tests/h62/item1/readonly-bind/capture-joints.sha256",
       "current_evidence": "capture-joints/current-final/probe.log",
       "boundary": "Actual source-model failure feasibility, not compiler success, constructor reachability, EVM/gas/fork or source-callee/physical-frame adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.CaptureFailures.encoding_failed",
+      "signature_sha256": "212dd531e33fdc32ea393be3f8930f24753ecd5521b31c6789cef438d64a29be",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyBind.CaptureCompositionControls.encoding_inputs",
+      "client": "Solidity.H62.ReadonlyBind.CaptureCompositionControls.encoding_failure",
+      "global_premises": "One explicit Glob EB and typed context/program per conjunction; every original hypothesis jointly instantiated.",
+      "per_input": "Signature, u256 validity and receiver/value/arguments success plus actual ABI encoding failure all at one allocated-array state, fuel6.",
+      "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "frozen_type_sha256": "c03b5cf387710b4f0a80ed0c99c58011357fbd54f9a9792cb10bb0300e5d391e",
+      "evidence": "capture-composition/frozen-reviewed/probe.log",
+      "evidence_manifest": "tests/h62/item1/readonly-bind/capture-composition.sha256",
+      "current_evidence": "capture-composition/current-final/probe.log",
+      "boundary": "Source encoding-failure/capture feasibility, not callee/compiler success, EVM/gas/fork, constructor or physical-frame adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.CapturePhases.compose",
+      "signature_sha256": "3c297ace0fb96c598e929a1b5ede267473a4b4add6f559d058136c0a237b24f5",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyBind.CaptureCompositionControls.compose_inputs",
+      "client": "Solidity.H62.ReadonlyBind.CaptureCompositionControls.capture_success",
+      "global_premises": "One explicit Glob EB and typed context/program per conjunction; every original hypothesis jointly instantiated.",
+      "per_input": "Signature, u256 validity and six actual phase/admission hypotheses; before/before/before->after/after/after, arguments mutate local4 while captured receiver stays ext9, fuel6.",
+      "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "frozen_type_sha256": "ca163f70c4fa4bc1b50954edec63f862e01bb9978df8c9206fada6df0d40e037",
+      "evidence": "capture-composition/frozen-reviewed/probe.log",
+      "evidence_manifest": "tests/h62/item1/readonly-bind/capture-composition.sha256",
+      "current_evidence": "capture-composition/current-final/probe.log",
+      "boundary": "Source encoding-failure/capture feasibility, not callee/compiler success, EVM/gas/fork, constructor or physical-frame adequacy."
     }
   ]
 }

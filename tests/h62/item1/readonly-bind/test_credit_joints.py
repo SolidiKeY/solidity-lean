@@ -82,6 +82,25 @@ class CreditRefusals(unittest.TestCase):
                     '\n'.join(rows).replace(capture['prefix'],m.PREFIX)]:
             with self.assertRaises(ValueError):m.parse_axioms(bad,capture['prefix'],capture['names'])
 
+    def test_extra_dependency_refusals(self):
+        allowed={'Solidity/Lowering/Readonly/CaptureFailures.lean','Solidity/Source/SemanticsExamples.lean'}
+        m.validate_extra_imports(['Solidity.Lowering.Readonly.CaptureFailures',
+                                 'Solidity.Source.SemanticsExamples','Init','Std'],allowed)
+        for imports in [[m.profile.HELD],['Solidity.Unverified'],['Foreign.Module'],['EncodingFailureControls']]:
+            with self.subTest(imports=imports),self.assertRaises(ValueError):m.validate_extra_imports(imports,allowed)
+
+    def test_composition_suite_binding(self):
+        suite=m.SUITES['capture-composition']
+        self.assertEqual(suite['interfaces'],['Solidity.Lowering.Readonly.CaptureFailures.encoding_failed',
+                                             'Solidity.Lowering.Readonly.CapturePhases.compose'])
+        self.assertEqual(suite['extras'],{'tests/h62/item1/readonly-bind/EncodingFailureControls.lean':'EncodingFailureControls'})
+        self.assertEqual(suite['imports'],[suite['import'],'EncodingFailureControls'])
+        rows=["'"+suite['prefix']+n+"' does not depend on any axioms" for n in suite['names']]
+        self.assertEqual(len(m.parse_axioms('\n'.join(rows),suite['prefix'],suite['names'])),7)
+        for bad in ['\n'.join(rows[:-1]),'\n'.join(rows+[rows[0]]),
+                    '\n'.join(rows).replace('does not depend on any axioms','depends on axioms: [sorryAx]')]:
+            with self.assertRaises(ValueError):m.parse_axioms(bad,suite['prefix'],suite['names'])
+
     def test_retained_parent_digest(self):
         with tempfile.TemporaryDirectory() as tmp:
             path=Path(tmp)/'receipt.json';path.write_bytes(b'admitted');digest=m.check.sha(path)

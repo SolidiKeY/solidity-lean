@@ -41,8 +41,18 @@ SUITES = {
         'interfaces': ['Solidity.Lowering.Readonly.CaptureFailures.'+n for n in
                        ['target_failed','value_failed','arguments_failed','code_rejected']],
         'import': 'Solidity.Lowering.Readonly.CaptureFailureControls'},
+    'capture-composition': {
+        'source': 'tests/h62/item1/readonly-bind/CaptureCompositionControls.lean',
+        'prefix': 'Solidity.H62.ReadonlyBind.CaptureCompositionControls.',
+        'names': ['encoding_inputs','allocated_argument','encoding_failure','compose_inputs',
+                  'capture_success','resume_boundary','capture_observations'],
+        'interfaces': ['Solidity.Lowering.Readonly.CaptureFailures.encoding_failed',
+                       'Solidity.Lowering.Readonly.CapturePhases.compose'],
+        'import': 'Solidity.Lowering.Readonly.CaptureFailureControls',
+        'imports': ['Solidity.Lowering.Readonly.CaptureFailureControls','EncodingFailureControls'],
+        'extras': {'tests/h62/item1/readonly-bind/EncodingFailureControls.lean': 'EncodingFailureControls'},
+    },
 }
-
 
 
 def read_parent(path,mode):
@@ -78,6 +88,17 @@ def verify_parent(parent,receipt,mode):
     # SDK is an explicit trusted toolchain input, never inferred from project cache.
     pins=receipt['protected_sha256'] if mode=='frozen' else receipt['input_pins']
     check.verify_hashes({str(p):pins[str(p)] for p in [check.LEAN,ROOT/'lean-toolchain']})
+
+
+def validate_extra_imports(imports, allowed):
+    """An additive helper cannot introduce a held or unverified dependency."""
+    for module in imports:
+        if module==profile.HELD:raise ValueError('held extra dependency refused')
+        if module.startswith('Solidity.'):
+            if module.replace('.','/')+'.lean' not in allowed:
+                raise ValueError('unverified extra dependency')
+        elif module.split('.')[0] not in {'Lean','Init','Std'}:
+            raise ValueError('foreign extra dependency')
 
 
 def copy_parent_object(source, destination, digest, protected):
@@ -142,7 +163,7 @@ def main():
     sdk=subprocess.check_output([str(check.LEAN),'--print-prefix'],env=env,text=True).strip()
     if str(Path(sdk).resolve())!=str(Path(receipt['sdk_root']).resolve()):raise ValueError('credit SDK root mismatch')
     raw=(ROOT/source_name).read_bytes();source_pin=check.hashlib.sha256(raw).hexdigest()
-    if profile.imports(raw.decode())!=[suite['import']]:
+    if profile.imports(raw.decode())!=suite.get('imports',[suite['import']]):
         raise ValueError('unadmitted credit imports')
     steps=[]
     def run(tag,source,artifact=None):
@@ -181,6 +202,18 @@ def main():
         for relative,pin in pins.items():
             if check.hashlib.sha256(original.read_git(relative)).hexdigest()!=pin['source_sha256']:
                 raise ValueError('frozen supplement Git source drift')
+    extra_records={}
+    allowed=set(receipt['source_pins']) | set(supplements)
+    for relative,extra_module in suite.get('extras',{}).items():
+        extra_raw=(ROOT/relative).read_bytes();extra_pin=check.hashlib.sha256(extra_raw).hexdigest()
+        validate_extra_imports(profile.imports(extra_raw.decode()),allowed)
+        extra_source=out/(extra_module+'.lean');extra_artifact=library/(extra_module+'.olean')
+        extra_record=check.compile_staged(ROOT/relative,extra_source,extra_artifact,
+            lambda src,obj:run(extra_module,src,obj))
+        if extra_record['source_sha256']!=extra_pin:raise ValueError('extra source drift')
+        protected.update({str(ROOT/relative):extra_pin,str(extra_source):extra_pin,
+                          str(extra_artifact):extra_record['artifact_sha256']})
+        extra_records[relative]=extra_record
     source,artifact=out/(module+'.lean'),library/(module+'.olean')
     record=check.compile_staged(ROOT/source_name,source,artifact,lambda src,obj:run('fixture',src,obj))
     if record['source_sha256']!=source_pin:raise ValueError('credit source changed before compile')
@@ -199,7 +232,7 @@ def main():
         raise ValueError('credit SDK root changed')
     result={'boundary':__doc__,'profile':args.profile,'parent_receipt_sha256':PARENTS[args.profile],
             'parent':str(parent),'parent_objects_verified':len(receipt['artifacts']),
-            'suite':args.suite,'source':source_name,'fixture':record,'frozen_supplements':supplements,'frozen_reused_objects':reused,'steps':steps,'axioms':axioms,'types_sha256':protected[str(out/'types.json')],
+            'suite':args.suite,'source':source_name,'fixture':record,'frozen_supplements':supplements,'frozen_reused_objects':reused,'extra_records':extra_records,'steps':steps,'axioms':axioms,'types_sha256':protected[str(out/'types.json')],
             'protected_sha256':protected,'sdk_root':sdk,'joint_interface_names':suite['interfaces'],
             'head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
             'full_goal_acceptance':False}
