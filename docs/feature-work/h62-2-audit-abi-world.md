@@ -13,9 +13,9 @@ mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings pass.
-The prior full Lean build passed on 2a43bf4f; the current 806a972a full build
-is pending. Final acceptance also awaits 85 standard-only G07 registrations
-(zero axiom errors) and two synthetic references in another audit checker. The later coordinator instruction explicitly
+The prior full Lean build passed on 2a43bf4f; the current e0f4251f full build
+is pending. Final acceptance also awaits 149 standard-only G07 registrations
+(zero axiom errors). Current root, fragment and documentation checks pass. The later coordinator instruction explicitly
 reactivated this same worker and authorized merging origin/master and continuing.
 The retirement section below is historical; no goal was created or reset.
 
@@ -24,7 +24,7 @@ The retirement section below is historical; no goal was created or reset.
 | 1. Frozen signatures, ownership, premise classification | Complete source inventory; elaborated binders now also exported. |
 | 2. Simultaneous hypotheses | 177 exact-type packages pass complete Lean diagnostics and reviews. |
 | 3. Success/totality and behavioral controls | Seven formal theorems and ten provenance-bound external programs pass; proof/runtime boundary below. |
-| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Fresh 806 per-file census passes; current full build and owner metadata closure remain pending. |
+| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Fresh e0 per-file census passes; current full build and owner metadata closure remain pending. |
 
 The accounting tool explicitly reports `witness_gate_complete=true` and
 `assignment_complete=false`. All original Solidity sources, generated roots,
@@ -675,3 +675,43 @@ budget, gate command or axiom changed. fragments --check now passes.
 Independent finder and skeptic verified the line multiset/protected hashes and
 retained failure, no findings; neither Lean/server/builds/edits. Current full
 retry remains pending; fragments PASS alone is not a full-build PASS.
+
+## Superseding e0 re-baseline and full-build policy (2026-11-07)
+
+Coordinator requested e0f4251ff before further work while the806full retry was
+running. Sent SIGTERM via pidfd only to the exact owned bounded guard, after
+command identity validation. Its receipt records cancellation, exit-15, cleanup
+complete and4801.177983seconds; partial progress4665, no Lean errors. This is
+not a pass. The original3.288second pre-Lean failure and all partial logs remain.
+After cleanup released the writer lock, fast-forwarded c460c0ce to exact remote
+e0f4251ff40ad79c37bae53795b7419afe52e8d9, verifying original-base and lane-head
+ancestry. Same VM/branch; no reset, competing goal, push or pre-gate.
+
+Current root policy changed45validation inputs, including lakefile/run-lean.
+The full gate explicitly adds SoliditySlowExamples alongside default targets
+and SolkeyTestSuite. Regenerated only the owned serial config, preserving every
+upstream target and non-weak argument; all targets retain stack131072/-j1.
+Actual toolchain remains Lean4.24.0 Release797c613 and Lake5.0.0-src+797c613.
+VM hard16GiB/taskRSS12GiB/reserve4GiB, LEAN_NUM_THREADS1 and no active swap
+remain unchanged. No slowdown refactor, statement, premise, exclusion, proof
+budget, root, module map or axiom inventory edit was made by this continuation.
+
+Fresh9auditfiles+KeySort bind7986upstream Lean paths/bytes. Frozen24ABI+map
+remain originalbytes. Acceptance177/439/7/10,3receipt controls and4scanner
+tests pass. Matched timing1.646584388 to1.666911998seconds (+1.234531929%,within
+10%) passes. Trust6631sources/289sites/0findings, reachability6614/0orphans,
+roots/fragments/documentation paths pass. The former foreign A/B reference
+wait is resolved upstream; no owner checker was edited here.
+
+Global pin metadata reports16739theorems,0errors,149unrecorded standard-only
+registrations. Off-Git PIN-e0f4251f contains149unique previous=null entries and
+current central hash, authenticated by the tiny committed bulk manifest.
+No bulky ticket/member-manifest data was re-added to Git. Historical absolute
+paths require VM retrieval before off-VM byte verification. Original source
+and proof/external-test boundaries remain: archived gas/fork observations for
+ten identical fixtures, no fresh EVM or formal gas/world/generalcompiler proof.
+
+Independent read-only finder and skeptic verified ancestry, cancellation/log
+binding/cleanup, preserved full/serial policy, fresh receipt/fidelity identity,
+149-entry ticket and matched timing; no findings, no Lean/server/build/edit.
+The expanded full gate remains pending and is required before final handoff.
