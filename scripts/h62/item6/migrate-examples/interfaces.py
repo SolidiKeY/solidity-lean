@@ -18,7 +18,7 @@ def inventory(raw,census):
     if census["base"]!=BASE:raise ValueError("wrong pinned base")
     expected={m["module"] for m in census["modules"]}
     if len(expected)!=len(census["modules"]):raise ValueError("duplicate census module")
-    lines=iter(raw.splitlines());header=json.loads(next(lines))
+    lines=iter(raw.splitlines() if isinstance(raw,str) else raw);header=json.loads(next(lines))
     if header.get("schema")!="h62-examples-interface-v1":raise ValueError("wrong schema")
     actual=header["modules"]
     if len(actual)!=len(set(actual)) or set(actual)!=expected:raise ValueError("incomplete or unexpected module inventory")
@@ -62,7 +62,8 @@ def main():
     p=argparse.ArgumentParser();p.add_argument("--raw",type=pathlib.Path,required=True);p.add_argument("--census",type=pathlib.Path,required=True);p.add_argument("--output",type=pathlib.Path,required=True);p.add_argument("--compare",type=pathlib.Path);a=p.parse_args()
     census=json.loads(a.census.read_text())
     if len(census["modules"])!=354:raise ValueError("expected all 354 assigned modules")
-    data=inventory(a.raw.read_text(),census);a.output.write_text(json.dumps(data,indent=2,sort_keys=True)+"\n")
+    with a.raw.open() as stream:data=inventory(stream,census)
+    a.output.write_text(json.dumps(data,indent=2,sort_keys=True)+"\n")
     print(json.dumps({"modules":len(data["modules"]),"declarations":len(data["declarations"]),"interface_sha256":data["interface_sha256"]}))
     if a.compare:
         delta=compare(json.loads(a.compare.read_text()),data);print(json.dumps(delta));return int(any(delta.values()))
