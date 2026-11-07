@@ -58,6 +58,30 @@ theorem journal_order {E : Source.Env} (frame : Source.Fr)
  .account frame.this ((SourceWordWrite.after frame p v state).ex.world.accounts frame.this) ::
  .account frame.this (state.ex.world.accounts frame.this) :: state.ex.journal := by rfl
 
+/-- Package both actual captured-write runs, world equality and their distinct journal orders. -/
+theorem complete {E : Source.Env} {Γ : Source.RCtx} (frame : Source.Fr)
+ (p : Source.SPath) (v : Source.Val E.layout (E.cellTy p))
+ (q : Source.SPath) (w : Source.Val E.layout (E.cellTy q))
+ (locals : Source.Locals E.layout Γ) (state : Source.St E)
+ (writable : frame.static=false) (ordinaryP : E.transientRoot p=false) (ordinaryQ : E.transientRoot q=false)
+ (different : p≠q) :
+ let forward := (two frame p v q w).run (locals,state)
+ let reverse := (two frame q w p v).run (locals,state)
+ forward=(.ok (), (locals,SourceWordWrite.after frame q w (SourceWordWrite.after frame p v state))) ∧
+ reverse=(.ok (), (locals,SourceWordWrite.after frame p v (SourceWordWrite.after frame q w state))) ∧
+ forward.2.2.ex.world=reverse.2.2.ex.world ∧
+ forward.2.2.ex.journal =
+ .account frame.this ((SourceWordWrite.after frame p v state).ex.world.accounts frame.this) ::
+ .account frame.this (state.ex.world.accounts frame.this) :: state.ex.journal ∧
+ reverse.2.2.ex.journal =
+ .account frame.this ((SourceWordWrite.after frame q w state).ex.world.accounts frame.this) ::
+ .account frame.this (state.ex.world.accounts frame.this) :: state.ex.journal := by
+  dsimp only
+  rw [run frame p v q w locals state writable ordinaryP ordinaryQ,
+    run frame q w p v locals state writable ordinaryQ ordinaryP]
+  exact ⟨rfl, rfl, world_commute E frame p q v w state different,
+    journal_order frame p v q w state, journal_order frame q w p v state⟩
+
 end Solidity.Lowering.StorageOps.SourceWordCommutation
 
 
@@ -75,3 +99,6 @@ end Solidity.Lowering.StorageOps.SourceWordCommutation
 
 /-- info: 'Solidity.Lowering.StorageOps.SourceWordCommutation.journal_order' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Lowering.StorageOps.SourceWordCommutation.journal_order
+
+/-- info: 'Solidity.Lowering.StorageOps.SourceWordCommutation.complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Lowering.StorageOps.SourceWordCommutation.complete
