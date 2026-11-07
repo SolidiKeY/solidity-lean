@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "reported_master": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
+  "pre_integration_head": "8036ad2773523b8c51f151131172b9ecd28af005",
+  "merge_commit": "584a6a5f7ec2d4f55cae3f54e2ca969c2464d6d9",
+  "integration": "History-preserving normal merge: published owned content matched but old tip not ancestor; tree equals published master before new local proposal",
+  "assigned_and_dependency_census": "equal pinned base",
+  "independent_backfill_completed": "Pinned static narrower-import candidate; live fixture unchanged, no Lean",
+  "status": "blocked_after_available_static_backfill",
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Compatible Raw prerequisites"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Disposition of diagnostic RSS STOP; approval/policy for any modified-candidate validation"
+    },
+    {
+      "lane": "COORD",
+      "item": "Current VM-readable H81 policy; another lane conservative setting is not this lane policy delivery"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Authoritative H78 visibility/new exports"
+    }
+  ],
+  "remaining_original_items": [
+    "new complete assigned build",
+    "new interfaces/signatures/axioms and compatibility",
+    "full validation",
+    "clean before/after timing acceptance"
+  ],
+  "proposal_pending": [
+    "visibility/type/axiom/per-file checks",
+    "fresh modified-case measurements after holds permit"
+  ],
+  "new_proof_or_lean_run": false,
+  "push": false
+}
