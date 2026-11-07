@@ -427,3 +427,34 @@ narrow evalLocal pipeline statement, using no Lean server or writes. Affected
 LocalBlock, original dirty-readback controls and P16 built successfully (201
 jobs), including the six exact axiom pins. The bounded affected run took 84.37
 seconds with no swap/OOM; this is not a controlled before/after speed comparison.
+
+## Source read observations under view agreement and capture
+
+After adopting master 05d2c2587, four additive generic laws connect selected
+readback to the existing authoritative RawFrame view. Equal clean backups and
+word views give equal selected decoding, with no world premise. Equal worlds
+additionally give equal complete optional Source result/state under the same
+global, frame, fuel, index and runtime plan. Only the original raw-frame return
+component is projected away; its metadata is deliberately not equated.
+
+The existing capture operation preserves backup, world and authoritative view,
+so it preserves selected decoding and the Source observation. One concrete
+LocalBlock control exercises both pipelines and records that sparse flag
+metadata is none while captured flag metadata is some(view flag). Equal Source
+observations therefore do not imply equal raw frames. Refusal remains explicit.
+
+The semantic ledger records decoder none/some cases and exact premises.
+Read-only finder and skeptic both passed the four laws and the control without
+Lean or writes. MCP and the 121-job LocalBlock build passed; all five declarations
+use only the standard three axioms. The bounded control/audit run exited zero in
+122.50 seconds with no swap/OOM. Its earlier inference failure is retained;
+the repair supplies the captured frame explicitly and changes no statement.
+
+No existing decoder, Source evaluator, representation, premise, exclusion or
+proof budget changed. General Source expression/statement integration,
+raw-copy propagation, complete Raw-family accounting and timing acceptance
+remain open; H58 remains on HOLD.
+
+The affected LocalBlock, original decoder controls and P16 build passed (201
+jobs), including exact axiom pins. This run took 80.33 seconds within the
+existing memory/no-swap bounds; no before/after speed acceptance is claimed.

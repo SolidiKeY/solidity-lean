@@ -74,5 +74,24 @@
     "global_change": "Only G.pipeline changes; all other global fields, frame, fuel, state, index and runtime plan are identical.",
     "reuse": "RawFrame.Logic.frame_readback_pipelines has unchanged signature and reuses readbackFrom_pipelines.",
     "limitation": "No equality of arbitrary Source expressions, unchecked arithmetic, statements or raw-copy propagation."
+  },
+  "view_and_capture": {
+    "readAt_agrees_premises": [
+      "equal clean backup",
+      "equal authoritative word view"
+    ],
+    "evalLocal_source_agrees_extra_premise": "equal world",
+    "source_observation": "Option of complete Source R result and complete prepared Source EMState; only original raw-frame return component projected away",
+    "capture": "Existing RawFrame.capture of exactly the same authoritative view; backup and world unchanged",
+    "semantic_cases": [
+      "selected decoder none: both observations refuse",
+      "selected decoder some: same full Source evaluation with G/F/fuel/index/plan unchanged"
+    ],
+    "metadata_control": "At flag, selectedReadState.raw is none and captured state.raw is some(view flag), while full optional Source observations agree in both pipelines.",
+    "limits": [
+      "No raw-frame identity or overlay equality",
+      "No general Source expression/statement or copy integration",
+      "No all-Raw-case completeness claim"
+    ]
   }
 }

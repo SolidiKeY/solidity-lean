@@ -392,4 +392,56 @@ Solidity.Yul.DirtyReadback.evalLocal {G with pipeline := .viaIR} F fuel state in
   cases fuel <;> unfold Solidity.Yul.DirtyReadback.evalLocal <;>
     rw [Solidity.Yul.DirtyReadback.readAt_pipelines] <;> rfl
 
+/-- Selected readback depends on the authoritative word view and clean backup,
+not the optional overlay's sparsity or world. The clean-backup premise matters
+for unsupported locals and is retained explicitly. -/
+theorem readAt_agrees :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy) (pipeline : Solidity.Yul.DirtyReadback.Pipeline)
+(first second : Solidity.Yul.RawFrame.State ctx),
+first.clean = second.clean → Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+∀ (index : Solidity.Source.Idx ctx.tys ty),
+Solidity.Yul.DirtyReadback.readAt pipeline first index = Solidity.Yul.DirtyReadback.readAt pipeline second index := by
+  intro ctx ty pipeline first second clean words index
+  unfold Solidity.Yul.DirtyReadback.readAt Solidity.Yul.RawFrame.materialize
+  rw [clean, words]
+
+/-- Equal clean backups, worlds and authoritative word views produce identical full Source observations. Only the original raw-frame component is projected away; its metadata need not be equal. -/
+theorem evalLocal_source_agrees :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+(G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+(first second : Solidity.Yul.RawFrame.State ctx),
+first.clean = second.clean → first.world = second.world →
+Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+∀ (index : Solidity.Source.Idx ctx.tys ty) (plan : Solidity.Source.FailureExecution.RuntimePlan),
+(Solidity.Yul.DirtyReadback.evalLocal G F fuel first index plan).map Prod.fst =
+(Solidity.Yul.DirtyReadback.evalLocal G F fuel second index plan).map Prod.fst := by
+  intro ctx ty G F fuel first second clean world words index plan
+  unfold Solidity.Yul.DirtyReadback.evalLocal
+  rw [Solidity.Yul.DirtyReadback.readAt_agrees ctx ty G.pipeline first second clean words, clean, world]
+  cases Solidity.Yul.DirtyReadback.readAt G.pipeline second index <;> rfl
+
+/-- Capturing the same complete word view preserves selected decoding, including refusal and clean-backup fallback. -/
+theorem readAt_capture :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy) (pipeline : Solidity.Yul.DirtyReadback.Pipeline)
+(state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty),
+Solidity.Yul.DirtyReadback.readAt pipeline (Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state)) index =
+Solidity.Yul.DirtyReadback.readAt pipeline state index := by
+  intro ctx ty pipeline state index
+  exact Solidity.Yul.DirtyReadback.readAt_agrees ctx ty pipeline _ state rfl
+    (Solidity.Yul.RawFrame.view_capture state _) index
+
+/-- Snapshot capture preserves the complete optional Source result/state at the selected-read boundary. The returned original raw frame is deliberately not equated. -/
+theorem evalLocal_source_capture :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+(G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+(state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+(plan : Solidity.Source.FailureExecution.RuntimePlan),
+(Solidity.Yul.DirtyReadback.evalLocal G F fuel
+(Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state)) index plan).map Prod.fst =
+(Solidity.Yul.DirtyReadback.evalLocal G F fuel state index plan).map Prod.fst := by
+  intro ctx ty G F fuel state index plan
+  exact Solidity.Yul.DirtyReadback.evalLocal_source_agrees ctx ty G F fuel
+    (Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state)) state rfl rfl
+    (Solidity.Yul.RawFrame.view_capture state _) index plan
+
 end Solidity.Yul.DirtyReadback

@@ -11,7 +11,9 @@ import Solidity.Source.Semantics
 The selected-local Source readback regression is guarded here: a dirty unsupported
 neighbor must not block a supported read, cleanup must not rewrite raw bits,
 and fuel exhaustion remains distinct from readback refusal. The empty-program
-Source fixture below executes local reads only, not crypto or call agreement. -/
+Source fixture below executes local reads only, not crypto or call agreement.
+Snapshot capture must preserve the complete Source observation while retaining
+the distinction between sparse and fully populated overlay metadata. -/
 namespace Solidity.Yul.Checks.LocalBlock
 open Solidity.Source
 def env : Solidity.Source.Env := ⟨[]⟩
@@ -1126,5 +1128,32 @@ theorem readbackRawWords :
 /-- info: 'Solidity.Yul.DirtyReadback.evalLocal_pipelines' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.DirtyReadback.evalLocal_pipelines
+
+/-- Capture preserves the Source observation without identifying sparse and full raw overlays. -/
+theorem readbackCaptureMetadata :
+ ∀ (pipeline : Solidity.Yul.DirtyReadback.Pipeline),
+(Solidity.Yul.DirtyReadback.evalLocal (Solidity.Yul.Checks.LocalBlock.readbackGlob pipeline) Solidity.Yul.Checks.LocalBlock.readbackFrame 1 (Solidity.Yul.RawFrame.capture Solidity.Yul.Checks.LocalBlock.selectedReadState (Solidity.Yul.RawFrame.view Solidity.Yul.Checks.LocalBlock.selectedReadState)) Solidity.Yul.Checks.LocalBlock.readbackSmallIndex).map Prod.fst =
+(Solidity.Yul.DirtyReadback.evalLocal (Solidity.Yul.Checks.LocalBlock.readbackGlob pipeline) Solidity.Yul.Checks.LocalBlock.readbackFrame 1 Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.readbackSmallIndex).map Prod.fst ∧
+Solidity.Yul.Checks.LocalBlock.selectedReadState.raw Solidity.Yul.Checks.LocalBlock.flag = none ∧ (Solidity.Yul.RawFrame.capture Solidity.Yul.Checks.LocalBlock.selectedReadState (Solidity.Yul.RawFrame.view Solidity.Yul.Checks.LocalBlock.selectedReadState)).raw Solidity.Yul.Checks.LocalBlock.flag = some (Solidity.Yul.RawFrame.view Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.flag) := by
+  intro pipeline
+  constructor
+  · exact Solidity.Yul.DirtyReadback.evalLocal_source_capture _ _ _ _ _ _ _ _
+  · constructor <;> rfl
+
+/-- info: 'Solidity.Yul.DirtyReadback.readAt_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.readAt_agrees
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_source_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_source_agrees
+/-- info: 'Solidity.Yul.DirtyReadback.readAt_capture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.readAt_capture
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_source_capture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_source_capture
+/-- info: 'Solidity.Yul.Checks.LocalBlock.readbackCaptureMetadata' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.readbackCaptureMetadata
 
 end Solidity.Yul.Checks.LocalBlock
