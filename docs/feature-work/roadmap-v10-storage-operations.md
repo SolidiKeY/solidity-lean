@@ -1276,3 +1276,31 @@ failure evidence outside automated gates. Protected inference/typing/elaboration
 resolved files have no published changes releasing its hold. H16 exact try
 support, separate mapping-bearing H24, Y04 physical and4.35 trust/timing waits,
 all prior STOPs, inherited proofs/coverage and full final gates remain open.
+
+### C252 — parameter and array structural correspondence
+
+SourceAstParameterCorrespondence proves exact parameter converted type,
+location and anonymous/named spelling; recursive parameter containers preserve
+every child in order through C247 Each/build law. Array conversion retains its
+converted base and exact optional bound through the existing optional-expression
+reader, covering null/dynamic and explicit/fixed syntax. Input-field/child-result
+premises describe conversion only, not Source feasibility or admission.
+
+Two parameter guards use the standard trio; the array guard uses propext+
+Quot.sound. All have exact measured guards. No reader/decoder, protected Source,
+frozen statement/interface/premise/budget/exclusion/trust policy or axiom
+declaration changed. Initial array proofs failed on match/bind distribution and
+the null-bound case; explicit JSON constructor analysis and the null equality
+fix the proof without changing its statement. Failed/recovery diagnostics are
+retained; no rejected artifact or sorryAx pin accepted.
+
+Existing compound controls keep named mapping/fixed bound, nested function and
+refusal/depth checks; added generic anonymous/default and named storage/calldata
+syntax controls guard qualifier/name preservation. Scalar storage/calldata test
+syntax is NOT claimed to be an accepted Source program. No per-case Source
+fixture copies or phase folders. Finder and skeptic reviewed read-only without
+Lean/server/build, no findings. Actual Source origin/H24/lifecycle/S03-PANIC41,
+artifact binding and remaining correspondence/coverage/full gates remain open.
+The historical C246 manual failed probe remains outside automated gates; H16
+exact try support, separate mapping-bearing H24, Y04 physical,4.35 trust/timing
+waits and all STOPs remain unchanged. Original/consolidated goal not complete.

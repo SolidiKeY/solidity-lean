@@ -1,8 +1,8 @@
-import Solidity.Lowering.P8.SourceAstCompoundTypes
+import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 
 /-! Structural conversion regressions, not Source acceptance/execution proofs.
 Regression purpose: retain array bound and mapping names, nested function
-parameter location, and explicit refusal of malformed/payable mapping keys. -/
+parameter location, anonymous/named qualifiers, and explicit refusal of malformed/payable mapping keys. -/
 namespace H62.StorageAudit.SourceAstCompoundTypesControls
 open Lean Solidity.Source Solidity.Lowering.P8.SourceAstCompoundTypes
 
@@ -26,6 +26,10 @@ def functionShape : Syn .typeName → Bool
       (some "xs")) .nil) (some .external) (some .view) .nil => true
   | _ => false
 
+def parameterShape (expectedName : Option String) (expectedLoc : Option DataLoc) : Syn .param → Bool
+  | .param (.elem (.int false 256 _)) loc name => decide (loc = expectedLoc ∧ name = expectedName)
+  | _ => false
+
 def check : Except String Unit := do
   let bound ← Json.parse "{\"nodeType\":\"Literal\",\"kind\":\"number\",\"value\":\"3\"}"
   let mapping := Json.mkObj [("nodeType", .str "Mapping"),
@@ -44,6 +48,16 @@ def check : Except String Unit := do
   unless !(mapKey payableKey).isOk do throw "payable mapping key accepted"
   unless !(typeName 16 (arrayNode (elementaryNode "bool") (.str "bad bound"))).isOk do
     throw "malformed bound dropped"
+
+  -- Syntax-only qualifier preservation; scalar storage/calldata combinations
+  -- are not asserted to be valid Source programs.
+  for (name, loc, expectedName, expectedLoc) in [
+      ("", "default", none, none), ("value", "storage", some "value", some DataLoc.storage),
+      ("value", "calldata", some "value", some DataLoc.calldata)] do
+    let node := Json.mkObj [("nodeType", .str "VariableDeclaration"),
+      ("typeName", elementaryNode "uint256"), ("name", .str name), ("storageLocation", .str loc)]
+    unless parameterShape expectedName expectedLoc (← parameterWith (typeName 16) node) do
+      throw "parameter name or qualifier changed"
 
 #eval match check with
   | .ok _ => IO.println "compound type structure and refusal controls passed"

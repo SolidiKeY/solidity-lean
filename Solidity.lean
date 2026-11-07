@@ -3265,6 +3265,7 @@ import Solidity.Lowering.P8.SourceAstCorrespondence
 import Solidity.Lowering.P8.SourceAstExpressionCorrespondence
 import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstLiteralCorrespondence
+import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 import Solidity.Lowering.P8.SourceAstParameters
 import Solidity.Lowering.P8.SourceAstStatements
 import Solidity.Lowering.P8.SourceAstTupleCorrespondence
