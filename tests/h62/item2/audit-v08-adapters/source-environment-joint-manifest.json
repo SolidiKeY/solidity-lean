@@ -1,0 +1,109 @@
+{
+  "status": "SOURCE_ENVIRONMENT_SAME_REACHED_STATE_COMPONENTS",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceEnvironmentJoint.lean": "280de69342df2f5fa785a7edc713eae830a8e4031cf828b46c75932b48f73aea",
+    "Solidity/Lowering/V08/SourceEnvironment.lean": "210f97a0054da0d9f22d94b509515528e6db00d7f109046809cca9577901a77e",
+    "Solidity/Lowering/V08/SourceKeccak.lean": "da457d92de90b7c81a3dd7ca29a4be6f0b365530a212e331b4cf5ffd8254d507",
+    "Solidity/Lowering/V08/SourceEnvironmentControls.lean": "bae35879e6d35efb6dbddd3d75a94856139afb9826db39578bb6729d0e1a0e8d"
+  },
+  "target_links": [
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceEnvironment.lean:24:eval_sender",
+      "target": "Solidity.Lowering.V08.SourceEnvironment.eval_sender",
+      "component": "reached_reads",
+      "statement_fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceEnvironment.lean:75:eval_value",
+      "target": "Solidity.Lowering.V08.SourceEnvironment.eval_value",
+      "component": "reached_reads",
+      "statement_fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceEnvironment.lean:83:eval_timestamp",
+      "target": "Solidity.Lowering.V08.SourceEnvironment.eval_timestamp",
+      "component": "reached_reads",
+      "statement_fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceKeccak.lean:20:eval_literal",
+      "target": "Solidity.Lowering.V08.SourceKeccak.eval_literal",
+      "component": "reached_reads",
+      "statement_fidelity": "PENDING"
+    }
+  ],
+  "new_body_fixtures": 0,
+  "fidelity_acceptances": 0,
+  "model": "Existing populated SourceEnvironmentControls model. Actual literal hash allocation and three independent environment reads share the same explicit reached state, for arbitrary bytes, both pipelines/static flags and sufficient fuel.",
+  "negative": "Full value-read and timestamp-read results differ (7 versus12345) despite identical input/reached states.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceEnvironmentJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.273,
+    "peak_sampled_aggregate_rss": 740175872,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axioms": {
+    "reached_reads": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "value_not_timestamp": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "limitations": [
+    "Conjunction of separate reads from same reached state, not sequential Source session or compiled call.",
+    "Existing generic SourceKeccak and SourceEnvironment laws reused; four component applications are not four new fixtures or new producer laws.",
+    "Other original environment/hash targets, generated records and full joint-feasibility/fidelity audit remain open.",
+    "No target projection/frame/body proof, Source admission/origin/lifecycle or canonical H68 bridge. No full-root or matched timing acceptance; previous STOPs retained."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-environment-joint-20261107/check/console.log",
+      "bytes": 167,
+      "sha256": "acaa158068b1af600be54cd37f52fbd8a7de7956d40369d3e951f2b0e3e95271"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-environment-joint-20261107/check/gates/1.log",
+      "bytes": 18224,
+      "sha256": "de93457a48a68094979120819bb0599eb26ee9ead45eef35eedda9a23285238c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-environment-joint-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "2a4b5d9263af22d4b0e0e587b3588f4b6aabe7b86fb75d2e205abcff50aeb147"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-environment-joint-20261107/check/gates/gates.tsv",
+      "bytes": 259,
+      "sha256": "9e3323e48b5da7353c08a493aa64dd2e033e8c4fd4ad7da7d05e9b46eb37045d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-environment-joint-20261107/check/results.json",
+      "bytes": 402,
+      "sha256": "e8f68c077728bccbf27f341829037d1a5d0e798e8ec1626b323898bcc5572778"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-environment-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-environment-joint-20261107/trust.json",
+      "bytes": 173,
+      "sha256": "c4d46cb50ce703e24e915f7d2b3172d2f2d99d816123d801e07e59e13dac33cc"
+    }
+  ]
+}

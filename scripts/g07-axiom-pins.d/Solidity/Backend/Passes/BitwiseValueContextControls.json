@@ -29,7 +29,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.signed_refusal": [
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.signed_acceptance": [
   "Quot.sound",
   "propext"
  ],

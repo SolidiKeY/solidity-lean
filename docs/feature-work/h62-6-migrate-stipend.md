@@ -52,3 +52,49 @@ Independent read-only finder `/root/finder` and skeptic `/root/skeptic`, neither
 Typed request DEP-SYNTAX-RAW-435 to migrate-syntax: provide owner-reviewed migration of exact file Raw.lean with provenance/source hashes. This lane has not edited it or requested scope expansion. Coordinator retrieves saved request; no relay.sh is present locally. Root-gate receives blockers.json, census and exports. Absent owner reply is not permission. Re-run after owner overlay is available, extending strict base-source guard only with explicit owner-approved source hash manifest; never silently accept drift. Original Rule.lean still requires exact-file owner coordination if a future fix is needed.
 
 Final exports: `/workspace/migrate-stipend-evidence/original.patch`, `migration.bundle`, `HANDOFF.md`, `SHA256SUMS`, `result.json`. The post-commit HANDOFF/result record full committed head and checksum paths. Bulk compiler outputs/toolchains stay off git. No final toolchain edit belongs to this lane.
+
+
+## 2026-11-07 resumed baseline and API tooling (partial)
+
+The coordinator explicitly requested rebaseline/continuation after merge. Fetched
+origin/master at `5da4771e63a4278ed53932ac39a032e3d7aea6ed` and fast-forwarded
+this same lane, preserving retirement ancestry/artifacts. No new/replacement
+goal or push. All 12 closure sources still match the original frozen base;
+Stipend.Rule is unchanged. The known unchanged Raw failure was not rerun.
+Original benchmarks remain historical; no new timing delta or Lean execution.
+
+public_api.py fixture deterministically generates the isolated
+`tests/h62/item6/migrate-stipend/PublicInventory.lean`. It enumerates ModuleData
+kernel/compiler-extra names with no generated/private/internal exclusion,
+records raw types, ordered universes/telescope binders, axiom names and naming
+flags, and retains missing signatures as unresolved. The exporter is NOT
+compiled/validated and has produced no actual inventory. Naming flags do not
+establish export visibility/accessibility; raw equality is not semantic
+equivalence. Added declarations require separate trust audit; no shim exists.
+
+CLI extract/compare requires saved successful-run receipts bound to log/source/
+fixture/object bytes, exact pinned versions/archive fields, old4.24/new4.35
+roles and unambiguous serial command metadata. This is consistency checking,
+not execution attestation or H81 approval. Current source binding refuses
+changed-source snapshots until explicit approved provenance is added. Full
+migration gate status remains false.
+
+22 external controls pass: completeness/counts/duplicates, generated/private
+names, unresolved types, universe/binder changes, new axioms, failed/mismatched
+receipts, exact versions, role pairing, conflicting threads, input hashes,
+exclusive evidence preservation and fixture reproduction. Independent finder
+and skeptic found/rechecked the receipt/version/role/thread fixes; neither ran
+Lean/server. Their reviews and exact open state are committed under
+`tests/h62/item6/migrate-stipend/resume-20261107/`.
+
+Registration/root and fragment checks pass. The broader layer gate FAILS on
+the unchanged baseline: 901 core modules, 12 new core-to-non-core edges (95
+pinned allowances). Full diagnostics: `/workspace/migrate-stipend-resume-20261107/layers.log`.
+Production and checker sources match the resume baseline; this is an upstream
+wait, not a passing final gate. No outside-scope source change was made.
+
+Evidence: `/workspace/migrate-stipend-resume-20261107/`. Q-RESUME-H81 requested
+current VM-readable resource policy before new Lean work. Raw migration,
+resource review, real generated API/visibility evidence, exporter/Stipend
+compilation, new fixtures, affected/final gates, matched timings and future
+milestone reviews remain open. No RUNTIME_GATE_PASS or queue completion claim.

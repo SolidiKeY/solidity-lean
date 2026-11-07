@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "obligation": "setting:dafny.compilerOutputDir",
+  "sourceHead": "26010a9ce1ddebbea8ea1f8f86704e14428d72e1",
+  "nativeHead": "26010a9ce1ddebbea8ea1f8f86704e14428d72e1",
+  "fileCount": 142,
+  "uncompressedBytes": 9606158,
+  "boundaries": [
+    "All three actual upstream CLI commands exit0; explicit Build output precedence and ordinary Run/Test omission observed with native Linux keys. Pinned Run/Test --no-verify retained.",
+    "Overall native runner exits1: ordinary Test changes nine previous Run artifact hashes. Guard remains failing; host aggregate reports missing cases after scenario throws. Raw completed three-case observation remains preserved.",
+    "Unchanged fixture has no Main or test declarations; CLI0 is not test coverage, local runtime, AST/executable equality, kernel proof or EVM correspondence.",
+    "Settings slots restored through raw/API readback; original eight-case matrix and failures unchanged. Both independent row judges and full visual/lifecycle/performance/scaling remain absent."
+  ],
+  "archive": {
+    "path": "/workspace/dafny-command-output-evidence-20261107/bulk.tar.gz",
+    "bytes": 2187697,
+    "sha256": "be32b0ba36a385b670053714c6968901346298cc636154bc117273b119931886"
+  },
+  "index": {
+    "path": "/workspace/dafny-command-output-evidence-20261107/files.json",
+    "bytes": 33417,
+    "sha256": "d37d26dfd753deade72fdb8b150203e107bea6eb7f8ded945b76e354639bc615"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-command-output-evidence-manifest.json --restore"
+}

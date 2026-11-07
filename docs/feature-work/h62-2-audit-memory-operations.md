@@ -491,7 +491,7 @@ contracts and full fidelity/final gates before any completion claim.
 
 Latest routing receipt: migrate-hash head
 `a3f49ee0ec1829e63022c90194048d5a1ffe0d22` reports the same partial patch and
-checksum. Its `/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/`
+checksum. Its `$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/`
 host receipt path is recorded but was not retrieved from this VM. The received
 message bytes are the locally checksum-verified artifact; no full affected gate,
 owner source commit import or Source/Raw readiness is implied.

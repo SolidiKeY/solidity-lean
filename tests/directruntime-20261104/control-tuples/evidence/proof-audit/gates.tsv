@@ -1,1 +1,0 @@
-FAIL	lean:tests/directruntime-20261104/control-tuples/ProofAudit.lean	0	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/proof-audit/1.log	lake env lean --tstack=131072 tests/directruntime-20261104/control-tuples/ProofAudit.lean

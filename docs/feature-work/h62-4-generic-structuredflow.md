@@ -142,3 +142,17 @@ Artifacts for retrieval: `/workspace/h62-generic-export/original.patch`,
 `/workspace/h62-generic-export/HANDOFF.md`, `/workspace/h62-generic-evidence/`,
 `/workspace/h62-generic-export/SHA256SUMS`. Full committed head is recorded in the
 exported handoff and result, avoiding self-referential commit metadata here.
+
+## Successor live-toolchain helper check
+
+The staged GenericMapped helper now passes cache-aware `lake lean` on the actual Lean4.24.0 closure. Its two theorem reports contain only propext/Classical.choice/Quot.sound. Prior direct `lake env lean` failures were missing fetched artifact paths; H88's `lake lean` resolves them without rebuilding or changing semantics. The real MappedCondition dependency build passed106jobs in538.881seconds; helper check2.399seconds. Replayed dependency warnings are retained, not relabelled clean diagnostics.
+
+Only the intrinsic universal compiler execution lemma and its two typed fixture instances are checked. Full original-control correspondence, negative/refusal execution, all-declaration trust audit, paired timings and final affected gates remain unfinished. No4.35migration or whole-family completion is inferred.
+
+## General snapshot correspondence follow-up
+
+`GenericMapped.copy_snapshot` now proves the complete four-memory-cell plus saved-stack snapshot at every natural base. `emitted_snapshot` binds this result to the exact original emitter and mapping expression; base0/base128 are instances. The theorem does not replace the stronger whole-machine equation, which remains `compiled_execution`/`MappedCondition.after`. Natural memory indices do not wrap in this model. Production control declarations and refusal proofs remain unchanged.
+
+Cache-aware bounded check generic-mapped-emitted-1107-02 exits0 in3.267seconds. Both new theorem axiom outputs contain only propext/Classical.choice/Quot.sound. Failed elaboration and recursion attempts remain retained; no budget was raised. Separate independent read-only finder and skeptic found no soundness issue and confirmed the exact snapshot/whole-machine distinction. Finder noted unused simp arguments; dependency and local warnings remain visible. No Lean server/build was used by reviewers.
+
+The inherited `gate.py`/`measure.py` protocol requires a pinned4.35 runtime and matched fresh-private-output receipts across all six original modules. Current successful checks use live4.24 and cannot be substituted into that comparison. No timing acceptance or STOP release is claimed. Exact ten-control correspondence, unchanged refusal coverage, complete declaration audit and final affected gates remain open.

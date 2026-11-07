@@ -1,5 +1,0 @@
-ERROR 11:50 Invalid field `numericFree`: The environment does not contain `Solidity.Frontend.Checked.WordClass.numericFree`
-  solWordTable raw
-has type
-  WordClass
-diag: 1 errors

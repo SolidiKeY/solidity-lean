@@ -126,11 +126,25 @@ def declarations(source, path):
     return result
 
 
+SCHEDULING_PATH = "Solidity/Backend/Scalar/PowerBounds.lean"
+SCHEDULING_EDIT = (b"-- Keep the 32 kernel-checked rows from retaining concurrent proof tasks.\n"
+                   b"set_option Elab.async false\n\n")
+
+
+def scheduling_only_change(path, frozen, actual):
+    """Accept only the published pre-namespace scheduling insertion, not proof edits."""
+    marker = b"-/\nnamespace Solidity.Backend.Scalar\n"
+    return (path == SCHEDULING_PATH and marker in frozen and
+            actual == frozen.replace(marker, b"-/\n" + SCHEDULING_EDIT +
+                                      b"namespace Solidity.Backend.Scalar\n", 1))
+
+
 def frozen_bytes(repo, path):
     frozen = subprocess.run(["git", "show", BASE+":"+path], cwd=repo,
                             check=True, stdout=subprocess.PIPE).stdout
     actual = (repo/path).read_bytes()
-    if actual != frozen: raise ValueError("frozen file mismatch: " + path)
+    if actual != frozen and not scheduling_only_change(path, frozen, actual):
+        raise ValueError("frozen file mismatch: " + path)
     return actual
 
 
@@ -152,7 +166,12 @@ def census(repo, ownership):
             row.update(area=area, owner=owner["owner"], owner_key=owner["ownerKey"])
         records.extend(rows)
         files.append({"path":path, "sha256":digest(content), "area":area,
-                      "owner_key":owner["ownerKey"], "named_theorems":len(rows)})
+                      "owner_key":owner["ownerKey"], "named_theorems":len(rows),
+                      "base_sha256":digest(subprocess.run(["git", "show", BASE+":"+path],
+                        cwd=repo, check=True, stdout=subprocess.PIPE).stdout),
+                      "published_scheduling_only_change": path == SCHEDULING_PATH and
+                        content != subprocess.run(["git", "show", BASE+":"+path],
+                        cwd=repo, check=True, stdout=subprocess.PIPE).stdout})
     public = [r for r in records if r["visibility"] == "public"]
     if len({r["name"] for r in public}) != len(public): raise ValueError("duplicate public theorem")
     return {"base":BASE, "module_map":MAP, "module_map_sha256":digest(map_bytes),

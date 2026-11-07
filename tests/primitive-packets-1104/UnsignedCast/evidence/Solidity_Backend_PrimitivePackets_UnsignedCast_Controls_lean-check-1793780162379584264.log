@@ -1,9 +1,0 @@
-COMMAND ["docker", "--host=unix:///var/run/docker.sock", "run", "--rm", "--name", "ucast-98677", "--memory=12g", "--memory-swap=12g", "--network=none", "--mount", "type=bind,src=/workspace/solidity-lean-ucast-1104,dst=/workspace/solidity-lean-ucast-1104", "--mount", "type=bind,src=/workspace/solidity-lean/.lake,dst=/workspace/solidity-lean/.lake", "--mount", "type=bind,src=/home/agent/sol-qn-tools,dst=/tools,readonly", "-w", "/workspace/solidity-lean-ucast-1104", "-e", "LEAN_NUM_THREADS=1", "-e", "LEAN_PATH=/workspace/solidity-lean/.lake/build/lib/lean", "debian:trixie-slim", "/tools/lean-4.24.0-linux/bin/lean", "-j1", "--tstack=131072", "Solidity/Backend/PrimitivePackets/UnsignedCast/Controls.lean"]
-Solidity/Backend/PrimitivePackets/UnsignedCast/Controls.lean:22:66: error: unexpected identifier; expected '}'
-Solidity/Backend/PrimitivePackets/UnsignedCast/Controls.lean:66:66: error: unexpected token 'protected'; expected ':=' or '|'
-Solidity/Backend/PrimitivePackets/UnsignedCast/Controls.lean:66:15: error: type expected, got
-  (StateRepr 1 1 16 (Frag.init []) (State.init C) base : Machine → Prop)
-Solidity/Backend/PrimitivePackets/UnsignedCast/Controls.lean:66:76: error: unexpected token ':='; expected 'abbrev', 'axiom', 'builtin_initialize', 'class', 'def', 'example', 'inductive', 'initialize', 'instance', 'opaque', 'structure' or 'theorem'
-EXIT 1
-SECONDS 2.001
-MINIMUM_AVAILABLE_BYTES 5381201920

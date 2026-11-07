@@ -1,10 +1,14 @@
 {
   "schema_version": 1,
-  "archive": "checkpoint-evidence.tar.gz",
-  "archive_sha256": "92ad15b2ef5cf7c118c4725e9f3f0b5229f992508f2813bf58e8f1e70fbf37d4",
-  "manifest": "tests/h62/item2/audit-abi-world/portable-evidence.sha256",
-  "verify_command": "python3 -B scripts/h62/item2/audit-abi-world/portable_evidence.py verify --archive PATH_TO_ARCHIVE --manifest tests/h62/item2/audit-abi-world/portable-evidence.sha256",
-  "integration": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "archive": "evidence.tar.gz",
+  "archive_sha256": "a4c4fd2a39d1c9458204d4ba32390d8cda984021cc36e0f0e16f3590416c080b",
+  "archive_bytes": 7358349,
+  "manifest": "/workspace/audit-abi-world-evidence/resume-902e-20261107/portable-evidence.sha256",
+  "manifest_sha256": "568f6fb757039d4d86fc084bef4d7619f845d8d259adfdb96d36fd7a804633ed",
+  "manifest_bytes": 255395,
+  "archive_entries": 2164,
+  "verify_command": "python3 -B scripts/h62/item2/audit-abi-world/portable_evidence.py verify --archive PATH_TO_ARCHIVE --manifest PATH_TO_OFF_GIT_MANIFEST",
+  "integration": "902e87762e5c3fb863bc3a592892f2dc09dfa979",
   "coverage": {
     "mapped_modules": 24,
     "statements": 177,
@@ -13,6 +17,14 @@
     "success_theorems": 7,
     "identical_external_fixtures": 10
   },
-  "full_gate_complete": false,
-  "boundary": "Byte integrity is portable; Lean diagnostics and external-test observations retain actual execution provenance. Full build remains pending."
+  "full_lean_build_complete": true,
+  "assignment_complete": false,
+  "final_acceptance": "G07 blocked (open; count from 902e): historical PIN-902e8776 records 247 registrations. P20 is resolved upstream; no fresh c977 inventory result is claimed.",
+  "owner_ticket": "/workspace/audit-abi-world-evidence/resume-902e-20261107/axiom-pin-owner-ticket.json",
+  "normal_build_record": "resume-902e-20261107/full-resource.json",
+  "boundary": "Portable byte integrity for historical 902e evidence: the 6654-job full gate and nine audit modules plus KeySort passed there. The P20 documentation wait is resolved on a282. No fresh a282 build or inventory claim. Archived external gas/fork observations apply to identical fixtures, not fresh EVM or formal gas/world/general compiler proofs. Transfer VM files before off-VM verification.",
+  "bulk_manifest": "tests/h62/item2/audit-abi-world/bulk-artifacts.sha256",
+  "documentation_correction_base": "c97738bd5edac625ff696e3ce4480406810477ba",
+  "ticket_authentication": "The bulk manifest hashes the ticket containing the recorded 902e central-file SHA; no separate central-file entry is present.",
+  "g07_status": "blocked (open; count from 902e)"
 }

@@ -1,4 +1,0 @@
-H70 requester disposition for solidity-h62-6-20261106/migrate-corpus head d507da6baac325b3e31c034dff4cd81bf0832eeb.
-Owner ticket destinations in this routing pass: solidity-h62-6-20261106/migrate-calculus, solidity-h62-6-20261106/migrate-syntax. Current-owner delivery pending: none.
-wait: migrate-syntax Raw and migrate-calculus Linear countermodel repairs; migrate-root-gate preliminary KeySort RSS review. Preserve unchanged corpus statements.
-Host relay journals determine delivery acceptance; a relay does not establish owner agreement or validation. Keep the original goal/branch and all limits.

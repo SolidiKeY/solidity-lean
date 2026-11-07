@@ -1,0 +1,41 @@
+{
+  "guardedRegression": "Primitive return default/earlyexit/tuple/shadow positive and falseassert/division negative runtime observations.",
+  "source": "tests/directruntime-20261104/native-browser/primitive-return/PrimitiveReturnRuntime.sol",
+  "sourceSha256": "6dc852877df09067b02d0434d700b9b904c05e380dbbf0aba5b37ae370932d68",
+  "contract": "PrimitiveReturnRuntime",
+  "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+  "expected": [
+    {
+      "name": "value",
+      "status": "proved"
+    },
+    {
+      "name": "namedDefault",
+      "status": "proved"
+    },
+    {
+      "name": "tuple",
+      "status": "proved"
+    },
+    {
+      "name": "early",
+      "status": "proved"
+    },
+    {
+      "name": "loopExit",
+      "status": "proved"
+    },
+    {
+      "name": "shadow",
+      "status": "proved"
+    },
+    {
+      "name": "bad",
+      "status": "refuted"
+    },
+    {
+      "name": "division",
+      "status": "refuted"
+    }
+  ]
+}

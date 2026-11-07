@@ -2,7 +2,7 @@
   "version": 1,
   "repair_head": "9641c774b4bf088dfe82c4f5d7cd731040906f88",
   "scope": "Separate coordinator evidence and fresh exact-commit recomputation; no extension of original175manifest, historical execution claim, approval, or global gate pass",
-  "context_manifest": "/home/guilherme/.local/state/cloudvm/solidity-next10-20261028/integration/repair-contexts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/616cae7d7f64b8ae733455cac84e2f3392fb6dc91c6e3ead13066e026564706b/manifest.json",
+  "context_manifest": "$XDG_STATE_HOME/cloudvm/solidity-next10-20261028/integration/repair-contexts/diamond-payments/20bbb1071e12d6e0765c885434df3defc7477b92/616cae7d7f64b8ae733455cac84e2f3392fb6dc91c6e3ead13066e026564706b/manifest.json",
   "context_manifest_sha256": "616cae7d7f64b8ae733455cac84e2f3392fb6dc91c6e3ead13066e026564706b",
   "identity": {
     "environmentId": "ccarenv_b64_Y2NhcmVudl80YTIwNzJmZTFkNjQ4MTkxYjNlNWU3NzU5NmVmZDg0NQ",

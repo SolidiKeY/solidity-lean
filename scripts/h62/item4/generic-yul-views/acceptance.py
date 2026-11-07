@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 import census
+from verify_manifest import verify as verify_manifest_files
 
 BASE = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 
@@ -16,6 +17,19 @@ def run(argv, root):
     if result.returncode:
         raise RuntimeError(f"{argv!r} exit {result.returncode}: {result.stderr}{result.stdout}")
     return dict(command=argv, exit=result.returncode, stdout=result.stdout, stderr=result.stderr)
+
+def verify_inputs(inputs):
+    """Verify local input identities, not coordinator origin or semantic coverage."""
+    class DigestPairs(list):
+        # Preserve duplicate object keys for the shared path/identity verifier.
+        pass
+
+    pairs = json.loads((inputs / "sha256.json").read_text(), object_pairs_hook=DigestPairs)
+    if not isinstance(pairs, DigestPairs):
+        raise ValueError("input digest manifest must be a JSON object")
+    return verify_manifest_files(inputs, dict(schema_version=1, files=[
+        dict(path=name, sha256=digest) for name, digest in pairs]))
+
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
@@ -27,10 +41,8 @@ def main():
     if evidence.is_relative_to(root): raise SystemExit("bulk evidence must be outside git checkout")
     evidence.mkdir(parents=True, exist_ok=True)
     checks = []
-    for name, expected in json.loads((args.inputs / "sha256.json").read_text()).items():
-        actual = hashlib.sha256((args.inputs / name).read_bytes()).hexdigest()
-        if actual != expected: raise RuntimeError("input SHA256 mismatch: " + name)
-    checks.append(dict(command="verify coordinator input SHA256 manifest", exit=0, files=5))
+    verified_inputs = verify_inputs(args.inputs)
+    checks.append(dict(command="verify coordinator input SHA256 manifest", exit=0, files=verified_inputs))
     checks.append(run([sys.executable, str(Path(__file__).with_name("test_census.py"))], root))
     checks.append(run([sys.executable, str(Path(__file__).with_name("test_bounded.py"))], root))
     data = census.scan(root)

@@ -1,0 +1,94 @@
+{
+  "status": "RESIDUAL_AND_EXACT_HYPOTHESIS_ACCOUNTING_ONLY",
+  "summary": {
+    "total_captured_records": 93,
+    "outer_type_hashes_match_previous_snapshot": true,
+    "residual_records_accounted_once": 59,
+    "residual_counts": {
+      "EQUATION_NAME_SHAPE_ONLY": 44,
+      "WRITTEN_DEFINITION_CANDIDATE": 3,
+      "PROOF_HELPER_NAME_SHAPE_ONLY": 3,
+      "SPLITTER_NAME_SHAPE_ONLY": 9
+    },
+    "public_hypothesis_records": 34,
+    "proposition_binders": 41,
+    "new_joint_witnesses": 0,
+    "fidelity_acceptances": 0
+  },
+  "source_bindings": {
+    "Solidity/Lowering/V08/SourceAbi.lean": "99a01f9fae81a81801245c32e177e05ae0b7fd090bca5727df3a7c8e60465d62",
+    "Solidity/Lowering/V08/SourceCustomErrors.lean": "29d81d560c49abafb96aee795ef172464ffaf0165ec023e3f8407cc816714e78",
+    "Solidity/Lowering/V08/SourceDispatch.lean": "4475cac4721e6f062012b202090b9f4b02a274fe02a0ccd445d8c10b77fe14a0",
+    "Solidity/Lowering/V08/SourceCallable.lean": "4b76b7f19609592d7eb816df9d3e6df27a151624996d40e2d641c1e044580a6a"
+  },
+  "diagnostic": {
+    "path": "tests/h62/item2/audit-v08-adapters/generated-census/SourceExecutionHypothesisCensus.lean",
+    "sha256": "8ab9b84196370234dfb32405132dabddfacac03cf92c589c348f516134cac011",
+    "purpose": "Additive diagnostic copy prints each binder type in its local telescope; original collector and production declarations unchanged."
+  },
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/generated-census/SourceExecutionHypothesisCensus.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 12.101,
+    "peak_sampled_aggregate_rss": 872214528,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "limitations": [
+    "Three written definition candidates are source-name/line links, not definition-fidelity acceptance.",
+    "44 equation,3 proof helper,9 splitter classifications are name shapes only; all records retain full captured types and pending provenance.",
+    "34 public types contain41 top-level proposition binders; contextual binder types do not establish simultaneous feasibility.",
+    "Data bundles, nested obligations and whole original mapped audit remain unfinished.",
+    "No Source admission/body/frame/session or H68 closure."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-boundary-hypotheses-20261107/check/console.log",
+      "bytes": 196,
+      "sha256": "eb3dafc38d71485e5a7844e3a051644980683183ca60614ed5b6ac96bcb3a1d7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-boundary-hypotheses-20261107/check/gates/1.log",
+      "bytes": 5967370,
+      "sha256": "3eab1384de98b1aba4d24bb546dc657e53201aa1577213644ea57f9b5728dfdf"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-boundary-hypotheses-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "d42b7809e38f9b644a4bd5fa829e363d7db0286272f0c4a87b2157f1ee013006"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-boundary-hypotheses-20261107/check/gates/gates.tsv",
+      "bytes": 314,
+      "sha256": "59ce4898109237540050082da061e3752a7c96dff029477709a38537a4d7f0c0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-boundary-hypotheses-20261107/check/results.json",
+      "bytes": 429,
+      "sha256": "66b4ca15f664e2caf970a20a00d109917343fbad37a8bbbd4caeb3e6fe7465a1"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-boundary-hypotheses-20261107/exact-hypotheses.json",
+      "bytes": 1100580,
+      "sha256": "d5bf530c183d8c891e08dd037cd4cef3b5666fcda084dad4732f9683667148d5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-boundary-hypotheses-20261107/residual-records.json",
+      "bytes": 4951352,
+      "sha256": "2290a01cd3975fd2e9be16d101d00e92f951ba40b9f5eb76cfd6a0ab31460bec"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-boundary-hypotheses-20261107/summary.json",
+      "bytes": 426,
+      "sha256": "5178da734e33420000425e30dd597772ae78fe0ad935c9c6861c830378e80bda"
+    }
+  ],
+  "reviews": "Independent read-only source finder/skeptic verified exact captures, hashes and pending feasibility/provenance boundaries; no findings, no reviewer scripts/tests/Lean/server."
+}

@@ -1,0 +1,261 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+  "interface_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.whole_some",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+      "line": 9,
+      "character_span": [
+        245,
+        384
+      ],
+      "signature": "theorem whole_some : (Memory.compileProg 1 (Frag.init [])\n    (ReachabilityControls.populatedBuilder.join appendAllocation)).isSome = true",
+      "signature_sha256": "03f878c64aada750b69952fccc26fe7aada2a623915653a45ac9804566f7e1ea",
+      "source_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.whole_some"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.whole_public",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+      "line": 20,
+      "character_span": [
+        703,
+        845
+      ],
+      "signature": "theorem whole_public : Memory.compileProg 1 (Frag.init [])\n    (ReachabilityControls.populatedBuilder.join appendAllocation) = some wholeCode",
+      "signature_sha256": "2fe27fef502dde59e31a918034277b26a536e3beebec6f834763084459b100e3",
+      "source_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.whole_public"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.whole_tail",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+      "line": 24,
+      "character_span": [
+        885,
+        1046
+      ],
+      "signature": "theorem whole_tail : \u2203 final : Machine, final.stack = [] \u2227 \u2200 tail,\n    run wholeCode.code {initialMachine with stack := tail} = .ok {final with stack := tail} 0",
+      "signature_sha256": "83a6195a4d131f969d52a8090d81c0b6152f996d4b784ead869e0faa1f79659d",
+      "source_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.whole_tail"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.complete_result",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+      "line": 55,
+      "character_span": [
+        3206,
+        3400
+      ],
+      "signature": "theorem complete_result :\n    [5,4,2,3,1,6,16,17,18,19,20,21,22,23,24,0].mapM\n      (fun n => readCell n (run wholeCode.code initialMachine)) =\n      some [21,0,16,16,19,0,2,7,9,1,4,3,0,0,0,25]",
+      "signature_sha256": "a697bd06f4179b6d55e49e2445bbb241b64a45ee3125b443706078ab5cf79243",
+      "source_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.complete_result"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.wrong_cursor",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+      "line": 62,
+      "character_span": [
+        3558,
+        3638
+      ],
+      "signature": "theorem wrong_cursor : readCell 0 (run wholeCode.code initialMachine) \u2260 some 21",
+      "signature_sha256": "e5c2000ec4dc78eeccc974e704e596b201dc1fbc27c3a483ed2ce45a2283b7f5",
+      "source_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.wrong_cursor"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.wrong_new_reference",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+      "line": 66,
+      "character_span": [
+        3668,
+        3755
+      ],
+      "signature": "theorem wrong_new_reference : readCell 5 (run wholeCode.code initialMachine) \u2260 some 16",
+      "signature_sha256": "d6dc3ba30b5cd30daf4acb77f383dad310844e6c3219005fcd77a0db9ffaa741",
+      "source_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.wrong_new_reference"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.stale_initial_map",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+      "line": 70,
+      "character_span": [
+        3784,
+        3907
+      ],
+      "signature": "theorem stale_initial_map (machine : Machine) :\n    \u00ac StateRepr 1 1 6 suffixCode.frag (suffixOut \u03c3).st initialBase machine",
+      "signature_sha256": "494b9730e8de96a88fc6360e554c34a7a9ef85a1b0bed06dfdd5a15fb41a48fd",
+      "source_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.stale_initial_map"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.corrupted_saved_tail",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+      "line": 77,
+      "character_span": [
+        4047,
+        4318
+      ],
+      "signature": "theorem corrupted_saved_tail : \u2203 final : Machine,\n    run wholeCode.code {initialMachine with stack := [w[99]]} =\n      .ok {final with stack := [w[99]]} 0 \u2227\n    run (wholeCode.code ++ [.pop]) {initialMachine with stack := [w[99]]} =\n      .ok {final with stack := []} 0",
+      "signature_sha256": "5254866d71a61d2f4aef6072eaa95854d473eaf9043f505f0549958dcb151eb6",
+      "source_sha256": "259f6aef5710a7f46b9c650e93e2079e57e02053fa72bb1c3cd712458cacfce9",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.corrupted_saved_tail"
+    }
+  ],
+  "uncovered_private_rows": {
+    "count": 0,
+    "names": [],
+    "reason": "All16 source rows now matched to actual private kernel identities with full original closed signatures."
+  },
+  "limits": "Eight public and sixteen actual private rows checked. Model semantics only; no native ByteWorld/emission or full Source/G24 adequacy.",
+  "aggregate_selected_coverage": 251,
+  "aggregate_remaining": 1008,
+  "checked_private_rows": {
+    "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
+    "kernel_prefix": "_private.Solidity.Backend.Passes.MemoryJoinedAllocationControls.0.",
+    "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
+    "witness_status": "checked-original-private-signature-and-axioms",
+    "axioms": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ],
+    "rows": [
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell0",
+        "signature_sha256": "ac2892ca31ab6501606a4fba384253d38e6b1fa1b4b1954bd21b765c92a99b58"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell1",
+        "signature_sha256": "9fbd15761a4b376c399f23202805b932fd6d78ed1c7483bf4f41512c729f54f7"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell2",
+        "signature_sha256": "26eca03c6d8b60a5dbf9acc33cc120facfe0dd70abd19320b40934c3c48965d6"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell3",
+        "signature_sha256": "20404e99d65c44c355f195612c16d7e82371f9eae8df52914fcad7a43baf6436"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell4",
+        "signature_sha256": "d2e3de6832d95ac296d601f812ab09818a309a11bd28be1a6d30e7c1d8c31785"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell5",
+        "signature_sha256": "ff3d14babde0f2e86bf7e648a449a83f77fbf8b34b1309fe6362a11a82063001"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell6",
+        "signature_sha256": "7504d3c3c8e9690ef16c690ad007c54a67810126ff370e19b936516a4f41a26a"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell7",
+        "signature_sha256": "2680273a728f75d59f8d2aa6b95e0274cf1cc20e0faa559cbc933ccbbadd0954"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell8",
+        "signature_sha256": "206a0c6390223440a74a0149937c2b379e27b1be9b8ffc117cb3cb44194f43c8"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell9",
+        "signature_sha256": "45c6e7fe7302153a70ca004a2965942fdfee2da85532e52e373a0928682bdab9"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell10",
+        "signature_sha256": "348ccaad4af414380dfacef414ea7d921f7774e950176170bdd0f7936d21ec62"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell11",
+        "signature_sha256": "5332e08cbd401b64a9620d08c9e7aae813dfeaeafe4a368ade098acc3f962696"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell12",
+        "signature_sha256": "cf98bff96a68cc7b083799aea2e0a0a59b1dece16c44f0cf7a41db55e3b15c95"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell13",
+        "signature_sha256": "434206fbbbba2fe97b32d89155f23de7276e987f649e039e26777fb58acc2cc3"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell14",
+        "signature_sha256": "df6626f727297c6f5fa8460c5b124d2e0c2c9ea998289579bc6d0d3f968657ee"
+      },
+      {
+        "name": "Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.cell15",
+        "signature_sha256": "dca0a9c1e968da67ae147af6ec2cc5cb8c418347c3cfad4a75bdb1c164c344d1"
+      }
+    ]
+  },
+  "joint_contract": "actual-public-whole-selection-full-input-cost-and-source-success"
+}

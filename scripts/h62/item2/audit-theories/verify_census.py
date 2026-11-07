@@ -97,6 +97,51 @@ WITNESSES.update({
  'Solidity.SFields.Mirrors.get': ('MirrorWitnesses', 'mirror_fields_get_joint_witness'),
  'Solidity.SVec.Mirrors.getElem': ('MirrorWitnesses', 'mirror_vec_getElem_joint_witness'),
 })
+WITNESSES.update({
+ 'Solidity.Storage.obs_len_ref_some': ('BridgeWitnesses', 'bridge_obs_len_joint_witness'),
+ 'Solidity.Storage.obs_word_ref_some': ('BridgeWitnesses', 'bridge_obs_word_joint_witness'),
+ 'Solidity.Storage.full_of_push': ('BridgeWitnesses', 'bridge_full_push_joint_witness'),
+ 'Solidity.Storage.full_of_pushPlace': ('BridgeWitnesses', 'bridge_full_pushPlace_joint_witness'),
+ 'Solidity.Op0.denote_eval': ('BridgeWitnesses', 'bridge_op0_joint_witness'),
+ 'Solidity.Op1.denote_eval': ('BridgeWitnesses', 'bridge_op1_joint_witness'),
+ 'Solidity.Op2.denote_eval': ('BridgeWitnesses', 'bridge_op2_joint_witness'),
+ 'Solidity.Op3.denote_eval': ('BridgeWitnesses', 'bridge_op3_joint_witness'),
+})
+WITNESSES.update({
+ 'Solidity.Theory.Progress.ends_of_notStuck': ('OutcomeWitnesses', 'outcome_notStuck_joint_witness'),
+ 'Solidity.Theory.Progress.Ends.notStuck': ('OutcomeWitnesses', 'outcome_ends_notStuck_joint_witness'),
+ 'Solidity.Theory.Progress.ns_iff_ends': ('OutcomeWitnesses', 'outcome_ns_iff_joint_witness'),
+ 'Solidity.Theory.Progress.NS.ends': ('OutcomeWitnesses', 'outcome_ns_ends_joint_witness'),
+ 'Solidity.Theory.Progress.not_ends_stuck': ('OutcomeWitnesses', 'outcome_stuck_negative_joint_witness'),
+ 'Solidity.Theory.Progress.coreEnds': ('OutcomeWitnesses', 'outcome_core_joint_witness'),
+ 'Solidity.Theory.Progress.Prog.run_ends': ('OutcomeWitnesses', 'outcome_run_joint_witness'),
+ 'Solidity.Theory.Progress.Prog.runF_ends': ('OutcomeWitnesses', 'outcome_runF_joint_witness'),
+ 'Solidity.Theory.Progress.Stmt.runF_ends': ('OutcomeWitnesses', 'outcome_stmt_runF_joint_witness'),
+})
+WITNESSES.update({
+ 'Solidity.Theory.Mutability.holds_modal_readOnly': ('CloserWitnesses', 'closer_modal_joint_witness'),
+ 'Solidity.Theory.Mutability.Spec.box_readOnly': ('CloserWitnesses', 'closer_spec_joint_witness'),
+ 'Solidity.Theory.Mutability.Transient.holds_readOnly': ('CloserWitnesses', 'closer_transient_modal_joint_witness'),
+ 'Solidity.Theory.Mutability.Transient.holds_frame': ('CloserWitnesses', 'closer_transient_frame_joint_witness'),
+})
+WITNESSES.update({
+ 'Solidity.Theory.Mutability.refuses': ('PayableWitnesses', 'payable_refuses_joint_witness'),
+ 'Solidity.Theory.Mutability.System.run_nonpayable': ('PayableWitnesses', 'payable_system_joint_witness'),
+ 'Solidity.Theory.Mutability.deployT_nonpayable': ('PayableWitnesses', 'payable_deploy_joint_witness'),
+ 'Solidity.Theory.Mutability.transact_nonpayable': ('PayableWitnesses', 'payable_transact_joint_witness'),
+ 'Solidity.Theory.Mutability.ContractWorld.World.enter_nonpayable': ('PayableWitnesses', 'payable_enter_joint_witness'),
+ 'Solidity.Theory.Mutability.ContractWorld.World.callFrame_nonpayable': ('PayableWitnesses', 'payable_call_joint_witness'),
+})
+WITNESSES.update({
+ "Solidity.Theory.Mutability.Frames.nothing": ("AssignableWitnesses", "assignable_nothing_joint_witness"),
+ "Solidity.Theory.Mutability.Frames.mono": ("AssignableWitnesses", "assignable_mono_joint_witness"),
+ "Solidity.Theory.Mutability.Frames.of_globals": ("AssignableWitnesses", "assignable_globals_joint_witness"),
+ "Solidity.Theory.Mutability.Prog.frames_readOnly": ("AssignableWitnesses", "assignable_readonly_joint_witness"),
+ "Solidity.Theory.Mutability.Prog.storage_readOnly": ("AssignableWitnesses", "assignable_storage_joint_witness"),
+ "Solidity.Theory.Mutability.Prog.frames_of_storeAt": ("AssignableWitnesses", "assignable_store_joint_witness"),
+ "Solidity.Theory.Mutability.assignableCheck_sound": ("AssignableWitnesses", "assignable_check_joint_witness"),
+ "Solidity.Theory.Mutability.committed_frames": ("AssignableWitnesses", "assignable_committed_joint_witness"),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),

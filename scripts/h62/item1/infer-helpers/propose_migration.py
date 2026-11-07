@@ -7,6 +7,7 @@ Lean validation, registration and full gates before any adoption.
 from difflib import unified_diff
 from pathlib import Path
 import sys
+from lean_mask import mask
 
 ROOT = Path(__file__).resolve().parents[4]
 SOURCE = "Solidity/Source/Infer.lean"
@@ -33,6 +34,14 @@ def emit(path, before, after, new=False):
     a = "/dev/null" if new else "a/" + path
     sys.stdout.writelines(unified_diff(before.splitlines(keepends=True), after.splitlines(keepends=True), fromfile=a, tofile="b/" + path))
 
+def replace_live(text, old, new, path):
+    if text.count(old) != 1:
+        raise ValueError(f"anchor changed: {path}")
+    offset = text.index(old)
+    if mask(text)[offset:offset + len(old)] != old:
+        raise ValueError(f"anchor is not live code: {path}")
+    return text[:offset] + new + text[offset + len(old):]
+
 def main():
     if (ROOT / NEW).exists():
         raise ValueError(f"destination exists: {NEW}")
@@ -43,11 +52,9 @@ def main():
         before = (ROOT / path).read_text(encoding="utf-8")
         after = before
         anchor = "import Solidity.Source.Typing\n"
-        if after.count(anchor) != 1: raise ValueError(f"import anchor changed: {path}")
-        after = after.replace(anchor, anchor + "import Solidity.Source.InferHelpers\n", 1)
+        after = replace_live(after, anchor, anchor + "import Solidity.Source.InferHelpers\n", path)
         for old, new in pairs:
-            if after.count(old) != 1: raise ValueError(f"declaration anchor changed: {path}")
-            after = after.replace(old, new, 1)
+            after = replace_live(after, old, new, path)
         changes.append((path, before, after))
     emit(NEW, "", shared, True)
     for path, before, after in changes: emit(path, before, after)

@@ -350,7 +350,7 @@ theorem countP_or_le {γ : Type _} (l : List γ) (p r : γ → Bool) :
   | cons a l ih =>
     simp only [List.countP_cons]
     cases p a <;> cases r a <;> simp only [Bool.or_self, Bool.or_true, Bool.or_false,
-      if_true] <;> omega
+      ite_true] <;> omega
 
 theorem countP_le_of_imp {γ : Type _} (l : List γ) {p r : γ → Bool}
     (h : ∀ a ∈ l, p a = true → r a = true) : l.countP p ≤ l.countP r := by
@@ -405,7 +405,7 @@ theorem countP_contains_le {A : List Nat} (hA : A.Nodup) (t : List Nat) :
           (List.nodup_cons.mp hnd).1
     have hsplit : A.countP (fun a => (x :: t).contains a) =
         A.countP (fun a => (a == x) || t.contains a) := by
-      congr 1
+      simp only [List.contains_cons]
     rw [hsplit, List.length_cons]
     have hor : A.countP (fun a => (a == x) || t.contains a) ≤
         A.countP (fun a => a == x) + A.countP (fun a => t.contains a) :=
@@ -529,11 +529,11 @@ theorem map_oracleOf {xs : List α} (hxs : xs.Nodup) {t : List Nat}
     | cons a t =>
       rw [List.nodup_cons] at hxs
       simp only [List.length_cons, Nat.add_right_cancel_iff] at hl
-      simp only [List.map_cons, oracleOf, if_pos]
+      simp only [List.map_cons, oracleOf, ite_true]
       congr 1
       refine Eq.trans (List.map_congr_left fun y hy => ?_) (ih hxs.2 hl)
       have : y ≠ x := fun h => hxs.1 (h ▸ hy)
-      simp only [if_neg this]
+      simp only [this, ite_false]
 
 /-- The list without repetitions, keeping each element's last occurrence. -/
 def dedup : List α → List α
@@ -545,17 +545,17 @@ theorem mem_dedup {xs : List α} {y : α} : y ∈ dedup xs ↔ y ∈ xs := by
   | nil => simp only [dedup]
   | cons x xs ih =>
     by_cases hx : x ∈ xs
-    · simp only [dedup, if_pos hx, ih, List.mem_cons]
+    · simp only [dedup, hx, ite_true, ih, List.mem_cons]
       exact ⟨Or.inr, fun h => h.elim (fun e => e ▸ hx) id⟩
-    · simp only [dedup, if_neg hx, List.mem_cons, ih]
+    · simp only [dedup, hx, ite_false, List.mem_cons, ih]
 
 theorem nodup_dedup (xs : List α) : (dedup xs).Nodup := by
   induction xs with
   | nil => exact List.nodup_nil
   | cons x xs ih =>
     by_cases hx : x ∈ xs
-    · simp only [dedup, if_pos hx]; exact ih
-    · simp only [dedup, if_neg hx]
+    · simp only [dedup, hx, ite_true]; exact ih
+    · simp only [dedup, hx, ite_false]
       exact List.nodup_cons.mpr ⟨fun h => hx (mem_dedup.mp h), ih⟩
 
 theorem length_dedup_le (xs : List α) : (dedup xs).length ≤ xs.length := by
@@ -563,8 +563,8 @@ theorem length_dedup_le (xs : List α) : (dedup xs).length ≤ xs.length := by
   | nil => exact Nat.le_refl 0
   | cons x xs ih =>
     by_cases hx : x ∈ xs
-    · simp only [dedup, if_pos hx, List.length_cons]; omega
-    · simp only [dedup, if_neg hx, List.length_cons]; omega
+    · simp only [dedup, hx, ite_true, List.length_cons]; omega
+    · simp only [dedup, hx, ite_false, List.length_cons]; omega
 
 /-- A run may hash the same preimage twice; the premise is that of its
 distinct preimages. -/
@@ -655,7 +655,8 @@ theorem countP_near_le {N L b : Nat} (hb : b < N) :
     apply countP_le_of_imp
     intro a ha hn
     have ha' : a < N := List.mem_range.mp ha
-    simp only [decide_eq_true_eq, Near] at hn
+    have hn' : Near N L a b := of_decide_eq_true hn
+    unfold Near at hn'
     simp only [Bool.or_eq_true, decide_eq_true_eq]
     omega
   have h1 := countP_or_le (List.range N)
@@ -675,7 +676,8 @@ theorem countP_covers_le {N L r : Nat} (hr : r < N) :
     apply countP_le_of_imp
     intro a ha hn
     have ha' : a < N := List.mem_range.mp ha
-    simp only [decide_eq_true_eq, Covers] at hn
+    have hn' : Covers N L a r := of_decide_eq_true hn
+    unfold Covers at hn'
     simp only [Bool.or_eq_true, decide_eq_true_eq]
     omega
   have h1 := countP_or_le (List.range N) (fun a => decide (r + 1 - L ≤ a ∧ a < r + 1))

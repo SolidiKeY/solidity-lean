@@ -1,0 +1,29 @@
+[
+  {
+    "label": "collision-bound",
+    "path": "/workspace/h62-audit-language-evidence/h70-received/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-received.patch",
+    "expected_sha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+    "owner": "solidity-h62-6-20261106/migrate-hash",
+    "reported_ticket_head": "a3f49ee0ec1829e63022c90194048d5a1ffe0d22",
+    "reported_source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+    "delivery": "coordinator inline H70 partial overlay; relay is not owner agreement or validation",
+    "permission": "unapplied; original files remain read-only; elaborated witnesses wait",
+    "previous_reported_ticket_heads": [
+      "78c110f83dc1a30700acd1b5bd34b19f61da6ccd"
+    ],
+    "reported_host_receipt_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
+    "additional_pending": "full affected migration gates and Syntax.Raw, per coordinator/owner report; no passing-gate claim",
+    "path_relative_to_evidence": "h70-received/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-received.patch"
+  },
+  {
+    "label": "fixedpoint",
+    "path": "/workspace/h62-audit-language-evidence/h70-received/a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82-fixedpoint-prerequisite.patch",
+    "expected_sha256": "a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82",
+    "owner": "solidity-h62-6-20261106/migrate-language",
+    "reported_ticket_head": "479f6e0079409a1867483dbffe5051932b8fa754",
+    "reported_source_head": "d8e1d9721455d3671882f19aa7155fbbd2d91415",
+    "delivery": "coordinator inline H70 partial overlay; relay is not owner agreement or validation",
+    "permission": "unapplied; original files remain read-only; elaborated witnesses wait",
+    "path_relative_to_evidence": "h70-received/a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82-fixedpoint-prerequisite.patch"
+  }
+]

@@ -35,6 +35,8 @@ jobs:
         run: |
           node --test scripts/check-trust.test.mjs
           bash scripts/check-trust.sh
+          bash scripts/check-private-paths.sh
+          bash scripts/check-evidence-files.sh
       # The examples site's recorder, against a stand-in language server
       # (`docs/site.md`; `pages.yml` runs it against Lean's).
       - name: Test the site exporter
@@ -44,6 +46,7 @@ jobs:
       - name: Check documentation and axiom-pin drift
         run: |
           node --test scripts/check-axiom-pins.test.mjs tests/h62/item5/statement-graph/h112-tooling.test.mjs
+          python3 -B tests/h62/item5/statement-graph/test_w0_tooling.py -v
           bash scripts/check-doc-paths.sh
           node scripts/check-axiom-pins.mjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
@@ -58,6 +61,8 @@ jobs:
       # inventory are generated from per-lane fragments (P5).
       - name: Check generated bookkeeping files
         run: bash scripts/coord-tools/fragments.sh --check
+      - name: Check slow example partition
+        run: python3 tests/h55/module-times/test_slow_examples.py
       - name: Check pinned Solidity feature inventory
         run: python3 scripts/solidity-feature-audit.py --check
 
@@ -99,7 +104,7 @@ jobs:
       - name: Seed Lake cache from master
         run: bash scripts/ci/fetch-lake-cache.sh
       - name: Build
-        run: lake build Solidity SolidityExamples
+        run: lake build Solidity SolidityExamples SoliditySlowExamples
       # Fetched modules stay in Lake's cache; tools that run Lean themselves
       # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
       - name: Restore fetched artifacts
@@ -152,9 +157,13 @@ jobs:
         run: python3 scripts/ci/restore-lake-artifacts.py
       - name: Check fresh replay timing
         run: |
-          timeout 300s python3 scripts/check-memory-loop-timing.py --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json \
+          # GitHub's 4-core runner is slower than the hardware the 300 s budget was set on (H116);
+          # CI allows 600 s and records the measured total in memory-loop-ci-replay.json.
+          timeout 660s python3 scripts/check-memory-loop-timing.py --budget 600 --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json \
             || { for f in .lake/memory-loop-ci-replay/*.log; do echo "== $f"; tail -20 "$f"; done; exit 1; }
       - name: Automation gate
+        env:
+          REPLAY_BUDGET_S: '600'
         run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log --replay-group-results memory-loop-ci-replay.json
 
   tools:

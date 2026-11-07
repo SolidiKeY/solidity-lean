@@ -1,4 +1,5 @@
 // Pinned EEST Osaka reference conformance. No source-semantics pass is inferred.
+import { executeBlockchain } from './blockchain_adapter.mjs';
 import { classifyRejection } from './eest_rejection.mjs';
 import { comparePost, validateConfig, guardedResult } from './eest_observation.mjs';
 import { createReadStream, readFileSync, createWriteStream, writeFileSync } from 'node:fs';
@@ -21,8 +22,9 @@ async function digest(path) {
 let modules;
 let activeBudget;
 async function execute(record) {
-  const expected = { state_root: record.post.hash, logs_hash: record.post.logs };
-  if (!validateConfig(record.config)) return { status: 'unsupported', reason: 'unsupported-fork-configuration', expected };
+  const blockchainInput = record.fixture !== undefined;
+  const expected = blockchainInput ? {} : { state_root: record.post.hash, logs_hash: record.post.logs };
+  if (!validateConfig(blockchainInput ? record.fixture.config : record.config)) return { status: 'unsupported', reason: 'unsupported-fork-configuration', expected };
   if (!modules) {
     const require = createRequire(resolve(bulk, 'reference/package.json'));
     const load = name => import(pathToFileURL(require.resolve(name)).href);
@@ -31,8 +33,8 @@ async function execute(record) {
     const loaded = [];
     for (const name of ['@ethereumjs/vm', '@ethereumjs/common', '@ethereumjs/util',
       '@ethereumjs/tx', '@ethereumjs/block', '@ethereumjs/rlp', 'ethers',
-      'micro-eth-signer/kzg.js', '@paulmillr/trusted-setups/fast-peerdas.js']) loaded.push(await load(name));
-    const [vm, common, util, tx, block, rlp, ethers, kzgLibrary, setup] = loaded;
+      'micro-eth-signer/kzg.js', '@paulmillr/trusted-setups/fast-peerdas.js', '@ethereumjs/blockchain']) loaded.push(await load(name));
+    const [vm, common, util, tx, block, rlp, ethers, kzgLibrary, setup, blockchain] = loaded;
     // Count calls to the unchanged executor. The engine's optional step-event
     // tracer reads REVERT memory before gas checks and can allocate huge arrays.
     // This budget wrapper changes no opcode implementation or successful result.
@@ -43,7 +45,11 @@ async function execute(record) {
       if (activeBudget && ++activeBudget.steps > 5000000) throw new Error('H44_HOST_STEP_LIMIT');
       return Reflect.apply(originalRunStep, this, args);
     };
-    modules = { ...vm, ...common, ...util, ...tx, ...block, RLP: rlp.RLP, keccak256: ethers.keccak256, kzg: new kzgLibrary.KZG(setup.trustedSetup) };
+    modules = { ...blockchain, ...vm, ...common, ...util, ...tx, ...block, RLP: rlp.RLP, keccak256: ethers.keccak256, kzg: new kzgLibrary.KZG(setup.trustedSetup) };
+  }
+  if (blockchainInput) {
+    activeBudget = { steps: 0 };
+    return executeBlockchain(record, modules, activeBudget);
   }
   const { createVM, runTx, Common, Mainnet, Hardfork, Account, createAddressFromString,
           hexToBytes, bytesToHex, createTxFromRLP, createBlock, RLP, keccak256, kzg } = modules;
@@ -108,17 +114,29 @@ if (workerMode) {
   const only = (process.argv[5] === undefined || process.argv[5] === 'all') ? null : Number(process.argv[5]);
   if (only !== null && (!Number.isInteger(only) || only < 0)) throw new Error('invalid index');
   const invalidOnly = process.argv[6] === 'invalid-only';
+  const format = process.argv[7] ?? 'state_test';
+  if (!['state_test','blockchain_test'].includes(format) ) throw new Error('unsupported input format/filter');
+  const blockchainInput = format === 'blockchain_test';
+  const receiptPath = blockchainInput ? 'evidence/blockchain-export.json' : 'evidence/eest-export.json';
+  const censusPath = blockchainInput ? 'evidence/archive-census.json' : 'evidence/eest-census.json';
+  const streamPath = blockchainInput ? 'blockchain-inputs.jsonl.gz' : 'eest-inputs.jsonl.gz';
   const mem = readFileSync('/proc/meminfo', 'utf8');
   if (Number(/^SwapTotal:\s+(\d+)/m.exec(mem)[1]) !== 0) throw new Error('no-swap prerequisite');
   if (!(limit > 0) || !/^[a-z0-9-]+$/.test(label)) throw new Error('invalid limit/label');
-  const receipt = json('evidence/eest-export.json');
+  const receipt = json(receiptPath);
   if (receipt.archive_sha256 !== '5dd08fee0fb41bc2a59bc4ab1dc75b19723fc71fe6af2f855454d3283fba09b9' ||
-      receipt.stream_sha256 !== await digest('eest-inputs.jsonl.gz') ||
-      receipt.census_sha256 !== await digest('evidence/eest-census.json')) throw new Error('export provenance binding mismatch');
-  const census = json('evidence/eest-census.json');
+      receipt.stream_sha256 !== await digest(streamPath) ||
+      receipt.census_sha256 !== await digest(censusPath)) throw new Error('export provenance binding mismatch');
+  const census = json(censusPath);
+  if (blockchainInput) {
+    if(census.inventory_sha256 !== await digest('archive-inventory.jsonl.gz')) throw new Error('inventory binding mismatch');
+    census.cases=[];
+    const inventory=createInterface({input:createReadStream(resolve(bulk,'archive-inventory.jsonl.gz')).pipe(createGunzip()),crlfDelay:Infinity});
+    for await(const line of inventory) {const row=JSON.parse(line);if(row.role==='fixture' && row.format===format && row.selection==='exact-osaka')census.cases.push({...row,variant:0});}
+  }
   if (receipt.cases !== census.cases.length || only >= receipt.cases) throw new Error('census count/index binding');
   const lockDigest = await digest('reference/package-lock.json');
-  const stream = createReadStream(resolve(bulk, 'eest-inputs.jsonl.gz')).pipe(createGunzip());
+  const stream = createReadStream(resolve(bulk, streamPath)).pipe(createGunzip());
   const lines = createInterface({ input: stream, crlfDelay: Infinity });
   const output = createWriteStream(resolve(bulk, `evidence/eest-reference-${label}.jsonl`));
   let child; let peakAggregateRss = 0;
@@ -159,9 +177,9 @@ if (workerMode) {
     if (seen.size >= limit) break;
     const record = JSON.parse(line);
     if (only !== null && record.index !== only) continue;
-    if (invalidOnly && !record.post.expectException) continue;
+    if (invalidOnly && !(blockchainInput ? record.fixture.blocks.some(b=>b.expectException||b.expectExceptionALL) : record.post.expectException)) continue;
     const original = census.cases[record.index];
-    if (!original || original.path !== record.path || original.case !== record.case || original.variant !== record.variant || original.sha256 !== record.fixture_sha256) throw new Error('fixture identity mismatch');
+    if (!original || original.path !== record.path || original.case !== record.case || original.variant !== record.variant || (!blockchainInput && original.sha256 !== record.fixture_sha256)) throw new Error('fixture identity mismatch');
     if (!Number.isInteger(record.index) || seen.has(record.index)) throw new Error('duplicate/invalid fixture index');
     seen.add(record.index);
     const result = await one(record);
@@ -177,11 +195,14 @@ if (workerMode) {
   const summary = { expected: receipt.cases, selected: seen.size, unselected: receipt.cases-seen.size, counts,
     reference_complete: seen.size === receipt.cases && counts.reference_match === receipt.cases,
     differential_complete: false, source_semantics_unsupported: receipt.cases,
-    export_sha256: await digest('evidence/eest-export.json'), reference_lock_sha256: lockDigest,
-    seconds: (Date.now()-started)/1000, label, peak_aggregate_rss: peakAggregateRss,
+    export_sha256: await digest(receiptPath), reference_lock_sha256: lockDigest,
+    seconds: (Date.now()-started)/1000, label, format, peak_aggregate_rss: peakAggregateRss,
     adapter_sha256: createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex'),
     instruction_budget: '5000000 original Interpreter.runStep calls; forwarding wrapper; optional step-event tracer disabled',
-    blockhash_convention: 'state-test absent history returns zero; all pinned envs omit blockHashes' };
+    rejection_adapter_sha256: await digest(resolve(dirname(fileURLToPath(import.meta.url)),'eest_rejection.mjs')),
+    blockchain_adapter_sha256: blockchainInput ? createHash('sha256').update(readFileSync(new URL('./blockchain_adapter.mjs',import.meta.url))).digest('hex') : null,
+    reference_provider: blockchainInput ? '@ethereumjs/blockchain@10.1.3' : null,
+    blockhash_convention: blockchainInput ? 'real validated fixture genesis/history provider; constant Osaka from genesis' : 'state-test absent history returns zero; all pinned envs omit blockHashes' };
   writeFileSync(resolve(bulk, `evidence/eest-reference-${label}-summary.json`), JSON.stringify(summary, null, 2)+'\n');
   console.log(JSON.stringify(summary));
   if (counts.reference_mismatch || counts.engine_error) process.exitCode = 1;

@@ -40,3 +40,28 @@ source tests/h62/item2/audit-theories/MirrorWitnesses.lean
 candidate Solidity/Theory/Audit/H62/MirrorWitnesses.lean
 import Solidity.Theory.Audit.H62.MirrorWitnesses
 row Theory/Audit/H62/MirrorWitnesses.lean | Joint inputs for all thirteen explicit memory-mirror theorems, using populated heap and nonempty field/vector fixtures.
+
+source tests/h62/item2/audit-theories/BridgeWitnesses.lean
+candidate Solidity/Theory/Audit/H62/BridgeWitnesses.lean
+import Solidity.Theory.Audit.H62.BridgeWitnesses
+row Theory/Audit/H62/BridgeWitnesses.lean | Joint input witnesses for all eight unchanged Bridge/Denote interfaces with actual SOME successes; standalone pending registration.
+
+source tests/h62/item2/audit-theories/OutcomeWitnesses.lean
+candidate Solidity/Theory/Audit/H62/OutcomeWitnesses.lean
+import Solidity.Theory.Audit.H62.OutcomeWitnesses
+row Theory/Audit/H62/OutcomeWitnesses.lean | Joint inputs for all nine unchanged Progress/Outcome interfaces with universal NS and actual model success; optional Source.Semantics/CoreTotality imports require owner-approved placement before registration.
+
+source tests/h62/item2/audit-theories/CloserWitnesses.lean
+candidate Solidity/Theory/Audit/H62/CloserWitnesses.lean
+import Solidity.Theory.Audit.H62.CloserWitnesses
+row Theory/Audit/H62/CloserWitnesses.lean | Joint inputs for all four unchanged modal/Spec/transient frame facts, with successful nonempty ordinary/transient runs.
+
+source tests/h62/item2/audit-theories/PayableWitnesses.lean
+candidate Solidity/Theory/Audit/H62/PayableWitnesses.lean
+import Solidity.Theory.Audit.H62.PayableWitnesses
+row Theory/Audit/H62/PayableWitnesses.lean | Six feasible Payable joint packets, one ordinary-input refutation pending Q-STATIC-VALUE, and three successful model API controls; no auto-H69 disposition.
+
+source tests/h62/item2/audit-theories/AssignableWitnesses.lean
+candidate Solidity/Theory/Audit/H62/AssignableWitnesses.lean
+import Solidity.Theory.Audit.H62.AssignableWitnesses
+row Theory/Audit/H62/AssignableWitnesses.lean | Joint inputs for all eight original assignable interfaces, with real nonempty storage-write and empty-clause refusal controls; standalone pending approved placement.

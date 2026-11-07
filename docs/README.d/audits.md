@@ -1,0 +1,4 @@
+- [Proof-coverage audit](audits/proof-coverage.md) (2026-11-06): claims vs theorems, statement quality, residue, and the ten best-paying proof efforts.
+- [Architecture audit](audits/architecture.md) (2026-11-06): areas and layering, per-case copies, Controls cost, dead weight.
+- [Build-speed audit](audits/build-speed.md) (2026-11-06): measured per-module time and memory, axiom-pin and slow-example costs.
+- [Coordination audit](audits/coordination-process.md) (2026-11-06): where lane time goes, gate saturation, merge latency, question load.

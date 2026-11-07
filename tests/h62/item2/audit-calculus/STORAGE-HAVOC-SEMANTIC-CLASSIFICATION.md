@@ -1,0 +1,13 @@
+# Storage-kept havoc formula roles
+
+Guarded regression: restoring original storage in a derived intrinsic formula must retain universal ledger/self-balance variation and scoped snapshot; it must not become a callback-execution restriction or an assertion of formula truth.
+
+Fetched master 05d2c25872c4bb963a0ca7f605905e6e1e99eedc remains adopted. Complete frozen-selected StorageOnlyHavoc source and all5 named signatures match frozen/current bytes. No theorem has proof premises. Definitions were read for interpretation without extra theorem/witness credit. Prior536 rows and owner map unchanged. All5283 candidates accounted:541 reviewed/4742 pending,owners3746 confirmed/1537 unresolved; generated declarations separate.
+
+The save landing snapshots original storage in a fresh typed OLD head. Restore lands after arbitrary storage/ledger/balance havoc, restores ORIGINAL storage and pops the snapshot, retaining arbitrary ledger and self balance. These are exact typed update landings, not source/native snapshot implementations. No name-freshness premise is added.
+
+Ordinary and callback satisfaction equivalences retain FOR EVERY ledger and self balance at original storage. Quantifiers are conclusions, not assumed semantic laws, and neither side's truth is asserted. The callback version retains arbitrary invariant formula I and pay without adding FO/no-transfer/invariant-truth premises. Snapshot uses only existing intrinsic update/havoc/formula constructors and stays scoped. The hypothesis wrapping result is exact structural equality, not a proof derivation or validity theorem.
+
+No callback execution is restricted, no claim actual callbacks preserve storage, and no physical-world nondeterminism, compiler success or normal termination follows. Bulk source bindings, static definition paths, reviews and measured gates stay off Git at /workspace/h62-successor-evidence/storage-havoc-roles-v38 and /workspace/h62-successor-bulk/storage-havoc-roles-v38, bound by small path/size/hash manifest. Zero fresh joint witnesses, Lean/axiom/kernel/replay/runtime/cache acceptance. Whole assignment/four audit checkpoints remain unfinished. Existing H28 dependent actualCallerFields/extractionActuallyChanges/replay pause, Raw compatibility/Context Classical.choice waits and timing/reserve STOPs remain. No statement/dependent-definition/budget/axiom/exclusion/toolchain changes. Missing historical bytes remain UNVERIFIABLE.
+
+Documentation gate remains FAIL exit1 on unchanged adopted-master fixture references A.lean/B.lean; exact citing source is archived and hash-bound. Accounting and89controls pass; complete acceptance remains FAIL exit1.

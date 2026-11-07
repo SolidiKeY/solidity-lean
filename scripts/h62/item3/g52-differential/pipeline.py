@@ -252,13 +252,95 @@ def compare_results(root):
     return dict(counts=counts, expected=len(expected), complete=receipt["complete"])
 
 
+def block_acceptance(root):
+    """Guard omitted mismatch transactions and reference/source count conflation.
+
+    Deterministic post-run accounting only, never a source-semantics proof.
+    Candidate transactions from mismatched blocks are retained observations,
+    separately counted from transactions of accepted blocks.
+    """
+    evidence = root/"evidence"
+    path = evidence/"eest-reference-block-transactions-final.jsonl"
+    summary = json.loads((evidence/"eest-reference-block-transactions-final-summary.json").read_text())
+    receipt_path = evidence/"blockchain-export.json"
+    export = json.loads(receipt_path.read_text())
+    if summary["format"] != "blockchain_test" or summary["export_sha256"] != file_sha(receipt_path):
+        raise ValueError("block export binding mismatch")
+    if export["archive_sha256"] != EEST_SHA or export["stream_sha256"] != file_sha(root/"blockchain-inputs.jsonl.gz"):
+        raise ValueError("block archive/input binding mismatch")
+    if summary["reference_lock_sha256"] != file_sha(root/"reference/package-lock.json"):
+        raise ValueError("reference lock drift")
+    for field, name in (("adapter_sha256", "eest_reference.mjs"), ("blockchain_adapter_sha256", "blockchain_adapter.mjs"), ("rejection_adapter_sha256", "eest_rejection.mjs")):
+        if summary[field] != file_sha(Path(__file__).parent/name):
+            raise ValueError("production adapter drift: " + name)
+    counts, outcomes, categories = Counter(), Counter(), Counter()
+    indices, mismatches = set(), []
+    totals = Counter()
+    def transactions(block, scope):
+        cumulative = 0
+        for index, tx in enumerate(block["transactions"]):
+            if tx["index"] != index or tx["receipt_status"] != (0 if tx["execution_exception"] else 1):
+                raise ValueError("native transaction identity/status mismatch")
+            cumulative += int(tx["total_gas_spent"])
+            if cumulative != int(tx["receipt_cumulative_gas_used"]) or not re.fullmatch(r"0x(?:[0-9a-f]{2})*", tx["output"]):
+                raise ValueError("native output/gas observation mismatch")
+            if tx["execution_exception"] and tx["logs"]:
+                raise ValueError("failed transaction retained logs")
+            totals[scope] += 1
+            totals["retained_transactions"] += 1
+            totals["raw_log_count"] += len(tx["logs"])
+            totals["nonempty_outputs"] += tx["output"] != "0x"
+            totals["positive_native_refund_counters"] += int(tx["native_gas_refund_counter"]) > 0
+            outcomes["return" if tx["execution_exception"] is None else ("revert" if tx["execution_exception"] == "revert" else "fault")] += 1
+        if cumulative != int(block["gas_used"]):
+            raise ValueError("retained transaction/block gas disagreement")
+    with path.open() as stream:
+        for line in stream:
+            row = json.loads(line)
+            if row["index"] in indices or row["source_semantics"] != "unsupported-adapter-pending":
+                raise ValueError("duplicate case or conflated source result")
+            indices.add(row["index"])
+            counts[row["status"]] += 1
+            if row["status"] == "reference_match" and not all(row.get(key) is True for key in ("header_validation", "block_validation", "block_size_validation")):
+                raise ValueError("match without all native validators")
+            if row["status"] == "reference_mismatch":
+                mismatches.append(row["index"])
+            for rejection in row.get("rejections", []):
+                if rejection["status"] != "reference_match" or not rejection["matched_categories"] or rejection["before_state_root"] != rejection["after_state_root"] or rejection["before_head"] != rejection["after_head"]:
+                    raise ValueError("invalid matched rejection/rollback")
+                totals["matched_rejections"] += 1
+                categories.update(rejection["matched_categories"])
+            for block in row.get("blocks", []):
+                totals["validated_accepted_blocks"] += 1
+                transactions(block, "accepted_block_transactions")
+            if "transactions" in row.get("observed", {}):
+                if row["status"] != "reference_mismatch":
+                    raise ValueError("unexpected candidate observations")
+                totals["mismatch_candidate_blocks"] += 1
+                transactions(row["observed"], "mismatch_candidate_transactions")
+    if indices != set(range(export["cases"])) or dict(counts) != summary["counts"] or summary["selected"] != export["cases"]:
+        raise ValueError("incomplete or inconsistent full-corpus outcome accounting")
+    complete = counts["reference_match"] == export["cases"]
+    if summary["reference_complete"] != complete or summary["differential_complete"] is not False:
+        raise ValueError("incorrect completion flags")
+    result = dict(summary=summary, unique_cases=len(indices), counts_verified=dict(counts), **totals,
+        outcomes=dict(outcomes), matched_categories=dict(categories), mismatch_indices=mismatches,
+        all_source_semantics_unsupported=True, result_sha256=file_sha(path),
+        production_adapter_hashes_verified=True, provisional_runs_excluded=True,
+        raw_full_process_exit=None,
+        exit_capture_limitation="Full PTY session expired before exit retrieval; runner assigns a failure exit for observed mismatches. Exact fixture replay separately captured exit1. No passing conformance gate claimed.",
+        new_fixture_matches_from_synthetic_controls=0)
+    write(evidence/"block-transactions-acceptance.json", result)
+    return result
+
+
 def manifest(root):
-    paths = sorted(p for directory in ("generated", "compiled", "typed-compiled", "lean-build", "pre-merge", "evidence")
+    paths = sorted(p for directory in ("generated", "compiled", "typed-compiled", "boundary-compiled", "lean-build", "pre-merge", "evidence")
                    for p in (root/directory).rglob("*") if p.is_file() and p.name != "sha256.json")
     paths += [root/name for name in ("upstream/solc", "upstream/solc-list.json",
               "upstream/fixtures_develop-v5.3.0.tar.gz",
               "reference/package.json", "reference/package-lock.json")]
-    for optional in ("eest-inputs.jsonl.gz", "upstream/reference-before-kzg-package-lock.json", "upstream/fixtures_stable-v5.3.0.tar.gz", "toolchain/lean-4.24.0-linux.tar.zst"):
+    for optional in ("engine-inputs.jsonl.gz", "engine-x-inputs.jsonl.gz", "sync-inputs.jsonl.gz", "engine-x-allocations.jsonl", "engine-x-allocations-index.json", "blockchain-inputs.jsonl.gz", "archive-inventory.jsonl.gz", "eest-inputs.jsonl.gz", "upstream/reference-before-kzg-package-lock.json", "upstream/reference-before-blockchain-package-lock.json", "upstream/eip7934-v5.3.0-spec.py", "upstream/fixtures_stable-v5.3.0.tar.gz", "toolchain/lean-4.24.0-linux.tar.zst"):
         if (root/optional).is_file(): paths.append(root/optional)
     obj = {str(p.relative_to(root)): file_sha(p) for p in paths}
     write(root/"sha256.json", obj)
@@ -267,7 +349,7 @@ def manifest(root):
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("action", choices=["generate", "compile", "census", "compare", "manifest"])
+    parser.add_argument("action", choices=["generate", "compile", "census", "compare", "manifest", "block-acceptance"])
     parser.add_argument("--bulk", type=Path, required=True)
     args = parser.parse_args()
     root = args.bulk.resolve()
@@ -276,8 +358,11 @@ def main():
     if root == repo or repo in root.parents:
         parser.error("H44 bulk directory must be outside Git checkout")
     fn = {"generate": generate, "compile": compile_cases, "census": census,
-          "compare": compare_results, "manifest": manifest}[args.action]
-    print(json.dumps(fn(root), sort_keys=True))
+          "compare": compare_results, "manifest": manifest, "block-acceptance": block_acceptance}[args.action]
+    result = fn(root)
+    print(json.dumps(result, sort_keys=True))
+    if args.action == "block-acceptance" and not result["summary"]["reference_complete"]:
+        raise SystemExit(1 if result["counts_verified"].get("reference_mismatch") or result["counts_verified"].get("engine_error") else 2)
 
 if __name__ == "__main__":
     main()

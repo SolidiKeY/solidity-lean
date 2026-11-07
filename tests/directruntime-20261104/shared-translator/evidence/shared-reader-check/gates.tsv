@@ -1,1 +1,0 @@
-PASS	lean:Solidity/Frontend/ExecutableAst/Shared/Boundary.lean	4	/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/shared-reader-check/1.log	lake env lean --tstack=131072 Solidity/Frontend/ExecutableAst/Shared/Boundary.lean 

@@ -1,0 +1,17 @@
+{
+ "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean:GenericP10.execute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean:GenericP10.fixture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean:GenericP10.fixture_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

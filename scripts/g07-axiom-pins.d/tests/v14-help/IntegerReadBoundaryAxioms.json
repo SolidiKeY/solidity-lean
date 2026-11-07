@@ -1,0 +1,18 @@
+{
+ "tests/v14-help/IntegerReadBoundaryAxioms.lean:Solidity.Backend.Aggregates.IntegerReadBoundaryWitness.geometry": [],
+ "tests/v14-help/IntegerReadBoundaryAxioms.lean:Solidity.Backend.Aggregates.IntegerReadBoundaryWitness.inhabited_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-help/IntegerReadBoundaryAxioms.lean:Solidity.Backend.Aggregates.IntegerReadBoundaryWitness.selected_decodes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-help/IntegerReadBoundaryAxioms.lean:Solidity.Backend.Aggregates.IntegerReadBoundaryWitness.traversal_fails": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,152 @@
+{
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.all_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.all_callbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.classify": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.callback_write_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.empty_function_impossible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.empty_getter_impossible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.empty_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.empty_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.function_jointly_satisfiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.function_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.function_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.getter_jointly_satisfiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.getter_no_function": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.getter_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.getter_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.horizon_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.migrated_all_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.migrated_all_callbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.migrated_at_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.special_jointly_satisfiable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.unknown_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_getter_empty_vacuous": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.Controls.v1_special_empty_vacuous": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.dispatch_succ": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.pickFn_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.pickGetter_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.selected_nonempty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.selector_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.selector_ne_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/Readonly/SourceDispatchInterfaceV2Controls.lean:Solidity.Lowering.Readonly.SourceDispatchV2.static_call_storage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

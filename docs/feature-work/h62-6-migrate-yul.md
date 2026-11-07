@@ -8,17 +8,19 @@ The original `/workspace/solidity-lean` checkout and its `work` branch are prese
 `git merge-base --is-ancestor c6f550e281a7e5affa9a99bc2cdaed556dec00e4 origin/master`
 returned 0. No assigned remote branch existed when inspected.
 
-## Queue status — Nov7 rebaseline and bounded DAG recovery
+## Queue status — Nov7 7683091e rebaseline and complete old inventories
 
-Coordinator requested rebaseline on origin/master2a43bf4fc. The original6aadc4999
-head was cherry-picked rather than literally ancestral: all3 stable patch IDs and
-all task files match upstream fdb282c76,05ba4cc6b,50b9539fd. Preserving merge into
+Coordinator requested rebaseline on origin/master2a43bf4fc. The original 6aadc4999
+head was cherry-picked rather than literally ancestral: all 3 stable patch IDs and
+all task files match upstream fdb282c76, 05ba4cc6b, 50b9539fd. Preserving merge into
 assigned branch produced c60d01cb49e5dff1287de4c572b39fa46bd9a48b; no reset/discard.
-Current upstream code includes further producer changes; originalc6 evidence
+Current upstream code includes further producer changes; original c6 evidence
 remains explicitly pinned-source evidence, not a current-master timing baseline.
 
-1. **Partial:** pinned clean2143-module baseline passed. Original API snapshots
-   now962/1774 verified (261old prefix+700suffix+1DAG recovery);812 remain.
+1. **Partial:** pinned clean 2143-module baseline passed. Original persisted-kernel snapshots
+   now 1774/1774 verified, with 55647 declaration records and 52406 public records.
+   All 32734 extra compiler names now have source-bound old IR signatures; public
+   visibility/attributes and new compatibility remain unresolved.
 2. **Partial:** B05 production repair integrated upstream. H78 generated public
    API compatibility and full new-toolchain dependency closure remain pending.
 3. **Pending:** full new build, common-source clean timings and regression gates.
@@ -281,7 +283,7 @@ requester `solidity-h62-2-20261106/audit-label-execution`, head
 `a107fd353aba492a3144da90cabcbde20032ca0c`, requester source
 `/workspace/solidity-lean/tests/h62/item2/audit-label-execution/owner-tickets.json`.
 Coordinator host receipt:
-`/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-2-20261106__audit-label-execution/66615193dea4-owner-tickets.json`,
+`$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-2-20261106__audit-label-execution/66615193dea4-owner-tickets.json`,
 11,017 bytes, supplied SHA256
 `4d515bbb0b5de8540c660ccf8c5f0aa5efa3a2f9d502eba8dab5142391ed51f1`.
 The full ticket is not staged in this VM and was not inspected here. The
@@ -406,7 +408,7 @@ set: tool discovery exposes only `stop_goal(outcome: complete|blocked)`, no
 pause/get_goal. Neither outcome was used as a substitute. Worker stops after
 this acknowledgement; no automatic implementation continuation is authorized.
 
-Full old interface export was interrupted safely under H82, supervisor exit130,
+Full old interface export was interrupted safely under H82, supervisor exit 130,
 261/1774 modules sealed; 1513 remain. Its manifest deliberately records fail /
 `export interrupted or incomplete`, not a pass. Current child had already exited;
 no Lean, build driver or export process remains. Interrupted export evidence
@@ -426,7 +428,7 @@ was implemented here. Full production old/new generated-API comparison remains
 unfinished; isolated inspector fixture differences are recorded, not waived.
 
 Original rendered prompt transcription, full original four-item work queue,
-backfill queue and exact1777-entry scope manifest are committed under
+backfill queue and exact 1777-entry scope manifest are committed under
 `tests/h62/item6/migrate-yul/handoff/`. The original prompt is reconstituted from
 the original user thread, with the exact scope string from the authenticated
 coordinator ownership input. Its computed SHA differs from the earlier reported
@@ -437,22 +439,22 @@ made. Coordinator-local receipt paths remain provenance, not accessible artifact
 Open obligations for successor:
 1. Finish full old exported declaration inventory (261/1774 available), retain all
    generated/public/private evidence and compare exact public shape under H78.
-   Census and clean old2143-module wall/RSS baseline already passed.
+   Census and clean old 2143-module wall/RSS baseline already passed.
 2. Official v4.35 archive identity/versions are established; adapt Yul with exact
    statement/semantics/budget/axiom preservation. B05 reviewed candidate unapplied.
    Receive/validate required external migrations (Raw, CollisionBound, Scalar.Slice,
    Source.Ctor, Frontend.Checked.Token and SortCheck). New KeySort remains failed.
    B07 optional Bridge dependencies belong migrate-bridge, not intrinsic core.
-3. Complete clean new2143-module build using identical settings/cache policy;
+3. Complete clean new 2143-module build using identical settings/cache policy;
    full frozen-interface comparison and meaningful same-policy timing/RSS delta.
    Any regression escalates; >10% STOP. Provisional candidate probe cost increase
-   is disclosed, not accepted. Old Horizon665.844s reported for external gate owner.
+   is disclosed, not accepted. Old Horizon665.844 s reported for external gate owner.
 4. Deliver/replay final root gates, cross-directory compatibility and interface
    disposition. Existing patch/bundle is a partial migration/backfill checkpoint,
    not proof of full success or runtime acceptance.
 
 Backfill completed: lexical scanner/import census, negative scanner/resource/
-comparison/interface controls,23 finite String cases with isolated proofs,
+comparison/interface controls, 23 finite String cases with isolated proofs,
 source/output-bound reproducible interface tooling and B05 isolated kernel proof.
 Backfill unfinished: production new API/case coverage and full clean comparison/
 reproduction. No newly unclaimed cleanup has been authorized. Universal parser
@@ -486,12 +488,12 @@ Evidence directory `/workspace/migrate-yul-artifacts/resume-d96f2406d/` contains
 merge-state.json, census.json, post-b05-census.json, production probe reports,
 old-production.json/new-production.json (and deterministic gzip raw payloads),
 and production-interface-check.json. All bounded probes use the existing guard,
--j1,-M12288,stack131072,LEAN_NUM_THREADS=1,no swap and4GiB estimated reserve.
-Original production compile passed old0.754835s/234319872bytes and
-new1.258165s/534036480bytes. These non-clean sampled probes are diagnostics,
+-j1, -M12288, stack131072, LEAN_NUM_THREADS=1, no swap and 4 GiB estimated reserve.
+Original production compile passed old 0.754835 s/234319872 bytes and
+new 1.258165 s/534036480 bytes. These non-clean sampled probes are diagnostics,
 not a full performance comparison or an accepted regression disposition.
 
-Private production snapshots preserve all3 original names/signatures/metadata,
+Private production snapshots preserve all 3 original names/signatures/metadata,
 raw table implementation and slotnum proof. Four declarations on each release:
 the added theorem helper is Solidity.Yul.reservedNames_count._proof_1_1.
 Old/new production declaration snapshots are equal. Count axioms remain none;
@@ -503,7 +505,7 @@ attempts remain recorded, not relabeled.
 
 Current upstream adds Compilation.Artifact and Compilation.CompletionControls,
 not present in the original exact scope; they remain read-only. Changed upstream
-original sources are Checks.Occurrences,Checks.ScopedSyntax,Checks.WordSyntax.
+original sources are Checks.Occurrences, Checks.ScopedSyntax, Checks.WordSyntax.
 No baseline mismatch is hidden: full old/new timing comparison needs a common
 source tree and identical settings. Existing outside-owned v4.35 dependency
 failures and KeySort remain unresolved; no unchanged failing timing gate rerun.
@@ -517,13 +519,13 @@ or wrote files. B05 production checkpoint approved; whole queue remains partial.
 ## Allocation API census and pinned-source inventory partition
 
 Unmodified Solidity/Yul/Compilation/Allocation.lean compiles on official v4.35:
-`new-allocation/probe-result.json`, exit0,0.754666s,500707328bytes sampled RSS.
+`new-allocation/probe-result.json`, exit 0, 0.754666 s, 500707328 bytes sampled RSS.
 Old/new private snapshots each contain74 declarations; no missing/added names.
 The standard comparator exits2 (differences_require_review): eight original
 public generated signatures differ. Exact name/kind/universes/visibility/type
 ASTs are in `allocation-public-api-records.json` and compressed raw snapshots.
 No shim or exclusion is implemented. Four structural changes affect
-Frame.noConfusion,Frame.noConfusionType,Slots.noConfusion,Slots.noConfusionType;
+Frame.noConfusion, Frame.noConfusionType, Slots.noConfusion, Slots.noConfusionType;
 both mk.noConfusion signatures also switch P/base/base' from explicit to implicit
 and rename h to eq. Both mk.inj differences are hygiene names in current raw types;
 they remain reported under H78. IR differences are retained too, not hidden.
@@ -532,30 +534,30 @@ not a passing migration gate. The linearNoConfusionType option only selects the
 construction strategy in official source; no flag experiment or budget change
 was made to waive these shape differences. Axiom unions match, which alone is
 not a signature-preservation proof. Read-only finder and skeptic verified the
-74/74 coverage,all8 changes,hashes and limitations; neither ran Lean or wrote.
+74/74 coverage, all 8 changes, hashes and limitations; neither ran Lean or wrote.
 
 Independent old API inventory continues from exact base in owned detached view
-`/workspace/migrate-yul-baseline`. No commit,branch reset,default branch change
+`/workspace/migrate-yul-baseline`. No commit, branch reset, default branch change
 or source proof edit in that view. All original census source hashes verified;
 only four copied owned inspection helpers are untracked, byte-identical to the
 primary lane. Original private old build cache remains unchanged. Provenance:
 `/workspace/migrate-yul-artifacts/resume-d96f2406d/baseline-view.json`.
 
-New deterministic `partition-old-inventory.py` revalidates all261 sealed prefix
+New deterministic `partition-old-inventory.py` revalidates all 261 sealed prefix
 summary/raw/gzip/probe/source/helper bindings and versions against the original
-census. It produces exactly1513 remaining targets, retaining the full original
+census. It produces exactly 1513 remaining targets, retaining the full original
 source-hash map and graph. This is a coverage partition, not an exclusion. The
 original interrupted export manifest is unchanged; its one unsealed raw output
 is retained diagnostically and not counted. Reordered-prefix and wrong-census
 negative controls both reject before output creation. Actual plan:
 `old-inventory-partition-v2/coverage-plan.json`; remaining-census.json is derived
-from the original1774-module census, indices261..1773. Final consolidation must
+from the original 1774-module census, indices261..1773. Final consolidation must
 require ordered exact union1774, disjoint fragments, parent hashes and verified
 complete snapshots/probes for every module before any full-inventory pass.
 Remaining fragment export and consolidation are pending. No full API, timing,
 runtime or whole-directory migration acceptance is implied by this partition.
 
-Final partition reviews: finder and skeptic independently verified exact261+1513
+Final partition reviews: finder and skeptic independently verified exact 261+1513
 coverage, full frozen source map, parent/probe/summary/raw/gzip hashes, detached
 base and helper identities, negative controls and no false acceptance. Neither
 ran Lean or wrote. No findings. Remaining export/consolidation still required.
@@ -563,7 +565,7 @@ ran Lean or wrote. No findings. Remaining export/consolidation still required.
 ## Complete old-inventory checker prepared
 
 `consolidate-old-inventory.py` requires a passing complete suffix and exact
-ordered disjoint coverage of all original1774 modules before writing a candidate
+ordered disjoint coverage of all original 1774 modules before writing a candidate
 result. It rechecks frozen baseline source hashes, parent/census hashes, each
 summary/probe/gzip/raw checksum, raw declaration/footer/schema reconstruction,
 exact exporter/module/output bindings, old release identity, unchanged resource
@@ -578,11 +580,11 @@ Negative controls using the actual running suffix reject incomplete status and
 also reject a forged pass label on incomplete coverage, before output creation.
 Evidence: resume-d96f2406d/consolidation-negative-control.json and
 consolidation-forged-pass-control.json. Full positive consolidation remains
-pending until all1513 suffix snapshots are sealed. This tool checkpoint alone
+pending until all 1513 suffix snapshots are sealed. This tool checkpoint alone
 does not finish the original queue or old full-inventory gate.
 
-Consolidation-tool finder and skeptic independently reviewed coverage,source/
-artifact/exporter bindings,version checks,negative controls and limited claims;
+Consolidation-tool finder and skeptic independently reviewed coverage, source/
+artifact/exporter bindings, version checks, negative controls and limited claims;
 no findings. Neither ran Lean or wrote. Tool checkpoint reviewed; full positive
 consolidation and final inventory gate still pending suffix completion.
 The export supervisor was briefly suspended at a probe boundary for this commit;
@@ -590,18 +592,18 @@ its active bounded probe was allowed to finish and the same export then resumed.
 
 ## Nov7 serializer resource recovery and complete coverage plan
 
-Original suffix export failed after700 sealed modules at
+Original suffix export failed after 700 sealed modules at
 Solidity.Yul.Views.DynamicJournalControls. Old parent manifest and truncated
-output remain unchanged. Resource guard stopped it at144.642547487s, sampled
-RSS12849807360bytes, availability4289298432bytes below4294967296 reserve; no
+output remain unchanged. Resource guard stopped it at 144.642547487 s, sampled
+RSS 12849807360 bytes, availability4289298432 bytes below 4294967296 reserve; no
 passing snapshot was counted. Combined retained coverage was261+700=961.
 No unchanged retry, budget increase, source proof edit or omitted declaration.
 
 A separate tests/h62/item6/migrate-yul/ExportInterfacesDag.lean emits schema3
-canonical postorder expression DAGs for every type,implementation,proof and
+canonical postorder expression DAGs for every type, implementation, proof and
 recursor RHS. ExprStructMap uses exact Expr.equal, retaining binder names and
-annotations. Canonical JSON node interning preserves literals,universes,let
-nondependency flags,projection indices and every expression edge. Only metadata
+annotations. Canonical JSON node interning preserves literals, universes, let
+nondependency flags, projection indices and every expression edge. Only metadata
 is erased, exactly as in the original encoder. Free/expression/universe
 metavariables reject. The original tree exporter and all sealed sources remain
 byte-identical. New representation cannot be compared using old raw tree hashes;
@@ -609,62 +611,451 @@ raw encoding-specific hashes are retained, and cross-schema normal comparisons
 reject. Control conversion uses a common complete DAG without exponential
 expansion. This is external inspection tooling, never a core proof shortcut.
 
-Python expr_dag.py rejects invalid tags/arities/primitives/names/levels,forward
-or cyclic refs,wrong roots,duplicates,unreachable nodes and noncanonical order.
+Python expr_dag.py rejects invalid tags/arities/primitives/names/levels, forward
+or cyclic refs, wrong roots, duplicates, unreachable nodes and noncanonical order.
 interfaces.py requires exact schema/helper binding and validates every Expr
 position.47 Python controls pass.22 tree/DAG expression controls per official
-release are identical, including all binder kinds,let flags,projections,Unicode,
+release are identical, including all binder kinds, let flags, projections, Unicode,
 large naturals and internal metadata. Shared depth64 diamond needs65 nodes.
 Initial prototype elaboration errors and an initial parser-indentation regression
 were fixed before acceptance; failed diagnostics are retained. The bytecode flag
 was moved ahead of dynamic imports per reviewer hygiene feedback.
 
-Matched Allocation control (same old toolchain,view,cache and resources):
-74 declarations and144 Expr fields roundtrip exactly, including recursor RHS;
-old tree5.793995323s/971530240bytes versus DAG3.020941315s/939442176bytes,
--47.86% wall,-3.30% sampled RSS. This is serializer performance only, not a clean
+Matched Allocation control (same old toolchain, view, cache and resources):
+74 declarations and 144 Expr fields roundtrip exactly, including recursor RHS;
+old tree5.793995323 s/971530240 bytes versus DAG3.020941315 s/939442176 bytes,
+-47.86% wall, -3.30% sampled RSS. This is serializer performance only, not a clean
 Lean migration benchmark. History inspected before introducing the separate
 encoder; prior speed changes were not undone.
 
-Changed-encoder DynamicJournalControls probe passes with the same -j1,-M12288,
-stack131072,16GiB VM cap,no swap,12GiB sampled RSS guard and4GiB reserve:
-3.019191437s,1040883712bytes,53 declarations. All31 complete prior diagnostic
+Changed-encoder DynamicJournalControls probe passes with the same -j1, -M12288,
+stack131072, 16 GiB VM cap, no swap, 12 GiB sampled RSS guard and 4 GiB reserve:
+3.019191437 s, 1040883712 bytes, 53 declarations. All 31 complete prior diagnostic
 rows (62 Expr fields) roundtrip exactly. Failed/truncated old output is retained
 and not accepted as coverage. Source proofs and axiom pins are unchanged.
 
 Evidence root `/workspace/migrate-yul-artifacts/resume-2a43bf4fc/`:
-expr-control-check.json,python-tests-v2.log,dag-control-roundtrip-timing.json,
+expr-control-check.json, python-tests-v2.log, dag-control-roundtrip-timing.json,
 dynamic-journal-dag-check.json and source/output-bound probe reports. New helper
 copy is frozen in the detached original-base view alongside the original helper;
 tracked original sources in that view remain unchanged.
 
 Four-fragment plan explicitly covers261+700+1+812=1774 ordered unique original
-modules. First2 incomplete parent manifests contribute only their complete sealed
+modules. First 2 incomplete parent manifests contribute only their complete sealed
 prefixes; one complete source-bound DAG module is separate; final812 remain a
 plain-export fragment. consolidate-fragments.py verifies per-fragment census,
 helper/schema/hash provenance and exact global coverage, with no implicit helper
-or encoding substitution. Gap,helper/schema mismatch,missing parent hash and
+or encoding substitution. Gap, helper/schema mismatch, missing parent hash and
 incomplete full coverage controls reject before output creation. A bounded
---prefix-only run verifies all962 available snapshots but returns inventory
-statuspartial (not full pass):75.502079s,1846493184bytes,source bindings verified.
-The original plan remains immutable; after812 finish, finalize a new plan file
+--prefix-only run verifies all 962 available snapshots but returns inventory
+statuspartial (not full pass): 75.502079 s, 1846493184 bytes, source bindings verified.
+The original plan remains immutable; after 812 finish, finalize a new plan file
 with the final parent checksum, then perform bounded full consolidation.
 
-Read-only finder and skeptic reviewed code,fidelity,53-record recovery,all144
-Allocation Expr fields,47 tests,resource bounds and exact fragment coverage;
-no blocking findings. Neither ran Lean or wrote. Full1774 consolidation,IR-only
-name/type disposition,attributes/priority and all migration gates remain pending.
+Read-only finder and skeptic reviewed code, fidelity, 53-record recovery, all 144
+Allocation Expr fields, 47 tests, resource bounds and exact fragment coverage;
+no blocking findings. Neither ran Lean or wrote. Full 1774 consolidation, IR-only
+name/type disposition, attributes/priority and all migration gates remain pending.
 
-Remaining812 will use the reviewed schema3 encoder explicitly via export-dag.py,
+Remaining 812 will use the reviewed schema3 encoder explicitly via export-dag.py,
 retaining every expression/declaration with fixed bounds. The schema2 helper
 remains unchanged. New four-fragment-plan-dag-tail.json records the changed
-transport explicitly (schemas2,2,3,3); earlier plans/probe bindings are immutable.
-The exporter reuses the existing bounded driver,sealer and serial checkpoint
+transport explicitly (schemas2, 2, 3, 3); earlier plans/probe bindings are immutable.
+The exporter reuses the existing bounded driver, sealer and serial checkpoint
 logic. No full old/new compiler timing conclusion is drawn from Allocation's
 serializer control. Tail performance and resource outcomes remain recorded per
 module; no budget increase or omitted type/proof field.
 
 Final finder/skeptic checks approve the explicit812 schema3 exporter and revised
-immutable plan; no blocking findings. Final47 Python tests pass in24.988s.
+immutable plan; no blocking findings. Final47 Python tests pass in 24.988 s.
 Remaining checksum stays null until the tail completes; no consolidation pass
 can be claimed from that pending plan. No reviewer ran Lean or wrote files.
+
+## Completed original old-kernel inventory and second Nov7 rebaseline
+
+All 812 DAG tail modules completed. Source-bound complete four-fragment plan is
+four-fragment-plan-complete.json; prior partial plans remain immutable. Bounded
+consolidate-fragments.py without --prefix-only passes exactly 1774 ordered unique
+original modules: 261+700+1+812. Report complete-old-inventory.json contains 55647
+persisted declaration records, 52406 public records; shared declaration records
+are not asserted globally unique. It retains all old kernel types, proof/value
+expressions, private/generated records and encoding provenance. IR-only names are
+retained in headers; their separate type/visibility disposition remains pending.
+This is not attribute/instance-priority validation or new-toolchain compatibility.
+
+Actual checker152.592778158 s, sampled peak 1799716864 bytes, minimum availability
+14783451136 bytes, exit 0, no resource stop, unchanged limits. Original source hashes,
+all parent/census/helper/parser/validator hashes and each probe/raw/gzip/summary
+binding verified. Report explicitly migration_acceptance=false. Lean 4.24.0
+commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and Lake 5.0.0-src+797c613.
+Independent finder/skeptic reviews confirm exact coverage, totals, resource/source
+bindings and limited claims; no findings. Neither ran Lean or wrote files.
+
+Coordinator then required origin/master95d1e9cb29dc5a34d1db68af3ca47e47b75e293f.
+After in-flight export finished, fetched and verified the reported commit and
+7029a97d72bde21abe4b636b8125302debdd65c9 as ancestors; fast-forwarded the clean
+assigned branch. Owned task files were byte-identical across this update. No
+push, reset, default-branch merge or replacement goal. Original pinned baseline
+view/cache remain unchanged. Current source census at 95d has 1809 Yul modules,
+2229 closure modules, 35 additions beyond original scope and 82 changed original
+source hashes. Rebaseline-state evidence is in
+/workspace/migrate-yul-artifacts/rebaseline-95d1e9cb2/. Original benchmark and
+inventory are historical c6 evidence, not a direct current-tree benchmark.
+
+Original migration remains partial: complete current/new source compatibility,
+all generated public interfaces and IR type disposition, new clean build, common
+baseline timing/RSS and final root gates remain. Known external Raw/Hash/Scalar/
+Frontend/SortCheck failures have unchanged original source files; Source.Ctor
+has a producer proof update and needs renewed dependency validation. No new
+original declaration, statement, budget, axiom or exclusion was changed by this
+serializer/inventory work. Kernel inventory integrity is distinct from external
+compiler/KeY/solc validation and full migration acceptance.
+
+
+## Extra compiler-name accounting — historical header correction
+
+Deterministic census-ir-names.py consumes the completed, previously reviewed
+old-kernel inventory and verifies every referenced summary hash. It retains all
+32734 extraConstNames across 1774 modules (1356 with extra names), including610
+records in 310 modules which ALSO occur in that module's kernel declarations.
+All 32734 compiler names are globally distinct in this dataset. The historical
+header label "IR-only names; not kernel ConstantInfo declarations" was too
+narrow: extra compiler names can overlap kernel declarations. This correction
+supersedes that label's interpretation in prior prose, not the immutable raw
+headers or their source bindings. No name was omitted from either inventory.
+
+old-compiler-name-census.json retains exact structured names, per-module order,
+per-name module membership and explicit kernel overlaps. IR type and public
+visibility are null for every name; no public/private inference is made from
+name spelling. This accounts for names only, not IR signatures or attributes.
+It derives from a previously verified/hash-bound inventory rather than replaying
+the full raw/probe validation. It has migration_acceptance=false, empty shims,
+and no exclusions or waivers. Generator and name-validator hashes are recorded.
+
+Five accounting controls pass: overlap retained, summary tampering rejected,
+incomplete inventory rejected, duplicate name rejected, malformed Name rejected.
+Initial local attempts exposed the overlap and a test path typo; both corrected
+before acceptance. Finder and skeptic independently reproduce all counts and
+bindings and report no findings. Neither ran Lean or wrote files.
+
+This increment contains only additive external census/test tooling and docs.
+No original Lean declaration, statement, definition body, budget, axiom or exclusion
+changed. Original old-kernel inventory and this compiler-name accounting do not
+resolve H78 generated API shims, IR types/visibility/attributes, new builds, clean
+common-source performance comparison, KeySort 35 or root runtime gates.
+
+
+## Nov7 4f0a2d6a rebaseline and compiler-signature sample
+
+Fetched and fast-forwarded the clean assigned branch onto coordinator-approved
+4f0a2d6abe3a920d8c5a20c8c06d373a1014824d; b8a940f3e is an ancestor. Read the
+updated AGENTS audit reference. No source reset, default merge, push or new goal.
+Current census has 1811 Yul modules and 2234 Yul-closure targets (2237
+source-union modules including KeySort-only inputs). Census and rebaseline state
+are off Git in resume-4f0a2d6ab. Original c6
+benchmark/inventory remain historical and are not current-tree acceptance.
+
+Additive external ExportCompilerSignatures.lean records every extraConstNames
+entry, optional IR lookup, parameter indices/borrow flags/types, result type and
+compiler visibility query separately from kernel types. Composite IR types have
+structured tags; terminal types retain exact compiler Repr text. Missing IR is
+retained as null, never silently dropped. Visibility query is an observation,
+not independently established public API classification; attribute coverage is
+still pending. No core imports or intrinsic representations changed.
+
+Source/output-bound Allocation probes pass on original 4.24 and official 4.35.
+Old 20 compiler entries, new 18: Frame.ctorIdx._boxed and Slots.ctorIdx._boxed are
+absent from the new extraConstNames snapshot. Direct new IR lookup of those
+old-only names was not performed. Exact old IR signatures and unobserved new
+signature nulls are in owner-requests.json for migrate-root-gate via coordinator. All 18common IR
+signatures match. This does not discharge the previous eight kernel public API
+changes, prove these compiler entries private, implement a shim or authorize an
+exclusion. Implemented shims remain empty; all compatibility gates stay open.
+
+Performance STOP: old probe1.764966317 s/912093184 bytes sampled RSS; new
+2.520661854 s/2003578880 bytes. Observed+42.8164 percent wall, +119.6682 percent RSS.
+Do not expand or rerun unchanged new IR probes. This is compiler-inspection/import
+runtime, not the required clean migration-build comparison; original whole-build
+performance gate remains pending. Both used unchanged bounded policy, j1, 12 GiB
+sampled RSS limit, 4 GiB reserve, no swap. Initial diagnostic failures and absent
+optional private artifact preflight are preserved; only v4 probes accepted.
+Seven transport controls pass, including a found nested struct/union signature,
+identity mismatch and malformed IR rejection; null IR, counts, truncation and acceptance claims
+remain explicit. No Lean MCP tools were exposed; bounded per-file CLI used.
+
+Independent portability backfill removes the fixed VM path from build.py's
+KeY rules input. New key invocations require --key-rules KEY_RULES_FILE. Missing
+or nonexistent rules fail before artifact writes or Lean jobs; negative CLI
+control passes. Historical commands retain their original paths as provenance;
+new reusable examples should use --root CHECKOUT --toolchain TOOLCHAIN
+--artifacts ARTIFACTS --census CENSUS --label FRESH_LABEL --kind key --clean
+--key-rules KEY_RULES_FILE. The frozen baseline driver and historical manifests
+are unchanged. No known KeySort failure or timing STOP was rerun.
+
+Finder and skeptic independently reproduced signatures, missing names, source and
+output bindings, STOP metrics and input preflight; no blocking findings. Skeptic
+suggested nested found-signature controls; added and passing. Neither used Lean
+or wrote files. No production Lean declaration, frozen statement, definition body,
+proof budget, axiom or exclusion changed. Remaining original queue/backfill and
+six dependency/API waits stay open; performance STOP is an additional typed wait.
+
+Skeptic corrected the initial phrase "missing compiler-table entries": observed
+absence is from the new extraConstNames enumeration, not a failed direct new IR
+lookup for the old-only names. Owner records now label that boundary explicitly.
+No additional probe was run; performance STOP remains. Full 60 Python tests pass
+in 25.161 s. Finder reports no findings; skeptic's wording finding is resolved.
+
+
+## Nov7 7683091e rebaseline and old-only compiler inventory supervisor
+
+Fetched and fast-forwarded the clean assigned branch to coordinator-approved
+7683091e7c35d265b3b76fdf2a93d0197ce9f556. Prior ebec6cb45 is verified ancestral.
+Original c6 source view/cache and historical source-bound inspectors are intact.
+No new-toolchain IR run, default merge, push, goal reset or completion.
+
+Additive ExportCompilerSignaturesBatch.lean preserves the frozen single-module
+inspector; only namespace/entry point differs. Supervisor deliberately uses
+ONE module per bounded process. Contemporaneous original 4.24 Allocation control:
+single2.267930335 s/885678080 bytes RSS; one-job batch1.764923368 s/882434048 bytes.
+All 20 output records are byte-identical. This is old-inspector transport only,
+not a multi-module memory result, new-toolchain acceptance or clean-build speed
+claim. Existing4.35IR wall/RSS STOP remains unchanged; this exporter rejects
+other tool versions and does not retry that affected lane.
+
+compiler-signatures-batch.py validates bound helper/job files, exact output
+coverage, fresh output hashes/sizes and record protocol before sealing. New
+export-old-compiler-signatures.py ties original 1774-module order and all 32734
+names to completed old kernel-inventory summaries. It will run1356 nonempty
+modules serially. The 418 empty headers derive from verified original summaries
+with explicit ir_query_performed=false; no fabricated Lean query or name waiver.
+Null missing IR remains visible; compiler public flags are observations only.
+Full old IR extraction is pending at this checkpoint, not already accepted.
+
+Both reviewers found a preflight gap before launch: redundant zero counts could
+skip a nonempty header. Fixed by deriving/checking counts against verified
+header counts/exact lists, binding each summary path/hash to its kernel-inventory
+row and checking original order/totals. Four negative/plan controls include a
+contradictoryzero+totalzero case and identical-byte wrong-summary substitution.
+Finder/skeptic read-only revalidation confirms1774 modules, 32734 names, 418 truly
+empty headers; no remaining prelaunch findings. Neither ran Lean or wrote files.
+Completion additionally rechecks all headers, inputs, original HEAD/source hashes
+and exact total before status=pass; interrupted/failed exports retain sealed
+prefixes and remain fail. No proof budget, statement, definition body, axiom,
+interface signature or exclusion changes. Bulk outputs stay off Git; deterministic
+inspectors/validators/supervisor and controls are committed in this lane.
+
+
+## Completed original old compiler-observation inventory
+
+Full old-only collection passes all 1774 original ordered unique modules:
+1356 supervised one-module queries plus 418 explicitly derived empty headers.
+All 32734 original extra compiler names have observed IR signatures; ir_missing=0.
+No original name was dropped or waived. Manifest is full-old-compiler/manifest.json
+under resume-7683091e7. Historical single-module inspector and all previously
+bound helper/parser files remain byte-identical; old c6 source view remains intact.
+
+Bounded verify-old-compiler-inventory.py passes exact original census SHA, corpus
+size, all original summary/name identities, all 1356 job/probe/raw/sealed-report
+bindings, gzip reconstruction, uniform old toolchain versions and final unchanged
+input hashes. Actual exit 0, 6.045821229 s, 245600256 bytes sampled RSS, minavailable
+16302698496 bytes, no resource stop. complete-old-compiler-inventory.json explicitly
+migration_acceptance=false. This validates old observation integrity, not public
+API classification, attribute/priority equivalence, new compatibility or semantics.
+Terminal IR types retain compiler Repr text; this validator is not an IR checker.
+
+All 1356 collection probes exit 0 without resource stops or swap. Sum of individual
+probe wall times2775.679068528 s (NOT end-to-end or migration-build wall), maximum
+sampled RSS 2083274752 bytes, minavailable 15066079232 bytes. Uniform original resource
+policy v3, unchanged 12 GiB sampled RSS cap/4 GiB reserve, explicit-j1/one Lean thread.
+Source and actual Lean 4.24/Lake versions are bound throughout. No4.35IR rerun;
+prior+42.8164 percent wall/+119.6682 percent RSS performance STOP remains unchanged.
+
+Independent finder and skeptic approve the full dataset with no findings. They
+verify full module/name totals, all summary hashes/source-output bindings and
+bounded verification evidence; skeptic additionally re-seals first/middle/last
+queries with gzip checks. Neither uses Lean or writes files. The new negative
+verifier control rejects incomplete results and a substituted corpus before
+output; exact original pinned census is required.
+
+Current source census at the 7683091e rebaseline has 1811 Yul modules/2234 Yul-closure
+targets/2237 union sources. There are83 changed original sources, so c6 clean-build
+figures remain historical. dependency-report.py records137 direct boundary edges
+for original 1774assigned modules to 58 distinct providers, unchanged edge set.
+It preserves providers outside the project source census with null source hashes
+rather than dropping them; initial null-provider handling failure was fixed
+before report acceptance. All 144 current boundary edges include7 outside the
+original importer scope. Current 37 new Yul modules remain read-only observations,
+not a scope takeover. Static import/source integrity is not elaborated API proof.
+
+Full original queue stays unfinished: old public visibility/attributes; complete
+new generated API compatibility and shims (including eight Allocation kernel
+differences and two old-only enumeration entries); all assigned new builds;
+common-source clean performance comparison; KeySort 35/root gates. Original old
+KeySort pass 377/131/131 and new Parser String API failure remain historical gate
+evidence. No RUNTIME_GATE_PASS. No new production Lean declaration, statement,
+definition body, proof budget, axiom or exclusion changed by this tooling work.
+
+Final finder/skeptic reviews of the dependency generator, resource aggregates and
+completion wording report no findings. All 66 Python tests pass in 24.879 s.
+The current committed handoff section is mirrored in
+`tests/h62/item6/migrate-yul/handoff/nov7-old-compiler-completion.md`; final
+head-bound artifact state records the actual commit, patch/bundle/evidence hashes
+and all original unfinished queue obligations. No push authorization delivered.
+
+
+## Nov7 d93f6839 rebaseline and focused old declaration metadata
+
+Fetched and fast-forwarded the clean assigned branch to
+`d93f6839c613468610ea488356b174cd183e3772`; the complete old-inventory commits
+are verified ancestors. The known Syntax.Raw, Hash.CollisionBound,
+Backend.Scalar.Slice, Frontend.Checked.Token and SortCheck.Parser failure sources
+are unchanged. No unchanged failure or new-toolchain IR performance STOP was
+rerun. The original c6 view/cache and all historical inspectors remain intact.
+
+Additive `ExportDeclarationMetadata.lean` observes selected old persisted
+families: class entries and out-parameter positions, ordered ordinary/scoped
+instance registrations with priority and synthesis order, default instances,
+and per-declaration private/protected/class/effective-instance fields. It is not
+a generic attribute inventory or public API classifier. Instance expression
+Repr text is retained without claiming to typecheck it. No core imports changed.
+
+A fixture exposes an important loader boundary. `importModules` defaults to
+`loadExts=false`; aggregate extension state then has initial values. Early
+uninitialized trials were excluded from accepted evidence after fixture checks.
+The final observer follows Lean's documented
+`enableInitializersExecution` then `loadExts=true` path. That API requires unsafe
+IO, confined to this external test inspector's run/main; it supplies no model
+proof, axiom or compatibility shortcut. Official old source quotations/hashes
+are in `import-api-provenance.json`. Existing constant/raw-IR inspectors were
+not changed or silently reinterpreted as attribute classifiers.
+
+The accepted fixture compiles and inspects on actual Lean 4.24. It retains 18
+declarations, 1 class, 4 persisted instances and 1 default. Global priorities 17/63,
+private priority 11 and scoped priority 41 are exact; the scoped registration is
+retained but inactive without opening its namespace. The `local97` declaration
+remains while its local attribute does not persist. Default priority 7 and
+protected/private/class flags match controls. Final inspection exit 0,
+5.560865639 s, 2113134592 bytes sampled RSS; unchanged limits and no resource stop.
+Rejected compile/uninitialized prototypes remain diagnostic evidence only.
+
+The original Allocation sample passes 74 declarations with exact old kernel
+name/private-marker coverage, 0 class entries, 2 `sizeOf` instances at priority 1000,
+and 0 defaults. Actual exit 0, 2.016755444 s, 780693504 bytes sampled RSS. This is one
+assigned module, not a completed metadata census or a migration speed comparison.
+Fixture controls link the compiled olean hash to the inspection input; both
+outputs are source/probe/output-bound. The parser rejects a false or absent
+`loaded_extensions` flag, partial records, count mismatches and acceptance
+claims. This flag is self-reported; it does not prove initialization. The
+source binding identifies the loader implementation, and finite fixture controls
+corroborate its initialization behavior. All 67 Python tests pass in 25.521 s.
+Finder and skeptic independently re-seal both reports and approve controls and
+unsafe-IO boundaries with no findings; neither ran Lean or wrote files.
+
+This checkpoint adds only test/tooling code and metadata observations. No
+production Lean statement, definition body, proof budget, axiom, interface or
+exclusion changed. The full original queue remains: broad compatibility evidence,
+generated public API shims, new builds, common-source clean timings, KeySort 35 and
+root gates. Earlier Allocation kernel/old-only enumeration differences remain
+unwaived; no shims implemented. No Lean 4.35 run occurred in this checkpoint, and its
+existing performance STOP remains. Bulk evidence is off Git in
+`resume-d93f6839c`; deterministic inspector/fixture/validator/controls are in Git.
+
+Current d93f6839 source census remains 1811 Yul/2234 closure/2237 union modules;
+85 original sources now differ from c6. Static dependency evidence is refreshed
+without treating inherited producer changes as migration acceptance. The full
+original rendered assignment, queue, exact scope and provenance remain committed
+and are included in the authenticated patch/bundle handoff. All prior completed
+old inventories are preserved. No H71 push authorization was delivered.
+
+
+## Nov7 metadata review corrections after 3c2734000
+
+Fetched and fast-forwarded the clean assigned branch onto coordinator merge
+`3c2734000413fb142b186e93387306bbb01fd181`, with `4ffe62dfc` verified ancestral.
+The metadata header's `loaded_extensions` flag is self-reported. Rejecting a
+false flag is a protocol check; a true flag cannot establish initialization for
+an arbitrary snapshot. Source bindings identify the observer implementation,
+and the finite compiled fixture corroborates its effective initialization
+behavior. Earlier wording implying generic uninitialized-state detection is
+corrected in this document and the November 7 handoff.
+
+The validator now reports malformed record/probe shapes as `ValueError`, with
+the underlying `KeyError` or other structural cause chained for diagnostics.
+Finite fixture checks explicitly require exactly 18 declaration records.
+Additional controls reject duplicate declarations, entry-index mismatches,
+a valid natural-number priority with the wrong fixture value, a 17-record
+fixture, missing fields and non-object rows. A true header plus a contradictory
+class observation fails fixture controls. These are protocol/finite controls,
+not a universal initialization or compatibility proof.
+
+Saved source-bound fixture and Allocation observations revalidate without Lean
+execution. All 74 Python tests pass in 25.675 seconds. Prose spacing is restored
+while historical code snippets, file paths, versions and hashes are retained.
+The original rendered assignment, original queue, exact scope and authentication
+files are untouched. Finder and skeptic report no remaining findings after the
+final spacing corrections; neither ran Lean or wrote files. No production Lean,
+proof budget, axiom, interface, exclusion, new-toolchain run or performance-STOP
+retry occurred. The original assignment and all remaining gates stay unfinished.
+
+
+## Complete original old metadata query plan
+
+After the coordinator merge at `d7a1cbdf597826add5af3533fdaf6b8d91e28f66`,
+`plan-old-metadata.py` prepares all 1774 original modules against the pinned
+census, old kernel summaries and source hashes. Nine modules have zero own
+kernel declarations; none can be skipped on that basis because serialized
+registration effects can exist independently. All queries remain required,
+and zero queries are performed by the planner. Existing focused observations
+are separate; selected families do not constitute all attributes or public
+classification. No Lean execution or performance STOP retry occurred.
+
+Finder recomputed the complete plan. Skeptic identified an input race, fixed
+by parsing captured bytes and checking hashes again before output, including
+all source and summary inputs. A changed-input negative control asserts no
+output is accepted. All 81 Python tests pass in 26.352 seconds; deterministic
+final generation matches byte for byte. Full queue, constraints and retrieval
+are in [the metadata plan handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-plan-handoff.md).
+All four original checkpoints remain partial. No model statements, budgets,
+axioms, interfaces, exclusions or shims changed.
+
+
+## Metadata binding follow-ups and nine old observations
+
+At coordinator rebaseline `81512fd7298eb0257a9bcbde9913d10eb8229951`, the planner
+now resolves relative summaries against `--baseline` and parses the same bytes
+it hashes. Tests additionally mutate sources and summaries during planning;
+final checks reject them before output. All 83 tests pass in 25.864 seconds,
+and final plans are byte-identical. Finder and skeptic approved without findings.
+
+All nine original modules with zero kernel declarations were then actually
+inspected with the unchanged external old metadata observer under serial bounded
+Lean 4.24.0. All probes passed with zero selected declaration/class/instance/
+default entries. This is finite observation, not absence of generic attributes,
+public classification or semantic/new compatibility proof. Peak sampled RSS
+was 1952473088 bytes; minimum available estimate 15164993536 bytes. Sum of
+individual probe walls was 17.683652906 seconds, not a clean-build comparison.
+No new-toolchain run or unchanged performance STOP retry occurred. Full scope,
+remaining queue and evidence retrieval are in
+[the binding handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-binding-handoff.md).
+All original checkpoints remain partial; no model statements, budgets, axioms,
+interfaces, exclusions or shims changed.
+
+
+## Selected old metadata coverage ledger
+
+At coordinator rebaseline `658d1b1d14c68a031c137f576764ec7e9e7a6359`, the prior
+checkpoint was verified patch-equivalent before the authorized rebase. The new
+`metadata-coverage.py` rebuilds the original source-bound plan and re-seals
+actual saved observations, rejecting duplicates, fixtures outside the corpus,
+stale records and input drift. It records ten unique original modules observed
+and 1764 explicitly pending, in exact original order. The complete zero-query
+plan and finite fixture evidence remain separate.
+
+All 93 Python tests pass in 26.406 seconds. Reversing actual observation arguments
+produces byte-identical output. Independent finder and skeptic verified all
+3970 input hashes and counts without findings or Lean/server/writes. This is
+selected old metadata coverage, not generic attribute, public API, proof or
+performance acceptance. No new Lean execution, model change or timing STOP retry.
+Full original scope, remaining queue and fresh-thread retrieval are recorded in
+[the coverage handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-coverage-handoff.md).
+All original checkpoints remain partial; the existing goal remains unfinished.

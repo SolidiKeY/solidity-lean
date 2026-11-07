@@ -31,7 +31,20 @@ class ProposalTest(unittest.TestCase):
                             with contextlib.redirect_stdout(io.StringIO()) as out:
                                 with self.assertRaises(ValueError): proposal.main()
                             self.assertEqual(out.getvalue(), "")
+                            target.write_text(original.replace(old, "/-\n" + old + "\n-/", 1), encoding="utf-8")
+                            with contextlib.redirect_stdout(io.StringIO()) as out:
+                                with self.assertRaises(ValueError): proposal.main()
+                            self.assertEqual(out.getvalue(), "")
                             target.write_text(original, encoding="utf-8")
+                target = root / proposal.SOURCE
+                original = target.read_text(encoding="utf-8")
+                anchor = "import Solidity.Source.Typing\n"
+                self.assertEqual(original.count(anchor), 1)
+                target.write_text(original.replace(anchor, "/-\n" + anchor + "-/\n", 1), encoding="utf-8")
+                with contextlib.redirect_stdout(io.StringIO()) as out:
+                    with self.assertRaises(ValueError): proposal.main()
+                self.assertEqual(out.getvalue(), "")
+                target.write_text(original, encoding="utf-8")
                 target = root / proposal.NEW
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text("already owned", encoding="utf-8")

@@ -235,7 +235,7 @@ as recorded above. Neither review used the Lean server.
 ### Supplemental original-evidence audit (2026-10-30)
 
 At `3c0af8ff`, the supplied immutable supplement's retrieval SHA256 is
-`9d762c79c1c3aaaaa8e14fc56e704cb2ab7578e365d5455672ff0faf41f8f9e1`.
+`cc63ed81609ebaea2df7c3bee3f87d3c4239713ea32c49dfd3d0f5956bc108a2`.
 All seven artifacts match their recorded sizes and hashes. Its archive contains
 177 verified members: the original 175 records, their checksum manifest and
 snapshot provenance. Every original path and hash agrees with the retained

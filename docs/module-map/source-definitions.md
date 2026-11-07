@@ -67,7 +67,7 @@
 | `Source/Infer.lean` | S02 item 1b: type inference computing derivations (`Typed.infer`, `StmtD.infer`, `ItemsD.infer`), sound by construction. |
 | `Source/Elaborate.lean` | S02 item 1b: the elaborator `elaborate : Resolution → Option Elaborated` (bodies, modifiers, initializers, constants, base arguments), coherent by construction. |
 | `Source/ElaborateExamples.lean` | Controls of the elaborator: a unit with inheritance, a base argument, a modifier and an initializer elaborated from syntax and run. |
-| `Source/Horizon.lean` | S05 item 2: the interpreter is monotone in its horizon (`belowAt`, horizon independence `runTx_stable`, `firstDone_runTx`), only appends events (`growAt`), and a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
+| `Source/Horizon.lean` | S05 item 2, last part of the `Horizon` split (imports `HorizonFuel`, `HorizonGrow`, `HorizonConst`): a timed-out run's events are a prefix of a larger horizon's (`approxAt`, `runTx_events_mono`). |
 | `Source/HorizonDeploy.lean` | S05 item 2: a deployment not completed at a horizon shows a prefix of its events at every larger one (`deploy_events_mono`). |
 | `Source/Session.lean`, `Source/SessionExamples.lean` | Sessions showing the events of unfinished transactions (`sessionAtEvents`, `sourceLangEvents`), consistent, and their controls. |
 | `Source/Hoare.lean` | V04b: Hoare triples over the interpreter monad `EM` (`Hoare`, `NotStuck`), with a rule per combinator (`bind`, `sub'`, `attempt'`, `lift'`, …). |
@@ -87,6 +87,9 @@
 | `Source/Agreement/Locals.lean` | Intrinsic primitive contexts, total related local environment producer and locals-only state projection. |
 | `Source/Agreement/NormalStatement.lean` | Unproved one-way normal-result locals obligation over actual source/model evaluators; whole-step simulation remains VY5 H16 work. |
 | `Source/MonetaryFit.lean` | BalancesFit writer inventory: initial state, `deploy`'s two account writes, generic fitting/same-balance account updates, `Authority.writeSource` under an explicit range premise and its guarded `writeSourceChecked?`; satisfiable transfer witness and unguarded/wide-authority negative controls. Per-writer laws, not whole-evaluator reachability. |
+# Shared inference helpers
+
+| `Source/InferHelpers.lean` | Canonical shallow mapping, payable-argument and conversion-location helpers for the source/static pointwise agreement interface; exact rule equations and branch controls. |
 # Source agreement producers
 
 | `Source/Agreement/NormalBoolBindings.lean` | Actual boolean literal initializer normal-step producer and two-initializer composition, retaining primitive locals only. |
@@ -130,6 +133,12 @@
 | `Source/Agreement/PrimitiveSlotReverseControls.lean` | Retained source/tail/neighbors and real opposite-direction controls. |
 | `Source/Agreement/PrimitiveCopySequence.lean` | Both orders of concrete primitive copies, actual intermediate reads, normal agreements/clients and horizon-four timeouts. |
 | `Source/Agreement/PrimitiveCopySequenceControls.lean` | Original-value survival by copy order, same-input model noncommutation and swap refusal controls. |
+| `Source/HorizonFuel.lean` | S05 item 2, first part of the `Horizon` split: fuel monotonicity (`belowAt`) and horizon independence (`runTx_stable`, `firstDone_runTx`, `runTx_stuck_stable`). |
+| `Source/HorizonGrow.lean` | S05 item 2, `Horizon` split: every interpreter function only appends events (`grow_go`, `growAt`). |
+| `Source/HorizonConst.lean` | S05 item 2, `Horizon` split: the helpers that leave the events as they are (`const_go`). |
+# H125 additive Source typing pair
+
+| `Source/TypingV2.lean` | H57 additive environment-aware local declaration judgment over frozen v1 derivations; generic policy fold, compatibility bridge and positive H24 admission, with no Lowering import. |
 | `Source/CalldataLayout.lean` | ABI head dimensions for the owned calldata aggregate subset (`cdStaticWords`, `cdHeadBytes`, `STy.cdStride`), taken from v14 781938cf. |
 | `Source/CalldataAggregates.lean` | S02/G18.04 nested calldata reads, string and static-reference slices, and typed read-only locations, taken from v14 781938cf. |
 | `Source/CalldataStaticCopyControls.lean` | G18.05 controls of `cdToMem` copying statically encoded elements (`uint256[2][]`, `uint256[2]`) at the head stride, with validation and the `stuck` dynamic-element case; the nested arm is called directly; its typed-source reachability is in `CalldataNestedCopyControls`. |

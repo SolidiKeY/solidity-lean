@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "source_module": "Solidity/Yul/Views/ByteObjects.lean",
+  "proof_module": "tests/h62/item4/generic-yul-views/Fixtures.lean",
+  "boundary": "Nine explicit imported theorem telescopes; not full-census acceptance, per-input feasibility or compiler/physical adequacy.",
+  "statements": [
+    {
+      "source": "Solidity.Yul.Views.bytesObject_header",
+      "proof": "Solidity.Yul.Views.H62.byte_object_joint",
+      "frozen_signature_sha256": "f6477c49192d1af0957595b354b263f127b0271b0279cac95aa46082da27ced2"
+    },
+    {
+      "source": "Solidity.Yul.Views.bytesObject_payload",
+      "proof": "Solidity.Yul.Views.H62.byte_payload_joint",
+      "frozen_signature_sha256": "5f09c34b2b00f9cfdeea9699032401d5b3f83c984b21a04890442ad682404c80"
+    },
+    {
+      "source": "Solidity.Yul.Views.bytesObject_residual",
+      "proof": "Solidity.Yul.Views.H62.byte_residual_joint",
+      "frozen_signature_sha256": "710d56dfbe5f3470b20237cae70d36fbbc9e70d5262c5494f2f937753f241b72"
+    },
+    {
+      "source": "Solidity.Yul.Views.bytesObject_unchanged",
+      "proof": "Solidity.Yul.Views.H62.byte_unchanged_joint",
+      "frozen_signature_sha256": "9c42338ced7e1a6f985751458167b9d29d291c6e219ab9fdca443677ba83327e"
+    },
+    {
+      "source": "Solidity.Yul.Views.bytesObject_payload_list",
+      "proof": "Solidity.Yul.Views.H62.byte_object_joint",
+      "frozen_signature_sha256": "0b77275a5b98b722d423237cf2ef3da534292fa3911bdc00de8b384a1a04233f"
+    },
+    {
+      "source": "Solidity.Yul.Views.decode_bytesObjectView",
+      "proof": "Solidity.Yul.Views.H62.byte_decoder_joint",
+      "frozen_signature_sha256": "31d094948f3a2e4ac6411f1569b473aaf29bd96b6ca05ecdcd136783013c1807"
+    },
+    {
+      "source": "Solidity.Yul.Views.decode_stringObjectView",
+      "proof": "Solidity.Yul.Views.H62.byte_decoder_joint",
+      "frozen_signature_sha256": "dde9d863ba64d87c241852053571af78c9b5a20809995abe8d488bbe97c5034f"
+    },
+    {
+      "source": "Solidity.Yul.Views.bytesObject_idempotent",
+      "proof": "Solidity.Yul.Views.H62.byte_object_joint",
+      "frozen_signature_sha256": "515bf93b0601ed6faefcfd936717cdbace1d5ab10f5f02aea6bb21808d5109a8"
+    },
+    {
+      "source": "Solidity.Yul.Views.bytesObject_source_payload",
+      "proof": "Solidity.Yul.Views.H62.byte_source_payload_joint",
+      "frozen_signature_sha256": "b34126ef8ba11ff58bc4afced703b8669ed59f3c69472663d817212a9d0e1877"
+    }
+  ]
+}

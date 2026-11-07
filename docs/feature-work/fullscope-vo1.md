@@ -162,7 +162,7 @@ The entire assignment is unfinished. No checkpoint readiness or publication.
 ## H41 cache receipt update — 2026-11-05
 
 Coordinator-reported receipt:
-`/home/guilherme/.local/state/cloudvm-coord/receipts/vo1-optimizer-cache-received-20261105T020426Z.json`.
+`$XDG_STATE_HOME/cloudvm-coord/receipts/vo1-optimizer-cache-received-20261105T020426Z.json`.
 The coordinator reports pulling and verifying the pack against SHA256
 `f84ba52f64e1d260ff0e6c7711acf9089330bc9bca8e604123332bfe48679b29`.
 Local SHA256 was rechecked and matches. Preserve the existing 89,252,357-byte
@@ -1470,3 +1470,143 @@ entries of one mapping (different literal keys).
   `save<[Struct<[..]>`), as recorded above. Rerun against the pinned snapshot
   (`SOLKEY_RULES=tests/migration/solkey/.../solidityProgramRules.key`): OK,
   "annotations match", 377 taclets, 131 read-bearing, table covers 131.
+
+
+## Constant observers: first G0 repair — 2026-11-07
+
+Re-baselined the existing branch by fast-forward to published
+5da4771e63a4278ed53932ac39a032e3d7aea6ed; old H44 archive hashes still match.
+Current master already contains O02 lowering passes, O03 inlining/CSE/RLE/
+dead stores/LICM and the eleven-stage SameRun pipeline. Earlier rows saying
+those implementations or intrinsic X06 apartness facts are missing are obsolete.
+This is still fragment coverage, not full D6 closure. Unused-function pruning,
+remaining pass coverage, public compiler adapters, D1/D6/artifact binding and
+physical gas/code-size benchmarks remain open. CtxEquiv/Unify explicitly calls
+its D6 relation a stub; no substitute is introduced here.
+
+The existing ledger records indexed matches in optimizer code as an unresolved
+Gate G0 obligation. This small repair replaces only Simple.const? and Val.const?
+in ConstFold.lean with casesOn whose motives generalize the primitive-type
+index (Val's mutual-family motive is motive_5). Exact signatures, constructor
+results, literal proof arguments and transparency are retained. All theorem
+statements and bodies are unchanged; no premise, expected verdict, exclusion,
+axiom or heartbeat changes. These nonrecursive observers need no recursive twin.
+This removes exactly two indexed matches. Recursive folding and the rest of the
+optimizer family remain G0 work; timings do not waive that requirement.
+
+Warned before refactoring and inspected source commits64f81751c/a383b213a;
+no speed-motivated reversal found. Repository per-file gate on the unchanged
+file: PASS,8.358962s total,RSS669380608,cgroup274010112,10 samples; after repair:
+PASS,3.815002s,RSS678596608,cgroup193605632,4 samples (gate rows5s/2s).
+Cache warming confounds this one pair: no speedup claim or gas/code-size
+benchmark follows. Both commands used the same historical runtime config and
+explicit-j1 wrapper. Actual Lean4.24.0 commit797c613, Lake5.0.0-src+797c613.
+The intermediate Val motive-name elaboration failure is retained; corrected
+motive_5 gives MCP0 (6.961470s,RSS1327255552,cgroup888700928,10 samples).
+
+Existing O02Controls and direct observer axiom audit PASS through gate.sh
+per-file:51.563411s,RSS895635456,cgroup592531456,95 samples. Twenty reports
+use only propext/Classical.choice/Quot.sound. Existing overflow/revert, assert
+Panic, short-circuit and invalid-simplification controls are unchanged; this
+proves only the existing lowering-IR results, not source Panic-byte/D6 adequacy.
+Reviewers found ignored audit/config files lacked execution-time fingerprints.
+A focused fresh audit recheck fixes that gap: matching SHA256 before/after,
+PASS2.326856s,RSS523194368,cgroup150966272,2 samples, same five axiom reports.
+Those hashes match the cache snapshots. Earlier ignored-file executions are
+not retrospectively labelled source-stable; the failed broad checkpoint's
+external runtime snapshot is retained without a historical before/after claim.
+
+Required checkpoint attempt: build-touched PASS29s, then library phase times
+out124 at292.166640s,RSS1816416256,cgroup2586542080,561 samples; last sampled
+Lean target Backend.Scalar.PowerBounds. Artifacts retained, no timeout lifted.
+All heavy checks serial under verified12GiB/no swap,threads1,-j1,4GiB admission
+reserve and original aggregate budget. Source stability/cleanup receipts retained.
+External current-runtime.toml mirrors the current lakefile with serial args;
+original tracked historical runtime is unchanged. Full examples/global audits/
+remaining final gates did not complete and remain open. No checkpoint readiness.
+
+Static roots/fragments/trust PASS (6562 sources,289 sites,0 findings). Layers
+FAIL:12 core→non-core closure edges (901 core,0 elaborator/adaptor reach,95 pinned
+allowances). Pin inventory FAIL:11 unrecorded changes,0 errors,99 baselined
+changes. Failures name producer areas, not optimizer changes; COORD owns repairs
+and Optimizer CORE registration. No central allowance, pin or registry edited.
+Separate read-only finder/skeptic reviews confirmed constructor semantics and
+scope; their ignored-input finding was addressed by the fresh bound audit.
+
+H44: all new raw data remains VM-only. Committed const-g0.sha256 has two entries:
+- delivery/const-g0-20261107/evidence.tar.zst:3686986 bytes,
+  SHA7becced85a9e85ec83df9f4df394c257d430ffe32ff35527ee8e1cbccd7eb2b6;
+  56 payload files/11011907 bytes, plus per-file MANIFEST.json.
+- delivery/cache-const-g0-20261107/cache-packet.tar.zst:100769388 bytes,
+  SHA791e86d883e119c24384a819f8245c550118605e8e0694de39611031dff7c3db;
+  checked66-module closure, not full-master cache, coordinator-pending under H41.
+Cache metadata explicitly records a precommit dirty-source snapshot at5da4771e6;
+source SHA256 values are authoritative, with final committed-source binding in
+the handoff. Audit/config snapshots bind to the fresh recheck, not the initial
+ignored-input execution. Never VM ship-cache.sh. Old evidence/packs unchanged.
+O01 remains partial; O02/O03 remain partial/full-scope obligations open. This
+small G0 repair is kernel checked; broad checkpoint/central-policy blockers
+must be resolved before advancing its required validation or claiming closure.
+
+Final finder and skeptic independently confirmed the fresh execution-hash binding, archive hashes/sizes, scope and failure accounting; no remaining finding in this two-observer change. Neither used Lean/server/builds or writes.
+
+
+## H82 compatibility correction — 2026-11-07
+
+The coordinator held284a998737e01be7ebc4e41e0d77f5f07e18c032 because the earlier
+const? rewrite changed existing definition bodies and dropped generated equation
+lemmas. That was not proof-only under H82. This correction explicitly supersedes
+the previous section's claim that existing runtime observers were G0-repaired.
+Old measurements/archives remain immutable records of the rejected proposal;
+they do not describe this corrected implementation or an accepted runtime change.
+Held history is preserved at codex/solidity-fullscope-20261104/vo1-pre-h82-284a9987.
+
+Simple.const? and Val.const? are restored verbatim from published reference
+95d1e9cb29dc5a34d1db68af3ca47e47b75e293f, including the original matcher equations.
+All existing downstream declarations, theorem statements/bodies and callers are
+unchanged versus that reference. The net source delta is32 added lines only:
+Simple.constView?, Val.constView? and their constView?_eq lemmas. New views use
+index-generalizing casesOn, and Val's new view delegates to the new Simple view.
+Each equality states value.constView? = value.const? for every typed input,
+with no additional premise. No global simp attribute or caller redirection.
+Only the NEW views satisfy this G0 observation pattern. Existing runtime callers
+still use the frozen matchers; their G0 obligation remains open. No speedup,
+pass-coverage or D6/compiler/EVM/gas claim is added by the unused helper views.
+
+Validation: ConstFold MCP0,8.002832s,RSS1392562176,cgroup934486016,12 samples.
+Repository per-file gates on ConstFold, CompatibilityAudit and unchanged
+O02Controls all PASS:54.749236s,RSS936792064,cgroup534700032,102 samples.
+Metadata audit confirms precisely Simple.const?.eq_1..eq_4 and
+Val.const?.eq_1..eq_10 (14 equations), and prints their types. New views and both
+agreement lemmas depend only on propext; old evaluation proofs and all15 O02
+axiom reports remain standard-only. Audit file SHA is recorded before/after its
+execution and matches the cache snapshot. Existing positive/negative control
+verdicts, including overflow IR revert and assert Panic, are unchanged; this
+establishes no source Panic-byte/D6 adequacy beyond the existing IR boundary.
+
+gate.sh touched PASS (build-touched29s),30.308200s total,RSS1030500352,
+cgroup573001728,54 samples. Its current-runtime config SHA matches before/after
+and the packet. All heavy work serial under verified12GiB/no swap,threads1,-j1,
+4GiB reserve and unchanged proof/build budgets. Actual Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613. No maxHeartbeats increase, sorry, new axiom or native_decide.
+Broader original checkpoint/full gates were not rerun here; historical timeout
+and central-policy failures retain their original revision bindings and no full
+assignment readiness is claimed. H82 correction is additive proof/helper work,
+not permission to migrate frozen callers or change other definition bodies.
+
+Separate read-only finder/skeptic confirmed the additive32-line delta, exact
+restoration and proof semantics; final ledger/hash review recorded in handoff.
+H44 new raw evidence remains VM-only; const-h82.sha256 commits two pointers:
+- delivery/const-h82-20261107/evidence.tar.zst,1859523 bytes,
+  SHAedd4427b7a74606f67b211dfd50725dbca1373f29609289c643e665c795390d8,
+  29 payload files plus per-file MANIFEST.json.
+- delivery/cache-const-h82-20261107/cache-packet.tar.zst,100864700 bytes,
+  SHA108e48f0aa911c1203cc8a49ebc8def5ea32ce27727437bc1fa99070aaa545be,
+  scoped66-module corrected cache, coordinator-pending under H41.
+Cache HEAD metadata is precommit held base284a; source hashes and final committed
+binding are authoritative. Old packet791e86... is not the corrected-source pack.
+Never VM ship-cache.sh. Coordinator explicitly requested pushing the correction;
+only the assigned codex branch is authorized, with no default-branch push/PR.
+O01/O02/O03 full obligations remain open under their original semantics/budgets.
+
+Final finder and skeptic approved source, restored equations, ledger and artifact hashes; no remaining correction finding. Both were read-only and used no Lean/server/builds.

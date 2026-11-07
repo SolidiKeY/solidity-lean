@@ -656,3 +656,31 @@ commit. Workflow dispatch no longer waits on a VM token: the coordinator will
 dispatch the published branch and return its run URL. That reference remains
 pending. The H107 evidence manifest pins successful and failed raw logs off git.
 This suite pass does not close the whole non-vacuity or V17 release assignment.
+
+### H121: inhabited H98 V2 headlines and actual checked-entry success
+
+`Solidity/Backend/Payments/EntrySuccess.lean` adds
+`Evm.Compiler.compile_core_some` and `Evm.Compiler.compile_core_success`.
+These concern the actual `Evm.Compiler.compile`, not an arbitrary result:
+every existing core-fragment certificate produces a compilation result, and
+the original simulation, stack-room and successful typed-run premises yield
+successful emitted-code execution, protected stack and final representation.
+The proof reuses `Payments.compile_success`; no frozen definition or statement
+changes, new admission predicates or assumed preservation are introduced.
+This is success on the stated supported core domain, not all-source compiler
+totality, physical EVM adequacy or precompile/gas/fork agreement.
+
+`tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean`
+reuses the existing nonempty require family and jointly constructed simulation.
+It directly applies `Main.compiler_checked_v2` in `checked_v2_family` and
+`Main.compiler_correct_v2` in `correct_v2_success`. `actual_entry_success`
+applies the actual compiler theorem over arbitrary contracts and fresh balances;
+`closed_actual_entry_success` provides a closed successful instance with no
+caller feasibility premise. All six new declarations have exact standard-axiom
+pins. The existing H107 all-module CI step discovers this new witness module;
+`check.py`, the original families and H98 interfaces remain unchanged.
+
+The production theorem is the reusable OBL-SUCCESS artifact for the
+precompile-agreement consumer. That consumer must still audit its own original
+statements and failure/gas/fork obligations; no downstream acceptance or whole
+lane completion follows from this additive checkpoint.

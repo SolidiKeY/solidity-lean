@@ -1,3 +1,0 @@
-PASS lean:tests/directruntime-20261104/shared-translator/DirectResultControls.lean 4s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/direct-result-capture/1.log
-{"childMaxRssKiB": 1250292, "command": ["env", "SHARED_DIRECT_RESULT_CAPTURE=1", "GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/direct-result-capture", "bash", "scripts/coord-tools/gate.sh", "per-file", "tests/directruntime-20261104/shared-translator/DirectResultControls.lean"], "exit": 0, "scopeMemoryPeakBytes": "182296576", "wallSeconds": 3.649950165010523}
-{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 6080249856, "outerWallSeconds": 7.5937557960132835}

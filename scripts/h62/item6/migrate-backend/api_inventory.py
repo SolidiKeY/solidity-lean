@@ -21,6 +21,14 @@ def name_ok(name):
     if name[0] == "num": return natural_ok(name[2])
     return False
 
+def name_is_private(name):
+    if name == ["anonymous"]: return False
+    return name == ["str",["anonymous"],"_private"] or name_is_private(name[1])
+
+def visibility_ok(row):
+    expected = "private" if name_is_private(row["name"]) else "public"
+    return row.get("visibility") == expected and type(row.get("protected")) is bool
+
 def level_ok(level):
     if level == ["zero"]: return True
     if not isinstance(level,list) or not level: return False
@@ -100,7 +108,7 @@ def universe_parameters(dag):
 def validate_index(index):
     modules = index.get("modules")
     rows = index.get("declarations")
-    if type(index.get("schema")) is not int or index["schema"] != 1 or not isinstance(modules,list) or any(not isinstance(x,str) for x in modules) or len(set(modules)) != len(modules):
+    if type(index.get("schema")) is not int or index["schema"] != 2 or not isinstance(modules,list) or any(not isinstance(x,str) for x in modules) or len(set(modules)) != len(modules):
         raise ValueError("invalid index module inventory")
     if not isinstance(rows,list) or type(index.get("declaration_count")) is not int or index["declaration_count"] != len(rows):
         raise ValueError("invalid index declaration count")
@@ -109,12 +117,13 @@ def validate_index(index):
     if not digest(index.get("raw_sha256")): raise ValueError("invalid raw export digest")
     names = set()
     for row in rows:
-        if set(row) != {"name","display_name","module","kind","level_params","unsafe","type_sha256"}:
+        if set(row) != {"name","display_name","module","kind","level_params","unsafe","visibility","protected","type_sha256"}:
             raise ValueError("invalid indexed declaration fields")
         if not name_ok(row["name"]) or not isinstance(row["display_name"],str) or row["module"] not in modules or not digest(row["type_sha256"]):
             raise ValueError("invalid indexed declaration identity or type digest")
         if row["kind"] not in {"axiom","definition","theorem","opaque","quotient","inductive","constructor","recursor"} or type(row["unsafe"]) is not bool:
             raise ValueError("invalid indexed declaration kind")
+        if not visibility_ok(row): raise ValueError("invalid or inconsistent visibility metadata")
         params = row["level_params"]
         if not isinstance(params,list) or not all(name_ok(x) for x in params) or len({canonical(x) for x in params}) != len(params):
             raise ValueError("invalid or duplicate universe parameters")
@@ -138,16 +147,17 @@ def index_export(raw, census):
     with raw.open() as stream:
         header = json.loads(next(stream))
         modules = header.get("module_inventory", [])
-        if type(header.get("schema")) is not int or header["schema"] != 1 or len(set(modules)) != len(modules) or set(modules) != expected:
+        if type(header.get("schema")) is not int or header["schema"] != 2 or len(set(modules)) != len(modules) or set(modules) != expected:
             raise ValueError("export module inventory does not match assigned census")
         for line in stream:
             row = json.loads(line)
             if row["module"] not in expected:
                 raise ValueError("declaration outside assigned module census")
-            if set(row) != {"name","display_name","module","kind","level_params","unsafe","type"}:
+            if set(row) != {"name","display_name","module","kind","level_params","unsafe","visibility","protected","type"}:
                 raise ValueError("unexpected declaration record fields")
             if not name_ok(row["name"]) or not isinstance(row["display_name"],str) or type(row["unsafe"]) is not bool:
                 raise ValueError("invalid declaration metadata")
+            if not visibility_ok(row): raise ValueError("invalid or inconsistent visibility metadata")
             if row["kind"] not in {"axiom","definition","theorem","opaque","quotient","inductive","constructor","recursor"}:
                 raise ValueError("unknown kernel declaration kind")
             if not isinstance(row["level_params"],list) or not all(name_ok(x) for x in row["level_params"]):
@@ -165,10 +175,10 @@ def index_export(raw, census):
     if type(header.get("declaration_count")) is not int or header["declaration_count"] != len(entries):
         raise ValueError("declaration count mismatch")
     with raw.open("rb") as stream: raw_sha256 = hashlib.file_digest(stream,"sha256").hexdigest()
-    return {"schema": 1, "modules": sorted(expected),
+    return {"schema": 2, "modules": sorted(expected),
             "declaration_count": len(entries),
             "raw_sha256": raw_sha256,
-            "boundary": "Includes every exported declaration, including private/generated names. Type hashes are sharing-independent Merkle hashes; expression metadata only is omitted. Not semantic equivalence, axiom auditing or a compiler gate.",
+            "boundary": "Includes every exported declaration, including private/generated names; private/public naming and protected metadata are retained. Type hashes are sharing-independent Merkle hashes; expression metadata only is omitted. Not semantic equivalence, axiom auditing or a compiler gate.",
             "declarations": [entries[key] for key in sorted(entries)]}
 
 def compare(old, new):

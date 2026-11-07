@@ -146,19 +146,7 @@ theorem indexLoc_effect : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RC
   · exact Solidity.Lowering.Readonly.SourceHistory.lengthOf_effect mode F a
   · intro len
     split
-    · cases a with
-      | storRef => exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
-      | memRef => exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
-      | cdRef h off len =>
-        dsimp only
-        split
-        · exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
-        · cases σ
-          case bytes loc _ => cases loc <;> exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
-          case string loc _ => cases loc <;> exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
-          case array loc elem count _ =>
-            cases loc <;> cases count <;> (try split) <;> exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
-          all_goals exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _
+    · cases a <;> first | exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _ | (dsimp only; split <;> exact Solidity.Lowering.Readonly.SourceHistory.Effect.pure mode _)
     · exact Solidity.Lowering.Readonly.SourceHistory.Effect.lift mode _
 
 end Solidity.Lowering.Readonly.SourceHistory

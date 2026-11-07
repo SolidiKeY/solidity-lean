@@ -1,0 +1,134 @@
+{
+  "regression": "H90 fixed-byte local admission and exact marker retention",
+  "base": "20ad62f98579fd1f3554f212973b41f8fe6b5cbb",
+  "productionFile": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+  "sourceSha256": "4b87138bc39130fcc0eaf2e6127336fbd0710d8c4520072d3e1be3aaf1493104",
+  "api": "Existing localTypeName/localPrim retain canonicalbytes1..32 spelling. Reader record, parameter/state/reference callbacks unchanged. localTypeName_of_fixedBytes proves the general decoding equation.",
+  "proofAxioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "controls": {
+    "canonicalByteSpellings": 32,
+    "freshRequestsBothModalities": 20,
+    "proved": 12,
+    "refuted": 4,
+    "unsupported": 4,
+    "unsupportedCases": [
+      "positive length checker:4294967296doesnotfituint32",
+      "parameter:compactverifierunsupportedtypebytes4"
+    ]
+  },
+  "transition": {
+    "regression": "H90 fixed-byte local observation transition",
+    "base": "20ad62f98579fd1f3554f212973b41f8fe6b5cbb",
+    "profileChanges": 8,
+    "profileTransitions": {
+      "refused->decoded": 2,
+      "refused->refused": 6
+    },
+    "censusBefore": {
+      "parsedUnits": 78,
+      "functions": 1655,
+      "existingPrinted": 1486,
+      "canonicalAdmitted": 245,
+      "candidateFiles": 78,
+      "both": 241
+    },
+    "censusAfter": {
+      "parsedUnits": 78,
+      "functions": 1655,
+      "existingPrinted": 1486,
+      "canonicalAdmitted": 245,
+      "candidateFiles": 78,
+      "both": 241
+    },
+    "censusChanges": [
+      {
+        "identity": {
+          "fixture": "tests/solc/DeclarationMetadata.ast.json",
+          "contract": "DeclarationMetadata",
+          "function": "receiverEffects",
+          "sourceId": 304
+        },
+        "before": "compact verifier: unsupported type bytes4",
+        "after": "compact verifier: unsupported expression"
+      },
+      {
+        "identity": {
+          "fixture": "tests/solc/DeclarationMetadataAdmission.ast.json",
+          "contract": "DeclarationMetadata",
+          "function": "receiverEffects",
+          "sourceId": 304
+        },
+        "before": "compact verifier: unsupported type bytes4",
+        "after": "compact verifier: unsupported expression"
+      },
+      {
+        "identity": {
+          "fixture": "tests/solc/PublicGetters.ast.json",
+          "contract": "GetterBytePrefixes",
+          "function": "evaluateOnce",
+          "sourceId": 966
+        },
+        "before": "compact verifier: unsupported type bytes4",
+        "after": "compact verifier: unsupported expression"
+      }
+    ],
+    "occurrenceChanges": {
+      "default.json": 12,
+      "composed.json": 12
+    },
+    "priorDecodedBehaviorPreserved": true,
+    "unknownRootRefusalsPreserved": true,
+    "boundary": "Fixed-byte source witness/decoder transition checks, not causal semantic or source adequacy proof."
+  },
+  "priorManifests": [
+    {
+      "gitPath": "tests/directruntime-20261104/shared-translator/h90-census-manifest.json",
+      "sha256": "1fc8e5562def95f8408b67085d5a4e5cbcbcf1fc083709872812d9c389b601f9"
+    },
+    {
+      "gitPath": "tests/directruntime-20261104/shared-translator/h90-reader-profile-manifest.json",
+      "sha256": "2f4cc90034c6c8658c2f72286a447209543577f20e52b6bea8c80cde5280a12f"
+    },
+    {
+      "gitPath": "tests/directruntime-20261104/shared-translator/h90-occurrence-manifest.json",
+      "sha256": "befd7e8c37f961d8dbdb83ae4f07aff828d2efec5063e6a929847acc2cf3657d"
+    }
+  ],
+  "gates": {
+    "ownedModulesBuilt": 9,
+    "affectedFilesPassingAfterRecovery": 28,
+    "mainExit": 1,
+    "mainFailure": "SelectionControls obsoleteprimitive-returnrefusal; correctedexactoverloadreadytestpasses. Historical957aggregateclaimcorrectedfrom27to26/27.",
+    "mainWallSeconds": 133.81841859799897,
+    "mainMaxRssKiB": 1388040,
+    "finalTwoControlFilesExit": 0,
+    "finalTwoControlFilesWallSeconds": 8.296854183001415,
+    "finalTwoControlFilesMaxRssKiB": 1258068,
+    "exactMemoryMax": 12884901888,
+    "swapMax": 0,
+    "threads": 1,
+    "leanJobs": 1
+  },
+  "compiler": {
+    "regression": "H90 fixed-byte local marker/bitwise/tuple",
+    "compiler": {
+      "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+    },
+    "sourceSha256": "15f6b991e61340cb928a56379b54adcba45c37c6c0ef289901678e6d3c6fa8b8",
+    "fixture": "tests/directruntime-20261104/shared-translator/artifacts/fixed-bytes/FixedByteLocals.ast.json",
+    "fixtureSha256": "983f7ad95c0137df36592ef1afd6b6908ac5af219b714920f9fe86ee976776a3",
+    "fieldsRetained": 0,
+    "boundary": "External compiler provenance; no Lean or semantic proof."
+  },
+  "boundaries": "Decoder/marker lemma, trusted model/checker observations and fixed-byte witness scope; not source/compiler/ABI/native proof.78-filecensus245unchanged,3refinedrefusals. Positive.length proof/backendgap retained. No RUNTIME_GATE_PASS.",
+  "evidence": {
+    "archiveRelative": "artifacts/fixed-byte-evidence.tar.zst",
+    "sha256": "87618326efdd54743f114d248a298164bd4089e5ada3618eed46ee4173f32cad",
+    "bytes": 60284
+  }
+}

@@ -47,7 +47,7 @@ run_gate() {
 build_touched() {
   local base=${GATE_BASE:-origin/master}; local targets
   rm -f "$logs/core"
-  targets=$(GATE_CORE_FILE="$logs/core" python3 - "$base" <<'PY'
+  targets=$(GATE_CORE_FILE="$logs/core" GATE_MODE="$mode" python3 - "$base" <<'PY'
 import os,pathlib,subprocess,sys
 base=sys.argv[1]
 def git(*args): return subprocess.check_output(["git",*args],text=True).splitlines()
@@ -79,6 +79,10 @@ while stack:
     for m in rev.get(stack.pop(),()):
         if leaf(m) and m not in leafs: leafs.add(m); stack.append(m)
 out={m for m in out if wide or m in leafs or not leaf(m)}
+# H109: checkpoint never builds the slow library, including transitive importers.
+if os.environ.get("GATE_MODE") == "checkpoint":
+    slow={line.split()[1] for line in pathlib.Path("SoliditySlowExamples.lean").read_text().splitlines() if line.startswith("import ")}
+    out.difference_update(slow)
 print(" ".join(sorted(m for m in out if pathlib.Path(m.replace(".","/")+".lean").is_file())))
 open(os.environ["GATE_CORE_FILE"],"w").write("core" if core else "")
 PY
@@ -89,6 +93,11 @@ PY
 if [ "$mode" = per-file ]; then
   for file in "${files[@]}"; do run_gate "lean:$file" lake lean "$file" -- --tstack=131072; done
 else
+  # Merge pre-gates use touched mode: reject the prospective tree before builds.
+  run_gate layers node scripts/check-layers.mjs
+  run_gate private-paths bash scripts/check-private-paths.sh
+  run_gate evidence-files bash scripts/check-evidence-files.sh
+  [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
@@ -103,7 +112,6 @@ else
     fi
     run_gate trust bash scripts/check-trust.sh
     run_gate orphans node scripts/check-orphans.mjs
-    run_gate layers node scripts/check-layers.mjs
     run_gate roots bash scripts/coord-tools/register.sh --check
     run_gate fragments bash scripts/coord-tools/fragments.sh --check
     run_gate doc-paths bash scripts/check-doc-paths.sh

@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "guarded_regression": "Fixture-only or cached artifact provenance promoted to project declarations",
+  "source_sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0",
+  "probe_sha256": "f1305dd5c37f465f13674b3cf05fe9b8dea919f0e37031a5c441ac80d7818231",
+  "fixture_contract_sha256": "fbbf557d615e7475e6993e5fd1d24586bd925560e3082c5d20a2954a8d587077"
+}

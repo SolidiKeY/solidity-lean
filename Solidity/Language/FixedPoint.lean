@@ -147,9 +147,10 @@ variable {t : FxTy}
 def zero (t : FxTy) : Fx t :=
   ⟨0, by
     have := t.half_pos
-    simp only [FxTy.inRange, FxTy.lo, FxTy.hi, Bool.and_eq_true, decide_eq_true_eq]
+    simp only [FxTy.inRange, Bool.and_eq_true, decide_eq_true_eq]
+    simp only [FxTy.lo, FxTy.hi]
     have := t.pow_bits
-    cases t.signed <;> simp only [Bool.false_eq_true, if_false, if_true] <;> omega⟩
+    cases t.signed <;> simp only [Bool.false_eq_true, ite_false, ite_true] <;> omega⟩
 
 /-- A scaled integer at a type, range-checked. -/
 def ofInt? (t : FxTy) (v : Int) : Option (Fx t) :=
@@ -166,8 +167,9 @@ theorem wrapInt_inRange (t : FxTy) (v : Int) : t.inRange (wrapInt t v) = true :=
   have hh := t.half_pos
   have h0 : 0 ≤ v % 2 ^ t.bits := Int.emod_nonneg v (by omega)
   have h1 : v % 2 ^ t.bits < 2 ^ t.bits := Int.emod_lt_of_pos v (by omega)
-  simp only [wrapInt, FxTy.inRange, FxTy.lo, FxTy.hi, Bool.and_eq_true, decide_eq_true_eq]
-  cases t.signed <;> simp only [Bool.false_eq_true, false_and, true_and, if_false, if_true] <;>
+  simp only [FxTy.inRange, Bool.and_eq_true, decide_eq_true_eq]
+  simp only [wrapInt, FxTy.lo, FxTy.hi]
+  cases t.signed <;> simp only [Bool.false_eq_true, false_and, true_and, ite_false, ite_true] <;>
     first | omega | (split <;> omega)
 
 /-- A scaled integer wrapped into the type. -/
@@ -177,12 +179,13 @@ def wrap (t : FxTy) (v : Int) : Fx t := ⟨wrapInt t v, wrapInt_inRange t v⟩
 theorem wrapInt_of_inRange {v : Int} (h : t.inRange v = true) : wrapInt t v = v := by
   have hp := t.pow_bits
   have hh := t.half_pos
-  simp only [FxTy.inRange, FxTy.lo, FxTy.hi, Bool.and_eq_true, decide_eq_true_eq] at h
+  simp only [FxTy.inRange, Bool.and_eq_true, decide_eq_true_eq] at h
+  simp only [FxTy.lo, FxTy.hi] at h
   unfold wrapInt
   cases hs : t.signed
-  · simp only [hs, Bool.false_eq_true, if_false] at h ⊢
+  · simp only [hs, Bool.false_eq_true, ite_false] at h ⊢
     exact Int.emod_eq_of_lt h.1 (by omega)
-  · simp only [hs, if_true] at h ⊢
+  · simp only [hs, ite_true] at h ⊢
     by_cases hv : 0 ≤ v
     · have hm : v % 2 ^ t.bits = v := Int.emod_eq_of_lt hv (by omega)
       simp only [hm, true_and]
@@ -296,17 +299,18 @@ theorem mul_one (m : Mode) (a : Fx t) (h1 : t.inRange t.scale = true) :
 
 /-- `a / 0` panics (`0x12`) in either mode. -/
 theorem div_zero (m : Mode) (a : Fx t) : div m a (zero t) = .error .divZero := by
-  simp only [div, zero, if_true]
+  simp only [div, zero, ite_true]
 
 /-- `a % 0` panics (`0x12`) in either mode. -/
 theorem mod_zero (m : Mode) (a : Fx t) : mod m a (zero t) = .error .divZero := by
-  simp only [mod, zero, if_true]
+  simp only [mod, zero, ite_true]
 
 /-- `|a tmod b| ≤ |a|`, with the sign of `a`. -/
 theorem tmod_between (x y : Int) : (0 ≤ x → 0 ≤ x.tmod y ∧ x.tmod y ≤ x) ∧
     (x < 0 → x ≤ x.tmod y ∧ x.tmod y ≤ 0) := by
+  have cast_ofNat (n : Nat) : Int.ofNat n = (n : Int) := rfl
   rcases x with m | m <;> rcases y with n | n <;>
-    simp only [Int.tmod, Int.ofNat_eq_coe, Nat.succ_eq_add_one] <;>
+    simp only [Int.tmod, cast_ofNat, Nat.succ_eq_add_one] <;>
     refine ⟨fun h => ?_, fun h => ?_⟩ <;>
     have := Nat.mod_le m n <;> have := Nat.mod_le m (n + 1) <;>
     have := Nat.mod_le (m + 1) n <;> have := Nat.mod_le (m + 1) (n + 1) <;> omega
@@ -325,7 +329,7 @@ theorem mod_inRange (a b : Fx t) : t.inRange (a.1.tmod b.1) = true := by
 /-- `a % b` for a nonzero `b`, in either mode: the truncated remainder. -/
 theorem mod_eq (m : Mode) (a b : Fx t) (hb : b.1 ≠ 0) :
     mod m a b = .ok ⟨a.1.tmod b.1, mod_inRange a b⟩ := by
-  simp only [mod, hb, if_false]
+  simp only [mod, hb, ite_false]
   exact result_of_inRange m (mod_inRange a b)
 
 /-- In either mode, division by a nonzero divisor without overflow is the
@@ -333,7 +337,7 @@ truncated scaled quotient. -/
 theorem div_eq (m : Mode) (a b : Fx t) (hb : b.1 ≠ 0)
     (h : t.inRange ((a.1 * t.scale).tdiv b.1) = true) :
     div m a b = .ok ⟨(a.1 * t.scale).tdiv b.1, h⟩ := by
-  simp only [div, hb, if_false]
+  simp only [div, hb, ite_false]
   exact result_of_inRange m h
 
 /-- Comparison is the order of the denoted numbers. -/
@@ -413,9 +417,10 @@ theorem implicit_sameValue (h : t.subsumes t' = true) (a : Fx t) : SameValue a (
 theorem implicit_lt (h : t.subsumes t' = true) (a b : Fx t) :
     lt (implicit h a) (implicit h b) = lt a b := by
   have hc : (0 : Int) < 10 ^ (t'.digits - t.digits) := Int.pow_pos (by decide)
-  simp only [lt, implicit]
+  simp only [lt]
   apply Bool.eq_iff_iff.mpr
   simp only [decide_eq_true_eq]
+  simp only [implicit]
   constructor
   · intro hl
     exact Int.lt_of_mul_lt_mul_right hl (Int.le_of_lt hc)
@@ -435,8 +440,9 @@ theorem explicit_of_subsumes (h : t.subsumes t' = true) (a : Fx t) :
   have hd : t.digits ≤ t'.digits := by
     simp only [FxTy.subsumes, Bool.and_eq_true, decide_eq_true_eq] at h
     exact h.1.1
-  simp only [explicit, rescale, hd, if_true, wrap, implicit,
+  simp only [explicit, rescale, hd, ite_true, wrap, implicit,
     wrapInt_of_inRange (inRange_mul_of_subsumes h a)]
+  all_goals rfl
 
 /-- An integer accepted by solc's implicit integer-to-fixed test is in
 range once scaled: that conversion never fails. -/
@@ -445,7 +451,8 @@ theorem ofInteger_inRange {lo hi k : Int} (h : t.intImplicit lo hi = true)
   have hs := t.scale_pos
   have hp := t.pow_bits
   have hh := t.half_pos
-  simp only [FxTy.intImplicit, FxTy.maxInt, FxTy.minInt, Bool.and_eq_true, decide_eq_true_eq] at h
+  simp only [FxTy.intImplicit, Bool.and_eq_true, decide_eq_true_eq] at h
+  simp only [FxTy.maxInt, FxTy.minInt] at h
   have hu : k * t.scale ≤ t.hi := by
     have e1 : k * t.scale ≤ (t.hi / t.scale) * t.scale :=
       Int.mul_le_mul_of_nonneg_right (by omega) (by omega)
@@ -471,6 +478,7 @@ theorem ofIntegerExplicit_of_implicit {lo hi k : Int} (h : t.intImplicit lo hi =
     (hk : lo ≤ k ∧ k ≤ hi) :
     ofIntegerExplicit t k = ⟨k * t.scale, ofInteger_inRange h hk⟩ := by
   simp only [ofIntegerExplicit, wrap, wrapInt_of_inRange (ofInteger_inRange h hk)]
+  all_goals rfl
 
 /-- An explicit `bytesM`-to-fixed conversion (solc admits it at the same
 width), by bit pattern: the bytes' unsigned integer `u < 2^M` is the scaled
@@ -538,13 +546,14 @@ theorem ofWord_toWord (a : Fx t) : ofWord? t (toWord a) = some a := by
   have hh := t.half_pos
   have hle := pow_bits_le t
   have h256 : (2 : Int) ^ 256 = 2 * 2 ^ 255 := by rw [Int.pow_succ, Int.mul_comm]
-  simp only [FxTy.inRange, FxTy.lo, FxTy.hi, Bool.and_eq_true, decide_eq_true_eq] at ha
+  simp only [FxTy.inRange, Bool.and_eq_true, decide_eq_true_eq] at ha
+  simp only [FxTy.lo, FxTy.hi] at ha
   have hw : (if t.signed ∧ 2 ^ 255 ≤ toWord a then toWord a - 2 ^ 256 else toWord a) = a.1 := by
     unfold toWord
     cases hs : t.signed
-    · simp only [hs, Bool.false_eq_true, if_false, false_and] at ha ⊢
+    · simp only [hs, Bool.false_eq_true, ite_false, false_and] at ha ⊢
       exact Int.emod_eq_of_lt ha.1 (by omega)
-    · simp only [hs, if_true, true_and] at ha ⊢
+    · simp only [hs, ite_true, true_and] at ha ⊢
       by_cases hv : 0 ≤ a.1
       · have hm : a.1 % 2 ^ 256 = a.1 := Int.emod_eq_of_lt hv (by omega)
         rw [hm]

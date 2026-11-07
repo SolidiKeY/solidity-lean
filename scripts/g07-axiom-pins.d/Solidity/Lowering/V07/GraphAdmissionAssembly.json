@@ -1,0 +1,82 @@
+{
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.admissionOfEmpty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.chain_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.chain_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.declarationGraphProducerOfEmpty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.empty_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.empty_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.env_admission_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.env_admission_of_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.graph_of_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.graph_of_produce": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_graphs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_excludes_mapping": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_graph": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_not_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
