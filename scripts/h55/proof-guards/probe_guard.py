@@ -62,6 +62,8 @@ def check_reserve():
 
 
 rows = []
+pair_ratios = []
+stop_reason = None
 for label, data in [('before', base), ('after', modified)] * 3:
     probe.write_bytes(data.encode('utf-8'))
     command = [lean, '-j1', '--tstack=131072', str(probe)]
@@ -84,18 +86,28 @@ for label, data in [('before', base), ('after', modified)] * 3:
                  'source_sha256': hashlib.sha256(data.encode()).hexdigest(), 'output': output})
     print(label, round(elapsed, 4), 'exit', p.returncode, flush=True)
     if p.returncode:
+        stop_reason = 'Lean invocation failed'
         break
+    if label == 'after':
+        pair_ratio = elapsed / rows[-2]['seconds']
+        pair_ratios.append(pair_ratio)
+        if pair_ratio > 1.1:
+            stop_reason = 'TIMING STOP: paired slowdown exceeds 10%'
+            print(stop_reason, 'ratio:', pair_ratio, flush=True)
+            break
 before = [r['seconds'] for r in rows if r['case'] == 'before']
 after = [r['seconds'] for r in rows if r['case'] == 'after']
 ratio = statistics.median(after) / statistics.median(before) if len(before) == len(after) == 3 else None
+if stop_reason is None and ratio is not None and ratio > 1.1:
+    stop_reason = 'TIMING STOP: median slowdown exceeds 10%'
 result = {'head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
           'tracked_status': subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=no'], cwd=root, text=True),
           'source': source_name, 'line': args.line[0] if len(args.line) == 1 else None,
           'lines': sorted(args.line), 'command': command, 'lean_version': version, 'lean_sha256': lean_sha256, 'cwd': str(root), 'LEAN_PATH': str(lean_path), 'LEAN_NUM_THREADS': '1',
           'generator_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
           'oleans_sha256': hashlib.sha256((out / 'oleans.json').read_bytes()).hexdigest(),
-          'rows': rows, 'median_ratio': ratio,
-          'status': 'pass' if ratio is not None and ratio <= 1.1 and all(r['exit'] == 0 for r in rows) else 'stop-or-fail'}
+          'rows': rows, 'pair_ratios': pair_ratios, 'stop_reason': stop_reason, 'median_ratio': ratio,
+          'status': 'pass' if stop_reason is None and ratio is not None and ratio <= 1.1 and all(r['exit'] == 0 for r in rows) else 'stop-or-fail'}
 (out / 'results-timed.json').write_text(json.dumps(result, indent=2) + '\n')
 print('median ratio:', ratio, 'status:', result['status'])
 if result['status'] != 'pass':
