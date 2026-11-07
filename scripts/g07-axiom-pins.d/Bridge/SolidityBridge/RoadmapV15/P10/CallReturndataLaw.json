@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean:SolidityBridge.RoadmapV15.P10.CallReturndataLaw.call_returnData": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean:SolidityBridge.RoadmapV15.P10.CallReturndataLaw.fetched_call_returnData": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
