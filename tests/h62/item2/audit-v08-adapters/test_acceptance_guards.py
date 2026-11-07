@@ -9,7 +9,7 @@ BASE='1506ee968e25a97aa63605301a651e33339a57c3'
 class Guards(unittest.TestCase):
  def test_all_original_predicates_retained(self):
   total=0
-  for name in ['accept_witnesses.py','accept_local_guard.py','h70_inventory.py']:
+  for name in ['accept_witnesses.py','accept_local_guard.py','h70_inventory.py','reconcile.py']:
    path='scripts/h62/item2/audit-v08-adapters/'+name
    before=ast.parse(subprocess.check_output(['git','-C',str(ROOT),'show',BASE+':'+path]).decode())
    after=ast.parse((ROOT/path).read_text())
@@ -17,7 +17,7 @@ class Guards(unittest.TestCase):
    new=sorted((n for n in ast.walk(after) if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id=='require'),key=lambda n:n.lineno)
    self.assertFalse(any(isinstance(n,ast.Assert) for n in ast.walk(after)))
    self.assertEqual([ast.dump(n.test) for n in old],[ast.dump(n.args[0]) for n in new]);total+=len(old)
-  self.assertEqual(total,44)
+  self.assertEqual(total,49)
  def test_captured_run_predicates(self):
   # This is fake metadata solely for exercising acceptance checks.
   with tempfile.TemporaryDirectory() as tmp:
@@ -67,5 +67,46 @@ class FrozenBaseline(unittest.TestCase):
    with self.assertRaises(SystemExit):c.verify_frozen(root,frozen,path)
    other='unapproved.lean';(root/other).write_text('unapproved')
    with self.assertRaises(SystemExit):c.verify_frozen(root,frozen,other)
+
+
+class Reconciliation(unittest.TestCase):
+ def fixture(self):
+  census={'summary':{'complete_interface_inventory':False},'declarations':[{'id':str(i),'name_candidate':'case'+str(i)} for i in range(15)]}
+  resource={'status':'RESOURCE_FAMILY_ONLY_PASS','witnesses':[{'census_id':str(i)} for i in range(11)]}
+  local={'status':'LOCAL_GUARD_ONLY_PASS','reviewed':[{'target':'case11'},{'target':'case12'}],'remaining_generated_candidates':[]}
+  return census,resource,local
+ def run_reconcile(self,inputs,optimized):
+  with tempfile.TemporaryDirectory() as temp:
+   folder=pathlib.Path(temp);args=[]
+   for label,data in zip(('census','resource','local'),inputs):
+    path=folder/(label+'.json');path.write_text(json.dumps(data));args+=['--'+label,str(path)]
+   out=folder/'output.json'
+   result=subprocess.run([sys.executable,*(['-O'] if optimized else []),str(SCRIPTS/'reconcile.py'),*args,'--out',str(out)],capture_output=True,text=True)
+   return result,json.loads(out.read_text()) if out.exists() else None
+ def test_valid_partial_accounting(self):
+  for optimized in (False,True):
+   result,output=self.run_reconcile(self.fixture(),optimized)
+   self.assertEqual(result.returncode,0,result.stderr)
+   self.assertEqual(output['accounted_source_theorems'],13)
+   self.assertEqual(output['remaining_lexical_ids'],['13','14'])
+   self.assertIs(output['complete_interface_inventory'],False)
+   self.assertEqual(output['global_SourceSpec_producer_witnesses'],0)
+ def test_refusals_survive_optimization(self):
+  # Synthetic metadata only; none of these objects is Lean proof evidence.
+  for optimized in (False,True):
+   for case in range(7):
+    c,r,l=self.fixture()
+    if case==0:c['summary']['complete_interface_inventory']=True
+    elif case==1:r['status']='UNVALIDATED'
+    elif case==2:l['status']='UNVALIDATED'
+    elif case==3:c['declarations'].append(dict(c['declarations'][0]))
+    elif case==4:l['reviewed'].append({'target':'case0'})
+    elif case==5:r['witnesses'].pop()
+    else:r['witnesses'][0]['census_id']='unknown'
+    with self.subTest(optimized=optimized,case=case):
+     result,output=self.run_reconcile((c,r,l),optimized)
+     self.assertNotEqual(result.returncode,0)
+     self.assertIsNone(output)
+     self.assertNotIn('PARTIAL_AUDIT:',result.stdout)
 
 unittest.main()
