@@ -749,3 +749,36 @@ P8 interface, ResourceContractLaw1, LibraryPremises and Source semantics; neithe
 found an inaccuracy or ran Lean. The initial documentation append and master
 merge omitted the writer lock; subsequent edits and commit checks used it.
 No concurrent writer was observed in status; unobserved activity is not ruled out.
+
+
+## Checkpoint 234: generated default-update fitting witness
+
+The existing populated array fixture supplies the sole logical base-fitting
+premise of TargetDefaultInit.updates_fit; the original law proves simultaneous
+fitting of every generated update. A nonempty-list control excludes an empty
+generated replacement. No new per-case fixture or production theorem is added.
+Four sequence laws already have witness rows, so additional trial applications
+were removed and none is counted again. The initial trial passed with an unused
+binder warning; its receipt remains historical, separate from the final source.
+
+All 54 guards pass at source head 83ca445d1aed1e9099d398193543abe4643e2561:
+3.04 seconds, peak aggregate RSS 723800064 bytes, no resource stop. Of three new
+guards, the base premise is axiom-free and the application and nonempty control
+use propext, Classical.choice and Quot.sound. Original guard expectations remain.
+The complete module has 10 axiom-free, 5 propext-only and 39 standard-three guards.
+
+The reference ledger adds exactly one frozen row: 69 mapped, comprising 57 joint
+bundles and 12 data inhabitants, with 3212 of 3281 conservative rows uncovered.
+Historical complete-validation and source receipts remain historical; only this
+module was freshly checked. Finder and skeptic independently reviewed the
+narrowed source without Lean or its server and found no remaining findings.
+This is symbolic-slot coverage, not actual Source or physical adequacy. H121
+producer implementation, original proofs/coverage and final gates remain open.
+
+Checkpoint-234 static trust reports 6628 sources, 289 inventoried sites and
+zero findings; registration reports 6612 reachable and no orphans or disallowed
+modules. Strict pins remain FAIL: 16678 pins, zero errors, 88 unrecorded and zero
+baselined changes. The three new entries match their measured guards; no shared
+inventory is rewritten. The bounded prerequisite records Lean 4.24.0 commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake 5.0.0-src+797c613 and a passing
+KeySort build. Prior full-build, strict-doc and timing failures remain retained.
