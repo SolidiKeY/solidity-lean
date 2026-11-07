@@ -108,4 +108,24 @@ async function buildKeybinding(client,{custom=false,input,directory}={}) {
   }
   return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':'ctrl+shift+b',prompt,scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
 }
-module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace};
+async function captureProofHelp(client,directory,metadata){
+ const inspect=()=>client.request('Runtime.evaluate',{expression:`(()=>{const editors=[...document.querySelectorAll('.monaco-editor[data-uri]')].filter(e=>e.getClientRects().length),active=editors.find(e=>e.closest('.editor-group-container.active')),input=[...document.querySelectorAll('.quick-input-widget input')].find(e=>e.getClientRects().length),items=[...document.querySelectorAll('.quick-input-list .monaco-list-row')].filter(e=>e.getClientRects().length).map(e=>({label:e.querySelector('.label-name')?.textContent??e.innerText.split('\\n')[0],text:e.innerText}));return {activeUri:active?.getAttribute('data-uri')??null,inputFocused:!!input&&input===document.activeElement,inputValue:input?.value??null,items};})()`,returnByValue:true});
+ let observed;
+ try{
+  if(metadata.action==='menu'){
+   const deadline=Date.now()+3000;
+   do{observed=(await inspect()).result.value;if(observed.inputFocused&&observed.items.some(row=>row.label===metadata.label))break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);
+   require('./proof-help.cjs').menuObservation(observed,metadata.binding,metadata.label);
+   writeFileSync(join(directory,'proof-help-rendered.json'),JSON.stringify(observed,null,2));const rendered=await capture(client,directory,true);
+   await client.request('Input.insertText',{text:metadata.label});
+   let filtered;do{filtered=(await inspect()).result.value;if(filtered.inputFocused&&filtered.items.length===1&&filtered.items[0].label===metadata.label)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);
+   if(!filtered?.inputFocused||filtered.items.length!==1||filtered.items[0].label!==metadata.label)throw Error('Native proof-help picker did not select exactly the requested action');
+   for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+   return {...rendered,proofHelp:observed,selection:{label:metadata.label,filtered}};
+  }
+  if(metadata.action!=='document'||!metadata.destination?.uri)throw Error('Missing proof documentation destination');
+  const deadline=Date.now()+3000;do{observed=(await inspect()).result.value;if(observed.activeUri===metadata.destination.uri)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);
+  if(observed.activeUri!==metadata.destination.uri)throw Error('Native documentation editor URI mismatch');writeFileSync(join(directory,'proof-help-rendered.json'),JSON.stringify(observed,null,2));return {...await capture(client,directory,true),proofHelp:observed};
+ }catch(error){try{writeFileSync(join(directory,'proof-help-attempt.json'),JSON.stringify(observed??null));await capture(client,directory,true);}catch{}throw error;}
+}
+module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp};

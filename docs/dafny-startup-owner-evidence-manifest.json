@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "ticket": "H70 native-browser startup STOP",
+  "ticketHead": "3efa0a3832de30e514ca9d2fd286f129c0ca9984",
+  "status": "partial",
+  "archive": {
+    "path": "/workspace/dafny-parity-h70-20261106/startup-inspection.tar.gz",
+    "bytes": 34895,
+    "sha256": "7b0887e65abc7703af68778d509ca6b3131be55c603ebb7261e34182cdd43974"
+  },
+  "inspection": "INSPECTION.json",
+  "boundary": "Read-only source timing-boundary investigation; raw benchmark bundle unavailable. No stopped benchmark rerun, integration, causal attribution or shared-runtime/semantic edit."
+}
