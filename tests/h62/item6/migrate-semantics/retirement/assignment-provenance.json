@@ -1,7 +1,0 @@
-{
-  "source": "Complete original visible user assignment copied from this original thread; no assignment file was found locally.",
-  "visible_assignment_sha256": "16c9c7ed4a36bf941b1ae4ce837e3bdeef6e056dfcb08aae88a1477e577b25b8",
-  "rendered_prompt_identifier_sha256": "72e9a384dc6f07a3135790fb6a57943b62afd9631b0dd181dbb0d16094e4ead3",
-  "byte_identity_to_rendered_identifier_verified": false,
-  "limitation": "Rendered wrapper bytes are not exposed; the recorded identifier is not represented as the hash of this recovered visible user turn. All visible original assignment, scope, queues and owner map are preserved without abridgement."
-}

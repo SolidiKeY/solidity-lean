@@ -1,6 +1,0 @@
-da0f8a56c5f544b5a43bdaccfc1578fb4119671302928f7058d09d84d475115f  scripts/h28-terra/drift-reports/item3.py
-8a45e10c604bf1d7b4801b81bbe6d6c9da7a04787166332376e745886b4c1264  tests/h28-terra/drift-reports/evidence/item3-accept-output.json
-35e2653404e4248b88aef10b6ceb4152453f2be28ecb287a3aca0fba858d5d80  tests/h28-terra/drift-reports/evidence/item3-accept-time.txt
-ac35d3e85031e5c9fd86e6c04e02c175079a1b6d577d16bda9b358498a780aba  tests/h28-terra/drift-reports/evidence/item3-manifest.json
-c1a8236e72884a9fbfd65cc7e63b32f29431234f4470a714a0fa23fa816e97ea  tests/h28-terra/drift-reports/evidence/item3-retained.json
-92ef21abb60cf9791b02786ab52c014737425ddd7b759f7497aaabd8450d25d9  tests/h28-terra/drift-reports/evidence/item3-routing.json

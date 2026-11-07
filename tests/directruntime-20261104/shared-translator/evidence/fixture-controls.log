@@ -1,3 +1,0 @@
-PASS lean:tests/directruntime-20261104/shared-translator/FixtureControls.lean 5s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/fixture-controls/1.log
-{"childMaxRssKiB": 574764, "command": ["env", "GATE_LOGS=tests/directruntime-20261104/shared-translator/evidence/fixture-controls", "bash", "scripts/coord-tools/gate.sh", "per-file", "tests/directruntime-20261104/shared-translator/FixtureControls.lean"], "exit": 0, "scopeMemoryPeakBytes": "141332480", "wallSeconds": 4.9839889580000545}
-{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 16276205568, "outerWallSeconds": 19.811956603}
