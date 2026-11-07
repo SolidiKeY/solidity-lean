@@ -180,15 +180,15 @@ theorem copy_timeout :
 
 Two adapters added to the prior sixteen: eighteen remain pending.
 
-## C171: nested allocating-capture wrapper
+## C171: nested allocating-capture wrapper — completed
 
 Module: `Solidity.Lowering.StorageOps.SourceNestedByteCapture`.
 Lemma: `copy_timeout_prefix`.
 Why routine: unfold actual storRef/loadMem outer capture, use OLD outer header,
 then apply checked `timeout_prefix` at start0. The existing producer proves the
 allocation prefix; do not assume full-state preservation or erase its heap.
-No destination or writable-frame premise is required. Proposition type only;
-no theorem/stub registered.
+No destination or writable-frame premise is required. The exact statement below
+is now compiled and consumed by the existing storage-observation control.
 
 ```lean
 theorem copy_timeout_prefix :
@@ -202,7 +202,8 @@ theorem copy_timeout_prefix :
  (.error .timeout,(locals,Nat.repeatTR Solidity.Lowering.StorageOps.SourceNestedByteCapture.captureStep count state))
 ```
 
-One adapter added to the prior eighteen: nineteen remain pending.
+This checkpoint originally brought the recorded subtotal to nineteen. C171 is
+now compiled; other adapters retain their individual recorded status.
 
 ## C172: nonempty nested capture outer wrapper
 

@@ -189,10 +189,12 @@ Populated actual storage-reference array copies distinguish storage/journal
 preservation from changed heap on timeout and static refusal. Ordered outcomes,
 heap contents, source shadows, old objects, success journals and self-copy are
 pinned. This is a concrete limit on generalizing primitive byte full-state
-preservation; no automatic heap/world rollback follows. The routine outer-copy
-wrapper is a type-checked proposition only in TERRA-TODO; nineteen adapters
-remain pending. General nested shapes, physical allocation/failure and compiler
-composition remain open.
+preservation; no automatic heap/world rollback follows. The compiled
+`copy_timeout_prefix` wrapper now gives the exact outer-copy failure state and
+is consumed by the existing storage-observation control. This closes only C171
+in TERRA-TODO. Lane-history finder and skeptic reviews found no preservation
+issue in this adapter. General nested shapes, physical allocation/failure and
+compiler composition remain open.
 
 ## Nonempty nested capture payloads
 
