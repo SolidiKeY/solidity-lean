@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Conservative text guard for the six assignment twin files; not a Lean parser."""
+from collections import Counter
 import pathlib
 import re
 import subprocess
@@ -57,12 +58,16 @@ def inventory(text):
 COMMAND = re.compile(r"^\s*(?:import|open|namespace|section|end|include|omit|axiom|opaque|constant|set_option|attribute|export|local|universe|universes|variable|variables|notation|infix|infixl|infixr|syntax|macro|instance|class|inductive|structure)\b[^\n]*|^\s*#[^\n]*", re.MULTILINE)
 
 
+# Raw textual indicators are intentionally conservative, including comments/strings.
+TRUST = re.compile(r"\b(?:sorry|sorryAx|admit|native_decide|ofReduceBool|unsafe|run_tac|axiom)\b")
+
+
 def frozen_view(text):
     # Conservative extra check for common commands outside our declaration grammar.
     declarations = list(DECL.finditer(text))
     commands = [(sum(d.start() < c.start() for d in declarations), c.group())
                 for c in COMMAND.finditer(text)]
-    return inventory(text), commands
+    return inventory(text), commands, Counter(TRUST.findall(text))
 
 
 def paths():
@@ -82,7 +87,7 @@ def main():
             failed = True
         else:
             print(f"UNCHANGED: {path} ({len(before[0])} declarations)")
-    print("Text heuristic only: Lean elaboration, arbitrary commands, attributes, axioms and semantics require separate checks.")
+    print("Text heuristic only: trust indicators include comments/strings and cannot establish Lean types, axiom sets or semantics.")
     return int(failed)
 
 
