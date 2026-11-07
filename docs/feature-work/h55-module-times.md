@@ -2124,3 +2124,21 @@ checked roles, driver mapping, hashes and history preservation without Lean or a
 server. Evidence hashes are in
 `tests/h55/module-times/roadmap-migration-evidence.sha256`. This non-atomic
 static observation does not establish runtime acceptance.
+
+## Tools migration fixture observations
+
+`tools_migration_controls.py` records four previously unreferenced Tools
+migration fixtures with source hashes and the migration feature document hash.
+They distinguish isolated elaborator metaprogram execution, checked-environment
+inventory, new String candidates and copied old String reference fixtures.
+The new candidate character-list specifications do not establish universal
+old-version or original-function equivalence. Current driver, exact inputs,
+effects and outcomes remain unresolved; this is supplied-subset evidence.
+
+At `f8d40c0ac07190893241f41af56f3e9219b6a560`, the refreshed static index
+has 766 candidates, 535 with supplied current references and 231 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/tools-migration-evidence.sha256`.
+This non-atomic static observation does not establish runtime acceptance.
