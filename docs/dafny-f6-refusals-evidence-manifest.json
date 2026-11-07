@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "obligation": "keybindings:dafny.buildCustomArgs",
+  "sourceHead": "262f8bf8e1e13fb296914d23ee538e1dbf5d1a68",
+  "fileCount": 173,
+  "uncompressedBytes": 13878439,
+  "boundaries": [
+    "Prior actual F6 evidence preserved ataba7ac5a; new native Linux F6 paired run at262f8bf8e exits0 for its scoped scenarios.",
+    "Local real F6 cancellation, exact malformed JSON/unsupported option refusal, then supported import build: current source/session and source/dependency/output artifact hashes bound.",
+    "Rejected cases have one pre-admission failure and unchanged output snapshots; actual input/Enter/disappearance DOM/AX/PNG and dispatch records retained.",
+    "Paired upstream retains original build/default args without added no-verify. Grammar, trust/file scope and executable-versus-AST semantics differ. Native macOS, full lifecycle/negative matrix and both row judgments remain missing.",
+    "Owned cleanup remaining[] both targets; one observed birth-owned upstream dotnet survivor retired. No solver/kernel retention or full parity claim."
+  ],
+  "archive": {
+    "path": "/workspace/dafny-f6-refusals-evidence-20261107/bulk.tar.gz",
+    "bytes": 2704266,
+    "sha256": "16f97c2769015e885c9dd50a497c85ad2535712ceb3111010113e6172d9b3b90"
+  },
+  "index": {
+    "path": "/workspace/dafny-f6-refusals-evidence-20261107/files.json",
+    "bytes": 39641,
+    "sha256": "e8cfe185ee13f9601081997a96bfec0a6d6e5a8d6aed714ad0244828e3ac8a69"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-f6-refusals-evidence-manifest.json --restore"
+}
