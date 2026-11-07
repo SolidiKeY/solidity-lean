@@ -1114,15 +1114,18 @@ only. No handwritten resolved program, empty model or rewritten caller body
 is used. These results are syntax/resolution, not compiler rerun, source-byte
 binding, typed SrcProg, actual origin/admission/session/lifecycle adequacy.
 
-REQUIRED full elaboration acceptance FAILS for BOTH fixtures: L.integer and
+The manual full-unit elaboration probe FAILS for BOTH fixtures: L.integer and
 L.stru elabBody succeed, but C.f and C.g fail and elaborate.isSome is false.
 Source/Infer.lean:672-713 currently handles only contract-receiver try with a
 plain catch or unnamed bytes-memory catch. It has no preserved library-call /
 Error(string memory) case. Protected H16 Source remains unchanged. Question
 V10-C246-SOURCE-TRY was sent via coord-ask, ref20261107T082812Z, requesting
 H16-owned extension/approved producer or explicit hold, preserving all frozen
-interfaces and H57 obligations. The full acceptance probe remains checked in
-and failing; it is not replaced by the passing resolution-only check. Shared
+interfaces and H57 obligations. SourceAstUnitControls.lean is a manual diagnostic probe: no automated CI,
+default, affected-module or final gate invokes it. Its recorded failure is from
+explicit manual runs, not a failing automated gate or a passing expected-failure
+test. The required whole-unit acceptance obligation remains open. The probe is
+not replaced by the passing resolution-only check. Shared
 fixtureInputs/inspect prevent case copies. Original first probe and all failure
 logs remain retained. Missing cached objects for the shared test import were
 materialized using the repository restorer; this was not a Source repair.
@@ -1164,9 +1167,25 @@ Unused simp arguments found by the linter were removed without disabling it.
 
 Independent read-only finder and skeptic found no findings and confirmed the
 limited correspondence scope without using Lean/server/build. Required actual
-Source whole-unit elaboration remains failed as recorded at C246; this syntax
+Source whole-unit elaboration remains open; the manual C246 probe fails; this syntax
 correspondence is not its substitute. H16 V10-C246-SOURCE-TRY support, general
 mapping-bearing H24 disposition, Y04 physical and separate4.35 trust/timing
 waits remain distinct. Local child-reader correspondence, accepted-artifact /
 Source-byte binding, original and consolidated proof/backfill/coverage and all
 full final gates remain open. No prior STOP or producer hold is released.
+
+
+### C248 — published baseline and manual-probe coverage clarification
+
+Adopted origin/master f5bfb9ba159d3ba2930d61dc07a2e0bbd5b07eb8 in the existing
+branch. SourceAstUnitControls.lean is explicitly a MANUAL diagnostic probe,
+excluded from automated gates. The recorded C246 failure therefore supplies
+manual evidence of the actual caller elaboration gap, not automated gate
+coverage. It raises when either whole-unit elaboration fails; this has not been
+converted to a passing expected-failure test. Whole-unit acceptance remains
+required and open. This checkpoint changes documentation/docstring only;
+no Lean code, acceptance condition, Source implementation or producer hold
+changed, and no Lean/build/timing result is claimed from it.
+
+Read-only finder and skeptic reviewed this clarification and found no findings;
+neither used Lean/server/build. Import and executable-suffix byte checks pass.
