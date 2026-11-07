@@ -1209,3 +1209,72 @@ no generated Lean declarations or proof budgets changed. Generator --check PASS.
 Final narrow finder/skeptic reviews confirm generator scheduling-header repair
 changes no numerical generation, declaration or proof, and no unbuilt checkpoint
 Lean module remains in the library. Draft text is explicitly not validated.
+
+
+### H121d independent premise and exact gas/layout accounting
+
+At input9229b4c7db79640293d693e86e229888f828d10b fetched origin/master
+65e69b6426a9a4fc3fb5541f41726a4bfefda5d0; it is already an ancestor.
+No duplicated producer implementation, new language premise, theorem alteration
+or frozen V1 edit. Coordinator confirms handoff/checksum retrieval, but no cache
+pull, full gate or registration integration receipt.
+
+Current Source owner is H125 solidity-inline-assembly5-20261031/vy1-words;
+previous VY5 ownership requests above are historical. H121b aggregate lifecycle
+remains V10. V14/V15 review requests are staged for coordinator forwarding, not
+reported as delivered. Native-browser slow-library request was relayed.
+
+The premise-audit inventory records30 distinct accounting items (not the30
+feature rows), source-pinned to7 interface/implementation files. Every item
+retains status open-production-linkage. approved-family labels identify only
+permitted crypto/chain premise families; they do not approve arbitrary Fixed
+functions, Allowed/Admissible/Forward/Guard predicates or producer instances.
+The four entries cover per-run source hash non-collision, bounded hashed-region
+non-overlap, specified crypto functions and quantified chain inputs. No global
+hash injectivity, no arbitrary gas oracle and no additional language restriction
+is authorized.
+
+Exact gas accounting findings: V1 D2 states code-size failures and a live
+attempt, not an operational Osaka schedule. allButOne64 exists but does not
+prove actual CALL accounting. StipendRule.Fitted is an obligation to prove,
+not an extra assumed public premise. Memory expansion, warm/cold access,
+precompile costs, refunds and resource failures still need target operational
+linkage; query agreement alone does not prove cost correctness. D6 preserves
+the permitted gas quotient but proves no improvement. Legacy pinned disables
+four Osaka limits; D2 explicitly supersedes the two code-size idealizations.
+Transaction/block gas-limit differences need existing chain-premise/producer
+accounting; this audit authorizes no waiver or changed decision.
+
+Exact layout accounting: intrinsic ByteMemory and reserved-range constants
+exist, but constants alone enforce no solc state initialization/update discipline.
+Generic Layout disjointness is not solc packing/layout-at agreement; generic
+D3 correspondence is not a word-machine/byte-memory refinement. Reachable-state
+representability, actual storage/transient accesses and transaction lifetime
+remain producer obligations. Unsafe writeback must cover all actual exits and
+prove MemOK recovery rather than assume MemOK there; generic executes/isUnsafe
+predicates and toy live witnesses are not operational adequacy.
+
+Predicate accounting: legacy SourceSpec records allowed_iff, forward_iff and
+guard_iff obligations. Concrete Source.sourceLang documents uninstantiated
+failures/hash/stipend with trivial resource/Forward/Guard defaults. Neither
+this source alone nor the abstract V1 bundle establishes production D1-D6.
+Legality/coverage bind specified runs structurally, but actual independent
+Specified/Aligned predicates still need owner review. admitsSome does not prove
+a live eligible guarded Forward success for arbitrary instances.
+
+Check.py verifies exact30unique IDs, reviewed dispositions, four permitted-family
+entries, open status, source digests, exact anchor occurrences/lines and current
+Source/lifecycle owners. It rejects9corruptions: missing/duplicate entry, gas-as-approved-
+premise, unproved completion, source digest drift, line drift, invented anchor
+stale Source owner and stale lifecycle owner. Both normal and Python-O checks pass; no assert-based
+validation is stripped. This is reproducible interface accounting, not a semantic
+proof of the prose, axiom-closure audit, compiler/EVM test or new admission claim.
+No Lean source/import changed and no heavy build was run for this increment.
+Frozen V1 and production gate obligations remain unchanged.
+
+Separate finder/skeptic reviews independently confirmed7source hashes and30
+anchors and found no substantive accounting or new-premise defect. Both were
+read-only without Lean/server/builds; skeptic ran the lightweight checker.
+Their checker findings are fixed: source-pin counts are computed, lifecycleV10
+is validated, and a ninth stale-lifecycle-owner mutation is rejected. Prose
+truth remains a reviewed conclusion, not something hashes alone prove.

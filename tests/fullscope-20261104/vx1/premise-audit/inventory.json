@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 1,
+  "inputHead": "9229b4c7db79640293d693e86e229888f828d10b",
+  "scope": "Read-only interface accounting. No producer proof, approval receipt or frozen V1 change implied. approved-family classifies authorized families, not any concrete instance.",
+  "sourceSha256": {
+    "Solidity/Hash/CollisionBound.lean": "131045ccc4973e8ba40f25a92cbb45b97ffd9776a3a2df4d4487a83601179923",
+    "Solidity/Roadmap/Evm.lean": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50",
+    "Solidity/Language/EnvironmentFields/Contracts.lean": "19b92c0b67abbc3196126b2060b88a27971ac010e841965cb3c41180f7967205",
+    "Solidity/Roadmap/Contracts.lean": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79",
+    "Solidity/Source/Semantics.lean": "b22b8708cb8241b814c01f5eaae9143bd0a9dcd64bcfc5e38eb9ef407bf4d352",
+    "Solidity/Language/EnvironmentFields/Frozen.lean": "a6e48553306dc0d3601a2782a3b31130e7ffe090d93dfbc2950d0e84502676c7",
+    "Solidity/Evm/Machine.lean": "5b9ec1172302b00d76a01a8fa329615b63b6103bac9be6db45f7168ed4896686"
+  },
+  "items": [
+    {
+      "id": "P01",
+      "area": "crypto",
+      "disposition": "approved-family",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Hash/CollisionBound.lean",
+        "line": 59,
+        "anchor": "def CollisionFree",
+        "occurrence": 0
+      },
+      "accounting": "Per-run source-observed non-collision is permitted; global injectivity is forbidden. Production transcript and Guard linkage remains open."
+    },
+    {
+      "id": "P02",
+      "area": "crypto",
+      "disposition": "approved-family",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Evm.lean",
+        "line": 196,
+        "anchor": "def Fixed.NoOverlap",
+        "occurrence": 0
+      },
+      "accounting": "Approved per-run hashed-region non-overlap is bounded/source-determined, never universal injectivity or separation of all slots."
+    },
+    {
+      "id": "P03",
+      "area": "crypto",
+      "disposition": "approved-family",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Evm.lean",
+        "line": 169,
+        "anchor": "structure Fixed where",
+        "occurrence": 0
+      },
+      "accounting": "Approval covers specified crypto functions, not arbitrary Fixed.precompile implementations or gas functions. Concrete specification linkage remains required."
+    },
+    {
+      "id": "P04",
+      "area": "chain",
+      "disposition": "approved-family",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Contracts.lean",
+        "line": 427,
+        "anchor": "structure Certificate",
+        "occurrence": 0
+      },
+      "accounting": "Chain inputs remain universally quantified. Abstract Allowed is not evidence that actual producer restrictions are approved; audit concrete predicates and both environment directions."
+    },
+    {
+      "id": "P05",
+      "area": "predicate",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Contracts.lean",
+        "line": 697,
+        "anchor": "allowed_iff :",
+        "occurrence": 0
+      },
+      "accounting": "SourceSpec allowed_iff (first occurrence) links SessionEnv.Allowed zero-address/precompile-code/codeless-success semantics; production chain/world identification must be proved, not freely assumed."
+    },
+    {
+      "id": "P06",
+      "area": "predicate",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Contracts.lean",
+        "line": 720,
+        "anchor": "forward_iff :",
+        "occurrence": 0
+      },
+      "accounting": "Prove original Forward resource-failure characterization. Do not use a new public premise to filter source behavior or narrow the language."
+    },
+    {
+      "id": "P07",
+      "area": "predicate",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Contracts.lean",
+        "line": 722,
+        "anchor": "guard_iff :",
+        "occurrence": 0
+      },
+      "accounting": "Prove Guard equals independently source-determined HashPremise; this is not permission to introduce unrelated assumptions."
+    },
+    {
+      "id": "P08",
+      "area": "predicate",
+      "disposition": "not-instantiated",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Source/Semantics.lean",
+        "line": 427,
+        "anchor": "def sourceLang",
+        "occurrence": 0
+      },
+      "accounting": "Concrete sourceLang documents trivial Admissible/Forward/Guard defaults and uninstantiated failures/hash/stipend. It is not a production D1-D6 certificate."
+    },
+    {
+      "id": "P09",
+      "area": "coverage",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Contracts.lean",
+        "line": 442,
+        "anchor": "legality :",
+        "occurrence": 0
+      },
+      "accounting": "Legality and unconditional source/target coverage structurally retain specified runs; independent Legal/Specified/Aligned definitions still need producer review."
+    },
+    {
+      "id": "P10",
+      "area": "coverage",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 290,
+        "anchor": "admitsSome :",
+        "occurrence": 0
+      },
+      "accounting": "Admitted input alone does not establish a live Allowed/Admissible/Forward/Guard run. Toy witnesses do not establish arbitrary producer non-vacuity."
+    },
+    {
+      "id": "G01",
+      "area": "gas",
+      "disposition": "superseded-idealization",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Evm.lean",
+        "line": 92,
+        "anchor": "def pinned :",
+        "occurrence": 0
+      },
+      "accounting": "Legacy pinned disables runtimeCodeLimit/initcodeLimit/txGasCap/blockGasLimited. D2 explicitly supersedes the two code-size idealizations. The transaction/block gas-limit differences still require existing chain-premise and producer accounting; this audit authorizes no waiver or changed decision."
+    },
+    {
+      "id": "G02",
+      "area": "gas",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 107,
+        "anchor": "structure D2",
+        "occurrence": 0
+      },
+      "accounting": "V1 D2 gives creation-size failure shape and a live attempt; it does not state an exact operational gas schedule."
+    },
+    {
+      "id": "G03",
+      "area": "gas",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Evm.lean",
+        "line": 102,
+        "anchor": "def allButOne64",
+        "occurrence": 0
+      },
+      "accounting": "EIP150 arithmetic exists. Actual forwarding, memory/access charges and stipend/resource correspondence require operational proofs."
+    },
+    {
+      "id": "G04",
+      "area": "gas",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Evm.lean",
+        "line": 339,
+        "anchor": "def StipendRule.Fitted",
+        "occurrence": 0
+      },
+      "accounting": "Fitted is a compiler obligation, never an unproved additional public premise or authority to exclude bodies. Derive it from exact charged execution where used."
+    },
+    {
+      "id": "G05",
+      "area": "gas",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Contracts.lean",
+        "line": 427,
+        "anchor": "structure Certificate",
+        "occurrence": 0
+      },
+      "accounting": "Exact memory-expansion charging must be linked to target execution/oracle reads; generic Certificate supplies no Osaka cost proof."
+    },
+    {
+      "id": "G06",
+      "area": "gas",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Roadmap/Evm.lean",
+        "line": 173,
+        "anchor": "precompileGas :",
+        "occurrence": 0
+      },
+      "accounting": "Crypto-function approval does not approve arbitrary gas. Prove pinned precompile costs and warm/cold access accounting operationally."
+    },
+    {
+      "id": "G07",
+      "area": "gas",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 44,
+        "anchor": "abbrev D1",
+        "occurrence": 0
+      },
+      "accounting": "Refunds and exact resource-sensitive success/failure require producer proofs; gas oracle agreement alone establishes neither."
+    },
+    {
+      "id": "G08",
+      "area": "gas",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 64,
+        "anchor": "theorem D1.forward_oracle",
+        "occurrence": 0
+      },
+      "accounting": "Executed-query equality reads the assigned actual target run. Unexecuted queries remain unconstrained; no exact charging theorem follows."
+    },
+    {
+      "id": "G09",
+      "area": "gas",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 227,
+        "anchor": "abbrev D6",
+        "occurrence": 0
+      },
+      "accounting": "Only permitted gas values are quotiented; nongas order and outcomes stay exact. Gas improvement is a separate cost/benchmark obligation."
+    },
+    {
+      "id": "G10",
+      "area": "gas",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 281,
+        "anchor": "structure Contract",
+        "occurrence": 0
+      },
+      "accounting": "Bind D2 attempt to actual compiled-artifact target execution, not an unrelated creation toy."
+    },
+    {
+      "id": "L01",
+      "area": "layout",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Contracts.lean",
+        "line": 18,
+        "anchor": "structure ByteMemory",
+        "occurrence": 0
+      },
+      "accounting": "Bounds/alignment/zero-outside-extent are intrinsic; they do not prove refinement from the existing word-cell machine."
+    },
+    {
+      "id": "L02",
+      "area": "layout",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Evm/Machine.lean",
+        "line": 4,
+        "anchor": "# An EVM-style stack machine",
+        "occurrence": 0
+      },
+      "accounting": "Existing word-machine proofs are not byte-memory refinement proofs. Require an adapter without changing those statements."
+    },
+    {
+      "id": "L03",
+      "area": "layout",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Contracts.lean",
+        "line": 26,
+        "anchor": "def scratchEnd",
+        "occurrence": 0
+      },
+      "accounting": "Constants scratchEnd0x40/freePointer0x40/zeroSlot0x60/allocationStart0x80 exist but enforce no actual initialization/update convention."
+    },
+    {
+      "id": "L04",
+      "area": "layout",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 131,
+        "anchor": "structure Layout",
+        "occurrence": 0
+      },
+      "accounting": "Disjoint packed fields and fieldRead do not establish solc packing/layout-at agreement for actual resolved declarations."
+    },
+    {
+      "id": "L05",
+      "area": "layout",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 148,
+        "anchor": "structure Physical",
+        "occurrence": 0
+      },
+      "accounting": "Link storage/transient physical layouts, including layout-at, to resolved declarations and compiled accesses, not arbitrary state types."
+    },
+    {
+      "id": "L06",
+      "area": "layout",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 172,
+        "anchor": "structure D3",
+        "occurrence": 0
+      },
+      "accounting": "D3 totality covers Representable states only. Prove reachable-state representability and operational correspondence; do not convert it into a language exclusion."
+    },
+    {
+      "id": "L07",
+      "area": "layout",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Contracts.lean",
+        "line": 40,
+        "anchor": "inductive SlotSpace",
+        "occurrence": 0
+      },
+      "accounting": "Separate namespaces do not establish transient transaction lifetime, cleanup or compiled access semantics."
+    },
+    {
+      "id": "L08",
+      "area": "assembly",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 195,
+        "anchor": "structure D4",
+        "occurrence": 0
+      },
+      "accounting": "Writeback covers declared executes exits; tie executes and Corresponds to actual source/target execution without hiding exits."
+    },
+    {
+      "id": "L09",
+      "area": "assembly",
+      "disposition": "proof-obligation",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Contracts.lean",
+        "line": 118,
+        "anchor": "structure UnsafeWriteback",
+        "occurrence": 0
+      },
+      "accounting": "MemOK is not assumed at an unsafe exit; recovery is a writeback proof obligation, preserving all executions and observations."
+    },
+    {
+      "id": "L10",
+      "area": "assembly",
+      "disposition": "generic-interface",
+      "status": "open-production-linkage",
+      "evidence": {
+        "path": "Solidity/Language/EnvironmentFields/Frozen.lean",
+        "line": 197,
+        "anchor": "opaqueBlocks :",
+        "occurrence": 0
+      },
+      "accounting": "Generic opacity needs actual unsafe-block classification; it does not itself establish optimizer production adequacy."
+    }
+  ],
+  "owners": {
+    "source": "solidity-inline-assembly5-20261031/vy1-words (H125)",
+    "aggregateLifecycle": "V10 (H121b)",
+    "evmResource": [
+      "solidity-v12-v17-20261031/v14-payments-bytecode",
+      "solidity-v12-v17-20261031/v15-evm-agreement"
+    ]
+  }
+}
