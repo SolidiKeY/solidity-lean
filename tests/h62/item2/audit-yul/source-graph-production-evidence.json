@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "purpose": "H126 isolated Source graph endpoint extraction; external measurements and checks",
+  "directory": "/workspace/vy2-evidence/source-graph-production",
+  "total_bytes": 75667,
+  "files": [
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/Axioms.lean",
+      "bytes": 313,
+      "sha256": "15b1d2a05485770aae966fe4f2055859b4e3142ea477162f2bd74159c9e79ff0"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/ImportBridge.lean",
+      "bytes": 47,
+      "sha256": "958c44a1747d3bd11a0bcc5d52d62e128095276f1552c23dcee9f508a52dbf70"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/ImportLayout.lean",
+      "bytes": 46,
+      "sha256": "b20b3cabde039aa010c65196ed111ab31800306e59435c15860bd440cbbd2367"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/after-audit.json",
+      "bytes": 183,
+      "sha256": "9ee4ac40179b3cf486af5347dc1c0c4b1703707c2e56c3f192939802b8d0ce09"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/after-audit.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/after-layout.json",
+      "bytes": 174,
+      "sha256": "2e56b95543562dc8f03b254df6bfb9fa5423060d6c040e7b2938a07c96b564c2"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/after-layout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/axioms.json",
+      "bytes": 186,
+      "sha256": "44cef68421d19f4b6f752d81ec4b7f5c61aac64147ac611cdacc81f3e373133e"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/axioms.log",
+      "bytes": 456,
+      "sha256": "b6a6c31fbd9045ad7e068cad97ff2ca3ae3ee94ad32e0b8d4e8de4c73658cf1f"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/before-audit.json",
+      "bytes": 184,
+      "sha256": "c745c3b614f92eb8977e3cbe6989465a40edd35e07a68d25f4ceff124419cbdd"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/before-audit.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/before-layout.json",
+      "bytes": 176,
+      "sha256": "f7ec786c3361d9b4d95451f55a3a4705d78ccbb9e496771b87962a1d714125ca"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/before-layout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-bridge-1.json",
+      "bytes": 201,
+      "sha256": "510bcad134a12332e501e1393d3bfdf4d9f11e339302f5dff11d37801188f61c"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-bridge-1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-bridge-2.json",
+      "bytes": 201,
+      "sha256": "c2eb576991b7192878e5900e08e4904cbd21b99cbeee7f472007016ef8a2ea54"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-bridge-2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-bridge-3.json",
+      "bytes": 187,
+      "sha256": "a3ee839a7cde6b72e030a698e5b4d0bb44089a1b4df95bed5aef0c07da3fb7b2"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-bridge-3.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-layout-1.json",
+      "bytes": 200,
+      "sha256": "aaad2ff13492e983cc4765f834cbb4533ed262f160755bd16e741a8ed54d983a"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-layout-1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-layout-2.json",
+      "bytes": 199,
+      "sha256": "fb2aa00736fb602b1c4bba84d7512ef1223969ff395caa86903b8ee831726270"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-layout-2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-layout-3.json",
+      "bytes": 200,
+      "sha256": "859dc25b6be2e2585676112a08fd7e43eaaa591a5fa073291cd3722deaf00de9"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/import-layout-3.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/keysort.json",
+      "bytes": 147,
+      "sha256": "33f93040dec0fcfd76c4df247c512050b389cadce351a3695812240f6bf78b2a"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/keysort.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/layout-1.json",
+      "bytes": 171,
+      "sha256": "9623f7d6e9b81947a73347dd956a0f5252e0fdc51c5f34be70c45223d303ece2"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/layout-1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/layout-2.json",
+      "bytes": 171,
+      "sha256": "2e7303708fa3d41ca2f5b26ecd999bbc4dbde60708480f73dd6f39c6c8dbd8cf"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/layout-2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/layout-3.json",
+      "bytes": 171,
+      "sha256": "efe285f5668e93c7b6b83a3a0c6a8181ae797ae074916ab72ac39fc40db88c31"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/layout-3.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/measure.pl",
+      "bytes": 1519,
+      "sha256": "13c8f2978b7122e6269368d2a0120abbd5281968859dff87e8a3ef2e55a3b887"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/preservation.json",
+      "bytes": 139,
+      "sha256": "e47aecd9c14a4938c04222291d13d29f41d9821d447df5ca31d1272f3436d400"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/production.json",
+      "bytes": 175,
+      "sha256": "ed0ba561fd08efd5e61e2d6a7096d2882b845994d976e852e2ad0619d296ae0c"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/production.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/reviews.json",
+      "bytes": 188,
+      "sha256": "753187f833b7251e1343fe613009d5f7bdb6a39eca685af5e28394b72d3c58da"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/source-hashes.json",
+      "bytes": 487,
+      "sha256": "4e2b14c147b7d49a046e80f364702ad6617675ed1eee4def0e22d9667862ba80"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/static-0.log",
+      "bytes": 167,
+      "sha256": "cfcaa6ce9d46c00b64965674168601213f0a9fc5e672e35c92835d01247f1297"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/static-1.log",
+      "bytes": 79,
+      "sha256": "b201ce8da825f2745d4e9fcfcabf1703911dd2c9de7c97c9165c3782c3e5f591"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/static-2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/static-3.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/static-4.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/static-5.log",
+      "bytes": 53396,
+      "sha256": "b6f1bb19d833d8740b2f624464c8dad52438ecb2ce2b27373aa8bea1b96c52c8"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/static-6.log",
+      "bytes": 14480,
+      "sha256": "b7e959e0e30cc8cccceeabb26db481b26ef8ff1192c6079884a31954d924ef07"
+    },
+    {
+      "path": "/workspace/vy2-evidence/source-graph-production/static-gates.json",
+      "bytes": 1424,
+      "sha256": "0ee3775e14ef202c8d39f8a88ad3c8d81afd5e59e2f9ebf84d2043ab6b1ffe93"
+    }
+  ],
+  "artifact_location_policy": "H44 external VM artifacts, intentionally outside Git. Absolute paths identify the originating VM, not repository files. Retrieve and verify listed bytes and SHA256 before reuse; absence is an evidence wait."
+}

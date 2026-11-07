@@ -889,3 +889,18 @@ those deliverables, not their provider; the generic V17 binding wait above is
 superseded. These are owned unfinished work. No complete producing files/head
 are available; conditional G49 framework and input exports do not satisfy them.
 This dependency notice changes no scope, paused-goal state or acceptance gate.
+
+
+H121c authorized adoption: full p10_execution_bridge is now owned by this lane;
+the frozen Claude V15 is no longer its provider. Master1ab348cf7 and exact V15
+implementation90153461127d8d0f1f188021e79bc1ccb256e1e5 were merged, preserving the
+clean prior head070e511a2 and all original task commits. No general paused-queue
+resume or goal mutation occurred. External inputs remain VY1 assembly sessions,
+VY4 unified events/world coupling, VY2 physical refinement, VY3 concrete pass
+certificates, V13 actual callee/world execution, executable-bytecode P10
+body/signature/site-origin application and original V14/V11/PAR dependencies.
+Canonical assembly/Osaka endpoints, full Approved_opcode coverage, all missing
+InstrV2 macro correspondence and complete map/resource/prefix bridge remain open
+owned work. No complete producing files/head or new acceptance is available.
+See roadmap-v15-p10.md H121c section and bridge-requests.json P10 ownership record.
+Source adoption does not discharge the15public obligations or six native FAILs.

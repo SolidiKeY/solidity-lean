@@ -1,0 +1,311 @@
+{
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.complete_memory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.fresh_reference_succeeds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.old_alias_fails": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AssociationControls.both_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AssociationControls.both_outputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.AssociationControls.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.complete_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.corrupted_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.complete_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.fail_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.failed_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.prefix_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.reached_budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.skipped_allocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.suffix_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.suffix_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.total_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.CostControls.wrong_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.actual_budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.admitted_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.prefix_only_frame_is_insufficient": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.scoped_maximum": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.scoped_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.scoped_slot_reuse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.unreachable_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.unreachable_frame_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.unreachable_other_fields": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.unreachable_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.reached_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.complete_pointer_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.fresh_bound": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.saved_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.stale_initial_map": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.stale_readback_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.whole_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.stale_initial_map": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.bad_budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.bad_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.capture_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.capture_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.complete_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.length_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.reached_third_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.third_frame_required": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.total_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.TripleAdmission.wrong_old_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.whole_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.whole_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.whole_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.wrong_cursor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedAllocationWitness.lean:Solidity.Backend.Passes.AuditJoinedAllocation.wrong_new_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,10 @@
+{
+ "Solidity/Lowering/P8/PlanWitness.lean:Solidity.Lowering.P8.PlanWitness.planLowering": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/PlanWitness.lean:Solidity.Lowering.P8.PlanWitness.producer_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

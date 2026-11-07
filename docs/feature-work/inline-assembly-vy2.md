@@ -4370,3 +4370,46 @@ refinement, concrete V10/V11 agreements and actual source/Yul/calculus/compiler
 joint closure. Existing owner state/world/memory APIs are used, not replaced.
 The persistent goal is unchanged; this checkpoint does not resolve its precise
 producer/composition dependencies or claim full-lane completion.
+
+
+### Runtime hash identity refusal repair
+
+The saved physical-fixture checker now requires both deployment/runtime hashes
+to be lowercase, exactly 64-character hexadecimal strings before comparing
+identity. This closes the missing-both-fields (`undefined === undefined`)
+false acceptance. Controls also refuse equal null/numeric, empty, wrong-length,
+nonhexadecimal and newline/CRLF-suffixed values. All original fixture and
+storage-write assertions remain. Finder/skeptic reviewed read-only; the skeptic
+requested explicit length and newline controls, which were added. The existing
+eight positive variants and 153 negative controls pass, including actual SSTORE
+observation. This validates report checking only, not physical completeness.
+Evidence stays outside Git at `/workspace/vy2-evidence/runtime-hash-validation`.
+
+
+### Isolated ordinary Source graph slot endpoints (H126)
+
+`Solidity/Yul/Views/SourceGraphEndpoints.lean` now owns the existing generic
+recursive uint256-key graph adapter and `NestedWordMappingRoot.graph_path_endpoint`.
+The audit imports it and retains both its joint Source declaration witness and
+wrong-root refusal exactly. All moved declaration bodies and audit statements
+are byte-identical. No producer interface or original layout module changes.
+The endpoint derives slot identity at the existing root0 placement; it supplies
+no Source liveness/value adequacy, compiler selection, reached execution or
+physical closure. V10 must retain those remaining premises.
+
+Pinned serial kernel checks pass. The explicit bridge import has median 0.54 s
+and peak 1,050,020 KiB, compared with layout-only import median 0.18 s; this is
+a separate 0.36 s import dependency cost, not a passing speed-neutral replacement.
+The generated Solidity.lean root includes this module in the default full build.
+Isolation preserves NestedMappingLayout's import closure, not optional build
+membership; these import-only timings do not establish a full-build delta.
+The unchanged layout checks remain 0.40 s median (pre-check 0.43 s), and the
+existing layout import-expansion STOP remains. Axiom exports retain inherited
+propext/Classical.choice/Quot.sound; no axiom or policy was added. Detailed
+measurements and preservation checks stay outside Git at
+`/workspace/vy2-evidence/source-graph-production/`. These absolute paths are
+H44 external VM artifact locations, not checkout-relative or portable links;
+retrieve the listed artifacts from the originating VM and verify the committed
+size/hash manifest before reuse. Missing artifacts remain an evidence wait.
+Full validation and Y04
+physical adequacy/reached-state work remain open.

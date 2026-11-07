@@ -409,3 +409,99 @@ def source_candidate_graph(rows, mapping):
             "statement_correspondence_established":False,"joint_witness_established":False})
     return {"sources":sorted(sources,key=lambda s:s["id"]),"records":records,
         "boundary":"Supplied source-position graph only; no source authenticity, statement correspondence or witness coverage"}
+
+
+def source_snapshot_bindings(mapping, sources):
+    """Guard regression: a self-consistent signature hash is not source binding.
+
+    Reuse the existing lexical census over supplied UTF-8 snapshots, require
+    complete candidate membership, and bind every signature/context byte range.
+    The caller must authenticate the snapshots. No Lean correspondence follows.
+    """
+    from census import declarations
+    if (not isinstance(mapping, dict) or not isinstance(sources, dict) or
+            set(mapping) != set(sources) or any(not text(m) for m in mapping)):
+        raise ValueError("source snapshot membership differs")
+    identity = ("name_candidate","kind","line","byte_start","byte_end",
+                "signature","signature_sha256","preceding_context_sha256")
+    result = []
+    for module in sorted(mapping):
+        raw = sources[module]
+        if type(raw) is not bytes or not isinstance(mapping[module], list):
+            raise ValueError("invalid source snapshot or candidate list")
+        expected = declarations(raw.decode("utf-8"))
+        by_range = {(v["byte_start"],v["byte_end"]):v for v in expected}
+        seen, bound = set(), []
+        for candidate in mapping[module]:
+            if not isinstance(candidate, dict):
+                raise ValueError("invalid source candidate")
+            if any(type(candidate.get(k)) is not int for k in ("byte_start","byte_end")):
+                raise ValueError("invalid source byte range")
+            key = (candidate["byte_start"],candidate["byte_end"])
+            if key in seen or key not in by_range:
+                raise ValueError("duplicate or unknown source byte range")
+            seen.add(key)
+            original = by_range[key]
+            for field in identity:
+                if type(candidate.get(field)) is not type(original[field]) or candidate[field] != original[field]:
+                    raise ValueError("source snapshot candidate differs: " + field)
+            positions = {"name_line","name_column"} & set(candidate)
+            if positions and (positions != {"name_line","name_column"} or any(
+                    type(candidate[k]) is not int or candidate[k] != original[k] for k in positions)):
+                raise ValueError("source snapshot name position differs")
+            if raw[key[0]:key[1]] != candidate["signature"].encode():
+                raise ValueError("signature byte slice differs")
+            snapshot = json.loads(json.dumps(candidate,sort_keys=True,separators=(",", ":")))
+            bound.append({"candidate":snapshot,"name_line":original["name_line"],
+                "name_column":original["name_column"],
+                "name_position_status":"supplied_and_reproduced" if positions else "reproduced_from_snapshot",
+                "signature_bytes_bound":True,"statement_correspondence_established":False,
+                "joint_witness_established":False})
+        if seen != set(by_range):
+            raise ValueError("source snapshot candidates omitted")
+        result.append({"module":module,"source_sha256":hashlib.sha256(raw).hexdigest(),
+            "source_bytes":len(raw),"candidates":sorted(bound,key=lambda c:c["candidate"]["byte_start"])})
+    return {"modules":result,"boundary":"Supplied lexical snapshot byte binding only; snapshots require caller authentication, no kernel correspondence or witnesses"}
+
+
+def source_obligation_inventory(mapping, sources, rows, inspected_mapping):
+    """Guard regression: an uninspected statement must not look hypothesis-free.
+
+    Join existing byte bindings and positional candidates to observed raw types.
+    Uninspected/unmatched/ambiguous sources and supplemental kernel records stay
+    explicit. Binder counts classify metadata only, never joint feasibility.
+    """
+    bound = source_snapshot_bindings(mapping, sources)
+    if not isinstance(inspected_mapping, dict) or not set(inspected_mapping) <= set(sources):
+        raise ValueError("inspection source scope differs")
+    source_snapshot_bindings(inspected_mapping, {m:sources[m] for m in inspected_mapping})
+    graph = source_candidate_graph(rows, inspected_mapping)
+    if not {r["module"] for r in rows} <= set(inspected_mapping):
+        raise ValueError("kernel record outside inspected source scope")
+    by_name = {r["name"]:r for r in rows}
+    candidates = {r["id"]:r for r in graph["sources"]}
+    obligations = []
+    for module in bound["modules"]:
+        for entry in module["candidates"]:
+            source = entry["candidate"]
+            identity = module["module"] + ":" + str(source["byte_start"]) + ":" + str(source["byte_end"])
+            candidate = candidates.get(identity)
+            if module["module"] in inspected_mapping and candidate is None:
+                raise ValueError("inspected source candidate missing")
+            types = []
+            for name in candidate["kernel_names"] if candidate is not None else []:
+                row = by_name[name]
+                types.append({"observed_type":observed_type(row),
+                    "raw_binder_count":len(row["binders"]),
+                    "observed_proof_binder_count":sum(b["proof_binder"] for b in row["binders"])})
+            obligations.append({"id":identity,"module":module["module"],
+                "source_sha256":module["source_sha256"],"source_binding":entry,
+                "inspection_status":"module_uninspected" if candidate is None else candidate["accounting_status"],
+                "candidate_types":types,
+                "hypothesis_classification":"unclassified; observed raw binders do not establish global/per-input feasibility",
+                "statement_correspondence_established":False,"joint_witness_established":False})
+    if len({o["id"] for o in obligations}) != len(obligations):
+        raise ValueError("duplicate obligation identity")
+    return {"obligations":sorted(obligations,key=lambda o:o["id"]),
+        "kernel_records":graph["records"],
+        "boundary":"Frozen lexical obligations with supplied type candidates only; kernel entries are graph summaries/hashes backed by caller-retained raw metadata; no statement correspondence, inherited instantiation or joint witnesses"}

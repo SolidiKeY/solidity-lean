@@ -893,6 +893,15 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ForContinueCompiler.lean`, `Backend/StructuredFlow/ForContinueCompilerControls.lean` | Actual mapped for/continue/post to existing loop-compiler join with physical observations and negative controls ([scope](../feature-work/roadmap-g36-for-continue-compiler.md)). |
 | `Backend/StructuredFlow/ForReturnCompiler.lean`, `Backend/StructuredFlow/ForReturnCompilerControls.lean` | Actual for-loop Source outcome/captured-flag compiler connection, full physical snapshots and capture/base/outcome negatives ([scope](../feature-work/roadmap-g36-for-return-compiler.md)). |
 | `Backend/StructuredFlow/ForBreakCompiler.lean`, `Backend/StructuredFlow/ForBreakCompilerControls.lean` | Actual mapped for-initializer/break to scoped-prefix compilation, exact exit fragment, full snapshots and initializer/base/post negatives ([scope](../feature-work/roadmap-g36-for-break-compiler.md)). |
+| `Lowering/P9/BoundRecognizer.lean` | Executable sound recognizers (`readyB`, `boundB`, fuelled `finiteDefaultB`) and `catalogueB`, which implies `BoundMemoryCatalogue` from the actual dispatch target and body; `OpsOK` from elaboration. |
+| `Lowering/P9/BoundRecognizerControls.lean` | `catalogueB` replaces two hand-built catalogue proofs on elaborated units; refuses zero default fuel and an undeclared function. |
+
+| `Lowering/P9/DefaultRecognizerCompleteness.lean` | Monotonic and existential fuel completeness for the finite-default component only; common fuel for finite lists. |
+| `Lowering/P9/DefaultRecognizerControls.lean` | Nested fixed-array and actual struct-layout acceptance, insufficient-fuel controls, larger/shared fuel. |
+
+| `Lowering/P9/BodyRecognizerCompleteness.lean` | Existing readiness certificates imply their Boolean body checks; no new syntax admitted. |
+| `Lowering/P9/CatalogueRecognizerCompleteness.lean` | Entry/catalogue fuel monotonicity and relative completeness up to existential recognizer fuel, with original converse premises. |
+| `Lowering/P9/CatalogueCompletenessControls.lean` | Reference/unchecked and existing elaborated-unit controls, checked calls, inadequate-fuel distinction and all-fuel refusal. |
 
 ### P8 Producer merge (H57, H60)
 
@@ -980,3 +989,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/Executable/ConstructorStorageFailure.lean` | Storage-effect argument failure at the native constructor boundary. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean` | Frozen-API CALL controls: absent and INVALID-body callees clear the stale return buffer, the following RETURNDATASIZE reads the new buffer, and the same caller frame gives callee-dependent CALL flags. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean` | General post-CALL law: a non-erroring fetched CALL leaves the return buffer of the exact `Θ` run `EVM.call` makes (all inputs pinned) when its entry condition holds, and an empty buffer otherwise. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean` | Core `CALLIN` (`Evm.callIn_returndata`) against the reference CALL buffer: case alignment under explicit entry-test, depth-below-1024 and exact-`Θ`-oracle premises, and `depth_disagreement` at depth 1024. |

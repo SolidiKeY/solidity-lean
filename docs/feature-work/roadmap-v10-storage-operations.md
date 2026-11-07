@@ -1445,3 +1445,191 @@ a build. Coverage remains 72 mapped of 3281 conservative rows, 3209 uncovered;
 these conversion laws add no audit witness rows. Original/consolidated queues,
 Y04 physical and separate 4.35 trust/timing waits, all prior STOPs and required
 full final gates remain open. No Source adequacy or whole-lane completion claim.
+
+### C261 — state and function declaration correspondence
+
+The existing declaration correspondence module now proves state_exact and
+function_exact. State syntax retains the declared type, visibility, transient
+flag, name and optional initializer, with the existing mutable/default-location
+checks and override refusal. Function syntax retains argument/result lists,
+name, visibility, mutability, virtual flag and optional original body, with the
+existing function-kind, modifier and override checks. Child conversion results
+are exact premises; no resolved Source program is invented. Both new axiom
+guards use propext, Classical.choice and Quot.sound. No reader, Source body,
+existing statement, dependent definition body, interface or budget changed.
+
+Existing resolution controls additionally guard initialized transient state,
+constant-state refusal, named Bool parameters/string-memory results, function
+qualifiers and absent versus nonempty retained bodies. These deliberately
+syntax-only inputs establish no typing or execution success. Both actual
+LibraryTry pipeline inputs retain the same eight declarations. The initial
+proof attempt rejected a reserved binder; the unused simp argument was removed
+and both corrected proofs pass. Failed diagnostic evidence remains off Git.
+C261 lane history records independent read-only finder and skeptic reviews
+with no findings; neither ran Lean, its server or builds.
+
+Actual Source admission/origin/lifecycle, S03-PANIC41 and accepted artifact
+binding remain local H121b duties. H125 vy1-words supplies the pending protected
+Source library-try/Error(string memory) and H57 environment-aware typing repairs.
+C246's manual full-elaboration failure remains outside automated gates until
+that actual producer lands. No duplicate issue, Source case copy or phase folder
+is added. The 19-signature transport evidence request is still outstanding.
+Coverage stays 72 mapped of 3281 conservative rows, 3209 uncovered. Original and
+consolidated work/backfill/proof queues, Y04 physical and separate 4.35 waits,
+all STOPs and required final gates remain open. No semantic producer is claimed.
+
+### C262 — ordered top-level declaration correspondence
+
+A generic bind_ok_iff_each law retains every ordered child conversion and the
+fallible container finish. The existing declaration module instantiates it in
+top_ok_iff_each for library, contract and interface headers, including the
+existing abstract-library refusal and unknown-kind error. pragma_exact retains
+the complete literal-token list. All three guards use propext and Quot.sound.
+No reader, existing statement, dependent definition body, protected Source,
+frozen interface, budget, exclusion or axiom declaration changed. The initial
+implicit-finish application failed elaboration; an explicit finish and
+non-generalizing header match passed. The failed receipt remains off Git.
+
+Existing controls now guard two ordered struct children through all three
+container kinds, the contract abstract flag, abstract-library and unknown-kind
+refusals, failed-child propagation, and pragma token retention. Both actual
+LibraryTry pipeline inputs still resolve the same eight declarations. These
+checks establish syntax conversion only; no compiler acceptance, typed program,
+Source Env/SrcProg, origin, H24 admission or lifecycle adequacy follows.
+C262 lane history records independent read-only finder/skeptic review; neither
+runs Lean, its server or builds.
+
+Next independent work includes remaining leaf/type conversion correspondence
+and artifact-binding obligations within the supported domain. Actual H121b
+Source-origin/lifecycle/P8 aggregate-lifecycle and S03-PANIC41 remain local duties.
+H125 vy1-words owns pending protected library-try/Error(string memory) support
+and the H57 environment-aware typing repair; retain the historical C246 manual
+full-elaboration failure until that actual support lands. No duplicate issue or
+Source case copy. The 19-signature H19/H60 transport evidence remains requested.
+Original/consolidated proof, backfill, coverage and final gates remain open:
+72 mapped of 3281 conservative rows, 3209 uncovered. Y04 physical and separate
+4.35 trust/timing waits, all prior STOPs and strict inventory failures remain.
+
+### C263 — qualified and elementary leaf correspondence
+
+The existing type correspondence module now proves explicit pathNode priority,
+namePath fallback only on lookup failure, non-address elementary conversion,
+payable address conversion and both supported plain-address encodings. The
+first three guards use propext/Quot.sound; address guards use the standard trio.
+Existing readers, statements, definition bodies, interfaces, budgets, exclusions
+and axiom declarations are unchanged. No compiler-ID resolution or semantic
+meaning is inferred from spelling conversion.
+
+Existing leaf controls guard a conflicting fallback spelling, malformed present
+pathNode refusal, empty path-component refusal, string versus bytes, payable
+versus plain address and malformed mutability refusal. All prior lexical kernel
+controls remain. Both actual LibraryTry pipeline inputs still convert all 12
+parameters/results, including storage formals and string-memory returns. No
+Source case copy or new phase folder. C263 lane history records independent
+read-only finder and skeptic reviews with no findings; neither ran Lean, its
+server or builds. Initial proof and control checks pass without repair.
+
+These laws are syntax correspondence only. Remaining lexical/path-validity and
+compound-to-leaf correspondence, accepted-source/artifact binding and actual
+Source Env/SrcProg/H24/origin/lifecycle/S03-PANIC41 remain open H121b work here.
+H125/H128 vy1-words is the protected Source producer for library try/Error(string
+memory) and additive v2 envLocOK typing, with v1 negative H24 refusals frozen.
+No published repair was consumed here; historical C246 full-elaboration failure
+remains manual evidence outside automated gates. The exact-19 H19/H60 transport
+evidence request remains assigned and unfulfilled. All original/consolidated
+proof/backfill/coverage/final gates, Y04 physical and separate 4.35 waits and
+STOPs remain. Coverage is still 72 mapped / 3281 rows, 3209 uncovered; these
+conversion laws add no witness rows or whole-lane completion credit.
+
+### C264 — exact-19 source evidence and H16 hold
+
+The coordinator disk helper removed the regenerable pinned .lake/build, leaving
+over 2 GB free; sealed evidence and historical failures were preserved. The live
+build symlink now needs its target restored before future Lean work. No Lean,
+Source check, integration or timing retry was run in this checkpoint.
+
+transport_pairs.py reuses the readonly-call consumer's lexical scanner and pins
+the exact inventory bytes. It captures original C6/current source and signatures
+for all 19 H19/H60 pairs (11 projections, one balance domain, seven typing
+parameters), separately retaining the three missing private identities. Original
+signature/context hashes must match; current drift is retained and fails the
+observation gate. All 22 current observations match the recorded hashes. The
+recorded 6f7002ca commit object is unavailable locally and is explicitly not
+verified as retrieved. Current source is tied to its actual captured Git head.
+This supplies source-version extracts only: zero transport proofs, zero H57
+approvals verified, zero kernel-fidelity or original-obligation credit. No
+assumed Fits/mapFree premise substitutes for actual range or typed-program
+evidence. The exact-19 proof/authorization portion remains open.
+
+Four Python controls cover original/context tampering, current drift or absence,
+exact membership, duplicate identity, unsafe paths and non-promotion to proof.
+They pass. C264 lane history records independent read-only finder/skeptic reviews
+with no findings; neither used Lean, its server or builds. No production file,
+reader, frozen statement, interface, budget, axiom set or exclusion changed.
+
+The vy1-words ticket at 2efd664e52612f4ae39af083180a9a1990ce2ec9 is a DRAFT under
+H16 TIMING HOLD, not a merge/retirement/acceptance. Do not integrate TypingV2 or
+run Source checks/timing retries against that draft. Aggregate median +9.2046%
+is a qualitative H16 hold despite being below the mechanical 10% threshold.
+Library try/Error(string memory) remains separate, unimplemented and held.
+V1 refusal statements stay frozen; future v2 consumer migration requires the
+versioned contracts and actual reproofs. Historical C246 full-elaboration failure
+remains. H121b actual Source admission/origin/lifecycle/P8/S03-PANIC41 duties stay
+local; Y04 physical and separate 4.35 waits, all STOPs and original/consolidated
+proof/backfill/coverage/final gates remain open. No new witness rows: 72 mapped
+of 3281, 3209 uncovered.
+
+### C265 — prepared H24 v2 consumption, awaiting published producer
+
+The coordinator released vy1-words' Source work from its timing hold to continue
+to mergeable checkpoints. This supersedes C264's producer-continuation hold; it
+does not authorize draft integration or clear unrelated STOPs. Consume nothing
+until the owner publishes the checkpoint head. The migration-note SHA supplied
+in the ticket is 1c2fbc40a5753d3f672a2e6ce489df183d4c31705faa529612574fcae6fcc289;
+its bytes are not locally retrieved or hash-verified here. Preparation uses the
+verbatim owner ticket, not an assumed producer implementation.
+
+The intended H57 pairing keeps the existing v1 SourceRefusesNonAdmissible,
+Admission, EnvAdmission, DeclarationGraphAdmission.Producer, negative H24
+characterization and every consumer statement unchanged. Proposed v2 symbols
+below are planning names, not declarations or a committed interface:
+
+| Frozen v1 component | Prepared v2 obligation |
+| --- | --- |
+| LocationGraphInterface.SourceRefusesNonAdmissible | A separate predicate with identical environment/context, local stores, type-resolution, explicit location and initializer quantifiers, using Source.V2.StmtD. Derive from the actual published declaration_admissible theorem, without an assumed CompatibleAt or mapping-free premise. |
+| LocationGraphInterface.Admission | A separate versioned admission over the exact same base producer, acceptedSource environment, input, resolved artifact and location. Preserve every graph field; change only the explicitly versioned local-declaration refusal relation. |
+| GraphAdmissionAssembly.EnvAdmission | Pair unchanged per-location certificates with the new refusal. Reuse graph_of_premises and GraphPremises; do not erase selection, related/supported fields, distinct/nonempty checks or rank. |
+| GraphAdmissionAssembly.env_admission_iff | Retain the v1 mapping-free-nameable characterization. Do not transfer that characterization to v2; prove any new v2 constructor directly from its actual components. |
+| DeclarationGraphAdmission.Producer | A separate paired producer contract, never a coercion or replacement of the frozen declarationGraphs field. Preserve base producer/origin/root identity. |
+| ConditionalAssembly.checked_source_refuses and LibraryPremises.Inputs | Keep frozen fields/theorems. Plan paired v2 consumers and obtain the required H57/interface-owner disposition before production migration; a v2 refusal proof alone cannot inhabit the existing v1 Inputs. |
+
+The refusal proof must instantiate the original local declaration shape, with
+actual type-resolution equality and actual v2 derivation, for every initializer
+and explicit location. Its environment must be the same acceptedSource used by
+the graph certificate. A universal v2 location theorem supplies no actual body
+derivation, graph/rank premise, origin, compiler correspondence, lifecycle or
+accepted-source/artifact binding. No toy PlanWitness or empty Source substitution.
+
+Transport preparation: consume published toV1 projections for actual v2
+derivations; use ofV1 only with its real CompatibleAt obligation at the actual
+nameable types. Mapping-free-nameable compatibility is a conditional bridge,
+not a new universal admission restriction. Preserve all v1 Loop-memory negative
+witnesses. Separately check the same v2 memory rejection, an inhabited initialized
+storage declaration and the Bool compatibility witness against the published
+controls. Do not weaken failure, initialization, location or graph observations.
+
+Publication intake sequence: verify exact owner head, ancestry, module and note
+hashes and full gate/resource disposition; inspect the actual theorem types;
+then add only versioned consumer contracts/proofs and registration under the
+authorized scope. Pin new measured axioms without changing existing pin sets.
+Check every affected consumer, statement fidelity and meaning, negative controls,
+matched-resource timing and independent read-only reviews. Library try/Error
+support is a separate producer checkpoint: retain C246's historical manual
+full-elaboration failure until that implementation is published and checked.
+The build target removed by C264 cleanup must be recovered before Lean work.
+
+No draft module imported, no v1 interface or production Source edited, no Lean
+check or timing retry run. This is concrete consumption preparation only, not
+producer delivery or consumer integration. Original H121b actual Source/H24/
+origin/lifecycle/P8/S03-PANIC41 work, exact-19 transport proofs, proof/backfill/
+coverage/final gates and Y04/separate 4.35 waits remain open.
