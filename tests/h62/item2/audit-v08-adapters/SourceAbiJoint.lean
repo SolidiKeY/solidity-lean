@@ -106,6 +106,121 @@ theorem other_word_refused {D : Source.Layout} (word other : Roadmap.Word)
 /-- The negative observation domain contains genuinely distinct typed words. -/
 theorem distinct_word_inputs : Source.toWord 0 ≠ Source.toWord 1 := by decide +kernel
 
+/-- Selector arguments, conversion and encoding share exact reached state. -/
+def SelectorJoint (pipeline : Roadmap.Pipeline) (static : Bool) : Prop :=
+  (Source.evalArgs (global pipeline) {frame with static:=static} 17
+    SourceAbiControls.selectorArgs).run (locals,populated) =
+    (.ok (.cons (.strLit SourceAbiControls.selectorBytes) (SourceAbiControls.values pipeline)),
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) ∧
+  (Source.convRV {frame with static:=static} 17 (.fixedBytes 4 (by decide +kernel))
+    (.strLit SourceAbiControls.selectorBytes) : Source.EM E [.bool] _).run
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary) =
+    (.ok (.val (Source.mkBytes (n:=4) (h:=by decide +kernel) SourceAbiControls.selectorBytes)),
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) ∧
+  (Source.encodeVals {frame with static:=static} 17 false
+    (SourceAbiControls.values pipeline) : Source.EM E [.bool] _).run
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary) =
+    (.ok (SourceAbiControls.data false pipeline),
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary))
+
+theorem selector_joint (pipeline : Roadmap.Pipeline) (static : Bool) :
+    SelectorJoint pipeline static :=
+  ⟨SourceAbiControls.selector_arguments_execute pipeline static, rfl,
+    SourceAbiControls.encoding_execute pipeline static false⟩
+
+theorem actual_selector (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSelector SourceAbiControls.selectorArgs)).run (locals,populated) =
+    (.ok (.val (.memRef rfl 2)),(.cons (.bool false) .nil,
+      SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+        (SourceAbiControls.selectorBytes ++ SourceAbiControls.data false pipeline))) := by
+  have h := selector_joint pipeline static
+  have result := SourceAbi.selector_execute (global pipeline) {frame with static:=static} 17
+    SourceAbiControls.selectorArgs locals (.cons (.bool false) .nil)
+    (.cons (.bool false) .nil) (.cons (.bool false) .nil) populated
+    (SourceKeccak.afterLiteral populated binary) (SourceKeccak.afterLiteral populated binary)
+    (SourceKeccak.afterLiteral populated binary) (.strLit SourceAbiControls.selectorBytes)
+    (SourceAbiControls.values pipeline)
+    (Source.mkBytes (n:=4) (h:=by decide +kernel) SourceAbiControls.selectorBytes)
+    (SourceAbiControls.data false pipeline) h.1 h.2.1 h.2.2
+  simpa only [SourceAbiControls.selector_value_bytes] using result
+
+/-- Signature arguments, actual byte reading and encoding retain shared state. -/
+def SignatureJoint (pipeline : Roadmap.Pipeline) (static : Bool) : Prop :=
+  (Source.evalArgs (global pipeline) {frame with static:=static} 17
+    SourceAbiControls.signatureArgs).run (locals,populated) =
+    (.ok (.cons (.strLit []) (SourceAbiControls.values pipeline)),
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) ∧
+  (Source.bytesOfRV {frame with static:=static} 17 (.strLit []) : Source.EM E [.bool] _).run
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary) =
+    (.ok [],(.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) ∧
+  (Source.encodeVals {frame with static:=static} 17 false
+    (SourceAbiControls.values pipeline) : Source.EM E [.bool] _).run
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary) =
+    (.ok (SourceAbiControls.data false pipeline),
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary))
+
+theorem signature_joint (pipeline : Roadmap.Pipeline) (static : Bool) :
+    SignatureJoint pipeline static :=
+  ⟨SourceAbiControls.signature_arguments_execute pipeline static, rfl,
+    SourceAbiControls.encoding_execute pipeline static false⟩
+
+theorem actual_signature (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalE (global pipeline) {frame with static:=static} 18
+      (.abiEncode .encodeWithSignature SourceAbiControls.signatureArgs)).run (locals,populated) =
+    (.ok (.val (.memRef rfl 2)),(.cons (.bool false) .nil,
+      SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
+        ((Source.wordBytes ((global pipeline).fixed.hash [])).take 4 ++
+          SourceAbiControls.data false pipeline))) := by
+  have h := signature_joint pipeline static
+  exact SourceAbi.signature_execute (global pipeline) {frame with static:=static} 17
+    SourceAbiControls.signatureArgs locals (.cons (.bool false) .nil)
+    (.cons (.bool false) .nil) (.cons (.bool false) .nil) populated
+    (SourceKeccak.afterLiteral populated binary) (SourceKeccak.afterLiteral populated binary)
+    (SourceKeccak.afterLiteral populated binary) (.strLit []) (SourceAbiControls.values pipeline)
+    [] (SourceAbiControls.data false pipeline) h.1 h.2.1 h.2.2
+
+/-- Actual published pin suffices for arbitrary raw signature-byte prefixes. -/
+theorem prefix_pin_joint (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
+    (global pipeline).fixed.Keccak ∧
+    (Source.wordBytes ((global pipeline).fixed.hash bytes)).take 4 =
+      (Semantics.wordBytes (keccakBytes (bytes.map (fun byte => (byte.toNat : Int)))).1.toNat).take 4 :=
+  ⟨Roadmap.Controls.toyFixed_keccak,
+    SourceAbi.signature_prefix_transport (global pipeline) Roadmap.Controls.toyFixed_keccak bytes⟩
+
+/-- Actual early argument timeout, before conversion/read/encoding/output allocation. -/
+theorem prefix_argument_step (pipeline : Roadmap.Pipeline) (static : Bool) :
+    (Source.evalArgs (global pipeline) {frame with static:=static} 6
+      SourceAbiControls.selectorArgs).run (locals,populated) =
+    (.error .timeout,(.cons (.bool false) .nil,populated)) := rfl
+
+/-- Preserve original generic AbiKind quantifier on the reached argument failure. -/
+theorem actual_prefix_failure (pipeline : Roadmap.Pipeline) (static : Bool) (kind : Source.AbiKind) :
+    (Source.evalE (global pipeline) {frame with static:=static} 7
+      (.abiEncode kind SourceAbiControls.selectorArgs)).run (locals,populated) =
+    (.error .timeout,(.cons (.bool false) .nil,populated)) :=
+  SourceAbi.prefixed_arguments_failure (global pipeline) {frame with static:=static} 6 kind
+    SourceAbiControls.selectorArgs locals (.cons (.bool false) .nil) populated populated
+    .timeout (prefix_argument_step pipeline static)
+
+theorem prefix_failure_not_rollback (pipeline : Roadmap.Pipeline) (static : Bool) (kind : Source.AbiKind) :
+    (Source.evalE (global pipeline) {frame with static:=static} 7
+      (.abiEncode kind SourceAbiControls.selectorArgs)).run (locals,populated) ≠
+      (.error .timeout,(locals,populated)) := by
+  rw [actual_prefix_failure]
+  intro same
+  have localSame := congrArg (fun result => result.2.1.get .here) same
+  cases localSame
+
+#print axioms selector_joint
+#print axioms actual_selector
+#print axioms signature_joint
+#print axioms actual_signature
+#print axioms prefix_pin_joint
+#print axioms prefix_argument_step
+#print axioms actual_prefix_failure
+#print axioms prefix_failure_not_rollback
+
 #print axioms word_joint
 #print axioms word_actual_run
 #print axioms other_word_refused

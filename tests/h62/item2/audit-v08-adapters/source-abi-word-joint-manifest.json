@@ -68,5 +68,6 @@
       "sha256": "47633fa032d3790d9211d5bf5c712ca74126d1e7934199734ad30eaf00f77458"
     }
   ],
-  "reviews": "Independent read-only finder/skeptic verified general typed observation, original encoder application and exact state/zero-horizon boundaries; no findings, no reviewer scripts/tests/Lean/server."
+  "reviews": "Independent read-only finder/skeptic verified general typed observation, original encoder application and exact state/zero-horizon boundaries; no findings, no reviewer scripts/tests/Lean/server.",
+  "source_binding_status": "Historical typed-word-extension snapshot. Later additive prefix-phase checks and current bytes are in source-abi-prefix-joint-manifest.json; prior hashes/evidence unchanged."
 }

@@ -1,0 +1,113 @@
+{
+  "status": "EXISTING_ABI_COMPONENT_EXTENDED_WITH_PREFIX_PHASES",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceAbiJoint.lean": "c96b3235542316153ef016bd257f187ed2bd55b36d37410062eefc8a970559f8",
+    "Solidity/Lowering/V08/SourceAbi.lean": "99a01f9fae81a81801245c32e177e05ae0b7fd090bca5727df3a7c8e60465d62",
+    "Solidity/Lowering/V08/SourceAbiControls.lean": "8c962b36053c8cedcc966668f547d7e91a78c34072b4c11a42aba7cc60280d52"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceAbi.selector_execute",
+    "Solidity.Lowering.V08.SourceAbi.signature_execute",
+    "Solidity.Lowering.V08.SourceAbi.signature_prefix_transport",
+    "Solidity.Lowering.V08.SourceAbi.prefixed_arguments_failure"
+  ],
+  "joint_premises": "Actual argument/conversion-or-reading/tail-encoding states share the same reached heap and caller locals. Published full Keccak pin supplies raw-byte prefix transport for arbitrary bytes.",
+  "domain": "All pipelines/static flags on existing mixed prefix fixtures; reached argument-failure law retains arbitrary Source.AbiKind.",
+  "full_results": "Successful prefix results retain pointer2, full callerfalse state and both allocations. Actual argument timeout retains earlier local update and original heap, before conversion/read/encoding/output allocation.",
+  "new_joint_model_families": 0,
+  "new_source_fixtures": 0,
+  "new_encoders": 0,
+  "additional_original_target_applications": 4,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceAbiJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 2.435,
+    "peak_sampled_aggregate_rss": 749047808,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "first_failure": "New diagnostic annotations used ambiguous AbiKind; failed source/log retained. Explicit Source.AbiKind fixes it without changing original APIs/budgets.",
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "pin_registration": {
+    "WORLD-G07-13": "RESOLVED_MATCHING_CENTRAL_FRAGMENTS",
+    "matching_pins": 13,
+    "gate_exit": 0,
+    "pinned_theorems": 17092,
+    "axiom_errors": 0,
+    "unrecorded_changes": 0,
+    "baselined_changes": 0,
+    "shared_inventory_edits_by_this_checkpoint": false
+  },
+  "limitations": [
+    "Selector/signature bytes are ABI expression inputs, not callable admission or canonical text-resolution certificates.",
+    "No target emitter/compiler/body/frame/session/gas/H68 adequacy.",
+    "Resolved registration wait does not discharge semantic producer waits or full-root gates.",
+    "No matched timing acceptance or prior STOP release."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "9b03f274f651a98e90f73f589129688104c7f055fc8768d472ca58efe87b3a05"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/final/results.json",
+      "bytes": 394,
+      "sha256": "41f5f7e3542f82cc2f8a77e71cf86887b15864b4847e8057a98f1716035a5784"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/final/gates/1.log",
+      "bytes": 43037,
+      "sha256": "0a64abf27092b9ecc7f451c83821c601fb39cc1ca094cedcbb50f1210da42c33"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/check/results.json",
+      "bytes": 394,
+      "sha256": "8b77f0a60f1f1fcf65095c53e0a0b63893fe5c1ebed5b2852160290d98712294"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/check/gates/1.log",
+      "bytes": 43687,
+      "sha256": "1f27198957475500b4cab23761eda133847a32b0dc4e4977782cda1c42ef3838"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/failed-source.lean",
+      "bytes": 13423,
+      "sha256": "9bb89ba0f6eab2207d0f00f31080d6d4d2ea9883a95d87f310efa00214d0164c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/pins.log",
+      "bytes": 211,
+      "sha256": "9b8394a3ae6f4093eb2011d6e0ba8e9c3e30a4554c25b76927b6273394fc26af"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-abi-prefix-joint-20261107/pin-registration.json",
+      "bytes": 692,
+      "sha256": "d7ba34d376bd175878da917bdfae1a78d445f26e7121502825e022114c62ed50"
+    }
+  ],
+  "also_revalidated_existing_targets": [
+    "Solidity.Lowering.V08.SourceAbi.execute",
+    "Solidity.Lowering.V08.SourceAbi.word_bytes_field",
+    "Solidity.Lowering.V08.SourceAbi.encode_fixed_bytes32"
+  ],
+  "revalidation_note": "Current gate checked the whole test file, retaining earlier mixed and typed-word declarations; these targets add no new counts in this checkpoint.",
+  "reviews": "Independent read-only finder/skeptic verified coherent prefix phases, generic failure boundary, exact evidence and centrally matching pins/current gate pass; no findings, no reviewer scripts/tests/Lean/server."
+}
