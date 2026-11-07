@@ -1,0 +1,11 @@
+{
+ "Solidity/Lowering/P8/SourceAstStatements.lean:Solidity.Lowering.P8.SourceAstStatements.block": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstStatements.lean:Solidity.Lowering.P8.SourceAstStatements.statement": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstStatements.lean:Solidity.Lowering.P8.SourceAstStatements.zero_depth": [
+  "propext"
+ ]
+}
