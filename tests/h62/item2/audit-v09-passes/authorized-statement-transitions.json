@@ -23,18 +23,27 @@
       },
       "replacement": {
         "name": "Solidity.Backend.Passes.BitwiseValueContextControls.signed_acceptance",
-        "source_sha256": null,
-        "signature_sha256": null,
-        "status": "authorized transition reported; exact replacement bytes and gates unavailable"
+        "source_sha256": "809fd4451599fac533f8a01122d3903abe686189f19d1386c10867c5990cc2b7",
+        "signature_sha256": "7ae57e33ffb0dc204e5f883b461091600996c716addaadd11c4a6e8d726a53c5",
+        "status": "published exact bytes and statement verified; separate kernel/witness adoption pending",
+        "signature": "theorem signed_acceptance :\n    (compileVal 1 (Frag.init _) (signedExpression C .bitAnd)).isSome = true",
+        "source_commit": "abf726ff80b52c1e4bfd6e95dcea64cef1ee2830",
+        "reported_source_axioms": [
+          "propext",
+          "Quot.sound"
+        ],
+        "reported_axioms_are_local_kernel_validation": false
       },
       "local_observation": {
-        "master": "a8f684928fa085d8976ead33e3d0db30208e7a4f",
-        "source_sha256": "de6a7dbdeb50af924722841683cbcedc4bf4f54d7d8dd77840f73ef01beafffd",
-        "old_declaration_present": true,
-        "new_declaration_present": false,
-        "exact_owner_commit_present": false,
-        "exact_owner_fetch": "origin rejected exact SHA with upload-pack: not our ref",
-        "canonical_lane_branch_probe": "No matching ref returned; other names not inferred."
+        "master": "f5038bc02bc52ea08f5a3cec7de292aef424e7c8",
+        "source_sha256": "809fd4451599fac533f8a01122d3903abe686189f19d1386c10867c5990cc2b7",
+        "old_declaration_present": false,
+        "new_declaration_present": true,
+        "exact_owner_commit_present": true,
+        "owner_is_master_ancestor": true,
+        "owner_parent_source_matches_frozen": true,
+        "current_source_matches_owner": true,
+        "delivery": "Exact owner object arrived via published master; prior failed fetch retained in observation history."
       },
       "accounting": {
         "frozen_registrations_rewritten": false,
@@ -42,9 +51,31 @@
         "selected_witness_credit_transferred": 0,
         "checkpoint_selected": 489,
         "checkpoint_open": 770,
-        "positive_adoption_status": "pending exact replacement statement and owner validation; no silent repin"
+        "positive_adoption_status": "Exact authorized replacement identified; no frozen-row rename, re-proof or credit transfer. Live kernel/witness validation remains separate."
       },
-      "remaining_obligation": "Obtain exact owner commit/patch plus replacement signature and existing semantic/axiom/gate evidence. Reconcile the explicitly authorized transition separately from frozen historical accounting."
+      "remaining_obligation": "Kernel/axiom and joint-witness validation of signed_acceptance under a matching updated Layout/SimLemmas/Bitwise.Selected import closure; retain frozen historical registration/assertions and failures unchanged.",
+      "local_observation_history": [
+        {
+          "master": "a8f684928fa085d8976ead33e3d0db30208e7a4f",
+          "source_sha256": "de6a7dbdeb50af924722841683cbcedc4bf4f54d7d8dd77840f73ef01beafffd",
+          "old_declaration_present": true,
+          "new_declaration_present": false,
+          "exact_owner_commit_present": false,
+          "exact_owner_fetch": "origin rejected exact SHA with upload-pack: not our ref",
+          "canonical_lane_branch_probe": "No matching ref returned; other names not inferred."
+        }
+      ],
+      "reconciliation_snapshot": {
+        "frozen_selected": 538,
+        "frozen_open": 721,
+        "new_acceptance_selected_credit": 0,
+        "semantic_dependency_files_in_owner_commit": [
+          "Solidity/Evm/Layout.lean",
+          "Solidity/Evm/SimLemmas.lean",
+          "Solidity/Backend/PrimitivePackets/Bitwise/Selected.lean"
+        ],
+        "fresh_live_closure_validation": "pending; do not validate new theorem against stale cached signed-refusal imports"
+      }
     }
   ]
 }

@@ -1418,3 +1418,19 @@ sourceState construction (line42: incompatible Source.St/Cursor.empty under the
 frozen artifact closure); that raw failure is retained, no production edit applied.
 Evidence: `/workspace/vy3-evidence/shift-source-expression-20261107`.
 All original transition/producer waits, STOPs and full acceptance obligations remain.
+
+
+Authorized signed-bitwise transition reconciliation: published master now contains
+the exact MRS owner commit `abf726ff80b52c1e4bfd6e95dcea64cef1ee2830`. Its parent
+control file matches the frozen historical bytes; its current file matches the
+owner's replacement bytes. The exact new `signed_acceptance` signature and source
+hash are recorded in `authorized-statement-transitions.json`, with the prior
+unavailable-object observation retained as history. The change from isNone to
+isSome is explicit authorized acceptance, not an unchanged historical proof.
+Frozen `signed_refusal` registrations, original external assertions and old
+failures remain unchanged; no witness credit transfers. The owner also changes
+Layout, SimLemmas and Bitwise.Selected, so local kernel/axiom and joint-witness
+validation must use their matching updated import closure. Source-reported axiom
+pins alone are not local kernel validation. Frozen coverage538/1259,721open is
+unchanged. Exact-byte delivery wait is resolved; semantic/kernel adoption remains
+pending. Evidence: `/workspace/vy3-evidence/signed-bitwise-transition-reconciliation-20261107`.
