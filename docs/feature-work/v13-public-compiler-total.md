@@ -129,9 +129,9 @@ or returndata, and it
 does not discharge G01 `PublicCorrectness.coverage`, whose domain is
 `S.Admitted` of a whole source input.
 
-## Q-H68-PAYLOAD (P1-REVERT): blocked on missing producers
+## Q-H68-PAYLOAD (P1-REVERT): delivered
 
-H87/H85 (user decision): wait for producers; G49 `PassCorrect` merges to
+H87/H85 (user decision): waited for producers; G49 `PassCorrect` merged to
 master first and this lane does not define the call-session language.
 
 H68 asks V13 for `p1_frame_bridge` in its P1-REVERT variant: a
