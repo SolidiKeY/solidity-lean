@@ -1,19 +1,22 @@
 {
   "schema_version": 1,
   "status": "blocked",
-  "integration": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
   "original_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "full_lean_build": {
     "status": "pass",
     "command": "./run-lean.sh",
-    "jobs": 6546,
+    "jobs": 6555,
     "exit_code": 0,
-    "elapsed_seconds": 274.93197262300237,
-    "peak_rss_bytes": 5904257024,
-    "minimum_available_bytes": 9599537152,
+    "elapsed_seconds": 6935.474577663001,
+    "peak_rss_bytes": 8629575680,
+    "minimum_available_bytes": 5710798848,
     "no_swap": true,
     "max_heavy_jobs": 1,
-    "cleanup_complete": true
+    "cleanup_complete": true,
+    "resource_receipt": "resume-20261107/full-resource.json",
+    "output": "resume-20261107/full.log",
+    "stdout_sha256": "0f741f0097ab7ff34d21865cb6f7660169c1afdf5253e02a9021e2cca040edc2"
   },
   "local_audit": {
     "modules": 9,
@@ -24,19 +27,20 @@
     "external_encoded_fixtures_identical": 10,
     "new_axioms": 0,
     "sorry": 0,
-    "frozen_statements_changed": 0
+    "frozen_statements_changed": 0,
+    "upstream_lean_paths": 7722
   },
   "static": {
-    "trust": "pass",
-    "orphans": "pass",
-    "doc_paths": "pass",
-    "axiom_pins": "fail:99 new standard-only registrations,0 errors"
+    "trust": "pass:6562 sources,289 sites,0 findings",
+    "orphans": "pass:6546 reachable,0 orphaned,0 not allowed",
+    "doc_paths": "pass:131 ambiguous references all resolve",
+    "axiom_pins": "fail:16151 pins,110 new standard-only registrations,0 errors"
   },
-  "timing_delta_percent": -2.130716676924582,
+  "timing_delta_percent": -0.09408949912913522,
   "waits": [
     {
       "lane": "coordinator/G07 inventory owners",
-      "item": "PIN-706: record exact99 existing standard-only pins from committed owner ticket; no theorem/axiom/premise/exclusion edits."
+      "item": "PIN-2a43bf4f: record exact110 existing standard-only pins from committed owner ticket; no theorem/axiom/premise/exclusion edits."
     }
   ],
   "questions": [],

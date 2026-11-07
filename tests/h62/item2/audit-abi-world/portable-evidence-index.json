@@ -1,10 +1,12 @@
 {
   "schema_version": 1,
   "archive": "evidence.tar.gz",
-  "archive_sha256": "b5877ce4d66921a9e46f2dca17b9ffcc88e431c33f5ecbb7e8f573673ff25b85",
+  "archive_sha256": "e104e967aeb6e249de84e5eb7ec94f748b7970e90fcf48cf662c07f29d7af8bb",
   "manifest": "tests/h62/item2/audit-abi-world/portable-evidence.sha256",
+  "manifest_sha256": "f1ae02f864f60a63027210765024cd3e461d7294d058bf4faccae191cf114446",
+  "archive_entries": 1524,
   "verify_command": "python3 -B scripts/h62/item2/audit-abi-world/portable_evidence.py verify --archive PATH_TO_ARCHIVE --manifest tests/h62/item2/audit-abi-world/portable-evidence.sha256",
-  "integration": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
   "coverage": {
     "mapped_modules": 24,
     "statements": 177,
@@ -13,12 +15,10 @@
     "success_theorems": 7,
     "identical_external_fixtures": 10
   },
-  "full_gate_complete": false,
-  "boundary": "Byte integrity is portable; Lean diagnostics and external-test observations retain actual execution provenance. Full build remains pending.",
-  "manifest_sha256": "4ecd020ccfea20bbcabbf743936037b7e56ea83cf84622f685a5ea096d026d24",
-  "archive_entries": 1260,
   "full_lean_build_complete": true,
-  "final_acceptance": "blocked: PIN-706 central inventory99 new standard-only registrations,0 errors",
+  "assignment_complete": false,
+  "final_acceptance": "blocked: PIN-2a43bf4f central inventory110 new standard-only registrations,0 errors",
   "owner_ticket": "tests/h62/item2/audit-abi-world/handoff/resumed/axiom-pin-owner-ticket.json",
-  "normal_build_record": "resume-20261106/checkpoints/final-blocked-acceptance/full-6-resource.json"
+  "normal_build_record": "resume-20261107/checkpoints/final-blocked-acceptance/full-resource.json",
+  "boundary": "Portable byte integrity; current full6555-job Lean and fresh audit diagnostics pass. Archived external gas/fork observations reused only for byte-identical fixtures; not formal gas/world/general compiler proofs."
 }

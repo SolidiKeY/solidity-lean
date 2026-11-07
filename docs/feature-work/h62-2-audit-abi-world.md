@@ -14,7 +14,8 @@ proposition premises, 53 have data/type/instance binders only, and 70 have no in
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings pass.
 The full normal repository build now passes. Final acceptance is blocked only by
-99 unrecorded central G07 pin registrations (zero axiom errors). The later coordinator instruction explicitly
+110 unrecorded central G07 pin registrations (zero axiom errors), at the current
+2a43bf4f integration. The later coordinator instruction explicitly
 reactivated this same worker and authorized merging origin/master and continuing.
 The retirement section below is historical; no goal was created or reset.
 
@@ -23,7 +24,7 @@ The retirement section below is historical; no goal was created or reset.
 | 1. Frozen signatures, ownership, premise classification | Complete source inventory; elaborated binders now also exported. |
 | 2. Simultaneous hypotheses | 177 exact-type packages pass complete Lean diagnostics and reviews. |
 | 3. Success/totality and behavioral controls | Seven formal theorems and ten provenance-bound external programs pass; proof/runtime boundary below. |
-| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Full final gate rerun remains required after checkpoint 3. |
+| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Current full build passes; final central inventory registration remains blocked. |
 
 The accounting tool explicitly reports `witness_gate_complete=true` and
 `assignment_complete=false`. All original Solidity sources, generated roots,
@@ -524,3 +525,50 @@ and contains110unique standard-only additions with matching centralSHA. No
 central pin update was made by this worker. Earlier full-build passes/99-entry
 tickets remain historical; they are not relabelled as current2a43 validation.
 The current full build remains to run after19 upstream validation-input changes.
+
+## Current full gate and final owner handoff (2026-11-07)
+
+The normal ./run-lean.sh passed on integration
+2a43bf4fcdaf24750265afc8f8be5b420d1d22b0, with 6555 jobs and exit 0,
+in 6935.474578 seconds. The resource receipt binds stdout SHA256
+0f741f0097ab7ff34d21865cb6f7660169c1afdf5253e02a9021e2cca040edc2.
+Peak task RSS was 8629575680 bytes; peak cgroup use 11469070336 bytes;
+minimum available memory 5710798848 bytes. One heavy Lean job, explicit -j1,
+LEAN_NUM_THREADS=1, no swap and verified cleanup satisfy the unchanged
+16 GiB hard cap, 12 GiB task RSS cap and 4 GiB reserve. No source, proof budget
+or configuration changed during the run. The prior 706 pass is historical.
+
+Actual Lean is 4.24.0 Release, commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake is 5.0.0-src+797c613.
+Fresh bounded per-file KeySort and all nine audit modules pass, with 177
+witnesses/fidelity comparisons, 439 binders and seven formal success theorems.
+Ten generated external fixtures remain byte-identical to authenticated archived
+observations. This does not claim a fresh EVM run, a formal gas/fork theorem
+or a general compiler correctness bridge. No new axiom, sorry, native trust
+shortcut or frozen statement edit. Matching timing delta is -0.094089499%,
+within the unchanged 10% limit.
+
+Fresh static gates: trust passes (6562 sources, 289 sites, zero findings),
+reachability passes (6546 reachable, zero orphans/not-allowed), documentation
+paths pass (131 ambiguous references all resolve). Global axiom metadata still
+fails: 16151 pins, zero errors, 110 unrecorded standard-only additions.
+PIN-2a43bf4f records every unique addition and the current central hash.
+The original explicit prohibition on central pin edits remains in force.
+Coordinator/G07 owners may register those existing pins and rerun the inventory
+gate, or retain the blocker pending their review. Neither option changes a
+theorem, premise, exclusion or axiom set. No vacuous or weakened mapped theorem
+was found, so there is no theorem-repair escalation.
+
+The four original implementation/proof checkpoints and independent backfill
+are complete; final checkpoint acceptance remains blocked only on the central
+metadata gate. No additional unclaimed audit candidate is assigned. Keep the
+original goal unfinished; do not create/reset it. No push, merge into master,
+PR or deployment was performed. Portable manifests use archive-relative paths;
+current committed index records the off-Git archive hash. Full original prompt,
+work/backfill queue and scope manifest remain committed in the parent handoff.
+
+Final independent finder and skeptic reviews verified the current full-build
+receipt and owner ticket without Lean/server/builds/edits. Both also verified
+all 1524 archive members; the skeptic checked all 402 resume-manifest entries
+and all 61 final-snapshot files. The packaging minor is closed: the current
+index hashes and blocked-versus-build-pass claims agree. No residual finding.
