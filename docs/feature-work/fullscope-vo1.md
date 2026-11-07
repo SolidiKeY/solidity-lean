@@ -1549,3 +1549,64 @@ small G0 repair is kernel checked; broad checkpoint/central-policy blockers
 must be resolved before advancing its required validation or claiming closure.
 
 Final finder and skeptic independently confirmed the fresh execution-hash binding, archive hashes/sizes, scope and failure accounting; no remaining finding in this two-observer change. Neither used Lean/server/builds or writes.
+
+
+## H82 compatibility correction — 2026-11-07
+
+The coordinator held284a998737e01be7ebc4e41e0d77f5f07e18c032 because the earlier
+const? rewrite changed existing definition bodies and dropped generated equation
+lemmas. That was not proof-only under H82. This correction explicitly supersedes
+the previous section's claim that existing runtime observers were G0-repaired.
+Old measurements/archives remain immutable records of the rejected proposal;
+they do not describe this corrected implementation or an accepted runtime change.
+Held history is preserved at codex/solidity-fullscope-20261104/vo1-pre-h82-284a9987.
+
+Simple.const? and Val.const? are restored verbatim from published reference
+95d1e9cb29dc5a34d1db68af3ca47e47b75e293f, including the original matcher equations.
+All existing downstream declarations, theorem statements/bodies and callers are
+unchanged versus that reference. The net source delta is32 added lines only:
+Simple.constView?, Val.constView? and their constView?_eq lemmas. New views use
+index-generalizing casesOn, and Val's new view delegates to the new Simple view.
+Each equality states value.constView? = value.const? for every typed input,
+with no additional premise. No global simp attribute or caller redirection.
+Only the NEW views satisfy this G0 observation pattern. Existing runtime callers
+still use the frozen matchers; their G0 obligation remains open. No speedup,
+pass-coverage or D6/compiler/EVM/gas claim is added by the unused helper views.
+
+Validation: ConstFold MCP0,8.002832s,RSS1392562176,cgroup934486016,12 samples.
+Repository per-file gates on ConstFold, CompatibilityAudit and unchanged
+O02Controls all PASS:54.749236s,RSS936792064,cgroup534700032,102 samples.
+Metadata audit confirms precisely Simple.const?.eq_1..eq_4 and
+Val.const?.eq_1..eq_10 (14 equations), and prints their types. New views and both
+agreement lemmas depend only on propext; old evaluation proofs and all15 O02
+axiom reports remain standard-only. Audit file SHA is recorded before/after its
+execution and matches the cache snapshot. Existing positive/negative control
+verdicts, including overflow IR revert and assert Panic, are unchanged; this
+establishes no source Panic-byte/D6 adequacy beyond the existing IR boundary.
+
+gate.sh touched PASS (build-touched29s),30.308200s total,RSS1030500352,
+cgroup573001728,54 samples. Its current-runtime config SHA matches before/after
+and the packet. All heavy work serial under verified12GiB/no swap,threads1,-j1,
+4GiB reserve and unchanged proof/build budgets. Actual Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613. No maxHeartbeats increase, sorry, new axiom or native_decide.
+Broader original checkpoint/full gates were not rerun here; historical timeout
+and central-policy failures retain their original revision bindings and no full
+assignment readiness is claimed. H82 correction is additive proof/helper work,
+not permission to migrate frozen callers or change other definition bodies.
+
+Separate read-only finder/skeptic confirmed the additive32-line delta, exact
+restoration and proof semantics; final ledger/hash review recorded in handoff.
+H44 new raw evidence remains VM-only; const-h82.sha256 commits two pointers:
+- delivery/const-h82-20261107/evidence.tar.zst,1859523 bytes,
+  SHAedd4427b7a74606f67b211dfd50725dbca1373f29609289c643e665c795390d8,
+  29 payload files plus per-file MANIFEST.json.
+- delivery/cache-const-h82-20261107/cache-packet.tar.zst,100864700 bytes,
+  SHA108e48f0aa911c1203cc8a49ebc8def5ea32ce27727437bc1fa99070aaa545be,
+  scoped66-module corrected cache, coordinator-pending under H41.
+Cache HEAD metadata is precommit held base284a; source hashes and final committed
+binding are authoritative. Old packet791e86... is not the corrected-source pack.
+Never VM ship-cache.sh. Coordinator explicitly requested pushing the correction;
+only the assigned codex branch is authorized, with no default-branch push/PR.
+O01/O02/O03 full obligations remain open under their original semantics/budgets.
+
+Final finder and skeptic approved source, restored equations, ledger and artifact hashes; no remaining correction finding. Both were read-only and used no Lean/server/builds.
