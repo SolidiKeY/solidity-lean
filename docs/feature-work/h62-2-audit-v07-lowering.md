@@ -43,3 +43,29 @@ Logs remain outside Git at v07-condition-contract-general.json and
 v07-condition-contract-general-files/1.log in the gate-output directory.
 This covers the specified expression shape, not admission, a full condition
 producer, whole compilation, or the complete V07 interface census.
+
+
+## Pair-assignment family feasibility
+
+IntegerPairFamilyWitness.lean audits the imported IntegerLocalFamily.assign_pair
+contract using three distinct slots. For either pipeline, one concrete tuple
+jointly inhabits all 23 telescope entries and derives the actual postfamily.
+A private typed guard checks the complete imported signature. General lemmas
+retain arbitrary bounded integers and both existing local carriers, distinguish
+legacy and viaIR effects when operand reads differ, and demonstrate that the
+two destinations may alias. Only the original first-destination/second-RHS
+separation premise is required.
+
+Master 2a43bf4fc was fetched and inspected before this item. The import gate
+passed in 14.077s, including KeySort and actual tool versions. The final guarded
+module passed in 2.083s with serial Lean 4.24.0, 12GiB/no swap and the existing
+4GiB headroom guard. Its seven printed theorem axiom sets contain only the
+standard three axioms; source_orders_differ is axiom-free. Logs are outside Git
+at /workspace/sol-numeric-literals-gate-output/v07-pair-family-guarded.json and
+the corresponding guarded-files/1.log. These are local-carrier feasibility and
+order results, not whole-program termination, gas, compiler success, or a full
+V07 census. Production sources, frozen statements and budgets are unchanged.
+
+Independent read-only finder and skeptic reviews passed with no findings; neither
+reviewer used Lean or a server. The global documentation check retains the three
+previously routed Theory/StructuredFlow missing references.
