@@ -2048,3 +2048,15 @@ test: both ambiguity directions and schema-valid non-theorem refusal are covered
 No reviewer edits, builds or server use. Trust reports zero findings; orphans,
 roots/fragments and whitespace pass. The final doc-only/report boundaries do
 not waive the retained documentation RED or full Lean/Bridge obligations.
+
+
+### H126 scope answers (2026-11-07)
+
+Q-WV-SCOPE-01 is resolved as option A: the nine WordValidation domains remain
+support-only evidence with no census or domain credit; original frozen-area
+obligations are unchanged. Do not re-file this question. H126 also transfers
+the staged V15/P10 production application to this successor; the former owner
+permission wait is replaced by actual application and validation obligations.
+The initial source application and imported producer limits are recorded in
+docs/feature-work/h62-4-generic-p10.md. No PowerBounds STOP or other producer
+wait is cleared by the scope answer.
