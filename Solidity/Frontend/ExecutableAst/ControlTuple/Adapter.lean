@@ -24,7 +24,7 @@ def components (j : Json) : Except String (List Json) := do
 /-- A scalar child cannot silently contain a tuple/call or reference value. -/
 def scalar (read : Json → Except String RawExpr) (j : Json) : Except String RawExpr := do
   if !constTy j then
-    let _ ← Shared.prim j
+    let _ ← Shared.localPrim j
     pure ()
   let e ← read j
   match e with

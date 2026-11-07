@@ -93,6 +93,9 @@ PY
 if [ "$mode" = per-file ]; then
   for file in "${files[@]}"; do run_gate "lean:$file" lake lean "$file" -- --tstack=131072; done
 else
+  # Merge pre-gates use touched mode: reject the prospective tree before builds.
+  run_gate layers node scripts/check-layers.mjs
+  [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
@@ -107,7 +110,6 @@ else
     fi
     run_gate trust bash scripts/check-trust.sh
     run_gate orphans node scripts/check-orphans.mjs
-    run_gate layers node scripts/check-layers.mjs
     run_gate roots bash scripts/coord-tools/register.sh --check
     run_gate fragments bash scripts/coord-tools/fragments.sh --check
     run_gate doc-paths bash scripts/check-doc-paths.sh

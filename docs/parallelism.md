@@ -11,6 +11,8 @@ chain, `--path A B` one import path from `A` to `B`;
 `node scripts/check-layers.mjs` fails when a core module reaches the
 elaborator or introduces an unapproved core-to-non-core import boundary.
 
+Audits (2026-11-06): [architecture](audits/architecture.md) (layering, copies, Controls cost), [build-speed](audits/build-speed.md) (where check time and memory go) and [coordination](audits/coordination-process.md) (lane time, gates, merge latency).
+
 ## P1. The core apart from the elaborator
 
 ### The core
@@ -52,6 +54,17 @@ found 95 direct core-to-non-core boundary edges. Those exact edges are pinned in
 bytes with `python3 -B scripts/h62/item5/statement-graph/audit_core_baseline.py`.
 They are existing debt, not proof that the core is already closed.
 
+The authorized OT-W0-TOOLING follow-up re-pins current master
+`fea090bf9fec1a372ad32952a5e72eb4d7015888` at **107** boundary edges.
+`scripts/core-import-current-baseline.json` contains that full snapshot and the
+12 additional edges, each attributed to its verified import-introduction commit;
+its SHA256 is `880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d`.
+Reproduce it with
+`node scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs`.
+The original 95-edge snapshot remains immutable. The twelve are cleanup candidates,
+listed in [the tooling handoff section](feature-work/h62-5-statement-graph.md#authorized-current-master-import-baseline-and-merge-pre-gate),
+not a declaration that the package is closed under imports.
+
 `scripts/check-layers.mjs` now checks the Solidity-package import closure as well
 as the existing elaborator/parser restrictions. It follows paths through core
 modules and rejects each new boundary to a non-core module, printing a witness
@@ -62,12 +75,21 @@ package-layer graph. The scanner handles comments, indented imports, and multipl
 modules on one import line; unsupported quoted or multiline import syntax fails
 closed. Existing elaborator/parser bans still apply even to an allowed edge.
 
-The active subset is `scripts/core-import-allowlist.json`. Remove obsolete entries
-when fixing debt. It can only shrink: additions outside the audited set, duplicate
+The active subset is the union of `scripts/core-import-allowlist.json` (original
+95) and `scripts/core-import-additions-allowlist.json` (authorized twelve). Each
+component has independent permanent shrink-only history; an original edge cannot
+be moved into the additions to restore it. Remove obsolete entries when fixing
+debt. Both can only shrink: additions outside the audited set, duplicate
 edges, re-adding a previously removed edge, and delete/recreate histories are
 rejected. Validation checks committed change history and the working tree;
 shallow histories, grafts and custom history overrides are refused. The immutable
-95-edge snapshot and its checksum must not be enlarged to silence a new failure.
+95-edge and current 107-edge snapshots and their checksums must not be enlarged
+to silence a later failure. No further allowance is authorized by this re-pin.
+
+The merge pre-gate `bash scripts/coord-tools/gate.sh touched` runs the layer check
+first and fails before invoking a build. Run it on the prospective merged tree
+before committing/publishing the merge. Checkpoint/full modes use the same
+preflight; per-file diagnostics remain unchanged.
 
 The elaborator is `Syntax/{Elab,Quote,Splice}` and
 `Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`. Source extraction for
