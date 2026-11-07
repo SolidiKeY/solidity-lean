@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/recursion-roles-v83/semantic-roles-reviewed.json",
-    "bytes": 2620345,
-    "sha256": "f8d752668385674b9ce9827ff5a8c67ff1e71cc5bf01497c1d12b4f73a1b2b39"
+    "path": "/workspace/h62-successor-bulk/term-equality-roles-v84/semantic-roles-reviewed.json",
+    "bytes": 2682483,
+    "sha256": "56d1b68de1c40d8e607e57f4d3b02cf756429724904ced94c6cbb9e638bd83c7"
   }
 }
