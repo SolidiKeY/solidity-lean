@@ -71,3 +71,7 @@ The base-byte-pinned `signed_div_origin_ledger.py` covers ten literal declaratio
 ## SignedDiv Selected
 
 The base-byte-pinned `signed_div_selected_ledger.py` adds twelve literal declarations covering public compiler selection, checked raw division and the unchecked minimum/-1 conditional, intrinsic evaluation under local-read premises, and symbolic `ValOutT` under the original physical StateRepr and arbitrary EVM-word tail. This is not a numeric capacity proof, target panic-payload claim, Lean proof or complete semantic account. The ledgers now account for 306 of 465 literal headers; 159 remain unclassified.
+
+## SignedDiv Execution
+
+`signed_div_execution_ledger.py` records six base-pinned intrinsic and joint Source/selected symbolic execution declarations. Ordinary and zero-divisor cases retain both checked modes; the minimum/-1 case separately records checked arithmetic panic/coarse revert and unchecked minimum success. Original Source/target local reads, physical StateRepr and arbitrary EVM-word tail remain binding. This is textual accounting, not Lean validation or a target panic-payload assertion. The ledgers now account for 312 of 465 literal headers; 153 remain unclassified.

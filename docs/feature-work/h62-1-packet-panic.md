@@ -97,3 +97,7 @@ The base-byte-pinned `signed_mod_source_ledger.py` adds 12 manually reviewed Sou
 ## SignedDiv Selected continuation
 
 `signed_div_selected_ledger.py` records twelve base-pinned selection declarations. Tests reject missing, duplicate, forged and changed-source inputs. Independent read-only finder and skeptic reviews matched the selection, intrinsic and symbolic observations to the originals without Lean, and found no material discrepancy. Source-only and target observations remain distinct; the textual ledger is not full semantic closure.
+
+## SignedDiv Execution continuation
+
+`signed_div_execution_ledger.py` records the six base-pinned execution declarations with original Source and target observation boundaries. Tests reject missing, duplicate and forged census headers and modified bytes. Independent read-only finder and skeptic reviews matched the statements without Lean; the checked-flag coverage was clarified and rechecked. This does not prove Lean statements or full semantic closure.
