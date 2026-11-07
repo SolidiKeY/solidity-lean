@@ -18,6 +18,9 @@ the read and then what the hole does with it (`SHole.contT`, `MHole.contT`,
 once.
 -/
 
+-- Retain the existing typed capture/lifting proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 open Solidity (Modality Srt Op0 Op1 Op2 Op3)
 open Semantics (Selector)

@@ -19,6 +19,9 @@ does, with its return value (`CallRet.sumOf_sound`), and the call's
 update fails exactly where the call reverts (`CallRet.summary_agrees`).
 -/
 
+-- Retain the existing typed call-summary proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Solidity (Srt Op0 Op1 Op2 Op3)

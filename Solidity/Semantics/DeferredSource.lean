@@ -84,7 +84,7 @@ theorem run_afterAlias {R : RefTy} (e : Operand C Γ T) (σ : State C Γ)
     (p : Option (SRef C (.ref R))) :
     (e.wk (.drop .refl)).run (σ.push (t := .alias R) p) =
       (e.run σ).map (fun x => (⟨x.1.st.push (t := .alias R) p, x.1.ext⟩, x.2)) := by
-  simpa only [liftedT₂, Out.lift, State.lift, State.push, TEnv.put, TEnv.wk, LTy.TDenote.wk]
+  simpa only [liftedT₂, Out.lift, State.lift, State.push, State.withEnv, TEnv.put, TEnv.wk, LTy.TDenote.wk]
     using run_wk e (.drop (t := .alias R) .refl) σ (p, σ.env)
 
 def pushAt {E : Ty} (e : Operand C Γ E) (ref : SRef C (.ref (.array E))) : TStep C Γ Γ := fun σ => do
@@ -103,10 +103,10 @@ theorem pushAt_afterAlias {R : RefTy} {E : Ty} (e : Operand C Γ E) (σ : State 
   | error err => rfl
   | ok x =>
     dsimp only [bind, Except.bind, Except.map]
-    dsimp only [State.push, State.withEnv]
-    cases hf : x.1.st.storage.full ref with
-    | true => rfl
-    | false =>
+    dsimp only [State.push, State.withEnv, State.withStorage]
+    rcases Bool.eq_false_or_eq_true (x.1.st.storage.full ref) with hf | hf
+    · simp only [hf, ite_true]
+    · simp only [hf, Bool.false_eq_true, ite_false]
       cases hp : x.1.st.storage.push ref (fun _ => some x.2.strip) with
       | none => rfl
       | some st => rfl
@@ -123,9 +123,8 @@ theorem join_ext : {Γ Δ Ε : Ctx} → (P : Prog C Γ Δ) → (Q : Prog C Δ Ε
 theorem join_run : {Γ Δ Ε : Ctx} → (P : Prog C Γ Δ) → (Q : Prog C Δ Ε) → (σ : State C Γ) →
     (P.join Q).run σ = TRun.seq P.runR Q.runR σ
   | _, _, _, .nil, Q, σ => by
-    change Q.run σ = (do let x ← Q.run σ; pure x)
-    cases Q.run σ
-    all_goals rfl
+    change Q.run σ = TRun.seq TRun.nil Q.runR σ
+    rw [TRun.seq_nil]
   | _, _, _, .cons s P, Q, σ => by
     change TRun.seq s.runR (P.join Q).runR σ = TRun.seq (TRun.seq s.runR P.runR) Q.runR σ
     simp only [TRun.seq, join_run P Q]
@@ -200,18 +199,19 @@ theorem expandedPush_atAlias {E : Ty} (e : Operand C Γ E) (σ : State C Γ)
         Except.ok.inj hf
       have hp : TEnv.get ((.here : Idx (.alias (.array E) :: Γ) (.alias (.array E))).ext
           (e.code.wk h).2.2.ext) (a.st.lift (e.code.wk h).2.1 d').env = some ref := by
-        simpa only [TEnv.get_ext_drop] using
+        simpa only [TEnv.get_ext_drop, Out.drop, State.drop, State.push, State.withEnv,
+          State.lift, TEnv.get] using
           congrArg (fun x : Out C σ.H (.alias (.array E) :: Γ) => x.st.env.1) hout
       simp only [TRun.push, SPath.resolveT, hp, Src.valueT_wk, TRes.ofOpt,
         bind, Except.bind]
       cases e.value.valueT a.st with
       | error err => rfl
       | ok v =>
-        dsimp only [State.lift, State.drop, State.withEnv]
+        dsimp only [State.lift, State.drop, State.withEnv, State.withStorage, State.push]
         dsimp only [pure, Except.pure, Except.map]
-        cases hc : a.st.storage.full ref with
-        | true => rfl
-        | false =>
+        rcases Bool.eq_false_or_eq_true (a.st.storage.full ref) with hc | hc
+        · simp only [hc, ite_true]
+        · simp only [hc, Bool.false_eq_true, ite_false]
           dsimp only [Option.getD]
           cases hs : a.st.storage.push ref (fun _ => some v.strip) with
           | none => rfl

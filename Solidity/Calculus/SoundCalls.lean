@@ -27,6 +27,9 @@ import Solidity.Semantics.RevertOnly
   outcome binds (`holds_binders_all`), is the run of that clause.
 -/
 
+-- Retain the existing typed call/try proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 open Solidity (Modality)
 
