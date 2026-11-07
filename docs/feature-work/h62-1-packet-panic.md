@@ -146,7 +146,7 @@ Twelve per-file ledger tests now restore the removed census row at its original 
 
 ## Attributed-header scan follow-up
 
-The original census omits same-line attributed declarations. At that earlier checkpoint, `attributed_header_scan.py` checked only a narrow single-simple-attribute pattern across the 48 base-validated files and found zero raw candidates. Independent read-only finder and skeptic independently matched this result without Lean. The scanner deliberately does not mask comments or cover nested/multiple attributes, multiline headers or other syntax; its synthetic controls demonstrate a block-comment false positive. This does not establish absence of attributed declarations or full coverage.
+The original census omits same-line attributed declarations. At that earlier checkpoint, `attributed_header_scan.py` checked only a narrow single-simple-attribute pattern across the 48 base-validated files and found zero raw candidates. Independent read-only finder and skeptic independently matched this result without Lean. That earlier scanner did not mask comments or cover nested/multiple attributes, multiline headers or other syntax; its then-current synthetic controls demonstrated a block-comment false positive. The later expanded scanner is described below. Neither scan establishes absence of attributed declarations or full coverage.
 
 ## SignedSub Controls continuation
 
@@ -187,3 +187,11 @@ The occurrence mapper now reuses the original census mask, whose function body w
 ## Expanded attributed-header follow-up
 
 The scanner now masks comments and strings and recognizes certain nested, multiple and multiline attributes, recording declaration-token positions and original-census coverage hints. The shared mask retains its former default behavior. The 48 pinned files yield zero candidates under this heuristic. Independent read-only finder and skeptic reviewed without Lean; they identified and rechecked a multiline-modifier location fix. Unsupported Lean syntax and modifiers remain possible, so the result is not full declaration or semantic coverage.
+
+## Raw-string and interpolation follow-up
+
+The shared lexical mask handles hash-delimited raw strings and conservatively fails on possible interpolation instead of silently masking embedded terms. Independent read-only finder and skeptic supplied Unicode and comment-separated counterexamples; fixes and false-positive limitations were rechecked without Lean. The rule can reject non-interpolation text and is not a full Lean lexer. Current pinned-tree panic occurrence output is unchanged.
+
+## LF occurrence-line follow-up
+
+The occurrence scanner now splits raw and masked text only on LF; CR, form-feed and Unicode separators in comments no longer produce a line-count mismatch in the synthetic control. Independent read-only finder and skeptic verified current output without Lean. Other window and census generators still use Python `splitlines()`; the pinned files and registered helper contain none of the differing separators, and other inputs remain subject to lexical mismatch or fail-closed behavior.
