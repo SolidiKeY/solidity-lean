@@ -2,12 +2,10 @@
   "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "interface": "Solidity/Backend/Passes/ShiftCaptureControls.lean",
   "interface_sha256": "3a81ca970d37718137b07e0e902b8a0c60bd17bf69ec6e64558275dd51b5bc80",
-  "joint_witness": "Solidity.Backend.Passes.AuditShiftCapture.joint",
+  "joint_witness": "Solidity.Backend.Passes.AuditShiftCapture.SourceCase.joint",
   "exercised_public_namespace": "Solidity.Backend.Passes.AuditShiftCapture",
   "checked_private_names": [],
-  "uncovered_public_names": [
-    "Solidity.Backend.Passes.ShiftCaptureControls.source_expression"
-  ],
+  "uncovered_public_names": [],
   "rows": [
     {
       "name": "Solidity.Backend.Passes.ShiftCaptureControls.represented",
@@ -83,13 +81,18 @@
       "name": "Solidity.Backend.Passes.ShiftCaptureControls.input_refused",
       "signature_sha256": "117b2e61f6058c416d9c87a8e1413822397a861442094f3f6da12a9702bab277",
       "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ShiftCaptureControls.source_expression",
+      "signature_sha256": "7e8344739f3a677f44fef10bfb31fbf17e9814df26db8ff3da774168797aad45",
+      "kind": "public-original-proof-reuse"
     }
   ],
-  "aggregate_selected": 537,
-  "aggregate_remaining": 722,
+  "aggregate_selected": 538,
+  "aggregate_remaining": 721,
   "auxiliary_definition_credit": 0,
-  "joint_contract": "general-actual-shift-state-and-capture-input-for-every-direction-value-count",
-  "limits": "Fifteen original target/control rows; source_expression remains explicitly uncovered until concrete Source metadata/tuple checked. Joint uses existing generic shift/capture API for both directions and all finite operands/counts. Original saturation, count clearing, full observations, wrong order and frame refusal preserved. No definition/supplemental/Source credit; no native ByteWorld/emission, ABI/gas or full Source/G24 adequacy.",
+  "joint_contract": "correlated-generic-target-input-and-concrete-Source-tuple-with-real-fuel-boundary",
+  "limits": "All sixteen original rows. Strong joint correlates actual target Input with typed Source Env/Glob/Fr/St/locals, every pipeline/caller checked flag/extra/direction/value/count. Evaluation explicitly overrides checked=false as frozen; fuel2 timeout and extra+3 success checked. Shared context uses Source.St.init and existing fixed parameters; no whole-session/hash/admission adequacy. No helper/definition/supplemental credit; no native ByteWorld/emission, ABI/gas or full Source/G24 adequacy.",
   "checked_axioms": {
     "insufficient_frame": [],
     "joint_and_other_aliases": [
@@ -97,5 +100,21 @@
       "Classical.choice",
       "Quot.sound"
     ]
-  }
+  },
+  "source_fixture": "Solidity.Backend.Passes.AuditSourceContext",
+  "source_evaluation_mode": "unchecked-as-required-by-frozen-source-expression",
+  "source_fuel": {
+    "timeout": 2,
+    "success": "extra+3"
+  },
+  "source_fixture_axioms": {
+    "E": [],
+    "frame": [],
+    "program_globals_sourceState": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "auxiliary_source_row_credit": 0
 }

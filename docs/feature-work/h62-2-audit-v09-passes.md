@@ -1400,3 +1400,21 @@ reports are guarded, including axiom-free insufficient_frame. Evidence:
 `/workspace/vy3-evidence/shift-capture-20261107`. No native ByteWorld/emission,
 ABI/gas or full Source/G24 adequacy is inferred. Existing transition/producer
 waits, STOPs and all original final acceptance obligations remain open.
+
+
+Shift Source-expression checkpoint: the remaining original `source_expression`
+row now has its exact original alias and a stronger correlated Source/target
+joint. Shared `SourceExpressionContext.lean` instantiates original typed
+Source.Program/Glob/Fr interfaces with Source.St.init and existing Roadmap fixed
+parameters; no per-case metadata or interface family is copied. The tuple retains
+every pipeline and caller checked flag, extra fuel, direction and finite operand.
+Evaluation explicitly uses checked=false as the frozen theorem requires. Fuel2
+times out, while extra+3 succeeds with the original Source encodings and unchanged
+locals/state. The old target joint remains unchanged. Selected538/1259,721open;
+context definitions and extra fuel controls add zero selected rows. Shared context
+and all new proof axiom reports are guarded. No session/hash/native adequacy follows.
+The attempted UnsignedCast.Controls fixture import failed at its explicit
+sourceState construction (line42: incompatible Source.St/Cursor.empty under the
+frozen artifact closure); that raw failure is retained, no production edit applied.
+Evidence: `/workspace/vy3-evidence/shift-source-expression-20261107`.
+All original transition/producer waits, STOPs and full acceptance obligations remain.

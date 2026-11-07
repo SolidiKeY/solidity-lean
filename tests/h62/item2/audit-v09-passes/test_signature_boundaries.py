@@ -167,7 +167,7 @@ class HeaderBoundaries(unittest.TestCase):
                     ('runtime-return-capture',10,0,'Solidity.Backend.Passes.AuditRuntimeReturnCapture.joint'),
                     ('runtime-void-capture',11,0,'Solidity.Backend.Passes.AuditRuntimeVoidCapture.joint'),
                     ('stateful-capture',6,0,'Solidity.Backend.Passes.AuditStatefulCapture.joint'),
-                    ('shift-capture',15,0,'Solidity.Backend.Passes.AuditShiftCapture.joint')]
+                    ('shift-capture',16,0,'Solidity.Backend.Passes.AuditShiftCapture.SourceCase.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
@@ -253,15 +253,18 @@ class HeaderBoundaries(unittest.TestCase):
                     if row['kind']=='private-exact-kernel-signature':
                         self.assertEqual(row['simultaneous_witness'],mapping['joint_witness'])
             if stem == 'shift-capture':
-                self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'source_expression'})
-                self.assertEqual(mapping['uncovered_public_names'],['Solidity.Backend.Passes.ShiftCaptureControls.source_expression'])
+                self.assertFalse(uncovered)
+                self.assertEqual(mapping['uncovered_public_names'],[])
+                self.assertEqual(mapping['source_evaluation_mode'],'unchecked-as-required-by-frozen-source-expression')
+                self.assertEqual(mapping['source_fuel'],{'timeout':2,'success':'extra+3'})
+                self.assertEqual(mapping['auxiliary_source_row_credit'],0)
                 self.assertEqual(mapping['auxiliary_definition_credit'],0)
             self.assertEqual(len(keys),total)
             self.assertEqual(sum(r['kind']=='private-exact-kernel-signature' for r in mapping['rows']),private_count)
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(537,722))
+        self.assertEqual((len(seen),1259-len(seen)),(538,721))
 
 
 
