@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/payment-classification-v10/semantic-roles-reviewed.json",
-    "bytes": 379413,
-    "sha256": "b61ef5bba522bd77a192f4109edcdf041ceadaebff301b717ae8b7c95ccc72fc"
+    "path": "/workspace/h62-successor-bulk/capture-close-classification-v11/semantic-roles-reviewed.json",
+    "bytes": 409313,
+    "sha256": "ad838bf71de5f6085590b19956d4ffb6ceabfbcf3b872af06f5ecbee90843aa4"
   }
 }
