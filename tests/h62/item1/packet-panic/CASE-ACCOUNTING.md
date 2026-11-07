@@ -103,3 +103,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## SignedMod Controls
 
 `signed_mod_controls_ledger.py` adds thirty base-pinned literal declarations for populated fixtures, Source and selected symbolic outcomes, separate raw/guarded numeric zero behavior, five signed remainder examples, low-horizon timeouts, saved-tail and short-frame refusals and an initial memory snapshot. Original ranges, checked/pipeline quantifiers and w77-prefixed arbitrary tails remain binding. Exact Source divZero data is not a symbolic target payload claim. The ledgers now describe 398 of 474 observed lexical headers; 76 of the original subtotal remain. This is not Lean proof or full semantic coverage.
+
+## SignedDiv Controls
+
+`signed_div_controls_ledger.py` adds twenty-one base-pinned literal declarations for the populated fixture, canonical word representation, zero-divisor and minimum/-1 Source/symbolic cases, -7/2 truncation, panic-class distinction, negative controls and numeric depth-4 stack bounds. It retains the original pipeline, checked-flag, fuel and arbitrary-tail quantifiers; Source exact panic data remains separate from coarse symbolic revert. Existing axiom guards are outside this ledger and were not edited. The ledgers now describe 419 of 474 observed lexical headers; 55 of the original subtotal remain. This is not Lean proof or full semantic coverage.

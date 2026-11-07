@@ -129,3 +129,7 @@ The base-pinned seven-row signed subtraction execution ledger retains the unchec
 ## SignedMod Controls continuation
 
 The base-pinned thirty-row controls ledger records Source, symbolic target, numeric guard, timeout and refusal distinctions. Negative controls pass. Independent read-only finder and skeptic reviewed without Lean, both flagging a potential initial-memory versus post-execution ambiguity; its wording was corrected and rechecked. No original producer or proof guard was edited.
+
+## SignedDiv Controls continuation
+
+The base-pinned twenty-one-row controls ledger records checked and unchecked minimum/-1 outcomes, zero-divisor and truncation controls, and the specific numeric stack-bound witness. Negative controls pass. Independent read-only finder and skeptic matched the declarations and premises without Lean; no material discrepancy was found. No producer or axiom guard was edited.
