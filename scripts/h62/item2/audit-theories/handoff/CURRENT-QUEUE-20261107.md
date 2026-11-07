@@ -6,7 +6,7 @@ fresh thread is coordinator-managed for SAME VM/branch/goal, not self-launched.
 Repository: /workspace/audit-theories.
 Branch: codex/solidity-h62-2-20261106/audit-theories.
 Frozen assignment base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
-Rebase/delivery base: 7683091e7c35d265b3b76fdf2a93d0197ce9f556.
+Rebase/delivery base: e0f4251ff40ad79c37bae53795b7419afe52e8d9.
 VM: ccarenv_b64_Y2NhcmVudl8yZmZkMjNiNDVmNTg4MTkxOTI3MDI3NGVhZWM4N2E1ZA.
 No push/PR/master merge; goal-tool inspection unavailable, not a blocker.
 
@@ -26,13 +26,13 @@ agreement request. No producer source/root/map/axiom pin/toolchain edits.
 ## Full original queue, current obligations
 
 1. Inventory: all500 original typed signatures and25 files reconciled historically;
-  28 global-structure/per-input role records reviewed,472 still need review.
+  36 global-structure/per-input role records reviewed,464 still need review.
   Live producer owner confirmation remains incomplete, informational under H82.
-2. Simultaneous inputs:87 joint certificates available on current dependencies;
-  version fidelity separate.75 current full-file subset records and6 additional
+2. Simultaneous inputs:95 joint certificates available on current dependencies;
+  version fidelity separate.83 current full-file subset records and6 additional
   Payable packets validated.3 intentional H69 impossibilities accepted;18
-  no-input telescopes explicitly historical.389public+3private ordinary witnesses
-  pending, all986 original generated candidates retained pending. Exact1378
+  no-input telescopes explicitly historical.381public+3private ordinary witnesses
+  pending, all986 original generated candidates retained pending. Exact1370
   names/source/owners in final evidence remaining-original-records.json.
   Static enter input is impossible and still ordinary-pending, not autoH69.
 3. Totality/controls:26 compiler helper proofs give actual core admission/bool
@@ -42,7 +42,7 @@ agreement request. No producer source/root/map/axiom pin/toolchain edits.
   ABI failure bytes, target gas/Fitted/Enforced and physical forks remain unproved.
   Source fuel/stipend/fork boundaries do not discharge physical target obligations.
   Preserve H68 full PassCorrect bridge requirements; don't duplicate H55 work.
-4. Acceptance:126 helpers/29fixture defs/7private abbreviations have current
+4. Acceptance:136 helpers/31fixture defs/7private abbreviations have current
   provenance, no sorry/customaxiom/trust shortcuts. Full original census refuses
   five changed Progress files; no frozen guard weakening. Full ./run-lean.sh and
   full final gates pending; NO RUNTIME_GATE_PASS. Optional root/module placement
@@ -66,10 +66,10 @@ No answer received; don't auto-promote it or change the frozen statement.
 ## Independent queue/backfill remains available
 
 Fetch/log/code-inspect master before the next item, consume landed prerequisites.
-More unchanged Mutability/Assignable/View/Pure, Typed/Obs/Values/Ops/Mem/Leaves,
+More unchanged Mutability/View/Pure, Typed/Obs/Values/Ops/Mem/Leaves,
 Segs, Progress/Calls and CallerModel/Reachable original statements need real joint
 packets (check exact names in ledger; do not pad or steal an owner scope).
-Continue remaining472 premise-role inventories and986 generated classifications,
+Continue remaining464 premise-role inventories and986 generated classifications,
 meaningful success/negative controls and deterministic receipt acceptance cases.
 Resource/timing tooling can be optimized with a matched before/after pair; do not
 rerun unchanged known STOP. Historic authorized pair30.298344s→30.926679s
@@ -83,9 +83,25 @@ Actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
 Lake5.0.0-src+797c613. Migration-only official4.35 pin does not change this audit
 lane's tracked toolchain. Serial explicit -j1,LEAN_NUM_THREADS=1, bounded12GiB AS,
 4GiB available reserve,no host swap,300s/file; preserve existing proof budgets.
-Fresh KeySort prerequisite passed in closer evidence,1.406s/245448704RSS.
+Fresh KeySort prerequisite passed in e0-rebase evidence,1.405s/258387968RSS.
 Current layer gate PASS with107 upstream pinned allowances, no worker exclusion
 changes; not a physical-edge repair. Per-file Lean MCP unavailable; bounded direct
 Lean used. No heavy jobs remain running at handoff. All bulk H44 evidence off Git;
 final absolute paths, actual final head and SHA256SUMS in final handoff.json.
 Full original text/queue/scope copies accompany cumulative patch/bundle exports.
+
+## Latest completed checkpoints and exact handoff
+
+This continuation completed/reviewed Assignable8 joint packets plus real write/
+emptyclause controls;8 Assignable premise inventories (36total); and acceptance
+snapshot combining136helper receipts,500original signatures/owners,1370remaining
+names/owners and36role reports. All5 snapshot corruptions rejected; 83full-file
+subset records and6 additional Payable packets checked separately.3accepted H69
+certificates unchanged; enter_static remains ordinarypending with refutation.
+Requested e0rebase verified contains full prior315a659a985 head. Fetched later
+origin/master fab1149c378e84ca69abacbe68e18620dfe871bc before final item; no
+relevant original Theory/owned audit duplicate, so no unrelated rebase applied.
+Final exact head/base/branch, clean status, all gate commands/outputs and hashes:
+/workspace/h62-audit-theories-e0-handoff-20261107-evidence/handoff.json.
+No push or master merge. No goal reset/create/complete/pause. Coordinator manages
+fresh-thread continuation on same VM/branch/existing goal after3revieweditems.
