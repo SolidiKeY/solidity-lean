@@ -1,0 +1,47 @@
+{
+  "v1_typing_sha256": "ab96b9090dd4b4790f34c572f9c8a82db3f980e44a4ab3662dceefb2cfb6e5c6",
+  "statement_cases": {
+    "declVar": "strengthened envLocOK, uninitialized",
+    "declInit": "strengthened envLocOK, initialized",
+    "block": "recursive items",
+    "ifThen": "recursive body",
+    "ifElse": "both recursive branches",
+    "whileLoop": "recursive body",
+    "doWhile": "recursive body",
+    "forLoop": "recursive body",
+    "forInit": "recursive initializer and body",
+    "tryCall": "recursive success and catch items",
+    "expr": "unchanged v1 premises; no recursive statement child",
+    "placeholder": "unchanged v1 premises; no recursive statement child",
+    "declTuple": "unchanged v1 premises; no recursive statement child",
+    "brk": "unchanged v1 premises; no recursive statement child",
+    "cont": "unchanged v1 premises; no recursive statement child",
+    "ret": "unchanged v1 premises; no recursive statement child",
+    "retVal": "unchanged v1 premises; no recursive statement child",
+    "retTuple": "unchanged v1 premises; no recursive statement child",
+    "emit": "unchanged v1 premises; no recursive statement child",
+    "revertError": "unchanged v1 premises; no recursive statement child",
+    "rethrow": "unchanged v1 premises; no recursive statement child"
+  },
+  "items_cases": {
+    "nil": "true",
+    "stmt": "statement and rest",
+    "unchecked": "body and rest"
+  },
+  "premises": "Actual v1 derivation retained; only declVar/declInit require additional environment-aware location policy. Tuple rule deliberately unchanged.",
+  "bridges": {
+    "v2_to_v1": "StmtD.toV1 and ItemsD.toV1 preserve the actual existing derivation",
+    "v1_to_v2": "ofV1 under CompatibleAt C, quantified only over nameable types passing v1 location rules"
+  },
+  "H24": "declaration_admissible applies in every environment with no compatibility premise",
+  "gap": "Same named mapping-bearing Loop: v1 memory accepted/negative theorem preserved, v2 memory refused, initialized storage pointer admitted.",
+  "not_claimed": [
+    "v1 retirement",
+    "automatic frontend migration",
+    "tuple policy repair",
+    "full Source/compiler adequacy",
+    "library try/Error support"
+  ],
+  "compatible_witness": "Mapping-free-nameable environments imply CompatibleAt; concrete empty-env Bool declaration lifted from actual v1 proof.",
+  "timing_status": "Newest user decision accepts recorded 42.1964s to 46.0804s (+9.2046%) for H128/H125 and releases the historical H16 stop. Any further noticeable slowdown stops and reports. Raw history retained."
+}

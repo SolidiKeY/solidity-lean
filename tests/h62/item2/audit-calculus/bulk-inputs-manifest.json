@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/closer-symbol-roles-v73/semantic-roles-reviewed.json",
-    "bytes": 2306568,
-    "sha256": "7a7553eea818545a5101bcb2f195145aba8aad828e854ccf857d309ae27d3e1b"
+    "path": "/workspace/h62-successor-bulk/fact-elimination-roles-v75/semantic-roles-reviewed.json",
+    "bytes": 2426199,
+    "sha256": "813c69920786b93b2a47026e35b6005d87d98aa8950a2afaf874b82a4abdde6c"
   }
 }

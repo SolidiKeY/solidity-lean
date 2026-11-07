@@ -1,0 +1,17 @@
+{
+ "tests/h62/item2/audit-v09-passes/JoinedMemoryWitness.lean:Solidity.Backend.Passes.AuditJoinedMemory.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedMemoryWitness.lean:Solidity.Backend.Passes.AuditJoinedMemory.public_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/JoinedMemoryWitness.lean:Solidity.Backend.Passes.AuditJoinedMemory.public_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,62 @@
+{
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.bad_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.frame_gap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.ordered_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.physical_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.prefix_refused_at_suffix_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.reached_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.short_suffix_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedWitness.lean:Solidity.Backend.Passes.AuditReframed.skipped_consumer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,5 +1,9 @@
 # H62 item 2: calculus / try-evidence empty-statement audit
 
+## External evidence and coordinator intake
+
+For coordinator-side review, census claims are bound by hash only until the coordinator pulls the referenced bytes and verifies the committed manifests. Classification inputs and bulk evidence remain off Git on this VM under H44, with absolute paths, sizes and SHA256 identities. Local accounting/tests and local finder/skeptic review do not establish coordinator delivery, independent semantic acceptance or proof validation. Delivery remains coordinator-pending; the checkpoint evidence includes the actual local retention/hash audit. Regenerated or transcribed material does not establish identity with unavailable historical bytes.
+
 ## H82 retirement: implementation stopped
 
 The human ordered stop-and-handoff to
@@ -1294,5 +1298,45 @@ All 48 typed operator equations are enumerated with exact RHS descriptions and e
 Exact signatures, source and full per-operator/guard rosters remain off Git under /workspace/h62-successor-evidence/closer-symbol-roles-v73 and /workspace/h62-successor-bulk/closer-symbol-roles-v73 with path/size/hash manifests. Fresh master48ff6a2eb inspected/already adopted. No production source, theorem/definition, budget, axiom, exclusion or toolchain change and no fresh kernel/runtime/cache/performance acceptance.
 
 Whole assignment and four audit checkpoints remain incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context waits persist. The missing SelectedHeapBoundaryWitness documentation reference is routed to vy3-compilation, not a new owner guess; no duplicate ping or doc-gate pass inferred. Existing rejected prototype/timing/reserve STOPs and historical unavailable-byte gaps remain.
+
+Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and101controls pass; complete acceptance remains FAIL exit1.
+
+## Elementary refinement static roles (V74)
+
+Guarded regression: saved source/receiver/index scopes and exact guards must survive capture refinement. Global Leads laws point backward from transformed holding to original holding; they are not forward equivalences or automatic truth.
+
+Complete frozen-selected Solidity/Calculus/Elementary.lean and all 28 named signatures match frozen/current master bytes. Prior 860 rows and owners are unchanged. All 5283 candidates remain accounted: 888 reviewed, 4395 pending; 3746 owners confirmed and 1537 unresolved. Zero fresh joint witnesses. Exact signatures/section history are separately bound for every row. Supporting definitions and generated declarations get no extra census credit.
+
+Fml.Leads a b means EVERY typed state holding b also holds a. Six capture interfaces conclude fixed-state Premise.Runs; the other 22 conclude global Leads. captureValue saves a value before destination resolution, even a simple source. Storage/memory receiver and index lemmas preserve exact val, alias and memory-local context order and every weakening/index shift. Field certificates and explicit memory-index mapFree remain inputs; derived b.mapFree/src.mapFree stay in their typed expressions. No receiver/index/statement success is silently assumed.
+
+All nine receiver/index/binary Leads facades retain unchanged continuations/frames/posts. Reference-field capture starts with the source memory reference already saved. binaryLeftLeads retains operand acceptance and return-type equality, and permits arbitrary right operand b; literal1 is a usage comment, not an extra premise. These are Lean semantic refinement laws, not additional SolKey taclets or replacements justified only by macro labels.
+
+The eight wrapper inputs h are GLOBAL Leads laws, not fixed-state facts; update, hidden/universal binder, common antecedent, conjunction side, havoc and anonymous-local wrappers remain exact. rawAbsorbAll/rawSingle require actual absorption and merge equations; independent binder/update modalities remain independent. rawUnderLift also retains the GLOBAL inner Leads law plus BOTH successful lift and (t.notMem || U.keepsNext)=true. dropStateLeads keeps exact empty drop lists and proves only backward implication, not update equality.
+
+The five raw helper definitions were read without credit: absorb/lift/allowed expose existing functions; mode wrappers retain explicit reorder and update-spine position k. mergeRunMode passes n+1 to mergeRunP; this k is not a strategy fresh index or runtime gas. Existing FmlRw sound fields add no new named theorem or runtime acceptance.
+
+Exact source/signatures and complete capture/global-law/raw-mode rosters remain off Git under /workspace/h62-successor-evidence/elementary-roles-v74 and /workspace/h62-successor-bulk/elementary-roles-v74 under path/size/hash manifests. Fresh mastere7e89a1e4 inspected/already adopted; no duplicate implementation, source/refactor, statement/definition, budget, axiom, exclusion or toolchain change.
+
+Whole assignment and four audit checkpoints remain incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context waits persist. Missing SelectedHeapBoundaryWitness documentation reference remains routed to vy3-compilation; no duplicate ping or pass inferred. Existing timing/trust STOPs and historical unavailable-byte gaps remain. No fresh kernel/runtime/cache/performance acceptance.
+
+Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and101controls pass; complete acceptance remains FAIL exit1.
+
+## Fact elimination static roles (V75)
+
+Guarded regression: elimination must retain actual fixed-state fact/representation certificates and successful equality operands. Source compiled-twin equality must not become runtime validation or global formula truth.
+
+Complete frozen-selected Solidity/Calculus/ElimFacts.lean and all 13 named signatures match frozen/current master bytes. Prior 888 rows and owners are unchanged. All 5283 candidates remain accounted: 901 reviewed, 4382 pending; 3746 owners confirmed and 1537 unresolved. Zero fresh joint witnesses. Exact signatures and section history are bound for every row; supporting definitions/generated declarations receive no extra credit.
+
+Facts.Ok is LOCAL to the same state g and atom environment nu: equations return the same value, disequalities return distinct values, listed return facts are isSome, and bounds constrain every returned value. It is not global all-state truth or merely an inhabited fact-list record. rwF_rep also requires actual sort-specific representation. Scalar elimination preserves the full Option result including none; storage/path/value representation uses its richer original relation, not an erased scalar equality.
+
+Four source twin equalities compare existing recursor and compiled implementations across every constructor/sort. Their implemented_by attributes are unchanged. These source equalities are not fresh generated-code execution, compiler correctness or a trust shortcut.
+
+The equality extractors require actual some-result extraction, exact Boolean result sort where needed, and actual evaluation to some true. Conclusions supply a typed value with BOTH operands some that SAME value; bare none=none is insufficient. eqFacts/factsOf soundness requires actual local formula holding, with membership guards inside the conclusion and no list-nonemptiness guarantee. Literal orientation and Boolean-true extraction remain exact; only equations and conjunctions contribute.
+
+addEqs_ok retains all original Facts.Ok fields and certifies EVERY inserted equation at the same fixed g/nu, prepending only eqs while keeping nes/rets/bnds. Formula elimination preserves pointwise holding IFF under actual Facts.Ok. Implications use added facts only where the eliminated antecedent actually holds; quantifiers drop facts mentioning the rebound atom before extending the environment. No global Valid, automatic proof search or compiler/source/physical/world/gas/fork adequacy is inferred.
+
+Exact source/signatures and complete sort/constructor/field/extractor/twin rosters remain off Git under /workspace/h62-successor-evidence/fact-elimination-roles-v75 and /workspace/h62-successor-bulk/fact-elimination-roles-v75 with path/size/hash manifests. Fresh mastere7e89a1e4 inspected/already adopted. No producer implementation, statement, dependent definition, budget, axiom, exclusion or toolchain changes; no fresh kernel/runtime/cache/performance acceptance.
+
+Whole assignment and four audit checkpoints remain incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context waits persist. Missing SelectedHeapBoundaryWitness documentation reference remains routed to vy3-compilation, with no duplicate ping or inferred gate pass. Existing timing/trust STOPs and historical unavailable-byte gaps remain.
 
 Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and101controls pass; complete acceptance remains FAIL exit1.
