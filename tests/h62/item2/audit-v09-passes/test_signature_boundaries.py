@@ -153,7 +153,8 @@ class HeaderBoundaries(unittest.TestCase):
                     ('returned-memory-capture',6,0,'Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.joint'),
                     ('allocated-reference-read',21,16,'Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.joint'),
                     ('positive-allocation-failure',10,0,'Solidity.Backend.Passes.AuditPositiveAllocationFailure.joint'),
-                    ('preserved-allocator',10,1,'Solidity.Backend.Passes.AuditPreservedAllocator.joint')]
+                    ('preserved-allocator',10,1,'Solidity.Backend.Passes.AuditPreservedAllocator.joint'),
+                    ('heap-boundary',14,3,'Solidity.Backend.Passes.AuditHeapBoundary.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
@@ -180,19 +181,19 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'noRefs'})
                 self.assertEqual(set(mapping['checked_private_names']),{'first_some','second_some','final_some','source_get'})
                 self.assertEqual(mapping['private_axioms'],['propext','Classical.choice','Quot.sound'])
-                refutation, = mapping['intentional_refutations']
+                for row in mapping['rows']:
+                    if row['kind']=='private-exact-kernel-signature':
+                        self.assertEqual(row['simultaneous_witness'],'Solidity.Backend.Passes.AuditMemoryCall.'+('source_get_joint' if row['name'].endswith('.source_get') else 'joint'))
+            for refutation in mapping.get('intentional_refutations',[]):
                 ref_key = (mapping['interface'],refutation['name'])
                 self.assertIn(ref_key,uncovered)
                 self.assertEqual(refutation['signature_sha256'],selected[ref_key]['legacy_signature_sha256'])
                 self.assertEqual(refutation['classification'],'checked-intentional-empty-heap-refutation')
                 self.assertEqual(refutation['kernel_name'],mapping['private_kernel_prefix']+refutation['name'])
-                self.assertEqual(refutation['premise_impossibility'],'Solidity.Backend.Passes.AuditMemoryCall.noRefs_premises_impossible')
+                self.assertEqual(refutation['premise_impossibility'],mapping['exercised_public_namespace']+'.noRefs_premises_impossible')
                 self.assertIsNone(refutation['joint_witness'])
                 self.assertEqual(refutation['selected_witness_credit'],0)
                 self.assertEqual(refutation['axioms'],['propext'])
-                for row in mapping['rows']:
-                    if row['kind']=='private-exact-kernel-signature':
-                        self.assertEqual(row['simultaneous_witness'],'Solidity.Backend.Passes.AuditMemoryCall.'+('source_get_joint' if row['name'].endswith('.source_get') else 'joint'))
             if stem == 'memory-call-scope':
                 self.assertFalse(uncovered)
                 self.assertEqual(mapping['checked_private_names'],['final_some'])
@@ -209,12 +210,17 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertEqual(mapping['joint_contract'],'actual-initial-input-source-success-and-mapped-prefix-output')
                 self.assertEqual(mapping['checked_private_names'],['suffix_some'])
                 self.assertEqual(mapping['private_axioms'],['propext','Classical.choice','Quot.sound'])
+            if stem == 'heap-boundary':
+                self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'noRefs'})
+                self.assertEqual(set(mapping['checked_private_names']),{'first_some','second_some','third_some'})
+                self.assertEqual(mapping['private_axioms'],['propext','Classical.choice','Quot.sound'])
+                self.assertEqual(len(mapping['intentional_refutations']),1)
             self.assertEqual(len(keys),total)
             self.assertEqual(sum(r['kind']=='private-exact-kernel-signature' for r in mapping['rows']),private_count)
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(381,878))
+        self.assertEqual((len(seen),1259-len(seen)),(395,864))
 
 
 
