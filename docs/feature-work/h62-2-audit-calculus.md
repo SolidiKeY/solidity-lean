@@ -669,3 +669,20 @@ The try and payload-catch formula transports retain the actual full-result condi
 Bulk snapshots, rosters, reviews and measured gates remain off Git at /workspace/h62-successor-evidence/try-condition-roles-v36 and /workspace/h62-successor-bulk/try-condition-roles-v36, with small committed absolute path/size/hash manifest. No fresh joint witnesses, Lean/axiom/kernel/replay/runtime/cache acceptance. Source print-axioms commands are not fresh validation. Whole assignment and four audit checkpoints remain unfinished. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause on Raw compatibility and Context Classical.choice audit remains. No unchanged STOP rerun, statement/dependent-definition/budget/axiom/exclusion/toolchain change or historical evidence identity claim; unavailable bytes remain UNVERIFIABLE.
 
 Documentation gate remains FAIL exit1 on unchanged adopted-master fixture references A.lean/B.lean; exact citing source is archived and hash-bound. Accounting and89controls pass; complete acceptance remains FAIL exit1.
+
+
+## Clean-tail boundary semantic premise roles (2026-11-07)
+
+Guarded regression: supplied all-state clean-tail preservation laws must not be replaced by initialization, single-run success or absence of violation; none proves arbitrary-program preservation or normal termination.
+
+Fetched master 05d2c25872c4bb963a0ca7f605905e6e1e99eedc remains adopted. Complete frozen-selected CleanTailBoundary file and all6 named signatures match frozen/current bytes. Supporting CleanTail and Callback files are hash-bound; only relevant predicate/outcome definitions were inspected, adding no role/witness credit. Prior530 records and owner map unchanged. All5283 source candidates accounted once:536 reviewed/4747 pending,owners3746 confirmed/1537 unresolved; generated declarations separate.
+
+The invariant-at bridge is definitional and asserts no cleanliness. Initialization proves cleanliness only for State.init, not deployment. The run-storage lemma requires an exact successful projection to the SAME storage and that storage's cleanliness. It gives a local boundary whose initial-cleanliness condition is inside the conclusion, not an extra input premise. It does not establish a global program boundary.
+
+Both exit interfaces retain the supplied global semantic boundary over all starting states, local initial cleanliness and an actual successful run or callback execution. The callback boundary quantifies every actual outcome under the original clean-tail invariant, including its default payment reading. Success requires clean final storage; halts retain the defined box/nonpanic condition; violation is False. noViolation excludes only the violated outcome and supplies neither execution existence nor normal-return totality. Box preservation alone does not exclude non-successful programs.
+
+Storage.CleanTail is the hereditary predicate using ordinary default array shadows, not all values zero, heap cleanliness, physical erasure or world adequacy. No arbitrary-program preservation, compiler success/negative controls or physical/source/gas/fork correctness follows. Static predicate and proof-path rosters add no formal witnesses.
+
+Bulk source identities, rosters, reviews and measured gates stay off Git at /workspace/h62-successor-evidence/clean-tail-boundary-roles-v37 and /workspace/h62-successor-bulk/clean-tail-boundary-roles-v37, with small committed path/size/hash manifest. Zero fresh joint witnesses, Lean/axiom/kernel/replay/runtime/cache acceptance. Whole assignment/four audit checkpoints remain incomplete. H28 dependent actualCallerFields/extractionActuallyChanges/replay checks stay paused on Raw compatibility and Context Classical.choice audit; existing timing/reserve STOPs retained. No statement/dependent-definition/budget/axiom/exclusion/toolchain changes. Missing historical bytes remain UNVERIFIABLE.
+
+Documentation gate remains FAIL exit1 on unchanged adopted-master fixture references A.lean/B.lean; exact citing source is archived and hash-bound. Accounting and89controls pass; complete acceptance remains FAIL exit1.
