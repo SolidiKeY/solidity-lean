@@ -1,10 +1,12 @@
 {
   "schema_version": 1,
-  "archive": "checkpoint-evidence.tar.gz",
-  "archive_sha256": "92ad15b2ef5cf7c118c4725e9f3f0b5229f992508f2813bf58e8f1e70fbf37d4",
-  "manifest": "tests/h62/item2/audit-abi-world/portable-evidence.sha256",
-  "verify_command": "python3 -B scripts/h62/item2/audit-abi-world/portable_evidence.py verify --archive PATH_TO_ARCHIVE --manifest tests/h62/item2/audit-abi-world/portable-evidence.sha256",
-  "integration": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "archive": "evidence.tar.gz",
+  "archive_sha256": "e104e967aeb6e249de84e5eb7ec94f748b7970e90fcf48cf662c07f29d7af8bb",
+  "manifest": "/workspace/audit-abi-world-evidence/h44-split-20261107/bulk/portable-evidence.sha256",
+  "manifest_sha256": "f1ae02f864f60a63027210765024cd3e461d7294d058bf4faccae191cf114446",
+  "archive_entries": 1524,
+  "verify_command": "python3 -B scripts/h62/item2/audit-abi-world/portable_evidence.py verify --archive PATH_TO_ARCHIVE --manifest PATH_TO_OFF_GIT_MANIFEST",
+  "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
   "coverage": {
     "mapped_modules": 24,
     "statements": 177,
@@ -13,6 +15,11 @@
     "success_theorems": 7,
     "identical_external_fixtures": 10
   },
-  "full_gate_complete": false,
-  "boundary": "Byte integrity is portable; Lean diagnostics and external-test observations retain actual execution provenance. Full build remains pending."
+  "full_lean_build_complete": true,
+  "assignment_complete": false,
+  "final_acceptance": "blocked: PIN-2a43bf4f central inventory110 new standard-only registrations,0 errors",
+  "owner_ticket": "/workspace/audit-abi-world-evidence/h44-split-20261107/bulk/axiom-pin-owner-ticket.json",
+  "normal_build_record": "resume-20261107/checkpoints/final-blocked-acceptance/full-resource.json",
+  "boundary": "Portable byte integrity; current full6555-job Lean and fresh audit diagnostics pass. Archived external gas/fork observations reused only for byte-identical fixtures; not formal gas/world/general compiler proofs.",
+  "bulk_manifest": "tests/h62/item2/audit-abi-world/bulk-artifacts.sha256"
 }
