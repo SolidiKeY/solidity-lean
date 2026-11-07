@@ -1101,3 +1101,29 @@ index and trust output are off Git, bound by source-effects-component-index-mani
 Read-only finder and skeptic found no issue in the32-link partition, fresh
 serial receipts, stable bindings, trust reports or unresolved global/residual
 boundaries. Neither ran Lean or a server; review receipt remains off Git.
+
+### Original reason/custom-error/standard-rethrow census (2026-11-07)
+
+The next guarded original modules are SourceFailures, SourceCustomErrorFailures
+and SourceStandardRethrow. Their census captures 120 kernel records and 19 public
+lexical name candidates, leaving 101 kernel-only records explicitly pending.
+Six matched targets have twelve explicit proposition binders in total; thirteen
+have none flagged. This does not establish dependent parameter inhabitance,
+simultaneous feasibility, ownership or statement fidelity for any target.
+
+The generated default diagnostic is retained unrun. Its derived checked copy
+removes only the previously reviewed global constants mergeSort; the collector
+predicate and captured fields are unchanged, with saved rows sorted afterward.
+Both diagnostic hashes and exact replacement are recorded. No proof/source
+statement, trust rule, failure classification or budget changes; previous OOM
+receipts and timing STOPs remain retained.
+
+The bounded three-module diagnostic passed in 17.494 seconds with one Lean,
+peak sampled aggregate RSS 941,608,960 bytes and no STOP. This is kernel/name
+accounting, not a full-root gate, semantic case census, matched timing or witness
+acceptance. Canonical Source/session/production frame and assigned H68 work stay
+open. Bulk captures/types remain off Git, sealed through source-failure-census-manifest.json.
+
+Read-only finder and skeptic found no issue in the original bindings, sort-only
+derivation, record/binder counts or unfinished acceptance boundaries. Neither
+ran Lean or a server; their receipt remains with the off-Git evidence.
