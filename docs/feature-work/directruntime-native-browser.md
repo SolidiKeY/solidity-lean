@@ -336,8 +336,7 @@ pending. D adds no Lean declaration, axiom, budget or premise change.
 The current versions/KeySort and three per-file MCP checks pass. A new verified
 337-module relative build-cache snapshot remains coordinator-pending under H41;
 it is explicitly not a Lake artifact catalog. The previous H35 pack remains
-coordinator-received. No VM ship-cache.sh invocation occurred. Full evidence and
-queue limits: [published f77 inventory](../benchmarks/directruntime-2026-11-04/published-f77/README.md).
+coordinator-received. No VM ship-cache.sh invocation occurred.
 
 ## Published 9584 producer adoption
 
@@ -358,8 +357,7 @@ acceptance and final full/corpus/post-integration gates remain pending.
 
 The two API modules' verified relative build-cache snapshot remains
 coordinator-pending under H41, not a Lake artifact catalog/full dependency pack.
-No VM shipping was attempted. Evidence, actual commands/resources and boundaries:
-[published9584 adoption](../benchmarks/directruntime-2026-11-04/published-9584/README.md).
+No VM shipping was attempted.
 
 ## Published b86a composition adoption
 
@@ -381,8 +379,7 @@ corpus gates remain pending. No new stack test or83benchmark is claimed.
 The original executed wrapper is archived; review's exact-target guard suggestion
 was applied and validated independently without rewriting prior evidence. The
 one-module verified build-cache snapshot remains coordinator-pending under H41,
-not a Lake catalog/full dependency pack. Evidence and queue boundaries:
-[publishedb86a inventory](../benchmarks/directruntime-2026-11-04/published-b86a/README.md).
+not a Lake catalog/full dependency pack.
 
 ## H44 reviewable split
 

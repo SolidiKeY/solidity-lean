@@ -183,10 +183,18 @@ at most two Lean agents, reduced to one during a large rebuild; current
 resource guards may impose tighter limits.
 After merging a lane, stop only its workers and remove its worktree.
 
-## AGENTS cleanup review
+## Documentation reviews
 
 The finder and skeptic reviews preserved canonical `save` / `find` spelling,
 the macros-only notation/`rfl` check, the obsolete-reader boundary and the
 priority of current resource bounds. Local links and relocated Lean file
-references were checked; the repository-wide path check still has unrelated
-missing references in archived records and external-source citations.
+references were checked. The backticked Lean-path check resolves existing
+references; ambiguous basenames are reported separately.
+
+Keep current instructions, semantic limits and unfinished obligations in their
+canonical documents. Remove standalone checkpoint boilerplate and duplicate
+review/status notes once their useful content is retained there; Git preserves
+the historical snapshots. The documentation cleanup compared complete bodies
+and module inventories before deletion. Independent read-only finder and skeptic
+reviews confirmed the retained boundaries and duplicate index rows; affected
+links and generated fragments were checked.

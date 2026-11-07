@@ -76,7 +76,6 @@ history is in git.
 | [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
 | [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
 | [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
-| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 | [feature-work/h28-mutation-testing.md](feature-work/h28-mutation-testing.md) | H28 semantic rule mutation testing: whole-family census, toStep proof oracle, checked kill witnesses and score. |
 | [feature-work/p8-producer-merge.md](feature-work/p8-producer-merge.md) | H57/H60 P8/P8b Producer merge: inventory, merged interface, inhabited frozen P8a Producer, controls and migration notes. |
 | [feature-work/source-s04-funds.md](feature-work/source-s04-funds.md) | S04.04: actual request-boundary sender-funds validation, invalid-drop laws, measured current Source release and remaining H19 boundary. |
@@ -187,8 +186,6 @@ V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-wor
 - [Coordination audit](audits/coordination-process.md) (2026-11-06): where lane time goes, gate saturation, merge latency, question load.
 - [Core EVM revert/return data (machine V2)](feature-work/evm-machine-v2.md): versioned `OutV2`/`MachineV2` with revert/return data, return buffer and CALL input bytes; migration to the frozen machine.
 - [Canonical P1 languages V2](feature-work/p1-lang-v2.md): `P1LangV2` with revert data, call events and frame classes over the V2 machine; `p1_frame_bridge` for a guarded revert-with-data family.
-| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
-| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 - [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
 - V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
