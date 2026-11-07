@@ -1,0 +1,11 @@
+{
+ "Solidity/Lowering/P8/SourceAstCompoundTypes.lean:Solidity.Lowering.P8.SourceAstCompoundTypes.parameterWith_leaf": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCompoundTypes.lean:Solidity.Lowering.P8.SourceAstCompoundTypes.typeName": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstCompoundTypes.lean:Solidity.Lowering.P8.SourceAstCompoundTypes.zero_depth": [
+  "propext"
+ ]
+}

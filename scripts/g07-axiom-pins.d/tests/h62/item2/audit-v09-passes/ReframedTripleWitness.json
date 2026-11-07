@@ -1,0 +1,42 @@
+{
+ "tests/h62/item2/audit-v09-passes/ReframedTripleWitness.lean:Solidity.Backend.Passes.AuditReframedTriple.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedTripleWitness.lean:Solidity.Backend.Passes.AuditReframedTriple.first_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedTripleWitness.lean:Solidity.Backend.Passes.AuditReframedTriple.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedTripleWitness.lean:Solidity.Backend.Passes.AuditReframedTriple.middle_room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedTripleWitness.lean:Solidity.Backend.Passes.AuditReframedTriple.saved_tail_corruption": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedTripleWitness.lean:Solidity.Backend.Passes.AuditReframedTriple.second_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedTripleWitness.lean:Solidity.Backend.Passes.AuditReframedTriple.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ReframedTripleWitness.lean:Solidity.Backend.Passes.AuditReframedTriple.wrong_zero_cost_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

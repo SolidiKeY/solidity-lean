@@ -12,11 +12,15 @@ The bridge is isolated: NestedMappingLayout retains its original imports.
 Lean 4.24.0, serial LEAN_NUM_THREADS=1 on the existing 12 GiB/no-swap VM:
 three import-only checks have median 0.54 s, peak VmHWM 1,050,020 KiB.
 The existing layout-only import has median 0.18 s (423,856 KiB peak): this
-opt-in producer dependency costs 0.36 s and is not a speed-neutral replacement.
+separate producer dependency costs 0.36 s and is not a speed-neutral replacement.
 NestedMappingLayout itself is byte-identical; its checks remain 0.40 s median
 versus the pre-extraction 0.43 s sample. Its earlier import-expansion STOP is
-retained; no existing layout/consumer module gains this bridge import.
-Raw measurements: /workspace/vy2-evidence/source-graph-production/.
+retained; NestedMappingLayout gains no bridge import. Solidity.lean registers
+this module in the default full-library build: isolation protects the layout's
+import closure, not default-build membership. The import-only comparison does
+not measure the full-build delta.
+Raw measurements are H44 external VM artifacts at
+/workspace/vy2-evidence/source-graph-production/, not repository files.
 -/
 namespace Solidity.Yul.Views
 
