@@ -1,4 +1,6 @@
 import Solidity.Yul.Compilation.Artifact
+import Solidity.Yul.Compilation.ArtifactPreparation
+import Solidity.Yul.Compilation.ScopedControlCompilationControls
 import Solidity.Yul.Compilation.ScopedControlCompletion
 
 /-! Explicit lossless transport for the existing scoped-control producer.
@@ -68,4 +70,60 @@ theorem inhabited_image : Nonempty (Image 1 (Stmt.skip (c := ⟨false, false⟩)
 #print axioms code_preserved
 #print axioms producer_preserved
 #print axioms inhabited_image
+end Solidity.Yul.Compilation.H55ScopedControl
+
+/-! The raw scoped producer instantiates the existing selected adapter and
+shared two-stage preparation. No new certificate type or source is introduced. -/
+namespace Solidity.Yul.Compilation.H55ScopedControl
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def prepare (a : ScopedControlCompilation.Compiled c fuel stmt) : Option (Artifact 0 stmt) :=
+  Artifact.afterSelection ScopedControlCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩) a
+
+abbrev Preparation (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt))
+
+theorem prepared (a : ScopedControlCompilation.Artifact fuel stmt) :
+    prepare a.compiled = some (encode a) :=
+  Artifact.afterSelection_some _ _ _ a.compiled a.block a.code a.emitted a.selected
+
+namespace RawControls
+theorem selected : prepare ScopedControlCompilation.Controls.artifact.compiled =
+    some (encode ScopedControlCompilation.Controls.artifact) := prepared _
+
+theorem effectful (b c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode ScopedControlCompilation.Controls.artifact).code
+      {m with stack := coreWord b :: coreWord c :: caller} =
+      .ok {m with stack := coreWord (ScopedControlCompilation.Controls.update b) :: coreWord c :: caller} 0 :=
+  ScopedControlCompilation.Controls.target_done b c m caller
+
+def refusedSource : Stmt [] [] ⟨false, false⟩ 17 := .if_ (.local 16) .skip
+def refused : ScopedControlCompilation.Compiled ⟨false, false⟩ 3 refusedSource :=
+  (ScopedControlCompilation.compile 3 refusedSource).get (by rfl)
+theorem refused_emission : refused.emit = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage prepare refused).artifact = none :=
+  Artifact.afterSelection_first_none ScopedControlCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩)
+    refused refused_emission
+
+theorem refused_original : Artifact.recoverPreparation
+    (Artifact.toPreparationImage prepare refused) = refused :=
+  Artifact.preparation_source_roundtrip prepare refused
+
+theorem source_completes : evalStmt 2 .nil True.intro refusedSource refused.profile
+    (sourceLocals (Vector.replicate 17 0)) =
+      some ⟨sourceLocals (Vector.replicate 17 0), .normal⟩ := rfl
+#guard (ScopedControlCompilation.compile 0 refusedSource).isNone
+end RawControls
+
+#print axioms prepare
+#print axioms prepared
+#print axioms RawControls.selected
+#print axioms RawControls.effectful
+#print axioms RawControls.refused_emission
+#print axioms RawControls.refused_preparation
+#print axioms RawControls.refused_original
+#print axioms RawControls.source_completes
 end Solidity.Yul.Compilation.H55ScopedControl

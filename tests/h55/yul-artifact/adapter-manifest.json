@@ -207,6 +207,33 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.Expressions",
       "adapter_kind": "preselection_provenance",
       "boundary": "Instantiates shared Artifact.Realization for the actual fixed-fuel expression evaluator, profile and original arity-one witness. Actual emission/selection proofs certify result push and complete machine/newer/locals/caller frame. Dependent ResultImage retains all raw producer evidence, including source-completing depth16 emission None. No wrapper statement, arbitrary-arity admission, inverse encoding or native/runtime-failure claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ScopedControlAdapter.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ScopedControl",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic two-stage preparation using actual scoped block emission/selection and existing selected scoped encode. Retains full raw constructor evidence; genuine source-completing local16 condition emission refusal is preparation None, not runtime failure."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ScopedForCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For.Scoped",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic two-stage preparation from actual scoped-for emission/selection and selected encode; full component artifacts/profile/raw evidence retained. Source-completing local16 condition emission refusal remains preparation None."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/ScopedForCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For.Scoped",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates shared zero-prefix Artifact from both original scoped-for source/model laws. Exact Image retains complete component artifacts, source horizons, block and code selection; actual initializer-only and taken/post effects checked. No termination, admission or native/source-session adequacy assumption."
     }
   ]
 }

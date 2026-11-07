@@ -1,4 +1,6 @@
 import Solidity.Yul.Compilation.ArtifactPreparation
+import Solidity.Yul.Compilation.ScopedForCompletion
+import Solidity.Yul.Compilation.ScopedForCompilationControls
 import Solidity.Yul.Compilation.ForCompilation
 import Solidity.Yul.Compilation.GuardedForCompilationControls
 
@@ -271,3 +273,94 @@ end Controls
 #print axioms Controls.refused_source_completes
 #print axioms Controls.refused_original_recovered
 end Solidity.Yul.Compilation.H55For.Guarded
+
+/-! Scoped FOR retains the actual component artifacts, full source horizons
+and zero-newer-prefix convention. Both stages instantiate shared interfaces. -/
+namespace Solidity.Yul.Compilation.H55For.Scoped
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : ScopedForCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code a.source_to_model (ScopedForCompletion.model_to_source a)
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+def toImage (a : ScopedForCompilation.Artifact fuel stmt) : Image fuel stmt := Artifact.toImage encode a
+
+def fromImage (a : Image fuel stmt) : ScopedForCompilation.Artifact fuel stmt := Artifact.fromImage a
+
+theorem source_roundtrip (a : ScopedForCompilation.Artifact fuel stmt) : fromImage (toImage a) = a := rfl
+
+theorem image_roundtrip (a : Image fuel stmt) : toImage (fromImage a) = a := Artifact.image_roundtrip a
+
+theorem code_preserved (a : ScopedForCompilation.Artifact fuel stmt) : (encode a).code = a.code := rfl
+
+def prepare (a : ScopedForCompilation.Compiled fuel stmt) : Option (Artifact 0 stmt) :=
+  Artifact.afterSelection ScopedForCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩) a
+
+abbrev Preparation (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt))
+
+theorem prepared (a : ScopedForCompilation.Artifact fuel stmt) :
+    prepare a.compiled = some (encode a) :=
+  Artifact.afterSelection_some _ _ _ a.compiled a.block a.code a.emitted a.selected
+
+namespace Controls
+theorem selected : prepare ScopedForCompilation.Controls.artifact.compiled =
+    some (encode ScopedForCompilation.Controls.artifact) := prepared _
+
+theorem effectful (b c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode ScopedForCompilation.Controls.artifact).code
+      {m with stack := coreWord b :: coreWord c :: caller} =
+      .ok {m with stack := coreWord 0 :: coreWord (ScopedForCompilation.Controls.finish b c) :: caller} 0 :=
+  ScopedForCompilation.Controls.target_done b c m caller
+
+theorem zero_exit (c : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode ScopedForCompilation.Controls.artifact).code
+      {m with stack := coreWord 0 :: coreWord c :: caller} =
+      .ok {m with stack := coreWord 0 :: coreWord (c+3) :: caller} 0 :=
+  ScopedForCompilation.Controls.zero_target c m caller
+
+theorem taken_exit (b c : Scalar.Word) (nonzero : b ≠ 0)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode ScopedForCompilation.Controls.artifact).code
+      {m with stack := coreWord b :: coreWord c :: caller} =
+      .ok {m with stack := coreWord 0 :: coreWord ((c+3)+7) :: caller} 0 :=
+  ScopedForCompilation.Controls.nonzero_target b c nonzero m caller
+
+def refusedSource : Stmt [] [] ⟨false, false⟩ 17 := .for_ .skip (.local 16) .skip .skip
+def refused : ScopedForCompilation.Compiled 1 refusedSource :=
+  (ScopedForCompilation.compile 1 refusedSource).get (by rfl)
+theorem refused_emission : refused.emit = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage prepare refused).artifact = none :=
+  Artifact.afterSelection_first_none ScopedForCompilation.Compiled.emit WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩)
+    refused refused_emission
+
+theorem refused_original : Artifact.recoverPreparation
+    (Artifact.toPreparationImage prepare refused) = refused :=
+  Artifact.preparation_source_roundtrip prepare refused
+
+theorem source_completes : evalStmt 3 .nil True.intro refusedSource refused.profile
+    (sourceLocals (Vector.replicate 17 0)) =
+      some ⟨sourceLocals (Vector.replicate 17 0), .normal⟩ := rfl
+#guard (ScopedForCompilation.compile 0 refusedSource).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms code_preserved
+#print axioms prepare
+#print axioms prepared
+#print axioms Controls.selected
+#print axioms Controls.effectful
+#print axioms Controls.zero_exit
+#print axioms Controls.taken_exit
+#print axioms Controls.refused_emission
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_original
+#print axioms Controls.source_completes
+end Solidity.Yul.Compilation.H55For.Scoped

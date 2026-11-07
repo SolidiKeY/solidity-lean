@@ -418,3 +418,13 @@ The expression producer instantiates these generic interfaces directly with its 
 Pinned serial KeySort, both generic headers and adapter checks pass. The final adapter file takes 15 seconds at 1,132,356 KiB; its 124 printed axiom reports use only existing standard axioms. All 23 original producer files and earlier declaration/proof streams are preserved. Independent read-only finder and skeptic found no defects. Exact old-public-export/consumer checks, resource data, retained gate failures and source-pinned exports are recorded at `/workspace/vy2-evidence/h55-expression/`.
 
 Coverage is 23 of 38: thirteen semantic adapters and ten preparation envelopes, leaving fifteen. Production migrations, remaining source-kind coverage, matched full-scope timings, final gates and full-scope acceptance remain unfinished.
+
+### H112: scoped control and scoped FOR reuse existing generic stages
+
+The raw scoped-control entry now prepares its existing selected adapter through the generic actual-emission/selection laws. Both scoped-FOR entries reuse the shared zero-prefix certificate, exact Image and two-stage preparation: the selected entry obtains both directions from unchanged owner laws, while the raw entry retains its original component evidence through optional preparation. No new certificate type, per-case Lean file, compiler, termination assumption or source syntax is introduced.
+
+The controls reuse actual recursive-binder updates and initialized scoped loops, including initializer-only +3 on zero exit and body/post +7 on a taken exit. Every machine law retains arbitrary raw words, caller tails and nonstack fields. Real accepted local16 conditions demonstrate source completion despite emission refusal, with exact original recovery. A new FOR control initially used horizon 2; actual evaluation requires horizon 3. That failed log is preserved, and the corrected witness passes without changing any original horizon, statement or budget.
+
+Pinned serial checks pass: scoped adapter 2 seconds at 1,042,156 KiB; scoped-FOR adapter 6 seconds at 1,073,904 KiB. The six missing actual scoped-loop/FOR dependencies were rebuilt in order. Existing declarations/proof streams and all 23 producer files remain unchanged; printed reports use only existing standard axioms. Independent read-only finder and skeptic found no defects. The concurrent coordinator merge changed no dependency in the checked word closure; provenance and resource evidence are retained at `/workspace/vy2-evidence/h55-raw-scoped/`.
+
+Coverage is 26 of 38: fourteen semantic adapters and twelve preparation envelopes, leaving twelve. Production migrations, remaining source-kind coverage, matched full-scope timings and final gates remain unfinished.
