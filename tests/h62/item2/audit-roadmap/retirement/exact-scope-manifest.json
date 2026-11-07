@@ -1,0 +1,395 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-2-20261106/audit-roadmap",
+  "original_write_scope": [
+    "tests/h62/item2/audit-roadmap/**",
+    "scripts/h62/item2/audit-roadmap/**",
+    "docs/feature-work/h62-2-audit-roadmap.md"
+  ],
+  "original_audit_areas": [
+    "docs/module-map/roadmap.md",
+    "docs/module-map/tools.md"
+  ],
+  "frozen_module_files": [
+    {
+      "path": "Solidity/Roadmap/Contracts.lean",
+      "area": "roadmap",
+      "sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79",
+      "declarations": 29,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Roadmap/Frontend.lean",
+      "area": "roadmap",
+      "sha256": "cfc3dd64f408ac39ee96c6cb7e1ee6ae0183389e6b00b7ae732e673734665858",
+      "declarations": 13,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Roadmap/Evm.lean",
+      "area": "roadmap",
+      "sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50",
+      "declarations": 15,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Roadmap/TypedRun.lean",
+      "area": "roadmap",
+      "sha256": "f88399e3e3edc6b2f8c2c62516a48b86054f81c136262950af93b85d4296856f",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Roadmap/Controls.lean",
+      "area": "roadmap",
+      "sha256": "a45a9d8b3417667186b014bd2e13d07362b3bdd3b7ce9dff2a379ec7b5d09510",
+      "declarations": 43,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Roadmap/V16/SSCP2/NewAllocation.lean",
+      "area": "roadmap",
+      "sha256": "3b712c7c259c7a4dd65692def429f4467de3483391f2aa5c9e473445eec7a68d",
+      "declarations": 4,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean",
+      "area": "roadmap",
+      "sha256": "d18110c037cc2e4ddf6c89a25351f190e7bd2ae56248d46ca32f46b7b9f92b1a",
+      "declarations": 9,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Solidity/Roadmap/V16/SourceTransactionConsumer.lean",
+      "area": "roadmap",
+      "sha256": "0b839764dd12f6a11c6b8a8a14444e92f9b8bb8323fe17a192a74aaea0c5e18e",
+      "declarations": 9,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwise.lean",
+      "area": "roadmap",
+      "sha256": "540795dfbe5328ae0273e43799e162a78806ffd6e3620e1b6f7b846f5fdf7b54",
+      "declarations": 3,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwiseControls.lean",
+      "area": "roadmap",
+      "sha256": "184d04ff2a49ae276c902bb09d83cf83e4bacbc447d353796d491e5c54701220",
+      "declarations": 5,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Solidity/Roadmap/V16/CreationReturnConsumer.lean",
+      "area": "roadmap",
+      "sha256": "7dea8eba7b75a0ec353bb43989820b0d0a187f286a877622f692e33874d782e6",
+      "declarations": 8,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainder.lean",
+      "area": "roadmap",
+      "sha256": "423148a7075b79b5bce357db9c2fdd50f8188023b3411f73b10c0131acb47f31",
+      "declarations": 4,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean",
+      "area": "roadmap",
+      "sha256": "0db702403e7d5f2e3d765115fff3fff3235d558d2079d8482fb5e160b0d6c54c",
+      "declarations": 6,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean",
+      "area": "roadmap",
+      "sha256": "257d89fdc5b9595c1ef92e75f5a38f886303822b5403f968fe8b5e17fff4cec3",
+      "declarations": 34,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean",
+      "area": "roadmap",
+      "sha256": "f9ab88adacae8339a714722fe40af1fa44cec251395b9435936c876ae8571f1f",
+      "declarations": 70,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Solidity/Lowering/P8/SourceSize.lean",
+      "area": "roadmap",
+      "sha256": "01bfc6145fcdc05beca953e1db610b753f2b4bf06b86428da3872933748beafb",
+      "declarations": 1,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Solidity/Roadmap/V16/SourceSizeControls.lean",
+      "area": "roadmap",
+      "sha256": "8bc33400b5c8409082a803a9d6eddf931f407d4b34c8ff0da0eeadf7a1a08511",
+      "declarations": 11,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Solidity/Roadmap/V16/NativeRevertConsumer.lean",
+      "area": "roadmap",
+      "sha256": "7c65042072fd219a366ce16432add5f5bc3078e1a88a30dbb43395422353204a",
+      "declarations": 11,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean",
+      "area": "roadmap",
+      "sha256": "f812a935530aad7b6799bb4368354e79c57b83d43c3df582b921d2bed11fa22c",
+      "declarations": 4,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean",
+      "area": "roadmap",
+      "sha256": "8b357eac2fa03019cbe9cee1494cd26a371ac4e408123d49b7a2bc6c2792455c",
+      "declarations": 6,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean",
+      "area": "roadmap",
+      "sha256": "1a1b0a9748fa0c65238eef268b25995ba61917c9bfa81cab9c5296b977172259",
+      "declarations": 10,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Solidity/Roadmap/V16/CreationLibrarySpec.lean",
+      "area": "roadmap",
+      "sha256": "32b0f636bc0134fd907f65af61feaf974797b1dd35f8c9061e824bbf5786b312",
+      "declarations": 5,
+      "owner": "unresolved",
+      "owner_candidate": "V16 (v12-v17/v16-correctness-transfer)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean",
+      "area": "roadmap",
+      "sha256": "8afa0b7896da49c0ec830faaedf3b8eadece7eacfee3a00c73bcff598e417a8e",
+      "declarations": 5,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean",
+      "area": "roadmap",
+      "sha256": "3f56cb0c1bad24528eb33b99839d542890eeb3f3e0cbc8057517e795d8698bc9",
+      "declarations": 9,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean",
+      "area": "roadmap",
+      "sha256": "33762792fcdf54c7f4f020f119a63dd21c57b5c05468fc66b5b7adca3fa76d5e",
+      "declarations": 4,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean",
+      "area": "roadmap",
+      "sha256": "615a18e76d72358855ef38e9628001415c796ad87fc0ab3e280a7e493da0180d",
+      "declarations": 7,
+      "owner": "unresolved",
+      "owner_candidate": "V15 (v12-v17/v15-evm-agreement)"
+    },
+    {
+      "path": "Solidity/Tools/Show.lean",
+      "area": "tools",
+      "sha256": "6ebb2534a8deb75f1c65690cab944427a73f5a2c3a0d87c27cee31677bd601b5",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Common.lean",
+      "area": "tools",
+      "sha256": "a7d9fe840a70260952c5aee836a30485e47b27ce4144df0bdcced0871dbd3fca",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Run.lean",
+      "area": "tools",
+      "sha256": "4147228efdcdde08d2b5920d6b039175067d47612556b7d7206788ae616b01ce",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Upstream.lean",
+      "area": "tools",
+      "sha256": "832f3ec3cf43b2753dd28476c7bf477e7900f8ebe7c3d98c192c95af5ae017bf",
+      "declarations": 4,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/UpstreamEntry.lean",
+      "area": "tools",
+      "sha256": "0ecf3ed5d3f7b4221b3e3bcd0d3bbb293aa71cb7ccba24b170e065e6387a52ac",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Inspect.lean",
+      "area": "tools",
+      "sha256": "6e7d54bc2bfa978bd14bcbe4dd0078724a24af56f9cd449a05bb2ea85a0f0cdb",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Taclet.lean",
+      "area": "tools",
+      "sha256": "b4e293df4cdd37a0245321aab29c945cff9110ce5eaf363ebf58df89140e4d1d",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/DiffTest.lean",
+      "area": "tools",
+      "sha256": "4bc0b553384e0225db35fa06e2142ea4790c0c9f909ae241865f871aac530ef0",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Counterexample.lean",
+      "area": "tools",
+      "sha256": "43e521caea12fe12dbe7f1549983deb14e278b880d36169bb43adab9c7c3ff55",
+      "declarations": 16,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/LazyStorage.lean",
+      "area": "tools",
+      "sha256": "112de3d49fb2c3a8529a173c669b6a19fe178eb0bd514b9367fc6bacb6606c20",
+      "declarations": 4,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Verify.lean",
+      "area": "tools",
+      "sha256": "1e1c9fa1b4266641c76822c6f97fdd219017043085361ae0dd5d736bf45130e0",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/ProofTree.lean",
+      "area": "tools",
+      "sha256": "8733e90f2cd6ba5c7dd876b994d43da1823f693ce4af9f4ac1c286f1dec8d7a7",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/LatexTerm.lean",
+      "area": "tools",
+      "sha256": "6c5845d187554f09dafef03441db829f96343ee4325eff5d3e21c8625557a7c9",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Latex.lean",
+      "area": "tools",
+      "sha256": "838fbc729aafbb5fbdc1d805ec3a7676ff02cb053da66d07053c8d7ae07055ad",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/LatexSolkey.lean",
+      "area": "tools",
+      "sha256": "194364c1ff8d04a11ae04ef919df57f69584db79a3cc38ba66e067a3403ad7ef",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/Elementary.lean",
+      "area": "tools",
+      "sha256": "d9665945a8b69ceb53879176df73361261f15fd80feeaa4244ffc0e62ab708d5",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Tools/ProgramTrace.lean",
+      "area": "tools",
+      "sha256": "c14ac759b865129a9ec0cab62d955343575e7cd5f5af61686b69a66a0c5fa7fc",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Automation/H28/Chain.lean",
+      "area": "tools",
+      "sha256": "c6ff73664c9f4ee70db158a3218f14f05f4cea6876db75372bca8fce91db2240",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Automation/H28/Context.lean",
+      "area": "tools",
+      "sha256": "3f084f71f8150f8fda7129da2aa92302324fc960c566b00b4e59f9b8a1ffdd6e",
+      "declarations": 2,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    },
+    {
+      "path": "Solidity/Automation/H28/Prove.lean",
+      "area": "tools",
+      "sha256": "2461c7c833d2162ee1a05a6efc967988ad1f5bf44427d583dc948c1f42b14551",
+      "declarations": 0,
+      "owner": "unresolved",
+      "owner_candidate": "area producer; exact owner unresolved"
+    }
+  ],
+  "original_exclusions": [
+    "No original-file edits outside scope before later authorization",
+    "No generated roots,central module maps or axiom pins",
+    "No scope theft or duplicate H55 work",
+    "No statement/premise/exclusion/observation weakening",
+    "No sorry/new axiom/native_decide/trust shortcuts or raised maxHeartbeats"
+  ],
+  "registration": "Additive tests helpers pending coordinator-approved registration; proposal fragment retained",
+  "h82_standing_rule": "Statement-preserving proof-only/additive/module/import/doc changes need no exact-file owner agreement. Statement,relevant definition,interface,budget,axiom-set or exclusion changes require owner;frozen interfaces need H57 versioned pair.",
+  "retirement_override": "No new proof implementation. H82 retirement permits preservation,stopping/PAUSED and successor handoff only.",
+  "live_ownership": "Migration routing does not transfer proving ownership;no takeover before final stopped/head acknowledgement.",
+  "handoff_to": "solidity-v12-v17-20261031/v16-correctness-transfer"
+}
