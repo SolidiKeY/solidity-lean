@@ -37,6 +37,6 @@ The wrappers retain original tactic search/refusal behavior under a scoped
 limits, heartbeat origin and diagnostics. These controls establish only their
 exact statements; they do not prove whole-compiler or Source/physical adequacy.
 
-`bulk-data-manifest.json` lists optional archival VM data by path and SHA256.
+The [private H145 evidence archive](https://github.com/SolidiKeY/solidity-lean-coord/tree/de649e9c9648443622f3fc35b24999c15ecfb27a/evidence/solidity-h28-sol-20261104/automation-benchmark/h145-code-evidence/code-evidence/tests/h28-sol/automation-benchmark) contains the optional archival VM data index by path and SHA256.
 It is not an input to this runner or its tests. Delivery history begins at the
 coordinator-provided rewrite base; archived history is not part of the bundle.

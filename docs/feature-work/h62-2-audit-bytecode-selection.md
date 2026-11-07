@@ -2528,3 +2528,110 @@ for disk headroom; source, frozen products, shared cache and evidence remain
 intact. Future full builds may need those outputs fetched or rebuilt. Original
 closure, full census, source adequacy, runtime/Bridge and performance gates
 remain open; no global ledger or full-source acceptance is inferred.
+
+### Decoder-field feasibility and reject-all control
+
+The generic field renderer now accepts optional shared, hash-pinned audit
+support. Its default source and manifest outputs remain byte-identical to the
+previous implementation. Support is trusted reviewed Lean source, not a
+sandbox. One parametric reference self-adapter supplies all five exact frozen
+DecoderPremise domains: entry, closed, agrees, zero and succ. All global byte,
+height, step/run, reachability and self parameters remain explicit.
+
+The closed-domain witness includes a real gasless JUMPDEST transition: byte
+0x5b, PC zero to one, stack [11] preserved. Negative controls reject an empty
+entry-reachability predicate and corrupted result stack [12]. A general lemma
+proves that any admitted supported reference step rules out an always-none
+adapter; a concrete JUMPDEST instance supplies both hypotheses. This is local
+reference-adapter feasibility. Choosing reference step/iteration as adapter
+functions establishes no external Bridge decoder or G45.05-BR agreement.
+
+Both native runs pass: 5.214 seconds initially and 5.079 seconds with the
+generic reject-all control. All scoped axioms are propext/Quot.sound; the
+shared impossible-certificate control remains axiom-free. Thirty-four existing
+source/product bindings suffice; no new prerequisite build or STOP retry ran.
+The five decoder domains and earlier three compiler domains leave three
+runtime-consumer fields unwitnessed in the 11-field premise packet. This is
+local accounting, not a global ledger or completed census.
+
+The 125-test suite and independent read-only finder/skeptic source and final
+provenance reviews pass. Replay binds shared source, exact generated code,
+native commands/results/guards, prior seal and all imports. The final published
+master77dbfca86aa107955b83529007fcaf3b57c32f29 was adopted without discarding
+work. Its integration success is separate from local full validation. Native
+receipts and handoff are sealed outside the code branch under
+/workspace/parallel-20261103/executable-bytecode/decoder-field-domains/ and
+archived privately under H145. H1 cleanup removed only exited containers whose
+IDs match this lane's saved workload records, reclaiming VFS copies while
+retaining every host-bound proof product and receipt.
+
+### Frozen V2 control inspection and theorem domains
+
+The already built InterfaceV2Controls module now has an independent native
+all-constant packet: 17 records, comprising 13 kernel theorems and four other
+constants. Seven theorem names match frozen lexical candidates; six additional
+kernel theorem records receive no inferred source-parent ownership. This
+brings independently observed core modules to 153, leaving 37 core and 37
+Bridge modules uninspected. Packet fingerprints remain separate.
+
+The existing binder renderer now supports original theorems and explicitly
+refuted domains as well as registered projections. Original theorem kind,
+universes and raw type snapshots are checked before reusing the same pinned
+extractor. The projection entry point remains a backward-compatible wrapper;
+default source and manifest output tests still pass. A refuted-target roster
+emits negated domains and is pinned separately, preventing refutations from
+being counted as inhabited hypotheses. No original statement changes.
+
+Eight domains are positively witnessed, all axiom-free. Four domains are
+refuted as intentional negative controls: the oversized V2 program and its
+length auxiliary, the impossible wrong-result length auxiliary, and the V1
+overflow example's impossible stackBound premise. This reproduces the known
+conditional V1 capacity defect without repairing or endorsing it. These four
+refutations receive no positive witness credit. The remaining domain,
+reject_false_runtime, stays open because its composition argument was not
+supplied; no composition or source assumption is invented.
+
+Native inspection passed in 5.888 seconds. Domain checks passed in 6.956 and
+7.295 seconds, using 38 existing verified import products and no new
+prerequisite build or STOP retry. Refutations use only standard axioms; no file
+exceeds 60 seconds. The 127-test suite and independent read-only finder/skeptic
+source and provenance reviews pass. Raw packets, complete 17-record ledger,
+resource receipts and replay are sealed off-branch at
+/workspace/parallel-20261103/executable-bytecode/selection-controls-inspection/
+and archived privately under H145. Only exited lane-owned containers and
+regenerable import-view symlinks were removed; proof products remain intact.
+Original global census, Source/runtime/Bridge, physical, gas/fork, full closure
+and performance obligations remain open.
+
+
+### Frozen control source and binder accounting
+
+The 17-record InterfaceV2Controls inspection is now joined to its exact frozen
+source snapshot using the existing `source_obligation_inventory`,
+`binder_metadata` and `parent_metadata` helpers. All seven lexical theorem
+candidates have unique name/Unicode-position candidate edges. These remain
+candidate edges: no source authenticity, statement correspondence, ownership or
+additional witness credit follows. Ten records have declaration ranges; seven
+lack ranges, and ten kernel records have no lexical theorem candidate (including
+four constants). No auxiliary parent is guessed from a dotted name.
+
+The supplied records expose 34 ordered raw binders with six proof-binder flags.
+Of the 34 head observations, 24 name constants absent from this single-module
+packet and ten have no constant head. All global/per-input premise roles remain
+unclassified. In particular, a data-valued certificate can carry obligations;
+zero proof-binder flags do not show a hypothesis-free or inhabited domain. No
+private flags or structure-parent roots occur in this packet. That says nothing
+about private declarations or inherited obligations in the remaining census.
+
+The static reproduction first rejected source candidates without the required
+explicit edge metadata; supplying the independently recomputed position edges
+then reproduced byte-identical accounting. It pins the preserved parent checksum
+list, validates its manifest and three input file hashes and the frozen Git
+source hash, and records the current helper hash. It starts no
+Lean process, changes no frozen bytes, retries no stopped proof, and supplies no
+new gate, domain or full-census acceptance. Independent read-only finder and
+skeptic reviewed this accounting boundary. Original 703-source closure,
+190-core/37-Bridge inventory, joint witnesses, Source/runtime, G01 and physical
+obligations remain open. Evidence and reproduction are off branch under
+/workspace/parallel-20261103/executable-bytecode/control-source-accounting/ and
+archived privately under H145.

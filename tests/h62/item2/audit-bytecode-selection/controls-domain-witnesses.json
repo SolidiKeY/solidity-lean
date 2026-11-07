@@ -1,0 +1,61 @@
+{
+  "witnesses": {
+    "overflow_control_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.reject_overflow",
+      "proof": "True.intro"
+    },
+    "runtime_witness_control_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.runtime_witness_inhabited",
+      "proof": "True.intro"
+    },
+    "wrong_result_control_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.reject_wrong_ir_result",
+      "proof": "True.intro"
+    },
+    "zero_push_aux1_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.zeroPush._proof_1",
+      "proof": "True.intro"
+    },
+    "zero_push_aux2_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.zeroPush._proof_2",
+      "proof": "True.intro"
+    },
+    "zero_push_run_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.run_zero_pushes",
+      "proof": "⟨1,[11],True.intro⟩"
+    },
+    "legacy_frame_aux_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.legacyOverflow._proof_1",
+      "proof": "⟨[11],True.intro⟩"
+    },
+    "false_compiler_control_domain": {
+      "target": "Solidity.Backend.Selection.V2.Controls.reject_false_compiler",
+      "proof": "⟨Unit,(fun _ => ()),[],True.intro⟩"
+    },
+    "reject_push_domain_refuted": {
+      "target": "Solidity.Backend.Selection.V2.Controls.reject_push_program",
+      "proof": "by\n  rintro ⟨input,output,certificate,bad,_⟩\n  exact Solidity.Backend.Selection.V2.Controls.reject_push_program certificate bad"
+    },
+    "wrong_result_aux_domain_refuted": {
+      "target": "Solidity.Backend.Selection.V2.Controls.reject_wrong_ir_result._proof_1_3",
+      "proof": "by\n  rintro ⟨lengths,_⟩\n  cases lengths"
+    },
+    "reject_push_aux_domain_refuted": {
+      "target": "Solidity.Backend.Selection.V2.Controls.reject_push_program._proof_1_1",
+      "proof": "by\n  rintro ⟨input,bound,_⟩\n  omega"
+    },
+    "legacy_capacity_aux_domain_refuted": {
+      "target": "Solidity.Backend.Selection.V2.Controls.legacyOverflow._proof_2",
+      "proof": "by\n  rintro ⟨tail,bound,before,after,reached,split,ran,_⟩\n  have capacity : (List.replicate 1025 (0 : Solidity.Backend.Scalar.Word) ++ tail).length ≤ 1024 :=\n    Solidity.Backend.Scalar.run_capacity\n      (Solidity.Backend.Selection.V2.Controls.run_zero_pushes 1025 tail) bound\n  simp only [List.length_append, List.length_replicate] at capacity\n  omega"
+    }
+  },
+  "refuted_targets": [
+    "Solidity.Backend.Selection.V2.Controls.reject_push_program",
+    "Solidity.Backend.Selection.V2.Controls.reject_wrong_ir_result._proof_1_3",
+    "Solidity.Backend.Selection.V2.Controls.reject_push_program._proof_1_1",
+    "Solidity.Backend.Selection.V2.Controls.legacyOverflow._proof_2"
+  ],
+  "open_targets": [
+    "Solidity.Backend.Selection.V2.Controls.reject_false_runtime"
+  ]
+}

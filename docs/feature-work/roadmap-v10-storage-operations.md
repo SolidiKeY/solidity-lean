@@ -54,8 +54,11 @@ written-read inequality is not a separate failed representation judgment.
 typed cell writes, actual ordinary/writable execution and exact journal order.
 Mixed uint/bool controls retain nonempty locals, transient storage and a journal
 prefix: worlds agree while journals/states differ; overlap changes worlds.
-Explicit undo restores the seeded execution state. The routine combined adapter
-is pending in [TERRA-TODO](../../TERRA-TODO.md), without a compiled stub.
+Explicit undo restores the seeded execution state. The compiled `complete` adapter
+packages both runs, world equality and each exact journal order; the existing
+world-equality control consumes it. This closes only the C157 obligation in
+[TERRA-TODO](../../TERRA-TODO.md). Lane-history finder and skeptic reviews found
+no statement or semantic preservation issue in this adapter.
 
 `SourceWriteRollback` proves typed static refusal and actual `rollbackTo`
 restoration for a captured account-write-only poststate. Populated controls
@@ -64,7 +67,10 @@ show that a failed bind skips its rollback continuation, and invoke rollback
 separately. A wrong mark loses older journal/log prefixes; a wrong payload type
 fails before static refusal. Heap/events/locals survive because these writes
 never changed them. This does not prove general frame or compiler rollback.
-The routine generic pair adapter remains uncompiled in TERRA-TODO.
+The compiled `run_refused` adapter retains the exact first-write poststate on
+static refusal; the existing outcome control consumes it. This closes only C159
+in TERRA-TODO. Lane-history finder and skeptic reviews found no semantic or
+statement-preservation issue in this adapter.
 
 `SourceStorageCopyPrefix.prepared` proves the actual distinct-path Source
 `storeVal(storRef)` result for primitive integer arrays at original fuel
@@ -183,10 +189,12 @@ Populated actual storage-reference array copies distinguish storage/journal
 preservation from changed heap on timeout and static refusal. Ordered outcomes,
 heap contents, source shadows, old objects, success journals and self-copy are
 pinned. This is a concrete limit on generalizing primitive byte full-state
-preservation; no automatic heap/world rollback follows. The routine outer-copy
-wrapper is a type-checked proposition only in TERRA-TODO; nineteen adapters
-remain pending. General nested shapes, physical allocation/failure and compiler
-composition remain open.
+preservation; no automatic heap/world rollback follows. The compiled
+`copy_timeout_prefix` wrapper now gives the exact outer-copy failure state and
+is consumed by the existing storage-observation control. This closes only C171
+in TERRA-TODO. Lane-history finder and skeptic reviews found no preservation
+issue in this adapter. General nested shapes, physical allocation/failure and
+compiler composition remain open.
 
 ## Nonempty nested capture payloads
 

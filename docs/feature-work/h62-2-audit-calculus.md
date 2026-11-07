@@ -2,7 +2,11 @@
 
 ## External evidence and coordinator intake
 
-For coordinator-side review, census claims are bound by hash only until the coordinator pulls the referenced bytes and verifies the committed manifests. Classification inputs and bulk evidence remain off Git on this VM under H44, with absolute paths, sizes and SHA256 identities. Local accounting/tests and local finder/skeptic review do not establish coordinator delivery, independent semantic acceptance or proof validation. Delivery remains coordinator-pending; the checkpoint evidence includes the actual local retention/hash audit. Regenerated or transcribed material does not establish identity with unavailable historical bytes.
+Current exact V123/V124 payload publication: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. The current manifest is private and the loader pins this commit. Earlier preparation/pending-publication wording below is historical and superseded for these exact payloads; unrelated bulk retrieval and semantic acceptance remain pending.
+
+Under H145, lane evidence indexes are archived in the [private coordination repository](https://github.com/SolidiKeY/solidity-lean-coord/tree/de649e9c9648443622f3fc35b24999c15ecfb27a/evidence/solidity-h28-sol-20261104/automation-benchmark/h145-code-evidence). The archive preserves 110 removed index files byte-for-byte, the current classification dataset and frozen census, and the prior sealed handoff. The default checker now reads its checksum manifest and exact payloads from immutable private Git objects as documented in tests/h62/item2/audit-calculus/BULK-INPUTS.md; historical verifier fixtures remain intact. Other bulk bytes referenced by those indexes stay on the VM and are not claimed privately retrieved. Historical statements below about committed evidence manifests describe earlier checkpoints; their indexes now live in the private archive.
+
+For coordinator-side review, census claims are bound by hash only until the coordinator pulls the referenced bytes and verifies the privately archived manifests. Classification inputs and bulk evidence remain off Git on this VM under H44, with absolute paths, sizes and SHA256 identities. Local accounting/tests and local finder/skeptic review do not establish coordinator delivery, independent semantic acceptance or proof validation. Delivery remains coordinator-pending; the checkpoint evidence includes the actual local retention/hash audit. Regenerated or transcribed material does not establish identity with unavailable historical bytes.
 
 ## H82 retirement: implementation stopped
 
@@ -26,7 +30,7 @@ coordinator must pause the existing goal externally.
 The original prompt, queues, steering and retirement notes are retained under
 scripts/h62/item2/audit-calculus/h28-inherited-handoff/. The exact361-path scope inventory
 is external under H44; its absolute path, size and SHA256 are in
-tests/h62/item2/audit-calculus/bulk-inputs-manifest.json. Other bulk and unimplemented drafts
+tests/h62/item2/audit-calculus/BULK-INPUTS.md. Other bulk and unimplemented drafts
 remain off Git in the authenticated evidence archive. Coordinator-local paths
 are provenance, not assumed successor access. H71 push permission was not
 available, so no push was attempted. No new proof implementation occurred after
@@ -1684,3 +1688,371 @@ Binder handling first attempts direct absorption, optionally all-leading-binder 
 No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
 
 Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4068 classifications pending. No proof/runtime acceptance.
+
+## Scope absorption static roles (V99)
+
+Guarded regression: successful syntactic thinning/down/absorption must not be mistaken for runtime return or unconditional positive exhaustion. Preserve actual typed binder values, failure results and conditional local-held transport.
+
+Complete frozen-selected Solidity/Calculus/RewritePast/Scope.lean and all22 named signatures match frozen/adopted master. Prior1215 roles and owner map unchanged;1237 reviewed/4046 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations separate.
+
+Idx.unwk? rejects a dropped position; its theorem only reweakens an actual successful result. ThinOf.thin names the definitionally chosen thinned state; it is not fresh joint-witness credit. Kept typed environment lookup is equal under the exact successful unweakening guard. Term evaluation, denotation and RHS evaluation under thinning retain actual transformation success and exact equality; Option none remains possible. Exhaustion equations assert equality, not true.
+
+The complete ten term forms, eight RHS forms, five thinning/index branches and eight update-element forms were inspected. down specializes thinning to dropping the top local. Every down theorem retains some-result equality and arbitrary actual typed pushed value; global-element equality quantifies every compatible G. okB/exhB equality supplies neither positive return nor positive exhaustion.
+
+baseIdx follows nil/snoc/decl and rejects pop/drop. rebase introduces declaration x b beneath the prefix; snoc requires an existing base index, no write to it, successful recursive rebase and element down; declarations require successful RHS down. absorbFirst accepts only a local write of exactly the binder type and numeric position, with reorder or empty prefix, down RHS and successful rebase. absorb extends prior success or tries that first write, propagates successful declarations and maps scope exits. These checks are not claimed complete for all semantically absorbable updates.
+
+rebase_globT retains the actual b.eval bind before original globals at arbitrary pushed w, so failed b still fails. rebase_held gives the binder held term rhs b and only conditional Held.OKV transport at other numeric positions. Absorbed globals are exactly equal including failure; absorb_held is conditional one-way Held.OKV transport, not syntactic identity. Rebase exhaustion is the OR of RHS/original exhAny, and exhOk is RHS return-or-exhaust AND original exhOk. Absorption equates both flags exactly without asserting them true.
+
+holds_bind_absorb retains exact successful absorption and transformed-update holds. It transports to the hidden binder for arbitrary binder modality, retaining the inner update modality. Full definition/proof branches were read; no runtime or fresh kernel proof credit follows.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4046 classifications pending. No proof/runtime acceptance.
+
+## Scoped sequent walk static roles (V100)
+
+Guarded regression: a compiled bounded walk proposal is not a derivation without exact certificates, residual proofs and sound callback assumptions. Section-generalized hypotheses must remain visible beyond lexical signature excerpts.
+
+Complete frozen-selected Solidity/Calculus/ProvesDerive.lean and all15 named signatures match frozen/adopted master. Prior1237 roles and owner map unchanged;1252 reviewed/4031 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations separate.
+
+both_sound and each_sound retain universal callback soundness and actual successful computations plus all output P obligations. Budgets thread from one goal to the next, and empty input gives only an empty-domain conclusion. Structural maxIdx/fresh equalities and negModal recognizer shape equality supply no successful derivation themselves.
+
+premise_sound requires recursive soundness hr, conditional refuter law hx, exact stepIn success at H.fresh, exact premise-walk success and output obligations. The refuter law additionally receives a live derivation under another precondition; it is not unconditional validity of arbitrary branch rejection. All13 premise cases were read, including empty branch/case/allocation refusal and three invariant goals.
+
+leaf_sound generalizes section hleaf. runK_sound and run_sound generalize both hleaf and explicitly included hrf, despite their absence from short lexical declaration signatures. They require exact successful run and all residual P obligations. hrf has the same conditional live-derivation-to-false shape as hx. runK uses exactly H.maxIdxH; arbitrary cached indices are not covered. Fuel or whole-walk budget exhaustion and missing rules still return none.
+
+leafS closes only a known true scoped check; false or unread cases leave the original scoped sequent. SLeaf.nil is intentionally vacuous list-base bookkeeping, not positive automation/compiler success. cons needs head and tail proofs. of_residueWithin and of_residue specialize sound callbacks but retain actual residue equality and every scoped residual proof; default fuel unchanged. closeValid requires full typed wrapped validity and exact modalFree=true.
+
+Full14 formula/nine context shapes, quoting/parameter markers, residue scanning, both tactic routes and leafValid support were read. Named-contract, closed-sequent, bounded-step, oneCheck and kernel-rejection refusals remain. Staged compiled execution proposes leaves; original explicit residue equality is checked by the kernel, including shared-check original type annotation. Residual goals remain Proves obligations. allLeft budget4 and modal-free typed validity checks are unchanged. This static review supplies no parser/editor/tactic/kernel/replay/performance acceptance.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4031 classifications pending. No proof/runtime acceptance.
+
+## Archive-backed duplicate cleanup (V101)
+
+Guarded regression: resource cleanup must retain exact original evidence bytes, never substitute regenerated results. Four working classification reports were removed only after byte comparison with unique regular members of two retained, committed-hash-bound archives and independent finder/skeptic reviews.
+
+The receipt records original paths, byte counts, SHA256, exact archive-member names and retained archive bindings. Logical bytes reclaimed30025274. Post-deletion checks confirm every original byte sequence remains exactly restorable. Restore members to original working paths before historical checks. These deliberate duplicate evictions are not UNVERIFIABLE-byte gaps. Unique evidence, source, logs, datasets and caches remain intact.
+
+Census unchanged1252 reviewed/4031 pending of5283;1537 unresolved owners; zero fresh witnesses. Storage-law source inspection supplied no classification credit. Maintenance supplies no semantic/Lean/kernel/axiom/replay/runtime/performance acceptance. Coordinator bulk retrieval remains pending; claims bound by hashes until pull/verification. Whole original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained. No source/statement/definition/budget/exclusion change or push.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4031 classifications pending. No proof/runtime acceptance.
+
+## Storage term-law static roles (V103)
+
+Guarded regression: conditional storage frame/refinement laws must not become unconditional return or source/physical adequacy. Preserve exact successful operations, literal range guards, divergence and covered push-free-write conditions.
+
+Complete frozen-selected Solidity/Calculus/TermLaws/Storage.lean and all45 named signatures match frozen/adopted master. Prior1252 roles and owner map unchanged;1297 reviewed/3986 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations separate.
+
+Theq is an all-state denotational equality assumption; together with an actual literal target it gives only forward evaluation refinement. All eight LitLaw constructors retain exact typed operator some-result guards, including checked arithmetic/range and division. Certified LitLaw.exact yields a same typed literal and all-state successful source evaluation; the certificate itself is not supplied. This is expression algebra, not program/compiler totality.
+
+Storage write membership under exhOk yields return-or-exhaustion. Read-after-write literal return requires actual save success; its global forward refinement does not supply that success. Typed member/under identities retain exact root/field type evidence. shift?_eval states a partial fixed-state relation: successful path shifts commute with under; nonpath branch is True and absent shift gives no positive obligation. Member-wise read equality retains exact shift success and Option failure.
+
+Typed divergence derives from the actual label recognizer. Delete/push/pop decompose only successful results into saves; arbitrary callback return, array bounds and nonempty requirements are not supplied. find framing needs successful save and path divergence. Length framing uses divergence against array labels plus lengthSeg, permitting writes below an element without changing length. lenU equality retains equal counts and both uint bounds.
+
+All-state return refinement is distinct from fixed-state SavesAt, whose quantified successful-output antecedent remains inside the relation. Four SavesAt constructors supply only conditional decompositions. Actual frame/delete-value equations additionally retain exact operation success and divergence/same-segment certificates. find/len/default equations preserve all Option binds and failure. Same-segment evaluated paths yield type equality and heterogeneous reference equality only after both evaluations succeed.
+
+ReadStore recognizer and first-argument spine facts preserve actual success or propagate actual failure, not arbitrary-subterm strictness. Symbol exhaustion on a missing first operand is false, separately from term exhaustion. Spine okx conclusions remain return-or-exhausts. holdsWrite contains both pushFree and a storage-term spine witness; combined with U.exhOk this forces the selected write term to return, without claiming U returns.
+
+All seven RefLaw constructors and their guards were read. RefLaw.exact concludes an existing read-storage argument and all-state conditional equality when it returns; that nested success is not an outer assumption or furnished witness. Forward refinement needs the RefLaw certificate; reverse OLe additionally needs exact covered write and exhOk. No physical layout, source compilation, gas/fork/world or unconditional read-totality claim follows.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate FAIL exit1 (inherited ExecutionTransport.lean reference). Complete acceptance remains FAIL exit1:3986 classifications pending. No proof/runtime acceptance.
+
+## SolKey fragment static roles (V104)
+
+Guarded regression: conservative program-rule membership and weakening identities must not imply operational/source/compiler completeness. Retain exact modalities, step/rule certificates and current loop/exclusion boundaries.
+
+Complete frozen-selected Solidity/Calculus/SolkeyFragment.lean and all37 named signatures match frozen/adopted master. Prior1297 roles and owner map unchanged;1334 reviewed/3949 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations separate.
+
+The classifier restricts program operands and nested programs, not arbitrary symbols in formula atoms/updates. All36 statement cases,14 formula cases,13 premise cases and full program/frame/argument/return branches were inspected. Actual definition permits automatic loops with key condition/body, despite older loop-free comment wording. Nonautomatic annotations remain outside this conservative predicate. Transfer requires box, send permits either modality; try, recursive calls, data revert/catch and assumeFalse are rejected. Calls retain no capture, no summary path, key arguments/body. Receiver pushes retain actual source/deferred-code checks; joined if shapes are excluded.
+
+Actual LeanTaclet certificates imply negative fragment membership. Positive fragment plus exact step equality gives Taclet; admitted SolKey step likewise gives Taclet. The conditional existence theorem concerns the existing typed dispatcher, not source execution. Every Taclet excludes zero-bound unwind; the zero-bound example has some Rule and no Taclet. This is a rule-table separation, not compiler totality or a freshly executed witness.
+
+Frame/modal membership equations preserve conjunctions. Simplicity, capture absence, join recognizers, empty-program checks, key values, summaries and fragment predicates are invariant under actual typed weakening; none of those equalities supplies positive acceptance. Two-statement joinArm refusal and exact short-circuit AND/OR shapes retain their precise nonsimple operand guard. Prefix weakening and typed binder declaration expansions preserve classifier values; argument declarations additionally require keyValues.
+
+Call expansion and pure/deferred receiver steps preserve membership under exact original key/body/source premises. Automatic-loop unwind preservation retains actual membership; bounded annotations make that premise impossible, rather than proving general loop termination. Taclet.premise_inSolkey retains both actual Taclet certificate and positive source membership.
+
+The per-constructor generation command, specialized receiver/call/while/if branches, generic structural proof branches and open-goal refusal were read. It emits separate declarations at existing budgets; those generated lemmas remain separate from the37 named census rows and receive no fresh kernel/build credit here.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate FAIL exit1 (inherited ExecutionTransport.lean reference). Complete acceptance remains FAIL exit1:3949 classifications pending. No proof/runtime acceptance.
+
+## Logical normal-form static roles (V105)
+
+Guarded regression: checked cancellation requires the whole intermediate sum/difference to return; operand return alone does not exclude overflow. Retain fixed-state fact validity and exact literal/type/range guards.
+
+Complete frozen-selected Solidity/Calculus/Closer/Normal.lean and all20 named signatures match frozen/adopted master. Prior1334 roles and owner map unchanged;1354 reviewed/3929 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations separate. This is inherited audit census work only: no VA1 closer/Decision implementation, sharing or fixture change.
+
+Facts.Ok g nu is an actual fixed-state structured premise, not a universally valid database. apart and keyCmp soundness yield successful evaluated operands with actual disequality/comparison only under valid facts and exact positive recognizer results. Literal comparisons, identity plus return, recorded apart and unresolved none branches remain distinct.
+
+Conditional normalization retains actual optional evaluation. kite uses actual key comparison, or identical branches only with both key operands returning; bool identity needs exact typed true/true/false tags. seq drops only returning guard, retains err and unresolved cases; orElse preserves left-bias. Unary delValue folds to default only under actual operand return. Range decisions retain both InR memberships and some-result guards; overlapping ranges may remain unresolved.
+
+Add/sub/mul recognizers and cast reconstruction prove intrinsic sort/term equality, not evaluation success. Numeric ofInt round-trip requires actual typed numeric value with its range proof. Cancellation of (a+b)-b or (a+b)-a requires the whole checked sum returns; (a-b)+b requires the whole difference returns. Matching terms, operator acceptance and typed cast are retained.
+
+Division cancellation is specifically uint(a*k+c)/k with literal equal multipliers,0<=c<k,whole sum returning and successful typed reconstruction. Bounds imply nonzero divisor; no general signed/zero-divisor cancellation follows. Bool literal equality preserves failed lhs. ltSucc yields successful ordered values only from actual positive literal increment and whole sum return. Two-times equality preserves identical checked range/overflow behavior and failure; it does not assert return.
+
+Full normalizer and proof branches, including every refusal/fallback and numeric case, were read. No closer admission, source/compiler success, runtime/kernel replay, performance or solver-completeness credit follows.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate FAIL exit1 (inherited ExecutionTransport.lean reference). Complete acceptance remains FAIL exit1:3929 classifications pending. No proof/runtime acceptance.
+
+## Clean-tail fold static roles (V106)
+
+Guarded regression: clean-tail folding must retain the actual starting-storage premise and correct known tests. False-antecedent truth and empty/nonpath guard clauses are not positive clean-state or compiler-success controls.
+
+Complete frozen-selected Solidity/Calculus/DecideCleanTail.lean and all21 named signatures match frozen/adopted master. Prior1354 roles and owner map unchanged;1375 reviewed/3908 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations separate. Inherited static audit only; no VA1 implementation/sharing/fixture work.
+
+Premise/spine recognizer recursor links preserve exact Booleans. isCTPrem_holds concludes that for each state, actual formula holding implies clean tails; that holds antecedent remains nested. assumesCT_holds intentionally proves formula truth in nonclean states from a recognized clean-tail antecedent. This is explicit implication vacuity, not a weakened compiler contract or positive clean-state witness. Conjunction needs both assumption spines; quantifier bodies preserve the property.
+
+Guard dropping is compiled/recursor equivalent and preserves only successful source results forward, not arbitrary Option equality. lenOf recognizes exact observed length or guarded length+1-1 and additionally requires actual index return. Storage observed dynamic-array length is uint-bounded, including absent default0; no array existence follows.
+
+All term/formula/operator branches were read. Unchecked dynamic index adds a live-length test; fixed arrays pass guards, mapping keys clear them. Checked array indices and members pass prior guards with KeyFree extension; mapping indices stop. GuardsOK is fixed-state conditional on successful path evaluation: every listed guard returns and false marks the reference shadowed. Empty guard membership and nonpath True clauses are intentional, not supplied successful paths or clean-tail certificates.
+
+knownAs_eval retains actual validity of every recorded test at fixed g/nu. guardWith additionally needs path-failure strictness and successful-path/false-guard fallback equations. Filtering known-true tests, known/literal-false fallback and nested kite cases preserve exact Option evaluation; defaults do not apply to arbitrary paths.
+
+ctFoldK_eval requires actual starting-storage CleanTails, and concludes equality for each correctly recorded K; K validity remains nested after quantification. Empty-K ctFold equality preserves failure. Formula fold gives holds equivalence for every valuation at the same fixed clean-tail state. obsW uses primitive defaults and obsL zero only under their guarded clean-tail observation semantics; obsH remains unchanged. decideMemCT_holds needs exact checker=true plus actual clean-tail state and valuation. No checker result, physical storage adequacy or general program totality is supplied.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. Documentation wait owner is solidity-v07-v11-20261030/v08-world-lowering. No STOP release.
+
+Accounting and115controls PASS; documentation path gate FAIL exit1 (inherited ExecutionTransport.lean reference). Complete acceptance remains FAIL exit1:3908 classifications pending. No proof/runtime acceptance.
+
+## Local failure-slice static roles (V107)
+
+Guarded regression: bounded local emitter/checkpoint results must not imply source-level catch, global world or physical-EVM adequacy. Halted suffix unobservability is distinct from two executed emitters.
+
+Complete frozen-selected Solidity/Backend/Failure/Composition.lean, Solidity/Backend/Failure/Immediate.lean, Solidity/Backend/Failure/Unwind.lean and Solidity/Backend/Failure/Checkpoint.lean; all21 named signatures match frozen/adopted master. Prior1375 rows and owner map unchanged;1396 reviewed/3887 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; unresolved per-file owners remain unguessed and generated declarations separate.
+
+Two nonterminal write blocks execute in order under both word-limit bounds; disjoint payload readback additionally uses actual separation in the functional Memory model. Terminal emitters halt: a concatenated second emitter is unobserved and needs no Fits premise, rather than executing successfully. Actual local checked success and success/revert distinction retain first payload Fits and stack headroom.
+
+Immediate digits always have the requested width. Fold/read roundtrip requires n<256^k; PUSH32 serialization for arbitrary Nat gives exact digits/opcode bytes without unbounded readback or ABI-value claims. The opaque ABI payload is unchanged.
+
+Journal/checkpoint persistent and transient types remain independent and machine snapshots explicit. The inhabited existing relation has success-live and revert-restore constructors; functionality requires two actual relation proofs. Projection, save/restore and rollback identities concern these local records. Outer rollback restores outer; outer success after inner failure keeps inner restoration.
+
+execute first obtains immutable outcome bytes from actual checked emission, then finishes the local checkpoint. Exact positive result theorems retain Fits and stack bounds and supply only component execution. nested explicitly uses arbitrary resume data; its second stack bound is on resume(restore inner), with both payload Fits and initial stack guard retained. Both immutable revert payloads survive restoration. This is not a Solidity catch implementation, compiler totality or real-world/EVM correspondence.
+
+Full definitions/proof branches across all four files were read; no producer edits or runtime checks executed. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact sources/signatures/rosters/dataset stay off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained. Documentation dependency owner: solidity-v07-v11-20261030/v08-world-lowering.
+
+Accounting and115controls PASS; documentation path gate FAIL exit1 (inherited ExecutionTransport.lean reference). Complete acceptance remains FAIL exit1:3887 classifications pending. No proof/runtime acceptance.
+
+## Existing failure controls static roles (V108)
+
+Guarded regression: concrete internal byte/slice controls must not be reported as universal compiler/external-EVM agreement or fresh VM proof acceptance. Source axiom-message expectations remain separate from an executed axiom audit.
+
+Complete frozen-selected Solidity/Backend/Failure/CompositionChecks.lean and Solidity/Backend/Failure/EmissionChecks.lean; all13 closed named signatures match frozen/adopted master. Prior1396 rows and owner map unchanged;1409 reviewed/3874 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; both owners remain explicitly unresolved, generated declarations separate.
+
+Five composition controls cover separated payloads, two actually executed raw write blocks followed by RETURN, terminal overlapping suffix unobservability, a negative overlapping raw write, and returned/revert distinction at identical bytes. They retain exact marked machine/memory and31/64/32 offsets. A halted emitter suffix does not represent two executed emissions; raw run and checkedRun fixtures are distinguished.
+
+Eight emission controls inventory exact empty/custom opcode vectors, panic code1 bytes,32+1 write crossing,33-byte reason padded length132, return instruction shape, four mutations and contiguous error-selector combination. These are closed concrete internal vectors, not comprehensive ABI/source/compiler or external execution proofs. Exact payload/opcode lists remain in frozen signatures.
+
+All13 declaration/proof bodies and thirteen source print-axiom guards were read. Existing expectations include Classical.choice on concatenated-emitter/terminal-class results; no expectation, axiom set or proof edited and no fresh Lean/axiom execution claimed. Closed positive/negative fixtures are existing inhabited cases, not fresh simultaneous witnesses or replacement for universal producer obligations.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact sources/signatures/rosters/dataset stay off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained. Documentation dependency owner: solidity-v07-v11-20261030/v08-world-lowering.
+
+Accounting and115controls PASS; documentation path gate FAIL exit1 (inherited ExecutionTransport.lean reference). Complete acceptance remains FAIL exit1:3874 classifications pending. No proof/runtime acceptance.
+
+## Creation layout static roles (V109)
+
+Guarded regression: wrapper-entry local execution and byte/source-map bounds must not imply arbitrary constructor execution, frontend provenance or full-EVM/compiler adequacy. Keep embedded arithmetic certificates and explicit continuation/bounds premises.
+
+Complete frozen-selected Solidity/Backend/Creation/Execution.lean, Solidity/Backend/Creation/ExecutionChecks.lean, Solidity/Backend/Creation/Placement.lean, Solidity/Backend/Creation/PlacementChecks.lean, Solidity/Backend/Creation/Regions.lean and Solidity/Backend/Creation/Provenance.lean; all26 named signatures match frozen/adopted master. Prior1409 rows/owner map unchanged;1435 reviewed/3848 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; unresolved owners unguessed and anonymous/generated declarations separate.
+
+Exec means existence of successful finite fuel for the local raw-byte runner. Code bytes used by CODECOPY are distinct from instruction stream bytes. PUSH reduces to word modulus; reads/CODECOPY zero-pad, memory tracks bytes rather than gas/rounded allocation. Unsupported instructions, truncated PUSH, underflow and fuel exhaustion have no successful derivation. This is not full EVM/gas/account/CREATE semantics or a1024-stack-cap model.
+
+fetch_encode decodes actual intrinsic instruction bytes with arbitrary tail. Extra fuel preserves an already successful run; determinism requires two actual Exec proofs. Push/copy prefix theorems require exact continuation execution, while RETURN/REVERT construct finite local halts and ignore suffix. Read bounds, whole-list identity and empty-memory write are byte-model laws.
+
+wrapper_exec and placed_exec start at the wrapper stream with empty stack/memory and arbitrary code source. Placement supplies runtime-length and offset-alignment certificates with typed Immediate limits; installs returns runtime only at that entry. The pre prefix appears in code layout but is not executed as a constructor. Artifact installation similarly supplies local wrapper execution, not source compilation/constructor/world adequacy.
+
+Bounded patchAt length/get/frame/commutation retain actual interval limits and disjointness. Source-map Section covers wrapper/runtime/arguments; exact slice and bounds hold for supplied Artifact records. Provenance carries generated-byte and independently bounded supplied source ranges; global bounds and byte identity do not prove source anchors, frontend mapping fidelity or equal source/generated span widths.
+
+Existing boundary placements255/257, runtime lengths31/32/33/255/256 and negative known-byte examples were read without fresh execution or named-row credit. wrongSource_exec genuinely specifies a different returned vector for its concrete malformed offset. Existing axiom-message guards are source inventory only, not a new audit.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact sources/signatures/rosters/dataset stay off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained. Documentation dependency owner: solidity-v07-v11-20261030/v08-world-lowering.
+
+Accounting and115controls PASS; documentation path gate FAIL exit1 (inherited ExecutionTransport.lean reference). Complete acceptance remains FAIL exit1:3848 classifications pending. No proof/runtime acceptance.
+
+## Representation and try boundaries static roles (V112)
+
+Guarded regression: conditional representation/copy laws, exact creation-try conditions and callback-diamond obstruction must not imply unrestricted physical/compiler/world adequacy or positive execution witnesses.
+
+Complete frozen-selected Solidity/Storage/Representation/Words.lean, Solidity/Evm/MemoryStorageObjectCopy.lean, Solidity/Evm/MemoryStorageCopySource.lean, Solidity/Semantics/TryCreateConditions.lean and Solidity/Counterexamples/DiamondTry.lean; all12 named source signatures match frozen/adopted master. Prior1435 rows/owner map unchanged;1447 reviewed/3836 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses. Two private source declarations are included by exact lexical census identity, not guessed generated kernel names.
+
+Typed full-word bounds/idempotence and injectivity cover supported bool/uint/int values of the same primitive type. They do not establish cross-type uniqueness, hash injectivity or packed storage layout.
+
+Full object representation projects to fixed-copy representation. Private restoration lemmas require equal heap indices, heterogeneous heap equality and exact machine-memory equality alongside the original ownership/allocator relation. FixedResult.objects lifts represented success with those preservation facts, or matched revert; it does not supply initial representation or successful result.
+
+storeDrop requires actual matching storage representation and drops fragile aliases. Runtime array copy requires StateRepr, exact local/typed-struct-field PtrFrag, destination locIn and a fixed-state conditional bound n<L whenever source/destination resolve. The source pointer is obtained before destination resolution; destination failure matches revert before storage mutation. The exact result relation retains represented success, stack/existing allocator preservation or matched reversion. It is not unrestricted source-path admission, whole compiler or physical-machine adequacy.
+
+creationTry_eq_iff is exact on actual typed world/result and supplied handlers. Argument failure, static caller refusal, creation success, catchable frame error at original world and noncatchable propagation are separate. Handler failure/exhaustion remains possible; neither successful create nor normal catch completion is supplied.
+
+caller_revert constructs an existing callback-semantics revert for every typed try context. callback_diamond_false uses universal callback execution reading, even at diamond and either payment flag: that revert cannot be exhaustion. This is an intentional negative semantic obstruction; existential successful/caught execution cannot replace its universal requirement. No new relation/premise, source execution or positive witness is invented.
+
+Full proofs/definition branches and targeted result/pointer support definitions were read. Existing axiom-message guards are source inventory, not freshly run audits. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Evidence and current dataset are prepared for private archival under H145; publication remains pending until the checkpoint receipt; the checker retains its required external-input binding. Other referenced VM bulk remains hash-bound pending retrieval. Historical unavailable bytes UNVERIFIABLE; exact archive-backed duplicate evictions restorable. Original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained.
+
+## Artifact linking static roles (V113)
+
+Guarded regression: artifact/link-table metadata and conditional assembler completion must not become source/compiler/CREATE, ABI or external-address fidelity claims. Keep exact origins, bounded/disjoint sites and actual assembly/alignment premises.
+
+Complete frozen-selected Solidity/Backend/Creation/Artifact.lean, Solidity/Backend/Creation/ArtifactLaws.lean, Solidity/Backend/Creation/LinkLayout.lean and Solidity/Backend/Creation/Linking.lean; all30 named source signatures match frozen/adopted master. Prior1447 rows/owner map unchanged;1477 reviewed/3806 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; four private source declarations retain lexical identities, not guessed generated names.
+
+Immediate carries a256-bit value bound and minimal byte width. Standalone wrapper offset2*w+8 fits PUSH1; exact wrapper size/length and runtime/args slicing follow actual Artifact layout. Runtime length has a stack-word bound but no EIP-170/EIP-3860 or source-execution premise. Payload determinism ignores link metadata; section uniqueness still requires equal runtime lengths plus equal payloads.
+
+LinkSite contains an actual bounded20-byte location; LinkTable certifies exact absolute origin and pairwise separation. Length preservation works even without site disjointness; pair/permutation commutation retains disjointness and actual permutation. Private member separation needs both memberships; refs_bounds quantifies reference membership inside its conclusion, without inventing an outer all-reference assumption.
+
+Actual assembler metadata places unresolved PUSH20 addresses after their opcode, bounds them in the encoded section and orders them apart. Existing resolved addresses remain unchanged under fillLink; the supplied total address function is arbitrary data, not proved external provenance. tableOfAssembly constructs a table from actual base-zero assembly and length bound; its proof-bearing definition is read without adding a named theorem row.
+
+assembler_link_wrapper needs actual successful assembly at base equal wrapper size and gives exact absolute-offset byte patching and equal encoded length. It has no Exec conclusion or runtime-length relation to n. assembler_link_package instead starts with actual base-zero runtime assembly and fit, then concludes successful filled assembly, no refs, exact payload and restricted local wrapper installation. Neither supplies original assembler success, constructor execution or full EVM/world adequacy.
+
+linked_installs likewise uses supplied Artifact/table and local empty-stack/memory wrapper execution. linked_deployable checks only emptied placeholder metadata, not runtime opcode/account validity. resolve_missing requires an actual listed site and missing address. Argument checking validates exact byte length only; the theorem covers shorter refusal, not ABI decoding. link_payload_bounds concerns any bounded site and does not claim that it occurs in the table (whose parameter is unused).
+
+All definitions/proof branches, six item/resolution cases and four anonymous Artifact examples were read. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Evidence/current dataset are prepared for H145 private archival; publication awaits the checkpoint receipt. The checker retains its actual external-input binding. Other VM bulk remains hash-bound pending retrieval. Historical unavailable bytes UNVERIFIABLE; exact archive-backed duplicate evictions restorable. Original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained.
+
+## Constructor and immutable static roles (V114)
+
+Guarded regression: finite prefix execution and immutable-word patches must not imply source initializer/inheritance semantics, stack-resource adequacy or repeated-key value coherence. Keep genuine step, layout and interval certificates.
+
+Complete frozen-selected Solidity/Backend/Creation/Constructor.lean, Solidity/Backend/Creation/ConstructorChecks.lean, Solidity/Backend/Creation/LinkingChecks.lean and Solidity/Backend/Creation/Immutables.lean; all19 named signatures match frozen/adopted master. Prior1477 rows/owner map unchanged;1496 reviewed/3787 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; anonymous/generated declarations separate.
+
+Prefix certifies actual finite fetch/effect nonhalting steps, not the desired final result. Prefix.exec additionally requires final Exec. Constructor composition retains exact Prefix from initial empty stack/memory over the same full code to the placed wrapper entry. exit_exec/Placement.exit return or revert the exact copied bytes from arbitrary local stack/memory; the slice intentionally omits1024stackcap, gas/accounts and source semantics. Zero-padding/read-write byte laws preserve exact payload contents.
+
+copyPrefix_steps constructs actual nonempty bytecode-prefix steps for arbitrary code/tail. copyConstructor retains exactly3byte payload length and supplies existing local execution for both exit flags. Anonymous positives and wrong-terminal/short-payload/argument-contamination negatives were read without fresh execution. actual_assembly_combination is a genuine existing closed positive theorem: real two-library-PUSH20 plus STOP input assembles to43bytes, has a LinkTable, resolves placeholders and installs the linked runtime locally. This inventoried proof is not freshly verified or universal source compiler totality.
+
+ImmutablePatch has a full32-byte bounded location and supplied32-byte value; keys are labels. ImmutableTable requires pairwise patch separation; raw offset/table checks retain bounds/overlap refusal. Length preservation needs actual code length but not pairwise separation. Outside framing requires the outside condition for every patch. Per-byte/full-word readback adds actual membership, disjointness and within-word index where explicit.
+
+Compatibility is exactly all immutable/library-region pairs disjoint, not an admitted external map or same-key value agreement. combined_installs keeps positive cross-table compatibility and performs linkthenpatch before local wrapper return. patchedArtifact preserves link metadata; patched_installs therefore supplies no unresolved-placeholder deployment admission. Word/address patch commutation requires full32/20-byte interval disjointness.
+
+Full constructor/check/patch/proof branches and existing axiom-message guards were read. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Evidence/current dataset are prepared for H145 private archival; publication awaits the checkpoint receipt. The checker retains its actual external-input binding. Other VM bulk remains hash-bound pending retrieval. Historical unavailable bytes UNVERIFIABLE; exact archive-backed duplicate evictions restorable. Original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained.
+
+## Failure emission static roles (V115)
+
+Guarded regression: emitter instruction counts and partial outcome adapters must not imply encoded-size/gas bounds, ABI fidelity or total observation of resource halts. Keep actual adapter, false-evaluation, word-range and stack premises.
+
+Complete frozen-selected Solidity/Backend/Failure/Emit.lean, Solidity/Backend/Failure/Slice.lean and Solidity/Backend/Failure/Observe.lean; all29 named signatures match frozen/adopted master. Prior1496 rows/owner map unchanged;1525 reviewed/3758 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; anonymous/generated declarations separate.
+
+Input covers empty, typed panic code, reason bytes, custom preencoded bytes and returned bytes. Structural writes/emit length theorems count instructions (three per byte plus terminal pushes/op), not encoded byte length or gas. Append/decompose preserve exact byte order and Nat offsets without supplying Fits. Panic length36 and reason padding length use existing encoders; custom/return payloads stay preencoded. No new ABI encoder or UTF8 validation is supplied.
+
+Independent Slice semantics uses Nat-to-byte memory and big-endian word PUSH, low-byte MSTORE8 and terminal offset/length reads. Unsupported opcodes and underflow fail; raw run empty may return no terminal outcome. checkedRun additionally checks every reached pre/post stack height<=1024 and stops at terminal suffix. Functional memory frame/read/append/congruence laws preserve their exact interval premises without invented machine-word bounds; runtime no-wrap belongs to Fits elsewhere. Gas/expansion/world semantics remain outside this slice.
+
+HaltObserves covers empty revert, primitive Panic1 and revertWith data. ResultObserves adds success via supplied typed return encoder. Functionality needs two actual relations for the same input/encoder; wrong-observation refusal needs an existing correct observation plus inequality. No constructor observes divergence/exhaustion. inputOfResult is explicitly partial on those resource halts; multiple Input labels can have the same empty-revert observation.
+
+intrinsic_emission retains exact adapter success, Fits and stack+2 bound before its positive local checked result and original-result observation. assert/require results retain actual typed evaluation to false. Intrinsic byte/custom-selector parts preserve existing selector/hash function and preencoded arguments, including empty ofData handling; arbitrary supplied return encoders do not establish ABI fidelity. Same-byte returned/revert classes differ, while distinct same-class payloads require actual byte inequality.
+
+Full input/step/run/stack/observation/adapter/intrinsic proof branches were read. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Evidence/current dataset are prepared for H145 private archival; publication awaits the checkpoint receipt. The checker retains its actual external-input binding. Other VM bulk remains hash-bound pending retrieval. Historical unavailable bytes UNVERIFIABLE; exact archive-backed duplicate evictions restorable. Original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained.
+
+### Backend owner answer
+
+Q-SEM-OWNER-03 confirms the twelve files listed in tests/h62/item2/audit-calculus/BACKEND-OWNER-CONFIRMATION.md as master (coordinator), no live producer. Ownership accounting is 3806 confirmed/1477 unresolved; static role and witness coverage is unchanged.
+
+## Local unwind controls (V117)
+
+Guarded regression: nested rollback controls must distinguish persistent/transient stores, restore the intended checkpoint and preserve immutable emitted payloads without treating local success as rollback or claiming world/catch completeness.
+
+Complete frozen-selected Solidity/Backend/Failure/UnwindChecks.lean: nine named closed controls, exact frozen/adopted-master signatures. Prior1525 rows and owner map unchanged;1534 reviewed/3749 pending of5283;3806 confirmed owners/1477 unresolved. This file remains unresolved semantically: Q-SEM-OWNER-03 did not name it.
+
+Witness uses distinct Fin17/Fin19 stores. Root/middle/deep/resume carry1/2,7/11,13/17,15/18. Inner custom bytes de/ad at31 restore middle; outer be/ef/00/ff at64 after resume restore root. Nested execution discharges both Fits bounds and both stack bounds using the marked two-element stack. Payload bytes are obtained before checkpoint restoration. These are existing closed local checked executions, not Solidity catch/world semantics or whole compiler totality.
+
+Memory probes distinguish root17,middleaa,deepbb,resumecc at0 and restoredmiddle48 at31; they are finite observations. Wrong-store controls negate exact bad CheckpointRel targets through functionality and concrete contradictions, rather than inventing impossible global premises. Successful returns keep live deep/middle stores and update that live memory; they do not restore root.
+
+Existing guard_msgs/axiom inventories remain source text, not a fresh axiom or kernel replay pass. Zero fresh joint witnesses. No source/statements/dependent definitions/interfaces/budgets/axioms/exclusions changed. H28 extraction/replay pause and all STOPs remain. H145 evidence is prepared for private archival, publication pending receipt. Other historical unavailable exact bytes remain UNVERIFIABLE; exact archive-backed duplicates remain restorable.
+
+## Local byte-slice controls (V118)
+
+Guarded regression: literal instruction execution, operand order, underflow, low-byte storage and the1024 stack boundary must remain distinct; raw execution and syntactic write identities do not supply checked execution or compiler-totality evidence.
+
+Complete frozen-selected Solidity/Backend/Failure/SliceChecks.lean:12 named closed controls match exact frozen/adopted-master signatures. Prior1534 rows and owner map unchanged;1546 reviewed/3737 pending of5283;3806 confirmed owners/1477 unresolved. This file remains an unresolved semantic owner; Q-SEM-OWNER-03 did not include it. Zero fresh joint witnesses.
+
+The literal program uses explicit instructions and returns[aa] after MSTORE8 at31, retaining marked stack[7,9]. RETURN with empty stack and MSTORE8 with only an address refuse; swapping offset/value is distinguished by a concrete memory read. Value01aa stores lowbyteaa. These are exact local byte-machine controls, not gas/world/physical EVM agreement.
+
+Raw emitted custom bytes cross address31/32 with a concrete Fits proof. Untouched locations30,35,63 are finite probes. A first terminal return ignores later revert and INVALID suffix; raw run does not inspect that suffix. Suffix zero padding starts34 and preserves the3byte read at31. Chunking with an empty component is instruction-list equality, not execution.
+
+The stackSafe predicate accepts1022 existing entries for the empty emitter's two pushes and rejects1023. Only checked_combination_control explicitly supplies checkedRun, concrete Fits and stack guards; it preserves the first return and ignores the later revert. No broad raw-to-checked implication is inferred.
+
+Existing axiom guard_msgs are source controls, not fresh kernel replay or axiom acceptance. No statements, definitions, interfaces, budgets, axioms, exclusions or toolchain changed. Existing H28 extraction/replay pause and all STOPs remain. H145 evidence is prepared for private archival; publication awaits receipt. Historical unavailable exact bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Intrinsic observation controls (V119)
+
+Guarded regression: false assert/require observations, successful conditions, exact byte payloads and decoder refusals must remain distinguishable. Malformed bytes remain observable even when catch decoders reject; divergence/exhaustion adapters remain explicitly unsupported.
+
+Complete frozen-selected Solidity/Backend/Failure/ObservationChecks.lean:21 named closed controls match exact frozen/adopted-master signatures. Prior1546 rows and owner map unchanged;1567 reviewed/3716 pending of5283;3806 confirmed owners/1477 unresolved. This file remains an unresolved semantic owner because Q-SEM-OWNER-03 excluded it. Zero fresh joint witnesses.
+
+The empty-contract witness has false assert panic1 and false require empty revert, plus true assert/require success with unchanged state/reflexive prefix. Existing Error boom bytes and Denied(uint256) selector plus word7 pass through unchanged. Direct ok-byte success uses identity return encoding, not a compiled return theorem or independent selector/hash adequacy.
+
+Decoder negatives include selector-only/truncated inputs and complete valid bodies with swapped selectors. A wrong-selector panic-shaped body has correct length36, isolating selector failure from length. Positive existing encoders decode panic1 and boom. These are concrete controls, not a universal decoder specification. Byte/outcome inequalities distinguish panic1/empty/panic0, encoded empty Error/empty revert, argument byte order and return/revert classes.
+
+The emitter/source combination supplies a checked panic1 emission at5 on the marked two-element stack and a matching observation of mapped false assert. Exact adapter, Fits36-byte and stack guards are concretely discharged. Negative observations use an actual correct observation and inequality, not invented contradictory global premises. Divergence/exhaustion map to none. Malformed panic-selector-only bytes remain raw observable revert data despite decoder refusal.
+
+Existing axiom guard_msgs are source text, not fresh kernel replay or axiom acceptance. No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changed. H28 extraction/replay pause and all STOPs retained. H145 evidence is prepared for private archival, publication pending receipt; historical unavailable exact bytes remain UNVERIFIABLE and archive-backed exact duplicate evictions remain restorable.
+
+## Fixed-shape copy roles (V120)
+
+Guarded regression: local copy-code success must retain payload/range certificates and source representation assumptions; simulation results include paired destination revert and do not imply unconditional compiler success.
+
+Complete frozen-selected Solidity/Evm/MemoryFixedMixedCopy.lean, Solidity/Evm/MemoryFixedShapeSource.lean and Solidity/Evm/MemoryFixedShapeCode.lean:12 named declarations including five private helpers. Exact frozen/adopted-master signatures; prior1567 rows/map unchanged;1579 reviewed/3704 pending of5283. Ownership remains3806 confirmed/1477 unresolved; no owner guessed. Zero fresh joint witnesses; private lexical declarations remain separate from generated kernel names.
+
+FixedStateRepr includes legacy state representation and fixed heap representation with payload bounds/elements and above-frame premises. Actual PtrFrag certificates and locIn support are required together. Dynamic destinations require branch-conditional length<L bounds on successful source and destination resolutions. Primitive structs require primitiveMembers/static/length<W; fixed padding requires n<=k and k<W. storeDrop additionally needs the supplied ReprStore and drops fragile fragment facts.
+
+FixedResult is success with target counter0, final state representation, equal original stack/memory and unchanged typed heap, OR paired source/target revert. Source assignment proofs explicitly retain destination resolution failure. Dynamic-array copies drop fragile facts; static struct and fixed padding preserve their appropriate fragment via overlay/disjointness and length-slot properties. These are conditional simulations, not general source-compiler totality.
+
+Private setup/cleanup helpers duplicate pointers, configure ranges, pop four range slots, read old dynamic length and finally write its new header. dynamicLength needs n<W. Low-level padded code requires n<W,k<W,base+n<=W and exact payload words, but does not require n<=k: saturating subtraction makes the clear tail empty when k<n. Source-level padding correctness supplies n<=k separately. Dynamic conversion copies headerless fixed payload, clears stale dynamic tail and replaces its header last in the existing symbolic slot model.
+
+No gas/fork/world or physical bytecode adequacy is added. No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs retained. Evidence is prepared for H145 private archival, publication pending receipt. Historical unavailable exact bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Fixed-shape representation laws (V121)
+
+Guarded regression: primitive overlay identities and padded-store laws must not imply arbitrary reference copying, out-of-footprint zeroing or source/compiler execution without their exact shape and representation premises.
+
+Complete frozen-selected Solidity/Evm/MemoryFixedShapeLaws.lean:seven named declarations including two private primitive identities. Frozen/adopted-master signatures match; prior1579 rows and owner map unchanged;1586 reviewed/3697 pending of5283;3806 confirmed owners/1477 unresolved. Zero fresh joint witnesses; private lexical names remain separate from generated declarations.
+
+Primitive strip is identity and primitive overlay ignores arbitrary old contents. These dependent SVec identities do not generalize to references or mappings. Live padded-store reads require i<n and do not require n<=k; clearing begins at n. Tail zeros require n<=i and i<k. The frame law requires n<=k and exclusion from the exact primitive k-element Occ footprint.
+
+Dynamic representation requires the full FixedArrayRepr source certificate, n<W and n<L. It represents old.overlay of the converted fixed snapshot at the supplied symbolic destination. Fixed padded representation requires the same source certificate and n<=k; no explicit k<W or n<L premise appears in this theorem. Execution bounds belong to separate code/source simulations and are not invented here. Default primitive values are represented by zero through existing laws.
+
+These are pure storage/snapshot/representation theorems, not execution or compiler-totality proofs. No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes or fresh kernel/replay acceptance. H28 pauses and all STOPs remain. Evidence is prepared for H145 private archival, publication pending receipt. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Symbolic storage update roles (V122)
+
+Guarded regression: abstract footprint replacement and typed mapping-save composition must not be mistaken for runtime copy code, physical hash collision exclusion or unconditional nested-path success.
+
+Complete frozen-selected Solidity/Storage/Representation/Updates.lean:ten named declarations match exact frozen/adopted-master signatures. Prior1586 rows/map unchanged;1596 reviewed/3687 pending of5283;3806 confirmed owners/1477 unresolved. No semantic owner guessed; zero fresh joint witnesses.
+
+patch is a classical noncomputable function selecting the replacement store on Occ and original store outside it. Scalar word footprints reduce to one full-word write, without packed-field layout. ValueRep.replace needs a represented replacement; patch_frame needs the original representation and universal footprint disjointness at every location.
+
+Empty-path source saveM returns the supplied new typed value. Mapping source save changes one setBy entry and preserves the default, including initially absent keys. Mapping representation needs old shape/per-key representation plus a fresh replacement representation at the exact symbolic hashed key subtree. Same-type key-word injectivity is an encoding fact; symbolic location disjointness is not a physical Keccak collision theorem.
+
+Nested mapping path composition assumes exact inner save success on the lookup value or default and reuses that changed value. The final theorem jointly retains old mapping representation, inner success and fresh changed-value representation, then proves source-save and symbolic representation together. None of these assumptions is discharged by this classification or replaced with independent inhabitance claims.
+
+No runtime copying/allocation cost, compiler totality, gas/fork/world or physical storage adequacy is supplied. No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changed; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs retained. Evidence is prepared for H145 private archival; publication awaits receipt. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Typed try-condition roles (V123)
+
+Guarded regression: exact try/catch characterizations must retain receiver and argument failure boundaries, clause failures, decoder/allocation outcomes and typed heap/scope transport rather than implying successful clause completion.
+
+Complete frozen-selected Solidity/Semantics/TryConditions.lean:four named theorem signatures match frozen/adopted master. Prior1596 rows and owner map unchanged;1600 reviewed/3683 pending of5283;3806 confirmed owners/1477 unresolved. No owner guessed; zero fresh joint witnesses.
+
+tryCall_eq_iff characterizes an arbitrary full typed result, including normal completion and halts. Receiver zero reverts; optional self dispatch uses actual call outcome. Self revert selects other; revertWith tries Error decoder before Panic, then other; primitive panic uses selfPanicCode; remaining halts propagate. External lookup absence reverts; successful return decoding may fail before the success clause; error/panic/other entries select their clauses. Actual clause runs retain failures, scope drops and composed heap extensions. This is the existing non-callback judgement and proves no arbitrary result is feasible.
+
+catchData_eq_iff retains actual catchBytes failure, kind.decode rejection, literal-byte allocation and entire selected body result. Missing/malformed payloads or failures after allocation cannot be promoted into success. Its exact condition is not a separate producer of successful runs.
+
+try_prefix_failure requires actual firstStep error and forwards its exact halt without entering rest. try_prefix_success requires actual firstStep ok out, calls rest on out.st and composes its heap extension. It does not assume continuation success or re-evaluate operands in the original state.
+
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance or compiler-totality proof. H28 pauses and all STOPs remain. H145 evidence is prepared for private archival, publication pending receipt. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Panic source-plan roles (V124)
+
+Guarded regression: a completed finite store/store/snapshot plan must derive bytes and length from actual operands and states, without substituting desired bytes, a size36 restriction, a halt certificate or fallback OOG/revert for missing range evidence.
+
+Complete frozen-selected Solidity/Evm/TryPanicSourcePlan.lean:three theorem signatures match frozen/adopted master. Prior1600 rows/map unchanged;1603 reviewed/3680 pending of5283;3806 confirmed owners/1477 unresolved. Zero fresh joint witnesses; semantic owner not guessed.
+
+BodyCompletedAt requires both natural store bounds, first value evaluation at the initial state, second evaluation after the first store, terminal-length evaluation after both stores, and a real ByteSpan whose offset/length agree with the terminal operands. Its conclusion computes the final image and snapshot; desired bytes and desired halts are not inputs. completed_frame preserves the full logical state, key and capacity for an existing derivation.
+
+original_completed requires capacity at least36 for the stores at0 and4 plus the actual sizeSlot value fitting capacity. It constructs the existing plan's derivation with selectorWord/codeWord and the actual local length, generic n rather than n=36. original_completed_length derives snapshot length from that local evaluation and span equality; it is not an independent reply length premise.
+
+This is proof-side finite-plan interpretation, not a new source statement, admitted program, native evaluator or compiled-EVM execution theorem. Missing range evidence is not a halt outcome. No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes, no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. H145 evidence is prepared for private archival, publication awaits receipt. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## H145 pinned private input route
+
+The held V123 and current V124 exact payloads and checksum manifests are published privately: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. The default loader uses this immutable private Git packet through tests/h62/item2/audit-calculus/BULK-INPUTS.md, without VM-local fallback. This transport repair adds no witness or proof acceptance.
