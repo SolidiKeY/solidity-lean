@@ -498,3 +498,13 @@ stops after the authenticated retirement handoff; no automatic implementation
 continuation is authorized. Exact final head and clean status are in the external
 retirement HANDOFF.md and CLOUDVM-RESULT.json, with cumulative patch/bundle and
 complete SHA256SUMS under /workspace/v08-agreements-evidence/retirement.
+
+## General simultaneous frame-input witness
+
+`EnvironmentProjection.frameForContext` constructs a shared frame for every typed intrinsic address/context and arbitrary Source-frame template. The four observed fields use the existing exact address/word projections. `frameForContext_agrees` proves all four obligations together; `frameForContext_preserves` retains contract, checked flag, depth and calldata. The importing consumer `H55Agreements.production_frame_joint` supplies ONE frame for the common relation and both legacy constructor/library relations, indexed by caller storage rather than library code. There is no new fit, decidability, successful-execution or desired-state premise.
+
+This establishes general component inhabitance, not global SourceSpec, declaration admission, code identity, constructor/library bodies or runtime adequacy. Existing declarations are unchanged. Production and consumer passed the approved serial route. Warm matched checks were 1.446→1.339 and 4.857→4.751 seconds respectively; this is focused evidence, not full H55 performance acceptance. The initial record-update parse error is retained. Axiom reports for both production laws and the joint consumer contain only existing propext/Quot.sound dependencies.
+
+Independent read-only finder and skeptic accepted the construction and boundary; neither used Lean/server. Evidence, static-check exits, source hashes and exact commands are indexed in `tests/h55/v08-agreements/total-frame-witness-manifest.json`. Full lane gates, global pin reconciliation and all missing concrete producers remain open.
+
+Focused static results: trust, registration and whitespace pass. The layer check FAILS with 12 new core→non-core closure edges outside V08. Every module named in those diagnostics and the checker itself is byte-identical to origin/master; hashes are retained in layer-provenance.json. No allowance, checker or foreign-source edit was made, and no full baseline gate pass is inferred. This remains an integration limitation alongside global pin reconciliation.

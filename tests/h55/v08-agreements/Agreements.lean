@@ -611,3 +611,31 @@ instead of repeating diagnostics during every production-module build. -/
 #print axioms Solidity.Lowering.V08.LibraryPremises.sharedContracts_exact
 
 end Solidity.Lowering.V08.H55Agreements
+
+/-! Guards the component-witness regression where four separate field witnesses
+are mistaken for a simultaneous frame. These queries concern only frame inputs,
+not global SourceSpec, constructor/library bodies or admission producers. -/
+#print axioms Solidity.Lowering.V08.EnvironmentProjection.frameForContext_agrees
+#print axioms Solidity.Lowering.V08.EnvironmentProjection.frameForContext_preserves
+
+namespace Solidity.Lowering.V08.H55Agreements
+
+/-- One arbitrary template supplies all three input relations at the caller
+storage address. No library code address or global producer is substituted. -/
+theorem production_frame_joint {K : Type} {caller : K}
+    (owner : ContractWorld.Handle caller) (template : Source.Fr)
+    (ctx : ContractWorld.Context) :
+    ∃ frame : Source.Fr,
+      EnvironmentProjection.FrameAgreement frame owner.address ctx ∧
+      ConstructorScalarTransport.FrameInputs frame owner.address ctx ∧
+      LibraryFrameTransport.FrameInputs frame owner ctx ∧
+      frame.contract = template.contract ∧ frame.checked = template.checked ∧
+      frame.depth = template.depth ∧ frame.cd = template.cd := by
+  let frame := EnvironmentProjection.frameForContext template owner.address ctx
+  have agreement := EnvironmentProjection.frameForContext_agrees template owner.address ctx
+  exact ⟨frame, agreement, ConstructorScalarTransport.ofFrameAgreement agreement,
+    LibraryFrameTransport.ofFrameAgreement agreement,
+    EnvironmentProjection.frameForContext_preserves template owner.address ctx⟩
+
+#print axioms production_frame_joint
+end Solidity.Lowering.V08.H55Agreements

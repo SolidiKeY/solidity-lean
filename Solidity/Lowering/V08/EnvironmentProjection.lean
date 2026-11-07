@@ -270,6 +270,33 @@ theorem frame_nat_int_exact (n : Nat) (word : Semantics.Word) :
   simp only [PrimTy.inRange, decide_eq_true_eq] at bound
   rw [← Int.natCast_inj, Int.toNat_of_nonneg bound.1]
 
+/-- A total witness of the shared input relation. Only its four observed
+fields change; this constructs no admission, code identity or body producer. -/
+def frameForContext (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : Source.Fr :=
+  { template with
+    this := lowerAddress address
+    sender := lowerAddress ctx.sender
+    value := lowerWord ctx.value
+    static := ctx.isStatic }
+
+/-- Guarded regression: individually representable projections must have ONE
+joint frame witness, including read-only and maximum-word contexts. -/
+theorem frameForContext_agrees (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : FrameAgreement (frameForContext template address ctx) address ctx :=
+  ⟨(frame_nat_int_exact _ address.1).mp rfl,
+    (frame_nat_int_exact _ ctx.sender.1).mp rfl,
+    (frame_nat_int_exact _ ctx.value).mp rfl, rfl⟩
+
+/-- Unobserved Source fields are retained, rather than reset by the witness. -/
+theorem frameForContext_preserves (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) :
+    (frameForContext template address ctx).contract = template.contract ∧
+    (frameForContext template address ctx).checked = template.checked ∧
+    (frameForContext template address ctx).depth = template.depth ∧
+    (frameForContext template address ctx).cd = template.cd :=
+  ⟨rfl, rfl, rfl, rfl⟩
+
 #print axioms frame_nat_int_exact
 
 end Solidity.Lowering.V08.EnvironmentProjection
