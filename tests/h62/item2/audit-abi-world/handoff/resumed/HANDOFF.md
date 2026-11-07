@@ -61,3 +61,15 @@ External export records exact final head/base/branch, cumulative original-base
 patch and bundle, integration-only patch, artifact/checksum paths, gates,
 read-only finder/skeptic review results and the metadata wait. Keep the existing
 goal unfinished and blocked on this owner action; do not create a continuation.
+
+## Superseding coordinator cleanup
+
+Coordinator requested withdrawal of our edits to the three other-lane files
+listed in the feature-work cleanup section. All three now equal shared base
+2a43bf4f exactly, leaving zero lane delta and allowing master-side owner edits
+to merge. No Lean/config input changed; previous full6555/KeySort/audit receipts
+remain source-valid and were not rerun. The local documentation-path gate now
+fails on four references in the restored other-lane files; earlier PASS refers
+to the pre-cleanup tree. Retain the central110-pin owner wait and this explicit
+documentation limitation until coordinator integration. No master merge/push.
+Latest head/artifact hashes are in the separate conflict-cleanup export.

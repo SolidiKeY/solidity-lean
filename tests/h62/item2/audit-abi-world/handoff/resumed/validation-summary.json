@@ -33,7 +33,7 @@
   "static": {
     "trust": "pass:6562 sources,289 sites,0 findings",
     "orphans": "pass:6546 reachable,0 orphaned,0 not allowed",
-    "doc_paths": "pass:131 ambiguous references all resolve",
+    "doc_paths": "fail after coordinator-requested withdrawal:4 references in restored other-lane files; previous pass is historical",
     "axiom_pins": "fail:16151 pins,110 new standard-only registrations,0 errors"
   },
   "timing_delta_percent": -0.09408949912913522,
@@ -41,8 +41,12 @@
     {
       "lane": "coordinator/G07 inventory owners",
       "item": "PIN-2a43bf4f: record exact110 existing standard-only pins from committed owner ticket; no theorem/axiom/premise/exclusion edits."
+    },
+    {
+      "lane": "coordinator/other-lane documentation owners",
+      "item": "Retain owner master versions of the three reverted files at integration; branch doc-path check has4 restored missing references. No further worker edits requested."
     }
   ],
   "questions": [],
-  "boundary": "Full Lean build and local ABI audit pass; final global metadata acceptance remains blocked. External gas/fork observations are reused for byte-identical fixtures, not formal gas/world proofs."
+  "boundary": "Full Lean build and local ABI audit pass; final global metadata acceptance remains blocked. External gas/fork observations are reused for byte-identical fixtures, not formal gas/world proofs. Coordinator-requested documentation-only withdrawal leaves four branch-local missing references; Lean/config inputs remain unchanged."
 }

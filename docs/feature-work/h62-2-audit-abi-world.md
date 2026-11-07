@@ -13,7 +13,7 @@ mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings pass.
-The full normal repository build now passes. Final acceptance is blocked only by
+The full normal Lean build passes. Final acceptance awaits
 110 unrecorded central G07 pin registrations (zero axiom errors), at the current
 2a43bf4f integration. The later coordinator instruction explicitly
 reactivated this same worker and authorized merging origin/master and continuing.
@@ -572,3 +572,36 @@ receipt and owner ticket without Lean/server/builds/edits. Both also verified
 all 1524 archive members; the skeptic checked all 402 resume-manifest entries
 and all 61 final-snapshot files. The packaging minor is closed: the current
 index hashes and blocked-versus-build-pass claims agree. No residual finding.
+
+## Coordinator-requested cross-lane cleanup (2026-11-07)
+
+The coordinator reported dd89c41fbb conflicting with master ba3c0f15 in three
+other-lane documentation files and explicitly requested dropping our edits.
+Fetched origin/master a0cdc0beca021d34e60c4a3ed40aa9559a11d88a; verified the
+reported ba3c0f1539c8b64ac0c6c89e729481d3d398ee83 is its ancestor. The shared
+merge base remains 2a43bf4fcdaf24750265afc8f8be5b420d1d22b0. No master merge
+or rebase was performed, preserving the validated Lean input identity.
+
+Restored exact merge-base bytes in docs/feature-work/h62-1-infer-helpers.md,
+docs/feature-work/h62-6-migrate-theory.md and
+tests/h62/item4/generic-structuredflow/registration.md. Each now has zero lane
+delta against the shared merge base, so the coordinator can retain each owner's
+master-side version. This withdraws all three of our documentation-path fixes.
+No Lean source, statement, definition, premise, exclusion, proof budget, axiom
+pin, root or toolchain input changed. The prior 6555-job full Lean build and
+per-file/KeySort receipts retain their original source identity; no Lean job
+or timing rerun was needed for this documentation-only correction.
+
+The current branch documentation-path check exits 1 with exactly four missing
+references, all in those restored other-lane files. This is an explicit known
+consequence of the requested withdrawal, not a newly repaired owner file.
+Earlier documentation-path PASS claims above describe the pre-cleanup tree.
+The coordinator's current owner versions are not overwritten or adjudicated.
+The original PIN-2a43bf4f metadata wait remains; overall assignment is not done.
+Final cleanup evidence, reviews, cumulative patch/bundle and exact new head are
+exported separately, preserving the earlier authenticated evidence archive.
+
+Independent read-only finder and skeptic reviews accepted this narrow cleanup:
+exact three-file base identity and zero lane delta, unchanged Lean/config/pins,
+four restored missing references and accurate superseding handoff. Neither
+used Lean/server/builds or edited files; no findings remain for this correction.
