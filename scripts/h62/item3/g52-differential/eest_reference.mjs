@@ -115,7 +115,7 @@ if (workerMode) {
   if (only !== null && (!Number.isInteger(only) || only < 0)) throw new Error('invalid index');
   const invalidOnly = process.argv[6] === 'invalid-only';
   const format = process.argv[7] ?? 'state_test';
-  if (!['state_test','blockchain_test'].includes(format) || (invalidOnly && format !== 'state_test')) throw new Error('unsupported input format/filter');
+  if (!['state_test','blockchain_test'].includes(format) ) throw new Error('unsupported input format/filter');
   const blockchainInput = format === 'blockchain_test';
   const receiptPath = blockchainInput ? 'evidence/blockchain-export.json' : 'evidence/eest-export.json';
   const censusPath = blockchainInput ? 'evidence/archive-census.json' : 'evidence/eest-census.json';
@@ -177,7 +177,7 @@ if (workerMode) {
     if (seen.size >= limit) break;
     const record = JSON.parse(line);
     if (only !== null && record.index !== only) continue;
-    if (invalidOnly && !record.post.expectException) continue;
+    if (invalidOnly && !(blockchainInput ? record.fixture.blocks.some(b=>b.expectException||b.expectExceptionALL) : record.post.expectException)) continue;
     const original = census.cases[record.index];
     if (!original || original.path !== record.path || original.case !== record.case || original.variant !== record.variant || (!blockchainInput && original.sha256 !== record.fixture_sha256)) throw new Error('fixture identity mismatch');
     if (!Number.isInteger(record.index) || seen.has(record.index)) throw new Error('duplicate/invalid fixture index');
@@ -199,6 +199,7 @@ if (workerMode) {
     seconds: (Date.now()-started)/1000, label, format, peak_aggregate_rss: peakAggregateRss,
     adapter_sha256: createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex'),
     instruction_budget: '5000000 original Interpreter.runStep calls; forwarding wrapper; optional step-event tracer disabled',
+    rejection_adapter_sha256: await digest(resolve(dirname(fileURLToPath(import.meta.url)),'eest_rejection.mjs')),
     blockchain_adapter_sha256: blockchainInput ? createHash('sha256').update(readFileSync(new URL('./blockchain_adapter.mjs',import.meta.url))).digest('hex') : null,
     reference_provider: blockchainInput ? '@ethereumjs/blockchain@10.1.3' : null,
     blockhash_convention: blockchainInput ? 'real validated fixture genesis/history provider; constant Osaka from genesis' : 'state-test absent history returns zero; all pinned envs omit blockHashes' };
