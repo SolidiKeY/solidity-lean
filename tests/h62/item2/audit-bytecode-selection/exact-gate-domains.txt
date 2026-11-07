@@ -768,3 +768,105 @@ theorem tail_initial_size_mismatch_refused :
 #guard_msgs (whitespace := lax) in #print axioms raw_tail_method_reference_domain
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_initial_size_mismatch_refused' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms tail_initial_size_mismatch_refused
+
+
+private def oversizedInput : Solidity.AbiEntry.Input :=
+  {data := List.replicate 31 0 ++ [32] ++ List.replicate 23 0 ++ [1] ++ List.replicate 8 0, free := 0}
+private def shortOversizedInput : Solidity.AbiEntry.Input :=
+  {data := oversizedInput.data.take 63, free := 0}
+
+private theorem oversized_load_zero : Solidity.AbiEntry.load oversizedInput.data 0=32 := by decide
+private theorem oversized_load_length : Solidity.AbiEntry.load oversizedInput.data 32=2^64 := by decide
+private theorem oversized_length_large :
+    Solidity.AbiEntry.lim<Solidity.AbiEntry.load oversizedInput.data
+      (Solidity.AbiEntry.wrap (0+Solidity.AbiEntry.load oversizedInput.data 0)) := by
+  have address : Solidity.AbiEntry.wrap (0+32)=32 := by decide
+  simp only [oversized_load_zero, address, oversized_load_length]
+  decide
+
+/-- Guard dropping the length-check certificate self or protected frame. -/
+theorem length_certificate_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.correct := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, BitVec.ofNat 256 (2^64), [258,513], True.intro⟩
+
+/-- Guard vacuous room premises in the length-check capacity field. -/
+theorem length_certificate_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.capacity := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, [258,513], by decide, True.intro⟩
+
+/-- Tail-fit, prefix and oversized loaded length coexist with a valid head span. -/
+theorem length_certificate_lazy_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.lazy_revert := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, oversizedInput, tailShape, 0, 0,
+    by decide, by decide, oversized_length_large, True.intro⟩
+
+theorem length_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.correct := by
+  exact ⟨BitVec.ofNat 256 (2^64), [258,513], True.intro⟩
+
+theorem length_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.capacity := by
+  exact ⟨[258,513], by decide, True.intro⟩
+
+theorem length_method_lazy_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.lazy_revert := by
+  exact ⟨oversizedInput, tailShape, 0, 0, by decide, by decide, oversized_length_large, True.intro⟩
+
+theorem length_method_eager_bytes_panic_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.eager_bytes_panic := by
+  exact ⟨oversizedInput, 0, 32, 0, by decide, by decide, True.intro⟩
+
+theorem length_method_eager_array_panic_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.eager_array_panic := by
+  exact ⟨oversizedInput, (.word (.uint 256)), 0, 32, 0, by decide, by decide, True.intro⟩
+
+/-- Guard unrelated/vacuous failure fixtures: one well-formed head/tail input,
+certificate and code exhibit numeric boundary rejection, lazy revert and eager
+panic. A related one-byte truncation keeps the padded length but reverts at the
+head-span check; zero fuel takes priority. No charged/native behavior is claimed. -/
+theorem length_failure_joint :
+    ∃ _self : LengthCheckCertificate LengthCheck.code,
+      0+31<oversizedInput.size ∧ 32+31<oversizedInput.size ∧
+      Solidity.AbiEntry.load oversizedInput.data 0=32 ∧
+      Solidity.AbiEntry.load oversizedInput.data 32=2^64 ∧
+      Solidity.Backend.Scalar.run LengthCheck.code (0::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run LengthCheck.code (BitVec.ofNat 256 (2^64)::[258,513])=some (0::[258,513]) ∧
+      Solidity.AbiEntry.tailRef oversizedInput tailShape 0 0=.error .revert ∧
+      Solidity.AbiEntry.mdec oversizedInput 1 .bytes 32 0=.error .panic ∧
+      Solidity.AbiEntry.mdec oversizedInput 1 tailShape 32 0=.error .panic ∧
+      Solidity.AbiEntry.mdec oversizedInput 0 .bytes 32 0=.error .fuel ∧
+      Solidity.AbiEntry.load shortOversizedInput.data 32=2^64 ∧
+      Solidity.AbiEntry.mdec shortOversizedInput 1 .bytes 32 0=.error .revert ∧
+      Solidity.Backend.Scalar.stackBound LengthCheck.code 3=true ∧
+      Solidity.Backend.Scalar.stackBound LengthCheck.code 1024=false := by
+  have lazyFailure : Solidity.AbiEntry.tailRef oversizedInput tailShape 0 0=.error .revert :=
+    LengthCheck.certificate.lazy_revert oversizedInput tailShape 0 0 (by decide) (by decide) oversized_length_large
+  have bytesFailure : Solidity.AbiEntry.mdec oversizedInput 1 .bytes 32 0=.error .panic :=
+    LengthCheck.eager_bytes_panic oversizedInput 0 32 0 (by decide) (by decide)
+  have arrayFailure : Solidity.AbiEntry.mdec oversizedInput 1 tailShape 32 0=.error .panic :=
+    LengthCheck.eager_array_panic oversizedInput (.word (.uint 256)) 0 32 0 (by decide) (by decide)
+  have shortFailure : Solidity.AbiEntry.mdec shortOversizedInput 1 .bytes 32 0=.error .revert := rfl
+  exact ⟨LengthCheck.certificate, by decide, by decide, by decide, by decide,
+    LengthCheckControls.boundaries.1, LengthCheckControls.boundaries.2.2.1,
+    lazyFailure, bytesFailure, arrayFailure, rfl, by decide, shortFailure,
+    LengthCheck.certificate.capacity [258,513] (by decide),
+    LengthCheckControls.inhabited_frame.2.2⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_lazy_revert_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_lazy_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_lazy_revert_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_lazy_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_eager_bytes_panic_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_eager_bytes_panic_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_eager_array_panic_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_eager_array_panic_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_failure_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_failure_joint

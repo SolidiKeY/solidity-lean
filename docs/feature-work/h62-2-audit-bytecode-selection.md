@@ -1771,3 +1771,65 @@ Final checkpoint82tests, trust/orphans, roots/fragments, doc paths and
 whitespacePASS. These checks do not replace the explicit native probe/strict
 receipts. Scoped global28pin registrations remain coordinator work; full
 source/kernel/runtime gates and original proof obligations remain unwaived.
+
+
+## Joint length-check domains and observable failure ordering
+
+Fetched master8863c4127 already adopted at3960af263; registries regenerated
+without delta. Extend the same existing renderer/fixture with LengthCheck's five
+public methods and three certificate fields, yielding85exactdomains. Common
+64byte input encodes relative offset32 and length2^64; BOTH pointer0 and tail
+header32 have valid32byte spans. Tail fit, length-prefix and oversized-length
+premises coexist, rather than relying on an out-of-range header. Actual common
+certificate/code/suffix258,513 jointly exhibit safezero flag1, oversized flag0,
+lazy tail-reference revert, eager bytes/array panic, and capacity3/refusal1024.
+A related63byte truncation keeps the zero-padded loaded2^64 but reverts at the
+head-span check; zero fuel yields fuelerror first. These are original scalar/
+ABI-model observations, not charged gas, native loading or allocation behavior.
+Existing producer proofs/control results reused, no source implementation copy.
+
+Initial direct probeFAIL27.326s at three nested lazy-length decidability goals
+with existing recursion limit; compiler error-recovery sorryAx appears ONLY in
+rejected diagnostic output, never accepted/source proof. Named proved load0/
+load32/address facts plus simp only remove nested normalization without changing
+any premise or maxRecDepth/maxHeartbeats. MCPstatus found no existing server.
+Provided try-tactics first invocation used a non-file proposition, which the
+script interprets as a declaration; all candidates failed before the intended
+goal. Corrected unchanged proposition via goalfile: rfl and decidePASS, other
+candidatesFAIL; runner exits0. A documented nonbuilding lake-env-lean adapter
+forces pinned-j1/-M8192, original prefix and serial guard environment. Failed
+invocation/recursion outputs remain preserved. No prerequisite build or cache
+rekey. Successful repaired probe groupPASS38.326s including8.265s tactic run.
+
+Probe's unused existential binder warning removed by alpha-renaming self to
+_self; no linter disabled and proposition meaning unchanged. Final strict
+PASS62.482s (>60s explicitly reported), emptydiagnostics, bothmonitorsPASS under
+12GiB/noSwap/CPU1/4GiBreserve+margin/300sgroup limits. Same05:20→09:20aggregate
+epoch/deadline retained, no reset/extension/PowerBounds retry or proof-budget
+increase. Timing variants are not paired performance trials; no speed/fullgate
+acceptance asserted.92guards cover85domains+7transport/joint/refusal lemmas:
+16none/25propext/2standardpair/49standardtrio, plus2classifierrefusals. Three
+private load-fact support lemmas are transitively covered by public guard sets.
+22frozenproducerleaves/250importproducts matched; all exact target types bind
+to sealed150module observations without global witness/sourcegate acceptance.
+
+Independent readonly finder/skepticPASS nofindings, including valid common
+input, premise retention, actual derived failure classes/order, discarded error
+recovery, approved limits, alpha-only rename, native hashes and all open scope.
+No reviewer edits/builds/Lean/server. Final reproducer reconstructs exact source/
+manifest, checks successful probe/strict outputs, tactic outcome, expected-only
+probe warning, code-token equality modulo guard commands/one alpha rename and
+actual92guardsets. Generated source/oleans/reports stay offGit; trusted fixture
+still requires explicit native checking beyond82Python tests/seven-file roster.
+
+No production/interface/statement/definition/premise/exclusion/axiom/trust
+change. All original703sourceSTOP,40remainingcore+37Bridge, owner/private/type/
+source/correspondence/global-input-inherited classification, remaining joint
+witness/globalledger, Source/native/gas/fork, P10production and Bridge/package/
+performance obligations remain. No RUNTIME_GATE_PASS or whole-goal completion.
+Evidence: /workspace/parallel-20261103/executable-bytecode/length-check-domains/.
+
+Final checkpoint82tests, trust/orphans, roots/fragments, doc paths and
+whitespacePASS. Explicit native/replay/tactic receipts remain separate; no
+original Source/correspondence/native/full-gate obligation or global28pin
+registration is waived by these checks.

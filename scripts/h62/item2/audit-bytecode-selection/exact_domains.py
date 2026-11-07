@@ -61,9 +61,14 @@ for method in ("correct", "capacity", "reference"):
 for method in ("raw", "reference"):
     TARGETS["raw_tail_method_" + method + "_domain"] = "Solidity.Backend.AbiEntry.RawTailGuard." + method
 
+for method in ("correct", "capacity", "lazy_revert", "eager_bytes_panic", "eager_array_panic"):
+    TARGETS["length_method_" + method + "_domain"] = "Solidity.Backend.AbiEntry.LengthCheck." + method
+for field in ("correct", "capacity", "lazy_revert"):
+    TARGETS["length_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate." + field
+
 
 PRODUCERS = ["Solidity/Backend/AbiEntry/" + name + ".lean" for name in
-             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface", "TailGuard", "TailGuardInterface", "RawTailGuard", "RawTailGuardInterface", "TailGuardControls")]
+             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface", "TailGuard", "TailGuardInterface", "RawTailGuard", "RawTailGuardInterface", "TailGuardControls", "LengthCheck", "LengthCheckInterface", "LengthCheckControls")]
 
 
 def sha(raw):
@@ -89,7 +94,7 @@ def render(macro_source, fixture):
         raise ValueError("forbidden fixture mechanism")
     fragment = macro_fragment(macro_source)
     return ("import Lean\nimport Solidity.Backend.AbiEntry.HeadGate\n"
-            "import Solidity.Backend.AbiEntry.WordGate\nimport Solidity.Backend.AbiEntry.SingleWordGate\nimport Solidity.Backend.AbiEntry.BoolBinding\nimport Solidity.Backend.AbiEntry.RawTailGuard\nimport Solidity.Backend.AbiEntry.TailGuardControls\n\n"
+            "import Solidity.Backend.AbiEntry.WordGate\nimport Solidity.Backend.AbiEntry.SingleWordGate\nimport Solidity.Backend.AbiEntry.BoolBinding\nimport Solidity.Backend.AbiEntry.RawTailGuard\nimport Solidity.Backend.AbiEntry.TailGuardControls\nimport Solidity.Backend.AbiEntry.LengthCheckControls\n\n"
             "/-! Guards omission of implicit/self/proof binders from joint hypotheses.\n"
             "Only the original conclusion is replaced by True; no census acceptance follows. -/\n"
             + fragment + "\n" + fixture + "\nend " + NAMESPACE + "\n")
