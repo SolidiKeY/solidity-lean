@@ -1,0 +1,61 @@
+import Solidity.Backend.Passes.SourceCallProducerV2
+import Solidity.Backend.Passes.SourceCallProducerControls
+
+/-! Controls for the MachineV2 G42.02 producer on the actual payment
+invocation `WorldCalls.PaymentControl.origin` (`ping()`, value 0, source
+outcome `success []`). Positive: the agreeing oracle leaves the source payload
+in the buffer and journals the `ping()` selector bytes. Negative: a lying
+oracle is observed, and the pinned relation refuses a wrong buffer. -/
+namespace Solidity.Backend.Passes.SourceCallProducerV2Controls
+open Solidity.Source Solidity.Source.SemanticsExamples Solidity.Evm
+open Solidity.Backend.WorldCalls
+open Solidity.Backend.Passes.SourceCallProducerV2
+
+abbrev origin := PaymentControl.origin
+
+theorem small : (input origin).length < W := by decide
+
+theorem source_payload : payload (SourceCallProducer.raw origin) = some (true, []) := by
+  rw [SourceCallProducerControls.produced_raw.1]
+  rfl
+
+def cell : Fin W := ⟨64, by decide⟩
+def machine : MachineV2 := MachineV2.ofBase PaymentControl.initial
+
+theorem transported_control :
+    ∃ m', runV2 (code origin cell) (oracle machine true []) = .ok m' 0 ∧ m'.returndata = [] ∧
+      m'.base.stack = [] ∧ m'.calls = [⟨receiver origin, amount origin, input origin, true, []⟩] :=
+  transported origin cell machine small true [] source_payload
+
+/-- The journaled call input is the captured `ping()` selector. -/
+theorem journaled_input :
+    ∃ m', runV2 (code origin cell) (oracle machine true []) = .ok m' 0 ∧
+      m'.calls.map (·.input) = [selOf "ping()"] := by
+  obtain ⟨m', run, _, _, calls⟩ := transported_control
+  exact ⟨m', run, by rw [calls]; rfl⟩
+
+/-- A lying oracle: funded and accepting, but answering `[1]`. -/
+def liar : MachineV2 := {oracle machine true [] with reply := fun _ _ _ => [1]}
+
+theorem liar_disagrees : ¬ OracleAgrees origin liar true [] := by
+  intro h
+  have r := h.reply
+  cases r
+
+theorem liar_observed :
+    ∃ m', runV2 (code origin cell) liar = .ok m' 0 ∧ m'.returndata = [1] := by
+  obtain ⟨m', run, _, _, _, cases⟩ := call_run origin cell liar small
+  rcases cases with ⟨_, buffer, _⟩ | ⟨poor, _, _⟩
+  · exact ⟨m', run, buffer⟩
+  · exact absurd poor (Nat.not_lt_of_le (Nat.le_of_lt (amount origin).isLt))
+
+/-- The pinned relation is not trivial: a run leaving another buffer is refused. -/
+theorem wrong_buffer_refused :
+    ¬ Returndata origin (oracle machine true [])
+      (.ok {oracle machine true [] with returndata := [1]} 0) (SourceCallProducer.raw origin) := by
+  intro h
+  obtain ⟨m', same, buffer, _⟩ := h true [] source_payload (oracle_agrees origin machine true [])
+  cases same
+  cases buffer
+
+end Solidity.Backend.Passes.SourceCallProducerV2Controls
