@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Guard primitive read credit against dropped original identities or unadmitted evidence.
 
-The committed admission JSON names the exact executed pair, never scan for a
+The private admission JSON is fixed by a source-code digest; never scan for a
 successful receipt. Full parent/tool/object/source/log verification is delegated
 to the existing checker; only these eight original cases may gain credit.
 """
@@ -18,11 +18,12 @@ spec=importlib.util.spec_from_file_location('read_coverage_verifier',Path(__file
 verifier=importlib.util.module_from_spec(spec);spec.loader.exec_module(verifier);verifier.gate=gate
 CANONICAL_SHA='77dd8d2b6a7f771206458bbef38915f9f5269964b861a1a803d8dbd601ee862d'
 COVERAGE='tests/h62/item2/audit-readonly-calls/coverage.json'
-ADMISSION=gate.ROOT/'tests/h62/item2/audit-readonly-calls/primitive-reads-admitted.json'
+ADMISSION_SHA256='deb93f4d7e1b061e94574a46e204eb0ae9499314e125e3ce078937e44db75a8f'
 BASELINE='c2ea2ff3af9f796ed6e0cf051c7b28affd6cba71'
 CREDIT_PROOFS=None
 ENTRY_DETAILS={}
 CONFIGURATION_SOURCE=None
+HISTORICAL_TOOL_HEAD='b099c40125795ce00cfa39c1df48fe5f76925a40'
 
 def apply(frozen,coverage,pair,types,pins):
     rows=copy.deepcopy(frozen);updated=copy.deepcopy(coverage)
@@ -58,27 +59,52 @@ def apply(frozen,coverage,pair,types,pins):
         changes.append({'source_name':name,'before':'pending','after':'joint-witness','proof':entry['proof']})
     return rows,updated,{'original_count':792,'changes':changes,'changed_entries':len(gate.INTERFACES),'before_counts':dict(Counter(r['witness_status'] for r in frozen['declarations'])),'after_counts':dict(Counter(r['witness_status'] for r in rows['declarations'])),'runtime_gate_pass':False,'definition_equivalence_proved':False}
 
+def read_admission(path):
+    admission=path.resolve()
+    if admission.is_relative_to(gate.ROOT):raise ValueError('admission evidence must remain outside public checkout')
+    raw=admission.read_bytes();pin=gate.hashlib.sha256(raw).hexdigest()
+    if pin!=ADMISSION_SHA256:raise ValueError('unadmitted private admission bytes')
+    pins=json.loads(raw,object_pairs_hook=gate.current.original.pairs)
+    if set(pins)!={'frozen','current'} or any(not isinstance(v,str) or len(v)!=64 for v in pins.values()):raise ValueError('incomplete explicit admission')
+    return admission,pin,pins
+
+def prepare_output(path):
+    if path.resolve().is_relative_to(gate.ROOT):raise ValueError('evidence output must remain outside public checkout')
+    # Never overwrite earlier outputs, even if historical snapshots are needed.
+    path.mkdir(parents=True,exist_ok=False)
+
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path,required=True);p.add_argument('--reviewed',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--admission',type=Path,required=True);p.add_argument('--root',type=Path,required=True);p.add_argument('--reviewed',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
     with gate.current.headers.binder.writer_lease():
         collector_pin=gate.check.sha(Path(__file__))
         configuration_pin=gate.check.sha(CONFIGURATION_SOURCE) if CONFIGURATION_SOURCE else None
-        admitted_raw=ADMISSION.read_bytes();pin=gate.hashlib.sha256(admitted_raw).hexdigest()
-        pins=json.loads(admitted_raw,object_pairs_hook=gate.current.original.pairs)
-        if set(pins)!={'frozen','current'} or any(not isinstance(v,str) or len(v)!=64 for v in pins.values()):raise ValueError('incomplete explicit admission')
+        admission,pin,pins=read_admission(a.admission)
         verifier.ADMITTED=pins
         pair={};types={}
-        for mode in pins:pair[mode],types[mode]=verifier.verify_mode(a.root/(mode+'-accepted')/'receipt.json',mode)
+        legacy_verify=gate.check.verify_hashes
+        cache_spec=importlib.util.spec_from_file_location('private_evidence_historical_tools',Path(__file__).with_name('verified_dependency_cache.py'))
+        cache=importlib.util.module_from_spec(cache_spec);cache_spec.loader.exec_module(cache)
+        prepare_output(a.output)
+        historical={}
+        def verify_executed_inputs(protected):
+            exact,snapshots=cache.authenticate_tools(gate.ROOT,HISTORICAL_TOOL_HEAD,protected,a.output/'historical-tools')
+            historical.update(snapshots);legacy_verify(exact)
+        def verify_pair():
+            gate.check.verify_hashes=verify_executed_inputs
+            try:
+                return {mode:verifier.verify_mode(a.root/(mode+'-accepted')/'receipt.json',mode) for mode in pins}
+            finally:gate.check.verify_hashes=legacy_verify
+        checked=verify_pair()
+        for mode,(record,exported) in checked.items():pair[mode],types[mode]=record,exported
         frozen=gate.current.original.load_pinned(a.reviewed,CANONICAL_SHA);gate.current.verify_frozen(frozen)
         raw=subprocess.check_output(['git','show',BASELINE+':'+COVERAGE],cwd=gate.ROOT)
         rows,updated,delta=apply(frozen,json.loads(raw),pair,types,pins)
-        a.output.mkdir(parents=True,exist_ok=False)
         for name,value in [('census-updated.json',rows),('coverage-updated.json',updated),('delta.json',delta)]:
             (a.output/name).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n')
-        for mode in pins:verifier.verify_mode(a.root/(mode+'-accepted')/'receipt.json',mode)
-        if gate.check.sha(ADMISSION)!=pin:raise ValueError('admission changed during validation')
+        verify_pair()
+        if gate.check.sha(admission)!=pin:raise ValueError('admission changed during validation')
         if gate.check.sha(Path(__file__))!=collector_pin:raise ValueError('collector changed during validation')
         if CONFIGURATION_SOURCE and gate.check.sha(CONFIGURATION_SOURCE)!=configuration_pin:raise ValueError('configuration source changed during validation')
-        receipt={'status':'pass','baseline':BASELINE,'coverage_input_sha256':gate.hashlib.sha256(raw).hexdigest(),'admission_sha256':pin,'admitted_receipts':pins,'collector_sha256':collector_pin,'configuration_sha256':configuration_pin,'outputs':{n:gate.check.sha(a.output/n) for n in ['census-updated.json','coverage-updated.json','delta.json']},'runtime_gate_pass':False}
+        receipt={'status':'pass','baseline':BASELINE,'coverage_input_sha256':gate.hashlib.sha256(raw).hexdigest(),'admission_sha256':pin,'admitted_receipts':pins,'collector_sha256':collector_pin,'configuration_sha256':configuration_pin,'historical_executed_tools':historical,'outputs':{n:gate.check.sha(a.output/n) for n in ['census-updated.json','coverage-updated.json','delta.json']},'runtime_gate_pass':False}
         (a.output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(delta))
 if __name__=='__main__':main()

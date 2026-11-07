@@ -13,7 +13,7 @@ verifier=importlib.util.module_from_spec(spec);spec.loader.exec_module(verifier)
 collector.gate=module.gate;collector.verifier=verifier;verifier.gate=module.gate
 collector.CANONICAL_SHA='532234a73caefaadee0ef39a75108d9392b6de99e05fcbd763ce9634642c9077'
 collector.BASELINE='abcf292e41410f0ba4eb379dd554c4269f1ec735'
-collector.ADMISSION=module.gate.ROOT/'tests/h62/item2/audit-readonly-calls/read-statements-admitted.json'
+collector.ADMISSION_SHA256='e654ee83644eb0c80a69b1c635d8497ec1bd42685f31827dff61ce00f7799882'
 collector.CONFIGURATION_SOURCE=Path(__file__)
 collector.CREDIT_PROOFS=module.NEW_NAMES
 collector.ENTRY_DETAILS={

@@ -1570,3 +1570,51 @@ Evidence: /workspace/h62-audit-readonly-calls/loaded-original-types/; committed
 pins `tests/h62/item2/audit-readonly-calls/loaded-original-types.sha256`. No scope
 question, push or goal change. Next independent work: remaining original joint
 inputs, broader exact bindings and the owned full RO execution/frame producer.
+
+
+### H145 private evidence storage (2026-11-07)
+
+Rebased onto896fd3451f712fd940d28305eddfb8cf1c4ef034. H145 moves lane
+evidence to private coordination storage; historical evidence paths in earlier
+sections name archived records, not current public-tree files. Before resolving
+modify/delete conflicts, the complete26-file metadata snapshot at original
+headb099c40125795ce00cfa39c1df48fe5f76925a40 was copied and hash-verified
+outside the checkout. Owner tickets and their ten Source-related type blockers
+remain in that private snapshot. Rebase conflict versions were retained too.
+No Source/Lean proof, original statement, budget or goal was changed.
+
+The four reintroduced checksum manifests, two admission JSON files and three
+operational intake/dependency records are now outside the public tree. Real
+checker fixtures remain. The acceptance CLI takes an explicit private
+--admission path; its source-code digest pins remain exactly the original
+values. Hashing and parsing use the same retained buffer, and both admission
+and output paths are refused inside the checkout. Existing outputs cannot be
+overwritten. Changed historical Python tools are authenticated as exact
+hash-matching bytes from the original snapshot; they are not executed. All
+proof/source/object/log/type checks remain intact.
+
+Five private-storage controls, nine legacy accounting controls and three
+statement controls pass. Replayed paired acceptance is byte-identical for
+all792-row census, coverage and delta outputs;419ordinary pending and zero
+new credit. The exact loaded-type census also reproduces byte-identically:
+49loaded,38matching types,11drifts,743unloaded. This is evidence relocation
+and verification, not a Lean proof rerun, new current-fidelity result or
+performance rebaseline. All historical STOPs, ten Source transport blockers,
+nineteen H19/H60 transports, G42.04, private gaps and full owned H121 producer
+remain open.
+
+H145 explicitly authorizes the private coordination evidence upload. The
+metadata-only packet is prepared under
+/workspace/h62-audit-readonly-calls/evidence-policy/private-upload/. Large
+proof caches remain on the VM with absolute paths and hashes. Publication
+receipt and checksums are recorded in the saved CLOUDVM-RESULT, not in tests.
+Public code-branch/default-branch pushes remain prohibited. Full assignment
+and runtime acceptance remain unfinished.
+
+
+Private H145 archive uploaded successfully:
+SolidiKeY/solidity-lean-coord@2ea13a380409910c0b198737d07c60ee2b63b426,
+evidence/solidity-h62-2-20261106/audit-readonly-calls/private-upload/.
+Its LARGE-VM-ARTIFACTS.json records fifteen larger VM archives by path/hash.
+The upload changed only the private evidence repository; the code branch
+was not pushed.

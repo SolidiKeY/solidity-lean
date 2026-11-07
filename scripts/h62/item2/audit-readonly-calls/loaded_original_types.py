@@ -96,7 +96,12 @@ def run(parent_path,canonical_path,output):
     head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     parent=pinned(parent_path,PARENT_SHA);frozen=pinned(canonical_path,CANONICAL_SHA)
     protected={str(p):sha(p.read_bytes()) for scope in ['scripts/h62','tests/h62'] for p in (ROOT/scope).rglob('*.py')}
-    protected.update(parent['protected_sha256']);protected[str(parent_path)]=PARENT_SHA;protected[str(canonical_path)]=CANONICAL_SHA;protected[str(COVERAGE)]=sha(COVERAGE.read_bytes())
+    output=output.resolve()
+    if output.is_relative_to(ROOT):raise ValueError('evidence output must remain outside public checkout')
+    output.mkdir(parents=True,exist_ok=False)
+    cache=load('loaded_historical_tool_authentication',ROOT/'scripts/h62/item2/audit-readonly-calls/verified_dependency_cache.py')
+    executed,snapshots=cache.authenticate_tools(ROOT,'b099c40125795ce00cfa39c1df48fe5f76925a40',parent['protected_sha256'],output/'historical-tools')
+    protected.update(executed);protected[str(parent_path)]=PARENT_SHA;protected[str(canonical_path)]=CANONICAL_SHA;protected[str(COVERAGE)]=sha(COVERAGE.read_bytes())
     protected.update({s['log']:s['sha256'] for s in parent['steps']});verify(protected)
     if parent['mode']!='current' or parent['runtime_gate_pass'] or any(s['exit']!=0 for s in parent['steps']):raise ValueError('parent proof gate incomplete')
     if len(set(parent['project_order']))!=len(parent['project_order']) or set(parent['project_order'])!=set(parent['source_pins']):raise ValueError('parent closure membership mismatch')
@@ -109,7 +114,6 @@ def run(parent_path,canonical_path,output):
     protected[str(LEAN)]=sha(LEAN.read_bytes());verify(protected)
     selected=[r for r in frozen['declarations'] if r['file'] in parent['source_pins']]
     if len(selected)!=49:raise ValueError('review loaded original surface change')
-    output=output.resolve();output.mkdir(parents=True,exist_ok=False)
     buffers={str(EXPORT):EXPORT.read_bytes()}
     if sha(buffers[str(EXPORT)])!=protected[str(EXPORT)]:raise ValueError('export helper buffer drift')
     tree=ast.parse(buffers[str(EXPORT)]);helper=next(ast.literal_eval(n.value) for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='HELPER' for t in n.targets))
@@ -140,7 +144,7 @@ def run(parent_path,canonical_path,output):
         raw=(json.dumps(value,ensure_ascii=False,indent=2)+'\n').encode();(output/name).write_bytes(raw);protected[str(output/name)]=sha(raw)
     verify(protected)
     if subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()!=head:raise ValueError('head changed during query')
-    receipt={'status':'pass','source_head':head,'parent_receipt_sha256':PARENT_SHA,'canonical_sha256':CANONICAL_SHA,'command':cmd,'exit':0,'log_sha256':sha(data),'query_sha256':sha(staged.read_bytes()),'protected_sha256':protected,'selected':49,'project_objects':len(objects),'kernel_statuses':result['kernel_statuses'],'type_matches':result['matched_types'],'type_drifts':result['changed_types'],'original_credit_added':0,'kernel_metadata_only':True,'object_boundary':'Uses actual admitted fresh-source proof objects; hashes checked before/after. Standard SDK/import-loader trust; no independent loader-byte attestation.','runtime_gate_pass':False,'timing_stop_released':False}
+    receipt={'status':'pass','source_head':head,'parent_receipt_sha256':PARENT_SHA,'historical_executed_tools':snapshots,'canonical_sha256':CANONICAL_SHA,'command':cmd,'exit':0,'log_sha256':sha(data),'query_sha256':sha(staged.read_bytes()),'protected_sha256':protected,'selected':49,'project_objects':len(objects),'kernel_statuses':result['kernel_statuses'],'type_matches':result['matched_types'],'type_drifts':result['changed_types'],'original_credit_added':0,'kernel_metadata_only':True,'object_boundary':'Uses actual admitted fresh-source proof objects; hashes checked before/after. Standard SDK/import-loader trust; no independent loader-byte attestation.','runtime_gate_pass':False,'timing_stop_released':False}
     (output/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps({k:v for k,v in receipt.items() if k not in ['protected_sha256','command']}))
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--parent',type=Path,required=True);p.add_argument('--canonical',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();run(a.parent,a.canonical,a.output)
