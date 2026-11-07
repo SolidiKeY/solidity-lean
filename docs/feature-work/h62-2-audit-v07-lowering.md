@@ -246,3 +246,27 @@ original migration gates and full audit remain open.
 
 Independent read-only finder and skeptic reviews passed without findings; neither
 used Lean/server. The four type resolutions do not add any feasibility witness.
+
+
+## Nonempty joint rank witness
+
+RankJointWitness.lean inhabits the rank premises on one two-node graph with
+nonempty field lists: a Boolean leaf and a fixed-size array of the leaf node.
+The same comparison assignment 10/100 satisfies positivity and every strict
+field inequality. Node-count stabilization is derived from stable_at_nodes;
+the count and comparison convergence applications retain their distinct bound
+premises. Computed ranks after two iterations are 1/3, and the parent has not
+stabilized after one iteration (2 differs from 3). This guards empty-domain or
+separate-premise substitutes without turning comparison ranks into executable
+representation, source-admission, depth or gas bounds.
+
+Master ac46c1978 was fetched and inspected before implementation; it was already
+an ancestor and contained no equivalent witness. Final bounded serial live Lean
+4.24.0 passed in 1.569s. All seven printed axiom sets are subsets of propext and
+Quot.sound. An initial missing FixedSize proof was corrected with the existing
+intrinsic positive/bounded size constructor; that failed log is retained.
+Independent read-only finder and skeptic reviews passed without findings or
+Lean/server use. Logs remain at v07-rank-joint-checked.json and the corresponding
+checked-files/1.log in the external gate-output directory. No production source,
+statement, budget or frozen ledger was edited. General graph feasibility, the
+rest of the simultaneous-witness census, original 4.35 and full gates remain open.
