@@ -1658,3 +1658,21 @@ failed guard and retained timing hold are in the private H145 evidence directory
 `evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-relative-reference-publish-20261107/`.
 This adds no selected-row credit and no jump-execution, Source/native or full
 validation claim. All prior holds and historical-evidence waits remain open.
+
+
+The generic linking companion
+`tests/h62/item2/audit-v09-passes/LinkingCertificates.lean` connects existing
+link_patch results to a specific original emitted pushTag: byte substitution
+preserves that reference and its scanner-valid destination, leaves no unresolved
+links, and makes another link pass inert. Existing resolved addresses remain
+unchanged. A generic PUSH payload law derives scanner rejection of every
+immediate byte from actual instruction boundaries, including arbitrary trailing
+bytes and every valid width. The linked nonempty-placeholder fixture uses20
+address bytes0x5b and proves both the real target valid and every payload byte
+invalid behind every correctly placed prefix. No new linker/interface or
+production definition was added. Private H145 proof/resource/provenance records
+are under
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-linking-reference-publish-20261107/`.
+This is byte-emission/scanner backfill only, with no jump-execution, native,
+Source/G24 or full validation claim, and no selected-row credit. Prior timing,
+trust, census/documentation failures and missing-history waits remain open.
