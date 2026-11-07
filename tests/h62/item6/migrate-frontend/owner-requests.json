@@ -108,7 +108,7 @@
     "H70_audit_label_execution": {
       "head": "a107fd353aba492a3144da90cabcbde20032ca0c",
       "ticket_sha256": "4d515bbb0b5de8540c660ccf8c5f0aa5efa3a2f9d502eba8dab5142391ed51f1",
-      "coordinator_receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-2-20261106__audit-label-execution/66615193dea4-owner-tickets.json",
+      "coordinator_receipt": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-2-20261106__audit-label-execution/66615193dea4-owner-tickets.json",
       "full_ticket_on_this_VM": false,
       "response": "Token candidate only; no consumer witness/signature/full acceptance claim."
     },

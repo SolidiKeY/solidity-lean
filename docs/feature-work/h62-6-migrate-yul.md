@@ -283,7 +283,7 @@ requester `solidity-h62-2-20261106/audit-label-execution`, head
 `a107fd353aba492a3144da90cabcbde20032ca0c`, requester source
 `/workspace/solidity-lean/tests/h62/item2/audit-label-execution/owner-tickets.json`.
 Coordinator host receipt:
-`/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-2-20261106__audit-label-execution/66615193dea4-owner-tickets.json`,
+`$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-2-20261106__audit-label-execution/66615193dea4-owner-tickets.json`,
 11,017 bytes, supplied SHA256
 `4d515bbb0b5de8540c660ccf8c5f0aa5efa3a2f9d502eba8dab5142391ed51f1`.
 The full ticket is not staged in this VM and was not inspected here. The

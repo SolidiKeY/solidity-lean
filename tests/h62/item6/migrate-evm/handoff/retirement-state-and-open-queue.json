@@ -114,7 +114,7 @@
     "H82 standing agreements and explicit retirement pause"
   ],
   "source_provenance_note": "Coordinator-local source paths in the ticket are provenance only; include delivered copies/evidence in archive and never assume cross-VM accessibility.",
-  "root_ticket_sha256_verified": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+  "root_ticket_sha256_verified": "9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10",
   "withdrawn_exact_file_permission_waits": [
     {
       "item": "B-DOC-CITE",

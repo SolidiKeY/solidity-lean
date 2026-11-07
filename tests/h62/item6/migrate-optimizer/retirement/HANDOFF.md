@@ -15,7 +15,7 @@ all visible original assignment content, with a final LF.
 
 queue-state.schema-v1.json lists every checkpoint/backfill item and all waits.
 The complete H78 root owner request is h78-owner-requests.json, authenticated to
-749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5. All original
+9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10. All original
 public generated APIs remain in scope; h78-public-api-state.json maps exact
 existing raw exports to portable evidence. No shim is implemented or excluded.
 

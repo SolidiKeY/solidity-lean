@@ -38609,6 +38609,296 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.blocksPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.boolCopyStatement_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.booleanSlots_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.booleanSlots_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.booleanSlots_unique": [
+  "Quot.sound"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.boolPair_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.boolWriteStatement_set": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.branchSlots_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.captured_flag_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.checkedSlot_exact": [],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.CheckedSlot.type_eq": [],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.Compiled.code_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.Compiled.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.Compiled.output_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.Compiled.result_eq_core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.conditional_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.contextMap_boolSlot": [],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.continuationPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.copyItems_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.copyItemsAux_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.copySlots_exact": [
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.copyStatement_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.dispatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.dispatch_accepts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.dispatch_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.dispatch_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.dispatch_error_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.dispatch_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.dispatch_template_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.doBreakPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.doContinuePlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.doReturnPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.empty_block_accepts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.forBreakPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.forContinuePlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.forReturnPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.incompatible_mapping_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.itemSpine_sourceItems": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.literal_condition_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.localCopy_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.localRead_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.mapping_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.mapping_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.operationalFact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.ordered_block_accepts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.pairPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.Plan.context_same": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.primitiveSlot_exact": [
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.program_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.recognize_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.recognize_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.recognize_plan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.recognize_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.recognize_returning_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.recognize_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.returning_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.returnTail_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.sequencePlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.skip_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.whileBreakPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.whileContinuePlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean:Solidity.Backend.StructuredFlow.SourceDispatch.whileReturnPlan_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Calculus/ArrayBlock.lean:Solidity.Decide.arrayBlockReduction?_isSome": [
   "Classical.choice",
   "Quot.sound",

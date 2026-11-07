@@ -1,0 +1,70 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/ReferenceCallReadbackControls.lean",
+  "interface_sha256": "889d7402db6b15d8a4819a194f50013f2906c02d8a744cf4d3f03e496294205a",
+  "joint_witness": "Solidity.Backend.Passes.AuditReferenceCallReadback.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditReferenceCallReadback",
+  "checked_private_names": [],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.source_run",
+      "signature_sha256": "8a6a825ae06cd0c38eeef7832b807fb302a1ba771ff2f8dba0b91ce412a1fb02",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.evaluated",
+      "signature_sha256": "63705dfe6779ae7c6419360e811454e83d301a7388ea17d31613e1be85ed7405",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.returned_run",
+      "signature_sha256": "fc4c546bf8833772f4b7b6d915827aff054d20e2c2312b4dd53d44b0be60681c",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.reached",
+      "signature_sha256": "de864101ea66614091fecfb56d268846d16dfc399ce6ec6597b6b5a914a13f0d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.source_observations",
+      "signature_sha256": "92fa277d13073d7f160acd4c30119d37da6f5ff0b57520f81ad361145f9fc277",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.complete_observations",
+      "signature_sha256": "ebfcb14b7af58aa5832ed95235577dcb9d25ab6afd46e1f31e197fa814e09035",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.wrong_recapture",
+      "signature_sha256": "b9d199b7e2c05dab19669d197cdf6ad7df7a4648f8f54b9487c29c76ec323642",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.body_failure",
+      "signature_sha256": "87adb21e76b43d535a32be5369749290d19a85a6a51b919b6ca1b8a13dbcdbdf",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.private_frame_refused",
+      "signature_sha256": "d9002e4ca3ea470301caf280db3969f87b5b8979d1598d03011b814d76ad030f",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.Controls.stale_map_refused",
+      "signature_sha256": "811cb8b390d9d493f0fc4d8c34b418ede2ecbde58c07a11769687144d80385c5",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 489,
+  "aggregate_remaining": 770,
+  "joint_contract": "actual-tuple-reference-runtime-entry-flags-source-and-reached-suffix-input",
+  "auxiliary_definition_credit": 0,
+  "limits": "Ten original public controls. Actual entry/frame64 lo/pointer16 cursor20, alias flags, source outcome, selected output map and suffixInput retained. Complete original tail/memory/allocator observations and body-failure/frame/stale-map refusals remain exact aliases. No private definition/supplemental credit; no native ByteWorld/emission, ABI/gas or full Source/G24 adequacy.",
+  "checked_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

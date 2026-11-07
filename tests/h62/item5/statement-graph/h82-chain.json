@@ -4,7 +4,7 @@
   "survivor": "solidity-h62-5-20261106/statement-graph",
   "originalGoalPreserved": true,
   "namespace": "live",
-  "scopeProvenanceHostPath": "/home/guilherme/.local/state/cloudvm-coord/receipts/h82-20261106T174134Z/assignments/registry-tooling/scope.json",
+  "scopeProvenanceHostPath": "$XDG_STATE_HOME/cloudvm-coord/receipts/h82-20261106T174134Z/assignments/registry-tooling/scope.json",
   "scopeHostBytesAvailable": true,
   "ownAnnouncedHead": "7974163ce7443d49e19e84abedaab95c41d386f7",
   "ownHeadAlreadyContained": true,

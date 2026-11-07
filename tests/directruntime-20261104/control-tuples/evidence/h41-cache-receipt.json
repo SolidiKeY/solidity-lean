@@ -9,7 +9,7 @@
   "local_sha256_verified": true,
   "coordinator_pull_reported": true,
   "coordinator_sha256_verification_reported": true,
-  "coordinator_receipt_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/control-tuples-cache-received-20261105T020258Z.json",
+  "coordinator_receipt_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/control-tuples-cache-received-20261105T020258Z.json",
   "receipt_provenance": "Coordinator message supplied by user on 2026-11-05; coordinator-host receipt was not directly read from this VM",
   "coordinator_import_or_merge_verified_on_vm": false,
   "archive_preserved_unchanged": true,
