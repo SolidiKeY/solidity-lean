@@ -289,6 +289,7 @@ VY2 chronological physical `mcopy` preparation and source-state preservation: [l
 VY2 mapping roundtrips and transient slot/frame/reset laws: [lane record](feature-work/inline-assembly-vy2.md#mapping-slot-views-and-transient-slots).
 
 VY2 actual-frame calldata copy/hash binding: [lane record](feature-work/inline-assembly-vy2.md#actual-frame-calldata-copy-and-hash).
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 | Assembly lane | Document |
 |---|---|
 | VY5 raw-local/physical, indexed-write/emit composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |
