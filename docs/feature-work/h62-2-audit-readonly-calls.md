@@ -298,3 +298,102 @@ changed. Bulk records and reproduction evidence are kept at
 `/workspace/h62-audit-readonly-calls/obligation-dependencies/` on the original VM;
 the committed evidence record pins generator and artifact hashes. The prior
 +80.254966536% Lean timing STOP remains. No runtime gate pass is claimed.
+
+
+## H121 reachable-dispatch takeover and additive audit
+
+H121 transfers RO V2 dispatch and consumer migration to this lane and freezes the
+former Claude lane. Merged current master 254c60df6, then exact published head
+2ed5f7ceb9a4204e4a1590b2eb9ca88fa8547601. The RO producer is no longer an external
+wait. V13 actual compiler success and exact retired proof-cleanup object recovery
+remain external dependencies. Original scope, all792 obligations and the original
++80.254966536% Premises STOP are unchanged.
+
+A fresh bounded serial build of `SourceDispatchInterfaceV2Controls.lean` passed
+in524.886s, peak aggregate RSS1644761088bytes, with4GiB available reserve and no
+swap. Its declared90-module project closure excludes the held Premises module.
+All three full branch conjunctions have simultaneous witnesses; both frozen V1
+empty-selected cases remain checked impossibilities. V1 SourceDispatchEffects
+and SourceAllHistories are byte-identical to the original base.
+
+The additive `dispatch_v2_audit.py` preserves the complete pinned original census
+and separately inventories all nine theorems in the two new V2 interface modules.
+Their exact kernel names, modules and full types export and verify under the
+unchanged budgets. Three explicit input-proof cases map to full joint clients;
+six no-named-input-proof-binder rows imply no nested feasibility or adequacy.
+The new `tests/h62/item2/audit-readonly-calls/StaticCallWitness.lean` gives all inputs and the actual static condition
+at one tuple, then applies the unchanged storage theorem. Both checked theorem
+axiom sets are exactly propext, Classical.choice and Quot.sound. Source-call
+success, gas/fork boundaries and compiler adequacy are not concluded.
+
+The four migrated consumers retain all28 original theorem headers, variable
+contexts and visibility. Their compiled/timing comparison has not passed: a
+sparse-library attempt failed package lookup; the complete-library baseline then
+failed before V2 at `RawAt` reduction. Diagnostic output with all arguments shows
+cached RawAt's old `callAddr` application alongside the current evaluator's added
+RuntimePlan parameter. Q-H121-CACHE was sent through coord-ask (receipt
+20261107T034608Z) for disposition of the dependency refresh under the standing
+STOP. No held Premises compile or unchanged benchmark rerun was performed.
+Cached imports are not source-binding or a full dependency recertification.
+
+36 applicable Python controls pass, including omission, duplicate, version/module,
+all792 retention and arbitrary-baseline header/context refusal cases. The initial
+blanket discovery failed because it included a command-line resource harness and
+two strict frozen-tree suites; this is retained as failed evidence. The strict
+FROZEN_DRIFT gate is not bypassed or weakened. A development fixture escaping
+error and both consumer failures are also retained, without a passing timing
+claim. The warned prior shared-ledger refactor passed its separate matched +0.95%
+comparison and189 scanner controls (project-accounting checkpoint810a59743).
+
+Independent read-only finder/skeptic reviews confirmed the branch and migration
+fidelity. Fixed findings: funded/entered qualification in the producer docstring,
+and staged header/context comparison before any future consumer benchmark.
+Neither reviewer executed code or used a Lean server. OracleAgrees supplies the
+reply and returndata_any ignores the source outcome; these remain oracle buffer
+laws, never source-world correspondence. Full original/inherited queues, consumer
+validation, G42.02 source-callee linkage, owner compiler success and final gates
+remain unfinished. Actual tools: Lean4.24.0/797c613; Lake5.0.0-src+797c613. Fresh
+bounded KeySort prerequisites passed in the preceding committed project captures.
+No new axiom, sorry, native_decide, statement weakening or proof-budget change;
+no RUNTIME_GATE_PASS or master publication. Evidence is retained under
+`/workspace/h62-audit-readonly-calls/ro-v2-intake/` on this VM.
+
+
+### Q-H121-CACHE resolved; current consumers checked
+
+Coordinator gh#78 chose A: one serial bounded current-tree dependency rebuild
+through Premises, after the cache refetch, with no statement/premise/exclusion/
+budget change, no before/after rebaseline and no runtime-pass claim. The
+historical +80.254966536% STOP remains. The preceding pending-question account
+is historical; no cache-refresh authorization is inferred beyond this answer.
+
+Three cache setup attempts stopped at the same reserve guard: initially RAM-backed
+/tmp extraction, then disk-backed file-cache pressure during extraction/copying.
+All failed logs remain. The downloaded release SHA256 is
+9279b7031dc5ee77ad2e7424ad7936172dc26e9da0d3a453e7e7c7d27a40d722,
+from master4f0a2d6abe3a920d8c5a20c8c06d373a1014824d. After rechecking that checksum,
+private interrupted artifact copies were replaced by hardlinks to the verified
+complete pack and its unchanged installer resumed. It installed19782 artifacts
+(6674078133bytes),6594 module entries, without relaxing any memory bound. These
+cache labels and counts are setup evidence, not proofs.
+
+The one approved current-tree build of ClosedSourceFrame, ClosedSourceConsumers,
+ClosedSourceControls and SourceExpressionConsumer passed:237 jobs,7.042s wall,
+885620736bytes peak aggregate RSS. No paired benchmark was rerun and these
+observations establish no speed baseline. Selected old objects, including the
+old RawAt-related object and current evaluator, were copied before refresh for
+diagnosis; that snapshot is not a complete dependency pack or source-binding proof.
+
+Current coverage labels the two frozen V1 cases as refuted with checked versioned
+migration, separately from intentional negative controls and positive witnesses.
+All792 original records remain; neither impossible V1 statement receives a
+positive witness. New V2 interfaces and the four migrated consumers are checked;
+the source-world OracleAgrees gap, V13 compiler success,462 ordinary witnesses,
+three private mappings, broader original/inherited queues and final full gates
+remain unfinished. The original strict frozen-tree gate remains failed on drift.
+
+The transferred producer model and input-byte controls also build successfully
+(236 jobs,17.597s,938057728bytes peak RSS), reusing the refreshed dependency
+objects. This checks their stated model laws only: the source outcome remains
+unused by returndata_any and no source-world oracle link is inferred. No new
+Premises timing comparison or runtime-pass claim was made.
