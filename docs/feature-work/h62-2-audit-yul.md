@@ -364,3 +364,33 @@ proof credit. Kernel records, credited witnesses and credited refutations are
 zero. Historical h69 remains UNVERIFIABLE. The driver, complete reconstruction,
 source identities and reproduction checks are private H145 evidence, not code
 branch data. Original proof/resource limits and timing/import STOPs remain.
+
+
+### H151: investigate the 34 unmatched lexical records
+
+All 34 unmatched reconstructed records now have explicit investigation
+annotations. Eleven are unnamed examples in LocalBlock: ignoring only their
+synthetic line-number names finds one same-file candidate with exactly the same
+header and section-variable text. Twelve named declarations have the visible
+addition of a mapFree argument after isBase in conversion/admission expressions.
+The remaining eleven have monetary surface differences: natural balance values,
+wordView projections, or corresponding literal/projection changes. Their exact
+before/after headers are retained; monetary classification is manual family
+triage, not a normalization or equivalence rule.
+
+The original 34 unmatched dispositions are unchanged. Even identical example
+headers do not establish elaborated type or dependency preservation. The 23
+named changes require type/owner reconciliation before any frozen-statement
+acceptance. Git text history locates the mapFree changes at
+7256a1ad97227e488b1b8fa1fcd4263077f47e53, balance projection at
+3ea8e72aba5f320fee3c87a0446722546cfe4fc7, and natural-balance changes at
+9572b8d3edd01e1dc11689a85f016d9d25f92af7; history alone supplies no approval
+or proof equivalence. No statement is edited, accepted, weakened, or declared
+vacuous by this investigation.
+
+The input inventories retain their existing hash identities and source bases.
+Every investigated original ID occurs once, repeated classification bytes are
+identical, and every proof-credit flag remains false. Historical h69 remains
+UNVERIFIABLE. Detailed headers, exact-match criteria, provenance and reproduction
+checks are private H145 evidence. Kernel/witness recovery, original semantic
+coverage, physical adequacy and full validation remain open under existing STOPs.
