@@ -93,3 +93,27 @@ Logs are /workspace/sol-numeric-literals-gate-output/v07-pair-separation-checked
 and the corresponding checked-files/1.log. These local completed-prefix results
 do not establish gas, compiler totality, or a full interface census. No producer,
 frozen statement, budget, axiom set or exclusion was changed.
+
+
+## Assignment-family execution binding
+
+AssignmentFamilyExecutionWitness.lean connects the existing two-slot value/alias
+family to assignment_family_transport. Its general theorem supplies the family
+on the same initial Source state and target state used by the actual runs, and
+derives both successful executions and the postfamily together. It covers every
+legal integer type, bounded pair of values, and either choice of written/RHS slot,
+with arbitrary Source world/frame and target base. A separate existing-model u8
+7/9 tuple inhabits the environment, globals, frame, world, target and family
+inputs together. The reject-all control uses an actual successful target run.
+No relation between arbitrary global worlds is asserted.
+
+Master 94f9862b6 was fetched and inspected before this item. Serial bounded Lean
+4.24.0 passed in 57.633s, including rebuilding uncached imports of the existing
+concrete world example. The three printed theorem axiom sets use only the
+standard three axioms. This is not a comparable before/after timing or a full
+runtime gate. Finder and skeptic read-only reviews passed without findings;
+neither used Lean/server. Exact evidence is outside Git at
+/workspace/sol-numeric-literals-gate-output/v07-family-execution.json and
+v07-family-execution-files/1.log. Local successful assignment is not whole-program
+termination, compiler totality, gas or a complete V07 interface census. No
+production statement, definition body, proof budget or G07 pin was changed.
