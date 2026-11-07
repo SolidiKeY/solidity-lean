@@ -77,6 +77,22 @@ theorem copy_snapshot (base : Nat) (flag : Bool) :
     upd, if_pos rfl, List.append_cons, List.nil_append]
   repeat first | contradiction | split <;> (try omega) | rfl
 
+/-- Exact original emitter expression: both zero and nonzero frame controls
+are instances of this general law, with their original full snapshot. -/
+theorem emitted_snapshot (base : Nat) (flag : Bool) :
+    MappedCondition.Controls.snapshot base
+      (run (MappedCondition.emit base
+        MappedCondition.Controls.mapping .here (.there .here) rfl rfl)
+        (MappedCondition.Controls.frame base flag)) =
+      some [.val (bword flag),.val (bword flag),.val (bword flag),w[99],w[77]] := by
+  change MappedCondition.Controls.snapshot base
+    (run (compileProg base (program MappedCondition.Controls.C copyFixture))
+      (MappedCondition.Controls.frame base flag)) = _
+  exact copy_snapshot base flag
+
+#print axioms copy_snapshot
+#print axioms emitted_snapshot
+
 #print axioms compiled_execution
 #print axioms fixtures_execute
 end Solidity.Backend.StructuredFlow.GenericMapped
