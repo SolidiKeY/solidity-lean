@@ -261,7 +261,7 @@ controls remain unaccepted, and all post-repair gates must be rerun as applicabl
 The coordinator confirms receipt of the preserved H35 pack and verification
 against SHA-256 `3f2fb9f6a585b6a64f386b6e127b972a84fd7149ca914a29a191afac97d95dbb`.
 The supplied receiver receipt is
-`/home/guilherme/.local/state/cloudvm-coord/receipts/native-browser-cache-received-20261105T025529Z.json`.
+`$XDG_STATE_HOME/cloudvm-coord/receipts/native-browser-cache-received-20261105T025529Z.json`.
 This is coordinator-attested receipt evidence; the remote file was not read
 on this VM. A fresh local hash matches and the 539,036,429-byte archive remains
 intact at its recorded path. Evidence: h41/cache-receipt.json.

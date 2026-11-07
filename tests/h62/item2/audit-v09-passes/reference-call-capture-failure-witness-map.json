@@ -1,0 +1,50 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/ReferenceCallCaptureFailureControls.lean",
+  "interface_sha256": "880a220fb7d2c52aaab407403587cb695888f2e1f1decc2235a0a0dc2e7a74c1",
+  "joint_witness": "Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditReferenceCallCaptureFailure",
+  "checked_private_names": [],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.bad_source",
+      "signature_sha256": "ed031843fffc6a273ac6627a88dd538c7d956584a6caf3428bac94d4c02f93f1",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.reached",
+      "signature_sha256": "dfd1a7348d0c76181a9eb0df3cf43691aa054a96f90352b755da04cccb69793e",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.joined_failure",
+      "signature_sha256": "ebf17b4c74759ca080777bcbd6b31d1526aceaee10e4b62ba6e934aaa127bc06",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.returned_observations",
+      "signature_sha256": "fe5e3529e0aa5d86284ed5078602089f7740b98d5fe1f0139f4eed3db5bcb1c6",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.wrong_zero_capture_cell",
+      "signature_sha256": "8393a03ef3bac2f21d3f1fba836ddcb65746f437bd4d8636d913537d6a1b46b4",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.wrong_failure_stage",
+      "signature_sha256": "82b81933358e00610423cb6dad1a933bcc4cbc848a5ddb3b2549e4b8e25a5423",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 495,
+  "aggregate_remaining": 764,
+  "auxiliary_definition_credit": 0,
+  "joint_contract": "actual-successful-reference-call-entry-flags-and-paid-map-before-reverting-capture",
+  "limits": "Six original public controls. Actual prefix succeeds, returned map and cost1 growth/cursor20/footprint are real; captureInput holds at the failing read. No post-revert machine. Original full tails, source/target failure transport, live memory, nonzero slot and successful alternate read preserved. No application/definition/supplemental credit; no native ByteWorld/emission, ABI/gas or full Source/G24 adequacy.",
+  "checked_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

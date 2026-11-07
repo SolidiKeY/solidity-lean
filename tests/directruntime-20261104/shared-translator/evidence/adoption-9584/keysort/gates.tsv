@@ -1,1 +1,0 @@
-PASS	lean:Solidity/KeySort.lean	2	/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/keysort-9584/1.log	lake env lean --tstack=131072 Solidity/KeySort.lean 

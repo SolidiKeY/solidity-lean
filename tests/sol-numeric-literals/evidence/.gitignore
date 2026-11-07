@@ -1,0 +1,3 @@
+# Written while Solidity.Frontend.NumericLiteralProofs.{Audit,Fixtures} elaborate (run_cmd);
+# the directory must exist. Evidence itself lives in the private coordination repository.
+*.actual.json

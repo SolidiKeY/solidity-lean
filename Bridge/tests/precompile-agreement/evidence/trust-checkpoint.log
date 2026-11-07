@@ -1,4 +1,0 @@
-CWD: /workspace/solidity-lean
-COMMAND: bash scripts/check-trust.sh
-trust: 3923 sources, 287 inventoried implementation/recovery sites, 0 findings
-EXIT=0 SECONDS=10.835

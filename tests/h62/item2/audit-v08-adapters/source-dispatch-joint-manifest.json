@@ -1,0 +1,109 @@
+{
+  "status": "PROVED_NONEMPTY_DISPATCH_COMPONENT_JOINT_MODEL",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceDispatchJoint.lean": "d55ecd17c7a30ec9da99af7462924af77c11f7b2659d0184a793108550d1d0c7",
+    "Solidity/Lowering/V08/SourceDispatch.lean": "4475cac4721e6f062012b202090b9f4b02a274fe02a0ccd445d8c10b77fe14a0",
+    "Solidity/Lowering/V08/SourceDispatchControls.lean": "3958c231bd4be852b67322a2fb3197067c94bab8f73aa7d9221af94b6656a8d1"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceDispatch.free_selection",
+    "Solidity.Lowering.V08.SourceDispatch.outside_selection",
+    "Solidity.Lowering.V08.SourceDispatch.free_body",
+    "Solidity.Lowering.V08.SourceDispatch.outside_body"
+  ],
+  "module_public_targets_accounted_once": [
+    {
+      "target": "Solidity.Lowering.V08.SourceDispatch.free_selection",
+      "lexical_id": "Solidity/Lowering/V08/SourceDispatch.lean:9:free_selection",
+      "signature_sha256": "5ffb608f0ec53e94f6a43c2e3b65886a5fabc3b4282e7fb53379af00565b2bc4",
+      "component": "actual_selection",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceDispatch.outside_selection",
+      "lexical_id": "Solidity/Lowering/V08/SourceDispatch.lean:17:outside_selection",
+      "signature_sha256": "9e5480e1ae43a601cb22bdf84d2770520c6ef6dd4694ccfb1f13c53c9951eb9b",
+      "component": "actual_selection",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceDispatch.free_body",
+      "lexical_id": "Solidity/Lowering/V08/SourceDispatch.lean:26:free_body",
+      "signature_sha256": "df1fc01ac81d21a7375de67efb8cf222cdc33db41408946c8c4dd4d57b1f2f2a",
+      "component": "actual_bodies",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    },
+    {
+      "target": "Solidity.Lowering.V08.SourceDispatch.outside_body",
+      "lexical_id": "Solidity/Lowering/V08/SourceDispatch.lean:31:outside_body",
+      "signature_sha256": "5897539a67224baea500088e249e24fd8c80e2c84147ca08a4d3ae7459043836",
+      "component": "actual_bodies",
+      "status": "COMPONENT_APPLICATION_CHECKED_FIDELITY_PENDING"
+    }
+  ],
+  "joint_premises": [
+    "actual free declaration scope none",
+    "actual caller linearization [C], not empty",
+    "library declaration scope L absent from caller chain",
+    "same supplied program bodies for free/library declarations",
+    "actual same-name caller decoy maps to a separate body"
+  ],
+  "controls": [
+    "decoy_selection_refused retains exact declaration identity, distinguishes scopeL from scopeC.",
+    "decoy_outside_refused shows actual in-chain declaration cannot supply outside=false predicate."
+  ],
+  "operational_links": "ambient_calls reuses existing full Source execution proofs for two independent calls from the same initial state; not new execution cases or sequential composition.",
+  "new_joint_model_families": 1,
+  "new_source_fixtures": 0,
+  "new_body_producers": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceDispatchJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 5.637,
+    "peak_sampled_aggregate_rss": 800448512,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Only free/nonvirtual outside-chain selection laws; general virtual/override dispatch is not proved.",
+    "Manually supplied Source program and bodies, not canonical parser/admission, library deployment/link/layout or target frame preservation.",
+    "No full session/gas/fork/H68 certificate or full original audit acceptance.",
+    "Per-file check is not matched performance acceptance; prior STOPs unchanged."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-dispatch-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "9b03f274f651a98e90f73f589129688104c7f055fc8768d472ca58efe87b3a05"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-dispatch-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-dispatch-joint-20261107/check/results.json",
+      "bytes": 399,
+      "sha256": "1079fa8952c39ec5b46b400102252baddf2340da75edfe892714f16089a72309"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-dispatch-joint-20261107/check/gates/1.log",
+      "bytes": 29391,
+      "sha256": "c9087d7d9e89bb832947db003e003d534d0a2b545aa0c770e60434b82e027eaa"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic verified nonempty-chain premises, four original law applications and exact decoy/operational boundaries; no findings, no reviewer scripts/tests/Lean/server."
+}

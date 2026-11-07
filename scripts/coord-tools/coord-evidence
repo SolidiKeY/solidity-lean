@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# coord-evidence [-m NOTE] PATH...   -- archive lane evidence in the private coordination repo.
+#
+# Evidence (receipts, logs, timings, handoffs, checksum manifests, resource records) never goes in
+# the code branch: this public repository's gate rejects it (scripts/check-evidence-files.sh).
+# This copies each PATH (file or directory) to evidence/<batch>/<slug>/<PATH> in
+# $COORD_EVIDENCE_REPO (default SolidiKeY/solidity-lean-coord, private) and pushes, rebasing and
+# retrying when other lanes push at the same time. An absolute PATH is stored under its basename.
+# It does not touch the lane's working tree, index or branch. Prints the commit and the path to
+# cite in CLOUDVM-RESULT (`evidence`), e.g. "evidence: <commit> evidence/<batch>/<slug>/".
+set -euo pipefail
+note=""
+while getopts m: o; do case $o in m) note=$OPTARG;; *) echo "usage: coord-evidence [-m NOTE] PATH..." >&2; exit 2;; esac; done
+shift $((OPTIND-1))
+[ $# -gt 0 ] || { echo "usage: coord-evidence [-m NOTE] PATH..." >&2; exit 2; }
+repo=${COORD_EVIDENCE_REPO:-https://github.com/SolidiKeY/solidity-lean-coord.git}
+lane=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown); head=$(git rev-parse HEAD 2>/dev/null || echo unknown)
+IFS=/ read -r _ b_batch b_slug _ <<<"$lane/" || true
+batch=${CLOUDVM_BATCH:-${b_batch:-unknown}}; slug=${CLOUDVM_SLUG:-${b_slug:-$(printf '%s' "$lane" | tr -c 'A-Za-z0-9._-' '-')}}
+dest=evidence/$batch/$slug
+max=$((50*1024*1024))  # GitHub rejects files over 100 MB; keep bulk packs on the VM with a sha256
+
+for p in "$@"; do
+  [ -e "$p" ] || { echo "coord-evidence: no such path: $p" >&2; exit 2; }
+  big=$(find "$p" -type f -size +${max}c | head -3)
+  [ -z "$big" ] || { echo "coord-evidence: over 50 MB (keep on the VM, cite path + sha256): $big" >&2; exit 2; }
+done
+
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+GIT_TERMINAL_PROMPT=0 git clone -q --depth 1 "$repo" "$tmp/r"
+for p in "$@"; do
+  case $p in /*) rel=$(basename "$p");; *) rel=${p#./};; esac
+  mkdir -p "$tmp/r/$dest/$(dirname "$rel")"
+  cp -a "$p" "$tmp/r/$dest/$(dirname "$rel")/"
+done
+cd "$tmp/r"
+git add -A "$dest"
+if git diff --cached --quiet; then echo "coord-evidence: nothing new under $dest"; exit 0; fi
+msg="evidence $batch/$slug${note:+: $note}
+
+lane: $lane
+head: $head"
+gc() { git -c user.name="${GIT_AUTHOR_NAME:-coord-evidence}" -c user.email="${GIT_AUTHOR_EMAIL:-coord-evidence@localhost}" "$@"; }
+gc commit -qm "$msg"
+for try in 1 2 3 4 5 6 7 8; do
+  if GIT_TERMINAL_PROMPT=0 git push -q origin HEAD:main 2>/dev/null; then
+    echo "evidence: $(git rev-parse HEAD) $dest/"; exit 0
+  fi
+  sleep $(( try + RANDOM % 4 ))
+  GIT_TERMINAL_PROMPT=0 gc pull -q --rebase --depth 50 origin main
+done
+echo "coord-evidence: push failed 8 times" >&2; exit 1

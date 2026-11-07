@@ -1,0 +1,31 @@
+{
+  "scope": "Archive-backed duplicate cleanup only; no census/proof credit",
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v94/evidence.tar.gz",
+      "bytes": 6681,
+      "sha256": "66e6e831a746700980949bb40fde4e7f930a56824360b967b92b6e51b55e225b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v94/plan.json",
+      "bytes": 4904,
+      "sha256": "35da97f2c51668a2d6e66ad5da52c313c2fe63a9bdd6bc45e1f76948ec455a73"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v94/receipt.json",
+      "bytes": 5112,
+      "sha256": "b6a527475979818a00518ff52bf9ff9568f64c9b5f3f6fdf7da603dc9404404e"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v94/gates.json",
+      "bytes": 2087,
+      "sha256": "cf819d3e1b7fbc36480d86cd6aae66b8b7107e7196d6f2e6f519f9e4dc0bbcbb"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/disk-reclaim-v94/reviews.md",
+      "bytes": 470,
+      "sha256": "07e366bed6e8f2c76f255d68b676e25066b7a325865027eb2d111675883a44c9"
+    }
+  ],
+  "boundary": "Retained original archive/member hashes bind exact restoration. Local byte checks, not coordinator retrieval/semantic acceptance."
+}

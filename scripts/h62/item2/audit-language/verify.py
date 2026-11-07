@@ -11,11 +11,16 @@ p = argparse.ArgumentParser(description=__doc__)
 p.add_argument("--census", type=Path, required=True)
 p.add_argument("--checks", type=Path, required=True)
 p.add_argument("--output", type=Path, required=True)
+p.add_argument("--gate-repair-manifest", type=Path)
 args = p.parse_args()
 root = Path(__file__).resolve().parents[4]
 census = json.loads(args.census.read_text())
 index = json.loads((root / "tests/h62/item2/audit-language/witness-index.json").read_text())
 checks = json.loads(args.checks.read_text())
+revisions = {}
+if args.gate_repair_manifest:
+    from gate_repair import approved_revisions
+    revisions = approved_revisions(args.gate_repair_manifest)
 by_id = {d["id"]: d for d in census["declarations"]}
 assert len(by_id) == len(census["declarations"])
 assert not census["scan_errors"] and not census["unresolved_references"]
@@ -39,7 +44,28 @@ for row in index:
     marker = f"H62_WITNESS {row['witness']} FOR {row['target']}"
     assert marker in log.splitlines(), marker
     assert "sorryAx" not in log
-    # Each imported frozen source is byte-for-byte tied to the census hash.
+    # Authenticate the target's actual importing source too. H82 permits only
+    # the exact received proof postimage when bytes differ from the frozen file.
+    target_import = by_file[source["path"]]
+    assert target_import["exit"] == 0 and target_import["outcome"] == "exit"
+    actual_source = (root / source["path"]).read_bytes()
+    assert hashlib.sha256(actual_source).hexdigest() == target_import["sha256"]
+    if target_import["sha256"] != census["sources"][source["path"]]["sha256"]:
+        from overlay_review import TRUSTED, reconstruct, fidelity, receipt_patch_path
+        from census import git
+        receipts = json.loads((root / "tests/h62/item2/audit-language/received-overlays.json").read_text())
+        candidates = [r for r in receipts if TRUSTED[r["label"]]["path"] == source["path"]]
+        assert len(candidates) == 1
+        receipt = candidates[0]
+        trusted = TRUSTED[receipt["label"]]
+        patch = receipt_patch_path(receipt).read_bytes()
+        assert hashlib.sha256(patch).hexdigest() == trusted["sha256"]
+        frozen_source = git("show", f"{census['base']}:{source['path']}")
+        assert hashlib.sha256(frozen_source).hexdigest() == census["sources"][source["path"]]["sha256"]
+        approved, *_ = reconstruct(patch, frozen_source, source["path"])
+        fidelity(source["path"], frozen_source, approved)
+        assert actual_source == revisions.get(source["path"], approved)
+    # Each independent frozen import remains byte-for-byte tied to the census hash.
     for path in ("Solidity/Language/Features.lean", "Solidity/Language/FeatureInfo.lean",
                  "Solidity/KeySort.lean", "Solidity/Syntax/CheckedExact.lean"):
         original = by_file[path]

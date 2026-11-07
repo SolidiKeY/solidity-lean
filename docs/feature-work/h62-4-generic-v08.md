@@ -340,3 +340,9 @@ optimized; two real CLI unrelated-CWD checks and twelve original scanner tests
 pass. Current integrity audit exits 1 and remains an unmet gate. Known semantic
 STOPs and the scope question remain recorded while independent audit work is
 preserved as a reviewable checkpoint.
+
+### Live execution-consumer diagnostic
+
+The approved live per-file route was run on tracked `IntrinsicWidths.lean` using actual Lean4.24.0, serially under the inherited stricter 300-second bound and retained memory limits. It fails in 1.688 seconds, peak sampled aggregate RSS 810,938,368 bytes, no resource STOP: the five original width-admission headers omit the now-required `mapFree` argument of `STy.implicit`. This is current API drift, not evidence that the original propositions are false. Source bytes and frozen acceptance remain unchanged. Later execution-section info messages do not make the failed file a passing proof.
+
+Existing Q-FROZEN-RECONCILE remains the disposition wait for retaining original obligations alongside current API changes. No statement rewrite is performed. The untracked duplicate `ExecutionTransport.lean` is preserved without registration/import/edit/counting. This live diagnostic is not pinned Lean4.35 migration acceptance; known Hash/Roadmap trust STOPs were not rerun or waived. No execution correspondence, original-instance acceptance or family timing completion is claimed. Exact source, wrapper and failure log hashes are in `tests/h62/item4/generic-v08/live-execution-diagnostic-manifest.json`.

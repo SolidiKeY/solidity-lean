@@ -1,5 +1,0 @@
-{
-  "success": true,
-  "output": "✔ [131/156] Built Solidity.Calculus.Shift:c.o (375ms)\n✔ [132/156] Built Solidity.Syntax.PushSource:c.o (129ms)\n✔ [133/156] Built Solidity.Calculus.LexVariant:c.o (238ms)\n✔ [134/156] Fetched Solidity.Calculus.JoinSequence\n✔ [135/156] Built Solidity.Calculus.SyntaxSize:c.o (701ms)\n✔ [137/156] Built Solidity.Calculus.CallSummary:c.o (1.2s)\n✔ [138/156] Built Solidity.Calculus.JoinSequence:c.o (1.0s)\n✔ [141/156] Built Solidity.Semantics.Ends:c.o (70ms)\n✔ [142/156] Built Solidity.Calculus.Arms:c.o (18s)\n✔ [143/156] Fetched Solidity.Calculus.LexDiamond\n✔ [144/156] Built Solidity.Semantics.NoPanic:c.o (1.8s)\n✔ [146/156] Built Solidity.Calculus.LexDiamond:c.o (216ms)\n✔ [148/156] Built Solidity.Calculus.Blocks:c.o (3.4s)\n✔ [150/156] Built Solidity.Calculus.WkOver:c.o (65ms)\n✔ [152/156] Built Solidity.Semantics.RunWk:c.o (1.2s)\n✔ [153/156] Built Solidity.Semantics.RunFuel:c.o (445ms)\n✔ [154/156] Built RuntimeProbe (1.4s)\n✔ [155/156] Built RuntimeProbe:c.o (1.3s)\n✔ [156/156] Built «control-tuples-probe»:exe (1.0s)\nBuild completed successfully (156 jobs).",
-  "errors": []
-}

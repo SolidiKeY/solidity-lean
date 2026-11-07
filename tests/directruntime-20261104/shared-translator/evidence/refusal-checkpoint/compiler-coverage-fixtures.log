@@ -1,4 +1,0 @@
-solc-ast: tests/directruntime-20261104/shared-translator/YulKinds.ast.json (10562 bytes, hash 0x07b1f1445ea83f6e, solc 0.8.34+commit.80d5c536.Emscripten.clang)
-Owned Yul source fixture generated; legacy throw rejected by pinned compiler.
-{"childMaxRssKiB": 169276, "command": ["node", "tests/directruntime-20261104/shared-translator/compiler-coverage-fixtures.mjs"], "exit": 0, "scopeMemoryPeakBytes": "157134848", "wallSeconds": 1.8946100080029282}
-{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 12254220288, "outerWallSeconds": 24.25345852999817}
