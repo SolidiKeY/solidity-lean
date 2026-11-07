@@ -3220,6 +3220,7 @@ import Solidity.Lowering.P8.CheckedSyntax
 import Solidity.Lowering.P8.ConditionalAssembly
 import Solidity.Lowering.P8.DeclarationGraphAdmission
 import Solidity.Lowering.P8.DeclarationGraphCheck
+import Solidity.Lowering.P8.DeclarationGraphConstraints
 import Solidity.Lowering.P8.DeclarationGraphControls
 import Solidity.Lowering.P8.DispatchCoverage
 import Solidity.Lowering.P8.DispatchCoverageControls
