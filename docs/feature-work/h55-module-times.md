@@ -2313,3 +2313,22 @@ Independent read-only finder and skeptic checked roles, hashes and history
 preservation without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/primitive-arithmetic-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Primitive correspondence observations
+
+`primitive_correspondence_controls.py` records eight previously unreferenced
+primitive correspondence sources with hashes and the primitive-packets document
+hash. Their stated scopes cover checked add, multiply and subtract, unsigned
+division/remainder, checked signed operations and unchecked signed subtraction.
+Source panic bytes and coarse target revert remain distinct. Current invocation,
+inputs, effects, outcomes and verification remain unresolved; these statements
+do not establish full world, session, gas or fetched-EVM adequacy.
+
+At `910590a3bc5f179ed3d9f587e6c360e671f7ff0d`, the refreshed static index
+has 779 candidates, 574 with supplied current references and 205 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in
+`tests/h55/module-times/primitive-correspondence-evidence.sha256`. This
+non-atomic observation does not establish current runtime acceptance.
