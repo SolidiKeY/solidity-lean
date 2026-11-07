@@ -656,3 +656,23 @@ sampled workload peak 811316 KiB. Arithmetic uses propext/Quot.sound; bridge law
 also use existing Classical.choice. No axiom or proof budget was added. Independent
 read-only finder/skeptic found no defect and used no Lean/server/build/edit.
 Full C4/H68, original fidelity and historical timing STOPs remain open.
+
+### Bitwise AND/OR/XOR correspondence
+
+`BitwiseCorrespondence.lean` adds three laws for all 32 unsigned byte widths and
+all supported AND/OR/XOR operand pairs. It proves the actual populated fixture's
+cell reads at 5 and 4, constructs its full initial physical StateRepr, and derives
+actual Source evaluation plus public `compileVal` selected-code execution with
+every saved target stack. Source environment/globals/frame/state remain general;
+its context is exactly two operands, without an arbitrary older local tail.
+The full fixture uses its original context/base zero; the public two-local code
+uses base four. The cell equations connect execution, and no intrinsic context
+projection or `CompiledVal.Input` adapter is asserted. Exact machine results
+preserve all non-stack fields. Reject-all is refuted by the actual execution law.
+
+The three-law kernel check passes in 1.078 seconds, sampled workload peak
+796140 KiB, using existing standard axioms. Independent read-only finder and
+skeptic found no defect and used no Lean/server/build/edit. These additive laws
+do not migrate the original case census or establish arbitrary heap/world,
+session/gas or fetched-EVM adequacy. Original fidelity failures, full C4/H68
+obligations and prior timing STOPs remain open.
