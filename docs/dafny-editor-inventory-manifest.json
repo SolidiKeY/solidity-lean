@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
   "decision": "H44 coordinator follow-up2026-11-06: full inventory is bulk; retain outside git with exact checksums",
-  "sourceHead": "d7c9f22418bfe7d09baaea96737ed0b4021a5f04",
+  "sourceHead": "d612e618f9c341c4ca2e2712b4f2881a2c6c1ac7",
   "repository": "/workspace/solidity-lean",
   "fileCount": 1,
-  "uncompressedBytes": 718619,
+  "uncompressedBytes": 720694,
   "rowCount": 489,
   "frozenRowCount": 270,
   "frozenSha256": "d2f7e40e0c4cd370d09f9feb04872ea81963524b48be8e46c9b98dba26f945f1",
   "archive": {
-    "path": "/workspace/dafny-parity-upstream-20261107/inventory/bulk.tar.gz",
-    "bytes": 43438,
-    "sha256": "17267fd76486437ad3d9343bc0dd93d8c589990c58ad45e38e16add74150e507"
+    "path": "/workspace/dafny-parity-candidate-hook-20261107/inventory/bulk.tar.gz",
+    "bytes": 43988,
+    "sha256": "43adf24e473518a47154060b582efd9e30308e760fce8505ea40251b34d47432"
   },
   "index": {
-    "path": "/workspace/dafny-parity-upstream-20261107/inventory/files.json",
+    "path": "/workspace/dafny-parity-candidate-hook-20261107/inventory/files.json",
     "bytes": 186,
-    "sha256": "3d0159e801d06597ee26a4d35472539e2ef42a07b0acd9819a8f14aa9a2d85af"
+    "sha256": "6ba448f0100c28c4422c7a89f0315c934fede3f021d637defa08c154c87250f6"
   },
   "rawInventory": {
-    "path": "/workspace/dafny-parity-upstream-20261107/inventory/inventory.json",
-    "bytes": 718619,
-    "sha256": "f73c455c59204ef5a80b669ebe984f234b01083c13d6c4339e2d629ae65a8619"
+    "path": "/workspace/dafny-parity-candidate-hook-20261107/inventory/inventory.json",
+    "bytes": 720694,
+    "sha256": "cb8e06ee587200538819ef29254cddece05330485cde78e8596bd8c28974e35f"
   },
   "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
   "relocation": "Provision both bulk.tar.gz and files.json together, then pass --directory DIR; CI uses DAFNY_PARITY_INVENTORY_DIR. Existing evidence bundle is separately required.",
@@ -31,6 +31,8 @@
     "docs/dafny-direct-retention-evidence-manifest.json",
     "docs/dafny-hover-proof-evidence-manifest.json",
     "docs/dafny-child-closure-evidence-manifest.json",
-    "docs/dafny-canonical-slot-evidence-manifest.json"
+    "docs/dafny-canonical-slot-evidence-manifest.json",
+    "docs/dafny-native-hover-evidence-manifest.json",
+    "docs/dafny-candidate-hook-evidence-manifest.json"
   ]
 }

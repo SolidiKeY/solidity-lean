@@ -1,0 +1,10 @@
+{
+ "tests/h62/item1/evm-lemmas/LocationFixture.lean:Solidity.Storage.Loc.data_data_ne_self": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item1/evm-lemmas/LocationFixture.lean:Solidity.Storage.Loc.data_ne_self": [
+  "Quot.sound",
+  "propext"
+ ]
+}
