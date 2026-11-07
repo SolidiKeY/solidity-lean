@@ -167,8 +167,8 @@ old definitional-shape and lookup rewrite issues. Final authorized review eviden
 is separate from the earlier blocked-handoff review; no review waives a gate.
 
 Export current committed original patch, verified bundle, handoff and checksum
-manifest from this VM/branch. Historical evidence.sha256 remains intact; new bulk
-outputs are off git and listed in evidence-authorized.sha256. Coordinator owns
+manifest from this VM/branch. Historical manifests and all non-Lean metadata are archived off git under H44;
+`tests/h62/item6/migrate-precompiles/bulk.sha256` authenticates the complete archive. Coordinator owns
 fresh-thread continuation; do not create/reset a goal or replacement thread.
 After root producer repair: apply only an authorized dependency input, rerun clean
 comparable new build and full affected/run-lean.sh validation with pinned toolchain,
@@ -211,3 +211,23 @@ objective, original queues, exact scope registry, open-work ledger and pause-too
 limitation are committed under `tests/h62/item6/migrate-precompiles/retirement/`.
 No H71 push permission is available; no push performed. Goal is not complete;
 exposed tool cannot set PAUSED. No automatic implementation continuation authorized.
+
+## H44 packaging split
+
+All formerly tracked non-Lean metadata, handoff JSON/text, original assignment/scope
+files and long per-file evidence manifests are preserved in the authenticated
+archive listed by `tests/h62/item6/migrate-precompiles/bulk.sha256`. The archive
+contains `tracked/<original repository path>` and actual `evidence/<relative path>`
+bytes plus `referenced/<absolute path without leading slash>` for additional
+manifest payloads; earlier metadata paths mentioned above refer to that archive, not current
+tracked files. The deterministic generator is `archive-bulk.py` in this lane’s
+scripts directory, invoked with metadata revision
+`3b7be8c4a35d056444b278c589acb88821fe83ca` and the preserved VM evidence directory.
+All Lean, existing scripts, theorems, gates and budgets are unchanged by the split.
+The pre-existing master merge was preserved; no reset/history rewrite or push.
+Retirement remains in force; this is packaging only, not implementation resumption.
+
+Independent read-only finder and skeptic verified all 500 archive members and
+all referenced hashes: 22 removed Git metadata files, 469 evidence files and nine
+additional referenced artifacts. Both found no proof, gate, budget or existing
+script change. No Lean rerun was necessary or performed for this packaging split.
