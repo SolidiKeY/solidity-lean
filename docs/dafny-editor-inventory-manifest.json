@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
   "decision": "H44 coordinator follow-up2026-11-06: full inventory is bulk; retain outside git with exact checksums",
-  "sourceHead": "e0ae18e3cd48fb9047079a45676453443953f304",
+  "sourceHead": "26010a9ce1ddebbea8ea1f8f86704e14428d72e1",
   "repository": "/workspace/solidity-lean",
   "fileCount": 1,
-  "uncompressedBytes": 730481,
+  "uncompressedBytes": 731147,
   "rowCount": 489,
   "frozenRowCount": 270,
   "frozenSha256": "d2f7e40e0c4cd370d09f9feb04872ea81963524b48be8e46c9b98dba26f945f1",
   "archive": {
-    "path": "/workspace/dafny-upstream-output-evidence-20261107/inventory/bulk.tar.gz",
-    "bytes": 46793,
-    "sha256": "a588ef7b32ea31d4e6d41fb2eacae186e4ac548e7473e60e89db885184c3ed4a"
+    "path": "/workspace/dafny-command-output-evidence-20261107/inventory/bulk.tar.gz",
+    "bytes": 46964,
+    "sha256": "a04baded890ab9d6cadbbc7e1515a6083fba20e3f56772ba893bfc881e7cadf8"
   },
   "index": {
-    "path": "/workspace/dafny-upstream-output-evidence-20261107/inventory/files.json",
+    "path": "/workspace/dafny-command-output-evidence-20261107/inventory/files.json",
     "bytes": 186,
-    "sha256": "cf4aefa8ede2356ded09f0e40f8d9779b0f88d330bfd580de73866834d38683f"
+    "sha256": "dc73e9aca769a956e2d3aa733cb3d4f8ecac3d4f2bf7522f13250388688ef2d8"
   },
   "rawInventory": {
-    "path": "/workspace/dafny-upstream-output-evidence-20261107/inventory/inventory.json",
-    "bytes": 730481,
-    "sha256": "512d54729d50fca7d6be6a931949e31b7b6c4a139c3add47c8bc9cfabd579df9"
+    "path": "/workspace/dafny-command-output-evidence-20261107/inventory/inventory.json",
+    "bytes": 731147,
+    "sha256": "cb95baf4e420826a85b5012076bf43b06560c11a991892642ad45669018e98f5"
   },
   "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
   "relocation": "Provision both bulk.tar.gz and files.json together, then pass --directory DIR; CI uses DAFNY_PARITY_INVENTORY_DIR. Existing evidence bundle is separately required.",
@@ -42,6 +42,7 @@
     "docs/dafny-output-preparation-evidence-manifest.json",
     "docs/dafny-f6-refusals-evidence-manifest.json",
     "docs/dafny-output-settings-evidence-manifest.json",
-    "docs/dafny-upstream-output-evidence-manifest.json"
+    "docs/dafny-upstream-output-evidence-manifest.json",
+    "docs/dafny-command-output-evidence-manifest.json"
   ]
 }
