@@ -98,6 +98,40 @@ def declarationGraphProducer (producer : P8.P8a.Producer S reference origins roo
     P8.DeclarationGraphAdmission.Producer S reference origins roots :=
   ⟨producer, admission producer env⟩
 
+/-- The empty Source environment (no declarations). -/
+def emptyEnv : Source.Env := ⟨[]⟩
+
+theorem empty_produces : ∀ loc, (produce "h24-empty" emptyEnv loc).isSome = true := by
+  intro loc
+  cases loc <;> decide
+
+/-- The empty environment is admitted: certificates at every location by the
+actual producer, and refusal (it declares no struct). -/
+theorem empty_admitted : EnvAdmission emptyEnv :=
+  ⟨fun loc => graph_of_produce "h24-empty" emptyEnv loc (empty_produces loc),
+   SourceRefusal.refuses_of_decls emptyEnv (by decide)⟩
+
+/-- **The H24 field for any producer whose accepted Sources all live in the
+empty environment.** The P8 model witness `P8.PlanWitness.planProducer`
+(branch `cloud/move5-20261106/p8-producer`, not yet on master) is such a
+producer: its origins map every admitted input to `sourceOf`, whose
+environment is `emptyEnv` by definition, so its instance is
+`admissionOfEmpty planProducer (fun _ _ _ _ => rfl)`. -/
+def admissionOfEmpty (producer : P8.P8a.Producer S reference origins roots)
+    (empty : ∀ (i : S.Input) (r : S.Resolved) (h : producer.admission.frontend i = some r)
+      (art : Roadmap.Artifact), (P8Bindings.acceptedSource producer i r h art).1 = emptyEnv) :
+    Admission producer :=
+  admission producer fun i r h art => by
+    rw [empty i r h art]
+    exact empty_admitted
+
+/-- The additive P8 record for such a producer. -/
+def declarationGraphProducerOfEmpty (producer : P8.P8a.Producer S reference origins roots)
+    (empty : ∀ (i : S.Input) (r : S.Resolved) (h : producer.admission.frontend i = some r)
+      (art : Roadmap.Artifact), (P8Bindings.acceptedSource producer i r h art).1 = emptyEnv) :
+    P8.DeclarationGraphAdmission.Producer S reference origins roots :=
+  ⟨producer, admissionOfEmpty producer empty⟩
+
 end Producer
 
 /-! ## Controls -/
@@ -178,5 +212,13 @@ theorem mixed_graphs : ∀ loc : Source.DataLoc,
 #guard_msgs (whitespace := lax) in #print axioms mixed_memory_premises
 /-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_graph' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms mixed_memory_graph
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.empty_produces' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms empty_produces
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.empty_admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms empty_admitted
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.admissionOfEmpty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms admissionOfEmpty
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.declarationGraphProducerOfEmpty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms declarationGraphProducerOfEmpty
 
 end Solidity.Lowering.V07.GraphAdmissionAssembly
