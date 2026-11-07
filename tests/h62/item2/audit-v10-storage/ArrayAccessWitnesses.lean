@@ -379,8 +379,7 @@ theorem colliding_hash_refuses :
 #guard_msgs (whitespace := lax) in #print axioms write_nonalias
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms write_transport
-/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_header' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_header_covered' does not depend on any axioms -/
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_header_covered' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms write_header_covered
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_child_covered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms write_child_covered
