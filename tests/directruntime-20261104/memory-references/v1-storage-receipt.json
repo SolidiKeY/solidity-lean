@@ -1,0 +1,118 @@
+{
+  "checkedParent": "5414256fdf7b78e8debe5e571c7af06ee55a5563",
+  "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "producerHead": "9992f69062900db2c06ed45f5cd36f7058aed9ff",
+  "source": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/V1StorageCases.lean",
+    "bytes": 2756,
+    "sha256": "a2cb12e83e383a26e14ff71f7a9e2167ee6109630db69274d2fb169b632a5c10"
+  },
+  "buildFailedAttempt": {
+    "command": [
+      "lake",
+      "build",
+      "V1StorageCases"
+    ],
+    "exit": 1,
+    "wallSeconds": 286.184584183,
+    "peakAggregateRssKiB": 1470556,
+    "headroomGuardStopped": false,
+    "memoryMax": 12884901888,
+    "memorySwapMax": 0,
+    "leanThreads": 1
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "V1StorageCases"
+    ],
+    "exit": 0,
+    "wallSeconds": 3.217277551000052,
+    "peakAggregateRssKiB": 1191368,
+    "headroomGuardStopped": false,
+    "memoryMax": 12884901888,
+    "memorySwapMax": 0,
+    "leanThreads": 1
+  },
+  "controls": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/directruntime-20261104/memory-references/V1StorageCases.lean"
+    ],
+    "exit": 0,
+    "wallSeconds": 4.215813143999981,
+    "peakAggregateRssKiB": 1187348,
+    "headroomGuardStopped": false,
+    "memoryMax": 12884901888,
+    "memorySwapMax": 0,
+    "leanThreads": 1
+  },
+  "toolchain": {
+    "lean": "4.24.0",
+    "leanCommit": "797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+    "lake": "5.0.0-src+797c613",
+    "observation": "Actual bounded invocations. Initial configured-wrapper lake --version rejected because Lake recognizes --version only as sole argument; absolute real Lake --version then succeeded."
+  },
+  "observedCases": 4,
+  "candidates": 0,
+  "retainedCertificates": 0,
+  "axioms": {
+    "newImportTheorems": 8,
+    "empty": 4,
+    "propextOnly": 4,
+    "importedMetadataLemmas": 2,
+    "metadataLemmaAxioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "newAxioms": 0,
+    "newSorry": 0
+  },
+  "reviews": "Independent read-only finder and skeptic: corrected probe, all260 existing input archive members, four fixture pins, eight generated theorem audits and both imported metadata lemma audits agree; no remaining concrete findings. Neither used Lean/server/build/browser. Initial harness namespace failure retained; explicit scoped obligations added before corrected execution. Final independent packaging reviews verified archive/receipt/cache/input hashes with no findings.",
+  "evidence": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/v1-storage/checkpoint-evidence.tar.gz",
+    "bytes": 34794,
+    "sha256": "644209f6c98a8126d3a952e78ffe6bd84ad31c495bd6beab65d6da486a20dbda"
+  },
+  "inputs": {
+    "index": {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/v1-storage/module-times-inputs.json",
+      "bytes": 98016,
+      "sha256": "fc02eae80c1d1ef6b505d55656a83acec0e59ddb6484d8eac0758e170f900708"
+    },
+    "archive": {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/v1-storage/module-times-existing-inputs.tar.gz",
+      "bytes": 92127,
+      "sha256": "f506465937cca58f3e85a84b31cee095af4d8a7a17010a5a96553fdcc2b4611f"
+    },
+    "files": 260
+  },
+  "cache": {
+    "manifest": {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/v1-storage/owned-development-cache.json",
+      "bytes": 1617,
+      "sha256": "b69529d8146a37fedecfcbf813408e271de5e6cf6f9be7249b100eec18f54158"
+    },
+    "archive": {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/v1-storage/owned-development-cache.tar.gz",
+      "bytes": 103464,
+      "sha256": "fd1e4ff00c271a0e5701f7e48ddcb4bda3de0e791a00d191f178c3dd8bc3aa14"
+    },
+    "delivery": "coordinator-pending; development-only partial cache"
+  },
+  "boundary": "Capability probe passes, semantic certification remains blocked on authenticated dafny-parity producer. No ordinary runtime, browser, timing STOP, full gate or source/compiler preservation rerun or pass claimed. Historical lost binary/cache remains UNVERIFIABLE. H44 bulk remains off Git.",
+  "documentationGate": {
+    "command": "bash scripts/check-doc-paths.sh",
+    "exit": 0,
+    "decisiveOutput": "OK: every backticked *.lean reference resolves. 143 ambiguous references resolve; none is unique.",
+    "log": {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/v1-storage/doc-paths.log",
+      "bytes": 14748,
+      "sha256": "568624ba81161885e10e17fa2a76065fc863f5d0c858eef1d40fe463cb08ccb5"
+    }
+  },
+  "evidenceMembers": 15
+}

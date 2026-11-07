@@ -1,0 +1,31 @@
+{
+  "to_lane": "solidity-h55-terra-20261106/module-times",
+  "checkedParent": "5414256fdf7b78e8debe5e571c7af06ee55a5563",
+  "consumerHead": "55d74692ca65d75a79a5877bb7a3809271eac529",
+  "request": "Deliver exact existing retained inputs. Verify this index and archive before extraction; no fixture regeneration, acceptance, timing or module check is inferred. Consumer documentation was inspected at exact55d74692 head through Git despite absent consumer checkout.",
+  "inputs": [
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/manifest.json",
+      "bytes": 47800,
+      "sha256": "e492ab283a297353bc2f6f971c3fd1df49b4244d85e81a0252f95785f78ddd35"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/evidence/admission-inputs.json",
+      "bytes": 43743,
+      "sha256": "dd561f7231fbfcc00fa6ace1d1bbc75f595176b7db1c5464c8e94eb3482ee08d"
+    }
+  ],
+  "index": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/v1-storage/module-times-inputs.json",
+    "bytes": 98016,
+    "sha256": "fc02eae80c1d1ef6b505d55656a83acec0e59ddb6484d8eac0758e170f900708"
+  },
+  "archive": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/v1-storage/module-times-existing-inputs.tar.gz",
+    "bytes": 92127,
+    "sha256": "f506465937cca58f3e85a84b31cee095af4d8a7a17010a5a96553fdcc2b4611f"
+  },
+  "files": 260,
+  "uncompressedBytes": 2823957,
+  "coverage": "All106 indexed normalized Admission inputs, their106 raw provenance files, both explicit input indexes, generator, Admission/KernelControls/KernelMatrix and42 generator source bodies. Admission writes model-results JSON; generator overwrites KernelMatrix. Recheck source/toolchain hashes before execution."
+}
