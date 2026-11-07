@@ -1,5 +1,10 @@
 # H62 item 2: audit-theories — continuing audit
 
+LATEST INVENTORY:28 original premise-role records reviewed,472 remaining.
+Three reviewed work items complete in this continuation; fresh-thread handoff
+to coordinator for the SAME original VM/branch/unfinished goal. No new/reset
+goal, completion transition or inferred retirement.
+
 LATEST CHECKPOINT: Payable6 joint packets,1 ordinary impossible-input blocker
 and3 successful model API controls. All126 helper proof receipts now match
 current dependencies;87 joint certificate names,75 full unchanged-file subset
@@ -918,3 +923,44 @@ wait; no automatic H69 classification, interface repair, root registration,
 push/master merge or RUNTIME_GATE_PASS. Finder/skeptic independently passed all126 receipts,500 exact original records,
 1,378 unique pending names and all recorded gate exits; no residual findings,
 edits, Lean/server/build jobs. Final reviews are in reviews.json off Git.
+
+## Inventory checkpoint: all eleven Closer/Payable telescopes
+
+Fetched origin/master before starting and inspected its log/current sources:
+05d2c25872c4bb963a0ca7f605905e6e1e99eedc has no new relevant producer changes
+or duplicate audit item beyond the already consumed7683091e7 delivery base.
+No unrequested rebase or producer edit. mutability_input_roles.py enumerates
+all11 original frozen declarations, matching every ordered elaborated binder
+and Prop flag, including inherited contracts/types, hygienic DecidableEq K,
+and state/formula/output binders after earlier premises. It distinguishes
+global configuration/operation-instance data from selected-program checks,
+selected-state modal facts, actual-success equations and selected-run noPanic.
+Neither inhabited System nor equality instance supplies admission/totality.
+
+Review corrected refuses.hv to nonzero-INTEGER, not positive value: v:Int may
+be negative. Word-valued positive-transaction tags remain justified. The other
+finding was an initially unguarded cumulative count. The final generator now
+reads the companion17 Bridge/Outcome report, verifies its original snapshot
+hash/base and all17 exact names, recomputes EVERY role record/current proof
+certificate, checks full frozen source bytes and disjointness, and derives28
+cumulative originals/472 remaining. Both generators were rerun against current
+checked dependencies. It adds no joint witness or generated disposition;10
+newly inventoried packets are already witnessed,1 static packet remains an
+ordinary pending impossibility. No H69 promotion or statement change.
+
+Final-role-gates.json records both positive generators,13 Python tests and
+clean diff check. Duplicate-prior-name and altered-prior-certificate controls
+both exit1 without producing an accepted inventory. Finder and skeptic closed
+both findings and independently validated all28 records/current certificates,
+original signatures, disjoint accounting and refusal outputs; no residual
+findings and no edits/Lean/server/build by reviewers. Bulk reports/reviews are
+/workspace/h62-audit-theories-mutability-roles-20261107-evidence.
+
+Three reviewed items in this continuation are now complete: Closer4 joint
+packets; Payable6 feasible packets/3positive controls/1ordinary blocker; and11
+additional exact premise-role records. Follow the original3–5-item fresh-thread
+handoff rule: coordinator continues this SAME original VM,branch and unfinished
+persistent goal. Do not create/reset/complete a goal or infer retirement/pause.
+All four full assignment checkpoints remain partial. Current queue is saved
+in scripts/h62/item2/audit-theories/handoff/CURRENT-QUEUE-20261107.md alongside
+the complete original prompt,original queues and exact frozen scope manifest.
