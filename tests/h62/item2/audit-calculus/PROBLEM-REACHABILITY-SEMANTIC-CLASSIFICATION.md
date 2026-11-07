@@ -1,0 +1,15 @@
+# Problem well-formedness and typed reachability roles
+
+Guarded regression: restricted typed-interpreter reachability and a satisfiable initial wt premise must not become arbitrary function success, compiler correctness or physical deployment reachability.
+
+Fetched/adopted master 3c2734000413fb142b186e93387306bbb01fd181, preserving prior head at refs/archive/h28-before-rebase-3f42202a. Complete frozen-selected Problem source and all6 named signatures match frozen/current bytes. Reachability is hash-bound with only its definition inspected, adding no role credit. Prior592 rows and all owners unchanged. All5283 candidates accounted:598 reviewed/4685 pending,owners3746 confirmed/1537 unresolved; generated declarations separate.
+
+holds_wt is an equivalence with the storage test, not unconditional wellformedness. Reachable means an actual successful typed program from State.init whose final storage is exactly the supplied st. Forward shape/wt theorems retain that certificate without adding Fits. Both shape/wt equivalences retain actual st.Fits; no unrestricted all-storage reachability is inferred. These model programs need not be a particular source function or physical deployment.
+
+initStorage_wt uses the original explicit nil-program witness and proves only the initial state's wt premise. It supplies neither arbitrary function/constructor validity nor a new simultaneous audit witness. Existing theorem proofs are not freshly rerun kernel evidence here.
+
+Obligation and constructor builders, parameter binding, deployment update, recognition/printing and refusal paths were read as definitions, adding no theorem credit. No constructor, skip, specification conflicts, reference parameters and elaboration errors remain refusals. Parameter-width and dynamic-array-capacity model/solc differences remain; formal diamond semantics accepts success OR exhaustion and must not be recast as normal termination from surrounding prose. No premises, exclusions or budgets are changed.
+
+Bulk source bindings, static theorem/builder rosters, reviews and measured gates remain off Git at /workspace/h62-successor-evidence/problem-reachability-roles-v48 and /workspace/h62-successor-bulk/problem-reachability-roles-v48, bound by small path/size/hash manifest. Zero fresh joint witnesses, Lean/axiom/kernel/replay/runtime/cache acceptance. Whole assignment/four audit checkpoints remain unfinished. No source/compiler/physical/world/gas/fork adequacy follows. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw compatibility/Context Classical.choice waits and timing/reserve STOPs remain. No statement/dependent-definition/budget/axiom/exclusion/toolchain edits. Historical unavailable bytes remain UNVERIFIABLE.
+
+Documentation gate PASS exit0 after adopted master repaired the other-lane synthetic fixture references; exact current fixture bytes/master identity archived. No local fixture/scanner edit; historical sealed failures retained. Accounting and89controls pass; complete acceptance remains FAIL exit1.

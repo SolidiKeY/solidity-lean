@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/formula-logic-roles-v47/semantic-roles-reviewed.json",
-    "bytes": 1574781,
-    "sha256": "efd2388f5795c905ad82f9d1d923a672d01c447133dbde7782af4e5590131ae2"
+    "path": "/workspace/h62-successor-bulk/problem-reachability-roles-v48/semantic-roles-reviewed.json",
+    "bytes": 1589923,
+    "sha256": "98ebdb294a2b309dbcd5e3b8e8df3ac6ee6b45ded08c201f5b389f5918a1b87a"
   }
 }
