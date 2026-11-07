@@ -893,6 +893,11 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ForContinueCompiler.lean`, `Backend/StructuredFlow/ForContinueCompilerControls.lean` | Actual mapped for/continue/post to existing loop-compiler join with physical observations and negative controls ([scope](../feature-work/roadmap-g36-for-continue-compiler.md)). |
 | `Backend/StructuredFlow/ForReturnCompiler.lean`, `Backend/StructuredFlow/ForReturnCompilerControls.lean` | Actual for-loop Source outcome/captured-flag compiler connection, full physical snapshots and capture/base/outcome negatives ([scope](../feature-work/roadmap-g36-for-return-compiler.md)). |
 | `Backend/StructuredFlow/ForBreakCompiler.lean`, `Backend/StructuredFlow/ForBreakCompilerControls.lean` | Actual mapped for-initializer/break to scoped-prefix compilation, exact exit fragment, full snapshots and initializer/base/post negatives ([scope](../feature-work/roadmap-g36-for-break-compiler.md)). |
+| `Lowering/P9/BoundRecognizer.lean` | Executable sound recognizers (`readyB`, `boundB`, fuelled `finiteDefaultB`) and `catalogueB`, which implies `BoundMemoryCatalogue` from the actual dispatch target and body; `OpsOK` from elaboration. |
+| `Lowering/P9/BoundRecognizerControls.lean` | `catalogueB` replaces two hand-built catalogue proofs on elaborated units; refuses zero default fuel and an undeclared function. |
+
+| `Lowering/P9/DefaultRecognizerCompleteness.lean` | Monotonic and existential fuel completeness for the finite-default component only; common fuel for finite lists. |
+| `Lowering/P9/DefaultRecognizerControls.lean` | Nested fixed-array and actual struct-layout acceptance, insufficient-fuel controls, larger/shared fuel. |
 
 ### P8 Producer merge (H57, H60)
 
