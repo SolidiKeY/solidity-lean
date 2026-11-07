@@ -1,8 +1,16 @@
 # H62 item 4: generic PrimitivePackets
 
+This document retains historical checkpoint narratives. Portable path variables
+refer to the corresponding authenticated receipt: `TASK_REPO` is the existing
+checkout, `PACKET_EVIDENCE` the historical packet evidence root, `COORD_INPUTS`
+the delivered coordinator inputs, and `PAIR_EVIDENCE`/`REBIND_EVIDENCE` the
+relevant off-Git diagnostic roots. Resolve them from matching manifests before
+replay. A variable reference does not assert that a historical copy remains
+available; deleted historical artifacts are still unavailable.
+
 Owner: `solidity-h62-4-20261106/generic-primitive-packets`. Branch:
 `codex/solidity-h62-4-20261106/generic-primitive-packets`.
-Repository: `/workspace/solidity-lean`.
+Repository: `${TASK_REPO}`.
 Pinned base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The clean older `work` checkout was preserved;
 `git fetch origin master` obtained the base and `git merge-base --is-ancestor
 c6f550e281a7e5affa9a99bc2cdaed556dec00e4 origin/master` exited 0. Published master at inspection:
@@ -17,7 +25,7 @@ No push, merge, PR, deployment, generated-root, module-map, or axiom-pin writes.
 476 declarations: 216 theorems, 204 definitions, 53 abbreviations, 3 examples.
 All original source files remain byte-identical to the pinned base. Complete
 signatures, declaration-region hashes, namespace identities and line numbers
-are in `/workspace/h62-generic-primitive-packets-evidence/census.json` (off git under H44). The committed manifest pins
+are in `${PACKET_EVIDENCE}/census.json` (off git under H44). The committed manifest pins
 its SHA256 and all 82 original-file SHA256 values. Anonymous examples retain
 file/line identities. Hashes describe source bytes, not elaborated Lean terms;
 full-file hashes also freeze imports, ambient namespaces and proof options.
@@ -58,8 +66,8 @@ five. Yul Raw/vector generation remains H55-owned and is not duplicated.
 Reproduction (from repository root; Python standard library only):
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/census.py --output /workspace/h62-generic-primitive-packets-evidence/census.json
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/accept.py /workspace/h62-generic-primitive-packets-evidence/census.json
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/census.py --output "${PACKET_EVIDENCE}/census.json"
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/accept.py "${PACKET_EVIDENCE}/census.json"
 ```
 
 Both exited 0. Decisive outputs: `FROZEN_SOURCE_INVENTORY_PASS` and
@@ -70,19 +78,19 @@ not a Lean semantic proof. It checks refusal with Python optimization enabled.
 Finder and skeptic independently reviewed the corpus read-only, neither using
 a Lean server or making fixes. They found six signatures truncated at type-level
 let initializers and assert-based gates disabled by Python optimization.
-Both were fixed; both re-reviews passed. Evidence: `/workspace/h62-generic-primitive-packets-evidence/reviews-census.txt`.
+Both were fixed; both re-reviews passed. Evidence: `${PACKET_EVIDENCE}/reviews-census.txt`.
 
 ## Runtime and current blockers
 
-Coordinator inputs in `/workspace/h62-coordinator-inputs` match all five hashes
+Coordinator inputs in `${COORD_INPUTS}` match all five hashes
 in sha256.json. The official v4.35.0 linux archive matches
 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
 Lean: `4.35.0`, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, Release.
 Lake: `5.0.0-src+eb6cafb`. No v4.24 artifacts are used for migration checks.
-Version evidence: `/workspace/h62-generic-primitive-packets-evidence/keysort.log` (initial timing executable was absent).
+Version evidence: `${PACKET_EVIDENCE}/keysort.log` (initial timing executable was absent).
 The corrected check uses Bash `time -p`: `LEAN_NUM_THREADS=1 lean -j1
---tstack=131072 -o /workspace/h62-generic-primitive-packets-evidence/build/Solidity/KeySort.olean Solidity/KeySort.lean`.
-Exit 0, wall 1.16 s; `/workspace/h62-generic-primitive-packets-evidence/keysort-check.log`. AST check also passed, 6.04 s,
+--tstack=131072 -o "${PACKET_EVIDENCE}/build/Solidity/KeySort.olean" Solidity/KeySort.lean`.
+Exit 0, wall 1.16 s; `${PACKET_EVIDENCE}/keysort-check.log`. AST check also passed, 6.04 s,
 with deprecation warnings. This is a prerequisite result, not a full runtime gate.
 VM cgroup memory cap: 16 GiB; no active swap. Initial checks used a 12 GiB
 address-space limit and host-only headroom. Independent review identified that
@@ -96,8 +104,8 @@ function equality), :660 and :680 (omega), followed by axiom-message guard
 failures caused by unsolved proofs. That source was not modified. This is not
 a source sorry insertion. Owner per snapshot:
 `solidity-h62-6-20261106/migrate-hash` (isolated migration overlay); proving-owner
-ownership remains intact. Logs: `/workspace/h62-generic-primitive-packets-evidence/dependency-results.json` and
-`/workspace/h62-generic-primitive-packets-evidence/dependency-logs/Solidity.Hash.CollisionBound.log`. Exit 1.
+ownership remains intact. Logs: `${PACKET_EVIDENCE}/dependency-results.json` and
+`${PACKET_EVIDENCE}/dependency-logs/Solidity.Hash.CollisionBound.log`. Exit 1.
 No dependency failure is accepted as proof or axiom evidence.
 
 **B-OWNER-RELAY**: Existing family originals are read-only. H71 now agrees
@@ -143,7 +151,7 @@ frame and exact/nontruncated/nonempty panic bytes. The local arithmetic
 Final pinned-v4.35 checks, with cgroup-aware 8 GiB cap and explicit `-j1`:
 KeySort exit 0, 1.118 s; SubFixtures exit 0, 0.323 s, no warnings.
 Commands/caps/exits are in
-`/workspace/h62-generic-primitive-packets-evidence/final-bounded-checks.json`;
+`${PACKET_EVIDENCE}/final-bounded-checks.json`;
 proof/axiom output is in `subfixtures-final.log`. These are isolated check times,
 not migration speed measurements. Full runtime/affected validation is pending.
 
@@ -163,7 +171,7 @@ Tooling under `scripts/h62/item4/generic-primitive-packets/`:
   exact original operand bindings. The final invocation exited 0.
 
 After guard repairs, `check.py --evidence
-/workspace/h62-generic-primitive-packets-evidence
+"${PACKET_EVIDENCE}"
 Solidity.Backend.PrimitivePackets.CheckedSub.Controls` again exited 1 at the
 same Hash prerequisite under the 8 GiB cap. Source.Syntax/Const/Types passed;
 Hash.CollisionBound failed at 407/660/680. `dependency-results.json` records
@@ -179,7 +187,7 @@ comparison. No before/after performance conclusion is supported.
 
 Independent finder/skeptic backfill reviews passed after all confirmed fixes;
 neither used a Lean server or made edits. Detailed results:
-`/workspace/h62-generic-primitive-packets-evidence/reviews-backfill.txt`.
+`${PACKET_EVIDENCE}/reviews-backfill.txt`.
 
 ## Resumption handoff
 
@@ -205,7 +213,7 @@ conditions and stop above 10 percent slowdown. Obtain finder/skeptic reviews
 for each remaining checkpoint. No required pending gate may be marked pass.
 
 External final handoff, original patch, checksum manifest and evidence archive
-are under `/workspace/h62-generic-primitive-packets-evidence/`. Their exact head
+are under `${PACKET_EVIDENCE}/`. Their exact head
 and hashes are recorded after the final commit in `handoff.md`, `result.json`
 and `SHA256SUMS`. Large raw inventory, logs and distribution archive stay off git.
 
@@ -255,9 +263,9 @@ supply the still-missing full affected-scope timing or semantic correspondence.
 Deterministic reproduction, with a fresh staging destination and writer lock:
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/stage_hash_overlay.py /workspace/h62-generic-primitive-packets-evidence/hash-overlay/fresh-source
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/accept_hash_overlay.py /workspace/h62-generic-primitive-packets-evidence/hash-overlay/fresh-source /workspace/h62-generic-primitive-packets-evidence/hash-overlay
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/check.py --evidence /workspace/h62-generic-primitive-packets-evidence/hash-overlay/run --source-overlay /workspace/h62-generic-primitive-packets-evidence/hash-overlay/fresh-source Solidity.Hash.Adaptive Solidity.Backend.PrimitivePackets.CheckedSub.Controls
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/stage_hash_overlay.py "${PACKET_EVIDENCE}/hash-overlay/fresh-source"
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/accept_hash_overlay.py "${PACKET_EVIDENCE}/hash-overlay/fresh-source" "${PACKET_EVIDENCE}/hash-overlay"
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item4/generic-primitive-packets/check.py --evidence "${PACKET_EVIDENCE}/hash-overlay/run" --source-overlay "${PACKET_EVIDENCE}/hash-overlay/fresh-source" Solidity.Hash.Adaptive Solidity.Backend.PrimitivePackets.CheckedSub.Controls
 ```
 
 The actual first run staged `hash-overlay/source`, and its manifest matches the
@@ -280,7 +288,7 @@ MRS owner application review on CheckedSub/Controls remains pending under the
 H71 owner-applied coordination protocol recorded below.
 
 The complete eight-module command/exits/source roots/caps/hashes/times are in
-`/workspace/h62-generic-primitive-packets-evidence/hash-overlay/run/dependency-results.json`.
+`${PACKET_EVIDENCE}/hash-overlay/run/dependency-results.json`.
 The decisive failing log is
 `hash-overlay/run/dependency-logs/Solidity.Roadmap.Contracts.log`.
 Hash check times are isolated observations, not before/after migration deltas.
@@ -300,7 +308,7 @@ thread after census, arithmetic/tooling backfill, and exact-owner overlay
 consumption. No replacement goal or thread was created by this worker.
 The original VM is
 `ccarenv_b64_Y2NhcmVudl8wNTVjODQyNGExN2M4MTkxODFjMjUyNzJhMGFiOTdkYQ`;
-repository `/workspace/solidity-lean`; assigned branch unchanged. The original
+repository `${TASK_REPO}`; assigned branch unchanged. The original
 launcher-created goal is identified by the frozen rendered-prompt SHA256
 `6f981f1156a761c51ec5daff85fc7683198027eaf4dd88c64057cb9de9fdf8a9`.
 A numeric goal ID is not exposed; do not create/reset a goal to obtain one.
@@ -845,7 +853,7 @@ The independent CheckedSub RuntimePair extraction candidate is parked, not
 applied: its predeclared fresh Target/Agreement/Controls timing metric measured
 10.823 seconds before and 12.638 after (+16.769842%, STOP). The original Target
 file is retained unchanged. Raw candidate, failed attempts, matched measurements
-and disposition are preserved off Git under /workspace/mrs-runtime-pair; this
+and disposition are preserved off Git under ${PAIR_EVIDENCE}; this
 result neither clears that STOP nor replaces historical timing evidence.
 
 ### H121 captured bare-revert branch
@@ -1018,7 +1026,7 @@ Local reducibility annotations were rejected and no unsafe override was used.
 This localizes the unfinished elaboration to the first theorem's application
 rather than input construction alone; it does not prove the root cause.
 Exact sources, errors and resource receipts remain off Git under
-/workspace/mrs-h121-rebind-isolation, covered by SHA256SUMS. The candidate stays
+${REBIND_EVIDENCE}, covered by SHA256SUMS. The candidate stays
 parked and unregistered; all original global failures and performance STOPs
 remain open. No production P1/G42.04 completion is claimed.
 
@@ -1093,9 +1101,9 @@ The source quotation family is constant; this introduces no recursive session
 or alternate language/prefix family.
 
 ReferenceBridgeControls uses the actual old-graph rebinding call. The same
-program simultaneously inhabits Form, alias flags, original profile agreement
-and both physical-entry witnesses. A closed physical_certificate and nonempty
-physical inputs are constructed; this native reflexive profile is explicitly
+native program supplies Form, alias flags and both physical-entry witnesses.
+The test profile component is only physical-predicate reflexivity. A closed
+physical_certificate and nonempty physical inputs are constructed; this native reflexive profile is explicitly
 not evidence that an external Source Approved profile has been authenticated.
 All legal indices and arbitrary journal/returndata stay in the physical domain.
 A genuine successful physical entry refutes a complete fixed-map certificate
@@ -1105,17 +1113,58 @@ intentional substitute counterexample, not assumed failure of the real source.
 Initial notation/type errors and importer memory stops are retained. Staged
 endpoint aliases, rewriting only the old call definition in entry-witness types,
 and proved generic admission equalities/transport avoid eager concrete heap
-conversion without increasing any budget. The joint importing consumer checks
+conversion without increasing any budget. The native importing consumer checks
 in 0.783 seconds. Exact-source final receipts follow; no old performance STOP or
 full production gate is cleared. Full Source/profile/session P1, G42.04, actual
 library Source H24 admission/origin, RO physical frame and whole decoder work
 retain their original obligations and ownership.
 
 Final general-bridge fresh receipts: 1.374 seconds for the generic module and
-0.783 seconds for the joint consumer; exact source/import cached revalidation
+0.783 seconds for the native consumer; exact source/import cached revalidation
 also passes. MCP reports zero errors on both (2.594 and 0.866 seconds). All 37
 new public declaration axiom reports contain only the existing standard axioms
 or none. Read-only finder and skeptic independently found no domain narrowing,
-near-vacuous joint witness, semantic weakening or full-production overclaim.
+weakening of native premises or full-production overclaim.
 The original broad root/full gates and timing STOPs remain open; no unchanged
 Source.Horizon/Derived17/OpenLoops failure was rerun or relabeled a pass.
+
+
+Mixed-tuple constructor coverage extends the existing ReferenceBridgeControls
+module rather than creating another control module. The sibling tuple namespace
+uses the existing certified tuple emitter over its PUBLIC compiled expansion;
+it does not claim direct public selection of the outer tuple call. Its return
+contains both primitive uint256 seven and the old array reference, after a real
+default allocation and rebinding. Form.tuple, alias flags and both genuine
+entry witnesses hold for this selected native image. Its test profile is only reflexivity, not authenticated
+external Approved or Source joint-input evidence.
+A closed nonempty native physical certificate retains all six original Local
+duties and admits every legal index with arbitrary prior journal/returndata.
+
+Actual source observation [7,0,0,2,1] and native target word snapshot are proved;
+index two produces actual lifted bare failure. Omitting tuple result compaction/
+export is an intentional wrong-image countercontrol that loses primitive and
+pointer result words. Snapshots are not substituted for StateRepr; native
+physical profiles are not external Approved/Source-origin evidence. Both Form
+constructors now have native importing coverage. Existing rebinding declarations
+and proof bodies are byte-identical after removing imports/module docstring.
+First extension checks pass in 0.882/0.907 seconds; no proof/resource budget was
+raised or old global/performance STOP cleared. Full production P1/G42.04 and
+all existing actual-Source, RO-frame, decoder and original acceptance waits
+remain open. Separate read-only finder/skeptic found no weakening or overclaim.
+
+Final tuple-extended importer check passes in 1.031 seconds with 832128 KiB
+sampled workload RSS. The unchanged legacy tuple controls rebuilt in 5.976
+seconds; no affected module exceeded 60 seconds. Cached MCP reports zero errors
+in 1.856 seconds. All 26 new tuple declarations were axiom-audited (existing
+standard axioms or none). Existing rebinding declaration/proof-body preservation
+check passes. These are native importing controls, not external Source/profile
+provenance, complete pipeline adequacy or an original-baseline timing comparison.
+
+
+Review clarification: physical_profile is Iff.rfl. The native premise
+conjunctions do not establish external Approved, actual Source admission/origin
+or a full production joint input. No theorem or domain was changed to suggest
+otherwise. Two unused forwarding aliases old_alias_source/wrong_root were
+removed at coordinator request; their original source_observation and
+default_root_refused statements and proofs remain in the defining rebind
+controls. Native execution and export-refusal proofs are retained.
