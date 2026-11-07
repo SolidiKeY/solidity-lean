@@ -1000,6 +1000,45 @@
       "frozen_receipt_sha256": "e536654922e09fea080522b372b992ca1b2f01d95b2832287718350764de2f39",
       "current_receipt_sha256": "d71f05671d9197a7f97543903b7dc56b540152c3985e314ce80e0c7e1a192918",
       "proof_boundary": "Joint original History premises and actual primitive Source transfer/credit runs only. History is algebraic, not nonzero static-call authorization, general execution linkage, compiler/world/native-frame/gas/fork or cross-version semantic equivalence."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.InvocationFrame.Invocation.inherited",
+      "signature_sha256": "f09dd03a2a815905ad7a1fc5a09183d9ff2076cd953992de1222c63ad52359b9",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.InvocationModeWitnesses.inherited_joint",
+      "global_premises": "Explicit checked function declaration, environment and Glob; each Invocation jointly contains membership, signature, typed target/value/arguments and actual successful capture.",
+      "per_input": "Payable declaration with inherited static=true; view/pure declarations with ordinary static=false parents. Nonempty address locals capture distinct receiver2/caller0 and zero call value at horizon2.",
+      "evidence": "Private coordination archive: invocation-modes/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: invocation-modes/SHA256SUMS",
+      "frozen_receipt_sha256": "970f4c8780ec3a2eef8b995230fdcc9e0c8516429846e3a6b46800446c8c0478",
+      "current_receipt_sha256": "eba160e987280b59a46be668fda0b70a965cf66bf841201a51d8088f01730418",
+      "proof_boundary": "Joint mode premises and actual pre-callee capture only; explicit hasCode/callee model records are not callee execution, selected compiler/world binding, physical frames, gas/fork or H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.InvocationFrame.Invocation.view_mode",
+      "signature_sha256": "7d0b7f4ec5712573b9e85b0333356fe4e600d4d36bafb7d06281e5669ffd6a48",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.InvocationModeWitnesses.view_joint",
+      "global_premises": "Explicit checked function declaration, environment and Glob; each Invocation jointly contains membership, signature, typed target/value/arguments and actual successful capture.",
+      "per_input": "Payable declaration with inherited static=true; view/pure declarations with ordinary static=false parents. Nonempty address locals capture distinct receiver2/caller0 and zero call value at horizon2.",
+      "evidence": "Private coordination archive: invocation-modes/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: invocation-modes/SHA256SUMS",
+      "frozen_receipt_sha256": "970f4c8780ec3a2eef8b995230fdcc9e0c8516429846e3a6b46800446c8c0478",
+      "current_receipt_sha256": "eba160e987280b59a46be668fda0b70a965cf66bf841201a51d8088f01730418",
+      "proof_boundary": "Joint mode premises and actual pre-callee capture only; explicit hasCode/callee model records are not callee execution, selected compiler/world binding, physical frames, gas/fork or H121 adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.InvocationFrame.Invocation.pure_mode",
+      "signature_sha256": "fc0049ca9d3081716d96f6a96e11f9026c1d8c74702a55e987cf2460ec12ce8c",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.InvocationModeWitnesses.pure_joint",
+      "global_premises": "Explicit checked function declaration, environment and Glob; each Invocation jointly contains membership, signature, typed target/value/arguments and actual successful capture.",
+      "per_input": "Payable declaration with inherited static=true; view/pure declarations with ordinary static=false parents. Nonempty address locals capture distinct receiver2/caller0 and zero call value at horizon2.",
+      "evidence": "Private coordination archive: invocation-modes/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: invocation-modes/SHA256SUMS",
+      "frozen_receipt_sha256": "970f4c8780ec3a2eef8b995230fdcc9e0c8516429846e3a6b46800446c8c0478",
+      "current_receipt_sha256": "eba160e987280b59a46be668fda0b70a965cf66bf841201a51d8088f01730418",
+      "proof_boundary": "Joint mode premises and actual pre-callee capture only; explicit hasCode/callee model records are not callee execution, selected compiler/world binding, physical frames, gas/fork or H121 adequacy."
     }
   ]
 }

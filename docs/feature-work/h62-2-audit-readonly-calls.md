@@ -1703,3 +1703,44 @@ The full owned H121 Source/callee/selected compiler-world/physical-frame
 producer, external transports/G42.04 and inherited cleanup queues remain
 unfinished. Next independent work is the remaining original joint inputs and
 that producer. No new scope question or goal change.
+
+
+### Joint captured invocation modes (2026-11-07)
+
+Rebased the clean lane onto a3a12bfa258e15db0cbb8f054042504b66e33352.
+The relevant Source and readonly files are unchanged. InvocationModeWitnesses
+supplies actual Invocation records for the original inherited, view_mode and
+pure_mode interfaces. Each record includes a checked declaration/signature,
+typed receiver/value/arguments and successful Source capture with nonempty
+address locals. Receiver two differs from caller zero. Inherited mode uses a
+payable declaration and static parent; view/pure use ordinary parents, so each
+cause of static mode is exercised independently. The pure-mode downgrade is
+explicitly refused.
+
+The explicit hasCode/callee records model capture inputs. They do not prove
+callee/body execution, selected compiler/world binding or physical frames.
+The first symbolic capture proof exhausted the unchanged heartbeat budget;
+case splitting on the existing mutability constructors gives checked concrete
+captures without raising the budget or weakening any invocation requirement.
+No existing statement, dependent definition, premise, exclusion or axiom changed.
+
+The same additive module passes frozen/current isolated proof gates. Three
+exact original raw kernel types match, and eight theorem axiom sets match the
+existing propext/Classical.choice/Quot.sound sets. All dependency sources, imports,
+objects, logs and historical tools remain authenticated by the existing checker.
+Detailed commands, actual versions, resource records and failed/intermediate
+attempts stay in private evidence under H145. No held Premises workload,
+performance rebaseline, STOP release or runtime acceptance is claimed.
+
+The exact-accounting collector changes only the three mode rows. All 792
+identities remain: 76 joint, 410 ordinary pending (including three private
+identity gaps), 3 target-failure joint, 45 intentional impossibility, 256 no-input
+and 2 frozen-v1 refutation/migration results. The other 789 rows are unchanged.
+Independent read-only finder and skeptic confirmed joint premise satisfaction,
+controls, exact receipts and complete ledger preservation with no findings;
+neither used Lean servers, execution, tests/builds or writes.
+
+Full owned H121 Source/callee/selected compiler-world/physical-frame production,
+external type/semantic transports and G42.04, inherited cleanup queues and final
+acceptance remain unfinished. Next independent work remains the original joint
+inputs and that owned producer; no goal or scope change.
