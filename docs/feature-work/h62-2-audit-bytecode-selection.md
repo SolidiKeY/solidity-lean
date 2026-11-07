@@ -2741,3 +2741,41 @@ attempts and receipts stay off branch under
 archival and adoption of the newly published master still await credential
 repair. Original Source/runtime/G01, physical, Bridge, global census, performance
 and full validation obligations remain open; no runtime gate is claimed.
+
+
+### Runtime-consumer proof projections: simultaneous reference instances
+
+Three further joint domains now check: V1 `RuntimeConsumer.consume`, V2
+`RuntimeConsumer.consume`, and V2 `RuntimeConsumer.inhabited`. The witnesses
+supply every parameter, an actual consumer self, the nonempty identity compiler
+relation, the existing reference decoder, and the same empty composition
+certificate together. V2's admission witness includes a real successful empty
+IR run. Its consume proof preserves the full machine relation, derives equality
+of the numeric stacks, and uses the decoder's zero equation to realize the exact
+zero-step result with its stack bound. The V1 instance reuses that proved V2
+result with the inhabited identity compiler; it does not repair V1's general
+empty-relation vulnerability or establish Source coverage.
+
+The new generic negative control rejects an always-none run function for every
+`DecoderPremise`: even its zero-step equation must return the input state. The
+positive domain uses `LabelExec.advance` and the existing `referenceDecoder`,
+not that rejected iterator. Shared certificate and decoder support are consumed
+once rather than copied. These are empty-program reference instances, not an
+external Bridge adapter, general compiler theorem or G01 operational producer.
+
+The exact checked file passed in 4.868 seconds on its first native attempt with
+182697984-byte workload peak; all printed axioms are standard-only. The same 39
+verified import products suffice, without new prerequisite builds or a
+PowerBounds retry. The suite passes 129 tests. Exact source/receipt replay also
+joins the preserved three compiler and five decoder field witnesses by their
+raw type expressions: all eleven proof projections observed in the two frozen
+Premises modules now have separate per-statement joint-domain witnesses. This
+is not one universal witness across all programs, acceptance of the other 30
+kernel records, lexical theorem correspondence or global census closure.
+
+Independent read-only finder and skeptic review covers the proof, negative
+control and receipt join. Full original source/runtime, G01, physical, Bridge,
+performance and affected-build obligations remain open. Evidence, native output,
+ledger and reproduction stay off branch under
+/workspace/parallel-20261103/executable-bytecode/runtime-consumer-domains/;
+private archival and fresh-master adoption still await credential repair.

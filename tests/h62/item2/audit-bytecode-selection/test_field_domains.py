@@ -124,4 +124,19 @@ class FieldDomainTests(unittest.TestCase):
         self.assertIn('0,0,emptyComposition',next(iter(fixture['witnesses'].values()))['proof'])
         self.assertNotIn('import ',support)
 
+    def test_runtime_field_roster_reuses_shared_support_once(self):
+        fixture=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/runtime-consumer-witnesses.json').read_text())
+        targets=[w['target'] for w in fixture['witnesses'].values()]
+        self.assertEqual(len(targets),len(set(targets)))
+        self.assertEqual(set(targets),{
+            'Solidity.Backend.Selection.RuntimeConsumer.consume',
+            'Solidity.Backend.Selection.V2.RuntimeConsumer.consume',
+            'Solidity.Backend.Selection.V2.RuntimeConsumer.inhabited'})
+        self.assertEqual(len(fixture['support_sources']),len(set(fixture['support_sources'])))
+        combined='\n'.join((ROOT/p).read_text() for p in fixture['support_sources'])
+        self.assertEqual(combined.count('def emptyComposition :'),1)
+        self.assertEqual(combined.count('def referenceDecoder ('),1)
+        self.assertEqual(combined.count('def emptyReferenceRuntime :'),1)
+        self.assertIn('theorem decoder_always_none_run_refused',combined)
+
 if __name__=='__main__':unittest.main()
