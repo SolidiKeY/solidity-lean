@@ -1374,3 +1374,66 @@ validated/, acceptance under accepted/. Committed pins:
 `tests/h62/item2/audit-readonly-calls/primitive-reads.sha256`. No new scope question
 or owner ticket. Next independent work: remaining original joint inputs and full
 RO execution/frame producer under the retained holds.
+
+
+### Nineteen Source version extracts received (2026-11-07)
+
+Fetched master and found the requested Source producer extraction already
+published, then rebased onto coordinator master
+6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f while preserving owned work.
+The integrated producer is scripts/h62/item2/audit-v10-storage/transport_pairs.py
+at32c853a6396aad1f4f79ad1e4cdddc4aef9c6488. It supplies19 exact lexical pairs
+(11 balance projections, one balance domain, seven typing parameters) plus
+three removed private identities. It explicitly supplies zero transport proofs.
+
+The consumer executes that producer and its direct lexical helper from retained
+buffers verified equal to their exact Git HEAD blobs. Captured C6/current Lean
+source buffers are independently Git-checked and reparsed from those same
+buffers. The saved producer packet, executed tools, sources and output buffers
+are sealed through completion. All22 cases bind to their exact original file,
+source name, signature, variable context and visibility in the retained792-row
+census. Historical kernel names/type hashes are reference-only; no current
+Lean elaboration, Source-definition equivalence or kernel transport is inferred.
+
+All792 original rows and root coverage remain unchanged:65 joint,3 target-failure
+joint,45 intentional impossibility,256 no-top-level-input,2 frozen-v1
+refutation/migration and421 ordinary pending. Three private gaps remain explicit
+and are never mapped to replacement public helpers. Exact source delivery is now
+received; the V10 wait is narrowed to H57/semantic/kernel transports and actual
+consumer proof references. Live ownership is not established by source intake.
+The old recorded observation commit exists on this VM; that fact alone does not
+recover historical proof/test artifacts or clear any provenance hold. Historical
+proof-cleanup fb0defdc remains UNVERIFIABLE.
+
+Seven controls pass, including missing/duplicate identities, signature/context
+drift, private alias/partition substitution and forbidden H57/kernel/proof credit.
+The retained-loader control uses different disk bytes and verifies that only the
+Git-verified captured buffers execute; Git mismatch refuses. Finder/skeptic
+found three provenance gaps (executed tool vs Git, saved-packet final seal, and
+second Source read); all were fixed, then both reviewed final source/evidence
+with no remaining findings and no execution or writes.
+
+Bounded final intake PASS1.01s/29773824 bytes peak aggregate RSS. This is a text
+and tooling gate, not a Lean proof or performance rebaseline. No Lean source,
+statement, definition, exclusion, axiom or budget changed; no held Lean workload
+was run. Historical Premises +80.254966536% STOP and runtime/whole-goal gates
+remain open. Our full H121 RO G42.02 Source/callee execution, selected
+compiler/world binding and physical frame remain OUR unfinished producer for
+memory-reference-structs; this intake is not that deliverable. G42.04 body
+binding, inherited queues and the421 ordinary inputs also remain open.
+
+Evidence: /workspace/h62-audit-readonly-calls/transport-intake/; committed pins
+`tests/h62/item2/audit-readonly-calls/transport-intake.sha256`. Owner-ticket
+historical requests are retained with explicit current routing/owned-producer
+fields. No new scope question, owner ping, push or goal change. Next independent
+work: remaining original joint inputs and the full owned RO execution/frame
+producer, while preserving all holds.
+
+
+The repository-wide documentation gate fails on an existing master citation at
+line348 of docs/feature-work/h62-4-generic-v08.md: it backticks the name of an
+explicitly untracked historical file. Exact bytes match master; the cited file
+is absent. Owner request RO-DOC-GENERIC-V08-UNTRACKED supplies an off-git
+formatting-only patch removing those backticks, retaining the filename and
+historical claim. No other lane file was edited and no passing docs gate is
+claimed. Source intake and all792-row preservation pass independently.
