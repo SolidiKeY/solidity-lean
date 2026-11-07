@@ -648,3 +648,209 @@ handoffs use a bounded checkpoint history summary while retaining the full
 original-base patch and bundle. Original scope and goal identity are unchanged.
 Read-only finder/skeptic reviews and raw strict/frozen documentation comparisons
 accompany the sealed packet. All broader producer and final-gate work remains.
+
+
+### Checkpoint 232: H121 producer ownership and checked dependency intake
+
+H121 transfers the staged VY5 Source-origin/lifecycle and P8 aggregate-lifecycle
+items to this lane. They are local open work, not waits on the frozen Claude
+lanes. Original goal identity, observations and remaining obligations are
+unchanged. No frozen interface or new per-case source implementation is added.
+
+Fresh master was adopted first, then the exact P8 head
+809f6d7f8efd8067d76402f5207e0fb04ecd0bc7 was merged. Its PlanWitness, Merged and
+MergedControls focused build passes 142 jobs in 44.21 seconds, peak aggregate
+RSS 795566080 bytes, without a resource stop. This producer is an inhabited
+MODEL reference over empty Source programs; Merged is a pair of frozen halves.
+It is not actual Source.sessionAt or aggregate-lifecycle adequacy. Six frozen
+P8/P8b interface files retain their exact bytes.
+
+The VY5 composition and dirty-readback commits e8247d927 and a0cdc0bec are already
+on master. CorrectnessPublic and DirtyReadbackControls pass a 124-job focused
+build in 89.76 seconds, peak aggregate RSS 2235285504 bytes, no resource stop.
+Composition retains its explicit producer inputs; dirty readback declares a
+local cleanup boundary and supplies no Source semantics call. Presence and
+focused checking do not finish the locally owned Source-origin producer.
+
+The existing V07 head 8ab717749c4dcf4cd5932e7fea800af1ddca5a87 already has the
+shared GraphAdmissionAssembly.declarationGraphProducerOfEmpty helper. Only
+SourceRefusal and GraphAdmissionAssembly are missing from master. H112 forbids
+a duplicate per-case proof, so question V10-H121-V07 asks whether to publish the
+existing packet or extend H121 to integrate those two unchanged files here.
+No live V07 source file is edited or integrated while that route is pending.
+
+A minimal P8 consumer proposal reuses that helper. The exact fetched V07 files
+and the proposal passed isolated kernel checks; the proposal's three measured
+standard-three axiom guards also pass. This is a checked UNAPPLIED proposal,
+not a live producer instance or master evidence. The first isolated attempt
+failed before elaboration on prerequisite object lookup; the published imports
+were built and a read-only object view prepared before successful checks. No
+failed artifact is accepted. Exact input hashes and receipts accompany the
+portable packet; compiled object views are not shipped as evidence of source.
+
+After these checks, this lane re-baselined on published master
+806a972a4f1eefc367f7fe21078e56469447ce13. Selected API bytes are unchanged, but
+focused receipts retain their actual pre-rebaseline source head
+79e400cb9cf07b5e6a23efa4adfcfd2a291a7134; this is no fresh whole-build claim.
+The original V10 and consolidated queues, real Source adequacy, physical Y04 and
+separate 4.35 validation remain open. Checkpoint 231's bounded handoff and the
+compact checkpoint-230 relay remain separate sealed/historical receipts.
+
+
+Checkpoint-232 static checks at the latest baseline: trust passes 6628 sources
+and 289 inventoried sites with zero findings; registration reports 6612 reachable,
+zero orphaned and zero disallowed modules. Strict pins remain FAIL: 16675 pinned,
+zero errors, 85 unrecorded and zero baselined changes. The isolated consumer's
+three axiom guards use only propext, Classical.choice and Quot.sound. No shared
+inventory is written. Kernel/source-head receipts and portable relative artifact
+references distinguish prior focused validation from the later baseline merge.
+The V07 integration question remains pending; neither isolated compatibility nor
+a locally checked model proposal authorizes live integration or Source adequacy.
+
+
+## H121b actual-Source H24 intake
+
+The memory-reference-structs ticket at
+85b3741d0ac578696e147cf5d455e38c4f8671b6 requests the locally owned P8
+admission/origin producer, not transfer of its G42.04 body/result obligation.
+LibraryPremises.Inputs requires admission, origin and program/environment,
+pipeline and fixed-parameter agreements for the same library-containing Source
+program. A producer over empty environments cannot discharge libraryDeclared.
+The checked PlanWitness and P8b.Merged model results remain separate evidence.
+
+Source.Semantics.sessionAt is the existing actual evaluator. Its sourceLang uses
+Nat horizons and explicitly leaves resource failures, the hash premise and
+stipend rule uninstantiated. ResourceContractLaw1.nat_encodable_resource_impossible
+refutes the full failure replacement/projection contract when the resource
+retracts into Nat; it does not refute all non-Nat resources or all possible
+LibraryPremises.Inputs. LibraryPremises currently describes all such inputs as
+uninhabited: that blanket documentation claim is not justified by this theorem.
+This intake records the correction without editing the consumer-owned module.
+
+Source.FailureResources.Bound already supplies horizon plus full failure choices
+and replacement laws. Reuse this resource interface rather than duplicating it;
+its module explicitly does not make the evaluator consult those choices.
+Remaining local work is an actual-Source operational reference with justified
+failure resources, canonical frontend-derived origins, root/feature extraction
+and declaration admission for the same program, followed by lifecycle
+correspondence. Neither a caller-supplied execution equality nor an origin chosen
+from the producer itself completes those duties. No new instance, Source edit,
+frozen signature change or completed adequacy proof is claimed here.
+
+The protected V07 packet remains a separate pending integration route, not a
+reason to substitute its empty-environment model for actual library admission.
+Y04 physical adequacy/reached-state delivery and the separate 4.35 trust/timing
+disposition remain external waits. Existing proof/coverage and final-gate gaps
+remain open. Fresh master 05d2c2587 was inspected and merged before this intake;
+no kernel check is claimed for this documentation-only change.
+
+Independent read-only finder and skeptic checked this intake against the frozen
+P8 interface, ResourceContractLaw1, LibraryPremises and Source semantics; neither
+found an inaccuracy or ran Lean. The initial documentation append and master
+merge omitted the writer lock; subsequent edits and commit checks used it.
+No concurrent writer was observed in status; unobserved activity is not ruled out.
+
+
+## Checkpoint 234: generated default-update fitting witness
+
+The existing populated array fixture supplies the sole logical base-fitting
+premise of TargetDefaultInit.updates_fit; the original law proves simultaneous
+fitting of every generated update. A nonempty-list control excludes an empty
+generated replacement. No new per-case fixture or production theorem is added.
+Four sequence laws already have witness rows, so additional trial applications
+were removed and none is counted again. The initial trial passed with an unused
+binder warning; its receipt remains historical, separate from the final source.
+
+All 54 guards pass at source head 83ca445d1aed1e9099d398193543abe4643e2561:
+3.04 seconds, peak aggregate RSS 723800064 bytes, no resource stop. Of three new
+guards, the base premise is axiom-free and the application and nonempty control
+use propext, Classical.choice and Quot.sound. Original guard expectations remain.
+The complete module has 10 axiom-free, 5 propext-only and 39 standard-three guards.
+
+The reference ledger adds exactly one frozen row: 69 mapped, comprising 57 joint
+bundles and 12 data inhabitants, with 3212 of 3281 conservative rows uncovered.
+Historical complete-validation and source receipts remain historical; only this
+module was freshly checked. Finder and skeptic independently reviewed the
+narrowed source without Lean or its server and found no remaining findings.
+This is symbolic-slot coverage, not actual Source or physical adequacy. H121
+producer implementation, original proofs/coverage and final gates remain open.
+
+Checkpoint-234 static trust reports 6628 sources, 289 inventoried sites and
+zero findings; registration reports 6612 reachable and no orphans or disallowed
+modules. Strict pins remain FAIL: 16678 pins, zero errors, 88 unrecorded and zero
+baselined changes. The three new entries match their measured guards; no shared
+inventory is rewritten. The bounded prerequisite records Lean 4.24.0 commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake 5.0.0-src+797c613 and a passing
+KeySort build. Prior full-build, strict-doc and timing failures remain retained.
+
+
+## Checkpoint 235: authorized unchanged H24 assembly packet
+
+Coordinator approval resolves V10-H121-V07. Fresh published master
+05d2c25872c4bb963a0ca7f605905e6e1e99eedc has neither SourceRefusal nor
+GraphAdmissionAssembly. Only those two files are integrated from the verified
+V07 branch commit 8ab717749c4dcf4cd5932e7fea800af1ddca5a87, not its unrelated
+branch history. Their SHA256 values remain respectively
+2b7ed2b93dd8064086673b198d12c426931b01c9ca2a080fd9bf8cfe0cd5c0a0 and
+1abed888a138c2c58c21bed309a0a9369d48a1e7ea5e211f761b70ca42dc362c.
+Generated module registration accompanies the exact packet; no master push or
+claim of coordinator publication is made. Six frozen P8/P8b files and all Source
+implementation files remain unchanged. H16 single-writer restrictions remain.
+
+The serial affected build passes 138 jobs in 6.65 seconds, aggregate RSS peak
+830517248 bytes, no resource stop. Existing unused-simp warnings belong to the
+unchanged packet/imports; no warning suppression or budget change is introduced.
+Finder and skeptic independently verified provenance and scope without Lean or
+its server, finding no proof/provenance issue. Both identified inherited prose
+requiring qualification: the blanket P8-vacuity sentence is not justified by
+the Nat-only resource obstruction, and PlanWitness's absent-from-master note is
+historical. Those sentences are retained to preserve authorized exact bytes;
+this paragraph records their current disposition rather than endorsing them.
+
+This is generic conditional H24 assembly plus current-Source refusal laws. Its
+empty-environment application is a model result, not actual Source/session or
+library lifecycle adequacy. The MRS request at
+85b3741d0ac578696e147cf5d455e38c4f8671b6 requires admission and independently
+justified origins for the same library-containing Source program/environment
+and the same pipeline/fixed parameters. MRS retains G42.04 body/result
+implementation. Actual P8 producer/origin and VY5 lifecycle work remain locally
+owned unfinished duties; Y04 and separate 4.35 timing/trust remain external.
+
+The exact committed packet head 117f003291195801d295a93dca9d31927cb60d04 also
+passes fresh per-file checks: SourceRefusal 3.04 seconds / 835960832 peak aggregate
+RSS, GraphAdmissionAssembly 4.88 seconds / 821784576 bytes. All 29 guards pass.
+Trust reports 6630 sources and zero findings; registration/layers pass with
+6614 reachable modules. Strict pins remain FAIL with 16707 pinned theorems,
+zero errors, 117 unrecorded and zero baselined changes. Raw strict docs retain
+3 missing / 137 ambiguous references; the same checker on exact published
+05d2c25872c4bb963a0ca7f605905e6e1e99eedc has identical findings, zero new/removed.
+The frozen comparison remains FAIL with 137 new and 9 removed findings.
+
+## Checkpoint 236: exact-origin H24 necessary constraint
+
+DeclarationGraphConstraints reuses the integrated refusal characterization.
+accepted_mapping_free retains input, resolved result, frontend derivation and
+artifact; program_mapping_free carries equality of the whole dependent Source
+program, preserving environment, pipeline and fixed parameters. The third law
+refutes only an accepted origin whose same environment has the supplied nameable
+mapping-bearing struct. It is a conditional contradiction, not a simultaneous
+positive witness, actual producer or claim that every library input is impossible.
+No Nat-resource premise, new failure assumption or per-case copy is introduced.
+
+The three measured guards use only propext, Classical.choice and Quot.sound.
+An affected-import build passes 139 jobs. Fresh per-file validation at committed
+source head a1d573b61303417756e44df307c35b6feeacbf4f passes in 1.85 seconds,
+aggregate RSS peak 579579904 bytes, no resource stop. Finder and skeptic reviewed
+the generic statements and proofs without Lean/server and found no findings.
+The audit ledger remains 69 mapped / 3212 uncovered; these new P8 constraints
+are not counted as new witnesses of frozen audit rows.
+
+Question V10-H121-H24-REFUSAL was sent through coord-ask at
+coord-q/codex/solidity-v07-v11-20261030/v10-storage-operations/20261107T055502Z.
+It requests the controlled H16/H57 route for the environment-aware Source typing
+repair, or exact consumer program/environment evidence for a supported local
+case; it never authorizes narrowing the original profile. The earlier V07
+packet integration question is resolved. Source/Typing remains untouched.
+Actual Source resource/session realization, canonical origins, general graph
+admission, Source/lifecycle correspondence and original proof/final gates remain
+locally open. Separate Y04 and 4.35 producer waits are unchanged.
