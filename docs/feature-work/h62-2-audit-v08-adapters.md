@@ -842,3 +842,34 @@ Exact bindings and off-Git evidence: source-emit-joint-manifest.json.
 Independent read-only finder and skeptic found no issue in the joint premises,
 full-run payload distinction, bindings or limited acceptance claims. Neither ran
 Lean or a server; their receipt remains with the off-Git evidence.
+
+### Remaining seven rethrow signatures (2026-11-07)
+
+Recorded exact frozen-ID/type-hash classifications for allocated_object,
+reached_rethrow, literal_rethrow, statement_timeout, allocation_timeout,
+intrinsic_rethrow and execution_transport. The current SourceRethrow bytes still
+match the guarded capture. None has an explicit proposition binder; that is not
+proof of inhabitance of every dependent parameter or joint-feasibility acceptance.
+No new witness or statement-fidelity result is counted.
+
+The first five are allocation lookup and actual Source execution/timeout laws.
+They retain the same pointer/heap, sufficient positive horizons, post-allocation
+state on statement timeout and initial state on allocation timeout. Intrinsic
+rethrow concerns an explicitly chosen typed revertData statement, with the
+original empty/nonempty THalt.ofData distinction. Execution transport conjoins
+that independent intrinsic run with a Source run using the same bytes, but does
+not relate their states or prove that a compiler selected that statement.
+
+No new producer is required to apply these seven local laws as written. A
+canonical transport claim still requires actual Source admission/origin/lifecycle
+and complete production body/frame correspondence, including the actual
+P1RevertBridge route rather than substituting a successful fragment. Those
+obligations are not added as premises or attributed to these local theorems.
+All seven full feasibility/fidelity reviews remain pending. Exact saved types
+and classifications are off Git, bound by source-rethrow-classification-manifest.json;
+this metadata-only checkpoint runs no new Lean check or timing comparison.
+
+Read-only finder and skeptic reviews found no semantic issue. The finder's
+precision note was fixed: literal_rethrow uses independent allocationFuel+4
+and statementFuel+1 horizons, not one shared fuel. Evidence hashes were refreshed
+for that description change. Neither reviewer ran Lean or a server.
