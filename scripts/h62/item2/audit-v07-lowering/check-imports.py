@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Serial bounded compiler check of frozen mapped modules' import closure.
 No Lake/old-toolchain cache, no source edits, no generated root registration.
-Stop at the first error; successful files alone are not a full acceptance gate.
+Default stops at first error; --keep-going checks independent import branches.
+Successful files alone are not a full acceptance gate.
 """
 import argparse
 import hashlib
@@ -17,12 +18,14 @@ p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--repo', required=True, type=pathlib.Path)
 p.add_argument('--toolchain', required=True, type=pathlib.Path)
 p.add_argument('--evidence', required=True, type=pathlib.Path)
+p.add_argument('--keep-going', action='store_true', help='check independent branches and record skipped dependents')
 a = p.parse_args()
 a.evidence.mkdir(parents=True, exist_ok=True)
 output = a.evidence / 'olean'
 output.mkdir(exist_ok=True)
 seen = set()
 order = []
+dependencies = {}
 
 
 def visit(module):
@@ -35,11 +38,13 @@ def visit(module):
             return
         raise RuntimeError(f'unresolved import {module}')
     text = masked(source.read_text())
+    dependencies[module] = []
     import re
     for line in text.splitlines():
         m = re.match(r'\s*(?:(?:public|private)\s+)?import\s+(.+)', line)
         if m:
             for dependency in m[1].split():
+                dependencies[module].append(dependency)
                 visit(dependency)
     order.append((module, source))
 
@@ -49,6 +54,7 @@ for row in census(a.repo)['modules']:
 (a.evidence / 'import-order.json').write_text(json.dumps([m for m, _ in order], indent=2)+'\n')
 env = dict(os.environ, LEAN_NUM_THREADS='1', LEAN_PATH=str(output))
 results = []
+failed = set()
 
 
 def limit():
@@ -56,6 +62,12 @@ def limit():
 
 
 for module, source in order:
+    blocked_by = [d for d in dependencies[module] if d in failed]
+    if blocked_by:
+        failed.add(module)
+        results.append(dict(module=module, exit=None, status='skipped-dependency', blocked_by=blocked_by))
+        (a.evidence/'results.json').write_text(json.dumps(results, indent=2)+'\n')
+        continue
     available = next(int(x.split()[1])*1024 for x in pathlib.Path('/proc/meminfo').read_text().splitlines() if x.startswith('MemAvailable:'))
     dest = output / (module.replace('.', '/')+'.olean')
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -81,4 +93,8 @@ for module, source in order:
     (a.evidence/'results.json').write_text(json.dumps(results, indent=2)+'\n')
     print(module, status, row['seconds'], flush=True)
     if status:
-        raise SystemExit(status)
+        failed.add(module)
+        if reason or not a.keep_going:
+            raise SystemExit(status)
+if failed:
+    raise SystemExit(1)

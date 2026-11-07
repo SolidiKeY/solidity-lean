@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Payments/CompilerExact.lean:Solidity.Evm.Compiler.Compilation.compile_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/CompilerExact.lean:Solidity.Evm.Compiler.Compilation.correct_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/CompilerExact.lean:Solidity.Evm.Payments.compile_paid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/CompilerExact.lean:Solidity.Evm.Payments.compile_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

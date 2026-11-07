@@ -1,0 +1,53 @@
+{
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.base_fits": [],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.copy_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.read_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.read_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.reset_changes_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.reset_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.reset_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.self_copy_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.target_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.unwritten_target_disagrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean:H62.StorageAudit.RepresentedWitnesses.write_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
