@@ -1,0 +1,72 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/PreservedAllocatorControls.lean",
+  "interface_sha256": "15e7adbcc957c12ec89edc0e579dd0383f65a93139662862568600673eec67f3",
+  "joint_witness": "Solidity.Backend.Passes.AuditPreservedAllocator.joint",
+  "joint_contract": "actual-initial-input-source-success-and-mapped-prefix-output",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditPreservedAllocator",
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.PreservedAllocatorControls.0.",
+  "checked_private_names": [
+    "suffix_some"
+  ],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.suffix_some",
+      "signature_sha256": "34e8098bf4d65d9843c42891b7225e1c731c369d593c970419236211382046d2",
+      "kind": "private-exact-kernel-signature"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.suffix_source",
+      "signature_sha256": "b6bf84f8da705974c188ca32267c2b08c762e35d043e0d2b2aa1f2d1eaf27c2b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.suffix_cost",
+      "signature_sha256": "395e02749a447b5bc98a1f82b37adc538f99bc04fa9cda6a653f1d070876c946",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.memory_cost",
+      "signature_sha256": "13d2b70469df4a7985124f9c75eee767174ef02cca1b56a2d1a9d598ebcd92cc",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.object_code",
+      "signature_sha256": "77f0542a626b24562542a6495cd63b0d4047ffc69dcef2602571b7e83132b3a0",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.suffix_codes",
+      "signature_sha256": "bf0ebe3a969d2fecfcf12ac223538b98f7dbf47c117f86ae7f10494a94071245",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.reached_allocator",
+      "signature_sha256": "03f546110b66758ff7c3b835142d685c90c258659b19e0fc32d1e4434eea9ca0",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.reached_link",
+      "signature_sha256": "f85e9c271544374fe7b9cec2878fc370d789a74a51f6d08487f23df8a9405890",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.reached_memory_link",
+      "signature_sha256": "2804e19e06c7688970b27af04a12cac8c513b3b0f0689aa90b88cc603ed74389",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PreservedAllocatorControls.shared",
+      "signature_sha256": "db82bbd7604a9ef3062a450cfb06bedaed8bd55b5341efcf3cbc2de8f16db5a5",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 381,
+  "aggregate_remaining": 878,
+  "limits": "Nine public and one private model allocator-preservation rows; real mapped prefix witness derived from execution, not an assumed preservation result. No native ByteWorld/emission, gas/session resources or full Source/G24 adequacy.",
+  "private_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}
