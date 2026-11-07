@@ -2217,3 +2217,21 @@ removed since the preceding snapshot. Independent read-only finder and skeptic
 checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/stipend-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Storage migration probe observations
+
+`storage_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover isolated
+local predicate copies, metadata-stripped closed kernel type export for external
+hashing, and copied layout/locate rejection controls. These fixtures do not repair
+production or alter original premises; type syntax is not semantic equivalence.
+Current invocation, inputs, effects and outcomes remain unresolved; this is
+supplied-subset evidence.
+
+At `a087d25797fc5cc1bd29b4a8aeaf12cdd7cea035`, the refreshed static index
+has 771 candidates, 549 with supplied current references and 222 without; seven
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/storage-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
