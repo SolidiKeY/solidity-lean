@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/capture-printer-classification-v20/semantic-roles-reviewed.json",
-    "bytes": 717470,
-    "sha256": "0f3d0fa59624c532d3f0c04638e5f735d5c361dfd405742c934425ad8825470a"
+    "path": "/workspace/h62-successor-bulk/read-rigid-classification-v21/semantic-roles-reviewed.json",
+    "bytes": 730258,
+    "sha256": "5ec6cb1d9d24fec4d47ea4dfb4dfe0d7f70bff9f10d54015fda16c3ece0edd14"
   }
 }
