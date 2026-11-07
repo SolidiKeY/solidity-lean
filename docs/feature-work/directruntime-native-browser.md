@@ -602,3 +602,58 @@ the historical6ae binary, not the fresh19e or whole H90 reader.
 Final read-only finder and skeptic reviews pass with these limits. They
 independently checked both archive hashes/counts, gate exits and the exact
 historical binary equality; neither ran Lean, builds or timing reruns.
+
+
+## Fixed-byte producer intake and exact prerequisite recovery
+
+[Results manifest](../../tests/directruntime-20261104/native-browser/fixed-byte/results-manifest.json)
+pins amended source build1b2bdb490054293c86cddb5e4b7fa15736bae25b and exact
+producer2738af9966 Translate,Compose and ControlTuple.Adapter bytes. The first
+intake matched Shared/DirectRuntime but omitted the adapter's local scalar
+callback. Both backends refused tupleSwap/repeated; those failed reports and a
+separate missing-activation setup failure remain archived. The exact committed
+adapter prerequisite fixes the omissions with unchanged expectations.
+
+Fresh native and real Chromium runs match all20fixed-byte fixtures:12proved,
+4refuted,4unsupported per backend,plus2positive harness guards. The source-level
+box twin erases to the exact producer diamond source after removing10annotations.
+Tags and specific parameter/positive-length refusal strings are asserted.
+C13,A8,B84 and83existing functions all pass their unchanged observation checks
+on both amended binaries. B retains64proved/16refuted/4pending; exact positive
+Identitydiamond passes in both compiler modes. Native negatives pass14/14,
+browser negatives remain13/14 with invariantCountsToBound stack overflow.
+Edited-source,counterexample and disconnected fresh-edit UI controls pass.
+
+The206-module inventory has9966functions/4989closed values with selected C
+parity. Seven per-file diagnostics report0errors;32marker guards,18finite modal
+cases/effect/refusal controls and12intrinsic memory controls pass. Both decoder
+lemmas print only propext,Classical.choice,Quot.sound. These are decoder/model
+facts and trusted compiled-checker observations,not source/compiler/ABI/native
+preservation or exhaustive source/H90 migration proofs. Ordinary-request traces
+and browser assets load no forbidden serialized environment/frontend resources;
+reviewed frontend-origin generic bodies remain explicitly classified.
+
+Actual Lean4.24.0/Lake5.0.0-src+797c613,18unit checks and on-demand KeySort
+377/131/131 with matching annotations pass. Every heavy gate uses serial12GiB,
+swap0,CPU1,threads1/-j1 and4GiB outer reserve. Amended native30.52s reuses
+content-addressed objects and performs a new link; WASM285.05s recompiles selected
+C. The first371.15s native build was26.13% above prior294.26s; this conservatively
+retains a build-cost STOP. Empty native output is not a fully cold machine or
+matched invalidation workload. Unchanged SliceCopy source/C does not establish
+a cause. The incremental rebuild cannot clear that STOP. Original native median
++21.32% and browser startup+32.20% STOPs remain; no stopped timing benchmark
+was rerun. Full performance/final runtime acceptance remains pending repairs.
+
+| Local registration proposal | Role | Central action |
+|---|---|---|
+| fixed-byte/MarkerControls.lean |Standalone32-spelling/signature/axiom driver |No generated production root addition |
+
+Bulk fixtures,logs andruntime binaries remain off Git under the manifest's
+absolute paths with per-file SHA256 indexes. Independent read-only finder and
+skeptic inspect the exact intake,denominators,failures andarchive receipts;
+no proof budgets,statements,exclusions,trust pins or optional-certificate boundary
+are weakened. This checkpoint does not complete the original queue.
+
+The locally verified24-artifact incremental cache pack is retained for coordinator
+pull with path/size/SHA in the manifest. Delivery is coordinator-pending; no
+ship-cache.sh or H88 cross-cache coherence claim is made.
