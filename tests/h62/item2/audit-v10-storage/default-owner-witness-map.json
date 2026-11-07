@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "291b12e2f079a7ea60b49a35dcddca6e8eb48462b7fc32df3d7404deba52ef07",
+  "kind": "joint-premise",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/CopyDefaults.lean:284:represented",
+      "theorem": "Solidity.Backend.StorageOps.CopyDefaults.represented",
+      "signature": "theorem represented {n : Nat} (G : Schema n) (T : TypeGraph.Ty n)\n    (permit : CopyPermit G T) (queries : List (Query G T))\n    (supported : \u2200 q \u2208 queries, q.supported)\n    (base : Solidity.Storage.Loc) (store : Store) :\n    Represented (Value.dflt T) queries base\n      ((updates G T base).foldl (fun w op => write w op.1 op.2) store)",
+      "signature_sha256": "86b06c009bedd8b1e1b36da73ff0c8b9e9d07ebd4d02ff9bbb1571561c971b2f",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.default_owner_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/CopyDefaults.lean:310:numeric_transport",
+      "theorem": "Solidity.Backend.StorageOps.CopyDefaults.numeric_transport",
+      "signature": "theorem numeric_transport {n N L R : Nat} (G : Schema n) (T : TypeGraph.Ty n)\n    {hash : Solidity.Storage.Pre \u2192 Nat} {P : List Solidity.Storage.Pre}\n    {locations : List Solidity.Storage.Loc} (run : FiniteRun N L R hash P locations)\n    (base : Solidity.Storage.Loc) (store : Store) (machine : WordStore)\n    (initial : Transport N hash locations store machine)\n    (covered : \u2200 q \u2208 demands G T, q.location base \u2208 locations) :\n    Transport N hash locations\n      ((updates G T base).foldl (fun w op => write w op.1 op.2) store)\n      (numericInit (N := N) G T base hash machine)",
+      "signature_sha256": "d65bb75deebfab76e396fefb4e44a37a403c0ce6ac7dfe4768c85c21f5360bdd",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.default_transport_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}

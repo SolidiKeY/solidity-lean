@@ -39,5 +39,5 @@ theorem typed_storage (i : InvocationFrame.Invocation E Γ dn ps rs)
 theorem source_environment (global : Glob E) (mode : Bool) (n depth : Nat) (state : St E) :
     StaticJournal.History state.ex mode
       ((envLoop global n depth mode).run (L0 E,state)).2.2.ex :=
-  (SourceHistory.all_at global n).envLoop depth mode (L0 E) state
+  (SourceDispatchV2.all_at global n).envLoop depth mode (L0 E) state
 end Solidity.Backend.WorldCalls.ClosedSourceConsumers
