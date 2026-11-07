@@ -106,9 +106,11 @@ class WorkerPool {
   }
   remove(worker){const i=this.workers.indexOf(worker);if(i>=0)this.workers.splice(i,1);}
   fail(error){this.failure=error;for(const entry of [...this.queue])this.finish(entry,error);}
-  retire(worker){
+  retire(worker,{graceful=false}={}){
     if(worker.retirement)return worker.retirement;worker.retiring=true;
-    const retirement=waitForClose(worker.child,{closed:worker.closed,kill:true});worker.retirement=retirement;this.retiring.add(retirement);
+    const deadline=Date.now()+1000;let cooperative=graceful&&!worker.exited&&worker.child.connected;
+    if(cooperative)try{worker.child.send({action:'shutdown',deadline},error=>{if(error)try{require('./backend.cjs').terminateTree(worker.child);}catch{}});}catch{cooperative=false;}
+    const retirement=waitForClose(worker.child,{closed:worker.closed,kill:!cooperative,deadline}).then(()=>{if(cooperative&&worker.child.exitCode!==0)throw new Error('Cooperative worker retirement failed');}).catch(error=>{try{require('./backend.cjs').terminateTree(worker.child);}catch{}throw error;});worker.retirement=retirement;this.retiring.add(retirement);
     retirement.then(()=>{this.retiring.delete(retirement);this.remove(worker);try{this.onRetire?.(worker.child);}catch(error){this.fail(error);}queueMicrotask(()=>this.drain());},error=>{this.retiring.delete(retirement);this.fail(error);});return retirement;
   }
   drain(){
@@ -134,7 +136,7 @@ class WorkerPool {
   dispose(){
     if(this.disposal)return this.disposal;this.closed=true;
     for(const entry of [...this.queue,...this.workers.map(w=>w.busy).filter(Boolean)])this.finish(entry,failure('Worker pool closed',-32800),undefined,true);
-    this.disposal=Promise.all([...this.retiring,...this.workers.map(worker=>this.retire(worker))]).then(()=>{if(this.failure)throw this.failure;});this.disposal.catch(()=>{});return this.disposal;
+    this.disposal=Promise.all([...this.retiring,...this.workers.map(worker=>this.retire(worker,{graceful:!worker.busy}))]).then(()=>{if(this.failure)throw this.failure;});this.disposal.catch(()=>{});return this.disposal;
   }
 }
 module.exports={WorkerPool,fingerprint};
