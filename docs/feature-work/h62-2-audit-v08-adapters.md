@@ -451,3 +451,9 @@ budget or scope-content changes. Prior exports remain preserved. Branch arrival
 head cf354e514bf0b0327f89fa2c60a799a5d04b776d already merged origin/master;
 that history is preserved. The review patch isolates this correction from it.
 Packaging only: retirement pause remains; no proof continuation or push.
+
+### Prepared mapped collector: actual bounded check
+
+The coordinator clarified that the retained 4 GiB reserve applies to RAM, not disk. With approximately 3.4 GB disk free and adequate available RAM, the prepared FailureResources diagnostic passed the approved serial per-file gate in 6.754 seconds, with one Lean process, 708,759,552 bytes peak sampled aggregate RSS, no swap and no STOP. The unchanged wrapper enforced the 12 GiB limits and 4 GiB RAM reserve. The initial checkout build remains untouched; `Q-WORLD-INITIAL-BUILD` no longer blocks these checks.
+
+The actual kernel output contains twenty defining-module records: twelve theorems, seven other declarations and one predicate definition. Only the existing standard Lean axioms appear. Every record remains PENDING, with zero new witnesses or fidelity acceptances. This validates the prepared collector on this existing resource family; it does not add global SourceSpec/body/world coverage, semantic adequacy or an all-module gate pass. Bulk types and logs remain outside Git, indexed by `tests/h62/item2/audit-v08-adapters/mapped-census-check-manifest.json`. Earlier disk-reserve STOP/hold reports remain historical evidence; the capacity interpretation is corrected here rather than changing proof or memory budgets.

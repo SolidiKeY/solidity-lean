@@ -1,0 +1,77 @@
+{
+  "scope": "Actual Lean validation of reused mapped collector, not new resource-law witnesses or semantic acceptance.",
+  "checked_head": "649a21586050f281ba57f7a364a6b3782b2482a4",
+  "source_bindings": {
+    "/workspace/v08-world-lowering-published/tests/h62/item2/audit-v08-adapters/generated-census/FailureResourcesPrepared20261107.lean": "4360ac6d0413ceb4d6cf3955921c3c0febd7debe1a447dc27bbc52e416f230d6",
+    "Solidity/Source/FailureResources.lean": "0a50a6a2178d263b6f330e8ab7141f7c48d8efa9bc571838cb3723cdd9af258f"
+  },
+  "kernel_records": 20,
+  "kinds": {
+    "other_declaration": 7,
+    "theorem": 12,
+    "predicate_definition": 1
+  },
+  "axioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "new_witnesses": 0,
+  "fidelity_acceptances": 0,
+  "all_statuses": "PENDING",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/generated-census/FailureResourcesPrepared20261107.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 6.754,
+    "peak_sampled_aggregate_rss": 708759552,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "capacity_clarification": "4 GiB reserve is RAM, not disk. Coordinator H1 clarification admits adequate disk headroom; no initial checkout cleanup needed for this check.",
+  "question_disposition": "Q-WORLD-INITIAL-BUILD no longer blocks checks; initial build remains untouched.",
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/mapped-census-check-20261107/admission.json",
+      "bytes": 766,
+      "sha256": "d3021c34d9391e6c06a39bfadb2fc25b9f14fd491c44a047eab1c23476c43729"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/mapped-census-check-20261107/inventory.json",
+      "bytes": 41387,
+      "sha256": "b3bbde8fbc5f40fd62252d3fb2129adf6db5ca583c929326412d06a625378342"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/mapped-census-check-20261107/run/console.log",
+      "bytes": 187,
+      "sha256": "31c266649414b9da22881089b08a970c87b950c1a876985187af972028e5e3f4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/mapped-census-check-20261107/run/gates/1.log",
+      "bytes": 34922,
+      "sha256": "42a0a1dfa49098a36a98cf873d7f14dc9f1f1f144603a72b148a996cc0e3de23"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/mapped-census-check-20261107/run/gates/HEAD",
+      "bytes": 41,
+      "sha256": "ee11195c72e137a09f7dd8231a757eb3a466c05ce9a05814f11adbc5b2df8a9d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/mapped-census-check-20261107/run/gates/gates.tsv",
+      "bytes": 306,
+      "sha256": "d27512dacc30ed177830960facd395c1189a8ca5ee8c0e896df722d5c72ff90b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/mapped-census-check-20261107/run/results.json",
+      "bytes": 429,
+      "sha256": "e1ac335d7bbaf90c49f5ddf92134da648cef436b35e5e5f8bf5edcb7a99b2d49"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic verified both source hashes, raw 20-record inventory, actual gate and limited claims; no findings and no reviewer builds/tests."
+}
