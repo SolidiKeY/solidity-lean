@@ -2235,3 +2235,22 @@ removed since the preceding snapshot. Independent read-only finder and skeptic
 checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/storage-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Theory migration probe observations
+
+`theory_migration_controls.py` records three previously unreferenced migration
+probes with source hashes and the migration document hash. They cover imported
+Theory declaration/axiom introspection, five finite String boundary cases and
+an intentionally negative legacy String API control. The latter historically
+passes on old Lean and fails on new Lean with four checked diagnostics; it must
+not be treated as an ordinary expected-success module. The finite observations
+do not establish production function equivalence. Current invocation, inputs,
+effects and outcomes remain unresolved; this is supplied-subset evidence.
+
+At `ddc46c09ecd07b1627756ae8f5060a7ecdded140`, the refreshed static index
+has 772 candidates, 552 with supplied current references and 220 without; seven
+retain historical references for review. One candidate was added and none
+changed or removed since the preceding snapshot. Independent read-only finder and
+skeptic checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/theory-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
