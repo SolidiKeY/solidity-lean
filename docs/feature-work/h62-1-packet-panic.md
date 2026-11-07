@@ -145,3 +145,7 @@ Twelve per-file ledger tests now restore the removed census row at its original 
 ## Attributed-header scan follow-up
 
 The original census omits same-line attributed declarations. `attributed_header_scan.py` checks only a narrow single-simple-attribute pattern across the 48 base-validated files and found zero raw candidates. Independent read-only finder and skeptic independently matched this result without Lean. The scanner deliberately does not mask comments or cover nested/multiple attributes, multiline headers or other syntax; its synthetic controls demonstrate a block-comment false positive. This does not establish absence of attributed declarations or full coverage.
+
+## SignedSub Controls continuation
+
+The base-pinned 40-row controls ledger distinguishes same-named Seed and outer declarations by line. Its negative controls pass. Independent read-only finder and skeptic matched the statements without Lean; the checked overflow `revertOf` observation was corrected to specify `some` panic data and rechecked. No original proof or guard changed.

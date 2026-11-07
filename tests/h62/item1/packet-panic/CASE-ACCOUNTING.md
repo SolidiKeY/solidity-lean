@@ -115,3 +115,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## Same-line attribute candidate scan
 
 `attributed_header_scan.py` examines the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
+
+## SignedSub Controls
+
+`signed_sub_controls_ledger.py` describes forty base-pinned literal headers, identifying repeated Seed and outer namespace names by original line and name. The observations separate unchecked Source execution, symbolic target outcomes and projections, the checked Source overflow projection, initial fixture memory, low-horizon timeout and refusal cases. Existing axiom guards were not edited. After registering this ledger, reconciliation covers 459 of 474 observed lexical headers; 15 original headers remain unclassified. Manual prose and lexical headers are not Lean proof or complete semantic coverage.

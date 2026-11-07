@@ -7,7 +7,7 @@ LEDGERS = (
  "controls_ledger.py", "signed_controls_ledger.py", "checked_pipeline_ledger.py",
  "signed_mod_source_ledger.py", "signed_mod_selection_ledger.py", "signed_mod_controls_ledger.py",
  "signed_div_origin_ledger.py", "signed_div_selected_ledger.py", "signed_div_execution_ledger.py", "signed_div_controls_ledger.py",
- "signed_sub_execution_ledger.py", "unsigned_div_origin_ledger.py", "unsigned_div_selection_numeric_ledger.py",
+ "signed_sub_execution_ledger.py", "signed_sub_controls_ledger.py", "unsigned_div_origin_ledger.py", "unsigned_div_selection_numeric_ledger.py",
  "unsigned_div_execution_composition_ledger.py", "unsigned_div_witness_ledger.py", "private_header_ledger.py",
 )
 PRIVATE = "private_header_ledger.py"
