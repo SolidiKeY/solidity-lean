@@ -3246,6 +3246,7 @@ import Solidity.Lowering.P8.FieldAdmission
 import Solidity.Lowering.P8.FrozenInterface
 import Solidity.Lowering.P8.GraphSchema
 import Solidity.Lowering.P8.GraphSchemaControls
+import Solidity.Lowering.P8.PlanGraphAdmission
 import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
 import Solidity.Lowering.P8.ResourceBoundary
