@@ -2545,3 +2545,23 @@ Independent read-only finder and skeptic checked roles, hashes and history
 preservation without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/language-migration-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Calculus migration probe observations
+
+`calculus_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. They cover exact
+closed-type metadata encoding and isolated String API controls. The encoder
+returns before opening a file when its default expected-module list is empty;
+when populated it opens the path in `H62_INTERFACE_OUTPUT` for writing. The
+transcript proves no interface-equivalence theorem, and the String cases do not
+establish full Calculus preservation. Current invocation, inputs, effects and
+outcomes remain unresolved.
+
+At `126c27de59d9badfc961a3cf02cea23af378de15`, the refreshed static index
+has 819 candidates, 628 with supplied current references and 191 without; eight
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, conditional file effect, hashes and history preservation without
+Lean or a server. Evidence hashes are in
+`tests/h55/module-times/calculus-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
