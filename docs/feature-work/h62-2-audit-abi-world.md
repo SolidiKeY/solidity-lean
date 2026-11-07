@@ -330,6 +330,16 @@ was assigned. No theorem repair ticket or vacuity escalation is outstanding.
 Full validation/resource wait is retained; retirement prevents further local work.
 No RUNTIME_GATE_PASS or full-assignment completion is claimed.
 
+## Successor census reference correction (2026-11-06)
+
+The duplicate-row scanner regression now uses the existing
+`Backend/AbiEntry/Interface.lean` path twice. It retains the same duplicate
+assertion, frozen census and checker implementation. All four scanner tests
+pass. Independent read-only finder and skeptic reviews found no issues.
+The unchanged global documentation checker still fails on four references
+outside this successor scope; this correction does not establish full audit
+validation, timing acceptance or completion.
+
 ## Reactivated post-merge validation (2026-11-06)
 
 The coordinator reported audit head e55d46407e merged into master20e492ee9 with

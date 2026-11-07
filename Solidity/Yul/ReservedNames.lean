@@ -40,7 +40,7 @@ def reservedNames : List String :=
     "loadimmutable"
   ]
 
-theorem reservedNames_count : reservedNames.length = 157 := rfl
+theorem reservedNames_count : reservedNames.length = 157 := by decide +kernel
 
 theorem slotnum_not_reserved : "slotnum" ∉ reservedNames := by decide
 
