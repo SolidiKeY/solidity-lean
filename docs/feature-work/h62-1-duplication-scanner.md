@@ -781,3 +781,38 @@ All 792 original audit obligations retain their previous classifications. The
 original/inherited acceptance remain open. Raw evidence, baseline variation and
 reproduction commands are retained under
 `/workspace/h62-audit-readonly-calls/checked-probe-logs/` on the original VM.
+
+## Intrinsic Scope binding through the admitted closure interface
+
+The existing closure producer now accepts explicit `ast` (unchanged default) and
+`scope` profiles. Scope pins unchanged KeySort, AST and Scope sources/imports in
+that dependency order, compiles all three fresh, and enumerates only Scope types
+and direct source ranges. The scanner accepts `--project-binding-target scope`
+with a distinct pinned contract. Arbitrary manifests and reused execution receipts
+remain inadmissible; AST/KeySort dependency rows receive no Scope annotations.
+
+Two fresh mixed scans account for 224 lexical rows: 25 direct Scope links and
+199 unresolved rows. Scope itself has 37 lexical rows, including 12 unresolved.
+The complete visible Scope census contains 312 constants: 286 serialized types
+and 26 retained unsupported records (`expression metadata`), with 287 constants
+lacking lexical links. No unsupported record is dropped or simplified. Both
+captures have identical metadata/bindings and no incremental candidate changes.
+All original candidate refusals and unverified ownership rows remain.
+
+All 158 controls pass, including six new admission/dependency/replay controls.
+Independent read-only finder and skeptic reviews found no substantive issue and
+used no Lean server or execution. Existing AST workflow timing was measured in
+the same checkout with source/SDK/cache policy and bounds retained: one warmup
+and three measurements per cohort, median 41.271550384 s before and 43.448407344 s
+after (+5.2745%, below the 10% stop threshold). AST metadata/bindings remain
+byte-identical. Fresh AST CLI and KeySort-default compatibility checks also pass;
+only scanner hash and fresh dependency observations differ where applicable.
+
+Production Lean files, statements, representations, budgets and axioms are
+unchanged. One 54-line test-only probe was added; it is staged and unregistered.
+Fresh bounded KeySort prerequisites pass with Lean 4.24.0 and Lake
+5.0.0-src+797c613. This extends observed context signatures, not model witnesses,
+verified ownership, body equivalence or global/private/unloaded coverage. All
+792 original audit obligations, owner compiler-success work and the original
++80.254966536% Lean STOP remain. Raw captures, refusals, timings and manifests are
+retained at `/workspace/h62-audit-readonly-calls/scope-binding/` on the original VM.
