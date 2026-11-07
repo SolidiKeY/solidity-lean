@@ -48,12 +48,9 @@
     }
   ],
   "missingLocalArtifacts": [
-    "requester commit08f37691851d562c85ab2f5c9f0db50a1443af96",
-    "tests/directruntime-20261104/memory-references/v1-storage-owner-ticket.json",
-    "tests/directruntime-20261104/memory-references/V1StorageCases.lean",
-    "all four exact trimmed JSON fixtures at ticket paths"
+    "all four exact trimmed JSON fixtures at ticket paths; absent from fetched consumer commit and examined recorded bulk-source/history objects"
   ],
-  "nextReadOnlyPrerequisite": "Authenticated consumer/fixture bytes or bundle at stated hashes/head for exact-type/refusal readback. No unauthorized fetch/ref update was attempted.",
+  "nextReadOnlyPrerequisite": "Supply the four exact SHA256/FNV-pinned trimmed JSON inputs or a checksum-bound archive. Consumer and ticket metadata are now recovered and authenticated; do not regenerate/substitute fixtures to claim reproduction.",
   "scopePreserved": [
     "primitive guard",
     "original statements/premises/exclusions",
@@ -61,5 +58,14 @@
     "intrinsic types and trust boundary"
   ],
   "ordinaryResults": "Requester-reported four ordinary native/browser results remain pending; not independently reproduced locally. Intrinsic negative controls are not substituted.",
-  "actions": "Read-only source/hash/object checks only; no Lean execution, producer edits, profile extension, external notification or publication."
+  "actions": "Read-only source/hash/object checks only; no Lean execution, producer edits, profile extension, external notification or publication.",
+  "recoveredReadOnly": {
+    "consumerCommitAvailable": true,
+    "intakeManifest": "/workspace/dafny-storage-owner-response-20261107/INTAKE.json",
+    "consumerAndTicketHashesVerified": true,
+    "refsUnchanged": true,
+    "fetchHeadUnchanged": true,
+    "source": "Exact object-only fetch from existing origin; no merge/ref update"
+  },
+  "consumerProbeFinding": "Recovered V1StorageCases.lean imports/scopes four goals, calls refuteSourceCandidateV1?, and deliberately asserts candidate.isNone and retained theorem absence. It is a refusal/capability probe, not a command that persists a successful refutation theorem. It has not been executed locally because the four hash-pinned JSON inputs are absent."
 }
