@@ -1,6 +1,10 @@
 import Solidity.Semantics.Run
 import Solidity.Calculus.WkOver
 
+-- Retain legacy elaboration of the original dependent run/weakening proofs.
+-- Statements and proof budgets remain unchanged; kernel checking stays active.
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # A weakened program runs as the program, typed
 
@@ -1442,10 +1446,9 @@ theorem TRun.pushAfterPrefix_wk {Γ Δ Γv Δv : Ctx} {E : Ty} (h : Thin Γ Δ)
       | error err => rfl
       | ok v =>
         dsimp only [State.lift, State.withEnv]
-        cases hf : a.st.storage.full ref with
-        | true => rfl
-        | false =>
-          cases hs : a.st.storage.push ref (fun _ => some v.strip) with
+        split
+        · rfl
+        · cases hs : a.st.storage.push ref (fun _ => some v.strip) with
           | none => rfl
           | some st =>
             exact TWkRel.drop ho (r₀ := .ok ⟨a.st.withStorage st, a.ext⟩)

@@ -412,5 +412,15 @@ run_cmd Lean.modifyEnv fun env =>
     ``Solidity.TacletAnnotations.ReadSite.toCtorIdx,
     ``Solidity.TacletAnnotations.SortVarcond.toCtorIdx].foldl Lean.Meta.addToCompletionBlackList env
 
+
+/-! Retain cache-bound Lean 4.24 reducibility of public constructor-index helpers. -/
+attribute [reducible]
+  Solidity.TacletAnnotations.ReadDomain.ctorIdx
+  Solidity.TacletAnnotations.ReadSite.ctorIdx
+  Solidity.TacletAnnotations.ReadSort.ctorIdx
+  Solidity.TacletAnnotations.SortVarcond.ctorIdx
+  Solidity.TacletAnnotations.TacletRead.ctorIdx
+  Solidity.TacletAnnotations.TacletReadAnn.ctorIdx
+
 end TacletAnnotations
 end Solidity

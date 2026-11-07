@@ -497,8 +497,8 @@ condition `inTyCond` writes. -/
 `uint256` and `int256` are `PrimTy.ofName?`'s. -/
 def narrowTy? (s : String) : Option (PrimTy × Nat) :=
   let (p, ds) :=
-    if s.startsWith "uint" then (PrimTy.uint, s.drop 4)
-    else if s.startsWith "int" then (PrimTy.int, s.drop 3)
+    if s.startsWith "uint" then (PrimTy.uint, (s.drop 4).copy)
+    else if s.startsWith "int" then (PrimTy.int, (s.drop 3).copy)
     else (PrimTy.bool, "")
   match ds.toNat? with
   | some n =>
@@ -838,5 +838,30 @@ def RawExpr.bytesLit?.match_3.{u_1} : type_of% RawExpr.bytesLit?.match_4.{u_1} :
     (fun f names args => h_2 (Solidity.RawExpr.named f names args)) (fun k => h_2 (Solidity.RawExpr.env k))
     (fun es => h_2 (Solidity.RawExpr.tuple es)) (fun l r => h_2 (l.assign r)) fun op l r =>
     h_2 (Solidity.RawExpr.opAssign op l r)
+
+
+/-! Retain cache-bound Lean 4.24 reducibility of public constructor-index helpers. -/
+attribute [reducible]
+  Solidity.ArrTy.ctorIdx
+  Solidity.Contract.ctorIdx
+  Solidity.EnvKey.ctorIdx
+  Solidity.EvalOrder.ctorIdx
+  Solidity.FunDecl.ctorIdx
+  Solidity.InContract.ctorIdx
+  Solidity.IndexTy.ctorIdx
+  Solidity.ModApp.ctorIdx
+  Solidity.OFMode.ctorIdx
+  Solidity.ParamLoc.ctorIdx
+  Solidity.RawExpr.ctorIdx
+  Solidity.RawInv.ctorIdx
+  Solidity.RawLoopSpec.ctorIdx
+  Solidity.RawStmt.ctorIdx
+  Solidity.RawTy.ctorIdx
+  Solidity.SourceAbiVisibility.ctorIdx
+  Solidity.SourceCallable.ctorIdx
+  Solidity.SourceFunction.ctorIdx
+  Solidity.SourceLocalVisibility.ctorIdx
+  Solidity.SourceMutability.ctorIdx
+  Solidity.SourceSelection.ctorIdx
 
 end Solidity

@@ -1,6 +1,10 @@
 import Solidity.Semantics.RunWk
 import Solidity.Calculus.WkOver
 
+-- Retain legacy elaboration of the original typed frame rewrites.
+-- All statements and proof budgets remain unchanged; kernel checks stay active.
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # A loop body runs within its frame, typed
 
