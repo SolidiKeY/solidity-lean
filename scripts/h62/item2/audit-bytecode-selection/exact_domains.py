@@ -71,9 +71,14 @@ for method in ("tail_raw", "region_raw", "tail_correct", "region_correct", "tail
 for field in ("tail_correct", "region_correct", "tail_capacity", "region_capacity"):
     TARGETS["offset_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate." + field
 
+for method in ("correct", "capacity", "classified", "early_revert"):
+    TARGETS["head_check_method_" + method + "_domain"] = "Solidity.Backend.AbiEntry.HeadCheck." + method
+for field in ("correct", "capacity", "classified", "early_revert"):
+    TARGETS["head_check_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate." + field
+
 
 PRODUCERS = ["Solidity/Backend/AbiEntry/" + name + ".lean" for name in
-             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface", "TailGuard", "TailGuardInterface", "RawTailGuard", "RawTailGuardInterface", "TailGuardControls", "LengthCheck", "LengthCheckInterface", "LengthCheckControls", "OffsetChecks", "OffsetChecksInterface", "OffsetChecksControls")]
+             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface", "TailGuard", "TailGuardInterface", "RawTailGuard", "RawTailGuardInterface", "TailGuardControls", "LengthCheck", "LengthCheckInterface", "LengthCheckControls", "OffsetChecks", "OffsetChecksInterface", "OffsetChecksControls", "HeadCheck", "HeadCheckInterface", "HeadCheckControls")]
 
 
 def sha(raw):
@@ -99,7 +104,7 @@ def render(macro_source, fixture):
         raise ValueError("forbidden fixture mechanism")
     fragment = macro_fragment(macro_source)
     return ("import Lean\nimport Solidity.Backend.AbiEntry.HeadGate\n"
-            "import Solidity.Backend.AbiEntry.WordGate\nimport Solidity.Backend.AbiEntry.SingleWordGate\nimport Solidity.Backend.AbiEntry.BoolBinding\nimport Solidity.Backend.AbiEntry.RawTailGuard\nimport Solidity.Backend.AbiEntry.TailGuardControls\nimport Solidity.Backend.AbiEntry.LengthCheckControls\nimport Solidity.Backend.AbiEntry.OffsetChecksControls\n\n"
+            "import Solidity.Backend.AbiEntry.WordGate\nimport Solidity.Backend.AbiEntry.SingleWordGate\nimport Solidity.Backend.AbiEntry.BoolBinding\nimport Solidity.Backend.AbiEntry.RawTailGuard\nimport Solidity.Backend.AbiEntry.TailGuardControls\nimport Solidity.Backend.AbiEntry.LengthCheckControls\nimport Solidity.Backend.AbiEntry.OffsetChecksControls\nimport Solidity.Backend.AbiEntry.HeadCheckControls\n\n"
             "/-! Guards omission of implicit/self/proof binders from joint hypotheses.\n"
             "Only the original conclusion is replaced by True; no census acceptance follows. -/\n"
             + fragment + "\n" + fixture + "\nend " + NAMESPACE + "\n")

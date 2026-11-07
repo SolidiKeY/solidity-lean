@@ -1900,3 +1900,31 @@ whitespacePASS. Strict native/replay/tactic evidence remains separately required
 PendingQ-WV-SCOPE-01 is not a blocker to original mapped work; no answer is
 interpreted as supplemental-scope approval. Global28pins/fullsource/runtime
 validation and original obligations remain unwaived.
+
+
+### Head-check simultaneous domains (2026-11-07)
+
+The existing exact-domain renderer now covers eight mapped HeadCheck method and
+certificate fields, for 103 selected original declarations. The additive joint
+witness binds the same code/certificate to a 35-byte short head (flag 1), the
+36-byte head boundary (false short-head flag), short-head rejection before fuel,
+and a dirty 36-byte payload that still reverts. It also preserves the saturated
+huge-layout metadata control, peak-one frame code, valid capacity and height-1024
+refusal. Clearing the short-head predicate is not payload admission.
+
+The guarded native probe passed in 29.475 s and strict axiom guards in 27.171 s;
+112 guards use only the existing standard axiom sets. All 252 selected imports
+were rebound to the saved source/product receipts. Finder and skeptic found no
+material fidelity or vacuity issue; their flag-polarity clarity note is reflected
+here. No producer, statement, budget, exclusion or toolchain changed.
+
+Evidence: `/workspace/parallel-20261103/executable-bytecode/head-check-domains`.
+This is selected hypothesis/packet evidence, not Source/native/gas/fork adequacy,
+global census coverage, or a full lane pass. The original PowerBounds STOP and
+703-source/190-core/37-Bridge obligations remain. Q-WV-SCOPE-01 is unanswered;
+the separate nine WordValidation domains remain uncredited.
+
+Checkpoint static exception: doc-paths exits1 for newly adopted master's
+`Solidity/Yul/Compilation/P20InterfaceV2Controls.lean` reference to missing
+`tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean`. This is preserved
+as an upstream documentation wait, not counted as a passing gate.

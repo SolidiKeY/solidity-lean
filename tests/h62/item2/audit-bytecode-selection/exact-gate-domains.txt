@@ -1023,3 +1023,108 @@ theorem offset_predicate_joint :
 #guard_msgs (whitespace := lax) in #print axioms offset_method_region_capacity_domain
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_predicate_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms offset_predicate_joint
+
+
+private def headShortInput : Solidity.AbiEntry.Input := {data := List.replicate 35 0, free := 0}
+private def headDirtyInput : Solidity.AbiEntry.Input := {data := List.replicate 35 0 ++ [2], free := 0}
+private def hugeHeadParameters : List Solidity.AbiEntry.Param :=
+  [{shape := .fixed (.word (.uint 256)) (2^256),loc := .memory}]
+
+/-- Preserve the emitted function, common global self, parameters and frame. -/
+theorem head_check_certificate_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.correct := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,sampleParameters,35,[258,513],True.intro⟩
+
+theorem head_check_certificate_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.capacity := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,sampleParameters,[258,513],by decide,True.intro⟩
+
+/-- Size representation is an actual initial fact, not successful decoding. -/
+theorem head_check_certificate_classified_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.classified := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,headShortInput,sampleParameters,35,[258,513],by decide,True.intro⟩
+
+theorem head_check_certificate_early_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.early_revert := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,headShortInput,0,sampleParameters,by decide,True.intro⟩
+
+theorem head_check_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.correct := by
+  exact ⟨sampleParameters,35,[258,513],True.intro⟩
+
+theorem head_check_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.capacity := by
+  exact ⟨sampleParameters,[258,513],by decide,True.intro⟩
+
+theorem head_check_method_classified_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.classified := by
+  exact ⟨headShortInput,sampleParameters,35,[258,513],by decide,True.intro⟩
+
+theorem head_check_method_early_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.early_revert := by
+  exact ⟨headShortInput,0,sampleParameters,by decide,True.intro⟩
+
+/-- Guard conflating a passed short-head predicate with full entry admission.
+Actual size representation, boundary flags, early-before-fuel failure, dirty
+payload refusal, huge METADATA saturation and physical capacity coexist.
+No huge buffer is allocated and no native/gas/Source behavior is certified. -/
+theorem head_check_joint :
+    ∃ _certificate : HeadCheckCertificate HeadCheck.code,
+      headShortInput.size=35 ∧ headDirtyInput.size=36 ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code sampleParameters) (35::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code sampleParameters) (36::[258,513])=some (0::[258,513]) ∧
+      Solidity.AbiEntry.entry headShortInput 0 sampleParameters=.error .revert ∧
+      Solidity.AbiEntry.entry headDirtyInput 2 sampleParameters=.error .revert ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code hugeHeadParameters) (36::[258,513])=
+        some (Solidity.Backend.Scalar.flag true::[258,513]) ∧
+      (HeadCheck.frameCertificate sampleParameters 35).peak=1 ∧
+      Solidity.Backend.Scalar.run (HeadCheck.frameCertificate sampleParameters 35).code
+        (35::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.stackBound (HeadCheck.code sampleParameters) 3=true ∧
+      Solidity.Backend.Scalar.stackBound (HeadCheck.code sampleParameters) 1024=false := by
+  have early : Solidity.AbiEntry.entry headShortInput 0 sampleParameters=.error .revert :=
+    HeadCheck.certificate.early_revert headShortInput 0 sampleParameters (by decide)
+  exact ⟨HeadCheck.certificate,by decide,by decide,
+    HeadCheckControls.one_word_boundary.1,HeadCheckControls.one_word_boundary.2,
+    early,HeadCheckControls.passed_head_not_entry.2,HeadCheckControls.huge_is_short 36,
+    rfl,HeadCheckControls.one_word_boundary.1,
+    HeadCheck.certificate.capacity sampleParameters [258,513] (by decide),
+    HeadCheckControls.height_refusal⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_correct_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_capacity_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_classified_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_classified_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_early_revert_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_early_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_correct_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_classified_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_classified_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_early_revert_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_early_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_joint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_joint
