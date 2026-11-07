@@ -12,14 +12,12 @@ Original base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Branch: `codex/solidity-h62-2-20261106/audit-evm-compiler`.
 Repository: `/workspace/audit-evm-compiler`; old clean checkout
 `/workspace/solidity-lean` preserved.
-Authorized origin/master fast-forward: `e0f4251ff40ad79c37bae53795b7419afe52e8d9`,
-containing the saved checkpoint `8c5f94743c5503c72d5efc53d2603c43ccc3095f`.
-The existing branch and history are preserved. All 160 originally assigned source
-files remain byte-identical to original base. Added module-map rows remain
-outside the frozen scope. The original 321-file dependency closure is unchanged
-since the preceding integration, so its live captures remain valid with the
-same three pending raw-type differences from original base. Core and Bridge
-freshness checks pass. No original source or dependency definition was edited.
+Authorized origin/master fast-forward: `3c2734000413fb142b186e93387306bbb01fd181`,
+containing the saved checkpoint `3dc9a596acb5843f17272e0676ab472b902d2071`.
+The original branch, VM and history are preserved. The original 160 source files
+and 321-file dependency closure remain unchanged since the preceding integration.
+Original/live type captures stay separate, with the same three pending raw-type
+differences from the original base. No original source definition was edited.
 
 H82 permits statement-preserving edits without exact-file agreement; changing
 existing statements, dependent definitions, signatures, budgets, axiom sets or
@@ -462,3 +460,49 @@ whole-map identity remains failed after eight coordinator additions; the
 separate original-scope rescan passes without enrolling those additions. The
 previous fragment wait is resolved. Full root/library gates and the three
 frozen-type owner tickets remain pending; no RUNTIME_GATE_PASS is issued.
+
+## Review clarification and actual checked-entry observation
+
+The five LoopSelectorAudit packages establish binder-level satisfiability only.
+They instantiate all original arguments together. They do not show that Input,
+Room or Rep is satisfiable: those predicates occur in equivalence conclusions.
+The updated classification text makes this boundary explicit without changing
+any proof, original statement, signature, coverage status or exclusion.
+
+The index archive_member continuation-2/evidence-manifest.json is intentional.
+An authenticated check finds exactly one regular archive member at that path;
+its bytes, size and SHA256 match the index, and its archive_root is continuation-2.
+It is the compatibility transport prefix, not a checkpoint identifier. The
+archive filename and integration metadata identify each checkpoint.
+
+[CheckedEntryAudit](../../tests/h62/item2/audit-evm-compiler/CheckedEntryAudit.lean)
+connects the actual Compiler.compile result to the existing nonempty setAge
+observation. The closed admission certificate and the owner's read-only
+compile_core_some theorem select the core result; its code executes normally
+with zero pending jumps and writes 10 at storage slot 13. This result concerns
+the actual checked entry rather than a manually supplied Some code candidate.
+
+Four negative controls show that this actual output differs from rejection,
+revert-only code, empty code and code with the correct write followed by an
+unresolved jump. All use the unchanged WritesAge observation. They cover one
+supported intrinsic-model fixture; they establish no general totality, Source
+adequacy or external EVM gas/fork result. Owner modules are imported read-only
+and their new declarations are not enrolled in the original census.
+
+The increment adds five checked theorems and one code-observation definition.
+Seventeen audit modules check 148 printed theorem declarations. Original census
+accounting stays 345 (56 joint, 52 intentional impossibilities, 237 closed),
+with 1,485 pending and 1,793 producer owners unresolved. All four original
+checkpoints remain partial. The three frozen-type tickets, broader success and
+failure coverage and full root/library gates remain open.
+
+The current handoff directory is continuation-7-handoff under the evidence root.
+It preserves the original rendered assignment, full work/backfill queue, exact
+scope manifest, cumulative owned patch and named branch bundle. No original
+statement, budget, axiom set or observation changed. No push, master mutation,
+new goal, reset, pause or completion is performed.
+
+Current layer, fragment and documentation-path checks pass; the latter reports
+140 ambiguity warnings. Strict whole-map identity remains failed after eight
+coordinator additions. The original-scope rescan and all seventeen per-file
+checks pass. Full root/library gates and type-owner tickets remain unfinished.
