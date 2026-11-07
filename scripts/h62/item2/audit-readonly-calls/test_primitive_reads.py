@@ -1,6 +1,8 @@
 """Guard parent-source drift and unadmitted primitive-read client inventories."""
 import hashlib
 import copy
+import subprocess
+import types
 import importlib.util
 from pathlib import Path
 import tempfile
@@ -12,7 +14,8 @@ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 g=m.gate
 class PrimitiveReadControls(unittest.TestCase):
     def test_exact_client_inventory(self):
-        raw=(g.ROOT/g.SOURCE).read_bytes()
+        raw=subprocess.check_output(['git','show','abcf292e41410f0ba4eb379dd554c4269f1ec735:'+g.SOURCE],cwd=g.ROOT)
+        self.assertEqual(hashlib.sha256(raw).hexdigest(),'9d472ee503f88453294b6328c10925ca4837a195e9fbe4de98f3a2302d2e11f8')
         self.assertEqual(len(g.inventory(raw)),11)
         self.assertEqual(len(set(g.INTERFACES)),8)
         for bad in [b'import Extra.Module\n'+raw,raw+b'\nnamespace Extra\ntheorem extra : True := True.intro\nend Extra\n']:
@@ -53,6 +56,12 @@ class CoverageControls(unittest.TestCase):
         self.types={mode:{'declarations':[{'source_name':n,'raw_type_sha256':n} for n in g.INTERFACES]} for mode in self.pair}
         self.pins={'frozen':'f'*64,'current':'c'*64}
     def apply(self):return self.c.apply(self.f,self.cov,self.pair,self.types,self.pins)
+    def test_old_default_accounting_is_unchanged(self):
+        path=Path(__file__).with_name('primitive_read_coverage.py')
+        raw=subprocess.check_output(['git','show','abcf292e41410f0ba4eb379dd554c4269f1ec735:'+str(path.relative_to(g.ROOT))],cwd=g.ROOT)
+        old=types.ModuleType('historical_default_collector');old.__file__=str(path)
+        exec(compile(raw,str(path),'exec'),old.__dict__)
+        self.assertEqual(self.apply(),old.apply(self.f,self.cov,self.pair,self.types,self.pins))
     def test_only_selected_originals_change(self):
         before=copy.deepcopy(self.f);rows,cov,delta=self.apply()
         self.assertEqual(self.f,before);self.assertEqual(rows['declarations'][8:],before['declarations'][8:])

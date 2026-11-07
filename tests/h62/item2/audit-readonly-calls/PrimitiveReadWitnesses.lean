@@ -1,8 +1,9 @@
-import Solidity.Lowering.Readonly.PrimitiveReads
+import Solidity.Lowering.Readonly.ReadStatement
 
 /-! Guard vacuous empty layouts and constant/head-only primitive readers.
 The SAME two declared Bool fields, nonempty locals, Source store and intrinsic
-store instantiate eight original public interfaces. True at the head and false
+store instantiate primitive read interfaces and their read-statement extension.
+True at the head and false
 at the tail distinguish selected names and actual values. This is joint premise
 satisfiability and primitive evaluator checking, not compiler/call/frame adequacy. -/
 namespace Solidity.H62.ReadonlyAudit.PrimitiveReadWitnesses
@@ -87,5 +88,75 @@ theorem head_only_refused :
   rw [target_expression_joint]
   intro same
   cases same
+
+
+/-- Explicit global records are inhabited at the SAME actual expression inputs.
+No callee/body execution is inferred from their existence. -/
+def global : Glob environment where
+  prog := { body := fun _ => none, consts := fun _ => none, inits := fun _ => [],
+            ctor := fun _ => none, ctorLocals := fun _ => [], baseArgs := fun _ => [], contracts := [] }
+  pipeline := .legacy
+  fixed := { evm := { keccak := fun _ => 0, keccak_lt := fun _ => by decide,
+                      precompile := fun _ _ => none, precompileGas := fun _ _ => 0 },
+             ledger := fun balance _ a => balance a, regionLen := 1, rootSlots := 1 }
+  balance0 := fun _ => ⟨0,by decide⟩
+  hasCode := fun _ _ => false
+  callee := fun _ => .answer (.success [])
+  timestamp := ⟨0,by decide⟩
+
+def targetWithLocal : Solidity.State contract [.val .bool] := targetState.push (t := .val .bool) true
+
+def writing : Prog contract [.val .bool] [.val .bool] :=
+  .cons (.assign (.root "a" rfl) (.val (.simple (.bool false)))) .nil
+
+theorem source_expression_joint :
+    (evalE global frame 1 (.state second rfl)).run (locals,source) =
+      (.ok (.val (.bool false)),(locals,source)) :=
+  PrimitiveReads.source_expression global frame 0 second .bool rfl rfl rfl rfl locals source false rfl
+
+theorem root_expression_joint : ∃ binding : Binding environment "b" .bool, ∃ value : PrimTy.bool.Denote,
+    (evalE global frame 1 (.state binding.declaration binding.signature)).run (locals,source) =
+      (.ok (.val (toSource environment.layout .bool value)),(locals,source)) ∧
+    (Solidity.Val.read (.root "b" rfl) : Solidity.Val contract [.val .bool] .bool).evalT targetWithLocal = .ok value :=
+  PrimitiveReads.root_expression global frame 0 fields locals source targetWithLocal "b" .bool rfl related
+
+theorem source_statement_joint :
+    (execS global frame 2 0 none
+      (RStmt.expr (R := []) (M := false) (k := .body) (.state second rfl)) locals).run (L0 environment,source) =
+      (.ok (.normal locals),(L0 environment,source)) :=
+  ReadStatement.source_run global frame 0 0 none second .bool rfl locals source false source_expression_joint
+
+theorem target_statement_joint :
+    (ReadStatement.target "b" .bool (C := contract) (Ξ := [.val .bool]) rfl).run targetWithLocal =
+      .ok ⟨targetWithLocal,List.prefix_refl _⟩ :=
+  ReadStatement.target_run targetWithLocal "b" .bool rfl false
+    (PrimitiveReads.target_expression targetWithLocal "b" .bool rfl false rfl)
+
+theorem statement_simulation_joint : ∃ binding : Binding environment "b" .bool,
+    (execS global frame 2 0 none
+      (RStmt.expr (R := []) (M := false) (k := .body) (.state binding.declaration binding.signature))
+      locals).run (L0 environment,source) = (.ok (.normal locals),(L0 environment,source)) ∧
+    (ReadStatement.target "b" .bool (C := contract) (Ξ := [.val .bool]) rfl).run targetWithLocal =
+      .ok ⟨targetWithLocal,List.prefix_refl _⟩ :=
+  ReadStatement.simulation global frame 0 0 none fields locals source targetWithLocal "b" .bool rfl related
+
+theorem continuation_joint :
+    Prog.run targetWithLocal (.cons (ReadStatement.target "b" .bool rfl) writing) =
+      Prog.run targetWithLocal writing :=
+  ReadStatement.target_then targetWithLocal "b" .bool rfl false
+    (PrimitiveReads.target_expression targetWithLocal "b" .bool rfl false rfl) writing
+
+/-- The following write and original typed local survive the read/discard block. -/
+theorem continuation_writes : ∃ out,
+    Prog.run targetWithLocal (.cons (ReadStatement.target "b" .bool rfl) writing) = .ok out ∧
+      out.st.env.1 = true ∧ out.st.storage.get (f := "a") (by rfl) = .prim (p := .bool) false :=
+  ⟨_,rfl,rfl,rfl⟩
+
+/-- A following revert cannot be erased by removing the proved read/discard. -/
+theorem continuation_reverts :
+    Prog.run targetWithLocal (.cons (ReadStatement.target "b" .bool rfl) (.cons .revert .nil)) = .error .revert := by
+  rw [ReadStatement.target_then targetWithLocal "b" .bool rfl false
+    (PrimitiveReads.target_expression targetWithLocal "b" .bool rfl false rfl)]
+  rfl
 
 end Solidity.H62.ReadonlyAudit.PrimitiveReadWitnesses

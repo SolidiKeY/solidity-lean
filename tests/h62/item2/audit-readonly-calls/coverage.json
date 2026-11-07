@@ -896,6 +896,32 @@
       "frozen_receipt_sha256": "112d7275eae7bcc8ad43d3fa0e27a80f95ed57bf591be7ecd0eaa045cd291a1f",
       "current_receipt_sha256": "97895461eb9a7da8e9d24e590a0d0d891b7096d8debcefe4779ba6edb4ce7f04",
       "proof_boundary": "Joint premise satisfiability and primitive evaluator outcomes only; not compiler/Source body/call/native-frame adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.ReadStatement.target_run",
+      "signature_sha256": "3d39ec729430911e2343d9f22e51b18970fbecdbe79a6af695c14b83eb4a568c",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.PrimitiveReadWitnesses.target_statement_joint",
+      "global_premises": "Same explicitly constructed Glob, nonempty fields/source/typed locals and exact field relation; no callee execution inferred.",
+      "per_input": "Actual intrinsic second-field read at the same nonempty typed locals and target state; following assignment/revert continuations retained. Four Source-facing original type drifts receive no credit.",
+      "evidence": "read-statements/validated/frozen-accepted/receipt.json and read-statements/validated/current-accepted/receipt.json",
+      "evidence_manifest": "tests/h62/item2/audit-readonly-calls/read-statements.sha256",
+      "frozen_receipt_sha256": "77dabe72f101e76e7f06b1138333ef8891048768db33eb92c33557633b31cfb6",
+      "current_receipt_sha256": "de296db73898608cd3062f15a4e8a2d9c734fb17ed7cbebe425f104e596df1e8",
+      "proof_boundary": "Joint actual primitive expression/read-statement inputs and typed continuation results only; no compiled call/Source-world/native-frame/gas adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.ReadStatement.target_then",
+      "signature_sha256": "72eea84ada307d1a8d28d609de0a692484a0000dba3f26a188f020f652679a6b",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.PrimitiveReadWitnesses.continuation_joint",
+      "global_premises": "Same explicitly constructed Glob, nonempty fields/source/typed locals and exact field relation; no callee execution inferred.",
+      "per_input": "Actual intrinsic second-field read at the same nonempty typed locals and target state; following assignment/revert continuations retained. Four Source-facing original type drifts receive no credit.",
+      "evidence": "read-statements/validated/frozen-accepted/receipt.json and read-statements/validated/current-accepted/receipt.json",
+      "evidence_manifest": "tests/h62/item2/audit-readonly-calls/read-statements.sha256",
+      "frozen_receipt_sha256": "77dabe72f101e76e7f06b1138333ef8891048768db33eb92c33557633b31cfb6",
+      "current_receipt_sha256": "de296db73898608cd3062f15a4e8a2d9c734fb17ed7cbebe425f104e596df1e8",
+      "proof_boundary": "Joint actual primitive expression/read-statement inputs and typed continuation results only; no compiled call/Source-world/native-frame/gas adequacy."
     }
   ]
 }

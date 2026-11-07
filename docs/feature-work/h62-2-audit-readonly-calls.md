@@ -1437,3 +1437,73 @@ is absent. Owner request RO-DOC-GENERIC-V08-UNTRACKED supplies an off-git
 formatting-only patch removing those backticks, retaining the filename and
 historical claim. No other lane file was edited and no passing docs gate is
 claimed. Source intake and all792-row preservation pass independently.
+
+
+### Read/discard continuation witnesses and Source type drift (2026-11-07)
+
+Fetched and checked coordinator master6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f;
+no newer equivalent client was present. The existing primitive fixture is
+extended additively with an explicit global record, a target Bool local and
+a following assignment. Prior eleven fixture definitions and eleven proof
+bodies remain byte-identical after the namespace opener, as checked against
+abcf292e41410f0ba4eb379dd554c4269f1ec735. The import grows to ReadStatement;
+this adds checking work, not an optimization or proof-speed rebaseline.
+
+The same source/target storage and typed local inputs exercise actual Source
+expressions, Source statements and the intrinsic read/discard block. Following
+code writes a=false while retaining the old true local; a following revert
+remains a revert. No global/callee adequacy follows from constructing the global
+record: it supplies only the auxiliary primitive expression inputs. The two
+credited target contracts use intrinsic state/root/evaluation/continuation only.
+
+Strict cache reuse refused because master changed Hash/CollisionBound proof
+source. No cache check was relaxed. Final frozen53-module and current58-module
+closures were freshly compiled from captured bytes, serially within inherited
+12GiB/no-swap/4GiB-reserve bounds. All nineteen helper proofs check separately
+on both trees and expose only standard propext/Classical.choice/Quot.sound
+axioms or subsets. Frozen PASS350.477s, current PASS341.091s; per-file repository
+gate PASS102.158s. Actual Lean4.24.0/Lake5.0.0-src+797c613 and bounded KeySort
+PASS are recorded. These durations are validation costs, not comparable
+before/after performance measurements. Historical Premises +80.254966536% STOP
+is unchanged; the held workload was not rerun and no RUNTIME_GATE_PASS follows.
+
+The first full-six current gate compiled its source/witness/probe, then FAILED
+the exact original kernel-type comparison. Four Source-facing statements have
+unchanged lexical signatures/context but different elaborated types after
+evalE/execS gained default RuntimePlan arguments: PrimitiveReads.source_expression,
+PrimitiveReads.root_expression, ReadStatement.source_run and
+ReadStatement.simulation. Their C6 joint applications compile; current
+applications concern changed types. This is a type-fidelity blocker, not
+a contradiction or a proof that the original hypotheses are impossible.
+The four remain ordinary pending with zero bridge/current-fidelity credit.
+Exactly one ESCALATE record per affected declaration is retained in off-git
+read-statements/type-drift/ESCALATIONS.txt. Owner ticket RO-READ-PLAN-TRANSPORT
+requests H57 legacy/planned pairs and exact consumer/semantic transports; no
+existing interface or Source definition was edited, no premise/exclusion/budget
+was changed, and no equivalence is inferred from successful concrete runs.
+
+Only target_run and target_then match their exact frozen types on both trees.
+Paired receipt acceptance credits exactly those two: joint65→67 and ordinary
+pending421→419. All792 identities and original fields remain;790 unrelated rows
+are unchanged, including the four drift cases and three private identity gaps.
+Other counts remain3target-failure joint,45intentional impossibility,
+256no-top-level-input and2frozen-v1 refutation/migration. Earlier eight-case
+receipts bind the earlier committed fixture bytes; they are historical records,
+not verification of the extended file. New paired runs recheck all old helpers.
+
+The shared collector now accepts a restricted explicit proof mapping and
+explanatory metadata configuration. Nine legacy controls pass, including exact
+output equality with the historical eight-case collector; three new controls
+check complete19-proof inventory, old-body preservation, exact two-case mapping,
+fresh verification and held-import refusal. Finder and skeptic independently
+reviewed the final source/evidence and confirmed the two credits/four retained
+blockers without using Lean, tests, builds, a server or writes.
+
+Artifacts: /workspace/h62-audit-readonly-calls/read-statements/; committed pins
+`tests/h62/item2/audit-readonly-calls/read-statements.sha256`. Existing global
+documentation failure RO-DOC-GENERIC-V08-UNTRACKED remains pending owner adoption;
+no passing repository docs/full gate is claimed. Full H121 G42.02 Source/callee
+execution, selected compiler/world binding and physical frame remain OUR
+unfinished producer for memory-reference-structs. G42.04 body binding, nineteen
+H19/H60 transports, inherited queues, historical proof-cleanup artifact recovery
+and full acceptance remain open. No new scope question or goal change.
