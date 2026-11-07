@@ -108,7 +108,11 @@ def owner(path):
 
 
 def declarations(path):
-    source = (ROOT / path).read_text()
+    return declarations_text(path, (ROOT / path).read_text())
+
+
+def declarations_text(path, source):
+    """Apply the same scoped lexical census to explicitly supplied source bytes."""
     clean = mask(source)
     scopes = []
     variables = []

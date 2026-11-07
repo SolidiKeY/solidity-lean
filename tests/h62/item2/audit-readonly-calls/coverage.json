@@ -40,28 +40,40 @@
     {
       "source_name": "Solidity.Lowering.Readonly.SourceHistory.dispatch_getter_empty_succ",
       "signature_sha256": "f97a0e65679c104e5ed64dd546ae0d1a0b3f07cd61944cdb022f3baf12ada740",
-      "status": "pending-ro-v2",
+      "status": "frozen-v1-refuted-versioned-migration-checked",
       "proof": "Solidity.H62.ReadonlyAudit.ImpossibleDispatch.getter_empty_infeasible",
       "global_premises": "At G n is a global bounded history structure; its inhabitance cannot repair the contradictory per-input equalities",
       "per_input": "Empty input contradicts selected getter/function selector; refutation needs only a subset of exact hypotheses",
       "evidence": "proof-impossible-final.log",
-      "display_status": "pending RO v2",
+      "display_status": "V1 refuted; H69/H121 V2 partition and four consumers checked",
       "frozen_hypothesis_status": "joint-premises-refuted",
       "decision": "H69: RO publishes reachable versioned interface and explicit migration; consumers re-prove.",
-      "audit_result": "Checked joint-impossibility proof retained as H69 audit result; RO v2 migration remains pending."
+      "audit_result": "Original V1 joint premises remain refuted, never positive witnesses. Three reachable V2 branch conjunctions and nine exact interface types checked. All28 migrated headers retained and all four current-tree consumers built under gh#78. Historical timing STOP and full original fidelity/acceptance remain open.",
+      "current_owner": "audit-readonly-calls (H121)",
+      "versioned_interfaces": [
+        "Solidity.Lowering.Readonly.SourceDispatchV2.dispatch_succ",
+        "Solidity.Lowering.Readonly.SourceDispatchV2.all_at"
+      ],
+      "migration_evidence": "ro-v2-intake/evidence/migrated-consumers-current.json"
     },
     {
       "source_name": "Solidity.Lowering.Readonly.SourceHistory.dispatch_special_empty_succ",
       "signature_sha256": "216a881f37ac2fa742d861583d581a1806d8721ae2a7b4728d68b1e8e668b2d9",
-      "status": "pending-ro-v2",
+      "status": "frozen-v1-refuted-versioned-migration-checked",
       "proof": "Solidity.H62.ReadonlyAudit.ImpossibleDispatch.function_empty_infeasible",
       "global_premises": "At G n is a global bounded history structure; its inhabitance cannot repair the contradictory per-input equalities",
       "per_input": "Empty input contradicts selected getter/function selector; refutation needs only a subset of exact hypotheses",
       "evidence": "proof-impossible-final.log",
-      "display_status": "pending RO v2",
+      "display_status": "V1 refuted; H69/H121 V2 partition and four consumers checked",
       "frozen_hypothesis_status": "joint-premises-refuted",
       "decision": "H69: RO publishes reachable versioned interface and explicit migration; consumers re-prove.",
-      "audit_result": "Checked joint-impossibility proof retained as H69 audit result; RO v2 migration remains pending."
+      "audit_result": "Original V1 joint premises remain refuted, never positive witnesses. Three reachable V2 branch conjunctions and nine exact interface types checked. All28 migrated headers retained and all four current-tree consumers built under gh#78. Historical timing STOP and full original fidelity/acceptance remain open.",
+      "current_owner": "audit-readonly-calls (H121)",
+      "versioned_interfaces": [
+        "Solidity.Lowering.Readonly.SourceDispatchV2.dispatch_succ",
+        "Solidity.Lowering.Readonly.SourceDispatchV2.all_at"
+      ],
+      "migration_evidence": "ro-v2-intake/evidence/migrated-consumers-current.json"
     },
     {
       "source_name": "Solidity.Backend.WorldCalls.Callbacks.restore",
