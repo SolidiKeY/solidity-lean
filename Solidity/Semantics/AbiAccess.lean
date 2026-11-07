@@ -200,7 +200,7 @@ theorem tailRef_error {I : Input} {e : Shape} {base ptr : Nat} {x : Fail}
   repeat' split at h
   all_goals first
     | exact (Except.error.inj h).symm
-    | exact Except.noConfusion h
+    | exact (by cases h)
 
 theorem celem_step (I : Input) (f : Nat)
     (ih1 : ∀ (s : Shape) (addr len : Nat), Agree (cpart I f s addr len) (cval I f s addr len))
@@ -381,11 +381,11 @@ def catBytes (len : Nat) : Path → Except Fail Unit
 theorem catBytes_ne (len : Nat) (π : Path) : catBytes len π ≠ .error .revert := by
   unfold catBytes
   split
-  · exact fun h => Except.noConfusion h
+  · exact fun h => (by cases h)
   · split
-    · exact fun h => Except.noConfusion h
-    · exact fun h => Except.noConfusion h fun h => Fail.noConfusion h
-  · exact fun h => Except.noConfusion h fun h => Fail.noConfusion h
+    · exact fun h => (by cases h)
+    · exact fun h => (by cases h)
+  · exact fun h => (by cases h)
 
 mutual
 /-- **One access** below a reference of shape `s` at `addr` (`len` elements),
@@ -515,8 +515,8 @@ theorem cat_step1 (I : Input) (f : Nat) (ih2 : CatP2 I f) (ih4 : CatP4 I f) : Ca
       rw [if_pos hk]
       simp only [List.any_nil, Bool.false_eq_true, iff_false]
       split
-      · exact fun h => Except.noConfusion h
-      · exact fun h => Except.noConfusion h fun h => Fail.noConfusion h
+      · exact fun h => (by cases h)
+      · exact fun h => (by cases h)
     · rw [dif_neg hk] at h
       rw [if_neg hk]
       unfold miss at h
@@ -542,7 +542,7 @@ theorem cat_step1 (I : Input) (f : Nat) (ih2 : CatP2 I f) (ih4 : CatP4 I f) : Ca
       cases π with
       | nil =>
         rw [cat, any_pre_nil qs (fun x hx => (hh x hx).elim fun j ⟨r, e, _⟩ => ⟨j, r, e⟩)]
-        exact ⟨fun h => Except.noConfusion h, fun h => Bool.noConfusion h⟩
+        exact ⟨fun h => (by cases h), fun h => Bool.noConfusion h⟩
       | cons i π => rw [cat]; exact hi i π
   | fixed e n =>
     rw [cpart] at h
@@ -554,7 +554,7 @@ theorem cat_step1 (I : Input) (f : Nat) (ih2 : CatP2 I f) (ih4 : CatP4 I f) : Ca
       cases π with
       | nil =>
         rw [cat, any_pre_nil qs (fun x hx => (hh x hx).elim fun j ⟨r, e, _⟩ => ⟨j, r, e⟩)]
-        exact ⟨fun h => Except.noConfusion h, fun h => Bool.noConfusion h⟩
+        exact ⟨fun h => (by cases h), fun h => Bool.noConfusion h⟩
       | cons i π => rw [cat]; exact hi i π
   | tuple ms =>
     rw [cpart] at h
@@ -566,7 +566,7 @@ theorem cat_step1 (I : Input) (f : Nat) (ih2 : CatP2 I f) (ih4 : CatP4 I f) : Ca
       cases π with
       | nil =>
         rw [cat, any_pre_nil qs (fun x hx => (hh x hx).elim fun j ⟨r, e, _⟩ => ⟨j, r, e⟩)]
-        exact ⟨fun h => Except.noConfusion h, fun h => Bool.noConfusion h⟩
+        exact ⟨fun h => (by cases h), fun h => Bool.noConfusion h⟩
       | cons i π => rw [cat]; exact hi i π
 
 theorem cat_step2 (I : Input) (f : Nat) (ih2 : CatP2 I f) (ih3 : CatP3 I f) : CatP2 I (f + 1) := by
@@ -577,7 +577,7 @@ theorem cat_step2 (I : Input) (f : Nat) (ih2 : CatP2 I f) (ih3 : CatP3 I f) : Ca
     obtain ⟨_, rfl⟩ := h
     refine ⟨fun x hx => (by cases hx), fun t π => ?_⟩
     simp only [catSeq, List.any_nil, Bool.false_eq_true, iff_false]
-    exact fun h => Except.noConfusion h fun h => Fail.noConfusion h
+    exact fun h => (by cases h)
   | succ n =>
     rw [cseqP] at h
     rcases h1 : celemP I f e base (wrap (base + i * e.headSize)) with _ | ⟨v, p⟩ <;>
@@ -620,7 +620,7 @@ theorem cat_step3 (I : Input) (f : Nat) (ih1 : CatP1 I f) : CatP3 I (f + 1) := b
       show (Except.error Fail.revert : Except Fail Unit) = .error .revert ↔ _
       unfold miss at h'
       cases hm : e.dflt? with
-      | none => rw [hm] at h'; exact Except.noConfusion h'
+      | none => rw [hm] at h'; exact (by cases h')
       | some d =>
         rw [hm] at h'
         have : ps = [[]] := (Prod.mk.inj (Except.ok.inj h')).2.symm
@@ -637,7 +637,7 @@ theorem cat_step4 (I : Input) (f : Nat) (ih3 : CatP3 I f) (ih4 : CatP4 I f) : Ca
     obtain ⟨_, rfl⟩ := h
     refine ⟨fun x hx => (by cases hx), fun t π => ?_⟩
     simp only [catMembers, List.any_nil, Bool.false_eq_true, iff_false]
-    exact fun h => Except.noConfusion h fun h => Fail.noConfusion h
+    exact fun h => (by cases h)
   | cons m ms =>
     rw [cmembersP] at h
     rcases h1 : celemP I f m base (wrap (base + pos)) with _ | ⟨v, p⟩ <;> rw [h1] at h
@@ -686,7 +686,7 @@ theorem cat_cpart_all (I : Input) : ∀ f : Nat,
         obtain ⟨_, rfl⟩ := h
         refine ⟨fun x hx => (by cases hx), fun t π => ?_⟩
         simp only [catSeq, List.any_nil, Bool.false_eq_true, iff_false]
-        exact fun h => Except.noConfusion h fun h => Fail.noConfusion h
+        exact fun h => (by cases h)
       | succ n => simp only [cseqP] at h; cases h
     · intro e base src v ps π h; simp only [celemP] at h; cases h
     · intro ms base pos j vs ps h
@@ -696,7 +696,7 @@ theorem cat_cpart_all (I : Input) : ∀ f : Nat,
         obtain ⟨_, rfl⟩ := h
         refine ⟨fun x hx => (by cases hx), fun t π => ?_⟩
         simp only [catMembers, List.any_nil, Bool.false_eq_true, iff_false]
-        exact fun h => Except.noConfusion h fun h => Fail.noConfusion h
+        exact fun h => (by cases h)
       | cons m ms => simp only [cmembersP] at h; cases h
   | succ f ih =>
     obtain ⟨ih1, ih2, ih3, ih4⟩ := ih
@@ -777,12 +777,12 @@ theorem bodyValuesA_off (I : Input) (f : Nat) : ∀ (ps : List Param) (es : Entr
     intro es pos k
     cases es with
     | cons e es =>
-      simp only [bodyValuesA, bodyValues, Bool.false_eq_true, if_false, ih]
       cases e with
       | val v =>
-        simp only [bind, Except.bind, pure, Except.pure, Except.map, List.map_cons]
+        simp only [bodyValuesA, bodyValues, ih, bind, Except.bind, pure, Except.pure, Except.map, List.map_cons]
         cases bodyValues I f ps es (pos + p.shape.headSize) <;> rfl
       | ref addr len =>
+        simp only [bodyValuesA, bodyValues, Bool.false_eq_true, if_false, ih]
         cases eager I f p.shape pos with
         | ok v =>
           simp only [bind, Except.bind, pure, Except.pure, Except.map, List.map_cons]
@@ -791,7 +791,6 @@ theorem bodyValuesA_off (I : Input) (f : Nat) : ∀ (ps : List Param) (es : Entr
           cases x with
           | fuel => rfl
           | revert | panic =>
-            simp only
             cases cvalRef I f p.shape addr len with
             | ok v =>
               cases p.readsOnly

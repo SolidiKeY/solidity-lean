@@ -25,3 +25,7 @@ No Lean/proof build is needed or run for this packaging-only correction. Checks 
 The PAUSED request previously failed exactly: `Parameters failed connector schema validation: outcome [enum]: Value 'paused' not in allowed enum`. The tool exposes only complete/blocked. No goal completion/reset/new goal or automatic implementation continuation is authorized. This H44 packaging request does not resume implementation.
 
 No push: no applicable H71 grant was available, and the original no-push instruction remains. The successor/coordinator retrieves and integrates the final reviewable head. No master push, PR or default-branch merge occurs here.
+
+## Successor merge preservation
+
+The assurance successor retains its previously committed preservation records and `H44-OFF-TREE.json` alongside the published packaging manifest. The original held head remains in ancestry; these records preserve historical provenance and do not accept the unfinished drafts. The manifest paths identify artifacts on the original worker VM; this merge does not establish local archive availability or revalidate historical gates. The earlier successor inventory relocation and its hash remain unchanged.
