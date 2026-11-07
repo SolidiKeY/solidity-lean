@@ -1451,8 +1451,13 @@ import Solidity.Backend.Passes.SourceAdditionValue
 import Solidity.Backend.Passes.SourceAdditionValueControls
 import Solidity.Backend.Passes.SourceAdditionValuePins
 import Solidity.Backend.Passes.SourceCallBoundary
+import Solidity.Backend.Passes.SourceCallBytes
 import Solidity.Backend.Passes.SourceCallControls
 import Solidity.Backend.Passes.SourceCallFrame
+import Solidity.Backend.Passes.SourceCallProducer
+import Solidity.Backend.Passes.SourceCallProducerControls
+import Solidity.Backend.Passes.SourceCallProducerV2
+import Solidity.Backend.Passes.SourceCallProducerV2Controls
 import Solidity.Backend.Passes.SourceNarrowingValue
 import Solidity.Backend.Passes.SourceNarrowingValueControls
 import Solidity.Backend.Passes.SourceNarrowingValuePins
@@ -1505,6 +1510,7 @@ import Solidity.Backend.Passes.ValueSequencePins
 import Solidity.Backend.Passes.WidthApplication
 import Solidity.Backend.Payments.CompilerExact
 import Solidity.Backend.Payments.CoreExact
+import Solidity.Backend.Payments.EntrySuccess
 import Solidity.Backend.Payments.Headlines
 import Solidity.Backend.Payments.Versioned
 import Solidity.Backend.Payments.VersionedControls
@@ -3237,6 +3243,7 @@ import Solidity.Lowering.P8.FieldAdmission
 import Solidity.Lowering.P8.FrozenInterface
 import Solidity.Lowering.P8.GraphSchema
 import Solidity.Lowering.P8.GraphSchemaControls
+import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
 import Solidity.Lowering.P8.ResourceBoundary
 import Solidity.Lowering.P8.ResourceContractLaw1
@@ -3261,6 +3268,8 @@ import Solidity.Lowering.P8.SourceSize
 import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen
+import Solidity.Lowering.P8b.Merged
+import Solidity.Lowering.P8b.MergedControls
 import Solidity.Lowering.P8b.P8aInterface
 import Solidity.Lowering.P9.AdmissionControls
 import Solidity.Lowering.P9.CallControls
@@ -3329,6 +3338,7 @@ import Solidity.Lowering.Readonly.ResumeControls
 import Solidity.Lowering.Readonly.RootControls
 import Solidity.Lowering.Readonly.SourceAggregateReadEffects
 import Solidity.Lowering.Readonly.SourceAllHistories
+import Solidity.Lowering.Readonly.SourceAllHistoriesV2
 import Solidity.Lowering.Readonly.SourceBodyControls
 import Solidity.Lowering.Readonly.SourceBodyEffects
 import Solidity.Lowering.Readonly.SourceBuiltinEffects
@@ -3337,6 +3347,8 @@ import Solidity.Lowering.Readonly.SourceCallPrefix
 import Solidity.Lowering.Readonly.SourceCallUnknown
 import Solidity.Lowering.Readonly.SourceDispatchControls
 import Solidity.Lowering.Readonly.SourceDispatchEffects
+import Solidity.Lowering.Readonly.SourceDispatchInterfaceV2
+import Solidity.Lowering.Readonly.SourceDispatchInterfaceV2Controls
 import Solidity.Lowering.Readonly.SourceEnvironmentControls
 import Solidity.Lowering.Readonly.SourceEnvironmentEffects
 import Solidity.Lowering.Readonly.SourceExpressionEffects
