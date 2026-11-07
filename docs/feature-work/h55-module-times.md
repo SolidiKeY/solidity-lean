@@ -2565,3 +2565,23 @@ checked roles, conditional file effect, hashes and history preservation without
 Lean or a server. Evidence hashes are in
 `tests/h55/module-times/calculus-migration-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Examples migration probe observations
+
+`examples_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. ApiFixture exercises
+isolated Lean parser/elaborator/evaluator APIs, not a Solidity program property.
+InterfaceDump serializes loaded Examples constants, requires
+`H62_INTERFACE_OUTPUT` and opens that path for writing; it does not prove type
+equivalence. The historical handoff says the full dump awaits all-module
+compilation. Current invocation, inputs and outcomes remain unresolved.
+
+At `9248f6ddc804f2cf20462dfc61235909f58d9eaa`, the refreshed static index has
+823 candidates, 628 with supplied current references and 195 without; ten retain
+historical references for review. Four candidates were added, while two formerly
+referenced V10 Source AST controls changed and their old source identities and
+artifact references are retained as historical. Independent read-only finder and
+skeptic checked roles, file effect, hashes and history preservation without Lean
+or a server. Evidence hashes are in
+`tests/h55/module-times/examples-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
