@@ -1617,3 +1617,157 @@ Checkpoint documentation, roots/fragments and whitespace gatesPASS; no new
 Python or production source changed, existing82tooltests retained from the
 preceding passing checkpoint. Actual native full-record parser/reproducer
 validates every new record. No unchanged failed gate is relabeled green.
+
+
+## Typed raw-tail parent transport and joint witness
+
+Freshly fetched master05d2c2587 already adopted. Existing inspected raw-tail
+parent edge supplies an independent proof item: frozen RawTailGuard.certificate
+inhabits the child and projects the actual TailGuardCertificate at the SAME code
+parameter. Extend the one existing renderer/fixture, not a new lowering family.
+General typed lemmas transport parent correctness for all numeric operands and
+capacity with its suffix/room premise. Two new hypotheses_of% domains retain
+the exact parent code/self/operand/suffix/proof binders using the actual child
+projection. A closed conjunction exhibits child/parent equality, accepted
+scalar execution preserving suffix[258,513], capacity at height10 and refusing
+height1024, all on TailGuard.code, reusing existing producer controls.
+
+This checks instantiated parent-field use for this specific frozen edge; it is
+not general parent flattening or global inherited coverage. No native operand
+loading, encoded byte execution, Source admission or new compiler adequacy
+follows. Existing raw-tail direct fields/other public methods remain outside
+this explicit new two-field subset.70totalexactdomains+3newtransport/control
+lemmas checked;19frozenproducerleaves/249importproducts matched. Metadata
+observations for70targets use the sealed150module report without globalledger
+linkage or sourcegate promotion. Global/input premise classification and all
+other unmatched source, owner and witness obligations remain open.
+
+Direct first attempt27.948s failed ONLY two newly drafted no-axiom expected
+messages; Lean reported the approved standard pair propext/Quot.sound. Corrected
+those exact comments, not theorem statements/proofs; masked code-token equality
+verified. Initial program/manifests/diagnostics retained unaccepted. Accepted
+RawTailParentChecked nativePASS31.308s, empty diagnostics,73strictguards:
+4none/25propext/2standardpair/42standardtrio, plus2expected classifierrefusals.
+Both monitorsPASS under unchanged12GiB/noSwap/CPU1/4GiBreserve policy. Same
+05:20→09:20aggregate window retained, no reset/extension, prerequisite build,
+PowerBounds retry, heartbeat or trust increase. No new module>60s; these two
+failed/pass attempt timings are not a paired performance comparison.
+
+MCPstatus found no existing server; attempted diag in readonly sandbox failed
+socket-lock creation, not a passing diagnostic. No server installed/attached;
+native diagnostics identified the pin-only failure. Reproducer reconstructs
+accepted source/manifest from current generator, binds source/log/output hashes
+and monitors, derives axiom counts from guards, reruns import bindings and checks
+code-token equality across pin repair. Trusted fixture remains not regex-
+sandboxed, explicit native check required beyond existing82Python tests and
+seven-file verifier roster. Generated program/reports/products remain offGit.
+
+Independent readonly finder/skepticPASS, no edits/builds/Lean/server use. No
+production/interface/statement/definition/premise/exclusion/axiom-set change.
+Existing703sourceSTOP/40core+37Bridge, all broader source/correspondence/witness/
+globalledger, native/gas/fork, P10production, Bridge/package/performance and
+producer waits remain open. No RUNTIME_GATE_PASS or whole-goal completion.
+Evidence: /workspace/parallel-20261103/executable-bytecode/raw-tail-parent/.
+
+Final checkpoint82tests, trust/orphans, roots/fragments, documentation and
+whitespacePASS. Explicit native73guard/70domain check remains required; these
+static gates alone do not establish it. Existing28scoped global pins remain
+coordinator work, not changed or waived.
+
+
+## Common-input raw and reference field domains
+
+Fetched mastere0f4251ff already adopted at a75b307de. Extend the existing
+renderer/fixture with two remaining RawTailGuardCertificate direct-field domains:
+raw retains code/self/input/shape/base/pointer/protected suffix; reference also
+retains its lengthPrefixed proof. Both use the same closed child certificate,
+32zero-byte input, array-of-uint256 shape and zero base/pointer. A stronger
+joint witness combines child/parent equality, actual numeric execution on the
+represented raw operands preserving suffix[258,513], existing semantic reference
+result.ok(32,0), proven prefix premise, capacity10 and refused height1024.
+Reuses existing raw certificate/reference control rather than reproving producer
+semantics. Negative control refuses the conditional prefix premise for a word
+bool shape; no native execution trap or unsupported-compiler claim follows.
+
+72exactdomains+5othertransport/joint/refusal lemmas now checked. Direct first
+native attemptPASS25.903s, emptydiagnostics;77strictaxiomguards comprise5none,
+25propext,2standardpair,45standardtrio, plus2classifierrefusalprobes.19frozen
+producerleaves/249importproducts rechecked. Two previous parent-field witnesses
+and typed transport are preserved. These four selected field domains do not
+establish general inherited flattening, full public-method coverage or any
+global witness linkage. Actual source observations remain those of the frozen
+150module report, not current live RawUint differences or full-area closure.
+
+Replay initially refused a copied reference to the parent inspector's failed
+check1log (StopIteration/missing manifest member). Preserved initial recipe and
+repaired only parent path to acceptedcheck2; current native proof remainscheck1
+and no sealed parent artifact or proof changed. Final replayPASS reconstructs
+exact source/manifest, validates native output/log/monitors, derives actual guard
+counts, rechecks249imports and binds72targettype observations to sealed metadata.
+Independent readonly finder/skepticPASS after confirming the saved acceptance
+receipt; no reviewer builds, edits or Lean/server use.
+
+Same05:20→09:20aggregate epoch/deadline conservatively reused,12GiB/noSwap/CPU1/
+4GiBreserve and300sgroup limits unchanged. No new epoch, prerequisite build,
+PowerBounds retry, maxHeartbeats/axiom/trust change, module>60s or paired
+performance claim. No new compiler family or production module; generated
+program/reports/products stay offGit, trusted fixture still requires explicit
+native checking beyond82Python tests/seven-file verifier. No native load order,
+byte execution, Source admission, whole703source/190core/37Bridge acceptance,
+owner/remainingcorrespondence/witness/globalledger or full-package/runtime
+validation is discharged. All original producer and final-gate waits remain.
+Evidence: /workspace/parallel-20261103/executable-bytecode/raw-tail-fields/.
+
+Checkpoint82tests, trust/orphans, roots/fragments, doc paths and whitespace
+PASS. Strict native proof/replay remains separately required; no global pin,
+full-source or runtime gate is waived or inferred from these checks.
+
+
+## Public tail-method domains and initial representation fidelity
+
+Fetched master3a5b9de41 already adopted in d14210dea; registries regenerated
+without delta. Existing explicit renderer/fixture now includes all public
+theorems in TailGuard(correct/capacity/reference) and RawTailGuard(raw/reference).
+These five additions yield77exactdomains. They do not include private helpers,
+all predicate definitions or other families, and do not finish the whole census.
+TailGuard.reference retains its six initial representation equalities and prefix
+proof simultaneously on the SAME32zero-byte input/arrayuint256shape: size32,
+base0,relative0,extent32,length0,stride32,address0, pointer0. The address denotes
+the length-word header, while existing semantic reference returns data address32.
+Capacity keeps its actual room premise and populated protected suffix258,513.
+New size33 mismatch control refuses the sizeSame premise for inputsize32; this
+is not an execution-trap or native-load correctness claim.
+
+Direct native proof probePASS27.500s observed all five new domains and size
+control axiom-free. Added exact guards for those observed results, without
+changing proof declarations/tokens. Final strict nativePASS23.214s emptylog;
+83guardedtheorems=77domains+6transport/joint/refusal controls, standard sets
+11none/25propext/2pair/45trio, plus2expected classifierrefusals. Both runs
+validate proofs; they are not paired performance measurements. Existing macro
+implementation reused byte-for-byte,19frozenproducerleaves/249importproducts
+matched. Strict verifier reconstructs exact acceptedsource/manifest, binds both
+probe/strict kernel outputs/logs, checks proof-token equality ignoring only
+print/guard commands, derives all guard counts and binds77target observations
+to sealed150module metadata. No global source/ledger acceptance is promoted.
+
+Independent readonly finder/skepticPASS with no findings; representation facts
+and protected suffix/room, address interpretation, premise-only refusal, native
+hashes/monitors and limited domain claims reviewed. No edits/builds/Lean/server
+by reviewers. Same05:20→09:20aggregate epoch/deadline and12GiB/noSwap/CPU1/
+4GiBreserve/300sgroup bounds retained. No new epoch, prerequisite build,
+PowerBounds retry, maxHeartbeats/axiom/trust increase or new module>60s. No
+production/interface/statement/definition/premise/exclusion changes.
+
+Generated probes/acceptedsource/logs/products stay offGit; explicit native
+checking remains necessary beyond82Python tests/seven-file verifier. No native
+operand loading/order, encoded execution, Source admission, full703closure/
+40remainingcore+37Bridge, owner/private/global-input-inherited classification,
+remaining witness/globalledger/correspondence or Bridge/package/performance
+acceptance follows. All original producer/final-gate waits remain open; no
+RUNTIME_GATE_PASS or whole-goal completion claimed.
+Evidence: /workspace/parallel-20261103/executable-bytecode/tail-method-domains/.
+
+Final checkpoint82tests, trust/orphans, roots/fragments, doc paths and
+whitespacePASS. These checks do not replace the explicit native probe/strict
+receipts. Scoped global28pin registrations remain coordinator work; full
+source/kernel/runtime gates and original proof obligations remain unwaived.

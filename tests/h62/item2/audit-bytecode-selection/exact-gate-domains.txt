@@ -607,3 +607,164 @@ theorem unsigned_bool_rejection_domain :
 
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_bool_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms unsigned_bool_rejection_domain
+
+
+/-- Guard the regression of treating a parent-name edge as instantiated correctness.
+The same code parameter and child self determine the actual parent field type. -/
+theorem raw_tail_inherited_correct (code : Solidity.Backend.Program)
+    (self : RawTailGuardCertificate code)
+    (size base relative extent length stride address : Solidity.Backend.Scalar.Word)
+    (suffix : Solidity.Backend.Scalar.Stack) :
+    Solidity.Backend.Scalar.run code (extent::size::base::relative::length::stride::size::address::suffix)=
+      some (Solidity.Backend.Scalar.flag
+        (Solidity.AbiEntry.tailFits size.toNat base.toNat relative.toNat extent.toNat &&
+          decide (length.toNat≤Solidity.AbiEntry.lim) &&
+          Solidity.AbiEntry.regionFits size.toNat address.toNat length.toNat stride.toNat)::suffix) :=
+  self.toTailGuardCertificate.correct size base relative extent length stride address suffix
+
+/-- Guard loss of the common code parameter and room hypothesis in parent transport. -/
+theorem raw_tail_inherited_capacity (code : Solidity.Backend.Program)
+    (self : RawTailGuardCertificate code) (suffix : Solidity.Backend.Scalar.Stack)
+    (room : suffix.length+9≤1024) :
+    Solidity.Backend.Scalar.stackBound code ((suffix.length+8 : Nat) : Int)=true :=
+  self.toTailGuardCertificate.capacity suffix room
+
+/-- Exact inherited field domain, using an actual child certificate projection. -/
+theorem tail_inherited_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.TailGuardCertificate.correct := by
+  exact ⟨TailGuard.code, RawTailGuard.certificate.toTailGuardCertificate,
+    68, 4, 32, 32, 0, 32, 36, [258,513], True.intro⟩
+
+/-- Exact capacity field domain includes the same child and a populated suffix. -/
+theorem tail_inherited_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.TailGuardCertificate.capacity := by
+  exact ⟨TailGuard.code, RawTailGuard.certificate.toTailGuardCertificate,
+    [258,513], by decide, True.intro⟩
+
+/-- Guard vacuous inherited transport with one closed child, actual accepted numeric
+execution, capacity and overflowing-height refusal on the SAME emitted code.
+This certifies no native operand loading, byte execution or Source admission. -/
+theorem raw_tail_parent_joint :
+    ∃ child : RawTailGuardCertificate TailGuard.code,
+      child.toTailGuardCertificate = TailGuard.certificate ∧
+      Solidity.Backend.Scalar.run TailGuard.code
+        (32::68::4::32::0::32::68::36::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.stackBound TailGuard.code 10=true ∧
+      Solidity.Backend.Scalar.stackBound TailGuard.code 1024=false := by
+  exact ⟨RawTailGuard.certificate, rfl, TailGuardControls.accepted,
+    raw_tail_inherited_capacity TailGuard.code RawTailGuard.certificate [258,513] (by decide),
+    TailGuardControls.capacity_refused⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_inherited_correct' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_inherited_correct
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_inherited_capacity' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_inherited_capacity
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_inherited_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms tail_inherited_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_inherited_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms tail_inherited_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_parent_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_parent_joint
+
+
+private def tailInput : Solidity.AbiEntry.Input := {data := List.replicate 32 0, free := 0}
+private def tailShape : Solidity.AbiEntry.Shape := .array (.word (.uint 256))
+
+/-- Guard dropped raw-field input/shape/frame binders using the same closed child. -/
+theorem raw_tail_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.RawTailGuardCertificate.raw := by
+  exact ⟨TailGuard.code, RawTailGuard.certificate, tailInput, tailShape, 0, 0,
+    [258,513], True.intro⟩
+
+/-- Guard omission of the length-prefixed premise from reference-field witnesses. -/
+theorem raw_tail_reference_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.RawTailGuardCertificate.reference := by
+  exact ⟨TailGuard.code, RawTailGuard.certificate, tailInput, tailShape, 0, 0,
+    by decide, True.intro⟩
+
+/-- Guard replacing common raw/reference inputs with separately inhabited cases.
+The certificate, raw numeric execution, semantic reference and capacity coexist.
+No native load order, encoded execution or Source admission is claimed. -/
+theorem raw_tail_operand_joint :
+    ∃ child : RawTailGuardCertificate TailGuard.code,
+      child.toTailGuardCertificate = TailGuard.certificate ∧
+      Solidity.Backend.Scalar.run TailGuard.code
+        (rawTailOperands tailInput tailShape 0 0 ++ [258,513])=some (1::[258,513]) ∧
+      Solidity.AbiEntry.tailRef tailInput tailShape 0 0=.ok (32,0) ∧
+      tailShape.lengthPrefixed=true ∧
+      Solidity.Backend.Scalar.stackBound TailGuard.code 10=true ∧
+      Solidity.Backend.Scalar.stackBound TailGuard.code 1024=false := by
+  have pass : rawTailCondition tailInput tailShape 0 0=true := by decide
+  have executed : Solidity.Backend.Scalar.run TailGuard.code
+      (rawTailOperands tailInput tailShape 0 0 ++ [258,513])=some (1::[258,513]) := by
+    have raw : Solidity.Backend.Scalar.run TailGuard.code
+        (rawTailOperands tailInput tailShape 0 0 ++ [258,513])=
+        some (Solidity.Backend.Scalar.flag (rawTailCondition tailInput tailShape 0 0)::[258,513]) :=
+      RawTailGuard.certificate.raw tailInput tailShape 0 0 [258,513]
+    simp only [pass, Solidity.Backend.Scalar.flag, ite_true] at raw
+    exact raw
+  exact ⟨RawTailGuard.certificate, rfl, executed, TailGuardControls.raw_empty_array,
+    by decide,
+    raw_tail_inherited_capacity TailGuard.code RawTailGuard.certificate [258,513] (by decide),
+    TailGuardControls.capacity_refused⟩
+
+/-- Guard applying the conditional reference field to a non-prefixed shape.
+This is a refused premise, not a claim of a native execution trap. -/
+theorem raw_tail_unprefixed_refused :
+    ¬ ((.word .bool : Solidity.AbiEntry.Shape).lengthPrefixed=true) := by decide
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_raw_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_reference_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_reference_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_operand_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_operand_joint
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_unprefixed_refused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_unprefixed_refused
+
+
+/-- Guard omission of the public correctness method's numeric/frame binders. -/
+theorem tail_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.correct := by
+  exact ⟨32, 0, 0, 32, 0, 32, 0, [258,513], True.intro⟩
+
+/-- Guard loss of the public method's actual room premise. -/
+theorem tail_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.capacity := by
+  exact ⟨[258,513], by decide, True.intro⟩
+
+/-- All six initial operand-representation facts coexist with the SAME input,
+shape and prefix premise. No successful native load is assumed. -/
+theorem tail_method_reference_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.TailGuard.reference := by
+  exact ⟨tailInput, tailShape, 0, 32, 0, 0, 32, 0, 32, 0,
+    by decide, by decide, by decide, by decide, by decide, by decide,
+    by decide, True.intro⟩
+
+/-- Public raw method uses the exact common input/shape/protected suffix. -/
+theorem raw_tail_method_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.RawTailGuard.raw := by
+  exact ⟨tailInput, tailShape, 0, 0, [258,513], True.intro⟩
+
+/-- Public reference method retains its length-prefix hypothesis. -/
+theorem raw_tail_method_reference_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.RawTailGuard.reference := by
+  exact ⟨tailInput, tailShape, 0, 0, by decide, True.intro⟩
+
+/-- Guard forged initial-size facts in a reference-method witness.
+This rejects a representation premise, not native execution. -/
+theorem tail_initial_size_mismatch_refused :
+    ¬ ((33 : Solidity.Backend.Scalar.Word).toNat=tailInput.size) := by decide
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_method_reference_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_method_reference_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_method_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_method_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.raw_tail_method_reference_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms raw_tail_method_reference_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_initial_size_mismatch_refused' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms tail_initial_size_mismatch_refused

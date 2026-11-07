@@ -32,7 +32,7 @@ class RegistryTest(unittest.TestCase):
         return directory
     def test_complete_reference_ledger(self):
         result=m.build(self.inventory,m.maps())
-        self.assertEqual(result["counts"],dict(conservative_rows=3281,mapped_rows=69,mapped_joint_bundles=57,mapped_data_inhabitants=12,unmapped=3212))
+        self.assertEqual(result["counts"],dict(conservative_rows=3281,mapped_rows=72,mapped_joint_bundles=57,mapped_data_inhabitants=15,unmapped=3209))
         self.assertEqual(len({r["id"] for r in result["rows"]}),3281)
         self.assertEqual(len(result["witness_source_sha256"]),12)
     def test_corruption_refused(self):

@@ -20,6 +20,7 @@ remain under the authorized tests prefix until area-owner-approved registration:
 | InputFixture | Solidity.Evm.Compiler, Lean | Safe correlated audit fixtures from exact closed public Input certificates, with rejection guards |
 | SelectorAudit | InputFixture, JointWitness, five frozen memory example modules | Five ordinary compiler selector-equivalence joint input packages |
 | CopySelectorAudit | InputFixture, JointWitness, read-only copy/fixed-memory examples | Five complete premise packages; includes explicit copy-free guard and output-data equivalence without Rep/success claims |
+| LoopSelectorAudit | SelectorAudit, Solidity.Evm.MemoryCompileExamples | Remaining five Compiler joint premise packages; nonempty loop certificates and arbitrary typed construction output, without Input/Room/Rep/success assertions |
 
 The metadata inspector imports Lean only as an external tool. It is not part
 of the dependency-free intrinsic core.

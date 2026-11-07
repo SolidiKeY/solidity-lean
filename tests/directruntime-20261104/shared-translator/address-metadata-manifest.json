@@ -1,0 +1,86 @@
+{
+  "guardedRegression": "Address16 metadata receipt must not establish inspection of undelivered runtime payloads or release STOPs",
+  "checkpointBase": "d93f6839c613468610ea488356b174cd183e3772",
+  "tooling": [
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/verify-handoff-metadata.py",
+      "sha256": "71b96917f6071f45f8629850e1513b9b9ec644cbfa723b7e1787c0978eb65eb7"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/handoff-metadata-controls.py",
+      "sha256": "97594c4f964b0a1c0f3affb69e24b99ead4f4b0b0d91e6cdc52cc825dc75eee8"
+    }
+  ],
+  "archive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/address-metadata-evidence.tar.gz",
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/address-metadata-evidence.tar.gz",
+    "sha256": "c3f209ec1a970442b2af258ede561dfb85e0c86a9ca5c9ea6e66e67b2183e8fa",
+    "bytes": 8630
+  },
+  "handoff": {
+    "archiveMember": "handoff.ticket",
+    "sha256": "5bdf0e65c060c2570d59e81e2368744741c3e9972e84edf0269df95851b98d9e",
+    "bytes": 23906
+  },
+  "gitManifest": {
+    "head": "a14d56c9a8d45f5b085c2a5f3f15882916779716",
+    "repositoryRelative": "tests/directruntime-20261104/native-browser/address/post-merge-manifest.json",
+    "sha256": "0ef980d6a84b1a6b1cdf4fb5b3cfb1885534d1b1083a7b01b92fe043e852d8ba"
+  },
+  "report": {
+    "archiveMember": "report.json",
+    "sha256": "fb7072644ae56467dd0416e24a0a9b103567fc6994e3a3499c979dffc319eee0"
+  },
+  "gates": [
+    {
+      "command": [
+        "python3",
+        "tests/directruntime-20261104/shared-translator/verify-handoff-metadata.py",
+        "--handoff",
+        "tests/directruntime-20261104/shared-translator/artifacts/address-metadata/handoff.ticket",
+        "--report",
+        "tests/directruntime-20261104/shared-translator/artifacts/address-metadata/report.json"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0608229960052995,
+      "log": "tests/directruntime-20261104/shared-translator/artifacts/address-metadata/gate-1.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/directruntime-20261104/shared-translator/handoff-metadata-controls.py"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.13128293699992355,
+      "log": "tests/directruntime-20261104/shared-translator/artifacts/address-metadata/gate-2.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/directruntime-20261104/shared-translator/audit.py"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.1326388119996409,
+      "log": "tests/directruntime-20261104/shared-translator/artifacts/address-metadata/gate-3.log"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.025095959004829638,
+      "log": "tests/directruntime-20261104/shared-translator/artifacts/address-metadata/gate-4.log"
+    }
+  ],
+  "reviews": {
+    "finder": "Read-only: no concrete defect. Pins/counts/paths/failure and missing-payload boundaries verified; no Lean/server/build/writes.",
+    "skeptic": "Read-only: no confirmed blocker. Two Git pins only; declared metadata cannot imply receipt contents, binary parity or runtime acceptance. No Lean/server/build/writes."
+  },
+  "limits": [
+    "Metadata and two Git source pins only; all six address payloads/indexes absent at capture.",
+    "No runtime/Lean/build/benchmark rerun. No production source, statement, interface, premise, budget, axiom or exclusion change.",
+    "Original H90/importer/Binding/ControlTuple queue remains incomplete; runtime holds remain."
+  ]
+}
