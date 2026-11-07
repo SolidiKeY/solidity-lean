@@ -1,0 +1,54 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/MemoryJoinedOutputControls.lean",
+  "interface_sha256": "31a0e729f085c033295067bc57ff4348acb8c0fe7406b0d5e3b0584c56dcd7ea",
+  "guarded_regression": "shared final map must precede caller-tail quantification; reached failure supplies no output map",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedOutput.Controls.public_shared",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedOutputControls.lean",
+      "line": 11,
+      "character_span": [
+        485,
+        1118
+      ],
+      "signature": "theorem public_shared :\n    \u2203 whole : CompiledProg 1 (Frag.init [])\n      (ReachabilityControls.populatedBuilder.join (appendAllocation.join capture)),\n      Memory.compileProg 1 (Frag.init [])\n        (ReachabilityControls.populatedBuilder.join (appendAllocation.join capture)) = some whole \u2227\n      \u2203 (final : Machine) (selected : Nat \u2192 Fin W), final.stack = [] \u2227 \u2200 tail,\n        run whole.code {initialMachine with stack := tail} = .ok {final with stack := tail} 0 \u2227\n        MappedOutput (.memory whole) 1 7 initialBase (State.init C)\n          {initialMachine with stack := tail} captureOut.st {final with stack := tail} selected",
+      "signature_sha256": "58bfcbcf51668e5723918f9b0f984d7ab7dac33213a4163c6447327b3cc65286",
+      "source_sha256": "31a0e729f085c033295067bc57ff4348acb8c0fe7406b0d5e3b0584c56dcd7ea",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedMemory.joint",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedMemory.public_shared"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinedOutput.Controls.public_failure",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/MemoryJoinedOutputControls.lean",
+      "line": 36,
+      "character_span": [
+        1964,
+        2340
+      ],
+      "signature": "theorem public_failure :\n    \u2203 whole : CompiledProg 1 (Frag.init [])\n      (ReachabilityControls.populatedBuilder.join (appendAllocation.join badCapture)),\n      Memory.compileProg 1 (Frag.init [])\n        (ReachabilityControls.populatedBuilder.join (appendAllocation.join badCapture)) = some whole \u2227\n      \u2200 tail, run whole.code {initialMachine with stack := tail} = .revert",
+      "signature_sha256": "5479b4c2a2394fd2b98e6c4b0f3a17d6fa56626cae9e77586d9abac442269131",
+      "source_sha256": "31a0e729f085c033295067bc57ff4348acb8c0fe7406b0d5e3b0584c56dcd7ea",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedMemory.joint",
+      "witness_status": "checked-original-proof-reuse",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "exercised_witness": "Solidity.Backend.Passes.AuditJoinedMemory.public_failure"
+    }
+  ],
+  "witness_module": "tests/h62/item2/audit-v09-passes/JoinedMemoryWitness.lean",
+  "joint_witness": "Solidity.Backend.Passes.AuditJoinedMemory.joint",
+  "coverage": "2 additional distinct frozen selected rows; held external checkpoint remains 225; aggregate 227/1259, 1032 open",
+  "limits": "Model compilation and state relation only; no native ByteWorld/emission, full Source/G24 domain or migration acceptance."
+}
