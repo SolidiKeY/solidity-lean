@@ -296,3 +296,48 @@ for separately. Remaining work includes formal joint-witness/fidelity integratio
 other guard/gas/fork boundaries, broader binding/live ownership and the full RO
 source/callee outcome plus physical-frame producer. Bulk evidence is off Git:
 `/workspace/h62-audit-readonly-calls/capture-current-closure/`.
+
+
+## Callback guard boundary witnesses (2026-11-07)
+
+`tests/h62/item1/readonly-bind/CallbackBoundaryControls.lean` guards confusing
+callback refusal with credit failure or suppressing environment continuation.
+One saturated-balance state, nonzero value, target, sender, calldata and strategy
+are shared. At depth1024 in ordinary mode, the depth guard refuses the attempt;
+at depth1023 in inherited static mode, the nonzero-value guard refuses it. Both
+runs record a completed revert attempt and then let the strategy answer with
+success bytes[7]. At adjacent admitted depth1023 in ordinary mode, actual credit
+overflows: execution halts with only the attempt event. Balance and exact event
+lists are checked. These are model depth/static boundaries, not EVM gas/fork,
+constructor reachability or compiler/source-world adequacy claims.
+
+Three explicit closed conjunctions supply every hypothesis of the two refusal
+specializations and adjacent callback-credit failure. Clients apply unchanged
+EnvironmentSteps.refused and EnvironmentCredit.callback_credit_failed. All eight
+new theorem axiom sets are standard propext,Classical.choice,Quot.sound. Source
+headers, variable contexts and visibility for these two original interface rows
+match the authenticated792 census; historical dependency/kernel equivalence and
+whole-audit status promotion remain pending. All792 rows and three removed private
+identities remain; these supplemental cases are not counted as completed full
+original acceptance.
+
+`scripts/h62/item1/readonly-bind/check_callback_boundaries.py` admits only the
+exact previously executed fresh-closure receipt SHA256
+6cc6b35a60ec17a7082721c467f086f3c3cd0114b75405e6f36eec2a69f26bee.
+It verifies all80 reused current source/object inputs, exact import graph, helper/
+tool pins and SDK root before and after compiling the new module and axiom probe.
+This is checked-artifact reuse, not a fresh dependency rebuild or independent SDK
+source certification. Missing/substituted parent bytes require authentic recovery;
+no arbitrary parent receipt or replacement baseline is accepted. Final bounded
+check passed in6.274s at666099712bytes aggregate peak RSS; four external refusal
+controls passed. Actual tools:Lean4.24.0,Lake5.0.0-src+797c613,-j1,12GiB cap,
+4GiB reserve,no swap. Historical Premises +80.254966536%STOP remains untouched.
+
+Independent read-only finder and skeptic confirmed the joint cases, observed
+outcomes, dependency reuse and refusal tests; neither executed Lean or wrote
+files. Initial syntax/state-rewrite failures are retained; corrected proofs use
+the existing standalone strategy pattern and explicit post-refusal state.
+No original statement, definition, premise, budget, exclusion or axiom changed;
+no sorry/native_decide/newaxiom. Rebased onto coordinator master8863c41276f9;
+all80 parent source inputs remained unchanged. Evidence and handoff are under
+`/workspace/h62-audit-readonly-calls/callback-boundaries/`.

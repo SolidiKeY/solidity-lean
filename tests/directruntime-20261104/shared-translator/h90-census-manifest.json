@@ -8,7 +8,7 @@
     {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
       "baseSha256": "f915d2fdc5a7fd1cf36284df63f4952b99f6f8d8dc913432dde6627f583b4594",
-      "headSourceSha256": "35d64218f2156a209f0d9873e7c55e9568de9e1393304ebe02faa50a2928fcd3"
+      "headSourceSha256": "29ad41e9204addcadfccb42c71fe344f9cba7690e870be57400aadc35e08658e"
     },
     {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",

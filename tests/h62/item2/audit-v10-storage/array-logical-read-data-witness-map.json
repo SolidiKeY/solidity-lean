@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "f0fbbff837bd5c0df583ec434ba11f1b14eceec3908ce30858ee7a66a1dfc23f",
+  "kind": "data-inhabitance",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayRead.lean:29:live_word",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayRead.live_word",
+      "signature": "theorem live_word {n : Nat} {G : Schema n} {p : PrimTy}\n    (old : Value G (.array (.prim p))) (i : Index) :\n    ((path i).readLive Value.dflt old).map (fun v => PrimTy.toWord v.head) =\n      if i.val < old.length.val then (PrimitivePop.elementQuery i).read old else none",
+      "signature_sha256": "b987aad8b44203ab78a2d43e34ba889d489dabc7f68b69cdc6f6aefe3ec5da99",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.logical_read_inputs",
+      "status": "kernel-checked data-input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayRead.lean:41:live_none_iff",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayRead.live_none_iff",
+      "signature": "theorem live_none_iff {n : Nat} {G : Schema n} {p : PrimTy}\n    (old : Value G (.array (.prim p))) (i : Index) :\n    (path i).readLive Value.dflt old = none \u2194 old.length.val \u2264 i.val",
+      "signature_sha256": "096eb08fa50e04db710beba07a17406887e888cb8dba78a29d2ae1c5812ce560",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.logical_read_inputs",
+      "status": "kernel-checked data-input reference; independent fidelity reviews passed"
+    }
+  ]
+}

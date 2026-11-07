@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Textual checks only: no Lean elaboration and no patch application."""
+import hashlib
 import pathlib
 import subprocess
 import unittest
-from test_mul_proposal import statement
+from test_mul_proposal import HELPER_SHA256, statement
 
 DIRECTORY = pathlib.Path(__file__).resolve().parent
 ROOT = DIRECTORY.parents[3]
@@ -14,6 +15,7 @@ NAMES = ("exact_panic_bytes", "panic_not_truncated", "panic_not_empty")
 
 class ProposalTest(unittest.TestCase):
     def test_statements_and_unapplied_patch(self):
+        self.assertEqual(hashlib.sha256(HELPER.read_bytes()).hexdigest(), HELPER_SHA256)
         source, helper = SOURCE.read_text(), HELPER.read_text()
         for name in NAMES:
             self.assertEqual(statement(source, name), statement(helper, name))
