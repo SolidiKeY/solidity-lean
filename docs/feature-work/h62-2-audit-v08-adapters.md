@@ -760,3 +760,31 @@ Independent read-only finder and skeptic found no issue in the retained
 captures, hash bindings or sort-only diagnostic difference. Neither ran Lean or
 a server. The 349 kernel-only records also remain pending; a matched name is
 not statement acceptance. Review receipt remains with the off-Git evidence.
+
+### Source-effect hypothesis accounting (2026-11-07)
+
+The 32 lexical links now retain their complete saved kernel type expressions,
+pretty types and outer binder flags in an off-Git accounting table. Eighteen
+binders are flagged as propositions across eight targets; the remaining 24
+have no explicit proposition binder in the captured telescope. This says
+nothing about inhabitance of their dependent data parameters or global Source
+admission. It is not a per-binder canonical type extraction or a fidelity proof.
+
+The conditional entries retain event parameter-type identity and the exact
+argument/encoding execution premises, static flag, logged-state equality,
+fixed Keccak contract, and rethrow evaluation/heap lookup premises. In
+particular static emit retains the final state reached after encoding, argument
+failure retains its own final state, and rethrow reads the same final heap as
+its successful expression premise. No successful execution premise is promoted
+to global admission or assumed as a joint witness.
+
+All 349 residual records remain explicitly pending: 320 captured theorem-kind
+constants and 29 other declarations. Kind/name shapes alone do not establish
+written versus generated provenance, public ownership or feasibility. The
+manifest binds the prior inventory, reconciliation and new table; zero new
+witnesses or fidelity acceptances are claimed. No Lean check was needed for
+this metadata-only accounting; previous diagnostic gate receipts are unchanged.
+
+Independent read-only finder and skeptic verified the three artifact bindings,
+complete record partition and binder counts with no findings; neither ran Lean
+or a server. Their receipt is retained with the accounting evidence.
