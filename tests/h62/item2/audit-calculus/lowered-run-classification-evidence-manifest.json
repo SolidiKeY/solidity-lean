@@ -1,0 +1,47 @@
+{
+  "scope": "Complete18 lowered-run agreement theorem roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 749,
+    "pending": 4534,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/lowered-run-roles-v67/evidence.tar.gz",
+      "bytes": 206088,
+      "sha256": "edf9c835990f1df082ccc23e803dcdbbdb07d34f34c0a5709fbb05f48519eb8f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/lowered-run-roles-v67/inputs.json",
+      "bytes": 908,
+      "sha256": "a12ccb81fe80354e804c952946572cfa936dc7e1f2197b296d75615b20ef2a67"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/lowered-run-roles-v67/gates.json",
+      "bytes": 2816,
+      "sha256": "fdbb83d070773a8fc3dd3ff4e596d87a0e4d4af1704b6906409c7956bdb90b3c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/lowered-run-roles-v67/reviews.md",
+      "bytes": 825,
+      "sha256": "dadf306acd5ca339f6da2ab6c4aaffcc3d56a328915e9b9b884c2de3ac2d8933"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/lowered-run-roles-v67/case-rosters.json",
+      "bytes": 1508,
+      "sha256": "361b01a3da4379867e8ec294b17e63b9a66577b807f157b896e1f28b9f64147c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/lowered-run-roles-v67/doc-master-repair-binding.json",
+      "bytes": 416,
+      "sha256": "19979bd6d0223b14c15a8e0987143f1bef781fe72596e4109b90ff817c506c91"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/lowered-run-roles-v67/semantic-roles-reviewed.json",
+      "bytes": 1990316,
+      "sha256": "b9756f3221e2e3db58f3d323c0c58ede88b034aa7f648cfdc6b395cf2491f5f5"
+    }
+  ]
+}

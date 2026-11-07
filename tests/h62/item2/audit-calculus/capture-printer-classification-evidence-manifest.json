@@ -1,0 +1,42 @@
+{
+  "scope": "three named static capture/printer roles in two complete frozen-selected files; no new witnesses or runtime acceptance",
+  "counts": {
+    "role_reviewed": 258,
+    "role_pending": 5025,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/capture-printer-classification-v20/evidence.tar.gz",
+      "bytes": 1775251,
+      "sha256": "1bacfd1ad88608a6896967adb76012473bfe1ade733db147a7363b5cb7d8643c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-printer-classification-v20/inputs.json",
+      "bytes": 1057,
+      "sha256": "63fa7d7319ecfcf5cc890c740bc7eeb0de83f2f157d14a727f99da6ddf8b66ae"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-printer-classification-v20/gates.json",
+      "bytes": 4602,
+      "sha256": "4ee56c6bb33c80a3e3b92d99c9b14f08ebb256a9fc46d9108cb7270834042e78"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-printer-classification-v20/reviews.md",
+      "bytes": 624,
+      "sha256": "13302fd170b97c26ff054bba227ea388a4840d4a93b7fcff862587b4e8d63023"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-printer-classification-v20/doc-metrics.json",
+      "bytes": 221,
+      "sha256": "7f16fcda44e1837bff6ad3799b6fed7a9efc982df65881cd704c901130aa1eaf"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/capture-printer-classification-v20/semantic-roles-reviewed.json",
+      "bytes": 717470,
+      "sha256": "0f3d0fa59624c532d3f0c04638e5f735d5c361dfd405742c934425ad8825470a"
+    }
+  ]
+}

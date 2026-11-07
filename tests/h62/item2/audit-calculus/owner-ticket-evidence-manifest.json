@@ -1,0 +1,15 @@
+{
+  "boundary": "Question delivery only; no owner agreement or proof acceptance",
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/semantic-owner-ticket-v1/question.json",
+      "bytes": 1509,
+      "sha256": "ff43af3e0703dc6877594cd68e21c7a351bc98873e5faba1a4e84bc0ee79e090"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/semantic-owner-ticket-v1/delivery.json",
+      "bytes": 705,
+      "sha256": "0524d9c8d1010d59d4aef4afe82603bfcafb57ca44f5167d8f9293a323214208"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "scope": "Complete3 guarded spine-merge theorem role classifications; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 557,
+    "pending": 4726,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/merge-roles-v42/evidence.tar.gz",
+      "bytes": 1097434,
+      "sha256": "4e4d3f651c326baf234b17cc557523340fe86e67b28e380064f3b26666942027"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/merge-roles-v42/inputs.json",
+      "bytes": 897,
+      "sha256": "eea233009bf1d5b64e624c7a5db26b32a6ddf34e3c85c9f69e2ab09d34e281f7"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/merge-roles-v42/gates.json",
+      "bytes": 2910,
+      "sha256": "e8b9278a54074641821fce4c3204616e7b2103fa312648eb45f9d1714af8ca3a"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/merge-roles-v42/reviews.md",
+      "bytes": 673,
+      "sha256": "0037922a5ebf847adb04efed82728675461033b36e4dc54c2b164de45447d16d"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/merge-roles-v42/case-rosters.json",
+      "bytes": 597,
+      "sha256": "71bd39ab28aa0d7618bf6f6707a75c44439b867924634087b48715698e32e33f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/merge-roles-v42/doc-failure-source-binding.json",
+      "bytes": 371,
+      "sha256": "e69bcdb4f37992a5954a3a0aae27f155a2386675a5ce1256338d7efeb90d3d0c"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/merge-roles-v42/semantic-roles-reviewed.json",
+      "bytes": 1486163,
+      "sha256": "4db7bc7be128a62df08f2fb0dabe94a5c02f18ae5976fd0ea047953f02dcfd9c"
+    }
+  ]
+}
