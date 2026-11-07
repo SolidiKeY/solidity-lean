@@ -38,6 +38,22 @@ old=baseline['native-stub-classification.json']['data'];assert old['passed'];old
 oldIdent=baseline['native-input-identities.json']['data']
 for path,digest in oldIdent['headers'].items():assert sha(prefix/path)==digest
 machine_calls={'lean_dec_ref_cold','lean_nat_big_lt','lean_string_utf8_get','lean_string_utf8_next','lean_nat_big_eq','lean_notify_assert','lean_inc_heartbeat','lean_internal_panic_out_of_memory','mi_malloc_small'}
+def machine_transfers(assembly, symbol):
+ """Classify x86 calls and every jump, rejecting unclassified destinations."""
+ calls=set();branches=set();invalid=False
+ for instruction in re.finditer(r'\b(callq?|j[a-z]+|loop[a-z]*)\s+([^\n]+)', assembly):
+  mnemonic,operand=instruction.groups()
+  direct=re.fullmatch(r'[0-9a-f]+ <([^>]+)>\s*',operand)
+  if direct is None:
+   invalid=True
+   continue
+  target=direct.group(1)
+  if mnemonic.startswith('call'):
+   calls.add(target)
+  elif target.split('+',1)[0] != symbol:
+   branches.add(target)
+ return calls,branches,invalid
+
 classified=[];failures=[];modules={r['module']:r for r in records};actualFlags={line.split()[-1] for line in coarse};expectedFlags={'initialize_'+r['module'].replace('.','_') for r in old['records']}
 if actualFlags!=expectedFlags:failures.append('origin symbol set changed')
 frontend={m for m in texts if m.startswith(('Lean.Meta','Lean.Elab','Lean.Kernel','Lean.Environment'))}
@@ -45,11 +61,10 @@ if frontend!={r['module'] for r in old['records']}:failures.append('frontend-ori
 for record in old['records']:
  module=record['module'];assert modules[module]['compiledCSha256']==record['compiledCSha256'],module;details=[]
  for f in record['functions']:
-  symbol=f['symbol'];asm=subprocess.check_output(['objdump','-d','--disassemble='+symbol,str(native/'direct-check')],text=True);calls=set(re.findall(r'\bcall\s+[0-9a-f]+ <([^>]+)>',asm))
+  symbol=f['symbol'];asm=subprocess.check_output(['objdump','-d','--disassemble='+symbol,str(native/'direct-check')],text=True);calls,tails,invalid=machine_transfers(asm,symbol)
   if '<'+symbol+'>:' not in asm:failures.append('missing disassembly label: '+symbol)
-  tails={target for target in re.findall(r'\bjmp\s+[0-9a-f]+ <([^>]+)>',asm) if target.split('+',1)[0]!=symbol}
   if not (calls|tails)<=machine_calls:failures.append('unreviewed machine transfer: '+symbol)
-  if re.search(r'\b(?:call|jmp)\s+\*',asm):failures.append('indirect transfer: '+symbol)
+  if invalid:failures.append('unclassified or indirect transfer: '+symbol)
   details.append({'symbol':symbol,'baselineCBodySha256':f['cBodySha256'],'machineCallees':sorted(calls),'disassembly':asm})
  classified.append({'module':module,'exactCompiledCMatchesReviewedBaseline':True,'functions':details})
 undefined=subprocess.check_output(['nm','--undefined-only','--format=posix',str(native/'direct-check')],text=True);leanUndefined=[s for s in undefined.splitlines() if s.split() and s.split()[0].startswith(('l_','_init_l_','lean_','initialize_'))]
