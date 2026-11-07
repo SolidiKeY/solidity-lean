@@ -206,3 +206,10 @@ It reuses existing EnvKey.ofParts and adds value/time routing beside sender.
 Reader signatures/imports and entry premises are unchanged. See environment-manifest.json
 for 31-file gates, exact source-ID controls and unchanged census/outcome limits.
 This does not qualify source/world semantics or the latest native/WASM binaries.
+
+Proof-only addition: `environmentMember?_guard` establishes that every successful
+helper result belongs to `EnvKey.ofParts` and satisfies the negative-reference
+guard. It does not authenticate compiler identity or prove source/world adequacy.
+All pre-existing Translate definitions remain byte-identical to prework f83a7016.
+See environment-proof-manifest.json for the exact signature, axiom set and gates.
+Existing H71 runtime packets remain on their original route; no duplicate relay.

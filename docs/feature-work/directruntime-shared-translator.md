@@ -1010,3 +1010,35 @@ lines, no new production module and one test module. Global timing STOPs remain.
 Finder/skeptic final read-only reviews found no checkpoint blocker. CR relay
 remains held under H118; importer parity/migration, fresh native/WASM qualification,
 source/physical adequacy and the remaining original queues remain open.
+
+### General environment decoder guard proof (2026-11-07)
+
+`environmentMember?_guard` proves that any successful helper result originates
+in the existing `EnvKey.ofParts` map and satisfies the negative builtin-reference
+guard. It quantifies over arbitrary JSON inputs, members, result spellings and
+keys; it is not a compiler authentication or source/world adequacy theorem.
+The exact statement was unchanged throughout repair. Final axioms are only
+`propext` and `Quot.sound`; no axiom, admission or budget increase was added.
+
+Removing the lemma/doc block reproduces the pre-work Translate file byte for
+byte. There is no executable definition, import, Reader signature or entry-premise
+change. The production delta is 37 proof/doc lines and no new module. Nine owned
+modules build; six focused files pass, including axiom/signature inventories,
+32 existing environment/address model requests and KeySort. Actual versions are
+Lean 4.24.0 and Lake 5.0.0-src+797c613. The serial 12 GiB/no-swap gate exits zero
+in 34.0344 seconds; the cgroup peak is 229,416,960 bytes and minimum outer
+available memory is 11,538,579,456 bytes. This is checking evidence, not runtime
+performance acceptance. Prior census outcomes are retained because definitions
+are identical; only their source-file proof hash is refreshed.
+
+Failed proof attempts and MCP goal/tactic trials are preserved in the H44 archive
+indexed by environment-proof-manifest.json. Independent read-only finder and
+skeptic reviews found no remaining proof checkpoint blocker. The scope baseline
+is the immutable pre-work head f83a7016, which already contains published05d2c2587
+and an inherited README-only bookkeeping commit636fc9880. That unrelated file
+was preserved, not authored or modified by this proof increment.
+
+The accepted H71 address handoff still lacks local payload bytes; its transport
+route is not duplicated. Existing environment qualification, H118-held CR relay,
+importer migration, ReadBounds production-owner resolution and all original
+source/physical/performance obligations remain open.

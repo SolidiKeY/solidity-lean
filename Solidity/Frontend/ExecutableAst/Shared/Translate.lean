@@ -137,6 +137,43 @@ def environmentMember? (base : Json) (member resultType : String) : Option EnvKe
   let expectedType := match key with | .msgSender => "address" | _ => "uint256"
   if resultType != expectedType then none else some key
 
+/-- A successful environment decoder selects an existing EnvKey map entry and
+has a negative builtin reference. This general guard inversion is not compiler
+identity authentication or a source/world adequacy theorem. -/
+theorem environmentMember?_guard (base : Json) (member resultType : String)
+    (key : EnvKey) (success : environmentMember? base member resultType = some key) :
+    (∃ root : String, (str base "name").toOption = some root ∧
+      EnvKey.ofParts root member = some key) ∧ (J.ref? base).any (· < 0) = true := by
+  unfold environmentMember? at success
+  split at success
+  next => cases success
+  next =>
+    simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at success
+    rcases success with ⟨root, hroot, mapped, hmap, success⟩
+    split at success <;>
+      simp only [Option.bind_some, Option.bind_none, Option.bind_eq_some_iff] at success
+    all_goals try contradiction
+    all_goals
+      rcases success with ⟨metadata, hmetadata, success⟩
+      split at success
+      next => cases success
+      next =>
+        split at success
+        next => cases success
+        next notnegative =>
+          let expectedType : EnvKey → String := fun selected =>
+            match selected with | .msgSender => "address" | _ => "uint256"
+          by_cases hresult : (resultType != expectedType mapped) = true
+          · rw [if_pos hresult] at success
+            cases success
+          · rw [if_neg hresult] at success
+            have same : mapped = key := Option.some.inj success
+            subst mapped
+            refine ⟨⟨_, hroot, hmap⟩, ?_⟩
+            cases hn : (J.ref? base).any (· < 0) with
+            | false => exact False.elim (notnegative (by rw [hn]; rfl))
+            | true => rfl
+
 def expressionStep (read : Json → Except String RawExpr) (j : Json) : Except String RawExpr := do
   let kind ← node j
   let type := ((j.getObjVal? "typeDescriptions").toOption.bind fun d => (d.getObjValAs? String "typeString").toOption).getD ""
