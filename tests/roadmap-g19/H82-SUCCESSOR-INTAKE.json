@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "status": "partial-preservation",
+  "sourceHead": "da7cdb052592668f31a76a745992b8fdf944ede8",
+  "originalBase": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "metadata": {
+    "directory": "/workspace/h82-handoffs/h82b-20261106T180909Z",
+    "archiveSha256": "fab677d3e4ccbf57410c175c9665ac0fd689ddf574869e24d431e28de16f9ed4",
+    "manifestSha256": "39fb14a45e1e34042b75922e8d60da77f4b6a3555bcae718a8f95e4c37d3055b",
+    "checksumsSha256": "ce406a8143f535f3ad79f501072f685a3a23dd5b21447eefe0e03f480931f5d3",
+    "entriesVerified": 557,
+    "archive": "/workspace/h82-handoffs/h82b-20261106T180909Z.tar.gz"
+  },
+  "members": [
+    {
+      "lane": "solidity-h28-sol-20261104/non-vacuity",
+      "acknowledgedHead": "f6a4ebf65a677f5138445c8d41c96639981e20cb",
+      "finalStopVerifiedInMetadata": true,
+      "assignment": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/solidity-h28-sol-20261104__non-vacuity.json",
+      "assignmentSha256": "94c36229ef0c21e0b9da40bd2eb0fd515780332cb0bfc5b6eef46df48cc23a62",
+      "scope": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/scope.json",
+      "scopeSha256": "4dabcb4842b5cb926b8164cf373f1c061c3874e5d43e8121729f2ccc1a550560",
+      "proofEvidenceAdopted": false,
+      "integration": "preservation-only",
+      "mergeCommit": "e484193217de3930d500e7a97c3f672cfc9e975e"
+    },
+    {
+      "lane": "solidity-h62-2-20261106/audit-evm-compiler",
+      "acknowledgedHead": "eaaaee17fe61e71ac3b5052839c0cf146eae3072",
+      "finalStopVerifiedInMetadata": true,
+      "assignment": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/solidity-h62-2-20261106__audit-evm-compiler.json",
+      "assignmentSha256": "2360733db3edf2391e05ae313d2726950e0c0b3d872747e708aa0bfefbc32b92",
+      "scope": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/scope.json",
+      "scopeSha256": "4dabcb4842b5cb926b8164cf373f1c061c3874e5d43e8121729f2ccc1a550560",
+      "proofEvidenceAdopted": false,
+      "integration": "preservation-only",
+      "mergeCommit": "d8fee824d371b21ac066da96d94e6e7e6bab0d0f"
+    },
+    {
+      "lane": "solidity-h62-2-20261106/audit-exact-verification",
+      "acknowledgedHead": "e889d64560925ef7fcdf655a3cb0fe13c6c9aa7b",
+      "finalStopVerifiedInMetadata": true,
+      "assignment": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/solidity-h62-2-20261106__audit-exact-verification.json",
+      "assignmentSha256": "5e172f1f89b44c436f7c937791779376f6a979bc07cff4ca1a4eb57c3b2dbf4a",
+      "scope": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/scope.json",
+      "scopeSha256": "4dabcb4842b5cb926b8164cf373f1c061c3874e5d43e8121729f2ccc1a550560",
+      "proofEvidenceAdopted": false,
+      "integration": "approved-owned-only-preservation",
+      "objectRetrieved": true,
+      "blocker": "Core candidate excluded; full member head remains unmerged; original timing STOP and evidence waits remain.",
+      "ownedOnlyReviewPatch": "/workspace/scratch/h82-successor-exact-review-20261106/owned-only.patch",
+      "ownedOnlyPatchSha256": "15f828d27d05894d5b0ce1114ccb66ade4d08b8d8c91d861724276b4bf805d59",
+      "ownedOnlyPatchApplied": true,
+      "approval": "Coordinator answer Q-H82-EXACT-INTAKE: approved exact prepared patch; Core unchanged; e889 left unmerged."
+    },
+    {
+      "lane": "solidity-h62-2-20261106/audit-theories",
+      "acknowledgedHead": "c1f72a60f9b1bcc1f7b209c241a2288436bb3b1f",
+      "finalStopVerifiedInMetadata": true,
+      "assignment": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/solidity-h62-2-20261106__audit-theories.json",
+      "assignmentSha256": "0e1a081a0b50444d1a774f858c0f402d0948429213a5941ae60d74c2b0f88da8",
+      "scope": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/scope.json",
+      "scopeSha256": "4dabcb4842b5cb926b8164cf373f1c061c3874e5d43e8121729f2ccc1a550560",
+      "proofEvidenceAdopted": false,
+      "integration": "preservation-only",
+      "mergeCommit": "15043b1e1a7d253cdec580f576599bd2d210ae47"
+    },
+    {
+      "lane": "solidity-h62-2-20261106/audit-typing",
+      "acknowledgedHead": "3aec70f615e1beeb37ac7bc659b6359fc952c2f0",
+      "finalStopVerifiedInMetadata": true,
+      "assignment": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/solidity-h62-2-20261106__audit-typing.json",
+      "assignmentSha256": "5a35f93498462bccc67c4d52004daeb242451610d65597106f69dd59968655f9",
+      "scope": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/scope.json",
+      "scopeSha256": "4dabcb4842b5cb926b8164cf373f1c061c3874e5d43e8121729f2ccc1a550560",
+      "proofEvidenceAdopted": false,
+      "integration": "preservation-only",
+      "mergeCommit": "daf5cad8347d797cb6fb4343b472fe5603a62e9f"
+    },
+    {
+      "lane": "solidity-terra-20261103/nonvacuity-audits",
+      "acknowledgedHead": "22fcc62f7dc1e544232caf1624e7dc71b6129606",
+      "finalStopVerifiedInMetadata": true,
+      "assignment": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/solidity-terra-20261103__nonvacuity-audits.json",
+      "assignmentSha256": "aa9811bd4aa794be9f734c0764905e4aea49cd429473618bc5a3de9e430ea483",
+      "scope": "/workspace/h82-handoffs/h82b-20261106T180909Z/assignments/assurance/scope.json",
+      "scopeSha256": "4dabcb4842b5cb926b8164cf373f1c061c3874e5d43e8121729f2ccc1a550560",
+      "proofEvidenceAdopted": false,
+      "integration": "not-merged",
+      "objectRetrieved": false,
+      "blocker": "Exact22fcc62f object unavailable; request cumulative bundle and its authenticated inventory."
+    }
+  ],
+  "hostControls": {
+    "path": "/workspace/scratch/h82-assurance-host-controls-20261106/results.json",
+    "sha256": "85dbddef5b17a1284baa75b4cbf8932783705870c2c4e9ba99910247d55502bf",
+    "commandsPassed": 4,
+    "nativeLeanInvocations": 0
+  },
+  "nonVacuityBulk": "tests/h28-sol/non-vacuity/retirement-h82/H44-OFF-TREE.json",
+  "waits": [
+    {
+      "lane": "all-six-members",
+      "item": "Original raw proof/census/review/archive bundles not present; metadata does not authenticate those claims."
+    },
+    {
+      "lane": "audit-exact-verification",
+      "item": "Known+19.655883% timing STOP remains; no unchanged Lean/timing rerun."
+    },
+    {
+      "lane": "V17",
+      "item": "Original G52-G55/backfills and457release rows remain incomplete; H12pauseditems unchanged."
+    },
+    {
+      "lane": "move5/v12-p1",
+      "item": "Full session/profile/origin producer and all-outcome native frame observation transports; published G49 generic adapters do not supply them."
+    }
+  ],
+  "kernelValidated": false,
+  "semanticPremisesDischarged": false,
+  "releaseClosed": false,
+  "exactArtifactVerification": {
+    "status": "UNVERIFIABLE",
+    "policy": "H30/H86",
+    "missingPaths": [
+      "/workspace/h62-audit-retirement/evidence.tar.gz",
+      "/workspace/h62-audit-retirement/SHA256SUMS",
+      "/workspace/h62-audit-h70-evidence/gates.json"
+    ],
+    "boundary": "Owned 27-path bytes verified live or in local H44 archive; no historical proof/gate acceptance."
+  },
+  "policyInspection": {
+    "path": "/workspace/h62-coordinator-inputs/H80-H81-H89-H93-policy.txt",
+    "sha256": "0e5e6d47a500278d571079555ead8350d0b7b0325a64721ad16eab9703a26a2f",
+    "verified": true,
+    "H80": "Dafny CLI/frontend dependency and12GiB serial scope; compiler-only CLI artifacts, runtime/test equivalence incomplete",
+    "H81": "16GiB pre-gates at most2 until named VY2 module split; then8GiB x3",
+    "H89": "No solkey checker gate wait",
+    "H93": "Further h55b cold-timing runs deferred",
+    "executionAuthorizedByReceipt": false
+  },
+  "g49Inspection": {
+    "publishedCheckpoint": "5f7c70b16090b25ea706dddf3e666d94fb5a09fe",
+    "inspectedMaster": "706e36825",
+    "modules": {
+      "Solidity/Roadmap/G49Final/PassCorrect.lean": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+      "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+      "Solidity/Roadmap/G49Final/FoldedPublic.lean": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925"
+    },
+    "available": "Behaviour.ofLang, cert_adapter and carrier adapters; full PassCorrect need/back/env transports; PassList.fold and explicit PublicObligations",
+    "boundary": "These adapters require existing full certificates. They do not construct canonical P1 source/target sessions, native outcome-prefix transports, profile/origin admission, or p1_frame_bridge. No assumed full certificate added.",
+    "kernelValidatedLocally": false
+  }
+}

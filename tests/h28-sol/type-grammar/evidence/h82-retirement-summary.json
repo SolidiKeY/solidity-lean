@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "state": "STOPPED;H67 docs/handoff-only re-cut;historical validation is not current candidate validation",
+  "handoff_to": "solidity-sol2-20261104/numeric-literals",
+  "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "checkpoint_base": "211c7adf640e7b503de0c381c9918cdf56a6ae8b",
+  "authority": "H82 additive-only statement-preserving metadata,then explicit human stop-and-handoff",
+  "not_run": [
+    "post-full default build",
+    "post-full SolKey"
+  ],
+  "raw_evidence_directory": "/workspace/scratch/h28-type-grammar/h82-additive-pins",
+  "scope_files": {
+    "EXACT-SCOPE-MANIFEST.json": "89a8c0d9787c80b592851c9758a72650aa0b02d6fe1e670a3c0be1f4dec7049a",
+    "GOAL-PAUSE-LIMITATION.json": "1c5bb7392bdc9d7f51893e0ce4683b6012f573f8ebc5e615a64b017f3137ad24",
+    "OPEN-QUEUE-AND-WAITS.json": "83c891b1ee92d384d5615dac0eb45a14d4f92a8e8c260a7ec216c17f3724e50e",
+    "ORIGINAL-FROZEN-PROMPT.md": "6725b91ba52ececcefed0ac8704cbf538bd7e1ebd04419d6858473b48997bf51",
+    "ORIGINAL-WORK-AND-BACKFILL-QUEUE.md": "123e20532b9ac324104b8c0afb0834ca167348c03a2fdd9d9d828f340dbb8b34",
+    "PROVENANCE.md": "70dc7496d63335bb36dad95302f74570c0c5e9437b9643afa6f1cb38229116a9",
+    "RETIREMENT-HANDOFF.md": "5a996269983ed897d7cb0816b6d08c568a62b5960775c7693b3caa1d23b1e279"
+  },
+  "reviews": {
+    "additive_source_meaning": "separatefinder/skeptic PASS before retirement",
+    "retirement_scope_completeness": "separatefinder/skeptic PASS,no omission;no Lean server",
+    "recut": {
+      "finder": "PASS;no finding;371preservedfiles/backup/candidate10paths/originalscope verified",
+      "skeptic": "PASS;no finding;G07/Lean delta zero,historicalvalidation separated,stoppedwaits retained"
+    }
+  },
+  "goal_pause": {
+    "requested_state": "PAUSED",
+    "performed": false,
+    "failure": "No goal pause/get/update tool exposed. Sole goal tool codex_goals_stop_goal accepts outcome complete|blocked only;neither is PAUSED. No substitute transition attempted.",
+    "available_goal_tool": "mcp__codex_apps__codex_goals_stop_goal",
+    "accepted_outcomes": [
+      "complete",
+      "blocked"
+    ],
+    "worker_action": "Implementation stopped;no automatic continuation authorized;existing goal not created/reset/completed."
+  },
+  "push": {
+    "performed": false,
+    "reason": "No accessible H71 authorization text;original no-push instruction remains binding."
+  },
+  "waits": [
+    {
+      "lane": "coordinator",
+      "item": "Set existing goal PAUSED;worker tool cannot express PAUSED."
+    },
+    {
+      "lane": "solidity-sol2-20261104/numeric-literals",
+      "item": "Retrieve complete frozen prompt/scope/queues,integrate final head,and own any remaining validation/implementation. No takeover before final stopped/head acknowledgment."
+    },
+    {
+      "lane": "coordinator-g07-one-off",
+      "item": "Reconcile G07 inventory centrally under H67;this lane supplies no pin/fragment changes and claims no current passing pin gate."
+    }
+  ],
+  "no_automatic_implementation_continuation": true,
+  "no_goal_complete_or_reset": true,
+  "historical_excluded_change": {
+    "inventory": "scripts/g07-axiom-pins.json",
+    "new_records": 3554,
+    "old_records_preserved": 8154,
+    "old_values_changed": 0,
+    "lean_sources_unchanged": 6492,
+    "checker_unchanged": true,
+    "actual_axiom_set_changes": false
+  },
+  "historical_pre_recut_gates": {
+    "checker-tests": {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--max-old-space-size=4096",
+        "--test",
+        "scripts/check-axiom-pins.test.mjs"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.11789797399978852,
+      "log": "/workspace/scratch/h28-type-grammar/h82-additive-pins/checker-tests.log"
+    },
+    "static-pins": {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "--max-old-space-size=4096",
+        "scripts/check-axiom-pins.mjs"
+      ],
+      "exit": 0,
+      "elapsed_s": 16.806340839000768,
+      "log": "/workspace/scratch/h28-type-grammar/h82-additive-pins/static-pins.log"
+    },
+    "runtime": {
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 2.627109992001351,
+      "sampled_peak_rss_bytes": 240013312,
+      "minimum_vm_or_host_headroom_bytes": 16626671616,
+      "command": "python3 -B tests/h28-sol/type-grammar/run_bounded.py runtime",
+      "receipt": "/workspace/scratch/h28-type-grammar/h82-additive-pins/runtime.json"
+    },
+    "solc": {
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 3.6762682980006502,
+      "sampled_peak_rss_bytes": 236916736,
+      "minimum_vm_or_host_headroom_bytes": 16280506368,
+      "command": "python3 -B tests/h28-sol/type-grammar/run_bounded.py solc",
+      "receipt": "/workspace/scratch/h28-type-grammar/h82-additive-pins/solc.json"
+    },
+    "axioms": {
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 10.475742471999183,
+      "sampled_peak_rss_bytes": 315363328,
+      "minimum_vm_or_host_headroom_bytes": 16109764608,
+      "command": "python3 -B tests/h28-sol/type-grammar/run_bounded.py axioms",
+      "receipt": "/workspace/scratch/h28-type-grammar/h82-additive-pins/axioms.json"
+    },
+    "controls": {
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 7.339982036999572,
+      "sampled_peak_rss_bytes": 372461568,
+      "minimum_vm_or_host_headroom_bytes": 15895285760,
+      "command": "python3 -B tests/h28-sol/type-grammar/run_bounded.py lean-fixtures",
+      "receipt": "/workspace/scratch/h28-type-grammar/h82-additive-pins/controls.json"
+    },
+    "full": {
+      "exit": 137,
+      "guard": null,
+      "elapsed_s": 102.35554109199984,
+      "sampled_peak_rss_bytes": 949313536,
+      "minimum_vm_or_host_headroom_bytes": 15051276288,
+      "command": "python3 -B tests/h28-sol/type-grammar/final_policy.py full",
+      "receipt": "/workspace/scratch/h28-type-grammar/h82-additive-pins/full.json",
+      "interpretation": "HUMAN RETIREMENT CANCELED;exit137,not passing,not timing STOP"
+    }
+  },
+  "current_candidate": {
+    "base": "20e492ee99a3fa8679aa526de0b6e731d85e4134",
+    "g07_inventory_delta": false,
+    "g07_fragment_delta": false,
+    "lean_source_delta": false,
+    "fresh_Lean_checks": false,
+    "fresh_full_gate": false,
+    "H67": "separate one-off G07 reconciliation;not lane work"
+  }
+}

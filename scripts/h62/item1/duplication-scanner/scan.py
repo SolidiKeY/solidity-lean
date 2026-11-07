@@ -5,17 +5,24 @@ import fnmatch
 import hashlib
 import hmac
 import json
+import os
 import re
+import stat
 from pathlib import Path
 
 DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
-TOKEN = re.compile(r"""r(#+)"[\s\S]*?"\1|'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'|«[^»]*»|"(?:\\.|[^"\\])*"|(?:[^\W\d]|_)[\w\'!?]*(?:\.(?:[^\W\d]|_)[\w\'!?]*)*|[\w\']+(?:\.[\w\']+)*|[^\s]""")
+ID_FIRST = r"A-Za-z_\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03b1-\u03ba\u03bc-\u03c9\u03ca-\u03fb\u1f00-\u1ffe\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u017f"
+ID_REST = ID_FIRST + r"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
+IDENT = "[" + ID_FIRST + "][" + ID_REST + "]*"
+TOKEN = re.compile(r"""r(#+)"[\s\S]*?"\1|'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'|«[^»]*»|"(?:\\.|[^"\\])*"|""" + IDENT + r"(?:\." + IDENT + r")*|[0-9]+(?:\.[0-9]+)*|[^\s]")
 RAW_START = re.compile(r'r(#+)"')
 CHAR = re.compile(r"'(?:\\(?:u\{[0-9A-Fa-f]+\}|u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)|[^'\\\n])'")
-BINDER = re.compile(r"([({\[])\s*((?:[^\W\d]|_)[\w'!?]*(?:\s+(?:[^\W\d]|_)[\w'!?]*)*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
+BINDER = re.compile(r"([({\[])\s*(" + IDENT + r"(?:\s+" + IDENT + r")*)\s*:\s*([^(){}\[\]]*)([)}\]])\s*")
+
+ID_REST_CHAR = re.compile("[" + ID_REST + "]")
 
 def raw_literal(text, i):
-    if text[i] != "r" or (i and (text[i-1].isalnum() or text[i-1] in "_'!?")): return None
+    if text[i] != "r" or (i and (ID_REST_CHAR.fullmatch(text[i-1]))): return None
     match = RAW_START.match(text, i)
     if not match: return None
     close = '"' + match.group(1)
@@ -24,7 +31,7 @@ def raw_literal(text, i):
     return end + len(close)
 
 def char_literal(text, i):
-    if text[i] != "'" or (i and (text[i-1].isalnum() or text[i-1] in "_'!?")): return None
+    if text[i] != "'" or (i and (ID_REST_CHAR.fullmatch(text[i-1]))): return None
     return CHAR.match(text, i)
 
 def mask(text):
@@ -294,6 +301,8 @@ def main():
     root = args.root.resolve()
     if (args.previous is None) != (args.previous_sha256 is None):
         parser.error("--previous and --previous-sha256 must be supplied together")
+    if any(Path(pat).is_absolute() or ".." in Path(pat).parts for pat in args.paths):
+        parser.error("patterns must stay within the root")
     selection = dict(root=str(root), patterns=sorted(set(args.paths)))
     previous = None
     old_inputs, old_statements, old_bodies = {}, {}, {}
@@ -333,10 +342,63 @@ def main():
                     raise ValueError("malformed previous " + field)
         except (OSError, UnicodeError, ValueError, RecursionError) as exc:
             parser.error("previous report: " + str(exc))
-    matched = {pat: sorted(f.resolve() for f in root.glob(pat) if f.is_file() and f.suffix == ".lean") for pat in args.paths}
+    # Keep logical selected paths. A leaf or traversed parent symlink would
+    # otherwise collapse aliases and attribute declarations to the target.
+    matched, selection_errors, checked_components = {}, {}, {}
+    for pat in args.paths:
+        selected = []
+        # pathlib's recursive glob does not descend into directory symlinks.
+        # Refuse such directories beneath the literal prefix rather than
+        # silently describing a selection as complete.
+        parts = Path(pat).parts
+        if "**" in parts:
+            prefix = []
+            for part in parts:
+                if any(c in part for c in "*?["):
+                    break
+                prefix.append(part)
+            anchor = root.joinpath(*prefix)
+            for ancestor in (anchor, *anchor.parents):
+                if ancestor == root:
+                    break
+                if ancestor.is_symlink():
+                    selection_errors[str(ancestor)] = "recursive selection traverses a symlink"
+            def walk_error(exc):
+                selection_errors[str(exc.filename)] = str(exc)
+            if anchor.is_dir() and not anchor.is_symlink():
+                for directory, dirs, names in os.walk(anchor, followlinks=False, onerror=walk_error):
+                    for dirname in list(dirs):
+                        child = Path(directory) / dirname
+                        if child.is_symlink():
+                            selection_errors[str(child)] = "recursive selection omits a symlink directory"
+                            dirs.remove(dirname)
+                    # Broken directory links occur in os.walk's files list;
+                    # conservatively refuse every link under the prefix.
+                    for name in names:
+                        child = Path(directory) / name
+                        if child.is_symlink():
+                            selection_errors[str(child)] = "recursive selection encounters a symlink"
+        for path in root.glob(pat):
+            if path.suffix != ".lean":
+                continue
+            try:
+                rel = path.relative_to(root)
+                component = root
+                for part in rel.parts:
+                    component = component / part
+                    if component not in checked_components:
+                        checked_components[component] = component.lstat().st_mode
+                    if stat.S_ISLNK(checked_components[component]):
+                        raise ValueError("selected path traverses a symlink: " + str(component))
+                if not stat.S_ISREG(checked_components[path]):
+                    raise ValueError("selected .lean path is not a regular file")
+                selected.append(path)
+            except (OSError, ValueError) as exc:
+                selection_errors[str(path)] = str(exc)
+        matched[pat] = sorted(selected)
     unmatched = sorted(pat for pat, paths in matched.items() if not paths)
     files = sorted({f for paths in matched.values() for f in paths})
-    rows, errors, inputs = [], [], []
+    rows, errors, inputs = [], [dict(path=p, reason=selection_errors[p]) for p in sorted(selection_errors)], []
     owners = json.loads(args.owners.read_text()) if args.owners else {}
     if not isinstance(owners, dict) or not all(isinstance(k, str) and isinstance(v, str) and v for k, v in owners.items()):
         parser.error("owners must be a path-to-owner JSON object")
