@@ -2,14 +2,14 @@
 
 ## Current resumed state
 
-Coordinator resumed this lane and merged its proof/inventory checkpoint
-087f76aa8360db0b89aa99b4f8fcc0022b925e4d into master. The assigned branch then
-fast-forwarded cleanly to origin/master b0e78c2c309246590dc42bc881d1ab2d14a4e486.
-Original base c6f550e281a7e5affa9a99bc2cdaed556dec00e4 and the prior lane head
-are verified ancestors. Coordinator reports gate.sh touched PASS and independent
-finder/skeptic reviews without blockers for that merge; this worker has not
-replayed those gates. Historical retirement receipts remain unchanged. This
-current status supersedes their stopped-worker and unapplied-Ctor descriptions.
+Coordinator merged the proof/inventory checkpoint 087f76aa8360 and documentation
+checkpoint ea8470f1f941. The assigned branch verified both ancestry and a clean
+fast-forward to origin/master 5da4771e63a4278ed53932ac39a032e3d7aea6ed on
+2026-11-07. That commit is the current operational census revision. The original
+frozen base remains c6f550e281a7e5affa9a99bc2cdaed556dec00e4; its evidence is
+preserved separately. Coordinator reports gate.sh touched PASS and finder/skeptic
+review for the merge; this worker has not replayed those gates. Historical
+retirement receipts remain unchanged and superseded by explicit resumption.
 No push or goal reset occurred.
 
 Under H82's proof-only standing agreement, the previously reviewed Ctor proposal
@@ -45,6 +45,43 @@ proof-fixture byte binding, scope delta and validation logs are saved off git at
 matched full timing, axiom reconciliation and required final gates remain open.
 
 
+
+## Operational census and timing identity (2026-11-07)
+
+The re-baseline census uses exactly the original 199 assigned paths, verified
+against the original base tree. The current directory contains 249 Source files;
+50 additions remain unassigned. Only CalldataLayout, FailurePrimitives and Monetary
+enter the assigned import closure as dependency-only modules. No ownership or
+write scope is added. The operational closure has 249 modules versus 246 at the
+original base. Independent raw-header and topological checks pass for each census
+at its own revision, with no unresolved local imports.
+
+The report retains all 199 old/new file hashes and lexical/import/budget drift:
+65 assigned files differ; lexical declaration candidates change from 4,428 to
+4,454; recorded budget-option text is unchanged. These are inherited source-text
+observations, not elaborated API equivalence, proof validation or a new theorem
+inventory. The complete old 17,542-entry ledger remains tied to its recorded
+snapshot. No operational old/new full build or comparable timing pair exists.
+
+census.py now resolves movable refs such as HEAD once to a full commit SHA before
+reading blobs. Its --scope-manifest option rejects any path-set difference from
+the canonical original scope and records the manifest hash. --prior-census adds
+reproducible lexical drift without changing the historical census files. Bulk
+outputs stay off git at /workspace/h62-migrate-source-evidence/rebaseline-20261107.
+
+The timing comparator now requires both reports' census_revision to match the
+selected census revision. Sharing the original base and module order alone no
+longer admits measurements from different trees. Stale, missing or mismatched
+revision controls pass; a matched newer revision remains accepted by synthetic
+controls. Historical failed target runs remain failed diagnostic evidence. No
+measurement or performance STOP was rerun, waived or reclassified.
+
+Finder and skeptic identified two validation gaps during review: acceptance read
+old-base headers even for a newer census, and census retained symbolic ref text.
+Both are fixed and re-reviewed without further concrete findings. Canonical-scope
+provenance was also made explicit. Separate final receipts reconcile 246 headers
+at the original base and 249 at the operational revision. These static checks do
+not discharge the retained MS-H78-SHIM-PERF-STOP, full target, API or axiom gates.
 
 **Overall blocked; original goal incomplete.** Sole migration lane owner:
 `solidity-h62-6-20261106/migrate-source`. Branch:
