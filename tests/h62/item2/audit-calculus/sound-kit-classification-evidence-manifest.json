@@ -1,0 +1,47 @@
+{
+  "scope": "Complete79 SoundKit theorem role classifications; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 526,
+    "pending": 4757,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/sound-kit-roles-v35/evidence.tar.gz",
+      "bytes": 1084634,
+      "sha256": "523c2a7e2300e5a48fae363744874b0588be4a2fa684cd30dbc8d46f747c937d"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sound-kit-roles-v35/inputs.json",
+      "bytes": 884,
+      "sha256": "a936937c052f79330127d3892a9623eb0ca47668de919e02eeeb071c1c534649"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sound-kit-roles-v35/gates.json",
+      "bytes": 2967,
+      "sha256": "180bf8ebf11f7ab2a1edc65054dfbb6ddfebb48be4d2a5d5c77e87e3e7b6d8bc"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sound-kit-roles-v35/reviews.md",
+      "bytes": 902,
+      "sha256": "82afad1858a8b53b25388054ef5aefc369eee0cfc5d6a1dbcdfdf6b6d9e0f0e2"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sound-kit-roles-v35/case-rosters.json",
+      "bytes": 1205,
+      "sha256": "6895ce11bef4be6c7a54d8e6608594c6008557068ad27cd61579cd6b1c740ea4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sound-kit-roles-v35/doc-failure-source-binding.json",
+      "bytes": 371,
+      "sha256": "e69bcdb4f37992a5954a3a0aae27f155a2386675a5ce1256338d7efeb90d3d0c"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/sound-kit-roles-v35/semantic-roles-reviewed.json",
+      "bytes": 1402336,
+      "sha256": "d0828d006dee75881de6a7293bd4544f602c7a0c62e23f707a4a1a5a1f667d21"
+    }
+  ]
+}
