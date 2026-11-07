@@ -94,6 +94,99 @@ theorem reject_all_mismatch : Evm.run [.revert]
   intro equal
   cases equal
 
+def readQueries : List (Query graph (.array (.prim .bool))) := PrimitivePop.queries [zero]
+def readStore : Store := fun _ => PrimTy.toWord (p := .bool) true
+def numeric : WordStore := fun _ => PrimTy.toWord (p := .bool) true
+def hash (_ : Storage.Pre) : Nat := 8
+def readLocations : List Storage.Loc := [.root 0, .data (.root 0) 0]
+
+theorem read_before : Represented old readQueries (.root 0) readStore := by
+  intro query member
+  change query ∈ [.length .nil, PrimitivePop.elementQuery zero] at member
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at member
+  rcases member with rfl | rfl
+  · refine ⟨True.intro, ?_, ?_⟩
+    · change 1 ≤ Storage.lmax ∧ 3 ≤ Storage.lmax
+      decide
+    · intro value observed
+      cases observed
+      rfl
+  · refine ⟨?_, True.intro, ?_⟩
+    · change 0 < Storage.lmax ∧ True
+      exact ⟨by decide, True.intro⟩
+    intro value observed
+    cases observed
+    rfl
+
+theorem read_initial : ∀ query ∈ readQueries,
+    machine.store.cells (TargetOperations.toSlot (query.location (.root 0))
+      (TargetOperations.query_keysFit query (.root 0) True.intro)) =
+        TargetOperations.encodeWord (readStore (query.location (.root 0))) := by
+  intro query member
+  change query ∈ [.length .nil, PrimitivePop.elementQuery zero] at member
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at member
+  rcases member with rfl | rfl <;> rfl
+
+theorem represented_read_joint :
+    (TargetArrayRead.path zero).readLive Value.dflt old = some (.prim true) ∧
+    TargetOperations.KeysFit (.root 0) ∧
+    Represented old readQueries (.root 0) readStore ∧
+    (∀ query ∈ readQueries, machine.store.cells
+      (TargetOperations.toSlot (query.location (.root 0))
+        (TargetOperations.query_keysFit query (.root 0) True.intro)) =
+          TargetOperations.encodeWord (readStore (query.location (.root 0)))) :=
+  ⟨rfl, True.intro, read_before, read_initial⟩
+
+theorem complete_read_joint :
+    (TargetArrayRead.path zero).readLive Value.dflt old = some (.prim true) ∧
+    TargetOperations.KeysFit (.root 0) ∧
+    Represented old readQueries (.root 0) readStore ∧
+    Transport 16 hash readLocations readStore numeric ∧
+    Storage.Loc.data (.root 0) zero.val ∈ readLocations ∧
+    (∀ query ∈ readQueries, machine.store.cells
+      (TargetOperations.toSlot (query.location (.root 0))
+        (TargetOperations.query_keysFit query (.root 0) True.intro)) =
+          TargetOperations.encodeWord (readStore (query.location (.root 0)))) := by
+  refine ⟨rfl, True.intro, read_before, ?_, List.mem_cons_of_mem _ (List.mem_singleton_self _), read_initial⟩
+  intro loc _
+  rfl
+
+theorem represented_read_actual : Evm.run TargetArrayRead.code
+    {machine with stack := .val zero :: .slot (.root 0) :: tail} =
+      .ok {machine with stack := .val (TargetOperations.encodeWord (PrimTy.toWord (p := .bool) true)) :: tail} 0 :=
+  TargetArrayRead.represented_read old zero (.prim true) represented_read_joint.1
+    (.root 0) represented_read_joint.2.1 readStore machine tail
+    represented_read_joint.2.2.1 represented_read_joint.2.2.2
+
+theorem complete_read_actual : Evm.run TargetArrayRead.code
+    {machine with stack := .val zero :: .slot (.root 0) :: tail} =
+      .ok {machine with stack := .val (TargetOperations.encodeWord (PrimTy.toWord (p := .bool) true)) :: tail} 0 ∧
+    numeric ((Storage.Loc.data (.root 0) zero.val).word 16 hash) = PrimTy.toWord (p := .bool) true :=
+  TargetArrayRead.complete_read old zero (.prim true) complete_read_joint.1
+    (.root 0) complete_read_joint.2.1 readStore machine tail numeric hash readLocations
+    complete_read_joint.2.2.1 complete_read_joint.2.2.2.1 complete_read_joint.2.2.2.2.1
+    complete_read_joint.2.2.2.2.2
+
+theorem wrong_numeric_refuses :
+    ¬ Transport 16 hash readLocations readStore (fun _ => PrimTy.toWord (p := .bool) false) := by
+  intro transported
+  have wrong := transported (.data (.root 0) 0) (List.mem_cons_of_mem _ (List.mem_singleton_self _))
+  have unequal : PrimTy.toWord (p := .bool) false ≠ PrimTy.toWord (p := .bool) true := by decide
+  exact unequal wrong
+
+def wrongChild : Evm.Machine := {machine with
+  store := Evm.WordStore.write machine.store (.data (.root 0) 0) 0}
+
+theorem wrong_target_refuses : ¬ (∀ query ∈ readQueries,
+    wrongChild.store.cells (TargetOperations.toSlot (query.location (.root 0))
+      (TargetOperations.query_keysFit query (.root 0) True.intro)) =
+        TargetOperations.encodeWord (readStore (query.location (.root 0)))) := by
+  intro initial
+  have wrong := initial (PrimitivePop.elementQuery zero)
+    (List.mem_cons_of_mem _ (List.mem_singleton_self _))
+  have unequal : (⟨0, by decide⟩ : Fin Evm.W) ≠ ⟨1, by decide⟩ := by decide
+  exact unequal wrong
+
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.read_joint' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms read_joint
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_joint' does not depend on any axioms -/
@@ -126,5 +219,22 @@ theorem reject_all_mismatch : Evm.run [.revert]
 #guard_msgs (whitespace := lax) in #print axioms after_write_observations
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.reject_all_mismatch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms reject_all_mismatch
+
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.read_before' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms read_before
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.read_initial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms read_initial
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.represented_read_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms represented_read_joint
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.complete_read_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_read_joint
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.represented_read_actual' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms represented_read_actual
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.complete_read_actual' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_read_actual
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.wrong_numeric_refuses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms wrong_numeric_refuses
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.wrong_target_refuses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms wrong_target_refuses
 
 end H62.StorageAudit.ArrayAccessWitnesses
