@@ -28,6 +28,29 @@ class ResultValidation(unittest.TestCase):
     def test_valid_report(self):
         self.assertEqual(validator.validate(wrap(json.dumps(valid()))), valid())
 
+    def test_v1_version_and_legacy_compatibility(self):
+        legacy = valid()
+        self.assertEqual(validator.validate(wrap(json.dumps(legacy))), legacy)
+        versioned = dict(legacy, schema_version=1)
+        self.assertEqual(validator.validate(wrap(json.dumps(versioned))), versioned)
+        for bad in (True, False, None, "v1", "1", 0, 2, 1.5, {}, []):
+            with self.subTest(version=bad):
+                with self.assertRaises(validator.ResultError):
+                    validator.validate(wrap(json.dumps(dict(legacy, schema_version=bad))))
+
+    def test_v1_retains_done_constraints(self):
+        value = dict(valid(), schema_version=1, status="done", head="b" * 40,
+            checkpoints=[{"name":"item", "status":"done"}],
+            gates=[{"command":"check", "status":"pass", "evidence":"ok"}],
+            artifacts={k:"/artifact" for k in valid()["artifacts"]})
+        self.assertEqual(validator.validate(wrap(json.dumps(value))), value)
+        for update in ({"waits":[{"lane":"coordinator", "item":"integration"}]},
+                       {"gates":[{"command":"check", "status":"pending", "evidence":"waiting"}]},
+                       {"head":None}):
+            with self.subTest(update=update):
+                with self.assertRaises(validator.ResultError):
+                    validator.validate(wrap(json.dumps(dict(value, **update))))
+
     def test_missing_extra_and_bad_enum(self):
         for mutate in (lambda d: d.pop("head"), lambda d: d.update(extra=1), lambda d: d.update(status="complete")):
             value = valid(); mutate(value)

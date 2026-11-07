@@ -48,6 +48,10 @@ theorem readLoc' (F : Fr) {t : STy} (loc : Loc E.layout Γ t) (hl : LocOK loc) :
   | mem _ _ => exact hl.elim
   | memByte _ _ => exact hl.elim
   | cd _ => exact hl.elim
+  | cdBytes _ _ => exact hl.elim
+  | cdString _ _ => exact hl.elim
+  | cdArray _ _ => exact hl.elim
+  | cdFixedArray _ _ => exact hl.elim
 
 theorem keyStep' (F : Fr) (n : Nat) {t : STy} (v : RVal E.layout t) :
     MemPres (keyStep F n v : EM E Γ _) := by

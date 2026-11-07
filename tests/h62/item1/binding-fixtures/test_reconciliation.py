@@ -53,9 +53,19 @@ class ReconciliationControls(unittest.TestCase):
             finally:
                 reconcile.ROOT = saved_root
 
+    def test_quoted_declaration_is_explicit_unknown(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=pathlib.Path(directory);source=root/'Quoted.lean'
+            source.write_text('def «BindingRel» := 1\n')
+            saved=reconcile.ROOT;reconcile.ROOT=root
+            try:
+                row=reconcile.record(source)
+                self.assertEqual(row['declarations'],[])
+                self.assertEqual(row['unknown_quoted_identifiers'][0]['text'],'«BindingRel»')
+            finally:reconcile.ROOT=saved
+
     def test_lexical_nonclaims(self):
-        # A line inside a block comment still looks like an import to this scanner.
-        # Pin that limitation so this test does not pretend to parse Lean syntax.
+        # Commented imports must not create source dependencies.
         with tempfile.TemporaryDirectory() as directory:
             fixture_root = pathlib.Path(directory)
             package = fixture_root / "Probe"
@@ -66,7 +76,7 @@ class ReconciliationControls(unittest.TestCase):
             saved_root = reconcile.ROOT
             reconcile.ROOT = fixture_root
             try:
-                self.assertIn(b, reconcile.closure(a))
+                self.assertNotIn(b, reconcile.closure(a))
             finally:
                 reconcile.ROOT = saved_root
 

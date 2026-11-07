@@ -1,0 +1,28 @@
+{
+ "Solidity/Yul/Compilation/SourceLoop.lean:Solidity.Yul.Compilation.SourceLoop.compiled_finite": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoop.lean:Solidity.Yul.Compilation.SourceLoop.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoop.lean:Solidity.Yul.Compilation.SourceLoop.finite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoop.lean:Solidity.Yul.Compilation.SourceLoop.for_finite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoop.lean:Solidity.Yul.Compilation.SourceLoop.for_skip": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoop.lean:Solidity.Yul.Compilation.SourceLoop.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
