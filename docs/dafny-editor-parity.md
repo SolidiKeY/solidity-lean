@@ -1685,3 +1685,27 @@ Frontend proofhelper changes need independent validation for later native work.
 Full library/checkpoint/build/TestSuite/timedstrict/kerneltrust, actual source
 metadata/positionedtrace, paired rendering/macOS, full performance/adversarial/
 scaling matrices and both judgments per row remain mandatory and unfinished.
+
+
+### Handoffs — exact native hover popup and dismissal (2026-11-07)
+
+Fetched and fast-forwarded the lane to actual master95d1e9cb29dc5a34d1db68af3ca47e47b75e293f under the requested writer lock. Four unfinished observer files were saved, stashed and restored byte-for-byte; the stash and absolute preservation receipts remain. No push or goal mutation.
+
+The optional proof-hover suite preserves the existing single actual certified failure and both project documentation actions. It adds a second actual provider request, exact rendered documentation/signature and authentic compiler-ready decoration rows, current URI/source/session/version/hash ownership, before/after screenshot checks, and observed disappearance after Escape. The original one-hover proof-help assertion is unchanged. No fake verifier, proof delay, new proof job, changed deadline or inferred per-function progress.
+
+Retained native failures include the old unrecognized phase/dispatcher, a parent-limit launch without a host receipt, and the genuine successful host observations rejected by an incorrectly nested generic envelope reader. The corrected reader revalidates the untouched native receipt; its original exit1 is not rewritten. Targeted injected controls cover wrong nonempty content, stale/duplicate RPC, post-capture disappearance, missing observations and both documentation actions. Finder found the screenshot race; repaired and independently re-reviewed with no further source findings. Skeptic found no further defect after envelope/omission repairs. See checksum-bound [native evidence and review receipts](dafny-native-hover-evidence-manifest.json).
+
+Only the existing hover assessment is extended and stays partial. All489 IDs/order/expected observations, frozen270, prompts, judges and budgets remain. This is one Linux local observation, not pinned NeverVerifies, paired Dafny/macOS or full lifecycle correspondence. Positioned trace and same-candidate source-span metadata producer hook Q-REL-HOOK-01 remain pending. Full library/build/TestSuite/timed strict/kernel trust, full performance/adversarial/scaling matrices and both judgments per row remain mandatory; parity is not complete.
+
+
+### Handoffs — additive same-candidate certificate companion (2026-11-07)
+
+Incoming user answers #72/#73 authorize the previously pending producer paths, additively. Actual master2a917f732 was fetched and merged before this increment; original source/consumer ownership elsewhere is unchanged. No question remains on those permissions.
+
+New interfaces in Tools/SourceCounterexample are `Cand.sourceValuesV1`, `SourceCounterexampleCandidateV1`, `sourceCounterexampleCandidateV1?` and `refuteSourceCandidateV1?`. The wrapper searches once through unchanged refuteSource?, then extracts the exact quoted candidate/state/domain and original proof values. A retained kernel-checked equality binds those values to the candidate's literal source user-name/typed-value pairs. This is not a general Cand.vals/FreshNames theorem; failed attribution remains unavailable, never a waiver. Existing proof/report fields and every old declaration body/signature remain byte-identical before the additive block. JSON remains presentation. Consumers must retain and axiom-audit both original proof and argument equality.
+
+Finder/skeptic identified an inferType-only public Expr trust gap. A real counterexample plus deliberately malformed nested id proof reproduced acceptance; mandatory kernel validation repairs it. Finder also found an assigned-metavariable return gap, reproduced then repaired by raw proof closure checks. The existing100000 kernel ceiling is never increased and caller-smaller limits are honored. A failed literal-name reduction hit the original200000-heartbeat diagnostic budget; no limit was raised or unchanged STOP rerun. Direct source-user equality avoids that name-parser computation without modifying it.
+
+Per-file MCP0 for producer and real-model controls;215job targeted build0; actual wrong goal/domain/arguments/candidate, forged proof and assigned-MVar controls pass. Retained exact-goal refutation axioms are propext/Classical.choice/Quot.sound; argument equality uses propext. Reviews after repairs have no new source finding. [H44 checksum-bound receipts](dafny-candidate-hook-evidence-manifest.json) retain all failures. These are model/tool controls, not imported Solidity/rendered or EVM-equivalence evidence.
+
+The newly authorized frontend span companions/forget lemmas, admitted-source/canonical-clause/source-span link, real imported counterexample/wrong ordinal/span controls and decoration consumer remain open implementation, not blocked on permission. No span is emitted and no row completes. All489 ordered rows/frozen270, judge contracts and budgets remain. Full original proof/runtime gates, paired rendering/macOS, full performance/adversarial/scaling matrices and both judgments per row remain mandatory.
