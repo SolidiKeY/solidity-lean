@@ -1,0 +1,98 @@
+{
+  "guardedRegression": "H77 sourceBuild1b2b recipient intake must not imply newer address qualification or repaired STOPs",
+  "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "checkpointBase": "ba3c0f1539c8b64ac0c6c89e729481d3d398ee83",
+  "repository": "/workspace/solidity-lean",
+  "report": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/fixed-byte-intake.json",
+    "sha256": "12f1523972306daf22821aa128744e94bc9d7dfb6480d43cb62f505584ad8e86"
+  },
+  "tooling": [
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
+      "sha256": "52d0ae4da781ab72dc62b030864aea1ba9809414eacc3eaa380f8967f79eca95"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py",
+      "sha256": "6db856235266e529228ef58084c8b80a7fe3e1aaf43061f074efab4627b34851"
+    }
+  ],
+  "archive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/fixed-byte-intake-evidence.tar.zst",
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/fixed-byte-intake-evidence.tar.zst",
+    "sha256": "e2af117204cc27986e47d572dc3783134f38fff533a00d6f3508e876e82d8838",
+    "bytes": 7894
+  },
+  "gates": {
+    "gates": [
+      {
+        "command": [
+          "python3",
+          "tests/directruntime-20261104/shared-translator/verify-fixed-byte-intake.py",
+          "--report",
+          "tests/directruntime-20261104/shared-translator/fixed-byte-intake.json"
+        ],
+        "exit": 0,
+        "wallSeconds": 2.6043317309959093,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/fixed-byte-intake/gate-1.log"
+      },
+      {
+        "command": [
+          "python3",
+          "tests/directruntime-20261104/shared-translator/fixed-byte-intake-controls.py"
+        ],
+        "exit": 0,
+        "wallSeconds": 0.13170679099857807,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/fixed-byte-intake/gate-2.log"
+      },
+      {
+        "command": [
+          "python3",
+          "tests/directruntime-20261104/shared-translator/sourcebuild-intake-controls.py"
+        ],
+        "exit": 0,
+        "wallSeconds": 0.10551225000381237,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/fixed-byte-intake/gate-3.log"
+      },
+      {
+        "command": [
+          "python3",
+          "tests/directruntime-20261104/shared-translator/inventory.py"
+        ],
+        "exit": 0,
+        "wallSeconds": 0.2844964809992234,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/fixed-byte-intake/gate-4.log"
+      },
+      {
+        "command": [
+          "python3",
+          "tests/directruntime-20261104/shared-translator/audit.py"
+        ],
+        "exit": 0,
+        "wallSeconds": 0.13565631700475933,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/fixed-byte-intake/gate-5.log"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit": 0,
+        "wallSeconds": 0.02950057599809952,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/fixed-byte-intake/gate-6.log"
+      }
+    ],
+    "suiteChildMaxRssKiB": 74360,
+    "boundary": "External read-only Python/Git checks; no Lean/build/payload execution or timing acceptance."
+  },
+  "reviews": {
+    "finder": "Found omitted Memory.Reader in initial7producer subset; fixed to exact8boundarymodules and independently verified hash. Final unique case IDs and four saved Identity mode/modality cases confirmed; no remaining static-intake blocker. No Lean/server/build/payload execution/writes.",
+    "skeptic": "Final scope correction confirmed: all343Git build-source matches separate from8producer boundary pins; completeProducerTreeCompared=false. Saved projected parity only; browser failure, fourpending Bcases and reported STOPs retained. No remaining static-intake blocker. No Lean/server/build/payload execution/writes."
+  },
+  "initialFailure": "Initial9runtime count was incorrect; initial source/failure preserved. Interim7subset omitted Memory.Reader; earlier source/report preserved. Final explicit8module boundary verified.",
+  "productionLeanChanges": false,
+  "newTheoremsOrAxioms": false,
+  "buildsOrTimingReruns": false,
+  "boundary": "Static recipient inspection and external integrity controls only. Full original queue and all semantic/source/physical/runtime acceptance obligations remain open."
+}
