@@ -1828,3 +1828,22 @@ regenerable pinned build directory, restoring more than 2 GB free. Strict pin,
 documentation and full gates remain open as recorded in C271. Coverage remains
 72/3281, 3209 uncovered. Actual H121b Source/P8 production, original/consolidated
 queues and all previously recorded external waits and STOPs remain binding.
+
+### C273: mapping-key syntax correspondence and refusal
+
+SourceAstTypeCorrespondence now proves generic preservation of named path keys
+and elementary keys with the existing nonpayable grammar restriction. A third
+law retains the exact payable-address refusal instead of normalizing that key
+to plain address. Existing reader definitions, statements, imports and Source
+interfaces are unchanged. These are syntax laws, not H24 or actual Source
+admission, artifact binding or lifecycle adequacy.
+
+The first elementary proof left a pure/Except definitional equality; rfl closes
+it. Failed diagnostics remain in evidence, with no recovery proof accepted.
+All three final guards use only propext. Bounded serial module checking passed
+in 2.48 s, sampled peak RSS 381669376 bytes, no resource stop. This is no matched
+performance comparison. Read-only finder and skeptic found no semantic defect;
+neither ran Lean/server/builds or edited. Cleanup removed regenerable build
+output and restored over 2 GB free, preserving sealed evidence. Original and
+consolidated queues, 3209 uncovered rows, strict pin/docs and final gates remain
+open. External library-try, Y04 physical and separate 4.35 waits remain distinct.
