@@ -6,20 +6,34 @@ import hashlib
 import io
 import json
 import tarfile
+import tempfile
+from functools import lru_cache
 from pathlib import Path
 from pipeline import EEST_SHA, file_sha
 
 
 FORMATS = {"state_test": "eest", "blockchain_test": "blockchain",
            "blockchain_test_engine": "engine", "blockchain_test_engine_x": "engine-x",
-           "blockchain_test_sync": "sync"}
+           "blockchain_test_sync": "sync", "transaction_test": "transaction"}
 
 
 def blockchain_record(index, row, fixture, digest, kind="blockchain_test"):
-    if kind not in FORMATS or kind == "state_test" or fixture.get("network") != "Osaka" or fixture.get("_info", {}).get("fixture-format") != kind:
+    if kind not in FORMATS or kind in ("state_test", "transaction_test") or fixture.get("network") != "Osaka" or fixture.get("_info", {}).get("fixture-format") != kind:
         raise ValueError("blockchain format/fork mismatch")
     return dict(index=index, path=row["path"], case=row["case"], variant=0,
                 fixture_sha256=digest, fixture=fixture, status="input-only-not-executed")
+
+
+def transaction_record(index, row, fixture, digest):
+    """Guard wrong-fork transaction expectations being imported as Osaka inputs."""
+    results = fixture.get("result")
+    if fixture.get("_info", {}).get("fixture-format") != "transaction_test" or not isinstance(results, dict) or not isinstance(results.get("Osaka"), dict):
+        raise ValueError("transaction format/fork mismatch")
+    if not isinstance(fixture.get("txbytes"), str) or not fixture["txbytes"].startswith("0x"):
+        raise ValueError("transaction bytes missing")
+    return dict(index=index, path=row["path"], case=row["case"], variant=0,
+                fixture_sha256=digest, fixture=fixture, selected_fork="Osaka",
+                expected=results["Osaka"], status="input-only-not-executed")
 
 
 def allocation_inputs(archive, root):
@@ -111,7 +125,7 @@ def export(root, kind="state_test"):
                         if kind == "state_test" and row["sha256"] != digest: raise ValueError("census fixture bytes changed")
                         fixture = doc[row["case"]]
                         if kind != "state_test":
-                            record = blockchain_record(index, row, fixture, digest, kind)
+                            record = transaction_record(index, row, fixture, digest) if kind == "transaction_test" else blockchain_record(index, row, fixture, digest, kind)
                             if allocation:
                                 record["allocation_ref"] = allocation_reference(fixture, row["case"], allocation[0], allocation_stream)
                                 referenced_groups.add(fixture["preHash"])
@@ -143,8 +157,71 @@ def export(root, kind="state_test"):
     receipt_temporary.replace(receipt_path)
     return receipt
 
+
+@lru_cache(maxsize=2)
+def _archive_input_expectations(archive_name, archive_sha, generator_pins, kind):
+    """Regenerate from verified upstream bytes, never a mutable receipt/cache file.
+
+    Guard coordinated input/result/receipt substitution. Reuse the existing
+    census/export algorithms and record their per-file source audit. The cache
+    is process-local immutable JSON, keyed by archive and generator hashes.
+    """
+    from archive_census import census
+    archive = Path(archive_name)
+    if archive_sha != EEST_SHA or file_sha(archive) != EEST_SHA:
+        raise ValueError("untrusted fixture archive")
+    with tempfile.TemporaryDirectory(prefix="engine-archive-verification-", dir=archive.parent.parent) as tmp:
+        root = Path(tmp)
+        (root/"upstream").mkdir(); (root/"evidence").mkdir()
+        (root/"upstream/fixtures_develop-v5.3.0.tar.gz").symlink_to(archive)
+        census(root)
+        generated = export(root, kind)
+        names = [FORMATS[kind]+"-inputs.jsonl.gz", "archive-inventory.jsonl.gz", "evidence/archive-census.json"]
+        sources = {}
+        if kind == "blockchain_test_engine_x":
+            names += ["engine-x-allocations.jsonl", "engine-x-allocations-index.json"]
+            sources = {entry["path"]: entry["source_sha256"] for entry in
+                       json.loads((root/"engine-x-allocations-index.json").read_text()).values()}
+        with gzip.open(root/(FORMATS[kind]+"-inputs.jsonl.gz"), "rt") as stream:
+            for line in stream:
+                row = json.loads(line)
+                previous = sources.setdefault(row["path"], row["fixture_sha256"])
+                if previous != row["fixture_sha256"]:
+                    raise ValueError("inconsistent archive source audit")
+        proof = dict(algorithm="verify pinned archive SHA256; regenerate existing census/export; compare exact stream/index hashes", format=kind,
+                     archive_sha256=EEST_SHA, cases=generated["cases"],
+                     files={name: file_sha(root/name) for name in names},
+                     generator_sha256=dict(generator_pins), source_files=sources)
+    if file_sha(archive) != EEST_SHA:
+        raise ValueError("fixture archive changed during regeneration")
+    return json.dumps(proof, sort_keys=True)
+
+
+def verify_archive_inputs(root, kind):
+    """Guard coordinated fixture/expectation/receipt substitutions against the archive."""
+    if kind not in ("blockchain_test_engine", "blockchain_test_engine_x", "transaction_test"):
+        raise ValueError("unsupported archive verification format")
+    archive = (root/"upstream/fixtures_develop-v5.3.0.tar.gz").resolve()
+    actual = file_sha(archive)
+    if actual != EEST_SHA:
+        raise ValueError("untrusted fixture archive")
+    directory = Path(__file__).resolve().parent
+    pins = tuple((name, file_sha(directory/name)) for name in
+                 ("archive_census.py", "eest_export.py", "pipeline.py"))
+    proof = json.loads(_archive_input_expectations(str(archive), actual, pins, kind))
+    for name, expected in proof["files"].items():
+        if file_sha(root/name) != expected:
+            raise ValueError("input differs from pinned archive: " + name)
+    return proof
+
+
+def verify_engine_x_inputs(root):
+    """Preserve the Engine-X verifier interface and its archive anchor."""
+    return verify_archive_inputs(root, "blockchain_test_engine_x")
+
+
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(__doc__); p.add_argument("--bulk", type=Path, required=True); p.add_argument("--format", choices=list(FORMATS), default="state_test"); a = p.parse_args()
+    p = argparse.ArgumentParser(__doc__); p.add_argument("--verify", action="store_true"); p.add_argument("--bulk", type=Path, required=True); p.add_argument("--format", choices=list(FORMATS), default="state_test"); a = p.parse_args()
     root=a.bulk.resolve(); repo=Path(__file__).resolve().parents[4]
     if root==repo or repo in root.parents: p.error("bulk must stay outside repository")
-    print(json.dumps(export(root, a.format)))
+    print(json.dumps(verify_archive_inputs(root, a.format) if a.verify else export(root, a.format)))

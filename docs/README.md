@@ -3,7 +3,8 @@
 
 Open [module-map.md](module-map.md) first. Each fact lives in one document;
 the others link to it. Finished work is recorded as what is in force; its
-history is in git.
+history is in git. The [complete documentation catalog](document-index.md)
+also links retained feature records, test guidance and agent conventions.
 
 **Language coverage**
 
@@ -65,6 +66,7 @@ history is in git.
 | [feature-work/precompiles.md](feature-work/precompiles.md) | Osaka's 18 precompiles as computed core functions with gas and failure laws, G06's `Fixed` instance, the vector provenance and the Bridge agreement. |
 | [feature-work/stipend-cost-rule.md](feature-work/stipend-cost-rule.md) | The compiler-independent stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs, its examples and the compiler obligation (G43). |
 | [feature-work/full-scope.md](feature-work/full-scope.md) | Full scope (2026-11-04): every exclusion withdrawn, optimizing compiler and solc translation validation; groups X/O/T, decisions D1–D6, parallel lanes and waves. |
+| [feature-work/trust-usability.md](feature-work/trust-usability.md) | Trust and usability (2026-11-07): trusted surface, independent re-check, continuous solc/EVM validation, fast and certified modes, per-function budgets; groups A/U, parallel lanes and priority. |
 | [feature-work/inline-assembly.md](feature-work/inline-assembly.md) | Authorized inline assembly extension: the exclusions it reopens, tiers, groups Y01–Y10, lanes VY1–VY5 and approved decisions YQ1–YQ7; implementation gates remain open. |
 | [feature-work/compiler-transport-proofs.md](feature-work/compiler-transport-proofs.md) | Compiler transport proofs, reached failure controls, full small-frame output and remaining Source/EVM obligations. |
 | [feature-work/memory-operation-proofs.md](feature-work/memory-operation-proofs.md) | Typed Source/heap/word memory-operation lemmas, reached decrement failures and the remaining physical/backend boundary. |
@@ -74,7 +76,6 @@ history is in git.
 | [feature-work/abstraction-pilot.md](feature-work/abstraction-pilot.md) | Anti-unification deduplication pilot: helper lemmas, measured line/token/check-time savings vs au.py predictions, redesign proposals and rollout shape. |
 | [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
 | [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
-| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 | [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 | [feature-work/h28-mutation-testing.md](feature-work/h28-mutation-testing.md) | H28 semantic rule mutation testing: whole-family census, toStep proof oracle, checked kill witnesses and score. |
 | [feature-work/p8-producer-merge.md](feature-work/p8-producer-merge.md) | H57/H60 P8/P8b Producer merge: inventory, merged interface, inhabited frozen P8a Producer, controls and migration notes. |
@@ -186,8 +187,6 @@ V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-wor
 - [Coordination audit](audits/coordination-process.md) (2026-11-06): where lane time goes, gate saturation, merge latency, question load.
 - [Core EVM revert/return data (machine V2)](feature-work/evm-machine-v2.md): versioned `OutV2`/`MachineV2` with revert/return data, return buffer and CALL input bytes; migration to the frozen machine.
 - [Canonical P1 languages V2](feature-work/p1-lang-v2.md): `P1LangV2` with revert data, call events and frame classes over the V2 machine; `p1_frame_bridge` for a guarded revert-with-data family.
-| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
-| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 - [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
 - V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |

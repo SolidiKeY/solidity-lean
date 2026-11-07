@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceHead": "21801f28b52f4a66a90d90101ff03162fe1697a4",
+  "fileCount": 58,
+  "uncompressedBytes": 366270,
+  "archive": {
+    "path": "/workspace/dafny-ingress-link-20261107/bulk.tar.gz",
+    "bytes": 45574,
+    "sha256": "8451f14b1045c4cb5737935ba4ae405626513be13193d903eeb9504ec856be59"
+  },
+  "index": {
+    "path": "/workspace/dafny-ingress-link-20261107/files.json",
+    "bytes": 14197,
+    "sha256": "2715898b4cdcfd3d6aec8b9c8a323eba1f8e876d9ed7207b9508e8d516e4c7e4"
+  },
+  "boundaries": [
+    "Actual pre-import context privately retained at opt-in ingress; no arbitrary caller input accepted by new joins. Process-local captures unavailable after serialized imports fail closed.",
+    "Real admitted bad counterexample/candidate joined without second search; source/ordinal/span negative controls and actual constructor/shadowing normalization retained; no selected-clause failure/span certificate emitted.",
+    "MCP changeddiagnostics0errors/supervisor0/no retirement; old supervisor1 retained. Repeated-TERM review reproduction3pass1fail, repaired4pass with bounded birth-owned cleanup.",
+    "All490 rows/frozen270 and original gates/budgets unchanged; pending producer normalization scope question does not grant an edit."
+  ]
+}

@@ -65,10 +65,32 @@ async function inputProbe(client) {
   return {started,finished:Date.now(),roundTripMs:performance.now()-clock,focusedEditor:focused.result.value,
     scope:'Arrow-key dispatch and next renderer animation frame; includes DevTools transport and does not isolate paint time.'};
 }
+const contextMenuNodes='(()=>{const roots=[document],nodes=[];for(let i=0;i<roots.length;i++){const root=roots[i];nodes.push(...root.querySelectorAll(".monaco-menu .action-label"));for(const e of root.querySelectorAll("*"))if(e.shadowRoot)roots.push(e.shadowRoot);}return nodes;})()';
+async function captureContributionMenu(client,directory,metadata){
+ const label=metadata.target==='local'?'Solidity Lean':'Dafny',expected=metadata.target==='local'?'Build Compiler Artifact with Import Options':'Build with Custom Arguments';
+ const nodes=contextMenuNodes+'.filter(e=>e.getClientRects().length)';
+ const read=async()=> (await client.request('Runtime.evaluate',{expression:'(()=>{const nodes='+nodes+';return{activeUri:document.querySelector(".editor-group-container.active .monaco-editor[data-uri]")?.getAttribute("data-uri")??null,items:nodes.map(e=>{const i=e.closest("[role=menuitem]"),r=e.getBoundingClientRect();return{label:e.textContent,ariaDisabled:i?.getAttribute("aria-disabled")??null,className:i?.className??null,bounds:{left:r.left,top:r.top,right:r.right,bottom:r.bottom},withinViewport:r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight};})};})()',returnByValue:true})).result.value;
+ const point=(await client.request('Runtime.evaluate',{expression:'(()=>{const e=document.querySelector('+JSON.stringify(metadata.kind==='tab'?'.editor-group-container.active .tabs-container .tab.active':'.editor-group-container.active .monaco-editor .view-lines')+');if(!e)return null;const r=e.getBoundingClientRect();return{x:r.left+Math.min(60,r.width/2),y:r.top+Math.min(12,r.height/2)};})()',returnByValue:true})).result.value;
+ if(!point)throw Error('Owned menu source/tab is not rendered');
+ const attempts=[],deadline=Date.now()+3000,prep=task=>require('./menu-lifecycle.cjs').preparation(task,deadline);let before,primary;
+ try{for(const type of ['mousePressed','mouseReleased'])await prep(()=>client.request('Input.dispatchMouseEvent',{type,...point,button:'right',clickCount:1}));
+  while(Date.now()<deadline){before=await prep(read);attempts.push(before);if(before?.items?.length)break;await new Promise(r=>setTimeout(r,20));}
+  if(!before?.items?.length)throw Error('No native context menu opened');
+  const submenu=before.items.find(i=>i.label===label);
+  if(!!submenu!==metadata.visible)throw Error('Native submenu visibility differs from declared predicate');
+  if(submenu){await prep(()=>client.request('Input.dispatchMouseEvent',{type:'mouseMoved',x:submenu.bounds.right-5,y:(submenu.bounds.top+submenu.bounds.bottom)/2}));
+   while(Date.now()<deadline){before=await prep(read);attempts.push(before);if(before.items.some(i=>i.label.includes(expected)))break;await new Promise(r=>setTimeout(r,20));}
+   if(!before.items.some(i=>i.label.includes(expected)))throw Error('Native submenu actions missing');}
+  if(before.activeUri!==metadata.binding.uri)throw Error('Foreign active source in menu renderer');
+  writeFileSync(join(directory,'menu-before.json'),JSON.stringify(before,null,2));const rendered=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'menu-after.json'),JSON.stringify(after,null,2));require('node:assert/strict').deepEqual(after,before,'Menu changed during AX/PNG capture');
+  return{...rendered,contributionMenu:{binding:metadata.binding,before,after,submenuVisible:!!submenu,kind:metadata.kind,scope:'Native mouse-opened menu endpoints; raw labels/attributes/bounds retained. No raster glyph or mutation-ABA claim.'}};
+ }catch(error){primary=error;try{await capture(client,directory,true);}catch{}throw error;}
+ finally{writeFileSync(join(directory,'menu-attempts.json'),JSON.stringify(attempts,null,2));const cleanupDeadline=Date.now()+3000;try{for(let i=0;i<2;i++)for(const type of ['keyDown','keyUp'])await require('./menu-lifecycle.cjs').preparation(()=>client.request('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27}),cleanupDeadline);}catch(error){writeFileSync(join(directory,'menu-cleanup-error.json'),JSON.stringify({error:error.message,primary:primary?.message??null}));if(!primary)throw error;}}
+}
 async function contextSubmenu(client,directory,{label='Solidity Lean',expected='Build Compiler Artifact with Import Options'}={}) {
   const point=await client.request('Runtime.evaluate',{expression:'(()=>{const e=document.querySelector(".monaco-editor.focused .view-lines")||document.querySelector(".monaco-editor .view-lines");if(!e)return null;const r=e.getBoundingClientRect();return{x:r.left+80,y:r.top+12};})()',returnByValue:true});
   if(!point.result.value)throw Error('No source editor for context submenu capture');
-  const menuNodes='(()=>{const roots=[document],nodes=[];for(let i=0;i<roots.length;i++){const root=roots[i];nodes.push(...root.querySelectorAll(".monaco-menu .action-label"));for(const e of root.querySelectorAll("*"))if(e.shadowRoot)roots.push(e.shadowRoot);}return nodes;})()';
+  const menuNodes=contextMenuNodes;
   const labels=()=>client.request('Runtime.evaluate',{expression:menuNodes+'.filter(e=>e.getClientRects().length).map(e=>e.textContent)',returnByValue:true});
   try {
     for(const type of ['mousePressed','mouseReleased'])await client.request('Input.dispatchMouseEvent',{type,...point.result.value,button:'right',clickCount:1});
@@ -205,4 +227,4 @@ async function captureCompilerConfiguration(client,directory,metadata){
  const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);writeFileSync(join(directory,'configuration-before.json'),JSON.stringify(before,null,2));const rendered=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'configuration-after.json'),JSON.stringify(after,null,2));
  if(!valid(before)||!valid(after)||JSON.stringify(before)!==JSON.stringify(after))throw Error('Rendered output directory configuration/source changed or missing');return{...rendered,configuration:{before,after,metadata,scope:'Actual Settings UI default or resource JSON DOM/AX/PNG; not full glyph/raster equivalence.'}};
 }
-module.exports={testingLabel,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
+module.exports={captureContributionMenu,testingLabel,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};

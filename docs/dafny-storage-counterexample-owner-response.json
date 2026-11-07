@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "status": "verified primitive-search refusal boundary; exact cases not independently diagnosed",
+  "ticket": "H71 memory-references storageAlias/storageCopy diamond certification",
+  "requesterHead": "08f37691851d562c85ab2f5c9f0db50a1443af96",
+  "checkedCurrentHead": "6fcf216bdcd91b31acac81d4189331c6b1d29c2a",
+  "apiProducerHeadFromTicket": "9992f69062900db2c06ed45f5cd36f7058aed9ff",
+  "producerSource": {
+    "path": "Solidity/Tools/SourceCounterexample.lean",
+    "bytes": 12779,
+    "sha256": "bcd3dd1b788b42a4d377ea585a4c2e96c7fefc64b62bd52f97d607138451b5ae",
+    "matchesTicketApiBytes": true
+  },
+  "sourceFinding": {
+    "guard": "unless C.vars.all (fun (_, type) => type.isPrimitive) do return none",
+    "location": "Solidity/Tools/SourceCounterexample.lean:109",
+    "ordering": "After exact closed Fml.Valid/contract/context checks and before formula evaluation, candidate enumeration and shrinking.",
+    "delegate": "refuteSourceCandidateV1? calls unchanged refuteSource? and returns none when it does.",
+    "unsupportedSemanticClass": "Source-friendly counterexample enumeration for contracts with nonprimitive storage variables, including storage-array heap/alias/copy states.",
+    "boundary": "This is a verified producer refusal boundary, not proof that a goal is valid or has no counterexample. Earlier goal-shape checks may also refuse; exact cases are not independently diagnosed without their bytes."
+  },
+  "certification": {
+    "providedCertificate": null,
+    "retainedTheoremCreated": false,
+    "certifiedReportCreated": false,
+    "reason": "No exact retained SourceCounterexample refutation or <namespace>.identity.refuted theorem is supplied here. sourceCounterexampleCandidateV1? extracts/checks an existing exact-goal proof and may construct/check an auxiliary argument-equality proof; it does not search or create a new exact-goal refutation. refuteSourceCandidateV1? does invoke the original guarded search."
+  },
+  "casesReportedByRequester": [
+    {
+      "case": "storageAlias.diamond.legacy",
+      "namespace": "V1Storage.storageAlias_legacy.Identity",
+      "fixtureSha256": "926b3e49ebbe45933487d9ada9adc241e3e093e9abfe7900f6170d2fad9a7cec"
+    },
+    {
+      "case": "storageAlias.diamond.ir",
+      "namespace": "V1Storage.storageAlias_ir.Identity",
+      "fixtureSha256": "41dc2c28a27351bb1ca1091570c0404412b02008a444a75eff7b9d6487c45454"
+    },
+    {
+      "case": "storageCopy.diamond.legacy",
+      "namespace": "V1Storage.storageCopy_legacy.Identity",
+      "fixtureSha256": "c1c7d612064a16e3d279c69d46598cf366b30b7310b93ac92a58b733905e2724"
+    },
+    {
+      "case": "storageCopy.diamond.ir",
+      "namespace": "V1Storage.storageCopy_ir.Identity",
+      "fixtureSha256": "30728082aa5fd58436e7e3ef8baf6b5f4cffc99b42fbe02919d6a0dc9c560ab6"
+    }
+  ],
+  "missingLocalArtifacts": [
+    "all four exact trimmed JSON fixtures at ticket paths; absent from fetched consumer commit and examined recorded bulk-source/history objects"
+  ],
+  "nextReadOnlyPrerequisite": "Supply the four exact SHA256/FNV-pinned trimmed JSON inputs or a checksum-bound archive. Consumer and ticket metadata are now recovered and authenticated; do not regenerate/substitute fixtures to claim reproduction.",
+  "scopePreserved": [
+    "primitive guard",
+    "original statements/premises/exclusions",
+    "candidate/search/shrink/kernel budgets",
+    "intrinsic types and trust boundary"
+  ],
+  "ordinaryResults": "Requester-reported four ordinary native/browser results remain pending; not independently reproduced locally. Intrinsic negative controls are not substituted.",
+  "actions": "Read-only source/hash/object checks only; no Lean execution, producer edits, profile extension, external notification or publication.",
+  "recoveredReadOnly": {
+    "consumerCommitAvailable": true,
+    "intakeManifest": "/workspace/dafny-storage-owner-response-20261107/INTAKE.json",
+    "consumerAndTicketHashesVerified": true,
+    "refsUnchanged": true,
+    "fetchHeadUnchanged": true,
+    "source": "Exact object-only fetch from existing origin; no merge/ref update"
+  },
+  "consumerProbeFinding": "Recovered V1StorageCases.lean imports/scopes four goals, calls refuteSourceCandidateV1?, and deliberately asserts candidate.isNone and retained theorem absence. It is a refusal/capability probe, not a command that persists a successful refutation theorem. It has not been executed locally because the four hash-pinned JSON inputs are absent."
+}

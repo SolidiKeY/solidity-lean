@@ -1453,5 +1453,15 @@
     "file": "Solidity/Yul/Views/RetainedLocationRun.lean",
     "kind": "override",
     "code": "@[implemented_by locationStoragePathsM]"
+  },
+  {
+    "file": "Solidity/Frontend/CounterexampleMetadataV1.lean",
+    "kind": "kernel-option",
+    "code": "withOptions (fun _ => debug.skipKernelTC.set (maxHeartbeats.set options limit) false) (addDecl declaration)"
+  },
+  {
+    "file": "Solidity/Frontend/CounterexampleMetadataV1.lean",
+    "kind": "kernel-option",
+    "code": "withScope (fun scope => { scope with opts := debug.skipKernelTC.set scope.opts false }) do"
   }
 ]
