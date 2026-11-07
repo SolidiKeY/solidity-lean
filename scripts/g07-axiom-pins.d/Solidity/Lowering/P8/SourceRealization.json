@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/P8/SourceRealization.lean:Solidity.Lowering.P8.SpecExecution.machineAgreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

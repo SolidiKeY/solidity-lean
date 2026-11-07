@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "3b02f54880b8d655cec106797b4d0da83a1edeb3",
+  "status": "partial",
+  "fileCount": 11,
+  "uncompressedBytes": 13373,
+  "archive": {
+    "path": "/workspace/dafny-parity-direct-retention-20261106/evidence/bulk.tar.gz",
+    "bytes": 4675,
+    "sha256": "7a50e1c003163da53ce85be5de34fd8c051b845e8b5f3c0cfa886c36a2ee5b63"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-direct-retention-20261106/evidence/files.json",
+    "bytes": 2066,
+    "sha256": "3c9fffb73993a42aa6fa5b80e71462f340f94c91c88ad57904f0de7af5968b2b"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-direct-retention-evidence-manifest.json --restore",
+  "supportingArchives": [
+    {
+      "path": "/workspace/dafny-parity-direct-retention-20261106/supporting-receipts.tar.gz",
+      "bytes": 21259,
+      "sha256": "dc905c51743f73d5577749dece7bfae1f89988c2fdc826fcae07972e70ade433"
+    },
+    {
+      "path": "/workspace/dafny-parity-timed-strict-20261106/failed-replay-evidence.tar.gz",
+      "bytes": 4460085,
+      "sha256": "9375e5de578f6ca1091e1c25e1af8be11bb8da9b77619b4a60c4ddf26d51a534"
+    },
+    {
+      "path": "/workspace/dafny-parity-merge-20261106/merge-evidence.tar.gz",
+      "bytes": 23206,
+      "sha256": "19e77110f5d5b2633836cb0934ad6ed2e3136fed2c6e0578be3aa5ad29088641"
+    }
+  ],
+  "boundaries": [
+    "Actual compiler plus pending-only injected native protocol/Wasm controls; no C/kernel/solver/EVM equivalence.",
+    "Independent frontend validation passes; original TestSuite resourceSTOP and fresh300s timeout remain failures.",
+    "All489 IDs/frozen270 retained; no row completed or paired judge fabricated."
+  ],
+  "packagingCorrection": {
+    "path": "/workspace/dafny-parity-direct-retention-20261106/packaging-first-error.txt",
+    "bytes": 232,
+    "sha256": "362d97365801435021c8b7867e4cf3486d6c41c60c266d4831ca767b03ac896c"
+  }
+}

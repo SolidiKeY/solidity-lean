@@ -1305,6 +1305,10 @@ theorem deleteLoc_mem {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.la
     exact Hoare.bind (Hoare.conseq ((zeroOK n).val H _) (fun _ h => h) (fun _ _ h => h.1) (fun _ _ h => h))
       fun v => writeLoc_memByte_mem F n a i v
   | cd off => exact Hoare.bind ((zeroOK n).val H τ) fun _ => Hoare.halt' fun _ h => h.1
+  | cdBytes _ _ => exact Hoare.bind ((zeroOK n).val H _) fun _ => Hoare.halt' fun _ h => h.1
+  | cdString _ _ => exact Hoare.bind ((zeroOK n).val H _) fun _ => Hoare.halt' fun _ h => h.1
+  | cdArray _ _ => exact Hoare.bind ((zeroOK n).val H _) fun _ => Hoare.halt' fun _ h => h.1
+  | cdFixedArray _ _ => exact Hoare.bind ((zeroOK n).val H _) fun _ => Hoare.halt' fun _ h => h.1
 
 
 /-! ## Copies from storage keep the memory invariant -/
@@ -1639,6 +1643,10 @@ theorem writeLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.l
   | memByte a i =>
     exact Hoare.conseq (writeLoc_memByte_mem F n a i v) (fun _ h => h.1) (fun _ _ h => h) (fun _ _ h => h)
   | cd off => exact Hoare.halt' fun _ h => h.1
+  | cdBytes _ _ => exact Hoare.halt' fun _ h => h.1
+  | cdString _ _ => exact Hoare.halt' fun _ h => h.1
+  | cdArray _ _ => exact Hoare.halt' fun _ h => h.1
+  | cdFixedArray _ _ => exact Hoare.halt' fun _ h => h.1
 
 /-- **Every `delete` keeps `MemOK`**, halts included. -/
 theorem deleteLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.layout Γ τ) :
@@ -1649,6 +1657,10 @@ theorem deleteLoc_memOK {H : HeapTy} (F : Fr) (n : Nat) {τ : STy} (loc : Loc E.
   | mem a i => exact deleteLoc_mem F n _ fun _ h => nomatch h
   | memByte a i => exact deleteLoc_mem F n _ fun _ h => nomatch h
   | cd off => exact deleteLoc_mem F n _ fun _ h => nomatch h
+  | cdBytes _ _ => exact deleteLoc_mem F n _ fun _ h => nomatch h
+  | cdString _ _ => exact deleteLoc_mem F n _ fun _ h => nomatch h
+  | cdArray _ _ => exact deleteLoc_mem F n _ fun _ h => nomatch h
+  | cdFixedArray _ _ => exact deleteLoc_mem F n _ fun _ h => nomatch h
 
 end
 

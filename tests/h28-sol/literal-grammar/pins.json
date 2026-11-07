@@ -679,11 +679,91 @@
     "word_cases": [],
     "word_dite": [],
     "word_transport": [],
-    "solWordTable_nonliteral": []
+    "solWordTable_nonliteral": [],
+    "Scan.deterministic": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Scan.isSuffix": [
+      "propext"
+    ],
+    "Scan.length_lt": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Scan.length_eq": [
+      "propext"
+    ],
+    "Plain.length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexLiteral.length_bounds": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "UnicodeLiteral.length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.length_eq": [
+      "propext"
+    ],
+    "Fragments.flatten_length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "FragmentValue.plain_length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "FragmentValue.hex_length_le": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "FragmentValue.unicode_length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "CodepointBytes.shape": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CodepointBytes.value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "utf8_injective": [
+      "propext",
+      "Quot.sound"
+    ],
+    "uniEscape_shape": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "uniEscape_value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexBody.length_tight": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "HexLiteral.length_le_tight": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
   },
   "hex_control_count": 28,
   "body_control_count": 53,
-  "full_control_count": 105,
+  "full_control_count": 118,
   "boundary_control_count": 56,
   "safe_declarations": [
     "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28._aux_Solidity_Frontend_LiteralGrammarH28_WordTable___elabRules_Solidity_Frontend_LiteralGrammarH28_tacticWord_range_all_1.match_1: Lean.DefinitionSafety.safe",

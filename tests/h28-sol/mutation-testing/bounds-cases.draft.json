@@ -1,0 +1,36 @@
+{
+  "state": "development-not-frozen",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "Distinct type-preserving read-skipping edit. Dynamic/fixed bound kills and inhabited live-read controls; default-schema candidate retained as invalid and unscored.",
+  "cases": [
+    {
+      "id": "bounds.array-read-skipped",
+      "kind": "mutant",
+      "family": "index-bounds",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storageIndexReadArrayFind :\n      dl{ \u27e8[ v = arr[ie]; ]\u27e9 \u21dd { v := find(storage, arr[ie]) } \u27e8[ ]\u27e9 }",
+      "new": "  | storageIndexReadArrayFind :\n      dl{ \u27e8[ v = arr[ie]; ]\u27e9 \u21dd { v := v } \u27e8[ ]\u27e9 }",
+      "source_symbol": "Taclet.storageIndexReadArrayFind",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/BoundsBaseline.lean",
+      "oracle_sha256": "059db341369f65869183ce8c422d2852b4fd9c2cf102678ee7641a1252e91cdc",
+      "oracle_declarations": [
+        "H28.BoundsBaseline.source_link",
+        "H28.BoundsBaseline.input_inhabited",
+        "H28.BoundsBaseline.dynamic_boundary_reverts",
+        "H28.BoundsBaseline.fixed_boundary_reverts",
+        "H28.BoundsBaseline.dynamic_positive_read",
+        "H28.BoundsBaseline.fixed_positive_read"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/BoundsSkippedKill.lean",
+      "witness_sha256": "debc07e078ca0938447de5bdc97c655a8b3ed9f51e211dc400751feb2910965e",
+      "witness_declarations": [
+        "H28.BoundsSkippedKill.source_link",
+        "H28.BoundsSkippedKill.input_inhabited",
+        "H28.BoundsSkippedKill.checked_kill",
+        "H28.BoundsSkippedKill.checked_fixed_kill",
+        "H28.BoundsSkippedKill.typed_landing"
+      ]
+    }
+  ]
+}

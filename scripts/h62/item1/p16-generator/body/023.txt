@@ -1,0 +1,6 @@
+/-! RawU8ForAbsent.adapter concretely composes the supported uint8 no-post
+producer with omitted-guard transport, for both clauses absent. Its Source law
+retains actual initializer/body certificates and checked/coherent premises.
+Checks witness mutation/break, a finite continue-only horizon, dirty retention
+and per-pipeline initializer errors. General admission and unbounded divergence
+claims do not follow from these bounded witnesses. -/

@@ -1,0 +1,8 @@
+/-! RawPreparedInteger.run exports an intrinsically typed integer-literal declaration
+into a named grown raw frame. The real integer range proof is required. Its
+Source.execS law projects stored clean locals; output coherence is proved under
+genuine input coherence, while dirty older words are retained independently.
+Checks.RawPreparedInteger witnesses signed/unsigned bounds, refusals, timeout
+identity and an existing checked uint8 consumer followed by typed scope removal.
+Enclosing integer-block composition, arbitrary initializers and dirty ordinary
+Source readback remain separate obligations. -/

@@ -1,0 +1,441 @@
+#!/usr/bin/env python3
+"""Black-box drift controls against a disposable miniature checkout."""
+import hashlib
+import json
+import os
+import re
+import pathlib
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+ROOT = pathlib.Path(__file__).resolve().parents[4]
+LANE = pathlib.Path("scripts/h62/item1/p16-generator")
+TARGET = pathlib.Path("Solidity/Yul/Interfaces/P16.lean")
+
+
+class GeneratorControls(unittest.TestCase):
+    def safe_run(self, args, **kwargs):
+        if args[0] == "git":
+            args = ["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                    "-c", "core.hooksPath=/dev/null", "-c", "init.templateDir=" + str(self.template), *args[1:]]
+        return subprocess.run(args, env=self.environment, **kwargs)
+
+    def setUp(self):
+        self.environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+        self.environment.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL="/dev/null", GIT_TERMINAL_PROMPT="0")
+        scratch = pathlib.Path("/workspace/scratch").resolve()
+        self.tmp = tempfile.TemporaryDirectory(prefix="p16-controls-", dir=scratch)
+        self.addCleanup(self.tmp.cleanup)
+        self.root = pathlib.Path(self.tmp.name).resolve()
+        if self.root.parent != scratch or self.root == ROOT:
+            raise RuntimeError("test repository must be an isolated direct child of /workspace/scratch")
+        self.template = self.root / "empty-template"
+        self.template.mkdir()
+        shutil.copytree(ROOT / LANE, self.root / LANE)
+        (self.root / TARGET).parent.mkdir(parents=True)
+        shutil.copyfile(ROOT / TARGET, self.root / TARGET)
+        for p in (self.root / LANE / "imports").glob("*.txt"):
+            module = p.read_text().strip()
+            if not re.fullmatch(r"Solidity(?:\.[A-Za-z_][A-Za-z_0-9]*)+", module):
+                raise ValueError("invalid fixture source module")
+            source = self.root / (module.replace(".", "/") + ".lean")
+            if not source.resolve().is_relative_to(self.root):
+                raise ValueError("source path escapes fixture")
+            source.parent.mkdir(parents=True, exist_ok=True)
+            source.touch()
+        self.original = (self.root / TARGET).read_text()
+        self.safe_run(["git", "init", "-q"], cwd=self.root, check=True, capture_output=True)
+        root = self.safe_run(["git", "rev-parse", "--show-toplevel"], cwd=self.root, check=True, text=True, capture_output=True).stdout.strip()
+        if pathlib.Path(root).resolve() != self.root:
+            raise RuntimeError("Git initialized outside the isolated fixture")
+        remotes = self.safe_run(["git", "remote"], cwd=self.root, check=True, text=True, capture_output=True).stdout
+        if remotes:
+            raise RuntimeError("fixture must have no remotes")
+        self.safe_run(["git", "add", "--", "Solidity"], cwd=self.root, check=True, capture_output=True)
+        self.safe_run(["git", "commit", "-qm", "synthetic baseline"], cwd=self.root, check=True, capture_output=True)
+        self.fixture_base = self.safe_run(["git", "rev-parse", "HEAD"], cwd=self.root, check=True, text=True, capture_output=True).stdout.strip()
+        for name in ("census.py", "conservation.py"):
+            script = self.root / LANE / name
+            text = script.read_text()
+            original = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
+            if text.count(original) != 1:
+                raise ValueError("unexpected pinned baseline reference")
+            script.write_text(text.replace(original, self.fixture_base))
+
+    def run_gen(self, arg):
+        return self.safe_run([sys.executable, str(self.root / LANE / "generate.py"), arg], text=True, capture_output=True)
+
+    def check_drift(self, text, message):
+        (self.root / TARGET).write_text(text)
+        result = self.run_gen("--check")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn(message, result.stdout)
+
+    def test_exact(self):
+        self.assertEqual(self.run_gen("--check").returncode, 0)
+        self.assertEqual(self.run_gen("--render").stdout, self.original)
+
+    def test_missing_and_extra(self):
+        line = self.original.splitlines(keepends=True)[0]
+        self.check_drift(self.original.removeprefix(line), "missing import")
+        self.check_drift(self.original + "\nimport Solidity.Yul.Extra\n", "extra import")
+
+    def test_duplicate_order_and_body(self):
+        lines = self.original.splitlines(keepends=True)
+        self.check_drift(lines[0] + self.original, "non-generated")
+        lines[0], lines[1] = lines[1], lines[0]
+        self.check_drift("".join(lines), "non-generated")
+        self.check_drift(self.original + "-- drift\n", "non-generated")
+
+    def test_missing_target_render_and_migration_patch(self):
+        target = self.root / TARGET
+        patch = self.run_gen("--patch").stdout
+        self.assertEqual(patch, "")
+        command = [sys.executable, str(self.root / LANE / "generate.py"), "--migration"]
+        migration = self.safe_run(command + ["--render"], text=True, capture_output=True, check=True).stdout
+        diff = self.safe_run(command + ["--patch"], text=True, capture_output=True, check=True).stdout
+        applied = self.safe_run(["patch", "-p1"], cwd=self.root, input=diff, text=True, capture_output=True)
+        self.assertEqual(applied.returncode, 0, applied.stderr)
+        self.assertEqual(target.read_text(), migration)
+        self.assertEqual(self.safe_run(command + ["--check"], capture_output=True).returncode, 0)
+        self.assertEqual(self.run_gen("--check").returncode, 1)
+        target.unlink()
+        self.assertEqual(self.run_gen("--render").stdout, self.original)
+
+    def test_fragment_and_source_drift(self):
+        entries = sorted((self.root / LANE / "imports").glob("*.txt"))
+        source = self.root / (entries[0].read_text().strip().replace(".", "/") + ".lean")
+        source.unlink()
+        self.assertEqual(self.run_gen("--check").returncode, 2)
+        source.touch()
+        extra = self.root / LANE / "imports" / "999-Extra.txt"
+        extra.write_text("Solidity.Yul.Extra\n")
+        (self.root / "Solidity/Yul/Extra.lean").touch()
+        result = self.run_gen("--check")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("extra=", result.stderr)
+        extra.unlink()
+        entries[0].unlink()
+        self.assertEqual(self.run_gen("--check").returncode, 2)
+        self.assertEqual(self.run_gen("--render").returncode, 2)
+        body = next((self.root / LANE / "body").glob("*.txt"))
+        body.unlink()
+        self.assertEqual(self.run_gen("--check").returncode, 2)
+
+    def add_extension(self, owner, name, module=None, doc=None):
+        ident = owner + "-" + name
+        lane = self.root / LANE
+        (lane / "registrations" / (ident + ".json")).write_text(json.dumps({"module": module, "documentation": doc is not None}))
+        if module is not None:
+            (lane / "imports" / ("ext-" + ident + ".txt")).write_text(module + "\n")
+            source = self.root / (module.replace(".", "/") + ".lean")
+            source.parent.mkdir(parents=True, exist_ok=True)
+            source.touch()
+        if doc is not None:
+            (lane / "body" / ("ext-" + ident + ".txt")).write_text(doc)
+
+    def test_concurrent_extensions_are_order_independent(self):
+        self.add_extension("VY3", "Beta", "Solidity.Yul.Beta", "/-! Beta -/\n")
+        self.add_extension("VY1", "Alpha", "Solidity.Yul.Alpha", "/-! Alpha -/\n")
+        first = self.run_gen("--render")
+        self.assertEqual(first.returncode, 0, first.stderr)
+        self.assertLess(first.stdout.index("import Solidity.Yul.Alpha"), first.stdout.index("import Solidity.Yul.Beta"))
+        self.assertLess(first.stdout.index("/-! Alpha -/"), first.stdout.index("/-! Beta -/"))
+        lane = self.root / LANE
+        paths = [p for directory in ("registrations", "imports", "body") for p in (lane / directory).glob("*VY[13]-*")]
+        contents = [(p, p.read_bytes()) for p in paths]
+        for path, _ in contents:
+            path.unlink()
+        for path, content in reversed(contents):
+            path.write_bytes(content)
+        self.assertEqual(self.run_gen("--render").stdout, first.stdout)
+        (self.root / TARGET).write_text(first.stdout)
+        self.assertEqual(self.run_gen("--check").returncode, 0)
+
+    def test_extension_conflicts_and_registration(self):
+        self.add_extension("VY1", "Alpha", "Solidity.Yul.Alpha", "/-! Alpha -/\n")
+        self.add_extension("VY3", "Alpha", "Solidity.Yul.Alpha", "/-! Other -/\n")
+        self.assertEqual(self.run_gen("--render").returncode, 2)
+        lane = self.root / LANE
+        (lane / "registrations/VY3-Alpha.json").unlink()
+        (lane / "imports/ext-VY3-Alpha.txt").unlink()
+        (lane / "body/ext-VY3-Alpha.txt").unlink()
+        (lane / "body/ext-VY1-Alpha.txt").unlink()
+        self.assertEqual(self.run_gen("--render").returncode, 2)
+        (lane / "body/ext-VY1-Alpha.txt").write_text("/-! Alpha -/\n")
+        registration = lane / "registrations/VY1-Alpha.json"
+        registration.rename(lane / "registrations/OTHER-Alpha.json")
+        self.assertEqual(self.run_gen("--render").returncode, 2)
+
+    def test_census_missing_extra_and_order(self):
+        command = [sys.executable, "-B", str(self.root / LANE / "census.py")]
+        result = self.safe_run(command, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("imports=39 documentation_blocks=33", result.stdout)
+        target = self.root / TARGET
+        lines = self.original.splitlines(keepends=True)
+        target.write_text("".join(lines[1:]))
+        result = self.safe_run(command, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("missing import Solidity.Yul.RawFrameLogic", result.stdout)
+        target.write_text(self.original + "\n/-! extra documentation -/\n")
+        result = self.safe_run(command, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("extra documentation sha256:", result.stdout)
+        lines[0], lines[1] = lines[1], lines[0]
+        target.write_text("".join(lines))
+        self.assertIn("import order differs", self.safe_run(command, text=True, capture_output=True).stdout)
+
+    def test_baseline_content_and_joint_inventory_tamper(self):
+        lane = self.root / LANE
+        baseline = lane / "baseline-inventory.json"
+        manifest = json.loads(baseline.read_text())
+        fragment = lane / "body" / sorted(manifest["body"])[0]
+        changed = fragment.read_text().replace("# Syntax", "# Changed syntax", 1)
+        fragment.write_text(changed)
+        self.assertEqual(self.run_gen("--render").returncode, 2)
+        manifest["body"][fragment.name] = hashlib.sha256(fragment.read_bytes()).hexdigest()
+        baseline.write_text(json.dumps(manifest))
+        self.assertEqual(self.run_gen("--render").returncode, 0)
+        result = self.safe_run([sys.executable, "-B", str(lane / "census.py"), "--baseline"], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("documentation sha256:", result.stdout)
+
+    def test_reject_injected_documentation_and_unexpected_files(self):
+        self.add_extension("VY1", "Alpha", "Solidity.Yul.Alpha", "/-! Alpha -/\n")
+        lane = self.root / LANE
+        doc = lane / "body/ext-VY1-Alpha.txt"
+        for value in ("", "/-! -/\n", "/-! hi -/\ndef injected : Nat := 1\n/-! hi -/\n", "/-! unclosed /- nested -/\n"):
+            doc.write_text(value)
+            self.assertEqual(self.run_gen("--render").returncode, 2, repr(value))
+        doc.write_text("/-! Alpha -/\n")
+        for path in (lane / "imports/stray.md", lane / "registrations/VY1-Oops.txt"):
+            path.write_text("bad")
+            self.assertEqual(self.run_gen("--render").returncode, 2, str(path))
+            path.unlink()
+        unexpected = lane / "body/nested"
+        unexpected.mkdir()
+        self.assertEqual(self.run_gen("--render").returncode, 2)
+
+    def test_git_merge_concurrent_and_colliding_registrations(self):
+        repo = self.root / "merge-fixture"
+        repo.mkdir()
+        def git(*args, check=True):
+            return self.safe_run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", *args], cwd=repo, text=True, capture_output=True, check=check)
+        git("init", "-q")
+        (repo / "seed").write_text("seed\n")
+        git("add", "seed")
+        git("commit", "-qm", "base")
+        base = git("rev-parse", "HEAD").stdout.strip()
+        def branch(name, files):
+            git("checkout", "-q", "-B", name, base)
+            for path, contents in files.items():
+                dest = repo / path
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_text(contents)
+                git("add", path)
+            git("commit", "-qm", name)
+            return git("rev-parse", "HEAD").stdout.strip()
+        def addition(owner, name):
+            ident = owner + "-" + name
+            module = "Solidity.Yul." + name
+            return {"registrations/" + ident + ".json": json.dumps({"module": module, "documentation": True}),
+                    "imports/ext-" + ident + ".txt": module + "\n",
+                    "body/ext-" + ident + ".txt": "/-! " + name + " -/\n"}
+        a = branch("owner-a", addition("VY1", "Alpha"))
+        b = branch("owner-b", addition("VY3", "Beta"))
+        merged_ab = git("merge-tree", "--write-tree", a, b).stdout.splitlines()[0]
+        merged_ba = git("merge-tree", "--write-tree", b, a).stdout.splitlines()[0]
+        self.assertEqual(merged_ab, merged_ba)
+        archive = self.safe_run(["git", "archive", merged_ab], cwd=repo, capture_output=True, check=True).stdout
+        self.safe_run(["tar", "-xf", "-", "-C", str(self.root / LANE)], input=archive, check=True)
+        for name in ("Alpha", "Beta"):
+            (self.root / "Solidity/Yul" / (name + ".lean")).touch()
+        result = self.run_gen("--render")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("import Solidity.Yul.Alpha", result.stdout)
+        self.assertIn("import Solidity.Yul.Beta", result.stdout)
+        a = branch("collision-a", {"registrations/VY1-Shared.json": "left\n"})
+        b = branch("collision-b", {"registrations/VY1-Shared.json": "right\n"})
+        self.assertNotEqual(git("merge-tree", "--write-tree", a, b, check=False).returncode, 0)
+
+    def test_whitespace_only_baseline_tamper_and_nested_documentation(self):
+        lane = self.root / LANE
+        manifest_path = lane / "baseline-inventory.json"
+        manifest = json.loads(manifest_path.read_text())
+        name = sorted(manifest["body"])[0]
+        fragment = lane / "body" / name
+        fragment.write_text(fragment.read_text() + "\n")
+        manifest["body"][name] = hashlib.sha256(fragment.read_bytes()).hexdigest()
+        manifest_path.write_text(json.dumps(manifest))
+        result = self.safe_run([sys.executable, "-B", str(lane / "census.py"), "--baseline"], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("invalid documentation fragment", result.stderr)
+        fragment.write_text(fragment.read_text()[:-1])
+        manifest["body"][name] = hashlib.sha256(fragment.read_bytes()).hexdigest()
+        manifest_path.write_text(json.dumps(manifest))
+        (self.root / TARGET).write_text(self.original + "\n")
+        result = self.safe_run([sys.executable, "-B", str(lane / "census.py")], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("byte-level text differs", result.stdout)
+        self.add_extension("VY1", "Nested", None, "/-! outer\n/-! inner -/\nend -/\n")
+        rendered = self.run_gen("--render")
+        self.assertEqual(rendered.returncode, 0, rendered.stderr)
+        (self.root / TARGET).write_text(rendered.stdout)
+        result = self.safe_run([sys.executable, "-B", str(lane / "census.py")], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_crlf_is_not_byte_reproduction(self):
+        target = self.root / TARGET
+        target.write_bytes(self.original.replace("\n", "\r\n").encode())
+        self.assertNotEqual(self.run_gen("--check").returncode, 0)
+        result = self.safe_run([sys.executable, "-B", str(self.root / LANE / "census.py")], text=True, capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        target.write_bytes(self.original.encode())
+        lane = self.root / LANE
+        manifest_path = lane / "baseline-inventory.json"
+        manifest = json.loads(manifest_path.read_text())
+        name = sorted(manifest["body"])[0]
+        fragment = lane / "body" / name
+        fragment.write_bytes(fragment.read_bytes().replace(b"\n", b"\r\n"))
+        manifest["body"][name] = hashlib.sha256(fragment.read_bytes()).hexdigest()
+        manifest_path.write_text(json.dumps(manifest))
+        self.assertEqual(self.run_gen("--render").returncode, 2)
+
+    def test_owner_and_integrated_conservation(self):
+        self.add_extension("VY1", "Alpha", "Solidity.Yul.Alpha", "/-! Alpha -/\n")
+        self.add_extension("VY3", "Beta", "Solidity.Yul.Beta", "/-! Beta -/\n")
+        lane = self.root / LANE
+        command = [sys.executable, "-B", str(lane / "conservation.py")]
+        header, body = self.original.split("\n\n", 1)
+        def snapshot(name, owners):
+            imports = "".join("\nimport Solidity.Yul." + node for node in owners)
+            docs = "".join("\n/-! " + node + " -/\n" for node in owners)
+            path = self.root / name
+            path.write_text(header + imports + "\n\n" + body + docs)
+            return path
+        a = snapshot("owner-a.lean", ["Alpha"])
+        b = snapshot("owner-b.lean", ["Beta"])
+        both = snapshot("both.lean", ["Alpha", "Beta"])
+        def run(path, owner):
+            return self.safe_run(command + ["--after", str(path), "--owner", owner], text=True, capture_output=True)
+        for path, owner in ((a, "VY1"), (b, "VY3"), (both, "integrated")):
+            result = run(path, owner)
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertEqual(json.loads(result.stdout)["status"], "interface_delta_match")
+        wrong_owner = run(a, "VY3")
+        self.assertEqual(wrong_owner.returncode, 1)
+        self.assertEqual(json.loads(wrong_owner.stdout)["unregistered_imports"][0]["node"], "Solidity.Yul.Alpha")
+        missing_other = run(a, "integrated")
+        self.assertEqual(missing_other.returncode, 1)
+        self.assertEqual(json.loads(missing_other.stdout)["unrepresented_import_registrations"][0]["node"], "Solidity.Yul.Beta")
+        without_baseline = self.root / "removed.lean"
+        without_baseline.write_text(a.read_text().removeprefix("import Solidity.Yul.RawFrameLogic\n"))
+        result = run(without_baseline, "VY1")
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(json.loads(result.stdout)["removed_imports"][0]["node"], "Solidity.Yul.RawFrameLogic")
+        changed_doc = self.root / "changed.lean"
+        changed_doc.write_text(a.read_text().replace("# Syntax", "# Changed syntax", 1))
+        result = run(changed_doc, "VY1")
+        self.assertEqual(result.returncode, 1)
+        self.assertTrue(json.loads(result.stdout)["removed_documentation_sha256"])
+        reordered = self.root / "reordered.lean"
+        lines = both.read_text().splitlines(keepends=True)
+        lines[0], lines[1] = lines[1], lines[0]
+        reordered.write_text("".join(lines))
+        result = run(reordered, "integrated")
+        self.assertEqual(result.returncode, 1)
+        self.assertFalse(json.loads(result.stdout)["output_matches_registered_bytes_and_order"])
+        unavailable = self.safe_run(command + ["--after-rev", "1" * 40, "--owner", "VY1"], text=True, capture_output=True)
+        self.assertEqual(unavailable.returncode, 2)
+
+    def test_commit_sources_ancestry_and_change_inventory(self):
+        lane = self.root / LANE
+        command = [sys.executable, "-B", str(lane / "conservation.py"), "--owner", "VY1", "--after-rev"]
+        base = self.fixture_base
+        result = self.safe_run(command + [base], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertEqual(report["status"], "interface_delta_match")
+        self.assertEqual(report["owner_completeness"], "unverified")
+        self.assertEqual(report["source_module_check"], "git_tree_verified")
+        tree = self.safe_run(["git", "rev-parse", "HEAD^{tree}"], cwd=self.root, text=True, capture_output=True, check=True).stdout.strip()
+        unrelated = self.safe_run(["git", "commit-tree", tree, "-m", "unrelated fixture"], cwd=self.root, text=True, capture_output=True, check=True).stdout.strip()
+        self.assertEqual(self.safe_run(command + [unrelated], capture_output=True).returncode, 2)
+        repo = self.root / "producer-git-fixture"
+        repo.mkdir()
+        def git(*args):
+            return self.safe_run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", *args], cwd=repo, text=True, capture_output=True, check=True).stdout.strip()
+        git("init", "-q")
+        directory = repo / "Solidity/Yul"
+        directory.mkdir(parents=True)
+        (directory / "Keep.lean").write_text("old\n")
+        (directory / "Gone.lean").write_text("old\n")
+        git("add", ".")
+        git("commit", "-qm", "before")
+        before = git("rev-parse", "HEAD")
+        (directory / "Keep.lean").write_text("new\n")
+        (directory / "Gone.lean").unlink()
+        (directory / "Added.lean").write_text("added\n")
+        git("add", "-A")
+        git("commit", "-qm", "after")
+        after = git("rev-parse", "HEAD")
+        code = "import sys,json; sys.path.insert(0,sys.argv[1]); import producer_inventory as p, conservation as c; rows=p.collect_changes(sys.argv[2],sys.argv[3],sys.argv[4]); c.verify_revision_sources(sys.argv[2],sys.argv[4],[\"Solidity.Yul.Added\"]); print(json.dumps(rows))"
+        result = self.safe_run([sys.executable, "-B", "-c", code, str(lane), str(repo), before, after], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = {row["path"]: row for row in json.loads(result.stdout)}
+        self.assertEqual(rows["Solidity/Yul/Added.lean"]["change"], "A")
+        self.assertEqual(rows["Solidity/Yul/Keep.lean"]["change"], "M")
+        self.assertEqual(rows["Solidity/Yul/Gone.lean"]["change"], "D")
+        self.assertIsNone(rows["Solidity/Yul/Gone.lean"]["sha256"])
+        self.assertEqual(rows["Solidity/Yul/Added.lean"]["sha256"], hashlib.sha256(b"added\n").hexdigest())
+        bad = "import sys; sys.path.insert(0,sys.argv[1]); import conservation as c; c.verify_revision_sources(sys.argv[2],sys.argv[3],[\"Solidity.Yul.Gone\"])"
+        result = self.safe_run([sys.executable, "-B", "-c", bad, str(lane), str(repo), after], capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        (directory / "Added.lean").unlink()
+        result = self.safe_run([sys.executable, "-B", "-c", code, str(lane), str(repo), before, after], capture_output=True)
+        self.assertEqual(result.returncode, 0)
+        (directory / "Added.lean").symlink_to("Keep.lean")
+        git("add", "-A")
+        git("commit", "-qm", "symlink")
+        symlink_commit = git("rev-parse", "HEAD")
+        result = self.safe_run([sys.executable, "-B", "-c", code, str(lane), str(repo), before, symlink_commit], capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        changed = "import sys,json; sys.path.insert(0,sys.argv[1]); import producer_inventory as p; print(json.dumps(p.collect_changes(sys.argv[2],sys.argv[3],sys.argv[4])))"
+        result = self.safe_run([sys.executable, "-B", "-c", changed, str(lane), str(repo), after, symlink_commit], text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)[0]["change"], "T")
+        self.assertEqual(json.loads(result.stdout)[0]["mode"], "120000")
+
+    def test_conservation_rejects_duplicate_nodes_and_partial_snapshots(self):
+        lane = self.root / LANE
+        target = self.root / TARGET
+        command = [sys.executable, "-B", str(lane / "conservation.py"), "--owner", "integrated", "--after", str(target)]
+        first_import = self.original.splitlines(keepends=True)[0]
+        target.write_text(first_import + self.original)
+        result = self.safe_run(command, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(json.loads(result.stdout)["unregistered_imports"][0]["count"], 1)
+        doc = (lane / "body/001.txt").read_text()
+        target.write_text(self.original + "\n" + doc)
+        result = self.safe_run(command, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["unregistered_documentation_sha256"][0]["count"], 1)
+        target.write_text("import Solidity.Yul.Syntax\n")
+        self.assertEqual(self.safe_run(command, capture_output=True).returncode, 2)
+
+    def test_bad_input(self):
+        entries = sorted((self.root / LANE / "imports").glob("*.txt"))
+        entries[1].write_text(entries[0].read_text())
+        self.assertEqual(self.run_gen("--check").returncode, 2)
+        entries[1].write_text("not a module\n")
+        self.assertEqual(self.run_gen("--check").returncode, 2)
+        entries[1].write_text("Solidity.Yul.Missing\n")
+        self.assertEqual(self.run_gen("--check").returncode, 2)
+
+
+if __name__ == "__main__":
+    unittest.main()

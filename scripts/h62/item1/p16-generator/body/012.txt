@@ -1,0 +1,7 @@
+/-! RawControlGrowingBlock.adapter closes the actual supported Boolean
+initializer/checked Items sequence through existing scope restoration, producing
+a same-context checked block adapter. The full Source.execS law retains actual
+initializer/tail errors, older effects and checked/coherent premises.
+Closed/nested Source computations and control/error-frame witnesses are in
+Solidity.Yul.Checks.RawControlGrowingBlock. Other declarations, dirty Source
+readback and general frontend admission remain separate. -/

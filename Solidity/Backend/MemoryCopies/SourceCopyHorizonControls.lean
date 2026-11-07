@@ -24,7 +24,7 @@ private def storage (populated : Bool) : Source.Storage E.layout E.cellTy :=
   else initial
 private def before (populated : Bool) : Source.EMState E [.bool] :=
   (.cons (.bool true) .nil,
-    {ex := ⟨⟨fun _ => ⟨⟨17,by decide⟩,3,some 9,storage populated⟩⟩,Source.Transient.empty,[]⟩,
+    {ex := ⟨⟨fun _ => ⟨17,3,some 9,storage populated⟩⟩,Source.Transient.empty,[]⟩,
      heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,events := [],
      logs := [(⟨13,by decide⟩,[1,2])],fnLocals := ⟨[.bool],.cons (.bool false) .nil⟩})
 private def observe {type : Source.STy}

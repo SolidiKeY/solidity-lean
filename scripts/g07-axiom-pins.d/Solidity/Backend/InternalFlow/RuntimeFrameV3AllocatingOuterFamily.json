@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamily.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.dynamic_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamily.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamily.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterFamily.framed_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

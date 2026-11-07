@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsDeleteTarget.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.resolved_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsDeleteTarget.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.resolved_write_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,8 +1,0 @@
-{
-  "published": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
-  "mergeHead": "7ccb1c6a5760d6dd2c307b0b114d158e9346852a",
-  "consumer": "DirectRuntime unchanged; uses private readers rejecting reference locals",
-  "newInterface": "Shared.Compose.executableReader",
-  "controls": "Same84 fixtures per isolated/composed reader; separate model result files",
-  "ordinaryAcceptance": "pending; no native/browser result"
-}

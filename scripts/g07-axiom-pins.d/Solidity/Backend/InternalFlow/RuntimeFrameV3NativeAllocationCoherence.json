@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherence.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeAllocationCoherence.common_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherence.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeAllocationCoherence.stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

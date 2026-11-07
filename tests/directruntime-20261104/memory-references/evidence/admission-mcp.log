@@ -1,2 +1,0 @@
-ERROR 32:1 refused valid fixture runtime/admission/compiler/referenceAlias.box.legacy.output.json: memory reader: inconsistent type identifier/location
-diag: 1 errors

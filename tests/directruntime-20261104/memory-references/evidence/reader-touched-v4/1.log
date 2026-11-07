@@ -1,7 +1,0 @@
-targets: Solidity.Frontend.ExecutableAst.Memory.Reader
-⚠ [3/19] Replayed Solidity.AST
-warning: Solidity/AST.lean:355:4: unused variable `k`
-
-Note: This linter can be disabled with `set_option linter.unusedVariables false`
-✔ [19/19] Built Solidity.Frontend.ExecutableAst.Memory.Reader (2.4s)
-Build completed successfully (19 jobs).

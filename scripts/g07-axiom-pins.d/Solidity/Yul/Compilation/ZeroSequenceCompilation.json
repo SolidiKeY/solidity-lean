@@ -1,0 +1,27 @@
+{
+ "Solidity/Yul/Compilation/ZeroSequenceCompilation.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Artifact.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilation.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Artifact.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilation.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Artifact.normal_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilation.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Artifact.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroSequenceCompilation.lean:Solidity.Yul.Compilation.ZeroSequenceCompilation.Artifact.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

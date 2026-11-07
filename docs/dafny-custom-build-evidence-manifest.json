@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "5f7bb1441566aaad64a34436904afc61de762fd2",
+  "obligation": "submenus:dafny.context",
+  "scope": "H70 first strict failure; partial source-supported custom import action and native Linux menu observation; no completed row",
+  "archive": {
+    "path": "/workspace/dafny-parity-custom-build-20261106/evidence.tar.gz",
+    "bytes": 1083387,
+    "sha256": "7b5bc64f2b724094ba8e13557b3a3991803317d8a75898a3f3865e5897a33a87"
+  },
+  "files": 175,
+  "reviewEvidence": {
+    "member": "REVIEWS.md",
+    "bytes": 773,
+    "sha256": "0d15da15ed046300877e5cda9f810082df6ef44884dae004a0c7bf7cd8d693db"
+  },
+  "failuresPreserved": [
+    "missing custom-build implementation",
+    "native argv flag-smuggling regression",
+    "menu selector missing open shadow roots",
+    "DevTools connection timeout"
+  ],
+  "boundaries": [
+    "all486 IDs and frozen270 preserved",
+    "native compiler AST, not binary/proof",
+    "injected editor guard tests labeled",
+    "actual Linux submenu and ordinary Build only",
+    "native custom action, paired Dafny and macOS remain pending"
+  ],
+  "provenanceFollowup": {
+    "path": "/workspace/dafny-parity-custom-build-20261106/provenance-evidence.tar.gz",
+    "bytes": 2020,
+    "sha256": "67441f7a0fc94b60eebc8826281ae147fee65c05b32dd0a16f5b25e46776838b",
+    "scope": "Same first obligation: actual compiler via injected dependency-change wrapper; old acceptance reproduced, all unit digests now bound to admitted snapshot; no proof pass",
+    "reviewMember": {
+      "path": "REVIEWS-provenance.md",
+      "sha256": "e9fd329ca8ac161ef46656ddaa24a99caa6e37ebe542f4de3a602cd469cd0892"
+    }
+  }
+}

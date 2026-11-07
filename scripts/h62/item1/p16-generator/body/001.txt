@@ -1,0 +1,5 @@
+/-! RawCheckedAdapterAbsent.adapter transports a supplied concrete literal-true
+for producer to the omitted-condition Source index, retaining runtime and the
+checked/coherence premises verbatim. Any post clause still requires the actual
+matching producer. Concrete initializer-write/break and refusal witnesses are
+in Solidity.Yul.Checks.RawCheckedAdapterAbsent. -/

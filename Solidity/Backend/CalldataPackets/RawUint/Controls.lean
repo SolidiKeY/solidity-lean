@@ -2,6 +2,8 @@ import Solidity.Backend.CalldataPackets.RawUint.Execution
 import Solidity.Source.Semantics
 
 /-! Concrete nonempty-prefix, unequal-word, entry-failure and padding controls.
+The multi-view regression rejects accidental aliasing of distinct raw lengths
+or offsets while preserving duplicate identities and raw-derived words.
 These execute the Source operations; no desired successful run is assumed. -/
 namespace Solidity.Backend.CalldataPackets.RawUint.Controls
 open Solidity.Backend.MemoryOps
@@ -199,6 +201,26 @@ theorem full_width_values : payload (frame (List.replicate 32 255)) 0 1=
 
 theorem padding_is_right : payload (frame (Source.natBytes 32 7++[18])) 0 2≠
     [wordValue 7,wordValue 18] := by decide
+
+/-- Duplicate and overlapping demands share only their exact raw identities. -/
+theorem packed_alias_control :
+    let p := packedViews (D := E0.layout) raw [(3,2),(35,1),(3,2),(3,0)]
+    p.key ⟨0,by decide⟩=p.key ⟨2,by decide⟩ ∧
+    p.key ⟨0,by decide⟩≠p.key ⟨1,by decide⟩ ∧
+    p.key ⟨0,by decide⟩≠p.key ⟨3,by decide⟩ := by decide
+
+/-- Nonempty-prefix input reaches the existing table reader through packing. -/
+theorem packed_prefix_values :
+    let p := packedViews (D := E0.layout) raw [(3,2),(35,1),(3,2)]
+    calldataUints p.calldata (p.key ⟨0,by decide⟩)=some [wordValue 7,wordValue 42] := by
+  dsimp only
+  rw [packedViews_uints raw [(3,2),(35,1),(3,2)] ⟨0,by decide⟩]
+  exact congrArg some prefix_values
+
+/-- info: 'Solidity.Backend.CalldataPackets.RawUint.Controls.packed_alias_control' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms packed_alias_control
+/-- info: 'Solidity.Backend.CalldataPackets.RawUint.Controls.packed_prefix_values' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms packed_prefix_values
 
 /-- info: 'Solidity.Backend.CalldataPackets.RawUint.Controls.old_nonempty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms old_nonempty

@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.EnvironmentProjection
 import Solidity.Lowering.V07.SourceReads
 import Solidity.Lowering.V08.SourceEnvironmentControls
 import Solidity.Lowering.V08.LibraryHandlerControls
@@ -253,4 +254,40 @@ theorem static_read_client :
  Quot.sound] -/
 #guard_msgs in
 #print axioms static_read_client
+
+section FrameAgreementAdapters
+omit [DecidableEq K]
+
+/-- Delegation keeps the existing caller-storage address as the shared index. -/
+def toFrameAgreement {f : Source.Fr} {caller : K} {owner : Handle caller}
+    {ctx : Context} (p : FrameInputs f owner ctx) :
+    EnvironmentProjection.FrameAgreement f owner.address ctx := by
+  rcases p with ⟨hs, hv, ha, ht⟩
+  exact ⟨ha, hs, hv, ht⟩
+
+def ofFrameAgreement {f : Source.Fr} {caller : K} {owner : Handle caller}
+    {ctx : Context} (p : EnvironmentProjection.FrameAgreement f owner.address ctx) :
+    FrameInputs f owner ctx := ⟨p.sender, p.value, p.address, p.static⟩
+
+theorem frameInputs_roundtrip {f : Source.Fr} {caller : K} {owner : Handle caller}
+    {ctx : Context} (p : FrameInputs f owner ctx) :
+    ofFrameAgreement (toFrameAgreement p) = p := rfl
+
+theorem frameAgreement_roundtrip {f : Source.Fr} {caller : K} {owner : Handle caller}
+    {ctx : Context} (p : EnvironmentProjection.FrameAgreement f owner.address ctx) :
+    toFrameAgreement (ofFrameAgreement p) = p := rfl
+
+theorem frameAgreement_exact {f : Source.Fr} {caller : K} {owner : Handle caller}
+    {ctx : Context} :
+    FrameInputs f owner ctx ↔ EnvironmentProjection.FrameAgreement f owner.address ctx :=
+  ⟨toFrameAgreement, ofFrameAgreement⟩
+
+#print axioms toFrameAgreement
+#print axioms ofFrameAgreement
+#print axioms frameInputs_roundtrip
+#print axioms frameAgreement_roundtrip
+#print axioms frameAgreement_exact
+
+end FrameAgreementAdapters
+
 end Solidity.Lowering.V08.LibraryFrameTransport

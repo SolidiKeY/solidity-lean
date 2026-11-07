@@ -132,7 +132,7 @@ theorem all_unsound : ¬ (StmtExt.all E0).Sound (G0 .legacy) (fun _ => False) (f
 /-- **Boundary** (`SlotsOK`): a declared `string memory` slot is refused,
 though the typing rule's `slotsFit` admits it. -/
 theorem slotsOK_refuses_reference :
-    slotsFit E0.isBase [some (.string .memory)] [.stringLit [97]] = true ∧
+    slotsFit E0.isBase E0.mapFree [some (.string .memory)] [.stringLit [97]] = true ∧
       ¬ SlotsOK [some (.string .memory)] [.stringLit [97]] :=
   ⟨by decide, fun h => nomatch h.1⟩
 

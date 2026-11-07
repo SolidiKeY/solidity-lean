@@ -1,0 +1,4 @@
+H70 requester disposition for solidity-h62-2-20261106/audit-roadmap @ 4ce2bfb8bc2ed558f4efd7423229363719b6625b
+Owner ticket recipients in this message plan: solidity-h62-6-20261106/migrate-backend, solidity-h62-6-20261106/migrate-hash, solidity-h62-6-20261106/migrate-source, solidity-h62-6-20261106/migrate-syntax.
+Continue source-level premise/classification census for the 334 uncovered statements and 642 additional candidates without claiming elaborated witnesses. H69 resolves intentional-refutation policy. wait: migrate-syntax Raw, migrate-hash CollisionBound, migrate-backend Creation/Linking, migrate-source Source/Ctor.
+relay.sh is host-only. Preserve the same goal/branch and original budgets; routing grants no original-file edit permission.

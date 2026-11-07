@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+cfg=/workspace/solidity-lean/tests/sol-expression-uniqueness/runtime-lakefile.toml
+if [[ ${1:-} == --version ]]; then
+  exec "$real" --version
+elif [[ ${1:-} == serve ]]; then
+  exec "$real" -f "$cfg" "$@" --tstack=131072 -j1
+elif [[ ${1:-} == env && ${2:-} == lean ]]; then
+  shift 2
+  exec "$real" -f "$cfg" env lean -j1 "$@"
+else
+  exec "$real" -f "$cfg" "$@"
+fi

@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.full_miss_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.getter_count": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.getter_no_retry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.getter_nonzero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.getter_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.ordinary_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.padded_short_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.protected_and_saved": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/GetterRoutesControls.lean:Solidity.Backend.AbiEntry.GetterRoutesControls.source_revert_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

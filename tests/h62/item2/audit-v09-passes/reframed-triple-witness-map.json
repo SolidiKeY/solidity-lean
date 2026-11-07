@@ -1,0 +1,49 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/ReframedTripleControls.lean",
+  "interface_sha256": "ef58eb0336f6ad8e1b3cb64ff47b310c42a2f4e0e2a7b2ca4d14fb17f9d871fc",
+  "joint_witness": "Solidity.Backend.Passes.AuditReframedTriple.joint",
+  "joint_contract": "actual-preparation-input-source-and-reached-middle-three-word-capacity",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditReframedTriple",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.ReframedTripleControls.middle_room",
+      "signature_sha256": "ca4fbb270af6029cc2884bd40de28eefe7b80f3bc42feb5e5a77989aa7617071",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedTripleControls.first_link",
+      "signature_sha256": "27ac853b7e4d4edd18973c6c09ac4cef72673afd8ac08ffc39f4424fb377f31d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedTripleControls.second_link",
+      "signature_sha256": "59d33c412b48d8763303a91f3ce0e7b33035636da81eeb91a5570aec64cbd926",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedTripleControls.shared",
+      "signature_sha256": "1e88b5a2b01a7f6502e3ebb98b1587364b81b7315782aaa22466fd1739256859",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedTripleControls.wrong_zero_cost_refused",
+      "signature_sha256": "6bd962c27f268618eda813cdfdf44bdd26a036850a3ac46e64f5897785871f02",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedTripleControls.complete_observations",
+      "signature_sha256": "c5631379a70cf2b5551822d70f5e6029e6790f056c442d3cc0a0287789fed51b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReframedTripleControls.saved_tail_corruption",
+      "signature_sha256": "1274de1400b1d174591f5c82c822e00fca2c25ba355524376481a31aa2fa045f",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 413,
+  "aggregate_remaining": 846,
+  "auxiliary_definition_credit": 0,
+  "limits": "Seven original 128/64/5 reframed loop model controls. Middle capacity is derived from actual checked Input/Room and original positive source cost, not a zero legacy metric. No native ByteWorld/emission, gas/session resource or full Source/G24 adequacy."
+}

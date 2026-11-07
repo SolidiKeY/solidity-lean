@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/StipendWitnesses.lean",
+      "size_bytes": 6862,
+      "sha256": "b05a91b644f425fb8d0f12a2e3fb4d668b19edea78a05c2f9dd7ea1901f8ffbe"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-first424.json",
+      "size_bytes": 2274,
+      "sha256": "e9f89931fdd434e8eb1c237daa11de18d3e4f8c910fc0d032eb187a0ba16e2ce"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-first424.log",
+      "size_bytes": 1674,
+      "sha256": "28afc4c697bc13fba075852c79579e7bdc821c9ef09bdab004c624c3cd46eb10"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-second424.json",
+      "size_bytes": 2275,
+      "sha256": "7dc864dba5b470810acf9cf32a4c92325204a173ef54eb8dbf72e4ea37ffa791"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-second424.log",
+      "size_bytes": 1850,
+      "sha256": "046bb5bbf6e136da8baa5ed6ae87539fc82f1a0d2ac5293310b050c25c9bb519"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-final424.json",
+      "size_bytes": 2275,
+      "sha256": "8a4eff1a907898ea46390c69801e42cd5a3a8f45491d1d670a5e06a27e5347c5"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-final424.log",
+      "size_bytes": 1424,
+      "sha256": "a4ea2e5b484abf47d0ce40f3a452fd7efbca98aad639e92816a0dd0f7f4be240"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-pinned424.json",
+      "size_bytes": 2275,
+      "sha256": "f1aa4c096c352dd6b5b3b17ad36f7252ef789b8bd7ee0a3d983d2c7b99311eb9"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-pinned424.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "note": "Current file hashes refreshed; historical receipts retain their original recorded source snapshots and are not current acceptance receipts."
+}

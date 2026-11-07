@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean:Solidity.Backend.AbiWorld.MutatingByteLoad.literal_mload_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean:Solidity.Backend.AbiWorld.MutatingByteLoad.write_then_load": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean:Solidity.Backend.AbiWorld.MutatingByteLoadControls.actual_literal_load_absent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean:Solidity.Backend.AbiWorld.MutatingByteLoadControls.actual_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean:Solidity.Backend.AbiWorld.MutatingByteLoadControls.concrete_literal_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean:Solidity.Backend.AbiWorld.MutatingByteLoadControls.conditional_application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean:Solidity.Backend.AbiWorld.MutatingByteLoadControls.conditional_wrong_scale": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/MutatingByteLoadControls.lean:Solidity.Backend.AbiWorld.MutatingByteLoadControls.no_literal_producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

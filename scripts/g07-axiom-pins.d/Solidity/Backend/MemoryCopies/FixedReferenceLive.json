@@ -1,8 +1,4 @@
 {
- "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixedReferenceLive": [
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixed_reference_live_contents": [
   "Quot.sound",
   "propext"
@@ -21,6 +17,10 @@
   "propext"
  ],
  "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixed_reference_live_vector_copy": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLive.lean:Solidity.Backend.MemoryCopies.fixedReferenceLive": [
+  "Quot.sound",
   "propext"
  ]
 }

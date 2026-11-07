@@ -33,7 +33,7 @@ theorem execS_declVar_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_histor
      | split
      | dsimp only
 
-theorem execS_declInit_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {σ τ : STy} (e : RExpr E Γ σ) (h : σ.implicit E.isBase τ = true) (locals : Locals E.layout Γ) :
+theorem execS_declInit_succ {E : Env} (G : Glob E) (F : Fr) (fuel : Nat) (_history : At G fuel) (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {σ τ : STy} (e : RExpr E Γ σ) (h : σ.implicit E.isBase E.mapFree τ = true) (locals : Locals E.layout Γ) :
     Effect F.static (execS G F (fuel+1) nps ph ((RStmt.declInit (E := E) (R := R) (M := M) e h) : RStmt E R M k Γ (τ :: Γ)) locals) := by
   simp only [Solidity.Source.execS]
   repeat' first

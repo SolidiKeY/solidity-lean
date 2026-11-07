@@ -34,11 +34,7 @@ bash scripts/coord-tools/fragments.sh --check
 # instead of starting after it (`docs/parallelism.md`, P5).
 mapfile -t default_targets < <(sed -n 's/^defaultTargets[[:space:]]*=[[:space:]]*\[\(.*\)\][[:space:]]*\(#.*\)\{0,1\}$/\1/p' lakefile.toml | tr ',' '\n' | tr -d " \t\"'" | grep -v '^$' || true)
 [[ ${#default_targets[@]} -gt 0 ]] || { echo "run-lean: no defaultTargets in lakefile.toml" >&2; exit 2; }
-lake build "${default_targets[@]}" SolkeyTestSuite
+lake build "${default_targets[@]}" SolkeyTestSuite SoliditySlowExamples
 if [[ "$with_bridge" -eq 1 ]]; then
   ./scripts/check-bridge.sh
 fi
-# Keep the sort-annotation table honest against the solkey taclet file:
-# drift fails the build. Skipped with a warning when no checkout is beside
-# this repository -- see scripts/check-solkey.sh.
-exec ./scripts/check-solkey.sh

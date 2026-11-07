@@ -1,0 +1,55 @@
+{
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.dirty_enum_after_match": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.existing_entry_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.matched_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.matched_short_before_word_and_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.matching_reverting_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.miss_before_any_entry_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.protected_and_saved": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.raw_value_and_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.selected_and_executes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.source_predicate_match_and_miss": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean:Solidity.Backend.AbiEntry.SelectorGateBodyControls.wrong_selector_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

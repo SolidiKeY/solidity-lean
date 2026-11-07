@@ -1,9 +1,4 @@
 {
- "Solidity/Backend/MemoryCopies/SelectedDefaultDemand.lean:Solidity.Backend.MemoryCopies.selectedDefaultDemand": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryCopies/SelectedDefaultDemand.lean:Solidity.Backend.MemoryCopies.selected_default_allocation": [
   "Classical.choice",
   "Quot.sound",
@@ -15,6 +10,11 @@
   "propext"
  ],
  "Solidity/Backend/MemoryCopies/SelectedDefaultDemand.lean:Solidity.Backend.MemoryCopies.selected_default_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemand.lean:Solidity.Backend.MemoryCopies.selectedDefaultDemand": [
   "Classical.choice",
   "Quot.sound",
   "propext"

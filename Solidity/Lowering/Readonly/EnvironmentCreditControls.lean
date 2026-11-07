@@ -25,7 +25,7 @@ theorem static_credit_finishes :
   rfl
 
 theorem static_balance_changes :
-    (fundedFinal.ex.world.accounts thisC).balance.val = 5 ∧
+    (fundedFinal.ex.world.accounts thisC).balance = 5 ∧
       (fundedFinal.ex.world.accounts thisC).balance ≠ (sB.ex.world.accounts thisC).balance := by
   decide +kernel
 

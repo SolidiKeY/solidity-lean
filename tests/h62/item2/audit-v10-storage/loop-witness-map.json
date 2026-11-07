@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "7beea1b98f2f591fd768781f8f040eaa28a96b1642ba602f1e3d03a403cb8602",
+  "test_module": "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LoopLaws.lean:8:turn_step",
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.turn_step",
+      "signature": "theorem turn_step (rc rb : Evm.Machine \u2192 Evm.Out) (machine result : Evm.Machine)\n    (flag : Fin Evm.W) (nonzero : flag.val \u2260 0)\n    (cond : rc machine = .ok { machine with stack := .val flag :: machine.stack } 0)\n    (step : rb machine = .ok result 0) : Evm.loopTurn rc rb machine = .inl result",
+      "signature_sha256": "b35562ab889268580f018f21e91e530a5ddb9de72cc86021caad0550f72eb1da",
+      "witness": "H62.StorageAudit.LoopWitnesses.step_joint",
+      "status": "kernel-checked-joint-premise-witness; independent source fidelity reviews passed",
+      "global_producer_inhabitant": false
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LoopLaws.lean:14:turn_exit",
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.turn_exit",
+      "signature": "theorem turn_exit (rc rb : Evm.Machine \u2192 Evm.Out) (machine : Evm.Machine)\n    (cond : rc machine = .ok { machine with stack := .val \u27e80,by decide\u27e9 :: machine.stack } 0) :\n    Evm.loopTurn rc rb machine = .inr (.ok machine 0)",
+      "signature_sha256": "b9338fc17db30ff286c035fb81ffd41b4be9ff7dbb0f5f8a30dbd15483e6adbe",
+      "witness": "H62.StorageAudit.LoopWitnesses.exit_joint",
+      "status": "kernel-checked-joint-premise-witness; independent source fidelity reviews passed",
+      "global_producer_inhabitant": false
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/LoopLaws.lean:19:run_single_loop",
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.run_single_loop",
+      "signature": "theorem run_single_loop (cond body : List Evm.Instr) (machine result : Evm.Machine)\n    (finished : Evm.loopRun (Evm.run cond) (Evm.run body) machine = .ok result 0) :\n    Evm.run [.loop cond body] machine = .ok result 0",
+      "signature_sha256": "065b0ebfaef6128d429be3fea957d3683f8f0c29f0d4c0fa66907faa10c3a8dc",
+      "witness": "H62.StorageAudit.LoopWitnesses.finished_joint",
+      "status": "kernel-checked-joint-premise-witness; independent source fidelity reviews passed",
+      "global_producer_inhabitant": false
+    }
+  ],
+  "interpretation": "Witnesses instantiate rc/rb by actual Evm.run cond/body on the existing populated machine. They do not prove arbitrary compiler totality, gas/fork behavior or whole-lane adequacy. Existing conservative3281-row ledger remains unchanged; only these3 premise bundles are checked here.",
+  "positive_finished_case": "H62.StorageAudit.LoopWitnesses.positive_finished"
+}

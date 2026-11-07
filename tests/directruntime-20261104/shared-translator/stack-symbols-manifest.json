@@ -1,0 +1,55 @@
+{
+  "regression": "Exact historical stack symbols without fresh-binary or causal-repair claims",
+  "archiveSha256": "d43c81b8556171d66356297a290464a9616d2650e183f2822468147b9ca43f1f",
+  "pinnedMembers": 9,
+  "historicalWasmSha256": "6ae1d6db106102dc38725cb32cb1ba7996c537d1948b156d4acae1cd9139b563",
+  "symbolMapSha256": "f8525ca7c5cbb789a82a4f355b54ee447f328eccdc23e01a563252ff40eeb519",
+  "symbolEntries": 3939,
+  "mappedFrameOccurrences": 10,
+  "frames": [
+    {
+      "index": 3207,
+      "name": "emscripten_builtin_malloc"
+    },
+    {
+      "index": 2203,
+      "name": "l_Solidity_Decide_LTm_fitsM___redArg"
+    },
+    {
+      "index": 2205,
+      "name": "l_Solidity_Decide_LTm_fitsM___redArg___lam__0___boxed"
+    },
+    {
+      "index": 3126,
+      "name": "lean_apply_1"
+    },
+    {
+      "index": 2208,
+      "name": "l_Solidity_Decide_LFml_fitsM___redArg"
+    },
+    {
+      "index": 2210,
+      "name": "l_Solidity_Decide_LFml_fitsM___redArg___lam__0___boxed"
+    }
+  ],
+  "sourcePath": "Solidity/Calculus/ReadBounds.lean",
+  "historicalSourceSha256": "f773647a7146f7359480e09ff895546a856325667b49aa00dfaae8593c405af5",
+  "currentSourceIdentical": true,
+  "recordedProducerGateExit": 1,
+  "producerRecoveryExit": 0,
+  "producerReportsBitIdenticalRelink": true,
+  "localRelinkOrBenchmarkExecuted": false,
+  "independentRelinkByteComparison": false,
+  "boundary": "Authenticated producer symbol/relink receipts and locally verified original WASM/map/source consistency. Relinked binary is not separately supplied; equality is producer-checked evidence, not a locally repeated relink comparison. Names locate fitsM bounds-check frames, not a proved root cause or algorithm repair. No957/H90freshness or runtime acceptance.",
+  "inputArchive": {
+    "path": "/workspace/h62-coordinator-inputs/exact-stack-symbols-d43c81b85561.tar.gz",
+    "bytes": 214639,
+    "sha256": "d43c81b8556171d66356297a290464a9616d2650e183f2822468147b9ca43f1f"
+  },
+  "controls": "Three external integrity controls pass:healthyarchive,archivecorruption,duplicate/gapped indexdomains.",
+  "evidence": {
+    "archiveRelative": "artifacts/stack-symbol-evidence-c252b090badac1de.tar.gz",
+    "sha256": "c252b090badac1de8395621b7211b02ad97f747e9683c33aadd209ef5624b89b",
+    "bytes": 1337
+  }
+}

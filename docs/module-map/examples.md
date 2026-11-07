@@ -153,3 +153,4 @@ At the root, the notation's own tests:
 | `Examples/DecisionHashesChecks.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Examples/Tactics/StaticStorageCompatibility.lean` | Inhabited conditional frame, changed balance, reentry refusal and malformed decoder controls; no opaque static preservation assertion. |
+| `Examples/DecisionResidue.lean` | M7-next: residue members (halting `||` APF guard valid and false; VA1 mapping-field and normalization-budget labels; a leaf every hash try refuses), witness controls (in-target non-residue feature fixtures of earlier milestones answered through `DecisionTheorem'`; the answering route is not pinned) and the negative control (a valid and a false residue leaf, neither claimed). |

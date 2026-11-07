@@ -18,7 +18,7 @@ private def nodeName : Source.DeclName := ⟨none,"Node"⟩
 private def initial : Source.St E :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩,Source.Transient.empty,[]⟩,
     (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,
-    [],[(⟨13,by decide⟩,[1,2])],⟨[.bool],.cons (.bool false) .nil⟩⟩
+    [],[(⟨13,by decide⟩,[1,2])],⟨[.bool],.cons (.bool false) .nil⟩,Source.FailureExecution.Cursor.empty⟩
 private def before : Source.EMState E [.bool] := (.cons (.bool true) .nil,initial)
 private def basketFields : SourceFieldsConstruction E (E.layout.fields basketName) :=
   .cons (.pureDefault (.int 0 Source.IntTy.u256.zero_mem) rfl)

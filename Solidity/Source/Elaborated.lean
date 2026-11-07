@@ -175,14 +175,14 @@ def Env.inheritCtx (E : Env) (c : String) : Ctx :=
 argument list `es` in context `C`, converted to the parameters `ps`. -/
 def RConvArgs.DerivedIn (C : Ctx) (es : Syn (.list .expr)) {Γ : RCtx} (ps : List STy)
     (args : RConvArgs C.env Γ ps) : Prop :=
-  ∃ (σs : List STy) (D : TypedArgs C es σs) (h : argsFit C.env.isBase σs ps = true),
+  ∃ (σs : List STy) (D : TypedArgs C es σs) (h : argsFit C.env.isBase C.env.mapFree σs ps = true),
     HEq args (RArgs.convert ps D.toR h)
 
 /-- An initializer elaborated from a derivation of the variable's
 initializer, converted implicitly to its type. -/
 def RInit.Derived (E : Env) (i : RInit E) : Prop :=
   ∃ (e : Syn .expr) (σ : STy) (D : Typed (Ctx.forInit E i.var.scope) e σ)
-    (h : σ.implicit E.isBase i.τ = true), i.var.init? = some e ∧ i.e = .conv D.toR (.inl h)
+    (h : σ.implicit E.isBase E.mapFree i.τ = true), i.var.init? = some e ∧ i.e = .conv D.toR (.inl h)
 
 /-- A modifier invocation of declaration `d` (frame `f`): written in `d`'s
 invocations, naming the modifier it carries with that modifier's

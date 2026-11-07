@@ -1,0 +1,26 @@
+{
+  "source": "Exact original frozen rendered prompt restored from first user turn and pinned scope; matched launcher hash after removing later goal appendix and restoring newline before H62/H63",
+  "expected_rendered_prompt_sha256": "7456740aae294bbb28be3e1b5806b783646bfbddeed942fd01137d0562faf014",
+  "actual_utf8_sha256": "7456740aae294bbb28be3e1b5806b783646bfbddeed942fd01137d0562faf014",
+  "matches_expected": true,
+  "scope_registry": {
+    "source": "/workspace/h62-coordinator-inputs/ownership.json",
+    "sha256": "d49774852008549673e67881dd1f4dee3fe2f0cd93ffd93632afaf8be4e5473e",
+    "item": "H62-6-MIGRATE-BRIDGE"
+  },
+  "note": "Initial reconstruction mismatch resolved. Separate original-first-user-transcription.txt retains the corrected first-user wrapper including the later goal appendix; original-frozen-prompt.txt exactly matches the launcher hash.",
+  "review_corrections": [
+    "G18.03=V16",
+    "G18.05=V14",
+    "G49.03=H55 final-theorem owner restored"
+  ],
+  "matched_rendering": {
+    "basis": "no-goal-appendix",
+    "newline_flags": [
+      false,
+      false,
+      true
+    ],
+    "trailing_newlines": 1
+  }
+}

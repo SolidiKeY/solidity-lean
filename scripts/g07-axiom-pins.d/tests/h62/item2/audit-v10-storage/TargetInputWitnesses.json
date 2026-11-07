@@ -1,0 +1,23 @@
+{
+ "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean:H62.StorageAudit.TargetInputWitnesses.copy_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean:H62.StorageAudit.TargetInputWitnesses.read_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean:H62.StorageAudit.TargetInputWitnesses.self_copy_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean:H62.StorageAudit.TargetInputWitnesses.slot_input": [],
+ "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean:H62.StorageAudit.TargetInputWitnesses.write_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

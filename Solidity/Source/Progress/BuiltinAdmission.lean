@@ -62,16 +62,16 @@ inductive BuiltinFragment (C : Decl → Prop) {Γ : RCtx} :
   | mod (b : Builtin) {x y k : STy} (args : RArgs E Γ [x,y,k]) :
       (b = .addmod ∨ b = .mulmod) →
       ScalarSource x → ScalarSource y → ScalarSource k →
-      x.implicit E.isBase (.int IntTy.u256) = true →
-      y.implicit E.isBase (.int IntTy.u256) = true →
-      k.implicit E.isBase (.int IntTy.u256) = true →
+      x.implicit E.isBase E.mapFree (.int IntTy.u256) = true →
+      y.implicit E.isBase E.mapFree (.int IntTy.u256) = true →
+      k.implicit E.isBase E.mapFree (.int IntTy.u256) = true →
       ArgsFragment C args → BuiltinFragment C b args (.int IntTy.u256)
   | recovery {h v r s : STy} (args : RArgs E Γ [h,v,r,s]) :
       WordSource h → WordSource v → WordSource r → WordSource s →
-      h.implicit E.isBase .bytes32 = true →
-      v.implicit E.isBase (.int IntTy.u8) = true →
-      r.implicit E.isBase .bytes32 = true →
-      s.implicit E.isBase .bytes32 = true →
+      h.implicit E.isBase E.mapFree .bytes32 = true →
+      v.implicit E.isBase E.mapFree (.int IntTy.u8) = true →
+      r.implicit E.isBase E.mapFree .bytes32 = true →
+      s.implicit E.isBase E.mapFree .bytes32 = true →
       ArgsFragment C args → BuiltinFragment C .ecrecover args (.address false)
 
 theorem builtinFragment_ns {C : Decl → Prop} (G : Glob E) (F : Fr)
@@ -99,7 +99,7 @@ theorem checked_builtin (res : Resolution) (G : Glob res.env) (c : String)
     (hc : Solidity.Lowering.P9.WholeProgram.checkFunctions res G c = true)
     (F : Fr) (hF : F.contract = c) (n : Nat) {Γ : RCtx} {ts : List STy}
     (b : Builtin) (args : RArgs res.env Γ ts) (t : STy)
-    (ht : b.callTy res.env.isBase ts = some t)
+    (ht : b.callTy res.env.isBase res.env.mapFree ts = some t)
     (hf : BuiltinFragment (fun d => d ∈ Solidity.Lowering.P9.WholeProgram.functions res) b args t) :
     NS (evalE G F n (.builtin b args ht)) := by
   cases n with

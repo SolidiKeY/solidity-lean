@@ -1,0 +1,62 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/PositiveAllocationFailureControls.lean",
+  "interface_sha256": "73a37ef03813dff73ee78ca0160a7f887650edecd5455ac8a2e0cca2625884a8",
+  "joint_witness": "Solidity.Backend.Passes.AuditPositiveAllocationFailure.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditPositiveAllocationFailure",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.stale_budget_fits",
+      "signature_sha256": "2780250b8efc29d94af2085ff2030e2170979b95b73e7473ea4fc66020077a06",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.reached_budget_refused",
+      "signature_sha256": "b71adc8fa27253e5cb562a26565be52b4de7a3257cc1d1f7c2a9d30cdc59b369",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.joined_source",
+      "signature_sha256": "bd510503d41bcc38cc33d82f737817441bcecc43973106934a48bedb1180d75b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.physical",
+      "signature_sha256": "d4628167c66be0f80902b051916e179c0322a2a7b941a498c7f01b7be6438686",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.initial_observations",
+      "signature_sha256": "afed70b68ec80429851ff8637eb8ccfab50d20c2f8da091526de7a7a6ab9f2bc",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.reached_observations",
+      "signature_sha256": "263bfa588fdf68b713197e5032b7cdbe6a6f07d80db5fddfe1202be306cfa823",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.prefix_saved_head",
+      "signature_sha256": "5a2e9ef3b3731511b8003a21d1e8dd146d772e25c81ca953370e8b79993987bd",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.reached_input_refused_near_end",
+      "signature_sha256": "eef3f43719d80621d258aa28f6682997a76ff2e89a54621ff54e80b3b2ab6504",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.prefix_source",
+      "signature_sha256": "eb67a309f025f11afc8e5f6991b18ae6a78855aeb87ecab7cf541917c9338f03",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.PositiveAllocationFailure.Controls.skipped_assignment_refused",
+      "signature_sha256": "e6e47faed7d4545ce40393f5c6a1ce51e1bd0f33fa2a0c03a689a33b2dc9e95e",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 371,
+  "aggregate_remaining": 888,
+  "limits": "Ten original positive-base allocation/failure model controls. Stale one-word capacity and refused reached three-word demand refer to distinct costs at the same near-end header. No post-failure machine, native ByteWorld/emission, gas/session-resource or full Source/G24 adequacy."
+}

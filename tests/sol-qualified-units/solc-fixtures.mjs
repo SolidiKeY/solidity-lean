@@ -7,12 +7,14 @@ const root=dirname(fileURLToPath(import.meta.url));
 const matrix=JSON.parse(readFileSync(resolve(root,'compiler-matrix.json'),'utf8'));
 const binary=process.env.SOL_QN_SOLJSON || '/tools/soljson-v0.8.38+commit.1835d247.js';
 const sha=b=>createHash('sha256').update(b).digest('hex');
-if(sha(readFileSync(binary))!==matrix.sha256)throw Error('compiler SHA256 mismatch');
+const pins=JSON.parse(readFileSync(resolve(root,'compiler-artifacts.json'),'utf8'));
+const artifact=sha(readFileSync(binary));
+if(!pins.artifacts.some(a=>a.sha256===artifact))throw Error('compiler SHA256 mismatch');
 const solc=createRequire(import.meta.url)(binary);
 const version=solc.cwrap('solidity_version','string',[])();
 if(version!==matrix.version)throw Error('compiler version mismatch');
 const compile=solc.cwrap('solidity_compile','string',['string','number','number']);
-const report={version,sha256:matrix.sha256,rows:[]};
+const report={version,sha256:artifact,rows:[]};
 let failed=false;
 for(const row of matrix.rows){
   const sources={}; const hashes={};

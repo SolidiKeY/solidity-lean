@@ -1,0 +1,736 @@
+{
+  "schema": 1,
+  "privateWorktree": "/workspace/vy5-dependencies-20261101",
+  "packages": [
+    {
+      "producer": "vy3-compilation",
+      "head": "250555de2df2c16e2413cf329f43c77ce51ac8b6",
+      "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
+      "files": [
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy3-compilation/250555de2df2c16e2413cf329f43c77ce51ac8b6/checkpoint.bundle",
+          "sha256": "ae4254e2bb83895516114b1dcda4b6e2b653a3d45f1496126fce885aed2c1b02"
+        },
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy3-compilation/250555de2df2c16e2413cf329f43c77ce51ac8b6/source-modules.tar.gz",
+          "sha256": "0eb1cd6d75a6af95831924ea748913f87d92b15bf7fe2317d5ca2ae9deb1396d"
+        }
+      ],
+      "modules": [
+        {
+          "module": "Solidity/Yul/Compilation/Allocation.lean",
+          "sha256": "71a07f9f1bfdfba21a9303b5c26a7d0c4d5ec8dd54d83451e8d155c988b489b6"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/CompilationControls.lean",
+          "sha256": "1bc16d14396a78f9e6ad0bbc4fe270aec5d74a32a1cb8a72af40c8679982db97"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/MemoryHarness.lean",
+          "sha256": "ddc48e67a7a1a3919327772cfd080be0ca02318e83d78c8dcd8aea328611c4ed"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/NestedWrites.lean",
+          "sha256": "a9e20a05306f63d4cc6ccd4462af7df38a564dc40b92311e59ec9dc503f5972b"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/NestedWritesControls.lean",
+          "sha256": "63d863d53c90e35890285ca2d5f59da986ab62eb47267cd877e61287ded0f515"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/Relocation.lean",
+          "sha256": "cd36054a1eea3e30bcec52013eda36767764ece782ef7645c1fefe8cdaa636ab"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/ScopeSemantics.lean",
+          "sha256": "094e5e7d49798fd1fb4f7a53e897b88e1cdf4c344e0fdd6a1f6d5ad2fabc840a"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/ScopeSemanticsControls.lean",
+          "sha256": "dbdf2d98f2452a68bbbe70e4c34f540ff9ad0364f2715312b81adbecf35de0a8"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/Slices.lean",
+          "sha256": "9e09cfcba7a2d3aca126d3b0dcc755fed9518fe96dc4d8fbfe617b7aa6a68de6"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/SlotSemantics.lean",
+          "sha256": "87cb4cb300e78046a4cdcd4b8cb48fbfd176b7e391f4f9f116429e62480a2a7e"
+        },
+        {
+          "module": "Solidity/Yul/Compilation/SlotSemanticsControls.lean",
+          "sha256": "b16aa51e0a0a179d06a590f5cd53dd2aabf83d4f7903bb7303af7b711d2c23d3"
+        }
+      ]
+    },
+    {
+      "producer": "vy4-world",
+      "head": "9c631ecb07af62039348239763e049275fd78c1e",
+      "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
+      "files": [
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy4-world/9c631ecb07af62039348239763e049275fd78c1e/checkpoint.bundle",
+          "sha256": "911a205d1109c72ecdf01f120b6f5640327afc0d7e410ef415bb2c19cf7c103a"
+        },
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy4-world/9c631ecb07af62039348239763e049275fd78c1e/source-modules.tar.gz",
+          "sha256": "8965518543b3c0d1e140bd9e737707cf622f517e2cc509c04b0cd78469646955"
+        }
+      ],
+      "modules": [
+        {
+          "module": "Solidity/Yul/World/Frames.lean",
+          "sha256": "39504c6df2d5a61e3d90a9045bac5f8d84d19074a844d18c9ebea3c8eb014230"
+        },
+        {
+          "module": "Solidity/Yul/World/Lifecycle.lean",
+          "sha256": "f24a42f947df320cff262e7a7deed61fe5a9438d497910e4a6f135a392f2dc35"
+        },
+        {
+          "module": "Solidity/Yul/World/Observations.lean",
+          "sha256": "a73b6c4ae9d0dbef12a8015550435533bc0382dfde8ba0a1d62545aa6e7fc1be"
+        },
+        {
+          "module": "Solidity/Yul/World/Raw.lean",
+          "sha256": "cee7486ecf1c59c65d5eb7b37d67a78514c44cce846c12a8f47883421e4591a0"
+        },
+        {
+          "module": "Solidity/Yul/World/WorldChecks.lean",
+          "sha256": "90bc48e98376bd1424b916d4fa3110e01563deeda9727df947b758f219eab3a5"
+        }
+      ]
+    },
+    {
+      "producer": "vy2-physical",
+      "head": "2bb7bb20852e986f81a44aaaadfda104cac9c3f4",
+      "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
+      "modules": [
+        {
+          "module": "Solidity/Hash/CollisionBound.lean",
+          "sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce"
+        },
+        {
+          "module": "Solidity/Keccak.lean",
+          "sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+        },
+        {
+          "module": "Solidity/Roadmap/Contracts.lean",
+          "sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+        },
+        {
+          "module": "Solidity/Roadmap/Evm.lean",
+          "sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50"
+        },
+        {
+          "module": "Solidity/Source/Const.lean",
+          "sha256": "46ea4e0b34c80b91ccf30dec162398c290a5ad3a8403e58317a1d67d46888fa3"
+        },
+        {
+          "module": "Solidity/Source/Ctor.lean",
+          "sha256": "2ccaac06787dc1aeab8fe923f6a38bb4a9657b868becafb12732358ca07cfe13"
+        },
+        {
+          "module": "Solidity/Source/Decls.lean",
+          "sha256": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9"
+        },
+        {
+          "module": "Solidity/Source/Elaborated.lean",
+          "sha256": "b6f7a4fd560ef3d916ed54c171632e1e4e74d9c1623608697d1b8690507492a0"
+        },
+        {
+          "module": "Solidity/Source/Eval.lean",
+          "sha256": "c7966316ffa86735c29251a8ab1c352d9380fe844f8ca84a8ec1aa36ace8a88c"
+        },
+        {
+          "module": "Solidity/Source/Hoare.lean",
+          "sha256": "18babea61c50d94235e25299fcccf02aa87eaac416be2d350bac1d4451b6ce96"
+        },
+        {
+          "module": "Solidity/Source/Machine.lean",
+          "sha256": "06642136430a6e40962dedfa5804ef590e5a3f0779d92e2888f3db7a41b178cd"
+        },
+        {
+          "module": "Solidity/Source/Observe.lean",
+          "sha256": "82db004513511e206ee57eb7437831d8908df9cab29b18271092406ccb166212"
+        },
+        {
+          "module": "Solidity/Source/Resolve.lean",
+          "sha256": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1"
+        },
+        {
+          "module": "Solidity/Source/Resolved.lean",
+          "sha256": "3fb2d8b7559b106f39b1f44c25525bc984d2f0801464fea124b60372217e5779"
+        },
+        {
+          "module": "Solidity/Source/State.lean",
+          "sha256": "ed7cb956dd17097a6bdb75d787e48810f057c7c7eda1ea7a7b9bef3b5c516120"
+        },
+        {
+          "module": "Solidity/Source/Syntax.lean",
+          "sha256": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95"
+        },
+        {
+          "module": "Solidity/Source/Types.lean",
+          "sha256": "7bb6c26eaad2fbff46c11e54ead9451156d31b54cbd0400d17d76336021bd73e"
+        },
+        {
+          "module": "Solidity/Source/Typing.lean",
+          "sha256": "8489d8002e2fb8bed1b4374dde7b3ea5b76b7e0901576f05df00ec87a33bbe80"
+        },
+        {
+          "module": "Solidity/Source/Value.lean",
+          "sha256": "6e1e9d0740f1c2b0783cd2ee56011e2174ba6333bb422d0fd12bb8dd1cb673f7"
+        },
+        {
+          "module": "Solidity/Source/WellFormed.lean",
+          "sha256": "7b1ed96f14f9ff91c34bca8150cdd657e12eb520c05c7c2aa463bba86e69189a"
+        },
+        {
+          "module": "Solidity/Source/WellTyped.lean",
+          "sha256": "4d37db67926d71cbbfe47c09095baf16b36d6d1b82d14a44d8d7371a3bdea229"
+        },
+        {
+          "module": "Solidity/Source/World.lean",
+          "sha256": "61855329c308e42edb5bc0997be35dd80a63278bb6a818f885bba7666d62e64c"
+        },
+        {
+          "module": "Solidity/Storage/HashedLayout.lean",
+          "sha256": "b3e0665011200d2ed78c94cc816591e8da5509fc73b17f13d809b8fe1306d4d3"
+        },
+        {
+          "module": "Solidity/Yul/Views/AggregateData.lean",
+          "sha256": "39e2ddf593e266e173fd44d4e51d46101830281a46c93c7b3b6cf6a2274dfca0"
+        },
+        {
+          "module": "Solidity/Yul/Views/AggregateMemoryObjects.lean",
+          "sha256": "1be6101d3637d84cde047f8bb4e66f95a5954706a3d860c7a5548709308f9e15"
+        },
+        {
+          "module": "Solidity/Yul/Views/AggregateMemoryWords.lean",
+          "sha256": "aa4d45314033c153b6780dee1512bd52974d6f4c456e3cba6bd3e231d59b98ff"
+        },
+        {
+          "module": "Solidity/Yul/Views/ByteHeapRealization.lean",
+          "sha256": "c613342b764916fd701b4c4e64a8191ec11a25e9791dd4b6a4332a943d988abf"
+        },
+        {
+          "module": "Solidity/Yul/Views/ByteObjects.lean",
+          "sha256": "0e2a87b004280d0948fdfe4063e89c47f702ad6a7183e1d773182ca58e4c9e85"
+        },
+        {
+          "module": "Solidity/Yul/Views/Bytes.lean",
+          "sha256": "587cd111c856a9ffbec00a3841bd046fb4a4e13819da7ca016707f1647e82b0d"
+        },
+        {
+          "module": "Solidity/Yul/Views/ComponentComposition.lean",
+          "sha256": "ab075e122b5ba21bfef82b1f7fb1dada269ffc832188a5c774a05dd9d085ae14"
+        },
+        {
+          "module": "Solidity/Yul/Views/ComputedLayout.lean",
+          "sha256": "f4d6d54b6980cc45d7d0d060a70979bf11e3760e22c80661f727db28593bb262"
+        },
+        {
+          "module": "Solidity/Yul/Views/ComputedLayoutPreparation.lean",
+          "sha256": "5443044558e3839e8166605e0396730708410d928e88048cf69f5af86702f719"
+        },
+        {
+          "module": "Solidity/Yul/Views/Controls.lean",
+          "sha256": "9a402bdd533f2a2b734e7a808cd936773146eea2821f5adc2100f4151e80d9cf"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationBoundary.lean",
+          "sha256": "e81cf07ccb75f4d1833db8a5f444e39b3408efb300fe539195e2978b63d1d917"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationBoundaryControls.lean",
+          "sha256": "cfd7e766ee4abb82c827aad7a7287cafb579e18e1b5aec6d4c1a38ea3ad835dc"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationControls.lean",
+          "sha256": "e192833a7325f4669d0e41239f4ad46d7441213a4fc5ef6a00c7ed8d5300b571"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationJournalControls.lean",
+          "sha256": "86dc2fc6154ff952d90d23dd0682243c975e05d2dbbef0989ccf28bc73039a50"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationPacking.lean",
+          "sha256": "33f8b221b52b12d88fe8488874658c3b7a2e47f489f32d6c6fb8a988ab398090"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationPathExtent.lean",
+          "sha256": "60c27d509964193a2f2386de992ea0544b890dde174f9be6b92364dba9d4635c"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationPathSeparation.lean",
+          "sha256": "2d190defefb764fab8dc0d5a091d0189783e2ce55852d53f9eda8c37ae75554b"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationScalars.lean",
+          "sha256": "c4247c8c746a5a34d4e95cf44fb2f40e7775630d5a19c30d2cfeb7e0974f015e"
+        },
+        {
+          "module": "Solidity/Yul/Views/DeclarationSeparation.lean",
+          "sha256": "432e2e7b297864a55b51b141a0b82b77734ef2de6aa80f76f788d1ffdd851bc0"
+        },
+        {
+          "module": "Solidity/Yul/Views/FiniteControls.lean",
+          "sha256": "838ffea3ef662abfc8ba253f1419c489892adc29ba7e7ce0c06543b265a5db8d"
+        },
+        {
+          "module": "Solidity/Yul/Views/FinitePaths.lean",
+          "sha256": "050df50ace144c9629af185aad4c5a9a88fafe5a4a4ae4839b1817759ae588fd"
+        },
+        {
+          "module": "Solidity/Yul/Views/FiniteResidual.lean",
+          "sha256": "4954fae0f07778dd427d049ad7f6d07782a760760eb21caf74ff6edc58bd017f"
+        },
+        {
+          "module": "Solidity/Yul/Views/FiniteResidualControls.lean",
+          "sha256": "fafcdd1eb841a3210f33388c05516cc1ea1ddc40168979454530afefd4c43a63"
+        },
+        {
+          "module": "Solidity/Yul/Views/FiniteWorld.lean",
+          "sha256": "8a097a81ff42750c40f2f278b603652d8f6a898e8b630252cd4351229f2a960f"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclaration.lean",
+          "sha256": "fb0ef0a4a54dd168d855381f67f873b762357eaea0b1117ae66ef47d8371076c"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationChecked.lean",
+          "sha256": "ea91a57618601ef0c47736f7432675515ac8c94f136b75ab0493fd0509e33020"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationComposition.lean",
+          "sha256": "c420c458263d35812966233f9b6087bc6f38075d150e63c571b394e24964a9f0"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationControls.lean",
+          "sha256": "f9259fc5674875594dd8047f9c369906d43e3c6cc787f1f70b7721e78f8ccd92"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationExtent.lean",
+          "sha256": "f25510cf851dce0dd3ed3910260af01b9454ed491ee43ca87a4917e26ff75622"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationFinal.lean",
+          "sha256": "dc8e0b7de839ed07fce0330bec084a1033b24c3cadea433e712ccb80d08a9e51"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationJournal.lean",
+          "sha256": "811e8aeb9bb53e41536a61cfb5ddd75a5576155e623ad4cf70573c6f7a52db4f"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationPack.lean",
+          "sha256": "9386a7effe1a5b68b9fca6d758875f8a80bb28c6936b43e2722d5b0b25ec3588"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationPaths.lean",
+          "sha256": "84d6133c2c1f13a605e7e32788aa33e7b89c5ff2f33f2e6b3921dc0798f6fbd2"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationReads.lean",
+          "sha256": "28d85a3a492b7d0342c7e1e573c48c38aff916090c5b6b357c429db58feb86dd"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationSource.lean",
+          "sha256": "c78782b2c855a09dddd0ed6285d0ca57eba509aea3af913d97429f77726c35db"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationSpec.lean",
+          "sha256": "7f1ec93fa862cc372c311bb06893755653f06573b76f140f0fa8892703922cd0"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationState.lean",
+          "sha256": "8407907c2e10a19339f1339c74a23ba5b0ca85f6086161d8fbbcbd216cca12ba"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationStore.lean",
+          "sha256": "c82fc023d42b631395e23badac189b416bb7f9add91ba861200c4257508ab4c1"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationTyping.lean",
+          "sha256": "abeb93a64bac144c8b98311b7fc91bfae3ae568b66d44be8b9a523eac4b7ad09"
+        },
+        {
+          "module": "Solidity/Yul/Views/FixedDeclarationTypingControls.lean",
+          "sha256": "288f93fbae7c62d636fe7a93067bd2db29988a527c05198921409623b003363e"
+        },
+        {
+          "module": "Solidity/Yul/Views/HeapByteComposition.lean",
+          "sha256": "d5b055b40b899c0aaa142ceab7bab19539566cc6bf6ef8b000c46e854d186b44"
+        },
+        {
+          "module": "Solidity/Yul/Views/HeapByteMemOK.lean",
+          "sha256": "155baa830872e6a33af452f1fad1c2da183573165c7cc44bffbb97283d130822"
+        },
+        {
+          "module": "Solidity/Yul/Views/HeapBytePlacement.lean",
+          "sha256": "1a263e2f08e9a90e1cd3a5c9c7c6150090f16d07875f2db4366e33ffc78b7883"
+        },
+        {
+          "module": "Solidity/Yul/Views/HeapByteResize.lean",
+          "sha256": "b49ad61055da383649733acdb2f865a28230544bfa44d8acbefe026ab152800c"
+        },
+        {
+          "module": "Solidity/Yul/Views/HeapByteResizeComposition.lean",
+          "sha256": "a16005e3bf1554a2b7a9ff29c4d783022a2467b1466f76abefdcbfc59030d5d1"
+        },
+        {
+          "module": "Solidity/Yul/Views/HeapByteResizePlacement.lean",
+          "sha256": "68a77dd42234139c786ea2320ca1cd54444812cf09d7cb51ea19a28fccdbf8ad"
+        },
+        {
+          "module": "Solidity/Yul/Views/HeapByteWriteback.lean",
+          "sha256": "db8b0ceecf09672a3707c9bf15e28d6a8bf0e3137973447c4e63c24dec1f498e"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationComposition.lean",
+          "sha256": "0b7ed87ee9f197951c6f61cbdb3494ba6b7fd9789345ba3c12c8005c4b977bc7"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationControls.lean",
+          "sha256": "4726a2e95b1099258b0a787f5476b6a125e55bb1a1bb7323e9b42a42b3f44796"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationFinal.lean",
+          "sha256": "a553f90c3f3f25b598b9fdf0a718d11b094fd7dee00aa8908106d6593c7a7f8c"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationJournal.lean",
+          "sha256": "0d6eaf740379b22ab48c13bb072f45f0785bb068233e007b9a2495a1dae2e41b"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationLaws.lean",
+          "sha256": "b92f7fc18a223775e9653b824a6c53d8b1e48603a56500f96a7b6c42ffc7b88a"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationNegativeControls.lean",
+          "sha256": "62263683d7f8c2d028043a729b3f239752d45084e660a9e2e52df97a901eac99"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationReads.lean",
+          "sha256": "fbb7b9a0b7bd7fa2dda0876f29ab0ef55437ed114e5def6abbbda361744f0b19"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationState.lean",
+          "sha256": "33edc193c8b8389fe808be5f990b0ca3f2602b916f69e91290825c25c4decc81"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarationStore.lean",
+          "sha256": "54474d89b4fe16bbfc5d819b2566143ad068e354544e1e8ebc01b5ad34f62860"
+        },
+        {
+          "module": "Solidity/Yul/Views/InheritedDeclarations.lean",
+          "sha256": "8c4cc5fb864a95a89280cd9af98b213a243f856dd87f4034e4e68c4a18c49b30"
+        },
+        {
+          "module": "Solidity/Yul/Views/Inputs.lean",
+          "sha256": "fae97a7762d2a98e8c1bddde4668c0cba48e7f920b4c797e10fc635401d26487"
+        },
+        {
+          "module": "Solidity/Yul/Views/LayoutOrigin.lean",
+          "sha256": "7d4f0d2b434ca140f19ed976cefd9afb9b6e0fd9f7b1e11844b39db61ab65885"
+        },
+        {
+          "module": "Solidity/Yul/Views/LayoutOriginControls.lean",
+          "sha256": "dcebdcff7b80bd16a5469d3e478609b37c58ae65b8f2776643de1874350cb525"
+        },
+        {
+          "module": "Solidity/Yul/Views/MemoryContract.lean",
+          "sha256": "6d14cdf48032186554fe32121838cba0789489dd045da0430730d70b3b4f183c"
+        },
+        {
+          "module": "Solidity/Yul/Views/MemoryControls.lean",
+          "sha256": "d069bd3fa18c37e735e4c54bf6698e391a0b41e0078cd739e0ea79a425f4a322"
+        },
+        {
+          "module": "Solidity/Yul/Views/MemoryImages.lean",
+          "sha256": "ec92f9f618611e0b1397b9ef11e6a72f6b3af6ec9b0244fd1d38ef3214c1dbe9"
+        },
+        {
+          "module": "Solidity/Yul/Views/MemoryLayout.lean",
+          "sha256": "43e7e37bfe568d968ed7776bcfddfeebc2e86861a61d98efd526fd5a6f273dec"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclaration.lean",
+          "sha256": "afa94dc5b96330d7bf824c071cfcd6f63da44d311846106b7701b782b2bcd1bf"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationComposition.lean",
+          "sha256": "62355b56625d85eec2075a3b0662a84ceea51e5ef0a81f9aa38776cacd6e5557"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationControls.lean",
+          "sha256": "a11a4e558d40d6ae294d64b34558e6c086235e573a7c96e3a177a4c25ec05ae6"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationFinal.lean",
+          "sha256": "44d9f016c1afc2a8fa3ca729d13bb51087b5408778a4c2c5f43791fa6637bf69"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationJournal.lean",
+          "sha256": "4fa2be72ca3854ce3aa56ffb4c625c4e0fe8b3eb8265e2a918af209c0970aa96"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationPreservation.lean",
+          "sha256": "791fb2c4c364ed8a1d888c9f14a7dbc45d900eb4140afa33c0330c6198588721"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationReads.lean",
+          "sha256": "a666a690374afa81501d4d095eb2a0f488d093545e0412c9557644014fec0e36"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationReset.lean",
+          "sha256": "900a98217075f07b1f62c0b1ab45668a85cbc1c9a31074233dcc95b5cc6d401c"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationSource.lean",
+          "sha256": "cf7f257fbb473349f27eb4a0e31f0ec14c0a6a257ab93caa3fa1b56bb155925e"
+        },
+        {
+          "module": "Solidity/Yul/Views/NestedDeclarationStore.lean",
+          "sha256": "21022d9a234b68ecdd028782b61d3a5ee6b2b66e000933b2400f6ce69f0d6252"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolControls.lean",
+          "sha256": "eeeef8e5e76d0de2bf7c2bdb7e3a9bbd802353e7c98e93f503e66aeb436dee4c"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolDeclarationControls.lean",
+          "sha256": "8d2de58b21ac741e8a036685d092423041bb9c3a242d6b0225f4b62174e59b8d"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolEncoding.lean",
+          "sha256": "fdb0ff0ef67524016c3513d50caa27b7a382fe49377bbbc774985409af9b09db"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolFrame.lean",
+          "sha256": "d89c75e8ad9372c71c70dd655c9f49828630360d158704bc259dbf5f8e1a33f1"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolJournal.lean",
+          "sha256": "44b767f8c8854022c2b4ba5b48a575d547523e487a2af98d06f6f6a2003a64ca"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolRegistry.lean",
+          "sha256": "e3f5c8b16aab4d61823db0eb793a17f30386d0c88a26116f8dd3d8ccfa07021f"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolSource.lean",
+          "sha256": "1075e444ec4687dca623a5994791da64e30babbdcc737258179c07537a41cd47"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolUpdates.lean",
+          "sha256": "b2a33957c18a07e946d3679c799fae69977a5595be7350fe2afa5cac97bdd482"
+        },
+        {
+          "module": "Solidity/Yul/Views/OwnedBoolView.lean",
+          "sha256": "6ec2c5e87d8f1938ba3ce963bc8480c58968a77b6a3252314553c84c2034ccea"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedAggregates.lean",
+          "sha256": "6030e5512ed9f60ac4321d78ca06041661ed5b794d7a6ecd5bc7a014a4bef124"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedControls.lean",
+          "sha256": "97eb4a7eee74be537821c48bf9998f8b8681f66bc7b4f3c4487dfae067985be5"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualBoundaryControls.lean",
+          "sha256": "7c627ff7f62ce43f7d07e0dac506fa335d0f36368f5530010e50d5179dc5cb11"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualCodec.lean",
+          "sha256": "acc2e3a6aa3e67a4ba011e5120e215c5afbface5da47690fe537e8e0ee44d3fb"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualControls.lean",
+          "sha256": "4e2372deb4355602205bccf12590b13631f7099fcc5a0b621ee93a3f0d3cc75f"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualFrame.lean",
+          "sha256": "079bf1c56de43096f75b1bf1cca556e12560974398d09430fdfd73af965e9871"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualInvariant.lean",
+          "sha256": "50c49d7be075e8d9ae0c773ab6dae5c40e069597805ab12e90997bf089431556"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualMask.lean",
+          "sha256": "27f9926549f0fab9e3bdf4b03dc3d614ef2624ba51214272c27a27e19ef4b8c2"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualPlan.lean",
+          "sha256": "9e5aa196ade1e61a3c0c13facf36efe277c4198576d1dee39c52032c411c2827"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualSource.lean",
+          "sha256": "e434761a66cc1bfbe1805ed3ed4a50e6b7f3f5debca5fc4d32761e757586a35a"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualTypedSourceControls.lean",
+          "sha256": "e5aa01ceca42bbb599c6e71a5eef00c91e811b391de60b69822913404fe09b1d"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualWorld.lean",
+          "sha256": "7f81b3de28f1255ef11b7463305af432ce02649de20b2ef9f54cd6019fb26a11"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualWriteback.lean",
+          "sha256": "fee33e7977f870033bc3a2ca4acfd3b50c189546283eb96e4a8452c065c85667"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedResidualWritebackSound.lean",
+          "sha256": "56c5b8daa7475022d39505b3b205e5561139881eb7781bb9f4e353dda32c5a6a"
+        },
+        {
+          "module": "Solidity/Yul/Views/PackedSlots.lean",
+          "sha256": "6b69e8cd1b0e24bbc131be96d4112e598c29aba9c3e5f89cc49bea1a4ba063b2"
+        },
+        {
+          "module": "Solidity/Yul/Views/Packing.lean",
+          "sha256": "21d4b720606c3846eca903d5b15420bca34c1468969f8069aa7508e85e3988ef"
+        },
+        {
+          "module": "Solidity/Yul/Views/Regions.lean",
+          "sha256": "7784657467293d4b77f90f2b2635a8e8e2a0b0139dabcdd0490b63f1bfa3dcfc"
+        },
+        {
+          "module": "Solidity/Yul/Views/ResidualControls.lean",
+          "sha256": "4523bcf73d13e9a8e51c6df52d596c63c902f47afd54286c05dbb443c9d4d1d9"
+        },
+        {
+          "module": "Solidity/Yul/Views/ResidualJournal.lean",
+          "sha256": "e97a14951cc097bca566c1b0ba6a9084801a39a42bcaa514899e2c2d5dd2aabf"
+        },
+        {
+          "module": "Solidity/Yul/Views/RetainedAllocation.lean",
+          "sha256": "b2634bfb1ef90ce7e0350e5b6b214f97a97f82072a78730309777db3fa1a18c9"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationChecked.lean",
+          "sha256": "a5694c149e47a3bdf1a920ff9dd009341eea5e1ed719aa02ecf603185c46d4d6"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationComposition.lean",
+          "sha256": "0cc9c4aef0f7a9882c27484e269316e842604dbfc03407751a9b9585e17e9241"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationControls.lean",
+          "sha256": "44a6f8ef7a3ebfaba1c6b27e4e5f8af16593ae71b39c13e5078027a17c44a312"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationFinal.lean",
+          "sha256": "14127764c5208221d5f276e36b22ce98d410d46ee82cb9ed33d98f7c3e595b34"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationIdentityControls.lean",
+          "sha256": "b547ee4be587e4b4859645aadd07f75a2061f3cd6b3cad28c2f2a4f9535d7f22"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationJournal.lean",
+          "sha256": "fcb70edc611e93a98ac3e0174bd6b1870ccbf8fbe86f1cf024409835db258d51"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationMetadata.lean",
+          "sha256": "d35c47475b1607fa8de7c7cb904a317807d1bbfb761fea92b5c717fc501d9b39"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationReadback.lean",
+          "sha256": "ea249ec2d6ba3dfbf22f5100af371438eb4e97247457dd54a1b5f1acf520c7a9"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationReads.lean",
+          "sha256": "2a73d4f3987d0d7ea1b67fda98969462b963037e8310b571fcdbb645b15ea023"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationSource.lean",
+          "sha256": "2f2ef06d9f799a7bc5ddcdbb9be73f8a0302e7bf6e31d89ad73b5ec2602e1279"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationSpec.lean",
+          "sha256": "455f90b8932a1a40afcb5b09ac64ddb34f344c4fee368e89b03de085a3e33c83"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationState.lean",
+          "sha256": "8e31cf02ede81dfd239b21efacf1fcc389c208bdab9f2f2b6244878dabc03847"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationStore.lean",
+          "sha256": "0a60fee74edb0c18c087de8b7c4b2c551d3c94350e4da3692eaf10a7b9d3e0c0"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarationTyping.lean",
+          "sha256": "2c47baf38adae35a5a07856194d32c9e33e6aae1fe1847f1b238f0ed4d48ca7a"
+        },
+        {
+          "module": "Solidity/Yul/Views/RootDeclarations.lean",
+          "sha256": "b912af0246bb7e2bd575d3c74b11c7673ee4ec6a3e0222ff037d6d5a93928935"
+        },
+        {
+          "module": "Solidity/Yul/Views/ScalarBytes.lean",
+          "sha256": "ceb83d131ed87459a5a4db3184ae57c288b02c15144dcdd2055ff8132947c66e"
+        },
+        {
+          "module": "Solidity/Yul/Views/ScalarCodecs.lean",
+          "sha256": "4b1152f30bf4b94dc539d4f5e1e5d98bc6e8c360ebd159f36cba71d841494c3e"
+        },
+        {
+          "module": "Solidity/Yul/Views/ScalarControls.lean",
+          "sha256": "1fba1c9d028d344c89388ec19002fdb69961d92c0c34b4432ca3a695726ae7f6"
+        },
+        {
+          "module": "Solidity/Yul/Views/ScalarWorld.lean",
+          "sha256": "ccdd57450932b8efd9d65dda40841397d7352ed8a61ead0d6933847a1e9e88b3"
+        },
+        {
+          "module": "Solidity/Yul/Views/ScalarWriteback.lean",
+          "sha256": "72c2690239ae1b7b8eeccae84667a12560c0cb41e0e394753e39dfb0ac24ebfe"
+        },
+        {
+          "module": "Solidity/Yul/Views/ScalarWritebackControls.lean",
+          "sha256": "5cc535a468fd9b850f27c1dfcefeae40146efd6d0d17e3ae397dd93c9addfde1"
+        },
+        {
+          "module": "Solidity/Yul/Views/SourceControls.lean",
+          "sha256": "b468ac377fd2356cbb97c94ebbe9a86a56d206269ef61f64f297170ed8edee4b"
+        },
+        {
+          "module": "Solidity/Yul/Views/StorageContract.lean",
+          "sha256": "c0697909d9894ab4ecc63d0271cdd625a496d3db80070897618c7db013c10927"
+        },
+        {
+          "module": "Solidity/Yul/Views/Widths.lean",
+          "sha256": "caf30ee58ec49eb329a4ef72d5a560204130e2d33f89eb2177f3088d120d0e8a"
+        },
+        {
+          "module": "Solidity/Yul/Views/WordMemory.lean",
+          "sha256": "352ac9f9a912a8ebdde8780f9cd9133655d3765286f75a7f0646ef5f14812e6f"
+        }
+      ],
+      "files": [
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy2-physical/2bb7bb20852e986f81a44aaaadfda104cac9c3f4/lane.bundle",
+          "sha256": "fd2a31455a32aa05f1ff64853c5c3bc950d36b436df91c6045c7bec99c00d711"
+        },
+        {
+          "path": "/workspace/shared/parallel-work-20261101/vy2-physical/2bb7bb20852e986f81a44aaaadfda104cac9c3f4/source-modules.tar.gz",
+          "sha256": "a3c0d4258ebf35e2a69107236f381f1497512ca7dedb38df12f5eb4a9e1c5b2b"
+        }
+      ]
+    }
+  ],
+  "unresolved": [
+    "VY1 intrinsic syntax/pure execution/dirty-local package not delivered",
+    "VY3 target slices are preparation; source compiler simulation, final calling convention and pinned EVM adequacy not supplied",
+    "VY4 supplied operation/outcome completion is not raw callee execution adequacy",
+    "G01 allocation/log amendments and concrete V16/G48-G51 whole-pipeline combination contracts remain open",
+    "VY2 represented actions and heap-image reads available; broad dynamic ownership, physical call journal transport, allocation/general memory writeback remain unproved"
+  ],
+  "adapter": "Solidity/Yul/Composition/Interface.lean",
+  "actualLaws": "Solidity/Yul/Composition/Concrete.lean",
+  "witnesses": "Solidity/Yul/Composition/Controls.lean",
+  "scope": "Verified immutable peer bodies consumed privately; no owner merge, no closed full-lane obligation."
+}

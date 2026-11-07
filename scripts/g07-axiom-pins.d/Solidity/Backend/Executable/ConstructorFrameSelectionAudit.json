@@ -1,0 +1,9 @@
+{
+ "Solidity/Backend/Executable/ConstructorFrameSelectionAudit.lean:Solidity.Backend.Executable.ConstructorFrameSelection.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Executable/ConstructorFrameSelectionAudit.lean:Solidity.Backend.Executable.ConstructorFrameSelection.preserved_contents": [],
+ "Solidity/Backend/Executable/ConstructorFrameSelectionAudit.lean:Solidity.Backend.Executable.ConstructorFrameSelection.wrong_order": []
+}

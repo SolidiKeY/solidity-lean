@@ -1,0 +1,199 @@
+{
+  "fixture": true,
+  "nodes": [
+    {
+      "id": "naturalReflexive",
+      "declaration": "H62WitnessFixture.naturalReflexive",
+      "kind": "helper",
+      "area": "witness-fixture",
+      "owner": "fixture-proof-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "parameter",
+          "reason": "arbitrary natural input, not a correctness certificate"
+        }
+      }
+    },
+    {
+      "id": "consumer",
+      "declaration": "H62WitnessFixture.consumer",
+      "kind": "statement",
+      "area": "witness-fixture",
+      "owner": "fixture-consumer-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "parameter",
+          "reason": "arbitrary natural input, not a correctness certificate"
+        },
+        "1": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        }
+      },
+      "completed": true
+    },
+    {
+      "id": "Certificate",
+      "declaration": "H62WitnessFixture.Certificate",
+      "kind": "premise",
+      "area": "witness-fixture",
+      "owner": "fixture-consumer-owner",
+      "binderRoles": {
+        "field:0": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        }
+      }
+    },
+    {
+      "id": "trueProducer",
+      "declaration": "H62WitnessFixture.trueProducer",
+      "kind": "helper",
+      "area": "witness-fixture",
+      "owner": "fixture-proof-owner",
+      "binderRoles": {}
+    },
+    {
+      "id": "certificateProducer",
+      "declaration": "H62WitnessFixture.certificateProducer",
+      "kind": "helper",
+      "area": "witness-fixture",
+      "owner": "fixture-proof-owner",
+      "binderRoles": {}
+    },
+    {
+      "id": "useCertificate",
+      "declaration": "H62WitnessFixture.useCertificate",
+      "kind": "statement",
+      "area": "witness-fixture",
+      "owner": "fixture-consumer-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        }
+      }
+    },
+    {
+      "id": "Pair",
+      "declaration": "H62WitnessFixture.Pair",
+      "kind": "statement",
+      "area": "witness-fixture",
+      "owner": "fixture-consumer-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "parameter",
+          "reason": "arbitrary natural input, not a correctness certificate"
+        },
+        "field:0": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        },
+        "field:1": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        }
+      }
+    },
+    {
+      "id": "secondProducer",
+      "declaration": "H62WitnessFixture.secondProducer",
+      "kind": "helper",
+      "area": "witness-fixture",
+      "owner": "fixture-proof-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "parameter",
+          "reason": "arbitrary natural input, not a correctness certificate"
+        },
+        "1": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        }
+      }
+    },
+    {
+      "id": "polymorphic",
+      "declaration": "H62WitnessFixture.polymorphic",
+      "kind": "helper",
+      "area": "witness-fixture",
+      "owner": "fixture-proof-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "parameter",
+          "reason": "rigid universe-polymorphic type input"
+        },
+        "1": {
+          "kind": "parameter",
+          "reason": "arbitrary value of the supplied type"
+        }
+      }
+    },
+    {
+      "id": "polyConsumer",
+      "declaration": "H62WitnessFixture.polyConsumer",
+      "kind": "statement",
+      "area": "witness-fixture",
+      "owner": "fixture-consumer-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "parameter",
+          "reason": "rigid universe-polymorphic type input"
+        },
+        "1": {
+          "kind": "parameter",
+          "reason": "arbitrary value of the supplied type"
+        },
+        "2": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        }
+      },
+      "completed": true
+    },
+    {
+      "id": "conditionalProducer",
+      "declaration": "H62WitnessFixture.conditionalProducer",
+      "kind": "helper",
+      "area": "witness-fixture",
+      "owner": "fixture-proof-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        }
+      },
+      "controlRole": "intentional-contradiction"
+    },
+    {
+      "id": "conditional",
+      "declaration": "H62WitnessFixture.conditional",
+      "kind": "statement",
+      "area": "witness-fixture",
+      "owner": "fixture-consumer-owner",
+      "binderRoles": {
+        "0": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        },
+        "1": {
+          "kind": "premise",
+          "owner": "fixture-proof-owner"
+        }
+      },
+      "controlRole": "intentional-contradiction"
+    }
+  ],
+  "roots": {
+    "positiveWitness": [
+      "consumer",
+      "polyConsumer"
+    ],
+    "certificateBoundary": [
+      "useCertificate"
+    ],
+    "intentionalContradiction": [
+      "conditional"
+    ]
+  }
+}

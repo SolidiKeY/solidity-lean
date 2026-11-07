@@ -1,0 +1,27 @@
+{
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.attempt_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.creditRollback_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.mark_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.rollback_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryRollback.lean:Solidity.Source.MonetaryExecution.rollback_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

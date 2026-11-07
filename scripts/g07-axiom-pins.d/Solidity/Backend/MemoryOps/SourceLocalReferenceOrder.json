@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceLocalReferenceOrder.lean:Solidity.Backend.MemoryOps.source_bool_write_local_delete_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

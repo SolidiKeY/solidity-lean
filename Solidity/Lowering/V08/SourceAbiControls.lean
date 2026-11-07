@@ -18,8 +18,8 @@ theorem literal_complete (pipeline : Roadmap.Pipeline) (static packed : Bool) (b
 theorem literal_vector (packed : Bool) (bytes : Roadmap.Bytes) :
     let data := if packed then bytes else Source.abiLayout [(true,bytes)]
     let final := SourceKeccak.afterLiteral populated data
-    (final.ex.world.accounts sender).balance.val = 93 ∧
-    (final.ex.world.accounts self).balance.val = 7 ∧
+    (final.ex.world.accounts sender).balance = 93 ∧
+    (final.ex.world.accounts self).balance = 7 ∧
     (final.ex.world.accounts self).code = some 0 ∧
     (final.ex.world.accounts self).nonce = 1 ∧
     (final.ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -108,8 +108,8 @@ theorem mixed_complete (pipeline : Roadmap.Pipeline) (static packed : Bool) :
 
 theorem mixed_vector (pipeline : Roadmap.Pipeline) (packed : Bool) :
     let final := SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary) (data packed pipeline)
-    (final.ex.world.accounts sender).balance.val = 93 ∧
-    (final.ex.world.accounts self).balance.val = 7 ∧
+    (final.ex.world.accounts sender).balance = 93 ∧
+    (final.ex.world.accounts self).balance = 7 ∧
     (final.ex.world.accounts self).code = some 0 ∧
     (final.ex.world.accounts self).nonce = 1 ∧
     (final.ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -363,8 +363,8 @@ Both successful return values and caller locals are in the execution theorems. -
 theorem prefixed_complete_vector (prefixData : Roadmap.Bytes) (pipeline : Roadmap.Pipeline) :
     let final := SourceKeccak.afterLiteral (SourceKeccak.afterLiteral populated binary)
       (prefixData ++ data false pipeline)
-    (final.ex.world.accounts sender).balance.val = 93 ∧
-    (final.ex.world.accounts self).balance.val = 7 ∧
+    (final.ex.world.accounts sender).balance = 93 ∧
+    (final.ex.world.accounts self).balance = 7 ∧
     (final.ex.world.accounts self).code = some 0 ∧
     (final.ex.world.accounts self).nonce = 1 ∧
     (final.ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -517,8 +517,8 @@ theorem memory_signature_complete (pipeline : Roadmap.Pipeline) (static : Bool) 
 theorem memory_signature_vector (pipeline : Roadmap.Pipeline) :
     let payload := (Source.wordBytes ((global pipeline).fixed.hash [])).take 4 ++ data false pipeline
     let final := SourceKeccak.afterLiteral (SourceKeccak.afterLiteral (afterSignature populated) binary) payload
-    (final.ex.world.accounts sender).balance.val = 93 ∧
-    (final.ex.world.accounts self).balance.val = 7 ∧
+    (final.ex.world.accounts sender).balance = 93 ∧
+    (final.ex.world.accounts self).balance = 7 ∧
     (final.ex.world.accounts self).code = some 0 ∧
     (final.ex.world.accounts self).nonce = 1 ∧
     (final.ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -581,18 +581,18 @@ theorem memory_signature_wrong_pointer (pipeline : Roadmap.Pipeline) (static : B
 #print axioms selector_byte_at
 
 /-- These are the published ABI argument predicates, not full source-unit admission. -/
-theorem selector_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase
+theorem selector_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase E.mapFree
     [.stringLit selectorBytes,.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
 
-theorem signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase
+theorem signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase E.mapFree
     [.stringLit [],.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
 
-theorem memory_signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase
+theorem memory_signature_argsOK : AbiKind.encodeWithSignature.argsOK E.isBase E.mapFree
     [.string .memory,.stringLit binary,.bool,.bool,.stringLit long33,STy.bytes32] = true := rfl
 
 /-- Generic resolved evaluation is broader than admitted typing: this published
 rejection is preserved, with no new profile rule or restriction. -/
-theorem overlong_selector_not_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase
+theorem overlong_selector_not_argsOK : AbiKind.encodeWithSelector.argsOK E.isBase E.mapFree
     [.stringLit long33,.stringLit binary] = false := rfl
 
 #print axioms selector_argsOK
@@ -635,8 +635,8 @@ theorem source_transient_zero_horizon (pipeline : Roadmap.Pipeline) :
       (.error .timeout,(locals,transientOpening)) := rfl
 
 theorem source_transient_complete_vector :
-    (transientWritten.ex.world.accounts sender).balance.val = 93 ∧
-    (transientWritten.ex.world.accounts self).balance.val = 7 ∧
+    (transientWritten.ex.world.accounts sender).balance = 93 ∧
+    (transientWritten.ex.world.accounts self).balance = 7 ∧
     (transientWritten.ex.world.accounts self).code = some 0 ∧
     (transientWritten.ex.world.accounts self).nonce = 1 ∧
     (transientWritten.ex.world.accounts self).storage.read saved = some (.bool true) ∧

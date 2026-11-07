@@ -1,0 +1,43 @@
+{
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_list_count_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_list_many": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_list_many_aux": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_list_token_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_list_yield": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_catch_step": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BooleanCatchList.cons": [],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BooleanCatchList.nil": [],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.catch_fragment_head": [],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.catch_list_yield_token_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.catch_step_start": [],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.catch_step_stop": [
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.catch_yield_head": [],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.catch_yield_nonempty": [],
+ "tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.statement_no_following_catch": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -65,7 +65,7 @@ and the remaining semantic gaps.
 
 ```sh
 lake build              # the formalization and its examples; elaboration is the test suite
-./run-lean.sh           # default targets, SolkeyTestSuite, then the solkey cross-check
+./run-lean.sh           # layer/root/fragment checks, default targets and SolkeyTestSuite
 ```
 
 The package declares no dependencies at all — no Mathlib, nothing — so
@@ -90,12 +90,7 @@ See [docs/cli.md](docs/cli.md) for setup, state files, output and exit codes.
 ## Relationship to solkey
 
 The calculus formalized here is implemented as KeY taclets by
-[solkey](https://github.com/SolidiKeY/solkey). `lake exe solkeycheck`
-(`./scripts/check-solkey.sh`, run by `run-lean.sh`) cross-checks the sort
-annotations in `Solidity/SortCheck/Annotations.lean` against solkey's
-`solidityProgramRules.key`, from a checkout beside this repository
-(`../solkey`; override with `--key`/`SOLKEY_RULES`). Without a checkout it
-prints `SKIPPED` and exits 0. `Calculus/RuleShapes.lean` checks which of
+[solkey](https://github.com/SolidiKeY/solkey). `Calculus/RuleShapes.lean` checks which of
 solkey's taclets the rule table claims, and `docs/lean-key-rule-map.md` is
 the name-by-name map between the two rule sets.
 

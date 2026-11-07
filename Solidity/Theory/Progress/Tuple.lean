@@ -56,7 +56,7 @@ def SlotsOK : List (Option STy) → List STy → Prop
 
 /-- **Pushing a tuple declaration's components is never `stuck`.** -/
 theorem pushVals_ns {Γ' : RCtx} (F : Fr) (n : Nat) : (slots : List (Option STy)) → {σs : List STy} →
-    (vs : RVals E.layout σs) → {Γ : RCtx} → (l : Locals E.layout Γ) → slotsFit E.isBase slots σs = true →
+    (vs : RVals E.layout σs) → {Γ : RCtx} → (l : Locals E.layout Γ) → slotsFit E.isBase E.mapFree slots σs = true →
     SlotsOK slots σs → NS (pushVals (Γ' := Γ') F n slots vs l)
   | [], _, .nil, _, _, _, _ => by simp only [pushVals]; exact NS.pure' _
   | Option.none :: ss, _ :: _, .cons _ vs, _, l, hf, ho => by
@@ -117,7 +117,7 @@ whose initializer and slots are in the fragment is never `stuck`, and it
 completes normally (so no `break` or `continue` escapes it). -/
 theorem declTuple_ns {A : Decl → Prop} (G : Glob E) (F : Fr) (n : Nat) (hE : ∀ m, m ≤ n → ExprNSAt A G F m)
     (nps : Nat) (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {σs : List STy}
-    (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs)) (h : slotsFit E.isBase slots σs = true)
+    (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs)) (h : slotsFit E.isBase E.mapFree slots σs = true)
     (l : Locals E.layout Γ) (hi : TupleInit A e) (hs : SlotsOK slots σs) :
     NSP (execS G F (n + 1) nps ph (RStmt.declTuple (R := R) (M := M) (k := k) slots e h) l)
       (fun o => ∃ l', o = .normal l') := by

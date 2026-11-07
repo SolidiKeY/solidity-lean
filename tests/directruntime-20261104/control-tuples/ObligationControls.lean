@@ -7,7 +7,8 @@ import Solidity.Frontend.Testing
 Both the standalone packet and published canonical composed reader use
 the existing plain producer helpers. All original controls run for each. These are
 trusted-verifier checks, not new kernel certificates or Source adequacy proofs.
-No production reader or verifier boundary is modified. -/
+Guards the primitive-return repair: returnGuard now proves through the shared
+builder; reference input refusals remain. No verifier boundary is modified. -/
 open Lean Solidity Solidity.Frontend
 open Solidity.Frontend.ExecutableAst
 
@@ -53,15 +54,16 @@ run_elab do
           throwError "relative obligation {readerName} {name}, box={box}: {result.compress}, expected {expected}"
         logInfo m!"RELATIVE_CHECK {readerName} {name} box={box}: {actual} (trusted verifier; no certificate)"
     let some j := nodes.find? (fun j => (j.getObjValAs? String "name").toOption == some "returnGuard")
-      | throwError "missing return refusal control"
+      | throwError "missing primitive-return control"
     let (name, d) ← Lean.ofExcept (Shared.function reader j source.compress)
     let C := { base with funs := [(name, d)] }
-    match Shared.obligation lowerBodyLoops producerPre C name false false with
-    | .error "plain return obligation" => pure ()
-    | _ => throwError "plain return obligation refusal changed"
+    let formula ← Lean.ofExcept (Shared.obligation lowerBodyLoops producerPre C name false false)
+    let result := directResult C formula
+    unless (result.getObjValAs? String "status").toOption == some "proved" do
+      throwError "primitive return obligation did not prove: {result.compress}"
     let refDecl : FunDecl := { params := [("a", .array (.prim .uint))], body := [] }
     let R := { base with funs := [("reference", refDecl)] }
     match Shared.obligation lowerBodyLoops producerPre R "reference" false true with
     | .error "plain reference obligation" => pure ()
     | _ => throwError "plain reference obligation refusal changed"
-    logInfo m!"plain return/reference refusals preserved ({readerName})"
+    logInfo m!"primitive return proved/reference refusal preserved ({readerName})"

@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.collision_failure_terminal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.default_can_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.empty_table_executes_default": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.first_match_wins_collision": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.heterogeneous_outputs": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.later_match_executes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.no_match_executes_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/CoreDispatchControls.lean:Solidity.Backend.AbiEntry.CoreDispatchControls.public_selections": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

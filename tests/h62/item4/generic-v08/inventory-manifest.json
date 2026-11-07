@@ -1,0 +1,899 @@
+{
+  "schema": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "inventory_sha256": "be03b64ac04c24940e39e24a75b806abf042524233bc465b1ed5109aad406096",
+  "file_count": 220,
+  "declaration_count": 4428,
+  "kinds": {
+    "theorem": 2619,
+    "def": 1616,
+    "structure": 17,
+    "abbrev": 138,
+    "instance": 20,
+    "inductive": 18
+  },
+  "controls_file_declarations": 2951,
+  "controls_file_theorems": 1589,
+  "files": [
+    {
+      "path": "Solidity/Lowering/V08/AbiControls.lean",
+      "sha256": "5278e0bc99b5351441c88b0b539f98c80aee7f1cbdfcf79ea58c4d4718db1091"
+    },
+    {
+      "path": "Solidity/Lowering/V08/AbiObservations.lean",
+      "sha256": "db2b4e72fe98f478f25c29a6fdc1821f36c2150dbc2902c3c65dfcda248a2897"
+    },
+    {
+      "path": "Solidity/Lowering/V08/Audit.lean",
+      "sha256": "60df65bc1a65caf5b455f21f207682cb89cb2eff6daa6e213363fd36f56498aa"
+    },
+    {
+      "path": "Solidity/Lowering/V08/BoolErrorAbi.lean",
+      "sha256": "6932be1686874ef3afc9cb9ce0057fc93f27987d6c5b86ede6460c34ec4935e9"
+    },
+    {
+      "path": "Solidity/Lowering/V08/BoolErrorAbiControls.lean",
+      "sha256": "4c2cdafe5a06769067d160237572eb79dedb1661feef6ecfc2c6fffdf44a3d3f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/BoolErrorCompleteness.lean",
+      "sha256": "9520a74075f7ba864a2c49ae5a62cb1f14341a7917460c7d5e03b18d6cbb57bd"
+    },
+    {
+      "path": "Solidity/Lowering/V08/BoolErrorCompletenessControls.lean",
+      "sha256": "f74713eb0028699ae4ac67c96caf0e694f47a1a4c9ea64933af7fde39b5d2fe1"
+    },
+    {
+      "path": "Solidity/Lowering/V08/BoolErrorControls.lean",
+      "sha256": "bc9c9f63fcbaa5a4c2ec396ea5a2752f33ef1e48c5b948c15a3c44f3e57cf6b3"
+    },
+    {
+      "path": "Solidity/Lowering/V08/BoolErrorLowering.lean",
+      "sha256": "1f43b038555914f0e53ce86ee493b36999b3875dc8cb6cbd9a9ababff24ba561"
+    },
+    {
+      "path": "Solidity/Lowering/V08/BoolErrorStatement.lean",
+      "sha256": "1ccfe3052d844e7c4a8d8689553475657abec754c030601c98ac5d3c8de71570"
+    },
+    {
+      "path": "Solidity/Lowering/V08/BoolErrorStatementControls.lean",
+      "sha256": "58f741271cadda385f86530b7deada34ab165740a4c975e414c2d00c45361df5"
+    },
+    {
+      "path": "Solidity/Lowering/V08/Callable.lean",
+      "sha256": "02eacfd96cea3131b5b8d5542764bba7f7072f64d48d30360874d34a13abd884"
+    },
+    {
+      "path": "Solidity/Lowering/V08/CallableMetadata.lean",
+      "sha256": "dfec5b17d8a029d150f82ad3f37c62c6d08d05e7d3f101720a1d6187337dc2eb"
+    },
+    {
+      "path": "Solidity/Lowering/V08/CallableReflection.lean",
+      "sha256": "17d938049d1669d7c903aee97ce094ebe10f5852f2082a3912a258f691818020"
+    },
+    {
+      "path": "Solidity/Lowering/V08/CallbackControls.lean",
+      "sha256": "b276ce1f6be011deb6a691ac442cff1a95cf5f3e094c8e88e4c3434c10c55fcf"
+    },
+    {
+      "path": "Solidity/Lowering/V08/ConditionalCallable.lean",
+      "sha256": "abd0c90c588912e6e9820b05580cdb6cdd475f3f673789aef78b525f3eca28e7"
+    },
+    {
+      "path": "Solidity/Lowering/V08/ConstructorContinuations.lean",
+      "sha256": "b7d397219f3ab73ab541dbabd202cad4581591dc787c172a32f574c1fe7d2826"
+    },
+    {
+      "path": "Solidity/Lowering/V08/ConstructorScalarTransport.lean",
+      "sha256": "21bba3b19ef5699eefd3263c621c167ef05a85b65f4ba94eb55e873534c10492"
+    },
+    {
+      "path": "Solidity/Lowering/V08/Controls.lean",
+      "sha256": "2c5b9656cbbe94a4976a47abf71f149abac3b5b92eef9e6f7307cc8a3ae6d823"
+    },
+    {
+      "path": "Solidity/Lowering/V08/CreationPremises.lean",
+      "sha256": "9ce078e744ff61d51b114c2987a6f989cf94988d2e33041f689498574a710dbe"
+    },
+    {
+      "path": "Solidity/Lowering/V08/CreationSuccessControls.lean",
+      "sha256": "a99363df5cf2f5dd08a10d5311a99e260c0c3539d83c388db70c6ccc466e6d51"
+    },
+    {
+      "path": "Solidity/Lowering/V08/CryptoControls.lean",
+      "sha256": "dc457a54d09d98b6821123f3bc03b90259c123f2e8f39dd59ac4b5543d8af6d3"
+    },
+    {
+      "path": "Solidity/Lowering/V08/CryptoObservations.lean",
+      "sha256": "10ffd42236704af2b57a0584e5a383a4d6ef9b963657f150626ab9621e0d6024"
+    },
+    {
+      "path": "Solidity/Lowering/V08/DeclarationRoles.lean",
+      "sha256": "643b74886bdb6570160ead0e129eebb112995bae76f959b2a3dd90408b565a75"
+    },
+    {
+      "path": "Solidity/Lowering/V08/EmitControls.lean",
+      "sha256": "35d7b84c83cda424d45efe68107c80e4c8eaf5a9c428e3f8d5ce7aecc494f2ca"
+    },
+    {
+      "path": "Solidity/Lowering/V08/EnvironmentProjection.lean",
+      "sha256": "2d0176baec08746c32cd2ebd96b8564d8241f8192a0b0c7a54931643c97a2d1c"
+    },
+    {
+      "path": "Solidity/Lowering/V08/FixedBytesCallableArgument.lean",
+      "sha256": "1edb47995bd30e1cad89092920bc2046ece8065e073e861d0b850259a65aea70"
+    },
+    {
+      "path": "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean",
+      "sha256": "78df90673105a8c64646a0f1dd058c09c2eb80fe4224a1f70a388057b9463d16"
+    },
+    {
+      "path": "Solidity/Lowering/V08/H1Audit.lean",
+      "sha256": "6acb733387ec9e76541e323e90fe76117cbef23007b922f5e520e0e8e6f7b0d4"
+    },
+    {
+      "path": "Solidity/Lowering/V08/HandlerControls.lean",
+      "sha256": "7cb51c75ca51f5d889793df423d0cc1c3b0ba96eaf2fe8cab48983e0d46ab9fb"
+    },
+    {
+      "path": "Solidity/Lowering/V08/InheritedControls.lean",
+      "sha256": "47e75399d795283d0d2a531b990ad3547cec699c6f90f246c2203067123f6042"
+    },
+    {
+      "path": "Solidity/Lowering/V08/InheritedMetadata.lean",
+      "sha256": "9f4fe12b321a6a48837e312e382a8fafc7436ec427b6157b6ac2a270af236dc6"
+    },
+    {
+      "path": "Solidity/Lowering/V08/IntegerCallable.lean",
+      "sha256": "95044564b701dc95a32d9443b3956df46d1ecf386c4f810edd2b300febe3f13a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LibraryControls.lean",
+      "sha256": "f68e1da3b27c3bed07e3f574b35eaa52834bc8d3d070fe88be9895f654cf7847"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LibraryCreation.lean",
+      "sha256": "2238930989eec5e13f9b2b6bd521bcd11effdc3fb9ccae8ab958f2a0eb0b0e53"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LibraryFrameTransport.lean",
+      "sha256": "1b2074bd0fdfa3fbe1d0993bf2e0107941183a626667768594469d36f421f3dc"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LibraryHandlerControls.lean",
+      "sha256": "513205d7cc7948c80c62f96168d4c459ba883a33b074306896c645c3a1ac249e"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LibraryIntegerTransport.lean",
+      "sha256": "6ef7eb3b259c27fd9c09d3605a1119085b8f8a0164749d50ffe066dfbdc12387"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LibraryPremises.lean",
+      "sha256": "e3b7e4233c33e7b24f9758f780ffd59fa021995bad7d900c01e6cfa494e70f3b"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureArithmeticReason.lean",
+      "sha256": "507b688a7e17d35b924ce1cb1b26a36a831172a5aad89013af09b1c9954c500a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureArithmeticReasonControls.lean",
+      "sha256": "a9c6c451e90b3b449818b53c7fedc299002bdc0f80daa127f1527506599f7499"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureBoolPrefix.lean",
+      "sha256": "7c1ed996f9ed84ae9c674d37ab2d28b2e396bb81db1c1f8a15d8b1ba8a0af79a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureBoolPrefixControls.lean",
+      "sha256": "15bc5977dd9ef3d38789c723bf79bf8fa5efe515f5eebb688bcce4e7b56eaf59"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureBoolStatement.lean",
+      "sha256": "eec1ccaf2564db20e394a44a16c2c2686d933aedd2be8a5c84e2e7e7e42b04f7"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureBoolStatementControls.lean",
+      "sha256": "a54d6427b611c3838f4f478d34656552108e822fc41ae1db4e925751d661de27"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureBytesReadback.lean",
+      "sha256": "0cb98cec281f29ea384346776148ab1e04f8fcc3cb5a6cd9c309985af9bcf35a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureBytesReadbackControls.lean",
+      "sha256": "edbe5b834dff0ba82c5231bb3938dba4486aa529e3f4e283993f46c4d5be7f41"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCalldataCopy.lean",
+      "sha256": "d9f8098d3d370be821ae60a705a60fb080e8cdde7bbd17f7a77031002d5c6b4c"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCalldataCopyControls.lean",
+      "sha256": "774b332e794aac8cb456479179d1b6cabfd4fd3288a4157dac0d79fcab0aafeb"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCalldataDecode.lean",
+      "sha256": "730f690620b3227a89c280d1a9a77dd5e4e36613e64770e82e6c506fd5f2d11a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCalldataDecodeControls.lean",
+      "sha256": "a340b159dd32df137f3792d5f3bc85b4b71ed579d9e921a59605d15f52f276fb"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCalldataPrefix.lean",
+      "sha256": "2acf88a3577e73aeaa0476a98f646e87d7c92cf8f7b913541246cbc684836dd9"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCalldataPrefixControls.lean",
+      "sha256": "8af9f761a7f543465f9eeb640d8f9ed0aa94752206f6335678ec0f34867a4082"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureChoiceDecode.lean",
+      "sha256": "8ff37285c035f08d1d618794a7fd3f44b4c61a765ad5ca2bc7b4b4d19b49af28"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureChoiceDecodeControls.lean",
+      "sha256": "33601aa096440aa90dfe89db44f6fbc19b05e61a63b970f45ed8e6adefb85348"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureControls.lean",
+      "sha256": "58ace31137154a64b0e4d5732ad58874a474dfac882ed60356d5fe965f9f8f40"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureConvertedFields.lean",
+      "sha256": "cce60f9f1b88994e04e463b8b6a2c457b8381f1f1da4b912e14298da1cfc1b04"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureConvertedFieldsControls.lean",
+      "sha256": "97b4ca653f51d2267aec61e7e33ab510af7228006b48988f9f32e56d41cf01e9"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopiedReason.lean",
+      "sha256": "fec65afd8e1b48d457a897f783ab98b2d150412f6c5c3eaf4981b59254c46efc"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopiedReasonControls.lean",
+      "sha256": "9a61f6588c44f3d6df393275d798d2d80b8197555d24969a1df64f9f58b26679"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopyEncoding.lean",
+      "sha256": "90884066e9408e7824b082824541bbefe05ab6ad263449eb0e7bc244da8fa3ba"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopyEncodingControls.lean",
+      "sha256": "01ac6c7a7f305864b742dec3656de84c0d6fcf333960423e52a6c5e27faef245"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopyReturn.lean",
+      "sha256": "d6b5c74aa98447eec986e99236559f087c2ef308f630d30826a35a273c499e6c"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopyReturnControls.lean",
+      "sha256": "f6b10ee7903beafa6b15fbea0c3b00e1ff18e703b08b29c152a54c276b80af07"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopySelector.lean",
+      "sha256": "34779c52afcb2eb5b120fe7ee4a922df3ad9ca83529e3e0c63dae599d5522acf"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopySelectorControls.lean",
+      "sha256": "b318a3beb31ac283cf2fbb1c0fd0fec040d04e191bbc40d3639602e638d10d5d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopySequence.lean",
+      "sha256": "6888a0abdf18bbe7877fa0f8655616ddea6ff1b60ad1e1846f13166a9e00354f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopySequenceControls.lean",
+      "sha256": "0451696a214e55f668f72a273b869dba860cef790e82d0f357ea023e7e2a9e48"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopySignature.lean",
+      "sha256": "941ff61b125176950e8c80cd2481c22e5fb81fe3219b30447cffc53e59c64d84"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureCopySignatureControls.lean",
+      "sha256": "a7cb200e5e14d07959f34af0326c4bedec71d1ca2ca2f44897f44e533fc3185f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureDynamicError.lean",
+      "sha256": "4c246bf5547196c3644e56e3010a1303cc1494ac57a2d60c1ff49c000153125a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureDynamicErrorControls.lean",
+      "sha256": "ff30491ecf480145ba5942a70aec6bf7f0ca08b4cb5b38e481faf5fbbea22292"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureDynamicListError.lean",
+      "sha256": "d7b406f9446cd0d6cdd6d7398aa08d07b87da702c6bc8ebcde988f2e45fa8e7f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureDynamicListErrorControls.lean",
+      "sha256": "af3f664ca9ca5d2b42f7f7dddcf1199033e3a70ec1dac4a576f74d7f8c539ff4"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureDynamicReturn.lean",
+      "sha256": "7094131874bbef76e0c75a1345433e221267b9ee3f9e6a6ceb0b5e0c36df999d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureDynamicReturnControls.lean",
+      "sha256": "13a976f92e705cd34443f909c050792226ad4e2c0ff3580d38e28ad359dd783f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureEffectDecode.lean",
+      "sha256": "8aca50c36572a61c29f6d2dcd799ab500a4707c97872546a464406c9f300af69"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureEffectDecodeControls.lean",
+      "sha256": "4158829f43284fa4b97aca08195b65d72631bef49f02b69a6a09072cc4d0fff8"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureEncodedRethrow.lean",
+      "sha256": "a10fc830f30ff423746b0daf58fb8a8a72e98a45d0be27625eff914494384760"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureEncodedRethrowControls.lean",
+      "sha256": "9a2d0dac119f693466fa218d601e2c602843d6e96ae9379b8e73db17b8ae0a63"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureLocatedFields.lean",
+      "sha256": "a9f51360751e62d6aa71610de28560dce1e06fe88f5f605b07e61e267d676086"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureLocatedFieldsControls.lean",
+      "sha256": "fc5c88fc103befe5c28d8a35dc9d0395f0d89edc0df9e26d449740e0c02bfe34"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureLowering.lean",
+      "sha256": "c05c98ff73d36242c98dd8f4fdd9b7c9103d0160c4c60d386641aa37017ada48"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMemoryReason.lean",
+      "sha256": "6988ae0e941cffa8ff8f33bb1974d22d0e1a84201a68954930b6ce4a24f47f82"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMemoryReasonControls.lean",
+      "sha256": "3be11a68304b87f4b10edef05628f5c27dd249d446876fca809fdfc22072859d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMemoryRevert.lean",
+      "sha256": "77184045e28ba8314efcee386258e6a102ca9dd7e93d2dd0f6da7f2df98b605d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMemoryRevertControls.lean",
+      "sha256": "208e3ce3d5956c3d577533f670526eee94b8cdc52c3eafd9e59fd18d7defeccb"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedCustomError.lean",
+      "sha256": "631b499ddfb8be4b166e94682ad3b51ec373d4e9bf5c2cdefabeed241d19eafb"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedCustomErrorControls.lean",
+      "sha256": "280b242382b2e099acbad5a8f6985e2357b0359bc54278102a366ace2b4938de"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedEncoding.lean",
+      "sha256": "99220d33f1290f3f8f0daece4ebf6855f4e64e85b08c860ac9823e512c2f0007"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedEncodingControls.lean",
+      "sha256": "9150c81417a8bc1112344083ba2d0b353bbd54eaccfd709a24766764f520b496"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedExpression.lean",
+      "sha256": "1f030e31cca979cbe21ed71422fef5f43a6fd53f1ca30fedb080a6e37f607147"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedExpressionControls.lean",
+      "sha256": "d2d395053669e493aa931e755a3f7dc22c62aeef99dec3d01cb3eaa6cafd66e3"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedSelector.lean",
+      "sha256": "b8d14a0d760eb1ad76752055fb2c02f0a8310d2581ae853e41fe93e3faa0e660"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedSelectorControls.lean",
+      "sha256": "82cdd16c2e116b1754bbe0b6d25a37472839f16f0d6c3bf1aebbcbcb0397407c"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedSignature.lean",
+      "sha256": "796546c7a0c2bc7604ec2733875eaf601812c75ba8b686711cb66b075d44a775"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureMixedSignatureControls.lean",
+      "sha256": "376d0bd996d921b73b39ef91a7403fcd10c01e40c1fcf9257d714217b65a1e68"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureNestedSlice.lean",
+      "sha256": "94f6607c5320678327a9ddb91d51520bd0e70db9f25db321a83f82e173847f25"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureNestedSliceControls.lean",
+      "sha256": "872bcc5aeeeb75f186b60b00d10b7d2128a16beecbc0e40135d166f584fc381e"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureOverflowReason.lean",
+      "sha256": "8cb420f7c5303f4e7d710fc5cd315c2795f5b5a685c7c7a5aa6bd4c89930960b"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureOverflowReasonControls.lean",
+      "sha256": "a9c7c9b97e65afd1fa58ced82a6f4485907dfb0f93df76f17a8c4eda2efe2655"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailurePackedBytes.lean",
+      "sha256": "6e72cb5cb70f6d40ed01d3976e1c53a2462b550c7a390e49f38a6b0520595b55"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailurePackedBytesControls.lean",
+      "sha256": "2b2cdbc10cd40df61c739df738f66637c818e1f16b5b5981fc7631207bd81b51"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailurePackedFields.lean",
+      "sha256": "0559828dccf0657e76c869f5532b303f8a3efb4be107eb83a4cb12ad7a481847"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailurePackedFieldsControls.lean",
+      "sha256": "e52d942a9c0fac05301067ddd7e9d185936ea2665a960f83cbb1a70a79e6dc18"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureReasonSequence.lean",
+      "sha256": "e1777237e63ec20e9fd3921e3ad8c148f4f400163ff416c99dcd95f3ee71f8cd"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureReasonSequenceControls.lean",
+      "sha256": "3d4a0c87a40cf831213cb7eaed75e5efddfb3addaf5dda2b6869781c75c03eb1"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureReferenceReturn.lean",
+      "sha256": "94f4efeeec1b5c548a65a1d77e1730648e79beca6b9c5d3f69dcf45df368c649"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureReferenceReturnControls.lean",
+      "sha256": "9ec5586570aa9b279b08dbc396702e543506d86fc533544267b417cbf982a2f0"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureReturnSlots.lean",
+      "sha256": "31ab2260f205df5f2d64d9ec17f958fe2feef746469b82745d6b9345350d0cb3"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureReturnSlotsControls.lean",
+      "sha256": "9d21494c1830eca9d9202eafe221c0866e07af4b6233b22f39ffc9ad94749c8f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureScalarOverflow.lean",
+      "sha256": "db300e1f29d4592875c4d3ed6943573d967adb3f5ae3ab78651d1ca1f24f11d5"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureScalarOverflowControls.lean",
+      "sha256": "d4e3095da4cfd4a27df10d074836bb9c0795868f2351bc16d3b6dca0e2eeec13"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSelectorBytes.lean",
+      "sha256": "22ba94af41cb6437842132e33a4697f5e0d799a9cb5c40d6343237be8b24fa2c"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSelectorBytesControls.lean",
+      "sha256": "7e8ffe6fca1c852d19813c85624a02b15ad471dd8980ba8533523af24ceb40f0"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSignatureBytes.lean",
+      "sha256": "99fbb914a02a7e0a342eee3fa9a5051411bf80f50f23639435c90151686a5928"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSignatureBytesControls.lean",
+      "sha256": "c41e12ce8dad7c103e0292b100e1bb35c2cd203a8ba2e779088722ea88e8478d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceChain.lean",
+      "sha256": "08c713928adae0d55181cd6ed634adaa284c477a499f070a3db273ce4b1ab0e4"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceChainControls.lean",
+      "sha256": "a77b384e1deee4e50344127b9fd29083cc87c9a09f6a786f5ca9e0ef66d5a104"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceDecode.lean",
+      "sha256": "67f55e55b659633cd6e017a6799544c87c909c64ad227a8d11aad7a04b09dcb8"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceDecodeControls.lean",
+      "sha256": "13b311db0d82870a18c4ac065133f77e2652ab0bc56b0cddbf1d7782d016939b"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceEncoding.lean",
+      "sha256": "48182821ab33b9f2bf8a3f02197d47c27b315f5cdd5b1e53be416b4e71d93ae8"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureSliceEncodingControls.lean",
+      "sha256": "3d046f014c586ac38150688a560196b3b18a3850acb3c2e1e29abcc6b443dad1"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStatementReason.lean",
+      "sha256": "e0532922e51ee33d3123dd74e33bf74aa836c53e0dac9c9b401ffc0adf8c52b2"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStatementReasonControls.lean",
+      "sha256": "bae1b36170eaee4984adcfb16c5fb7725aa1e8dd3cd0805f6f9cea208744362d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStorageDecode.lean",
+      "sha256": "8c555d7d59f13fd07fcc3baa18e075aa8f75619435df6b0f98e5d9d3aadfc298"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStorageDecodeControls.lean",
+      "sha256": "1514f9e75ae96914469c7a900a8254de0b4f79c887cd8950aacd021919d82201"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStorageSuccessControls.lean",
+      "sha256": "d0c271724b3c09bcb433865af61ab35369222ccd9c40719f88bb17831214aa44"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStringConversion.lean",
+      "sha256": "d561d2f2773635822a7eb68250f703c90387ec1b832e3773176a9dbd10ef8274"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStringConversionControls.lean",
+      "sha256": "04eeae5965fda94b4304eb95788f3e1628c25b9037428ae4ee5a92b210683d9e"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStringInterleaving.lean",
+      "sha256": "bc28dedba6b59bb73f507beae66c58c0ac658a2b84a1c56b96d5f7832252b958"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStringInterleavingControls.lean",
+      "sha256": "47309696dc2622bf5b7948860cf20b8b4edfd6a95557a424edc76519c5291c65"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStringPrefix.lean",
+      "sha256": "98a74c5e2bf76784e4e2d4ed422e123cb94c83b55b8173585f14b50a712cc59d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureStringPrefixControls.lean",
+      "sha256": "58b606894bea8f6ce9618e654b9335c3d8de86eba31e21383e8c979b89dbc334"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureTupleAbort.lean",
+      "sha256": "8f62091a4393ac1b9b71daf0d574c7978fb2e6849d4430f6c5f9fac901558dd2"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureTupleAbortControls.lean",
+      "sha256": "ea82b339180919cc496a6ea282d133d8b27f5a58c6a2a2bdfb31c239941da77d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureTypedFields.lean",
+      "sha256": "4ec842da2929f1af6dbd15f92ec9e95a94eed1cf8fb07803cbc77fb7ad2debac"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LiteralFailureTypedFieldsControls.lean",
+      "sha256": "bdddb100d0f6e2365d25865b2d1dc0123383a397ef8414c6d9d1f0ed61ce9834"
+    },
+    {
+      "path": "Solidity/Lowering/V08/LocalCallableTransport.lean",
+      "sha256": "9c285aea0fad03a7c9780bb08ae7800628f34d92b95776bc5401c7c9f96ab130"
+    },
+    {
+      "path": "Solidity/Lowering/V08/MetadataControls.lean",
+      "sha256": "b83ed29ec3d7bcc81d4480e3220ec27a3986371b8484b9da8e26b6f3b4aa6b34"
+    },
+    {
+      "path": "Solidity/Lowering/V08/NestedControls.lean",
+      "sha256": "fcc963cbee97e9676926cbc859e7b0e5ce1fec55ff984b87722eb22df10f910e"
+    },
+    {
+      "path": "Solidity/Lowering/V08/PayableControls.lean",
+      "sha256": "083cba3777f607a3cebbd29d75d02afd54224814aca716952afd55967e448d73"
+    },
+    {
+      "path": "Solidity/Lowering/V08/PayableMetadata.lean",
+      "sha256": "18e9e34682becc63a892efdc9857412278cf72d1a7ec90102f24cb6dad79e5f7"
+    },
+    {
+      "path": "Solidity/Lowering/V08/PrefixControls.lean",
+      "sha256": "da341f7c91314043cdb995444db32844a97232f1dc0a0a097c5a8c85285120e8"
+    },
+    {
+      "path": "Solidity/Lowering/V08/ProjectionControls.lean",
+      "sha256": "99fab258ced05553f001c71d54b6976ebd4b9a581c70141832eaee502d98d568"
+    },
+    {
+      "path": "Solidity/Lowering/V08/PureArgumentCallable.lean",
+      "sha256": "2ba9da15e03ff7751d3edae73d7f18fe52d88e4c44183a2e817022edba69c2b2"
+    },
+    {
+      "path": "Solidity/Lowering/V08/RoleControls.lean",
+      "sha256": "69d2a0a3b9d905be009f3808b99c56d4be0ea91a5bd4cfc43b3e1f60ee6d2065"
+    },
+    {
+      "path": "Solidity/Lowering/V08/ScalarCallableTransport.lean",
+      "sha256": "947c8837b1d3348757f16cca210a976bc8f057c28108e26b16adf2dc599d6e89"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SelectorControls.lean",
+      "sha256": "5035154ffb1e58b3bffdd2083e7dfb5f7e2c7d69df60915cfde3f275794746a0"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SelectorObservations.lean",
+      "sha256": "8c24dbe866b19cb6236838e33768a9c89e40413476c19886d376b351f6058d0e"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SignedCallableControls.lean",
+      "sha256": "270d8e64146f212b01200c3730da182b356b038aaa5ff29c8927662c99834e17"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SliceFailureControls.lean",
+      "sha256": "78533ea8af0b62831d77b494e31c5aa519ed557e9a31c121e0ad8c98f2a3f4fa"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SliceFailureLowering.lean",
+      "sha256": "592a4fbc179af14ebf6d85f8048def0f7947edd7e7613eca81084cad08e54a66"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceAbi.lean",
+      "sha256": "99a01f9fae81a81801245c32e177e05ae0b7fd090bca5727df3a7c8e60465d62"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceAbiControls.lean",
+      "sha256": "d173ce03d045d771357c0a841ce5211ba94afbec4401d9d550f8a4aaa1964b51"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceAbiEntryControls.lean",
+      "sha256": "9cf3157cf2cd8cdb4433c2edf39a8eb9e1c4c38bf1623f21bd8cc341545debb4"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceCallPhase.lean",
+      "sha256": "b9c6eb6a4f33ad4892a922d41fffabc91c1fff78ac0b11b85b9fca25979540df"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceCallPhaseControls.lean",
+      "sha256": "5454db8045a8e57bbbbd92b4e766d70797035aa61c4087006a6eb0283ecd5f34"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceCallable.lean",
+      "sha256": "4b76b7f19609592d7eb816df9d3e6df27a151624996d40e2d641c1e044580a6a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceCallableControls.lean",
+      "sha256": "f1203cd9b1caff344d5af506f135d47c0d8faaa9e5926674200abb27ad417e7c"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceClockTransactions.lean",
+      "sha256": "ae48a72420160136fdf063f7250375bcc6a9f3a1ee8e1821e2663aec751555f4"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean",
+      "sha256": "93c5a77cb64442faa6c6c4d2d486075f1d46d1e19d3396e486044f0115c87f25"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceCustomErrorControls.lean",
+      "sha256": "7220cc3a138c0b511ca548e07a08bd8b077ff29cf137ef2a7d132628b12748e5"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceCustomErrorFailureControls.lean",
+      "sha256": "e7302fd0fb38b00db592ee931eed03d09507df2db1a350e2468b98cefc788902"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean",
+      "sha256": "cda115ea96e965a28b5db2132d11dd422daa5d3b80fa69558357c289ed05cb00"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceCustomErrors.lean",
+      "sha256": "29d81d560c49abafb96aee795ef172464ffaf0165ec023e3f8407cc816714e78"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceDeploymentControls.lean",
+      "sha256": "2df2965cb6de297107f0ea2632fcf50b52b9f2afc47ddf724026ba1a6366c2a6"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceDeploymentSessionControls.lean",
+      "sha256": "ec88859b36c6ac74120ed38cbcaf02a0dc1ea27345f2620612bd992a723e64bf"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceDispatch.lean",
+      "sha256": "4475cac4721e6f062012b202090b9f4b02a274fe02a0ccd445d8c10b77fe14a0"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceDispatchControls.lean",
+      "sha256": "dda106a5ac35b5d02d2062cf59b5c976c2f637a9f3d2448773258ef852db7a43"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceEmit.lean",
+      "sha256": "ad7a57b731ad663d660c76f236f3a6cbdc0965d4da3a9f8c7f20ac81aae00f18"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceEmitControls.lean",
+      "sha256": "b232dee1b0075bd00212d1f6d528c284bf5987650b32c28f9d717da05eaa9c5b"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceEnvironment.lean",
+      "sha256": "210f97a0054da0d9f22d94b509515528e6db00d7f109046809cca9577901a77e"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceEnvironmentControls.lean",
+      "sha256": "e2d1bd9197dc1808f71f1ab4b6ec1e2197204f595be8ba7c17f6f4e3f3e7c60f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceExternalPhaseControls.lean",
+      "sha256": "9bca4c2318b7eff2d14998ef21d6367e10c9a1b5057acdd3b1abfbf568b98b1f"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean",
+      "sha256": "50656ee7f4fb7d17e516ee1914840aa508ce50669b763f83d9fc24cb1d1810eb"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceFailureControls.lean",
+      "sha256": "75044406476676abee50497bf85959cfd59576d0f968e667d39c8074ffa3890a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceFailures.lean",
+      "sha256": "4a7d0f205eae5d567c56494a7cb6e1692e792ecfb6a77b70c25ac5295a63e0a9"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceKeccak.lean",
+      "sha256": "da457d92de90b7c81a3dd7ca29a4be6f0b365530a212e331b4cf5ffd8254d507"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceKeccakControls.lean",
+      "sha256": "899cfa757951f0c8762dab2a65a727c6dccd826ed2c8c8d933b784f10ab3aac6"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceMemoryKeccak.lean",
+      "sha256": "ef9e2b2411611c15f124b5f77507fcfd555dcde65f8d6a20076f159ea45d4cbc"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourcePayableDeploymentControls.lean",
+      "sha256": "a5b405aa7899fd67aa3a39bce8738723c096d5b09944df96ee1ae516fb541374"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourcePrefixedRethrowControls.lean",
+      "sha256": "43f34feaa3645eb0508cb1179d45df49fcb5ee08aac8a41bbba93364e460acd7"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceRethrow.lean",
+      "sha256": "30fb23f7648f6df727f26940e4277f8af2146f48b45e11d2540e9b507cb31262"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceRethrowControls.lean",
+      "sha256": "b98e5e01215c8b2e671b2f3bffb7217825297264fc862664e51cbe7193378cbf"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceSessionControls.lean",
+      "sha256": "5740881212b73ee32a08c11ca1a3e9c7bd3740abf8e6deca188d5f16ff6f6777"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceSessionCreditControls.lean",
+      "sha256": "8cedbaccecc1de49b2bee63256dac6b25859b9ef9cdfd183cdae6d853c246086"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceStandardRethrow.lean",
+      "sha256": "77fc194271a175f1d88e5d23b83667d8b04d48427f1dd8ffb84da823968087e2"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceStandardRethrowControls.lean",
+      "sha256": "aa9a611ed1a2f3914201eb7e686008514fc93383b2a529347c1e11e2dccb44b4"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransactionControls.lean",
+      "sha256": "46a9a9834f7bd8ceeecd2cca711be7ae295358101a53e2a879e40ef5eb7ebf2c"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransient.lean",
+      "sha256": "b352164e2ace2b15d94f48355fa07fd016308c7ef1e563bd3d6b0a4150071aaa"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientBytesEmitControls.lean",
+      "sha256": "224d352b094104b34d4b698e819708bbde5deb3aace22f9f62405e5ba7dc6e4a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientEmitControls.lean",
+      "sha256": "3b942220de15d70c13d1bed5a8652823af000eb92ecd0da9e23cdc76b7bd2e7e"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientEmitPanicControls.lean",
+      "sha256": "dd8e3e1a31a0f882b7c2492b3b23e9350d2b4abf39a8f2d22f0e49f0c1cff6a9"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientErrorCallerRollback.lean",
+      "sha256": "9129b0b6523864a0473efc1d330689a9d09d5bc163594ce162da11b5d6330833"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientInnerRollbackOuterCommit.lean",
+      "sha256": "11b2bfa7d778d34a0ad613dec907702cc80509b27136757b50d9b56e90ec98e9"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientMixedRethrowControls.lean",
+      "sha256": "59e2637ea3d19d9f69fe506abd3868e0f5acce11017da588300a015bc21c3499"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientOwnerCommit.lean",
+      "sha256": "02dcd67ad96cec5d3ad48c8a3a8cf9dc006cf3d4d9b889fc425730939557aca5"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientOwnerRollback.lean",
+      "sha256": "b12856e9a57fa53159b76afe4095ba3519c16dc1d2b3dbf2a94a26886cb1bf5d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientReachedPayment.lean",
+      "sha256": "c8358b59008bbba3127a125a79753918cc32a5b62312c9fb73d7e0ff71ae544b"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientReentry.lean",
+      "sha256": "3df3a6f8743726bb753db8746b4584d9a1dd9f33fbb19cc3b0d504465d95eddc"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientRejectedPayment.lean",
+      "sha256": "35a08aa3d573114717db761331960d3977dd87c53170cfac1f16039d4b26769c"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientRethrowControls.lean",
+      "sha256": "4e32770f8616805877c24fb5e6800a0eda0e45006bb8c18e0e93cae611da15f0"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientSameOwnerPayment.lean",
+      "sha256": "cc2f5cfe1e51aa2327ecd789fbecba46a181d5363142a228850ee2fdfea6083b"
+    },
+    {
+      "path": "Solidity/Lowering/V08/SourceTransientZeroPayment.lean",
+      "sha256": "b472c369c73e297bc1c6ffe7903fd804c395bed81f90ebc5dedf6cf27fd34da2"
+    },
+    {
+      "path": "Solidity/Lowering/V08/TransactionPrefixes.lean",
+      "sha256": "65daedfca2584e9dbd8ed03bf162069dbd645363d467865ad39d5a7c58905eed"
+    },
+    {
+      "path": "Solidity/Lowering/V08/Transactions.lean",
+      "sha256": "1cab59690e997e474c254b106313bab9c93db0e47e0da7804b568dcf71245d9b"
+    },
+    {
+      "path": "Solidity/Lowering/V08/TupleCallable.lean",
+      "sha256": "a33bb27cc5a107759e5d2246534ab51318cb897c428e2334a109c8ea1ec6e34a"
+    },
+    {
+      "path": "Solidity/Lowering/V08/UnsignedUpdateCallable.lean",
+      "sha256": "bcb9111b6f915ea5093c1ff8410c7a149d430ffeb97517aa7e7554433352d52d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/UnsignedUpdateCallableControls.lean",
+      "sha256": "c3b7ac6f3fcda8a34ab2f874010ee7dca7e99f0ca3d3bfa033923cae6f88e5dc"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WordCastCallable.lean",
+      "sha256": "84295df2163200eabf10afe86a9838777bb6016357b96ad3f20d6d688c70e896"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldCatalogue.lean",
+      "sha256": "3b7b05e2eb3e92eccdebf4e5767dfce4c667746a210b7112559ae79bf2ab6bc0"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldCatalogueControls.lean",
+      "sha256": "f25b31f5427162c8671dbb22e2fbbad6e41e734936cd455661d338c585db5fc6"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldCatalogueTransport.lean",
+      "sha256": "1641d5efa208d328eacccf7a050c801524cd40686d9e915dd4b17e19a302997d"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldContextComposition.lean",
+      "sha256": "cd0092f8e89b6b80a18ae090865e60b1b9dc0adef1d1e27e32042ede12ca8674"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldImage.lean",
+      "sha256": "e9c70c8b42c2b5d2d8ba7c682c2f0ddf0232b94011aeb5077265d5497b2a17e6"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldImageAccess.lean",
+      "sha256": "986257224dd381bbd3937040ea53c0165db1b0d18b4ae3cbae4af26763cbf1d3"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldImageAccessControls.lean",
+      "sha256": "1fe271d5a1a6b110beb57f32b20e56fdcd8f588d8985612efe3030d5a6a00c75"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldReset.lean",
+      "sha256": "7ecaecacbe081d185d2c14e0d1a33afa0a708b27d2a87adcb76bea4f00e1b75b"
+    },
+    {
+      "path": "Solidity/Lowering/V08/WorldResetControls.lean",
+      "sha256": "23737ac0fe804222c98426d21403d0915cdec7e6d6bbe4236f07888e9870fa21"
+    }
+  ]
+}

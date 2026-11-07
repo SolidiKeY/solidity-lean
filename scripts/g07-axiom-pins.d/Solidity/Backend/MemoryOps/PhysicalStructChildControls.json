@@ -129,6 +129,31 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_rejections": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_calldata_copy_client": [
   "Classical.choice",
   "Quot.sound",
@@ -195,6 +220,61 @@
   "propext"
  ],
  "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_checked_copy_zero_family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_empty_late": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_prefix_tables": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_binding_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_decode_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_empty_late": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_prefix_tables": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChildControls.lean:Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_reads": [
   "Classical.choice",
   "Quot.sound",
   "propext"

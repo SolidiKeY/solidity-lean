@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintSliceCompoundRead.lean:Solidity.Backend.MemoryOps.source_items_triple_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceCompoundRead.lean:Solidity.Backend.MemoryOps.source_uint_slice_bind_add_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

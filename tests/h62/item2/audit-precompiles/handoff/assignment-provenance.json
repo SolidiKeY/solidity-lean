@@ -1,0 +1,14 @@
+{
+  "source": "Complete original user assignment turn visible in the original thread; copied without elision. Goal objective is saved separately.",
+  "original_rendered_prompt_identifier_sha256": "39585f8ffb6629c51fc8d1e0fca1808807d9cb06983d0c558dcdc019112450f3",
+  "assignment_file_sha256": "e759f8c6d33d5c1d1b5bfdd181e4064fc78c944ed83efa6558e01f6ce7f3d3c3",
+  "assignment_bytes_match_rendered_identifier": false,
+  "boundary": "Exact coordinator-pinned frozen rendered prompt recovered from an unmodified visible transcript envelope slice; SHA256 matches39585f8ffb6629c51fc8d1e0fca1808807d9cb06983d0c558dcdc019112450f3. Complete original user assignment and exact work/backfill queues are also preserved separately.",
+  "original_goal_id": null,
+  "original_goal_identity": "existing launcher goal identified by frozen prompt digest; no replacement created",
+  "original_environment": "ccarenv_b64_Y2NhcmVudl83YjM2Yzc3YzA3Njg4MTkxODg3Yjc3MTBhZWVkNzdhMg",
+  "rendered_prompt_bytes_available": true,
+  "rendered_prompt_file": "original-frozen-rendered-prompt.txt",
+  "rendered_prompt_sha256_verified": true,
+  "rendered_prompt_file_sha256": "39585f8ffb6629c51fc8d1e0fca1808807d9cb06983d0c558dcdc019112450f3"
+}

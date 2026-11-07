@@ -194,9 +194,10 @@ reverse-inclusion obligation is held specifically for VA1-Q1.
 - The nine printed axiom sets passed the automatic standard-axiom audit.
   Full `check-axiom-pins.mjs` still exits 1: 404 unrecorded changes, zero
   axiom errors, versus 403 at the frozen base. Tracked pins/sets are identical.
-  The extra untracked pin is `foo []` in the pre-existing optional
-  `Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean` cache. The cache
-  and inventory were preserved. This full gate is not reported as passing.
+  The extra untracked pin was `foo []` in the pre-existing optional Mathlib
+  cache ([the pinned upstream SplitIfs test](https://github.com/leanprover-community/mathlib4/blob/f897ebcf72cd16f89ab4577d0c826cd14afaafc7/MathlibTest/SplitIfs.lean)).
+  The cache and inventory were preserved in that earlier run. This full gate
+  is not reported as passing.
 - Strict documentation paths still exit 1 with 48 missing references and 37
   ambiguous references, exactly the frozen-base findings after qualifying
   this lane's ambiguous `Calculus/Decision.lean` citation. Differential result:

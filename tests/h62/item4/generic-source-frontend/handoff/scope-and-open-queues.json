@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "original_owner": "solidity-h62-4-20261106/generic-source-frontend",
+  "handoff_to": "solidity-sol2-20261104/numeric-literals",
+  "original_write_scope": [
+    "tests/h62/item4/generic-source-frontend/**",
+    "scripts/h62/item4/generic-source-frontend/**",
+    "docs/feature-work/h62-4-generic-source-frontend.md"
+  ],
+  "original_exact_owner_requests": {
+    "status": "pending_owner_relay_not_permission",
+    "requests": [
+      {
+        "id": "R-TOKEN",
+        "owner": "solidity-h62-6-20261106/migrate-frontend",
+        "exact_files": [
+          "Solidity/Frontend/Checked/Token.lean"
+        ],
+        "action": "Owner publishes compatible Lean4.35 migration at Bytes.str line38 and any subsequent dependency repairs; proving files remain read-only to this lane.",
+        "evidence": "/workspace/h62-runtime/evidence/build/Solidity.Frontend.Checked.Token.log"
+      },
+      {
+        "id": "R-STATEMENT",
+        "owner": "H28-STATEMENT-GRAMMAR",
+        "exact_files": [
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case00.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case01.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case02.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case03.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case04.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case05.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case06.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case07.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case08.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case09.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case10.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case11.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case12.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case13.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case14.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case15.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case16.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case17.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case18.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case19.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case20.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case21.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case22.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case23.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case24.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case25.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case26.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case27.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case28.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case29.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case30.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case31.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case32.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case33.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case34.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case35.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case36.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case37.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case38.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case39.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case40.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case41.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case42.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case43.lean",
+          "Solidity/Frontend/StatementGrammarH28/FixtureControls/Case44.lean"
+        ],
+        "action": "Review exact preserved statement adapters in owner-migration-proposal.json after required validation and timing. Owner applies migration; no permission inferred.",
+        "proposal": "tests/h62/item4/generic-source-frontend/owner-migration-proposal.json"
+      },
+      {
+        "id": "R-NUMERIC",
+        "owner": "SOL-NL",
+        "exact_files": [
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part00.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part01.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part02.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part03.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part04.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part05.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part06.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part07.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part08.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part09.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part10.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part11.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part12.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part13.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part14.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part15.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part16.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part17.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part18.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part19.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part20.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part21.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part22.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part23.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part24.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part25.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part26.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part27.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part28.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable/Part29.lean",
+          "Solidity/Frontend/NumericLiteralProofs/WordTable.lean"
+        ],
+        "action": "Coordinate semantic generic proof replacement of 439 preserved prefix declarations; no edits authorized/performed."
+      }
+    ],
+    "relay": "relay.sh unavailable in discovered checkout/tools; coordinator retrieves this saved exact-file request; no messages sent"
+  },
+  "current_H82_policy": "Statement-preserving proof-only/additive/split/import/doc edits no longer need exact-file agreement. Withdraw such permission-only requests. Changes to statements, depended-on definition bodies, interfaces, budgets, axiom sets or exclusions still require owner; frozen interfaces require H57 versioned pairs. No Claude-owned source edits or messages. Retirement forbids new implementation on this worker.",
+  "superseded_waits": [
+    "Permission-only part of R-STATEMENT and R-NUMERIC withdrawn under H82; owner integration and actual validation remain unfinished."
+  ],
+  "open_queue": [
+    {
+      "checkpoint": 1,
+      "status": "partial",
+      "remaining": "Elaborated statement/type inventory; conservative source inventory already sealed."
+    },
+    {
+      "checkpoint": 2,
+      "status": "partial",
+      "remaining": "Validate actual 45-case typed table/exact adapters; prove numeric 439-prefix generic consolidation."
+    },
+    {
+      "checkpoint": 3,
+      "status": "partial",
+      "remaining": "Actual parser/table correspondence and negative coverage validation; full deterministic acceptance."
+    },
+    {
+      "checkpoint": 4,
+      "status": "blocked",
+      "remaining": "Same-condition batch plus full original-module and adapter timings; stop >10% slowdown; full original inventory already saved."
+    }
+  ],
+  "backfill": {
+    "implemented": [
+      "scanner/census with regression controls",
+      "intrinsic generic correspondence/refusal proofs and typed witnesses",
+      "deterministic reproduction/mutation acceptance tooling",
+      "bounded timing tooling"
+    ],
+    "remaining": [
+      "real parser-dependent isolated fixture proofs",
+      "additional witness/case coverage as successor finds necessary",
+      "successful full reproduction and real matched measurements"
+    ],
+    "boundary": "No new audit candidate claimed or scope expanded; no new proof implementation at retirement."
+  },
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-frontend",
+      "item": "Deliver compatible Solidity/Frontend/Checked/Token.lean Bytes.str definition and downstream dependencies; actual fixture build failed on Lean4.35."
+    },
+    {
+      "lane": "solidity-sol2-20261104/numeric-literals",
+      "item": "Accepted successor owns integration of final head and numeric WordTable consolidation, validation and full gates."
+    },
+    {
+      "lane": "current Claude coordinator",
+      "item": "H70 FixtureControls application relay deferred here; do not message obsolete Codex/Claude owner. Proof-only exact-file agreement is no longer a prerequisite under H82."
+    }
+  ],
+  "prompt_provenance": "Full original visible user assignment transcribed from this thread; canonical rendered-envelope hash a1362084c2b4c3592373ecc8edbd8a5980d6337e4781124899e69de1b657ffbe was supplied by goal context, not independently reconstructed/authenticated as that envelope."
+}

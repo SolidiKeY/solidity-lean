@@ -1,7 +1,0 @@
-ERROR 15:3 sol_close_nonlin: bounded search stopped; original goal retained
-ERROR 25:3 sol_close_nonlin: bounded search stopped; original goal retained
-ERROR 31:3 sol_close_nonlin: bounded search stopped; original goal retained
-ERROR 37:3 sol_close_nonlin: bounded search stopped; original goal retained
-ERROR 55:3 sol_close_nonlin: bounded search stopped; original goal retained
-ERROR 64:3 sol_close_nonlin: bounded search stopped; original goal retained
-diag: 6 errors

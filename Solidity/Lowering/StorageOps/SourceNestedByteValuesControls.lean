@@ -87,7 +87,7 @@ def journalRows (s : Source.St env) := s.ex.journal.map fun e=>
     [child (child left 0) 0,child (child left 0) 1,child (child left 1) 0,child (child left 1) 1,
      child (child left 2) 0,child (child left 2) 1,child (child left 0) 3,child (child left 3) 0,
      child (child right 0) 0].map (fun p=>(old.storage.cell p).bind SourceNestedByteCaptureControls.bytes),
-    old.balance.val,old.nonce,old.code)
+    old.balance,old.nonce,old.code)
  | .transient a _ => (a.val,[],[],0,0,none)
 theorem journal_observations : runs.map (fun r=>journalRows r.2.2)=List.replicate 6
  [(7,[some 3,some 1,some 2,some 2,some 2,some 1],

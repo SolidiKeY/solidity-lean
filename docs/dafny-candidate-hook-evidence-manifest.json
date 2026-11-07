@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "d612e618f9c341c4ca2e2712b4f2881a2c6c1ac7",
+  "status": "partial",
+  "fileCount": 134,
+  "uncompressedBytes": 2153926,
+  "archive": {
+    "path": "/workspace/dafny-parity-candidate-hook-20261107/evidence/bulk.tar.gz",
+    "bytes": 152656,
+    "sha256": "03525b94a9843705b4385f45796d4083f5a9c2943789a7af7fa2c5302f3444e8"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-candidate-hook-20261107/evidence/files.json",
+    "bytes": 26823,
+    "sha256": "5293a506d37bc66e7f1af260579a9c211925cef99f48f7de0ccb008d46987dc4"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-candidate-hook-evidence-manifest.json --restore",
+  "boundaries": [
+    "Actual exact-goal model counterexample and kernelchecked source argument equality only.",
+    "No source span/canonical failed ensures/entry-premise or EVM correspondence supplied yet.",
+    "All original failed controls/probes remain; no budget increase or original producer modification."
+  ]
+}

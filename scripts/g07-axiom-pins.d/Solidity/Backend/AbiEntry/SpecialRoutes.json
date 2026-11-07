@@ -1,0 +1,43 @@
+{
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.run_route": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.source_absent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.source_executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.source_lookup": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SpecialRoutes.lean:Solidity.Backend.AbiEntry.SpecialRoutes.source_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

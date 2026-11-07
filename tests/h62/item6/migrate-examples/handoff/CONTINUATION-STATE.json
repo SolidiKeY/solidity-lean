@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "reactivation_authority": "Latest coordinator user message: merge origin/master and continue",
+  "historical_lane_head": "e511ddcb6e0b66e6e77d34542b57d61a3675e0c3",
+  "integration_head": "d96f2406d352de7e0b72ba6ac4ab29dc457582c6",
+  "reported_merge": "20e492ee99a3fa8679aa526de0b6e731d85e4134",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-examples",
+  "repository": "/workspace/solidity-lean-migrate-examples",
+  "clean_after_fast_forward": true,
+  "push_performed": false,
+  "original_model_source_edits": 0,
+  "implemented_shims": [],
+  "goal_created_or_reset": false,
+  "goal_resume_tool_exposed": false,
+  "retired": false,
+  "implementation_authorized": true,
+  "historical_handoff": "tests/h62/item6/migrate-examples/handoff/RETIREMENT-HANDOFF.md",
+  "all_original_checkpoints_complete": false,
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-examples",
+      "item": "Complete clean baseline, full old inventory, new-toolchain directory build and paired timings; latest incremental old run RESOURCE_STOP, retry only after recorded advisory cache preparation."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Full H78 generated-public API comparison and producer shims, meaning/axiom and final runtime gates remain unproved; no shims implemented."
+    }
+  ],
+  "nonblocking_external_issues": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-sortcheck",
+      "item": "Parser String.trim v4.35 CLI failure remains, but Parser is not in examples closure and solkeycheck no longer a current gate."
+    }
+  ]
+}

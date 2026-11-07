@@ -1,0 +1,62 @@
+{
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.branch_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.budget_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.false_branch_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.false_inner_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.false_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.inner_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.inner_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.old_scoped_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.old_sequence_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean:Solidity.Yul.Compilation.StructuredSequenceCompilation.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

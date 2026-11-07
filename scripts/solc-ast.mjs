@@ -17,8 +17,9 @@
  * `referencedDeclaration` and the `id` of a declaration it points to,
  * documentation text, and `src` with the 1-based source `line` it starts at
  * on every statement and declaration.  The rest (`isPure`, name locations,
- * primitive `typeIdentifier`, …) is noise that changes with unrelated edits.
- * Modern fixtures retain scalar UDVT type identifiers for nominal operator checks.  A
+ * inferred purity, …) is noise that changes with unrelated edits.
+ * Modern fixtures retain compiler typeIdentifier and tryCall metadata (H68),
+ * while explicit legacy fixtures retain their historical serialization. A
  * function's `modifiers` and a contract's `baseContracts` are kept when they
  * are not empty: the import refuses what it would otherwise drop.
  *
@@ -311,7 +312,7 @@ function trim(n, parentKey) {
     const worldMetadata = k === 'abstract' && args.includes('--world-metadata');
     const implementationMetadata = !legacyFixture && memoryReturnDispatch &&
       k === 'implemented' && n.nodeType === 'FunctionDefinition';
-    if (NOISE.has(k) && !hexBytes && !selector && !getterKeyName && !worldMetadata && !implementationMetadata && !(k === "commonType" && !legacyFixture) &&
+    if (NOISE.has(k) && !hexBytes && !selector && !getterKeyName && !worldMetadata && !implementationMetadata && !(["commonType", "tryCall"].includes(k) && !legacyFixture) &&
         !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
     if (KEPT_IF_ANY.has(k) && Array.isArray(v) && v.length === 0) continue;
     if (k === "id" && !(legacyFixture ? isDeclaration(n) : modernDeclaration(n))) continue;
@@ -325,10 +326,9 @@ function trim(n, parentKey) {
     if (k === "typeDescriptions") {
       if (v && v.typeString !== undefined) {
         out.typeDescriptions = { typeString: v.typeString };
-        // Operator aliases must retain nominal identity, even when two UDVTs
-        // have the same underlying primitive or spelling in separate scopes.
-        if (!legacyFixture && typeof v.typeIdentifier === "string" &&
-            v.typeIdentifier.startsWith("t_userDefinedValueType"))
+        // H68: keep the compiler's exact identifier, including primitives.
+        // Do not re-derive it from typeString or alter ID normalization.
+        if (!legacyFixture && typeof v.typeIdentifier === "string")
           out.typeDescriptions.typeIdentifier = v.typeIdentifier;
       }
       continue;

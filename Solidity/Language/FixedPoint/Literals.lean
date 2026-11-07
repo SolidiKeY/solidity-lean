@@ -112,24 +112,23 @@ theorem ofLiteral?_eq_some_iff {num : Int} {den : Nat} (hd : den ≠ 0) {a : Fx 
     ofLiteral? t num den = some a ↔ a.1 * den = num * t.scale := by
   have hd' : (den : Int) ≠ 0 := Int.ofNat_ne_zero.mpr hd
   unfold ofLiteral?
-  simp only [hd, if_false]
+  simp only [hd, ite_false]
   by_cases hm : (num * t.scale) % (den : Int) = 0
   · have hdv : (den : Int) ∣ num * t.scale := Int.dvd_of_emod_eq_zero hm
-    simp only [hm, if_true, ofInt?]
+    simp only [hm, ite_true]
     constructor
     · intro h
-      split at h
-      · simp only [Option.some.injEq] at h
-        subst h
-        exact Int.ediv_mul_cancel hdv
-      · exact nomatch h
+      have hv : a.1 = num * t.scale / den := ofInt?_val h
+      rw [hv]
+      exact Int.ediv_mul_cancel hdv
     · intro h
       have he : num * t.scale / den = a.1 := by
         rw [← h]; exact Int.mul_ediv_cancel a.1 hd'
       have hr : t.inRange (num * t.scale / den) = true := by rw [he]; exact a.2
-      simp only [hr, dite_true, Option.some.injEq]
-      exact Subtype.ext he
-  · simp only [hm, if_false]
+      rw [show ofInt? t (num * t.scale / den) =
+        some (⟨num * t.scale / den, hr⟩ : Fx t) from dif_pos hr]
+      exact congrArg some (Subtype.ext he)
+  · simp only [hm, ite_false]
     constructor
     · intro h; exact nomatch h
     · intro h
@@ -207,26 +206,23 @@ theorem ofRat?_eq_some_iff {q : Rat} {a : Fx t} :
 /-- An explicit conversion of a constant is its truncated scaled integer. -/
 theorem explicitConst?_eq_some_iff {num : Int} {den : Nat} (hd : den ≠ 0) {a : Fx t} :
     explicitConst? t num den = some a ↔ a.1 = literalTrunc t num den := by
-  unfold explicitConst? ofInt?
-  simp only [hd, if_false]
+  unfold explicitConst?
+  simp only [hd, ite_false]
   constructor
   · intro h
-    split at h
-    · simp only [Option.some.injEq] at h
-      subst h
-      rfl
-    · exact nomatch h
+    exact ofInt?_val h
   · intro h
     have hr : t.inRange (literalTrunc t num den) = true := by rw [← h]; exact a.2
-    simp only [hr, dite_true, Option.some.injEq]
-    exact Subtype.ext h.symm
+    rw [show ofInt? t (literalTrunc t num den) =
+      some (⟨literalTrunc t num den, hr⟩ : Fx t) from dif_pos hr]
+    exact congrArg some (Subtype.ext h.symm)
 
 /-- An explicit conversion of a constant is a compile error exactly when
 the truncated value is out of range (Q2). -/
 theorem explicitConst?_eq_none_iff {num : Int} {den : Nat} (hd : den ≠ 0) :
     explicitConst? t num den = none ↔ t.inRange (literalTrunc t num den) = false := by
   unfold explicitConst? ofInt?
-  simp only [hd, if_false]
+  simp only [hd, ite_false]
   constructor
   · intro h
     split at h
@@ -274,7 +270,7 @@ theorem explicitRat?_mkRat {n : Int} {d : Nat} (hd : d ≠ 0) :
   have he : (mkRat n d).num * d = n * (mkRat n d).den :=
     (Rat.mkRat_eq_iff (mkRat n d).den_nz hd).mp hq
   unfold explicitRat? explicitConst?
-  simp only [(mkRat n d).den_nz, hd, if_false, literalTrunc_congr (mkRat n d).den_nz hd he]
+  simp only [(mkRat n d).den_nz, hd, ite_false, literalTrunc_congr (mkRat n d).den_nz hd he]
 
 /-! ### solc's implicit literal test -/
 
@@ -296,18 +292,16 @@ theorem ofLiteral?_isSome_iff_solc {num : Int} {den : Nat} (hd : den ≠ 0) :
   -- the implicit conversion as a test
   have hlit : (ofLiteral? t num den).isSome =
       (decide ((num * t.scale) % den = 0) && t.inRange ((num * t.scale) / den)) := by
-    unfold ofLiteral? ofInt?
-    simp only [hd, if_false]
+    unfold ofLiteral?
+    simp only [hd, ite_false]
     by_cases hm : (num * t.scale) % (den : Int) = 0
-    · simp only [hm, if_true, decide_true, Bool.true_and]
-      by_cases hr : t.inRange (num * t.scale / den) = true
-      · simp only [hr, dite_true, Option.isSome_some]
-      · simp only [hr, Bool.false_eq_true, dite_false, Option.isSome_none]
-    · simp only [hm, if_false, decide_false, Bool.false_and, Option.isSome_none]
+    · simp only [hm, ite_true, decide_true, Bool.true_and]
+      exact ofInt?_isSome t _
+    · simp only [hm, ite_false, decide_false, Bool.false_and, Option.isSome_none]
   rw [hlit]
   unfold solcLiteralOK
   by_cases hneg : num < 0 ∧ t.signed = false
-  · simp only [hneg, and_self, if_true]
+  · simp only [hneg, and_self, ite_true]
     -- a negative value is never in an unsigned range
     apply Bool.eq_false_iff.mpr
     intro hc
@@ -315,14 +309,14 @@ theorem ofLiteral?_isSome_iff_solc {num : Int} {den : Nat} (hd : den ≠ 0) :
     obtain ⟨hm, hr⟩ := hc
     have hdv : (den : Int) ∣ num * t.scale := Int.dvd_of_emod_eq_zero hm
     have hq : num * t.scale / den * den = num * t.scale := Int.ediv_mul_cancel hdv
-    simp only [FxTy.inRange, FxTy.lo, hneg.2, Bool.false_eq_true, if_false, Bool.and_eq_true,
+    simp only [FxTy.inRange, FxTy.lo, hneg.2, Bool.false_eq_true, ite_false, Bool.and_eq_true,
       decide_eq_true_eq] at hr
     have h1 : num * t.scale < 0 := Int.mul_neg_of_neg_of_pos hneg.1 hs
     have h2 : 0 ≤ num * t.scale / den * den := Int.mul_nonneg hr.1 (by omega)
     omega
-  · simp only [hneg, if_false]
+  · simp only [hneg, ite_false]
     by_cases hi : num % (den : Int) = 0
-    · simp only [hi, if_true]
+    · simp only [hi, ite_true]
       have hdv : (den : Int) ∣ num := Int.dvd_of_emod_eq_zero hi
       obtain ⟨k, hk⟩ := hdv
       have hk' : num / den = k := by rw [hk]; exact Int.mul_ediv_cancel_left k (by omega)
@@ -352,7 +346,7 @@ theorem ofLiteral?_isSome_iff_solc {num : Int} {den : Nat} (hd : den ≠ 0) :
       constructor
       · intro h; exact ⟨hdown.mp h.1, hup.mp h.2⟩
       · intro h; exact ⟨hdown.mpr h.1, hup.mpr h.2⟩
-    · simp only [hi, if_false]
+    · simp only [hi, ite_false]
 
 /-! ### The mobile type of a fractional constant -/
 
@@ -387,9 +381,9 @@ theorem byteLen_spec : ∀ k v, v < 256 ^ k → v < 256 ^ byteLen k v ∧ byteLe
   | k + 1, v, h => by
     unfold byteLen
     by_cases hv : v = 0
-    · simp only [hv, if_true, Nat.pow_zero]
+    · simp only [hv, ite_true, Nat.pow_zero]
       omega
-    · simp only [hv, if_false]
+    · simp only [hv, ite_false]
       have hp : 256 ^ (k + 1) = 256 ^ k * 256 := by rw [Nat.pow_succ]
       have hk : v / 256 < 256 ^ k := by
         apply (Nat.div_lt_iff_lt_mul (by decide)).mpr
@@ -471,11 +465,11 @@ theorem literalTrunc_mob {q : Rat} {t : FxTy} (h : t.digits = mobDigits q) :
   rw [hsc]
   by_cases hn : q.num < 0
   · have ha : q.num = -(q.num.natAbs : Int) := by omega
-    simp only [hn, if_true]
+    simp only [hn, ite_true]
     rw [ha, Int.neg_mul, Int.neg_tdiv, hm,
       Int.tdiv_eq_ediv_of_nonneg (Int.mul_nonneg (Int.natCast_nonneg _) (Int.natCast_nonneg _))]
   · have ha : q.num = (q.num.natAbs : Int) := by omega
-    simp only [hn, if_false]
+    simp only [hn, ite_false]
     rw [hm, ← ha, Int.tdiv_eq_ediv_of_nonneg (Int.mul_nonneg (by omega) (Int.natCast_nonneg _))]
 
 /-- The mobile type holds the constant, truncated toward zero at its
@@ -494,17 +488,17 @@ theorem mobileFx?_inRange {q : Rat} {t : FxTy} (h : mobileFx? q = some t) :
   have hp : (2 : Int) ^ t.bits = 2 * 2 ^ (t.bits - 1) := t.pow_bits
   simp only [FxTy.inRange, FxTy.lo, FxTy.hi, hs, Bool.and_eq_true, decide_eq_true_eq]
   by_cases hn : q.num < 0
-  · simp only [hn, if_true]
+  · simp only [hn, ite_true]
     have hwq : mobWord q = if mobMag q ≠ 0 then (mobMag q - 1) * 2 else mobMag q := by
       simp only [mobWord, hn, true_and]
     have hh : (0 : Int) < 2 ^ (t.bits - 1) := t.half_pos
     by_cases hz : mobMag q = 0
     · simp only [hz, Int.natCast_zero, Int.neg_zero]
       omega
-    · simp only [hz, ne_eq, not_false_eq_true, if_true] at hwq
+    · simp only [hz, ne_eq, not_false_eq_true, ite_true] at hwq
       omega
-  · simp only [hn, if_false]
-    have hwq : mobWord q = mobMag q := by simp only [mobWord, hn, false_and, if_false]
+  · simp only [hn, ite_false]
+    have hwq : mobWord q = mobMag q := by simp only [mobWord, hn, false_and, ite_false]
     omega
 
 /-- At its mobile type, a constant converts implicitly exactly when its
@@ -604,8 +598,8 @@ theorem literalTrunc_rescale {t t' : FxTy} (num : Int) {den : Nat} (hd : den ≠
   · have hq : t.digits = t'.digits := Nat.le_antisymm h he
     have hs : t.scale = t'.scale := by simp only [FxTy.scale, hq]
     have hz : t.digits - t'.digits = 0 := by omega
-    simp only [rescale, he, if_true, hz, Int.pow_zero, Int.mul_one, literalTrunc, hs]
-  · simp only [rescale, he, if_false, literalTrunc]
+    simp only [rescale, he, ite_true, hz, Int.pow_zero, Int.mul_one, literalTrunc, hs]
+  · simp only [rescale, he, ite_false, literalTrunc]
     rw [tdiv_tdiv _ _ hp, ← Int.mul_tdiv_mul_of_pos_left (num * t.scale) (den : Int) hP]
     have hs : num * t.scale * 10 ^ (t'.digits - t.digits) = num * t'.scale := by
       simp only [FxTy.scale]
@@ -681,21 +675,21 @@ theorem litCommon?_solc {t u : FxTy} {q : Rat} (h : litCommon? t q = some u) :
   unfold solcLitCommon
   rw [← hs]
   by_cases h1 : (Fx.ofRat? t q).isSome = true
-  · simp only [h1, if_true] at h ⊢
+  · simp only [h1, ite_true] at h ⊢
     exact h
-  · simp only [h1, Bool.false_eq_true, if_false] at h ⊢
+  · simp only [h1, Bool.false_eq_true, ite_false] at h ⊢
     by_cases h0 : q.den = 1
-    · simp only [h0, if_true] at h
+    · simp only [h0, ite_true] at h
       exact nomatch h
-    · simp only [h0, if_false] at h ⊢
+    · simp only [h0, ite_false] at h ⊢
       split at h
       · rename_i m _
         by_cases h2 : (t.implicitOK m && (Fx.ofRat? m q).isSome) = true
-        · simp only [h2, if_true] at h
+        · simp only [h2, ite_true] at h
           simp only [Bool.and_eq_true, FxTy.implicitOK] at h2
-          simp only [h2.1.1, if_true]
+          simp only [h2.1.1, ite_true]
           exact h
-        · simp only [h2, Bool.false_eq_true, if_false] at h
+        · simp only [h2, Bool.false_eq_true, ite_false] at h
           exact nomatch h
       · exact nomatch h
 
@@ -710,22 +704,22 @@ theorem litCommon?_exact {t u : FxTy} {q : Rat} (h : litCommon? t q = some u) :
     t.subsumes u = true ∧ (Fx.ofRat? u q).isSome = true := by
   unfold litCommon? at h
   by_cases h1 : (Fx.ofRat? t q).isSome = true
-  · simp only [h1, if_true, Option.some.injEq] at h
+  · simp only [h1, ite_true, Option.some.injEq] at h
     subst h
     exact ⟨FxTy.subsumes_refl t, h1⟩
-  · simp only [h1, Bool.false_eq_true, if_false] at h
+  · simp only [h1, Bool.false_eq_true, ite_false] at h
     by_cases h0 : q.den = 1
-    · simp only [h0, if_true] at h
+    · simp only [h0, ite_true] at h
       exact nomatch h
-    · simp only [h0, if_false] at h
+    · simp only [h0, ite_false] at h
       split at h
       · rename_i m _
         by_cases h2 : (t.implicitOK m && (Fx.ofRat? m q).isSome) = true
-        · simp only [h2, if_true, Option.some.injEq] at h
+        · simp only [h2, ite_true, Option.some.injEq] at h
           subst h
           simp only [Bool.and_eq_true] at h2
           exact ⟨FxTy.implicitOK_iff.mp h2.1, h2.2⟩
-        · simp only [h2, Bool.false_eq_true, if_false] at h
+        · simp only [h2, Bool.false_eq_true, ite_false] at h
           exact nomatch h
       · exact nomatch h
 

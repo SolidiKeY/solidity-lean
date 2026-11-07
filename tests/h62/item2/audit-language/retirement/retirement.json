@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "execution_state": "STOPPED_BY_HUMAN_RETIREMENT",
+  "status": "partial",
+  "handoff_to": "solidity-sol2-20261104/numeric-literals",
+  "original_environment": "ccarenv_b64_Y2NhcmVudl9hNTQ3YjYwNzYwNjA4MTkxOGJhYmM3MGZiMTJjYzk0Mw",
+  "last_implementation_head": "b11bc46163fddb93f634e2a92fe6876d53e4cfd2",
+  "authorization": "Latest user H82 stop-and-handoff; no new proof implementation or automatic continuation authorized.",
+  "goal": {
+    "requested_state": "PAUSED",
+    "actual_transition": "not-performed",
+    "reason": "No get_goal or pause-goal tool is exposed. Only codex_goals_stop_goal(outcome: complete | blocked) is available; its schema cannot express PAUSED. It is not called with a false outcome. Prior stop-goal attempts additionally lacked trusted CCA source-turn context.",
+    "created_reset_completed": false
+  },
+  "push": {
+    "performed": false,
+    "reason": "No accessible H71 branch-push permission is established; original explicit no-push authorization remains. Only local patch/bundle export."
+  },
+  "pending_command": {
+    "outcome": "rejected-by-automatic-approval-review; not-executed",
+    "action": "Apply two H70 source overlays and extend checker",
+    "reason": "Latest user retires/pauses assignment and limits activity to handoff; implementation would violate that instruction.",
+    "source_patches_applied": 0,
+    "checker_changed": false,
+    "no_retry": true
+  },
+  "h82_standing_agreements": {
+    "exact_file_agreement_waits": "withdrawn for statement-preserving proof-only/additive/import/doc edits",
+    "still_required": "Meaning checks, axiom audit, frozen-statement fidelity; owner/H57 pair for changed frozen statements or dependent definitions; no scope takeover until final stopped acknowledgement.",
+    "historical_records": "Earlier H70 requests/permission labels remain historical; this retirement record supersedes their edit-agreement waits."
+  },
+  "completed_items": [
+    "Frozen module-map conservative census: 389 files, 4146 candidates, none excluded",
+    "Four additive Lean modules / 37 theorems; 12 joint full-telescope certificates checked",
+    "ABI boolean success/failure/fuel/allocation controls; compiler obligations still open",
+    "Per-row source/owner classification; strict authenticated partial receipt review",
+    "418 source refinements across 279 rows; 3664 source-resolved rows, 482 unresolved",
+    "Independent reviews, deterministic controls/replay and prior checkpoint export"
+  ],
+  "open_queue": [
+    {
+      "checkpoint": 1,
+      "item": "Complete elaborated interface membership, full actual hypothesis telescopes, global-vs-per-input classification and authoritative producer ownership. Source resolution alone is insufficient.",
+      "remaining_source_rows": 482,
+      "producer_routing_files": 262
+    },
+    {
+      "checkpoint": 2,
+      "item": "Joint witnesses for every remaining interface; generic conservative census has 4134 candidates without certificates, including non-interface/private candidates pending classification. No false completeness or per-premise substitute."
+    },
+    {
+      "checkpoint": 3,
+      "item": "Supported-program/compiler totality and success, reject-all and always-revert compiler controls, observable failure and gas/fork boundaries. Existing ABI controls are not compiler controls."
+    },
+    {
+      "checkpoint": 4,
+      "item": "Final elaborated statement-fidelity/witness coverage reconciliation, uncovered owners, required full gates/reviews and reviewable handoff; no RUNTIME_GATE_PASS yet."
+    }
+  ],
+  "open_backfill": [
+    "Remaining within-scope telescope/source-feasibility classification",
+    "Additional simultaneous witnesses and cases after exact validated prerequisites",
+    "Compiler-focused negative controls and isolated supported-program fixtures",
+    "Deterministic acceptance/reproduction and same-tree/cache/resource timing for later proof-only repairs; no unchanged rerun after timing STOP",
+    "Only explicitly newly unclaimed candidates via coordinator registry; no scope stealing"
+  ],
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "Solidity/Hash/CollisionBound.lean: authenticated partial patch delivered; not applied or elaborated on this VM. Full affected gates pending; H82 removed edit-agreement wait."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-language",
+      "item": "Solidity/Language/FixedPoint.lean: authenticated partial patch delivered; not applied or elaborated on this VM. Full affected gates pending; H82 removed edit-agreement wait."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Solidity/Syntax/Raw.lean: owner-reported pending migration dependency; no new local Raw failure claimed."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Authoritative producers for exact 262 files / 2876 declarations in h70-classification-final/owner-routing.json; information request remains, not edit permission."
+    },
+    {
+      "lane": "coordinator",
+      "item": "Set original persistent goal PAUSED via a tool that supports pause; worker exposes no pause operation and will not continue automatically."
+    }
+  ],
+  "frozen_statements_touched": [],
+  "new_axioms": 0,
+  "new_sorry": 0,
+  "new_native_decide": 0,
+  "new_Lean_checks_this_turn": 0,
+  "timing_delta_this_turn": null,
+  "prior_timing_boundary": "Source generation 57.807s vs replay 60.012s (+3.81%); not Lean before/after timing. No full build timing comparison.",
+  "proof_boundary": "12 imported kernel-checked joint certificates only; source annotations and 102 unchanged overlay theorem headers are not proofs of feasibility, compilation or migration. External Bridge/package/solkey and full run-lean gates pending.",
+  "authoritative_source_evidence": "h70-remaining-reviewed/; h70-remaining-final/ explicitly historical pre-hardening snapshot",
+  "mandatory_inputs": {
+    "original_prompt": "tests/h62/item2/audit-language/retirement/original-frozen-rendered-prompt.md",
+    "full_original_queue": "tests/h62/item2/audit-language/retirement/original-work-and-backfill-queue.md",
+    "exact_scope": "tests/h62/item2/audit-language/retirement/scope-manifest.json"
+  },
+  "reviews": "Prior implementation reviews h70-continuation-reviews.json; final retirement artifact reviews recorded separately off Git.",
+  "questions": []
+}

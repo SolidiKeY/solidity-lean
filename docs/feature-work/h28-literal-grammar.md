@@ -1,12 +1,17 @@
 # H28 G08 nonnumeric literal decoder completeness
 
-Status: **blocked on Q-ROOT-01:15 remaining registrations**. Latestb86ae456 adoption preserves all24 owned Lean bytes and four original input pins. Fresh owner VM checks and independentlyrunnable broad phases completed at95dfcbc1; actualregistration gates remain failed. Nine modules are centrallyintegrated. H41 remains: verifiedpack path+SHA for coordinatorpull, never VMshipping; no delivery/import/cachefreshness inferred. Earlier counts and cacheblocker descriptions are historical.
+Status: **done** (see "Claude VM completion"; the solc fixture rerun,
+queue item 3, ran on 2026-11-06). The lane moved from a Codex VM to a Claude VM on 2026-11-05;
+all 26 `Solidity/Frontend/LiteralGrammarH28/**` modules are registered in the
+generated `Solidity.lean` root, so the former registration blocker
+(Q-ROOT-01) and the cache-delivery question (Q-CACHE-01) are closed.
 
-Base: `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`.
-Branch: `codex/solidity-h28-sol-20261104/literal-grammar`.
-Repository: `/workspace/solidity-lean`.
-Proof/runtime source checkpoint: `60ded1cb6a484f68a562a141b165fd6a0086a43e`.
-Published8495f1deb0a95dd6b9301822d8649ab76b217681 is adopted by an explicitly authorized owned-branch merge preserving0858098f. No push/default-branch merge/PR. Manual edits remain in the assigned lane; all other changes equal published master. Original pinned inputs are unchanged.
+Exclusive writes: `Solidity/Frontend/LiteralGrammarH28/**`,
+`tests/h28-sol/literal-grammar/**`, this file, and the lane's module-map
+fragment `docs/module-map/frontend.d/literal-grammar.md`. Read-only inputs
+(SHA256-pinned in `tests/h28-sol/literal-grammar/pins.json`):
+`Checked/Lexer.lean`, `Checked/Token.lean`, `Checked/Tables.lean`,
+`tests/upstream/grammar-0.8.38/SolidityLexer.g4`.
 
 ## Independent complete clause inventory
 
@@ -29,7 +34,8 @@ Published8495f1deb0a95dd6b9301822d8649ab76b217681 is adopted by an explicitly au
 1. Independent Escape, Body, Quoted, HexBody, Plain, UnicodeLiteral, HexLiteral, Scan, Fragments, ModeLiteral and ModeSequence grammar/value relations are implemented independently of decoder outcomes. Body.toStrBody reuses existing strBody_sound. Numeric/EIP55 implementations remain immutable.
 2. Arbitrary-length completeness/soundness covers simple, hex and Unicode escapes, escaped line ends, both quote modes and exact values. Scan/split theorems preserve every arbitrary suffix. Scanner iff is for literal delimiters 34/39; q=92 is an explicit negative boundary control.
 3. Exact pair/underscore rules, independent byte/codepoint arithmetic, lengths, fragment concatenation values, universal classification iff/refusal consequences and all-byte constructive round trips are proved. All modes are characterized, including asm raw-source length/quote guards and unsupported pragma/Yul literal classes. Mixed-kind sequences are lexical; no parser-expression admission is claimed.
-4. 242 kernel rows (28 hex, 53 body, 56 boundaries, 105 classification), inhabited positive and universal negative controls, 200 public theorem signatures/axiom pins and 58 fixed compiler cases in both pipelines are implemented. Static review is complete; whole-lane acceptance is blocked on Q-ROOT-01.
+4. 255 kernel rows (28 hex, 53 body, 56 boundaries, 118 classification; 242 and 105 before the 2026-11-06 fixture rerun), inhabited positive and universal negative controls, 219 public theorem signatures/axiom pins (200 before the backfill) and 71 fixed compiler cases (58 before the rerun) in both pipelines are implemented.
+5. Backfill (2026-11-05, `Lengths`, `Utf8Shape`): see below.
 
 The old StrBody relation overlaps at escaped CRLF for an always-true predicate; the decoder emits empty but that relation can derive LF. Body models CRLF priority without excluding accepted inputs. Both the old overlap and new exact result remain visible kernel witnesses.
 
@@ -43,135 +49,240 @@ soljson 0.8.38+commit.1835d247.Emscripten.clang SHA256: `6c74ffba0ea4cf9521e78b1
 
 Initial strict comparison failed six rows (three cases times two pipelines), retained in evidence. Exact observation checking retains these differences: Unicode surrogate escape encodings are accepted by the byte model but rejected downstream by solc with SyntaxError 8452; plain surrogate escape compiles. solc accepts empty and single-quoted assembly flags, while the pinned model refuses raw length two and non-double quotes. Frozen producer/alignment files were not changed. JSON cannot transport arbitrary invalid UTF8 source bytes; byte-level kernel controls cover those cases.
 
-## Actual validation receipts
+## Claude VM completion (2026-11-05/06)
 
-All commands run serially under `/tmp/solidity-lean-feature-groups-20261025/writer.lock`, in bounded task container h28-literal-checks. Evidence paths below are relative to tests/h28-sol/literal-grammar/evidence.
+Branch `cloud/moved4-20261105/literal-grammar`, started from
+`cloud/literal-grammar-move` (3b327d00, which restores `solc-fixtures.mjs`)
+merged with master aec9adf1. Lean 4.24.0 / Lake from `lean-toolchain`; 4
+cores, 15 GB, no swap.
 
-- Exact-head `scripts/coord-tools/gate.sh per-file Solidity/Frontend/LiteralGrammarH28/*.lean`:24 PASS, exit0,49.59s wall,1388108KiB peak process RSS,0 swaps. Full commands/output in exact-head-per-file-60ded1cb/ and its outer log.
-- Strict lane audit PASS: all24 module/source identities,200 actual public theorem signatures/standard axiom sets,10 source inductive inventories,242 exact kernel rows, four frozen input hashes,eight safe proof-tactic definitions, all compiler model/single/perfragment/spelling/value links, exclusive scope. Printed signatures and axiom report are bound to reviewed source/log SHA256 identities, preventing stale statement reports.
-- Fixed compiler observation gate PASS:58 cases times legacy/viaIR; exact compiler hash/version, actual code generation, byte values, Sol/Yul literal source spans, error diagnostics, assembly flags and bytecode hashes. solc-check-02.log retains actual command/exit/time/RSS. This does not assert general conformance.
-- Corrected TestSuite source gate PASS:564 functions=552 derived+11 refuted+0 pending+0 divergent+1 excluded;2 skip. The pinned SolKey snapshot is tests/migration/solkey (commit473da8944ca7329e6b76819863591407db26e7ec).
-- Exact-head full toolkit run at60ded1cb:8 PASS and3 FAIL. Build-touched,trust,layers,doc-paths,axiom-pins,TestSuite,corpus,strictautomatic PASS (classification only; cumulative timing is not checked). run-lean/roots/orphans FAIL solely on registration of the24 local modules. Corpus probes and354-module closure completed serially. Exact commands/status/wall times and decisive output are in full-gates-60ded1cb/gates.tsv and numbered logs. Outer suite metrics:
+### Queue item 1: fresh validation
 
-```text
-Elapsed (wall clock) time (h:mm:ss or m:ss): 53:55.73
-Maximum resident set size (kbytes): 6102420
-Swaps: 0
-Exit status: 1
-```
+- `./run-lean.sh` at 079ef4ac (25m36s): every target built except
+  `Solidity.Examples.Tactics.OpenLoops`, which another lane owns. Lean was
+  killed with exit 137 (out of memory) after 801 s while other jobs ran in
+  parallel. The final head's run is recorded under "Final gates".
+- In that build `FullPins` was built fresh. `audit.py --record` copied its
+  `#print axioms` and `ProofSafety` reports to `evidence/axioms.log`, and
+  `proof-source-identities.json` binds that log's SHA256 to all 26 source
+  hashes. All 219 axiom sets and the 8 `DECL_SAFETY … safe` lines match
+  `pins.json`. Every set is within {propext, Classical.choice, Quot.sound}.
+- `register.sh --check` passes. `check-orphans.mjs` reports 5810 reachable,
+  0 orphaned. `check-doc-paths.sh` reports one missing path, which is not
+  from this lane: `docs/feature-work/after-roadmap-va1.md` cites a Mathlib
+  file under `Bridge/.lake` that is not fetched here.
 
-Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake5.0.0-src+797c613. Permitted KeySort passed before RUNTIME_GATE_PASS (runtime-keysort.log). Container memory.max12GiB,memory.swap.max0,one CPU,LEAN_NUM_THREADS1,Lean-j1; outer VM16GiB retains4GiB headroom. final-runtime.json is the pre-native resource snapshot (8470306816-byte peak). The later post-precheck-48f92c65/cgroup-final.txt records peak12884901888 bytes,6748 max-limit reclaim events,zero OOM/kill events and zero swap. The default/native run was not pressure-free. Individual passing-gate RSS was not separately collected; suite peak RSS is reported accurately. The three blocking gates were independently rechecked with exact exit1 and individual wall/RSS records in root-blocker/commands.json and its timed logs.
+### Queue item 2: audit repair
 
-The initial unset-SolKey-path run and interrupted concurrent-probe retry remain failures/interruption in evidence. They are not acceptance passes. The producer corpus script's Promise.all is serialized by lane-owned wrappers; original producer scripts are unchanged. Wrapper command parsing/shared locks/failure propagation were reviewed separately. Failed proof experiments remain in the sealed exploration evidence; no proof budget was raised.
+`audit.py` used to verify an adoption chain of Codex-VM commits (0858098f,
+9cbd923a, 405995c1, 59c3e31c). Those commits were never published, so the
+audit could not run. It now reads only committed files, git, and an optional
+fresh Lean log:
 
-## Final independent reviews
+- **Axiom reports.** It takes the `FullPins` reports from a supplied log or
+  from the committed `evidence/axioms.log`. A supplied log must show
+  `FullPins` being built or replayed. The committed log must match its
+  SHA256 in `proof-source-identities.json`. A supplied log is not otherwise
+  bound to the sources; `--record` makes it the committed evidence.
+- **Wrapped lists.** Axiom lists that Lean wraps onto continuation lines are
+  rejoined before matching.
+- **Scope.** It checks changes against the merge base with origin/master,
+  or `--scope-base`, using `--no-renames`. It fails if neither base
+  resolves.
+- **Shared files.** `Solidity.lean` and `docs/module-map/frontend.md` may
+  change only in lines that name this lane.
+- **What scope no longer covers.** The Codex-era history from 6f3eedf was
+  audited on the Codex VM and is not re-checked.
+- **Removed.** The obsolete `adopted-master.json`, the Codex
+  `runtime-bin/lake` wrapper and `runtime.toml`.
 
-Separate read-only finder and skeptic, without Lean/server use, returned scope-complete STATIC implementation/proof/coverage verdicts at60ded1cb. No remaining concrete implementation, theorem, premise, constructor, fixture or audit finding. All confirmed prior findings were fixed: CRLF/helper-none controls, asm/pragma closure, all-mode sequences, missing Yul/asm rows, inhabited mixed sequence/universal negative controls, exact theorem/constructor/control inventories, compiler/model/spelling joins, source/log hashes and runtime serialization. See final-static-reviews.json.
+### Queue item 3: solc fixture rerun
 
-These verdicts establish restricted pinned-model lexical/value claims and fixed external observations. They do not approve a full gate, a root waiver, parser admission, downstream Unicode acceptance or general compiler conformance.
+First session (2026-11-05): blocked. `binaries.soliditylang.org` was denied
+(proxy CONNECT 403) and the npm `solc@0.8.38` `soljson.js` has a different
+SHA256 (0b15fcb2…), so it was not used.
 
-## Root decision and remaining obligations
+Follow-up (2026-11-06): `soljson-v0.8.38+commit.1835d247.js` was fetched
+from the GitHub mirror
+`raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/`. Its SHA256,
+`6c74ffba…4312d390`, equals the pin in `solc-cases.json`; the runner checks
+it again together with the reported version.
 
-Q-ROOT-01 is recorded self-contained with source tags and two mutually exclusive options in tests/h28-sol/literal-grammar/scope-questions.json. AGENTS.md requires generated registration/final verification; H28 explicitly freezes shared roots/maps/trust inventories and requires a local manifest. At the historical60ded checkpoint the missing/orphan sets equaled all24 registrations. After8495 adoption the actual missing set is exactly registration.json minus the4 centrally integrated modules (20 remain). No approval has been received and no shared-root edit or waiver is inferred.
+- `node tests/h28-sol/literal-grammar/solc-fixtures.mjs <soljson> <out> check`
+  on the Codex-era 58 cases: PASS, and the output equals the committed
+  `solc-observations.json` (all 116 observations, bytecode hashes
+  included).
+- New cases (13), each with a matching `FullControls.lean` row that the
+  kernel checks (`fullControls_pass`). The model and solc agree on all 13:
+  - raw control bytes: `plain-raw-TAB`, `plain-raw-NUL`, `plain-raw-DEL`
+    (solc ParserError 8936 "Invalid character in string", model refuses:
+    not `printable`); `unicode-raw-TAB`, `unicode-raw-NUL`,
+    `unicode-raw-DEL` (both accept the raw byte as the value);
+    `unicode-raw-CR` (both refuse; solc "Expected string end-quote");
+    `yul-raw-TAB` (solc ParserError 1465, model refuses);
+  - the other quote inside a literal: `plain-double-other-quote` (`"'"`),
+    `plain-single-other-quote` (`'"'`), `unicode-double-other-quote`,
+    `unicode-single-other-quote`, `yul-single-other-quote` (all accept,
+    values `27`/`22`).
+- `record` mode rewrote `solc-observations.json`: the 116 earlier entries
+  are byte-identical (the diff only adds lines), 142 in total. A second
+  `check` run then passes: "PASS 71 cases x legacy/viaIR".
+- `audit.py` now derives the observation count from the case count
+  (71 cases, 142 observations) and prints the summed kernel-row count
+  from `pins.json`; `full_control_count` is 118.
 
-Either an authorized central integrator supplies registration and full validation receipts, or the human explicitly authorizes generated-root registration in a separate validation worktree with identical lane-source hashes while delivery roots/maps/trust inventories stay frozen. Neither option weakens a theorem, premise or refusal.
+A raw NUL/DEL fixture travels as a JSON string. The runner's
+`sourceSha256` binds the exact bytes.
 
-Remaining: obtain the root decision, resolve the actual registration failures through the authorized owner, and finish registered full-gate acceptance. The separately runnable default/native/SolKey phases have now passed. Final committed head/base/branch and absolute original patch/bundle/handoff/evidence/checksum paths are recorded in the external exact-head handoff to avoid self-reference. At the prior0858 checkpoint independent phases were complete. After adopting8495 the broad phases were rerun at8caa77da; Q-ROOT-01 remains the registration blocker and Q-CACHE-01 remains the delivery blocker. After sealing this checkpoint, stop the persistent goal as blocked rather than completed. get_goal is unavailable; no replacement goal or VM was created.
+Follow-up reviews (read-only, no Lean server):
 
-Native toolchain setup: required C development headers were absent; build-essential was installed only in the task-owned bounded container. The separately runnable default/native phase uses the exact original defaultTargets plus SolkeyTestSuite, then the unchanged check-solkey.sh with pinned SOLKEY_RULES. Both phases passed at48f92c6515347d8f342670b53003719a784936a2; neither root authorization nor full acceptance is inferred.
+- Finder: the model rows, `.yul 7`, byte spellings, coverage JSON and
+  `audit.py` are correct. It found three doc defects, all fixed in
+  1ff1c163: the stale status line, a stale "Not fixed" entry for these
+  fixtures, and a wrong merge date.
+- Skeptic: all five claims confirmed: pinned SHA256 and version, the 116
+  earlier observations unchanged, all 13 verdicts for solc and the model,
+  "PASS 71 cases", and that solc reads the raw bytes (`unicode-raw-TAB` span
+  `134:12:0`; plain cases fail with 8936 "Invalid character"). Caveats:
+  - The exact-span assertion runs only for accepted cases. The five
+    refused raw-byte cases are pinned by their frozen error locations in
+    `check` mode.
+  - The runner does not compare the model with solc. Agreement rests on
+    the `FullControls` kernel rows and `audit.py`; the kernel check
+    itself comes from the `run-lean.sh` build below.
 
-## Completed default/native validation and published integration
+### Queue item 4: backfill (suffix, byte-length and encoding properties)
 
-The unchanged original defaultTargets plus SolkeyTestSuite completed serially: `lake build Solidity SolidityExamples solkeycheck solidity-lean SolkeyTestSuite`, exit0,3660 modules,4:41:56 wall,9076344KiB peak process RSS,0 swaps. Both native executables linked. Then `bash scripts/check-solkey.sh` with the pinned SOLKEY_RULES passed, exit0,1.97s,277680KiB RSS: parsed377 taclets,131 read-bearing,table covers131; annotations match. Exact commands/heads/results and full losslessly compressed output are in evidence/post-precheck-48f92c65/. cgroup-final.txt records the actual memory events/peak; oom and oom_kill are zero, while max-limit reclaim events are retained. No producer source, budget or generated root changed.
+`Lengths.lean` (13 theorems):
 
-Fresh origin/master was fetched after validation released the writer lock. Published89373e34cdfd6bb5db7054b1c204d01edffc5fa7 and the pinned base are ancestors of fetched9c44a2f9acbdddba82d56a693eb7dba6e8eb8028. Per coordinator only Hex.lean and HexEncoding.lean are contributed. HexEncoding is byte-identical; Hex differs solely by removal of its final blank line (the initial strict blob comparison failed and the complete diff was inspected). No duplicate producer or source change was made. All other lane files remain ours. See evidence/published-89373e34.json.
+- **Scanner.**
+  - `Scan.deterministic`: the split is unique for a literal delimiter.
+  - `Scan.isSuffix`, `Scan.length_eq`.
+  - `Scan.length_lt`: at least the closer is consumed, so the suffix is
+    strictly shorter.
+- **Plain and unicode literals.** `Plain.length_le` (out + 2 ≤ raw) and
+  `UnicodeLiteral.length_le` (out + 9 ≤ raw). These are one-sided: an
+  escaped line end decodes to nothing.
+- **Hex literals.**
+  - `HexLiteral.length_bounds`: 2·out + 5 ≤ raw ≤ 3·out + 5.
+  - `HexBody.length_tight` and `HexLiteral.length_le_tight`: raw ≤ 3·out + 4
+    for a nonempty value, reached by `hex"00_00"`.
+- **Fragment sequences.** `Fragments.length_eq`,
+  `Fragments.flatten_length_le`, and the plain/hex/unicode `FragmentValue`
+  sums.
 
-At prior0858, independently runnable work was complete. This is historical, not adoption-tree acceptance. Q-ROOT-01 remains unanswered: shared roots/maps/trust inventories are frozen and the actual run-lean/root/orphan gates still fail for the24 locally manifested modules on this pinned-base branch. The goal must remain incomplete and become blocked if no authorized integration receipt or isolated-validation authorization arrives.
+`Utf8Shape.lean` (6 theorems):
 
-Final runtime finder/skeptic review: both independently verified lossless log hashes,3660-module closure, both native executable links, real pinned377/131 SolKey check, exact published ancestry and file differences, and actual memory pressure counters. At that historical checkpoint no independently runnable obligation remained. Finder requested completed-phase tense and explicit pre-native versus final cgroup snapshot labels; both are corrected. Neither review authorizes root edits or full-gate acceptance. See evidence/final-runtime-reviews.json.
+- `CodepointBytes.shape` and `uniEscape_shape`: every `\uHHHH` escape emits
+  UTF-8 lead/continuation bit patterns, never an overlong form.
+- `CodepointBytes.value`, `uniEscape_value` and `utf8_injective`: the code
+  point is recovered exactly.
+- Surrogates keep the shape. The model adds no scalar check, matching the
+  documented deviation.
+- Controls: a surrogate and a two-byte value (inhabited), and overlong
+  C0 80 and E0 80 80 (negative).
 
-## H35 VM validation and cache delivery
+All 19 theorems are pinned in `FullPins`/`pins.json`. The module-map
+fragment `docs/module-map/frontend.d/literal-grammar.md` gives rows for the
+17 lane modules master lacked.
 
-At exact committed e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea, repeated the VM-owned-module build for all24 registered targets using the existing serial wrapper/Lean-j1, then a fresh FullPins per-file check printing all200 theorem axiom sets. The build reused valid cache entries; the axiom/control per-file checks were fresh Lean invocations. Every set exactly matched pins.json; all four controls modules (HexControls, BodyControls, BoundaryControls, FullControls) passed fresh per-file kernel checks, and the inventory/scope audit passed. Exact commands, exits, elapsed times and per-command /usr/bin/time RSS are in evidence/h35-e7cf5143/results.json and its logs. No Lean source, theorem, premise, root or proof budget changed.
+### Queue item 5: reviews
 
-The original ship-cache.sh is a coordinator-to-lane relay. Its actual preflight used SHIP_ALLOW_HEAD=1, LAKE_CACHE_DIR=/root/.cache/lake and an owned scratch SHIP_STATE; it found11093 cached artifacts/3703 mappings with zero unresolved traces, then exited1 because /root/.local/state/cloudvm-coord/poll-state.json is absent. VMEXEC/catalog configuration is also unavailable in both container and actual host home /home/agent; no environment overrides provide it. No empty lane list, simulated receiver or successful delivery is substituted. This was preflight only, not a shipment pass.
+Read-only finder and skeptic reviewed the backfill and the audit repair;
+neither used the Lean server. Both found the new statements true and
+non-vacuous, with no hidden premise. The `cp < 65536` premise is always met
+by `\u` escapes (`hexQuad_lt65536`), and `IsQuote q` is necessary for
+`Scan.deterministic`. Confirmed findings, all fixed:
 
-Prepared a content-addressed export for exactly the24 owned modules:72 artifacts and24 input mappings, with module source SHA256/depHash/output manifests. Archive members were read back and SHA256-verified. Absolute archive: /workspace/scratch/h28-h35-cache-e7cf5143/owned-lake-cache.tar.gz (6045725 bytes), SHA256648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862. Its manifest and SHA256SUMS are adjacent. evidence/h35-e7cf5143/cache-receipt.json explicitly records status blocked and NOT shipped, plus the export identity.
+- The hex upper bound was not tight. Added the tight theorems and corrected
+  the docstring.
+- The module docstring overclaimed "linear relation".
+- `Lengths.lean` had an unused import, and the fragment theorems lacked
+  docstrings.
+- There was no three-byte overlong control or two-byte positive control.
+- The audit pins had no committed Lean output. Fixed by the fresh log.
+- A supplied log was accepted without any marker.
+- Renames could bypass the scope check, and the check was skipped silently
+  without origin/master.
+- Shared files were allowed wholesale.
+- `adopted-master.json` was stale.
 
-Q-CACHE-01 asks for either coordinator retrieval/import receipt or configured receiver/transport for the existing shipping script. The H35 checkpoint is not done until cache delivery is evidenced. The original registration/full-gate blocker and all proof/external-test boundaries remain unchanged.
+Fixed later: **printable-boundary fixtures** (raw control bytes, the other
+quote inside a literal) were added on 2026-11-06; see queue item 3.
 
-## Authorized published-master adoption: 2026-11-05
+Not fixed:
 
-The user explicitly instructed adopting published8495f1deb0a95dd6b9301822d8649ab76b217681 while preserving owned work. Fetched/verified that exact origin/master and original-base ancestry, then merged into the assigned owned branch, preserving0858098f1f278d99ca2d1b8f19100cef441f7cb0 as first parent. No default-branch merge/push, reset or new goal/VM. The two add/add conflicts were only final blank lines in Body/Hex and were resolved to exact owned bytes. All24 Lean sources and all four immutable original input hashes are unchanged. The strict ownership audit now verifies both original-base..preserved-owned-head and authorized-master..current-tree deltas; it hard-pins the authorized SHA and preserved head and checks ancestry. It grants no exemption for other edits. Original theorem/source/input pins remain unchanged.
+- **Model/compiler hex agreement.** Agreement on cases both accept is a
+  property of the data, not asserted by the gate. This is by design.
 
-The packet docs/feature-work/integration-20261105-checkpoints.md includes only Body/BodyControls from0858098f; combined with prior Hex/HexEncoding this centrally registers4 of24 lane modules. Actual register/orphan/run-lean checks still exit1 for precisely the other20, enumerated in evidence/adopt-8495/integration-accounting.json. No other lane implementation or protected producer was manually edited. All earlier full/default/native/corpus receipts remain explicitly historical, not fresh fullgate results for the adopted tree.
+### Final gates
 
-Fresh in-progress-merge VM receipts in evidence/adopt-8495/ record Lean4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b), Lake5.0.0-src+797c613, permitted KeySort PASS, all24 owned-module targets PASS (valid cache reuse), fresh200 printed axiom inventories exactly matching pins, all4 controls and strict scope/source inventory audit PASS. Serial Lean-j1/one CPU/12GiB cap/no swap preserved. A version probe through the old wrapper first failed on option placement; its failed receipt remains in version-probe-attempt1 and is not labeled PASS. Correct direct version-only probes passed; every actual build/check uses the bounded serial wrappers. No RUNTIME_GATE_PASS or whole-lane acceptance is inferred.
+- `./run-lean.sh` at d22b90d8 (later commits change only this doc
+  from the final head). layers, `register.sh --check` and
+  `fragments.sh --check` pass. `lake build` of every default target plus
+  `SolkeyTestSuite` completes: all 5826 jobs, OpenLoops included (585 s),
+  no `error:`. The script then exits 1 at its last step,
+  `check-solkey.sh`. That step reads the default rules path
+  `../solkey/...`, a sibling checkout at upstream b8d5f88, which is newer
+  than the pinned snapshot (392 taclets, 167 mismatches). This comes from
+  the environment, not the lane.
+- `check-solkey.sh` with `SOLKEY_RULES` set to the pinned snapshot
+  `tests/migration/solkey/.../solidityProgramRules.key` (commit 473da894):
+  exit 0, "parsed 377 taclets, 131 read-bearing, table covers 131;
+  annotations match".
+- `python3 tests/h28-sol/literal-grammar/audit.py`: PASS. 4 frozen input
+  hashes, 219 exact theorem axiom sets, 242 kernel control rows, 8 safe
+  declarations (fresh report), exclusive scope since aec9adf1.
+- Lean MCP diagnostics are clean (severity error) on `Lengths.lean`,
+  `Utf8Shape.lean` and `FullPins.lean`.
 
-Fresh ship-cache preflight still exits1 for missing coordinator poll-state; transport/configuration is not supplied by the shipping notice. All24 current cache trace dependency/output hashes and source hashes exactly match the existing verified72-artifact/24-mapping export; evidence/adopt-8495/cache-compatibility.json records this. Archive SHA256648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862 remains valid for these owned targets. No claim of whole-master cache freshness, actual delivery or target import is made. Q-CACHE-01 and Q-ROOT-01 remain unanswered; the goal/queue remain incomplete. Fresh adopted-tree full toolkit/corpus and separate default/native/SolKey phases completed at8caa77da; only the actual registration/cache blockers remain.
+### Follow-up gates (2026-11-06)
 
-## Adopted-tree broad validation completed
+- Merged origin/master in 44e41be2. The Lake cache release
+  returned 404, so the build was cold.
+- `./run-lean.sh`: the first run reached job 6350/6430 with no `error:`
+  before the 2-hour background limit stopped it. The rerun completed:
+  layers, `register.sh --check` and `fragments.sh --check` pass, and
+  "Build completed successfully (6463 jobs)", exit 0, 13m33s. The SolKey
+  checker is no longer part of the script (master a897dac76).
+  `FullControls` (`fullControls_pass`, 118 rows) built in the first run.
+- `audit.py --record <first run log>`: `evidence/axioms.log` is
+  byte-identical. Only the `FullControls.lean` hash in
+  `proof-source-identities.json` changes. `audit.py` (committed log) and
+  `audit.py <first run log>`: PASS, 219 exact theorem axiom sets, 255
+  kernel control rows, 8 safe declarations, exclusive scope (21 paths).
+- `solc-fixtures.mjs … check` against the pinned soljson: "PASS 71 cases
+  x legacy/viaIR".
 
-At exact committed8caa77daf0157e2af16c0ac46b0f459fea551a0c (parents0858098f and8495f1de), full toolkit ran with GATE_BASE8495f1de and the serial wrappers:8PASS/3FAIL, exit1,2:24.69 wall,1105052KiB peak process RSS,0swap. Touched/trust/layers/docpaths/axiompins/TestSuite/corpus/strictautomatic PASS; run-lean/orphans/roots FAIL only for the exact20 remaining local modules. Corpus completed in104s. All11 exact commands/status/wall seconds and decisive logs are in evidence/adopted-broad-8caa77da/full-gates/. No root waiver was applied.
+### Retained deviations
 
-Independently ran the unchanged original defaultTargets plus SolkeyTestSuite: SERIAL_BUILD_PASS3911, exit0,22:00.97,4835528KiB process RSS,0swaps. Both native executable targets successfully checked/built; this log does not report fresh executable links. The full losslessly compressed log and raw/gzip SHA256 identities are retained. Then the unchanged pinned SolKey check parsed377 taclets/131readbearing/table covers131 and matched the real rules path, exit0,2.10s. The post-merge strict ownership/source/axiom/control inventory audit passed. run-lean.sh remains unchanged; these independent phases cover its work after the blocked root precheck.
+- Unicode surrogate escapes: the model accepts them, but solc rejects
+  unicode-literal surrogates downstream (SyntaxError 8452).
+- Empty or single-quoted assembly flags: solc accepts them, the model
+  refuses them.
 
-Post-gate ship-cache preflight at8caa77da again exits1 for missing coordinator poll-state/VMEXEC/catalog. The owned24source/depHash/output sets still exactly match the verified72-artifact export SHA256648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862; actual cache-receipt.json says NOT shipped. Incoming master-delta notice does not establish an outbound owned-cache import/delivery receipt or whole-master cache freshness. Container lifetime resource counters are explicitly cumulative in cgroup-final.txt; timed logs give each phase process RSS.
+Neither theorem statements nor frozen inputs were weakened. No sorry, axiom
+or `maxHeartbeats` change.
 
-Final separate read-only finder/skeptic reviewed the actual new receipts. The skeptic broad-validation finding is CLOSED; no independently runnable proof/test obligation remains after final evidence/documentation commit and seal. They approve blocked evidence only. Q-ROOT-01 (20remaining registrations/full acceptance) and Q-CACHE-01 (actual cache delivery/import receipt) remain outstanding. The goal is not complete. Original lexical proof versus finite external-test boundaries and producer exclusions are unchanged.
+### Codex-era history
 
-## Follow-on master f77cf60d adoption
+The Codex VM's adoption, cache and blocked-registration narrative, and its
+receipts, live in `tests/h28-sol/literal-grammar/evidence/` and in git
+history before this section. They are historical. The bulk logs, the cache
+pack and `codex/h28-preserved-6492f34c` stayed on the Codex VM.
 
-The coordinator explicitly authorizes adoptingf77cf60d3cea8f7f1db8db29cc027532b0cd3fce, which contains8495f1de. Fetched/verified exact origin/master and ancestry; conflict-free owned merge preserves9cbd923a as first parent. The actualdelta also contains the published contextual-equivalence baseline before the five deferred-module increments; it is adopted verbatim, never manually repaired. No H16 Source/frozen Core ExtCall edit, default-branch merge/push, reset or newgoal/VM. All24 owned Lean bytes and4 original input pins remain unchanged. The audit now hard-pins and verifies both exact authorized adoption pairs, both intervening owned deltas and all ancestor links, with only the exact latestMERGE_HEAD allowed precommit. Original theorem/premise/refusal/budget pins are intact.
+Master's `4492e6ed9` ("Audit external H44 evidence after published
+integration") added `--evidence-dir`/`--published-integration` modes to the
+Codex-era `audit.py` for evidence under the Codex VM's `/workspace/scratch`
+and recorded a PASS there; `bulk-artifacts-h44.json` lists those off-git
+artifacts. The 2026-11-06 merge kept this branch's rewritten `audit.py`,
+which checks the committed `evidence/axioms.log` and scopes to the merge
+base, so those two flags are gone; that historical PASS stays in git history.
 
-Fresh VM precommit checks passed: actualLean4.24.0/Lake5.0.0-src+797c613, permittedKeySort, all24targets (validcache reuse),200fresh axiomreports exactmatch, all4control modules and inventory/ownershipaudit. Exactcommands/exits/time/RSS in evidence/adopt-f77/results.json and timedlogs. Actualrootcheck stillfails precisely20missing; central4 unchanged. Fulltoolkit/corpus/default/native/SolKey checks on the committed f77 adoption completed at736e12aa; actualreceipts are retained below.
+### Codex conflict resolution (2026-11-07)
 
-The incomingH21 notice reports prior8495 cachetarget outcomes49successes/1capacityskip/5failures underH30 recovery. It does not identify this lane's successful cache adoption or establish delivery of our verified outbound24module export. Q-ROOT-01/Q-CACHE-01 remain unanswered; no receipt or cachefreshness is inferred. Separate readonly finder/skeptic approved this strict staticadoption accounting, not wholelane/fullgate/cache acceptance.
+Merged published master2a43bf4fcdaf24750265afc8f8be5b420d1d22b0 into the preserved ea1876 branch. The portable audit, all26 modules/219 theorem pins/255 kernel rows/71 scanner cases, and the published runtime-profile deletion are retained. No older24-module audit or VM-only profile is restored. VM serial configuration and logs stay outside git. The old scope question is historical; central registration is present, and no validation waiver is inferred.
 
-## Follow-on f77 broad validation completed
+The completed immutable4492 build remains historical:6442-module original defaults/examples/native/TestSuite,exit0,3:10:03,RSS7864360KiB,0swaps. The subsequent full gate at ea1876 was stopped for this superseding merge request during run-lean; only its build-touched gate completed. It is not reported as a passing full gate. Both log sets are preserved at /workspace/scratch/h28-audit-5f145965 and /workspace/scratch/h28-current-e8247d92. Resolution evidence is /workspace/scratch/h28-resolve-2a43bf4f. Fresh resolved-head gates and reviews are recorded there; original proof versus finite compiler-observation boundaries remain unchanged.
 
-Exact gate head736e12aa8b71066e49b118f1c23c0815d7159afb preserves9cbd923a andf77cf60d as mergeparents. Fulltoolkit8PASS/3FAIL,exit1,25:32.59 wall,5823548KiB processRSS,0swaps. Touched/trust/layers/docpaths/axiompins/TestSuite/corpus/strictautomatic PASS; only run-lean/orphans/roots fail for exactly20unregistered localmodules. Corpus1492sPASS. Exactcommands/status/wallseconds/outputs in evidence/followon-broad-736e12aa/full-gates/.
-
-Independent originaldefaults+SolkeyTestSuite: SERIAL_BUILD_PASS3926,exit0,1:17:34 wall,8902024KiB peakprocessRSS,0swaps. Native executable targets checked/built successfully, without a freshlink claim. Full lossless gzip plus raw/compressed SHA identities are retained. The actual pinned SolKey check parsed377taclets/131readbearing/tablecovers131,annotations match,exit0. Postmerge strictscope/source inventoryaudit PASS. These actualphases cover unchanged run-lean.sh work after the blocked registrationprecheck; no broadvalidation obligation is silently treated as completed from an old receipt.
-
-Postgate ship-cache preflight at736e12aa exits1 for absentcoordinatorpoll-state/VMEXEC/catalog. Actual cache-receipt.json says NOTshipped. All24current source/depHash/output identities stillmatch the verified72artifact/24mapping archiveSHA256648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862. Incoming49success/1skip/5fail statistics establish no specificlane cachefreshness/adoption nor outboundownedcache delivery/import. Container lifetimepressure/max/peak/OOM counters are cumulative in cgroup-final.txt; phaseRSS/time/swaps are actual per-command metrics. OneCPU/12GiB/no-swap container and4GiB outerheadroom preserved; no source budgetraised.
-
-Separate readonly finder/skeptic approved actualf77 broad/runtime/cache evidence. No independentlyrunnable original proof/test obligation remains beyond finalmetadata commit/artifactseal. Q-ROOT-01 (20registrations and registeredfullgate) andQ-CACHE-01 (actualcache delivery/importreceipt) remain outstanding; the goal is not complete. Original lexical-model/finite-external-observation boundaries, producerownership, premises/refusals/exclusions and all24 Lean bytes/fourinput pins remain unchanged.
-
-## 9584f9e7 adoption and H41 coordinator-pull policy
-
-Explicit user authorization: adopt9584f9e7df09f638d9e0cb8930501d1660aa4b2f (basef77) preserving owned work. Merge preserves405995c1 as firstparent. Scanner's add/add conflict is EOFwhitespace only; exactowned bytes preserved, all24 Lean files and originalfour pins unchanged. No newtheorem/premise/refusal/exclusion/budget/trust weakening, no protectedSource/frozenExtCall edit, no defaultbranchmerge/push/reset/newgoal/VM. Strict ownershipaudit hard-pins allthree exactauthorized pairs and verifies eachhistoricalowned delta, ancestorlink and currentdelta against9584; only exactlatestMERGE_HEAD is permitted beforecommit.
-
-The bounded lane packet imports BoundaryControls/Quoted/Scanner only. Together with priorBody/BodyControls/Hex/HexEncoding,7 of24 are centrallyregistered and exact17 remain missing, enumerated in evidence/adopt-9584/integration-accounting.json. No integrated fragment is reimplemented; no manualsharedregistry edit. Freshowner VM build24targets (validcache reuse),200fresh printed axiomsets, all4controls, strictinventoryaudit and permittedKeySort passed using actualLean4.24.0/Lake5.0.0-src+797c613 and serial-j1/oneCPU/12GiB/no-swap. Rootcheckactualexit1 for17. Fulltoolkit/corpus/default/native/SolKey phases completed on the committed adoption at7985d1eb; prior736e/8caa receipts remain historical.
-
-H41 expressly supersedes the earlier VMshipping instruction: never invoke ship-cache.sh here; leave verifiedpacks with absolutepath+SHA for coordinatorpull. Q-CACHE-01 route is therefore resolved, archived with historicalpriorstate in cache-policy-h41.json and removed from openquestions. Coordinator delivery/import/cachefreshness is still unproved and is not inferred from publication or aggregate shipmentoutcomes. The existing verified24module/72artifact/24mapping pack remains available at /workspace/scratch/h28-h35-cache-e7cf5143/owned-lake-cache.tar.gz, SHA256648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862; its current source/dependency compatibility will be reverified after gates. No VMshipping command will be run.
-
-Readonly finder/skeptic approved the staticadoption/source/scope/H41 accounting. One wordingnit on the oldcachequestion state was fixed explicitly as historical. Q-ROOT-01 is the remaining scope question; no registrationpermission or finalgoal acceptance is inferred.
-
-## 9584 adopted-tree validation and H41 pack readiness
-
-Exact gatehead7985d1eb62ab1757df04802d963894ebf7fc8718 preserves405995c1 and9584f9e7 as mergeparents. Fulltoolkit8PASS/3FAIL,exit1,2:34.47,RSS1107812KiB,0swaps. Touched/trust/layers/docpaths/axiompins/TestSuite/corpus/strictautomatic PASS; corpus110s. Only run-lean/orphans/roots fail, precisely the17 localmodules not centrallyregistered. All11 commands/statuses/wallseconds/decisiveoutputs are retained in evidence/integration-broad-7985d1eb/full-gates/. No rootwaiver.
-
-Independent originaldefaults+SolkeyTestSuite: SERIAL_BUILD_PASS3998,exit0,18:24.94,RSS5471680KiB,0swaps. Native targets checked/built successfully, no freshlink claim. Full lossless gzip and raw/compressed hashes retained. Actual pinnedSolKey parsed377taclets/131readbearing/tablecovers131,annotations match,exit0. Postmerge strictsource/ownership/inventoryauditPASS. These actualphases cover unchanged run-lean.sh work after its blockedrootprecheck. Finalmetadata/doc commit is not misrepresented as a fresh exactheadfullgate rerun; all24Lean/fouroriginalinput bytes are identical.
-
-H41 pack verification was performed without invoking ship-cache.sh on this VM. Verified archive75 safe regular relative members, every73 manifestfile checksum plus embeddedmanifest, all24current source/depHash/output matches. Pack /workspace/scratch/h28-h35-cache-e7cf5143/owned-lake-cache.tar.gz,6045725bytes,SHA256648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862;24modules/72artifacts/24mappings. cache-pull-receipt.json status ready-for-coordinator-pull, VMshippingfalse, delivery/import/freshnessnotasserted. Q-CACHE-01 route resolved by explicitH41, not reopened as a requiredworker shipment; coordinator owns actualpull/import receipts. HistoricalVMpreflights remain historical, not repeated underH41.
-
-Readonly finder/skeptic approved fresh runtime/cache evidence and identified no further independentlyrunnable original obligation beyond finalmetadata/artifactseal. Originalimplementation/proofs/controls/fixtureinventories remain complete, but finalgoal acceptance is BLOCKED on Q-ROOT-01:17 remainingregistrations and registeredfullgate receipts. No premise/exclusion/refusal/budget/trust-policy weakening or protectedSource/frozenExtCall edit. Originallexicalmodel versusfiniteexternaltest/sourceadequacy boundaries unchanged. Cumulativecontainerpressure/OOM/peak counters retained; perphase /usr/bin/time RSS/time/swaps actual, oneCPU/12GiB/no-swap/4GiBouterheadroom maintained.
-
-## b86ae456 publication/adoption
-
-Fetched exactpublishedorigin/master b86ae4568cef6d6226f4d170360bbb089debe3fb andverified9584 ancestry. Continuing priorauthorizedadoption in the existingownedlane, conflict-free merge preserves59c3e31c firstparent and all source/history/work. HexControls/HexPins contributed from59c3 are byte-identical; no integratedfragment redone. All24 Lean sources/four originalinput pins unchanged. Ninecentral modules/15exactmissing are enumerated in evidence/adopt-b86/integration-accounting.json. Strictaudit adds onlyexactfourthauthorizedpair and retains originalbase/theorem/source pins plus eachhistorical/currentowned delta and ancestorlink; no arbitraryscopeexception. No defaultbranchmerge/push/reset/newgoal/VM or protectedSource/frozenExtCall manualedit.
-
-Freshowner VM gates: actualLean4.24.0/Lake5.0.0-src+797c613, permittedKeySortPASS,24targetbuild(cachehits),200fresh exactaxiomreports,all4controls,strictinventory/ownershipauditPASS. Actualrootcheckexit1 for15. Exactcommands/exits/timing/RSS in evidence/adopt-b86/. Fresh committed-tree fulltoolkit/corpus/default/native/SolKey phases completed at95dfcbc1 with actualreceipts below.
-
-Readonlyfinder/skeptic approved strictscope/source/trust accounting. H41coordinatorpull policy is unchanged; noVMship-cache.sh invocation. Verifiedpack willbe rechecked aftergates and leftwithabsolutepath+SHA; actualcoordinatordelivery/import/freshness remains unclaimed. Q-ROOT-01 remainsopenfor15registrations; no acceptance/producerobligation weakening frompublication notice.
-
-## b86 adopted-tree validation completed
-
-Exact gatehead95dfcbc1bb573f508a929fc1698afd23ffd9a532 preserves59c3e31c andb86ae456 as mergeparents. Fulltoolkit8PASS/3FAIL,exit1,2:42.25,RSS1109284KiB,0swaps. Touched/trust/layers/docpaths/axiompins/TestSuite/corpus/strictautomatic PASS; corpus118s. Onlyrun-lean/orphans/roots fail for precisely15localmodules notcentrallyregistered. All11 commands/status/wallseconds anddecisivelogs in evidence/b86-broad-95dfcbc1/full-gates/. No rootwaiver.
-
-Independent originaldefaults+SolkeyTestSuite SERIAL_BUILD_PASS4049,exit0,13:56.60,RSS3000596KiB,0swaps. Native targets successfullychecked/built, no freshlinkclaim. Full losslessgzip andraw/compressed hashes retained. ActualpinnedSolKey parsed377taclets/131readbearing/tablecovers131,annotations match,exit0. Postmerge strictownership/sourceinventoryauditPASS. These actualphases cover unchangedrun-lean.sh work after the blockedrootprecheck; finalmetadatahead is not misreported as afreshfullgaterun. All24Lean/fourinputbytes unchanged.
-
-H41pack verification performed without VMship-cache.sh invocation:75safe regularrelative members, everymanifestchecksum andembeddedmanifest, all24current source/depHash/output identities match. Pack /workspace/scratch/h28-h35-cache-e7cf5143/owned-lake-cache.tar.gz,6045725bytes,SHA256648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862;24modules/72artifacts/24mappings. Actualcache-pull-receipt status ready-for-coordinator-pull; no delivery/import/notice-basedfreshness asserted. Coordinatorowns pull/importreceipts. Q-CACHE-01 route remainsresolved byH41, not an openVMtransport question.
-
-Readonlyfinder/skeptic approved actualnewruntime/cache evidence. No independentlyrunnable originalproof/test phase remains beyondfinalmetadata/artifactverification. Q-ROOT-01 is soleopen scopequestion for15registrations/registeredfullgate acceptance; originalgoal notcomplete. No theorem/premise/refusal/exclusion/budget/trust expansion or protectedSource/frozenExtCall edit. All lexical-model/finiteexternal-test/sourceadequacy boundaries unchanged. ActualperphaseRSS/time/swaps and cumulativecontainerpressure/OOM/peak counters retained, oneCPU/12GiB/no-swap/4GiBouterheadroom preserved.
+Resolved-tree VM gates:26-module serial build PASS15.80s,RSS1400336KiB; fresh portable audit PASS219 exact axiom sets/255 kernel rows/eight safe definitions; all four kernel control files and ProofSafety PASS; permitted KeySort PASS. ActualLean4.24.0/Lake5.0.0-src+797c613. Fresh pinned compiler gate PASS71cases times legacy/viaIR,3.08s,RSS226964KiB,0swaps. Cache pack26modules/78artifacts/26mappings verified for coordinator pull; no VMshipping or import claim. Both read-only reviews found no conflict-resolution blocker. Global docpaths still fails on four references outside H28; no passing whole-project/full-runtime gate is claimed. The user explicitly authorized pushing the resolved assigned branch; default-branch push/merge is not performed.

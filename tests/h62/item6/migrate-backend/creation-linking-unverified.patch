@@ -1,0 +1,11 @@
+--- a/Solidity/Backend/Creation/Linking.lean
++++ b/Solidity/Backend/Creation/Linking.lean
+@@ -106,7 +106,7 @@
+   apply patchAt_commute
+   · simpa only [Vector.length_toList] using a.location.bounds
+   · simpa only [Vector.length_toList] using b.location.bounds
+-  · simpa only [Vector.length_toList] using disjoint
++  · simpa only [Vector.length_toList, Location.Disjoint] using disjoint
+
+ /-- Existing assembler correctness supplies byte equality through arbitrary
+ prefix and constructor arguments. No relocation/fixpoint algorithm is duplicated. -/

@@ -7,7 +7,7 @@ namespace Solidity.Lowering.V07.AddressQualifiers
 open AddressConversions
 
 theorem allowed_erase (E : Source.Env) (p : Bool) :
-    (Source.STy.address p).explicit E.isBase (.address false) = true := by
+    (Source.STy.address p).explicit E.isBase E.mapFree (.address false) = true := by
   cases p <;> rfl
 
 theorem erase_value {D : Source.Layout} (p : Bool) (a : Roadmap.Address) :

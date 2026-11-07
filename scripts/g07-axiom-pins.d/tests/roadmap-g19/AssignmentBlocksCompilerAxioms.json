@@ -1,0 +1,66 @@
+{
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.emitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.emitted_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.emitted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.index": [],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.maps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.repeated_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.repeated_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.reverse_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.reversed_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.self_alias_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.snapshot": [],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.Controls.steps": [],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksCompilerAxioms.lean:Solidity.Backend.StructuredFlow.AssignmentBlocksCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ]
+}

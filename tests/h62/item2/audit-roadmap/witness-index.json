@@ -1,0 +1,107 @@
+{
+  "boundary": "Witnesses for exact frozen ordinary theorem hypotheses; fixture limits remain explicit in Lean modules.",
+  "entries": [
+    {
+      "name": "Solidity.Roadmap.Evm.pinned_eq",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.pinned_eq_audit",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "no premises"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Precompile.mem_all",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.mem_all_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "input precompile p256Verify"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Precompile.ofAddress?_address",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.address_inverse_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "input precompile p256Verify"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Precompile.address_injective",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.address_injective_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "same pair and same address-equality hypothesis"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Precompile.address_pos_lt",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.address_bound_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "input precompile p256Verify"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Fixed.NoCollision.mono",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.collision_mono_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "global Fixed with real Keccak; nonempty per-run list and its same-list inclusion"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Fixed.NoOverlap.noCollision",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.overlap_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "global Fixed with real Keccak; nonempty hashed list, L=1, roots=0, no-overlap and positive-length premises jointly"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Fixed.createAddress_lt",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.creation_bound_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "global Fixed with real Keccak; concrete nonzero sender and nonce0"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.GasRes.le_refl",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.resource_refl_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "schedule and evaluator fuel1"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.GasRes.le_trans",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.resource_trans_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "same schedule and fuels1,2,3 with both order premises"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.GasRes.Admissible.of_le",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.admissible_of_le_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "actual Osaka pin; same schedule fuels1,2; both order and initial admissibility"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.GasRes.admissible_pinned",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.admissible_pinned_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "concrete resource"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Halt.observe_exceptional",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.exceptional_observation_audit",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "no premises"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Halt.observe_success",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.success_observation_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "one success halt with nonempty data"
+    },
+    {
+      "name": "Solidity.Roadmap.Evm.Certificate.back_le",
+      "helper": "Solidity.H62.AuditRoadmap.EvmWitnesses.certificate_back_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/EvmWitnesses.lean",
+      "premise_world": "global Nat carrier/order, nonconstant Pinned model and entire reflexive certificate; same specified artifact7, allowed environment3 and admissible resource2"
+    },
+    {
+      "name": "Solidity.Automation.H28.codegenContext_restore_options",
+      "helper": "Solidity.H62.AuditRoadmap.ContextWitnesses.restore_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/ContextWitnesses.lean",
+      "premise_world": "one explicitly constructed nondefault Core.Context; no proof-budget changes"
+    },
+    {
+      "name": "Solidity.Automation.H28.codegenContext_limits",
+      "helper": "Solidity.H62.AuditRoadmap.ContextWitnesses.limits_joint",
+      "helper_file": "tests/h62/item2/audit-roadmap/ContextWitnesses.lean",
+      "premise_world": "one explicitly constructed nondefault Core.Context; no proof-budget changes"
+    }
+  ]
+}

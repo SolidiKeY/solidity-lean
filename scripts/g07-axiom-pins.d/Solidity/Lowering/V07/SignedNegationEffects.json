@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/V07/SignedNegationEffects.lean:Solidity.Lowering.V07.SignedNegationEffects.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffects.lean:Solidity.Lowering.V07.SignedNegationEffects.code_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegationEffects.lean:Solidity.Lowering.V07.SignedNegationEffects.source_assignment_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

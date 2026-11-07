@@ -1,0 +1,10 @@
+{
+  "path": "tests/directruntime-20261104/native-browser/primitive-return/FiniteControls.lean",
+  "kind": "standalone test driver",
+  "imports": [
+    "Solidity.Tools.DirectRuntime",
+    "Solidity.Semantics.RunFuel"
+  ],
+  "proposal": "Local docs row only,no generatedlibraryroot registration needed for standaloneper-file driver.",
+  "guardedRegression": "Primitive-return normal/earlyexit/tuple/default/failure/model sideeffect and reference/width refusal."
+}

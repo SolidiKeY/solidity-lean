@@ -162,8 +162,10 @@ test('startup actions are explicit, scoped to declared settings and suppressed a
    e.service.emit('serverError',error);e.service.emit('serverError',error);assert.equal(actions.length,1);assert.deepEqual(actions[0].items,['Change configuration','Node.js downloads']);
    if(action==='stale')await e.commands.get('solidityLean.restartServer')();if(action==='disposed')await e.api.dispose();if(action==='closed'||action==='reopened'){e.doc.isClosed=true;e.events.close(e.doc);if(action==='reopened')e.events.open({...e.doc,isClosed:false});}
    choose(action==='stale'||action==='disposed'||action==='closed'||action==='reopened'?'Node.js downloads':action);await tick();
-   assert.equal(commands.length,action==='Change configuration'?1:0);assert.equal(links.length,action==='Node.js downloads'?1:0);
-   if(commands.length)assert.match(commands[0][1],/solidityLean.nodePath/);if(links.length)assert.equal(links[0],'https://nodejs.org/en/download');
+   const contextCommands=commands.filter(c=>c[0]==='setContext'),actionCommands=commands.filter(c=>c[0]!=='setContext');
+   for(const call of contextCommands){assert.equal(call.length,3);assert.match(call[1],/^solidityLean\.verificationTrace\.(CanShow|CanHide|CanCopy)$/);assert.equal(typeof call[2],'boolean');}
+   assert.equal(actionCommands.length,action==='Change configuration'?1:0);assert.equal(links.length,action==='Node.js downloads'?1:0);
+   if(actionCommands.length)assert.match(actionCommands[0][1],/solidityLean.nodePath/);if(links.length)assert.equal(links[0],'https://nodejs.org/en/download');
   }finally{await e.api.dispose();}
  }
 });
@@ -239,6 +241,20 @@ test('issue draft uses current real identity metadata and never attaches source 
   e.service.emit('identity',{uris:[e.doc.uri.toString()],serverInfo:{name:'Actual server',version:'0.5.5'},runtimeInfo:{version:'24.19.0'}});release();await pending;assert.equal(links.length,1);const url=new URL(links[0]);assert.equal(url.origin,'https://github.com');assert.equal(url.pathname,'/SolidiKeY/solidity-lean/issues/new');const body=url.searchParams.get('body');assert.match(body,/Actual server 0.5.5/);assert.match(body,/Node.js: 24.19.0/);assert.doesNotMatch(body,/PrivateSourceNeverAttach|contract.sol/);
  }finally{await e.api.dispose();}
 });
-test('H49 excludes contextual proof help while ordinary output preserves unrelated-folder picker ownership',async()=>{
+test('ordinary output preserves unrelated-folder picker ownership',async()=>{
  const e=fixture();let release,seen;try{e.status(e.doc,'running');e.vscode.window.showQuickPick=items=>{seen=items;return new Promise(resolve=>{release=()=>resolve(items.find(item=>item.label==='Show verification output'));});};const pending=e.commands.get(e.bar.command)();assert.ok(seen.some(item=>item.label==='Show verification output'));e.changeConfig('solidityLean.workers',e.documents[1].uri);release();await pending;assert.ok(e.logs.includes('output shown'));}finally{await e.api.dispose();}
+});
+
+for(const phase of ['running','error','complete'])test('H80 proof-help uses project documentation only for a qualified current '+phase+' state (injected editor)',async()=>{
+ const e=fixture(),opened=[];const original=e.vscode.commands.executeCommand;e.vscode.commands.executeCommand=async(command,...args)=>{if(command==='vscode.open'){opened.push(args[0].fsPath);return;}return original(command,...args);};try{e.status(e.doc,phase);let offered;e.vscode.window.showQuickPick=async actions=>(offered=actions,actions.find(item=>item.proofHelp==='index'));await e.commands.get('solidityLean.openStatusBarMenu')();assert.equal(offered.some(item=>item.proofHelp),phase!=='complete');assert.deepEqual(opened,phase==='complete'?[]:[require('node:fs').realpathSync(require('node:path').resolve(__dirname,'../../docs/README.md'))]);assert.equal(e.calls.restarts,0);}finally{await e.api.dispose();}
+});
+for(const barrier of ['edit','close','switch','configuration','dispose','trust'])test('proof-help selection rejects '+barrier+' owner changes (injected editor)',async()=>{
+ const e=fixture(),opened=[];let release;const original=e.vscode.commands.executeCommand;e.vscode.commands.executeCommand=async(command,...args)=>{if(command==='vscode.open'){opened.push(args[0]);return;}return original(command,...args);};try{e.status(e.doc,'running');e.vscode.window.showQuickPick=actions=>new Promise(resolve=>{release=()=>resolve(actions.find(item=>item.proofHelp));});const pending=e.commands.get('solidityLean.openStatusBarMenu')();if(barrier==='edit'){e.doc.version++;e.doc.text+=' ';e.events.change({document:e.doc,contentChanges:[{}]});}if(barrier==='close'){e.doc.isClosed=true;e.events.close(e.doc);}if(barrier==='switch'){e.vscode.window.activeTextEditor=e.editors[1];e.events.activeEditor(e.editors[1]);}if(barrier==='configuration')e.changeConfig('solidityLean.backendPath',e.doc.uri);if(barrier==='dispose')await e.api.dispose();if(barrier==='trust')e.vscode.workspace.isTrusted=false;release();await pending;assert.deepEqual(opened,[]);}finally{await e.api.dispose();}
+});
+
+test('proof guide and documentation index are both selectable destinations (injected editor)',async()=>{
+ const e=fixture(),opened=[];const original=e.vscode.commands.executeCommand;e.vscode.commands.executeCommand=async(command,...args)=>{if(command==='vscode.open'){opened.push(args[0].fsPath);return;}return original(command,...args);};try{e.status(e.doc,'running');for(const target of ['guide','index']){e.vscode.window.showQuickPick=async actions=>actions.find(item=>item.proofHelp===target);await e.commands.get('solidityLean.openStatusBarMenu')();}assert.deepEqual(opened,['calculus.md','README.md'].map(file=>require('node:fs').realpathSync(require('node:path').resolve(__dirname,'../../docs',file))));}finally{await e.api.dispose();}
+});
+test('missing project documentation reports a useful configuration error instead of raw ENOENT (injected editor)',async()=>{
+ const e=fixture(),fs=require('node:fs'),directory=fs.mkdtempSync(require('node:path').join(require('node:os').tmpdir(),'proof-docs-')),opened=[];const original=e.vscode.commands.executeCommand;e.vscode.commands.executeCommand=async(command,...args)=>{if(command==='vscode.open'){opened.push(args);return;}return original(command,...args);};try{e.config.backendPath=directory;e.status(e.doc,'running');e.vscode.window.showQuickPick=async actions=>actions.find(item=>item.proofHelp==='guide');await e.commands.get('solidityLean.openStatusBarMenu')();assert.deepEqual(opened,[]);assert.match(e.notices.join('\n'),/Set solidityLean.backendPath.*docs\/README.md.*docs\/calculus.md/);assert.doesNotMatch(e.notices.join('\n'),/ENOENT|realpath/);}finally{await e.api.dispose();fs.rmSync(directory,{recursive:true,force:true});}
 });

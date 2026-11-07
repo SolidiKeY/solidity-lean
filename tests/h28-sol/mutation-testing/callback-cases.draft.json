@@ -1,0 +1,60 @@
+{
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "cases": [
+    {
+      "id": "callback.failed-send-flag-true",
+      "kind": "mutant",
+      "family": "callback-frames",
+      "source_symbol": "Taclet.sendNoCallbackBox",
+      "target": "Solidity/Calculus/Rules.lean",
+      "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := true } \u27e8[ ]\u27e9 }\n",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/CallbackBaseline.lean",
+      "oracle_sha256": "de340249b80f01eeb91d0b53e0c2177004207c1f9ab9bef546754f3b79f86591",
+      "oracle_declarations": [
+        "H28.CallbackBaseline.source_link",
+        "H28.CallbackBaseline.input_inhabited",
+        "H28.CallbackBaseline.accepted_run",
+        "H28.CallbackBaseline.refused_run",
+        "H28.CallbackBaseline.callback_failed",
+        "H28.CallbackBaseline.callback_resumed",
+        "H28.CallbackBaseline.callback_local_global_controls",
+        "H28.CallbackBaseline.failed_frame",
+        "H28.CallbackBaseline.resumed_frame",
+        "H28.CallbackBaseline.frame_preserves_flag",
+        "H28.CallbackBaseline.drop_typed_landing",
+        "H28.CallbackBaseline.callback_frames_rejects"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/CallbackFailureKill.lean",
+      "witness_sha256": "c0154e2afaffd7d8b78a5dd5e0e8042e6d256844a9e47239d8cb4a92dea5e756",
+      "witness_declarations": [
+        "H28.CallbackFailureKill.source_link",
+        "H28.CallbackFailureKill.input_inhabited",
+        "H28.CallbackFailureKill.accepted_run",
+        "H28.CallbackFailureKill.refused_run",
+        "H28.CallbackFailureKill.callback_failed",
+        "H28.CallbackFailureKill.callback_resumed",
+        "H28.CallbackFailureKill.callback_local_global_controls",
+        "H28.CallbackFailureKill.failed_frame",
+        "H28.CallbackFailureKill.resumed_frame",
+        "H28.CallbackFailureKill.frame_preserves_flag",
+        "H28.CallbackFailureKill.drop_typed_landing",
+        "H28.CallbackFailureKill.callback_frames_rejects",
+        "H28.CallbackFailureKill.first_typed_landing",
+        "H28.CallbackFailureKill.second_typed_landing",
+        "H28.CallbackFailureKill.first_start_landing",
+        "H28.CallbackFailureKill.second_start_landing",
+        "H28.CallbackFailureKill.first_post",
+        "H28.CallbackFailureKill.second_post",
+        "H28.CallbackFailureKill.premise_accepts_post",
+        "H28.CallbackFailureKill.real_frames",
+        "H28.CallbackFailureKill.execution_rejects_post",
+        "H28.CallbackFailureKill.checked_kill",
+        "H28.CallbackFailureKill.frame_post_of_true",
+        "H28.CallbackFailureKill.callback_premise_accepts_frames",
+        "H28.CallbackFailureKill.checked_callback_frames"
+      ]
+    }
+  ]
+}

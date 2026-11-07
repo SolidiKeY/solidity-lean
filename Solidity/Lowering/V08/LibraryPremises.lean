@@ -12,6 +12,20 @@ results here are vacuous for now. -/
 namespace Solidity.Lowering.V08.LibraryPremises
 open Solidity ContractWorld
 open Solidity.Lowering.P8
+/-! The exact existing delegated body/result duty. Guarded regression: a
+shared name must retain both full post-states, actual result extraction and
+its value relation; it must not become an assumed World.libraryCall run. -/
+abbrev LibraryBodyObligation {E : Source.Env} {C : Contract} {rs : List Source.STy} {α : Type}
+    (operation : Source.EM E [] (Source.RVal E.layout (Source.STy.ret rs)))
+    (before after : Source.St E) (sourceValue : Source.RVal E.layout (Source.STy.ret rs))
+    (caller : State C []) (entry : Entry C α)
+    (stateRelation : {Γ : Ctx} → Source.St E → State C Γ → Prop)
+    (valueRelation : Source.RVal E.layout (Source.STy.ret rs) → α → Prop) : Prop :=
+  operation.run (Source.L0 E, before) = (.ok sourceValue, (Source.L0 E, after)) →
+    ∃ (out : Out C caller.H entry.locals) (value : α),
+      entry.body.run caller = .ok out ∧ entry.result out.st = .ok value ∧
+      stateRelation after out.st ∧ valueRelation sourceValue value
+
 variable {E : Source.Env} {K : Type} [DecidableEq K] {cs : K → Contract}
 
 theorem instance_code {Γ : Source.RCtx} (g : Source.Glob E)
@@ -198,8 +212,8 @@ def link : Roadmap.Address := ⟨4,by decide +kernel⟩
 def populated (bytes : Roadmap.Bytes) : Source.St Env :=
   {Source.St.init Env with
     ex:=(Source.St.init Env).ex.run [
-      .account sender (fun a => {a with balance:=⟨93,by decide +kernel⟩,nonce:=3}),
-      .account self (fun a => {a with balance:=⟨7,by decide +kernel⟩,nonce:=1,code:=some 0,storage:=a.storage.write saved (.bool true)}),
+      .account sender (fun a => {a with balance := 93,nonce:=3}),
+      .account self (fun a => {a with balance := 7,nonce:=1,code:=some 0,storage:=a.storage.write saved (.bool true)}),
       .account link (fun a => {a with nonce:=1,code:=some 1}),
       .transient self (fun t => t.write scratch (.bool true)),
       .transient sender (fun t => t.write scratch (.bool true))]
@@ -231,10 +245,10 @@ theorem source_client (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
 
 /-- Ordered observations complement, rather than replace, full state equality. -/
 theorem populated_vector (bytes : Roadmap.Bytes) :
-    ((populated bytes).ex.world.accounts sender).balance.val = 93 := rfl
+    ((populated bytes).ex.world.accounts sender).balance = 93 := rfl
 
 theorem retained_fields (bytes : Roadmap.Bytes) :
-    ((populated bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((populated bytes).ex.world.accounts self).balance = 7 ∧
     ((populated bytes).ex.world.accounts self).nonce = 1 ∧
     ((populated bytes).ex.world.accounts self).code = some 0 ∧
     ((populated bytes).ex.world.accounts link).nonce = 1 ∧
@@ -282,6 +296,37 @@ theorem wrong_target_kind :
     runtime.callerRole
 
 end Controls
+
+section SharedContractAdapters
+omit [DecidableEq K]
+
+def Inputs.programMetadata (p : Inputs S reference origins roots g frame declaration ps rs values horizon before after
+      sourceValue w caller owner library ctx kindOf stateRelation valueRelation) :
+    CreationPremises.GlobProgramAgreement g p.program :=
+  ⟨p.programAgreement, p.pipelineAgreement, p.fixedAgreement⟩
+
+def Inputs.originAgreement (p : Inputs S reference origins roots g frame declaration ps rs values horizon before after
+      sourceValue w caller owner library ctx kindOf stateRelation valueRelation) :
+    CreationPremises.SomeOriginWitness origins p.program := p.origin
+
+def Inputs.sharedFrame (p : Inputs S reference origins roots g frame declaration ps rs values horizon before after
+      sourceValue w caller owner library ctx kindOf stateRelation valueRelation) :
+    EnvironmentProjection.FrameAgreement frame owner.address ctx :=
+  LibraryFrameTransport.toFrameAgreement p.frameAgreement
+
+def Inputs.bodyObligation (p : Inputs S reference origins roots g frame declaration ps rs values horizon before after
+      sourceValue w caller owner library ctx kindOf stateRelation valueRelation) :
+    LibraryBodyObligation (Source.callInternal g frame horizon declaration values rs)
+      before after sourceValue (LibraryFrameTransport.emptyFrame w owner ctx p.runtime.store)
+      library.entry stateRelation valueRelation := p.g42_body
+
+theorem sharedContracts_exact (p : Inputs S reference origins roots g frame declaration ps rs values horizon before after
+      sourceValue w caller owner library ctx kindOf stateRelation valueRelation) :
+    p.originAgreement = p.origin ∧
+      LibraryFrameTransport.ofFrameAgreement p.sharedFrame = p.frameAgreement ∧
+      p.bodyObligation = p.g42_body := ⟨rfl, rfl, rfl⟩
+
+end SharedContractAdapters
 
 end Solidity.Lowering.V08.LibraryPremises
 

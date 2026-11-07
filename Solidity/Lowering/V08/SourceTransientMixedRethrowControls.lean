@@ -100,8 +100,8 @@ theorem sequence_timeout (pipeline : Roadmap.Pipeline) (packed : Bool) :
       (.error .timeout,(Source.L0 E,written)) := by cases packed <;> rfl
 
 theorem complete_vector (pipeline : Roadmap.Pipeline) (packed : Bool) :
-    ((after pipeline packed).ex.world.accounts sender).balance.val = 93 ∧
-    ((after pipeline packed).ex.world.accounts self).balance.val = 7 ∧
+    ((after pipeline packed).ex.world.accounts sender).balance = 93 ∧
+    ((after pipeline packed).ex.world.accounts self).balance = 7 ∧
     ((after pipeline packed).ex.world.accounts self).code = some 0 ∧
     ((after pipeline packed).ex.world.accounts self).nonce = 1 ∧
     ((after pipeline packed).ex.world.accounts self).storage.read saved = some (.bool true) ∧

@@ -1,0 +1,73 @@
+{
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.falseTarget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.no": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.observe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.reference_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.same_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.skip_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.trueTarget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.write_seen": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.Controls.yes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.reached": [
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileBreakAxioms.lean:Solidity.Lowering.G19.AssignmentWhileBreak.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

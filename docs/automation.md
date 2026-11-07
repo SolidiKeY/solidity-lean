@@ -3,8 +3,9 @@
 The milestones towards a closer that decides a fragment and a symbolic
 execution of polynomial size.  M0–M5 and M8's A1/A3 are built; M6 is the
 gate in force and the user's decisions; M7 is the decision theorem, its 33
-features and what is still open; M7-next is the plan waiting for the
-user's go.  Labels (M*n*, features *n*, plan steps *n*, decisions c … e3″)
+features and what is still open; M7-next is in progress (the user lifted
+its hold on 2026-11-06; `DecisionTheorem'` modulo the decidable residue is
+merged, 41f8b61be).  Labels (M*n*, features *n*, plan steps *n*, decisions c … e3″)
 are cited by Lean docstrings: keep them.
 
 ## M0 · The leaves of a type (`Theory/Typed/Leaves.lean`)
@@ -948,8 +949,28 @@ pin in 2,262 s; this is not a controlled comparison with the historical timing.
 The 300 s budget of the gate covers TestSuite modules only.
 ## M7-next · A checkpoint of the theorem (in progress)
 
+**`DecisionTheorem'` and `Fml.Residue` (lane `m7-decision`, 2026-11-06).**
+The user chose a route-refusal residue (Q1, recorded in
+[the m7-next handoff](feature-work/m7-next.md)).
+`Calculus/DecisionResidue.lean` defines `Fml.Residue`, the leaves every
+route of `decideGoal` refuses, each refusal named (`RouteRefusal`) and
+computed from the route's own front end (the hash route's refusal is each
+hash try's own verdict, since a try runs `decideLeaf` on its swapped leaf);
+it is decidable, kernel-evaluable and exact (`residue_iff_unknown`). `DecisionTheorem'` proves that on every
+in-target leaf off the residue `decideGoal` proves it (valid under the goal's
+own hash premise) or refutes it (a certified state). **Totality off the
+residue holds by definition: this is not a completeness result**, and it
+says nothing about which in-target leaves are answered.
+`decisionTheorem_iff_residue_disjoint` restates the unchanged
+`DecisionTheorem` as "the residue meets no in-target leaf"; the milestone
+policy that later rounds only shrink the residue is not enforced by the code. VA1's source classes that are decidable from
+the leaf are attached to residue leaves as labels (`Fml.residueReasons`); they
+are not residue tests, and no class is proved to lie in the residue. Fixtures, witness and negative controls:
+`Examples/DecisionResidue.lean`.
+
+
 The ledger-quantifier lane implements feature 33; repository-wide validation
-is recorded in its handoff. This does not
+is recorded in its handoff. That lane (not the `m7-decision` lane above) does not
 execute the broader checkpoint proposal below, introduce a `Residue`, or
 change `inTarget`, exclusions, `Waivers` or `DecisionTheorem`. The broader checkpoint is authorized by the exact AQ1/AQ2 receipt in
 `docs/solidity-scope.md`; its theorem and remaining work are incomplete.

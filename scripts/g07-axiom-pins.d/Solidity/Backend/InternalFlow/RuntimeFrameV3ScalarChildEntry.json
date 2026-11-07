@@ -1,0 +1,19 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarChildEntry.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.decrement_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarChildEntry.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarChildEntry.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.entry_state": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarChildEntry.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarEntry.public_selection": [
+  "Quot.sound",
+  "propext"
+ ]
+}

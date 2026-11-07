@@ -1,5 +1,5 @@
 {
-  "integration": "Local manifest only: H21 shared roots/module maps/trust inventories are frozen. Central integrator must register these modules.",
+  "integration": "All modules are registered in the generated Solidity.lean root via scripts/coord-tools/register.sh.",
   "modules": [
     {
       "module": "Solidity.Frontend.LiteralGrammarH28.Body",
@@ -96,6 +96,14 @@
     {
       "module": "Solidity.Frontend.LiteralGrammarH28.WordTable",
       "role": "Lane-local WordTable proofs and controls"
+    },
+    {
+      "module": "Solidity.Frontend.LiteralGrammarH28.Lengths",
+      "role": "Scanner suffix uniqueness and literal/fragment byte-length bounds"
+    },
+    {
+      "module": "Solidity.Frontend.LiteralGrammarH28.Utf8Shape",
+      "role": "Unicode escape byte shape, non-overlong form and code-point recovery"
     }
   ]
 }

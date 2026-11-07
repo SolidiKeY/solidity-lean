@@ -1,0 +1,913 @@
+{
+  "schema": 1,
+  "derivation": "Frozen BEFORE DoWhileDriver execution. Actual Source.doWhile body FIRST: DEAD/empty/panic full rethrow despite false/poisoncondition; same-length aliasAABB distinct. Break/ret skip index100 poison; continue/normal reach it=>panic0x32. Continue real booleanassignment sets original cleanflagfalse; normal declaration freshtrue removed before originalflag assignment. Continue literaltrue diverges every horizon. Lowdo0..4 andcontinueassign0..2 timeout unchanged pendingstate. Dangling99 body stuck evenfalsecondition; break skipsdanglingcondition. Complete physicalcarrier/rawcompanions unchanged; no rollback/cleanup/pointeridentity/fulladequacy inferred.",
+  "raw": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "1793",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "frame": {
+    "types": [],
+    "bool": null,
+    "refs": [
+      null,
+      null
+    ]
+  },
+  "logs": [
+    [
+      "1",
+      [
+        85
+      ]
+    ]
+  ],
+  "physical": {
+    "word": "2868903938",
+    "sourceJournalLength": 1,
+    "residualJournal": [
+      [
+        false,
+        "1",
+        "43",
+        "0"
+      ]
+    ],
+    "ownedJournal": [
+      [
+        false,
+        "1",
+        "43",
+        0,
+        1
+      ]
+    ]
+  },
+  "outerRef": {
+    "kind": "memory",
+    "logicalIndex": 0
+  },
+  "cases": [
+    {
+      "name": "do-DEAD-false-condition",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          222,
+          173
+        ]
+      }
+    },
+    {
+      "name": "do-empty",
+      "payload": [],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": []
+      }
+    },
+    {
+      "name": "do-panic",
+      "payload": [
+        78,
+        72,
+        123,
+        113,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          78,
+          72,
+          123,
+          113,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "wrong-alias",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          170,
+          187
+        ]
+      }
+    },
+    {
+      "name": "revert-poison-condition-skipped",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          222,
+          173
+        ]
+      }
+    },
+    {
+      "name": "break-poison-condition-skipped",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "success",
+        "flow": "normal",
+        "locals": [
+          {
+            "type": "bool",
+            "value": true
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 1
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "continue-condition-assigns",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "success",
+        "flow": "normal",
+        "locals": [
+          {
+            "type": "bool",
+            "value": false
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 1
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "normal-restores-scope",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "success",
+        "flow": "normal",
+        "locals": [
+          {
+            "type": "bool",
+            "value": false
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 1
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "continue-false",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "success",
+        "flow": "normal",
+        "locals": [
+          {
+            "type": "bool",
+            "value": true
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 1
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "return-poison-condition-skipped",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "success",
+        "flow": "return",
+        "locals": [
+          {
+            "type": "bool",
+            "value": true
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 1
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "continue-true-timeout",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "continue-poison-executed",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          78,
+          72,
+          123,
+          113,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          50
+        ]
+      }
+    },
+    {
+      "name": "normal-poison-executed",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          78,
+          72,
+          123,
+          113,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          50
+        ]
+      }
+    },
+    {
+      "name": "revert-skips-rest",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          222,
+          173
+        ]
+      }
+    },
+    {
+      "name": "break-then-rest-executed",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          170,
+          187
+        ]
+      }
+    },
+    {
+      "name": "do-fuel-0",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "do-fuel-1",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "do-fuel-2",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "do-fuel-3",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "do-fuel-4",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "continue-fuel-0",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "continue-fuel-1",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "continue-fuel-2",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "dangling-reference",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 99
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "stuck",
+        "reason": "dangling memory reference"
+      }
+    },
+    {
+      "name": "break-dangling-condition-not-read",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "bool",
+          "value": true
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 99
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "success",
+        "flow": "normal",
+        "locals": [
+          {
+            "type": "bool",
+            "value": true
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 99
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 0
+          }
+        ]
+      }
+    }
+  ]
+}

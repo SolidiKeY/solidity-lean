@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.decoded_and_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.entry_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.run_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.short_before_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierBinding.lean:Solidity.Backend.AbiEntry.WordCarrierBinding.uint_specialization": [
+  "propext"
+ ]
+}

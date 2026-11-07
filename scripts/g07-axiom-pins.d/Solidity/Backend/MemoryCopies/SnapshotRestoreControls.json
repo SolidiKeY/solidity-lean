@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryCopies/SnapshotRestoreControls.lean:Solidity.Backend.MemoryCopies.SnapshotRestoreControls.captured_memory_write_refutes_preservation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SnapshotRestoreControls.lean:Solidity.Backend.MemoryCopies.SnapshotRestoreControls.empty_capture_restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SnapshotRestoreControls.lean:Solidity.Backend.MemoryCopies.SnapshotRestoreControls.long_capture_restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SnapshotRestoreControls.lean:Solidity.Backend.MemoryCopies.SnapshotRestoreControls.pair_capture_restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

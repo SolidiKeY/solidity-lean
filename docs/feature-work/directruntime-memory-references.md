@@ -1,8 +1,9 @@
 # Executable array memory/reference reader
 
 Implementation and development controls are committed in this lane's packet.
-The whole assignment remains blocked on ordinary A/D integration and fresh native/browser
-acceptance. Central registration is resolved by the adopted published master. Kernel validation does not
+Consumer integration is published in `70845978ab616a63b13d0dee8b31b28893ccf591`;
+Fresh native Identity and mandatory local-memory controls pass; four storage-array
+diamond cases remain pending, and browser validation awaits D. Central registration is resolved. Kernel validation does not
 satisfy those gates. No runtime acceptance marker is issued.
 
 Repository: `/workspace/solidity-lean`.
@@ -21,7 +22,7 @@ No push, default-branch merge, PR or publication was performed.
 | Queue | Result | Remaining acceptance |
 |---|---|---|
 | Immutable model/interface inventory and waiting backfill | Existing constructors, elaboration, run, calculus and producer boundaries inspected; original compiler fixtures committed before A's interface arrived | Source/Core/physical adequacy gaps remain independent |
-| Location-aware locals and allocation | Owned reader implemented; existing index/assignment recursion reused; all 84 valid fixtures intrinsically typed | A must wire the reader into the ordinary verifier |
+| Location-aware locals and allocation | Owned reader implemented; existing index/assignment recursion reused; all 84 valid fixtures intrinsically typed | Consumer wiring is resolved in 70845978; fresh native/browser controls remain |
 | Controls and intrinsic proofs | 42 exact source-body box/diamond kernel controls, 12 focused controls, 84 initial-model executions, 20 malformed refusals and two intrinsic type refusals pass | These are development checks; ordinary runtime control results remain pending |
 | Source-to-result and handoff | Existing source transport checked; exact API/import and normalization instructions below | Both fresh native and browser binaries and the final full gate |
 
@@ -61,10 +62,10 @@ substitute the state-root parser into local/allocation handlers, or retry anothe
 reader after an error. This preserves child failures and existing sequencing.
 Primitive/reference parameters and specifications retain Shared's behavior.
 
-The ordinary `Solidity/Tools/DirectRuntime.lean` entry point still uses its
-private legacy readers at this head. This lane did not edit it or Shared.
-A must replace that reader use through its owned integration while retaining
-the existing intrinsic obligation builder and trusted-verifier result path.
+The published `70845978` entry point imports Shared.Compose and Shared.Intrinsic,
+uses the canonical executableReader, and calls the shared obligation builder.
+The earlier private-reader blocker is resolved by A's producer migration; this
+lane did not edit DirectRuntime or Shared. The trusted result path is retained.
 D must rebuild both ordinary runtimes from that integrated head and execute the
 actual source controls; a listing/ready result is not verification.
 
@@ -502,3 +503,489 @@ The publication changes no DirectRuntime/executable-AST interface. Ordinary
 consumer integration,fresh native/browser positive diamond Identity and all
 modality controls,and the full merged VM gate remain open. No ordinary proof
 closure,full-tree cache freshness or RUNTIME_GATE_PASS is claimed.
+
+
+## Integrated consumer and isolated native validation: 70845978
+
+Rebased the assigned branch onto `70845978ab616a63b13d0dee8b31b28893ccf591`.
+The prior head764d75c2 is an ancestor,and owned files were preserved; recovery
+ref `refs/backup/memory-references-pre-708` retains it. This publication also
+contains A's DirectRuntime migration to executableReader/shared obligations.
+Earlier consumer-blocker notes above are historical and superseded here.
+
+Fresh native validation uses the existing producer build script unchanged,
+Lean4.24.0/source797c613 and default-O2,with the exact12GiB/no-swap bound,
+serial-j1 and H1 headroom guard. The first build completed its344-module Lean
+target but failed before C compilation because cached dependency C was not
+materialized. Automatic approval review rejected an attempt to restore shared
+.lake C files outside exclusive paths. No rejected action executed. The safer
+alternative is a clean detached build worktree under the owned runtime path.
+All343 source bytes and cache/trace OLean identities were checked;only new C
+files and an identical-source successful setup descriptor were created there.
+No shared output overwrite or producer source edit was used.
+
+The new native-source-controls runner freshly compiles84 AST fixtures from42
+source variants through compileFixture.rawAst,then calls the real native
+compiled verifier with metadata-selected box/diamond readings and records
+source/compiler/request/binary/C/bridge identities. A protocol/modality/sourceId
+error always forces failure;Identity diamond explicitly requires two cases.
+Unknown and unsupported results remain gaps. Separate22 malformed/type-error
+API controls are not counted as fresh valid-source cases. Runtime traces and
+limited named-symbol/dynamic-link observations do not prove exhaustive binary
+closure or compiler/Source adequacy. Final results follow after execution.
+
+This VM currently lacks Emscripten and the pinned WASM leanrt/libuv/GMP stage;
+only the Ubuntu build container is installed. D's dependency handoff requires
+rebuilding the existing browser producer at the same source bytes and running
+the fresh request packet through an actual browser worker. Boot/listing or
+Node-only WASM does not satisfy browser acceptance. No browser success or
+RUNTIME_GATE_PASS is claimed.
+
+
+### Actual native source-to-result observations
+
+Fresh isolated native build passed in1230.231 s,sampled aggregate peak RSS
+1737064 KiB,without guard stop. Binary20962960 bytes,
+SHA256 `5f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01`.
+Producer C/object reconstruction verified all206 object keys and exact14
+frontend-origin candidate bodies. All source/bridge/C bytes matched the
+manifest and successful cache outputs. Lean4.24.0,Lake5.0.0-src+797c613,
+clang19.1.2 and hostCC14.2.0 identities are recorded.
+
+All84 compiler-AST cases were freshly compiled from42 source variants through
+the pinned0.8.34 compiler,then checked by that real native binary,with no cached
+verdicts or certificates. Results:64proved,16refuted,4pending,zero protocol
+errors. Both exact Identity box and unannotated positive diamond twins prove
+in both compiler settings. False assertion and alias-is-not-copy controls
+refute in both modes. Default initialization,alias writes,distinct allocations,
+uint/bool/fixed/nested-reference cases prove. Zero/OOB read/write cases prove
+under box and refute under diamond,preventing an always-revert pass.
+
+The full native matrix command deliberately exits1:storageAlias.diamond and
+storageCopy.diamond are pending in both settings. None was falsely proved.
+These are proof-closure gaps,not admission failures:existing development
+controls refute their universal diamond properties. SourceCounterexample's
+existing primitive-storage guard at lines75/109 returns unknown for these
+array-root contracts. That guard and all statements/premises remain unchanged.
+No exclusion is proposed. A separate real-native gate rejects20malformed ASTs
+and two coherent type-error ASTs;these22 are not fresh valid-source cases.
+
+Traces covering all106 requests observe no serialized/source Lean environment access,
+extra execve/execveat,or network syscall. Dynamic-link and named-symbol audits
+pass. Fourteen frontend-origin candidates have exact compiled-body/object
+provenance and disassembly for independent generic-helper classification.
+These observations do not prove exhaustive forbidden-functionality absence
+over all9953 retained functions,compiler equivalence,or Source adequacy.
+
+Fresh owned-module build,both-reader development controls,54standard-only
+axiom reports and KeySort377/131 pass on the integrated source. Final full
+merged gates were not rerun here. The full assignment remains incomplete.
+
+`evidence/consumer-708/D-HANDOFF.json` is the explicit dependency packet to D:
+it gives the fresh84-request file,hash,case order,source/build manifest,required
+actual browser-worker checks,missing pinned WASM/emsdk dependencies,and the
+four preserved native unknowns. D must return fresh browser binary/worker
+evidence;boot/listing and Node-only WASM do not count. No browser verdict or
+RUNTIME_GATE_PASS is claimed. Original source/physical/world adequacy gaps
+and producer premises remain independent and unchanged.
+
+Independent read-only finder/skeptic reviewed the actual native binary,all206
+object hashes,all84 results,22refusals,85traces covering106requests,and the D
+request digest. All pre-execution runner findings were fixed before the real
+run. Both classified all14 exact C bodies/disassemblies as six IO-success
+initializers and eight generic equality/membership/UTF8/JSON/array helpers;
+none of those14 implements forbidden frontend/kernel functionality. This
+remains a candidate-specific classification,not exhaustive9953absence.
+
+The explicit signed-int mandatory subset is44/44 decisive as expected
+(`native-mandatory-controls.json`):11scenarios×2modalities×2pipelines. This
+subset does not replace or weaken the full84-case gate,which stays failed
+with four pending conditional-storage diamonds. All required positive cases
+in that full matrix are proved;no expected-negative case was proved.
+
+H41 pickup pack for checkpoint `c9230cc9692a5974728959907afa1f60733409ad` passed complete archive
+readback: 1707 artifacts,573 mappings,584977490 bytes.
+All seven Reader/Compose/Intrinsic/DirectRuntime/Admission/KernelControls/
+KernelMatrix output mappings are included. Packing exit0,69.750 s,64352 KiB
+sampled aggregate RSS. Delivery remains coordinator-pending.
+Archive: `/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/cache-c9230cc9/cache.tar.zst`.
+SHA256: `5a25d13aab46396562e7adcf9a2aa4f0bf6ce5f82ba193b0e1c68d43e6953be5`.
+Native binary remains at the absolute path recorded in provenance.json and
+D-HANDOFF.json,with SHA2565f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01.
+No ship-cache.sh was run;all prior verified archives remain preserved.
+
+## H82 recovery: independent H44 packaging of available bulk
+
+The restored checkout did not contain worker commit618dda88 or its native
+packet. Exact remote fetch returned `not our ref`;no evidence was fabricated.
+The missing assigned branch was recreated at pinned baseb419c3cf,then advanced
+to verified published master7ae5607c. The original clean work branch remains
+preserved. Full618dda88 integration/split still requires the authenticated
+original commit/bundle and missing runtime assets. No retiring member scope
+was edited or integrated, and no stopped/paused acknowledgement is assumed.
+
+An independent H44 item is complete for the available published data:479
+generated fixture/evidence files(4079938 payload bytes)are archived under
+`tests/directruntime-20261104/memory-references/runtime/h82-h44/`. Every member
+was read back and SHA256-checked;all working files remain at original paths.
+Only Git tracking is removed. `bulk-manifest.json` records absolute archive
+path,size,hash,coverage and retained source hashes. Functional sources,Lean
+statements,proof budgets and gate scripts are byte-identical to this published
+base. Local Git excludes prevent accidentally restaging the retained data;
+no existing production/configuration file was changed for that exclusion.
+
+For a fresh checkout,verify the archive hash and extract it at the repository
+root before running the unchanged gates. Existing fixture/admission generators
+remain available;missing data still fails the gates rather than being skipped.
+No fresh Lean/native/browser gate is claimed for this tracking-only increment.
+Original native/browser validation,full gates,missing worker data,and the
+consolidation merge-first handoff remain open.
+
+Separate read-only finder/skeptic reviews verified all479 preserved payload
+files,the archive/hash and14 retained-source hashes;neither used Lean/server
+or changed files. No findings. Documentation paths and whitespace checks pass.
+
+## H82b authenticated recovery and completed committed-data split
+
+The delivered bundle and D-HANDOFF hashes match the coordinator receipt. Local
+bundle verification and prerequisite ancestry pass; the committed D-HANDOFF
+blob matches the separately delivered bytes. Recovered head618dda88 is merged
+without resetting newer work. Its four native scripts remain byte-identical.
+All cumulative committed fixture/evidence bytes are preserved at original
+paths and in the second archive in bulk-manifest.json, with full member hash
+readback. Bulk is absent from the current Git index. Historical native/gate
+results above remain historical; no fresh runtime or Lean pass is inferred.
+The original untracked executable and cache remain unavailable, and browser
+validation, four storage-diamond pending cases and final gates remain open.
+The separately indexed frozen scope package has not arrived in this VM.
+
+Independent read-only finder and skeptic found no defects in bundle identity,
+ancestry, D-HANDOFF equality, source preservation, all814 archived payloads,
+and current index exclusion. Neither ran Lean. Python AST parsing of all
+three recovered Python scripts, node --check of the JavaScript script, and
+git diff --cached --check pass. Reader and the three Lean controls are
+byte-identical against both parents. The unnecessary recovered whitespace
+exemptions were omitted; existing configuration is unchanged.
+
+## H82b final metadata intake
+
+The final intake archive, manifest and SHA256SUMS match the dispatched hashes;
+all557 member-file hashes verify. The frozen assignment and live exclusive
+scope are present and read. This chain has no retiring members and no missing
+final retirements. Its merge-first head618dda88 is already an ancestor of
+ce8653db. The earlier missing-metadata wait is resolved; no other chain scope
+is absorbed. intake-receipt.json records exact input paths, sizes and hashes.
+
+The original untracked native executable and executable-cache archive remain
+unavailable. The restored D-HANDOFF is ready for existing coordinator routing;
+no browser relay acceptance or execution is inferred. Browser validation,
+conditional storage-diamond proof closure and final validation remain open.
+A fresh setup probe found Docker28.4.0 available with no running containers
+and no local images; Reader OLean is absent. No Lean/build ran outside a bounded
+scope, and no historical gate was relabelled as fresh.
+
+Independent read-only finder and skeptic each verified all557 hashes, five
+receipt input sizes/hashes, merge ancestry and the limited metadata scope;
+no findings, no Lean/build invocation. check-doc-paths.sh exits0: all Lean
+references resolve, with115 ambiguous references reported. git diff --check
+passes. No statement, definition, axiom, gate or budget changed.
+
+## Integrated-master VM development gates (H86 regeneration)
+
+Fresh origin/master fetch and merge report already up to date at2e7c1228,
+which contains coordinator publication5f1459653 and prior lane7f207811.
+No owned source or gate changed. Docker fallback verified memory.max=12GiB,
+memory.swap.max=0; Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613.
+Every Lean process uses explicit-j1 under the writer lock and headroom guard.
+
+The first build exited1 after1527.182s, peak3442104KiB aggregate RSS, because
+Admission needed generated normalized fixture bytes. Reader and both kernel
+controls built successfully. The unchanged generator regenerated106 inputs;
+the retry passed in2.407s, peak1044512KiB. Explicit per-file Admission,
+KernelControls and KernelMatrix gates passed in64.256s, peak1489104KiB.
+Both readers check86 admitted and20 malformed cases;84 compatible obligations
+and two incompatible initializers are distinguished. All54 theorem axiom
+reports contain only propext,Classical.choice,Quot.sound. KeySort passes:
+377 taclets,131 read-bearing,table covers131;10.870s,620252KiB. No guard stop.
+
+H41 pickup pack verifies complete archive readback:1653 artifacts,555 mappings,
+569342298bytes; all four owned-module output mappings are included. Eight
+other traces were omitted, so this is not full-tree cache freshness. Receipt
+and absolute archive/evidence paths,commands,hashes and source fingerprints
+are in vm-validation-receipt.json. Delivery is coordinator-pending; no
+ship-cache.sh ran. Bulk logs remain outside Git.
+
+H86 supersedes recovery waits: original untracked executable/cache bytes are
+unrecoverable provenance gaps, not outstanding artifact requests. Regenerate
+needed runtime outputs. Fresh native/browser execution, four historical
+storage-diamond pending cases and full final gates remain open; these fresh
+development gates do not establish RUNTIME_GATE_PASS or source adequacy.
+
+Independent read-only finder and skeptic found no defects: both checked the
+raw gate records, initial failure and retry,54 axiom reports, KeySort output,
+source fingerprints and cache/evidence archive hashes. Neither used Lean
+or changed files. Documentation/whitespace checks pass; no source was edited.
+
+## Fresh native regeneration after H86
+
+Regenerated pinned Lean source797c613 under the owned runtime directory.
+The unchanged native producer uses an owned prefix routing Lake through the
+existing-j1 wrapper. Exact12GiB/no-swap scope, serial CPU and headroom guard
+remain active. After recording the missing cc alternatives link, the supported
+CC selector names /usr/bin/gcc-14; generated C/link use pinned leanc. Native
+build passes637.285s, peak1679404KiB; binary20963016bytes.
+
+Fresh solc-to-native84-case gate exits1:64proved,16refuted,fourpending. Both
+exact Identity diamond twins prove; no required positive is missing and no
+negative is proved. Mandatory signed-int44/44 pass. All22 malformed/type
+refusals pass. No observed serialized Lean/source environment access, extra
+exec or network on these requests; observations are not exhaustive absence.
+
+Named-symbol/dynamic-link checks pass. The owned evidence helper was stale
+against current producer object keys; it now verifies every complete-input
+snapshot hash and matches206 exact compiled object keys, extracting14candidate
+bodies. Producer code is unchanged; old failure is retained. This is candidate
+body evidence, not an exhaustive9953-function absence theorem.
+
+Native packet and raw evidence remain outside Git, with paths/sizes/hashes in
+native-validation-receipt.json. Fresh browser handoff requests are regenerated.
+Four storage-diamond cases remain pending, browser execution and full final
+gates remain open. No RUNTIME_GATE_PASS or whole-assignment completion claim.
+
+Independent read-only finder and skeptic verified fresh binary SHA256, all206
+objects and60 build-input hashes. Exact14 C/ASM bodies retain six inert
+initializers and eight generic helpers; neither reviewer inferred exhaustive
+absence. No findings. Corrected helper instrumented gate passes26.875s,
+1228652KiB. Both native/evidence archives pass complete member readback.
+Refreshed H41 cache verifies1707 artifacts,573 mappings,588286089bytes and
+all seven Reader/Compose/Intrinsic/DirectRuntime/three-controls mappings.
+Delivery remains coordinator-pending, not full-tree freshness. Existing-owner
+counterexample request is recorded in counterexample-owner-ticket.json; no
+producer file was edited. Python syntax and whitespace checks pass.
+
+## H70 complete finite runtime/source census
+
+The runtime-boundary-census.py backfill guards the regression where the
+previous14-candidate audit is mistaken for a complete inventory. It reuses the
+unchanged producer extractor and checks the exact producer build-input path
+set before every input hash. It accounts for all343 Lean source fingerprints
+against committed HEAD and generated C,1631 traversed C-source fingerprints,
+206 selected module/object pairs,9953 selected functions and206 initializers.
+All bodies have fingerprints and retained C snapshots. All4987 closed values
+also have explicit initializer and initializer-body fingerprint rows. This is exhaustive
+enumeration under the existing extractor, not proof of its C-parser completeness.
+
+All14789 defined and298 undefined ELF symbol rows are retained. Of8405 text
+rows,3783 lack an exact selected-generated name; these represent3255 distinct
+names. All3255 are inventoried:3249 have name-based input-object/archive
+candidates and six do not(_start,_init,_fini,__do_init,__do_fini,compact_initialize).
+Matches are candidate origins, not a recovered linker map. Six current dynamic
+libraries and16 pinned static archives are fingerprinted. The bridge object,
+bridge C and generated initializer source receive explicit retained-input
+fingerprints. No row is filtered out by an approval/safety classification.
+
+The final census passes35.998s,1230236KiB aggregate RSS in the exact12GiB/
+zero-swap serial scope with existing headroom guard. Five isolated refusal
+controls pass0.602s,30264KiB: truncated source list,wrong binary hash,wrong
+build-input hash,truncated build-input set,and Python optimization disabling
+assertions. Neither gate invokes Lean or executes a verifier request. Both
+new scripts name their guarded regression in their docstrings(H90).
+
+Finder found the initial input-key completeness gap; skeptic found missing
+bridge/initializer fingerprint rows. Both were fixed before the final gates.
+Both independent read-only reviewers then verified all223 inventory file hashes
+and reconciled every count, with no remaining concrete finding. No Lean/server
+was used. Bulk C snapshots/JSONL/symbol dumps stay outside Git; the archive
+has complete per-member readback. runtime-census-receipt.json records exact
+commands,exits,timings,RSS,source/script fingerprints and absolute archive path.
+
+Zero forbidden lexical hits and14 origin-name candidates are observations,
+not semantic absence certification. Indirect calls,native runtime functions,
+dynamic code and exact link attribution remain unclassified at that level.
+No ordinary runtime trust-boundary/source-adequacy theorem or RUNTIME_GATE_PASS
+is inferred. H89 removes the solkey checker from new gates; earlier KeySort
+outputs remain historical. Browser ticket was accepted by native-browser and
+is not relayed again; live counterexample certification remains coordinator-
+owned for the four pending storageAlias/storageCopy diamond cases.
+
+The repository-wide documentation gate exits1 on four unchanged references in
+three files outside this lane; exact files,hashes and references are recorded
+in doc-reference-owner-ticket.json. Owned-document references and whitespace
+checks pass. The global failure is preserved and no overall checkpoint/final
+gate pass is claimed. No Lean source,theorem,axiom,budget or producer changed.
+
+Final closed-value addition was independently checked by finder and skeptic:
+all4987 unique rows bind matching initializer body fingerprints and all223
+output hashes verify. Both report no defect; the global documentation failure
+remains explicitly unresolved.
+
+## H70 native entry classification and exact replay attribution
+
+Replayed only the unchanged producer final link, with diagnostic map/trace and
+save-temps flags in an owned output directory. The entire20963016-byte ELF is
+byte-identical to the original(a3f920a74d53ea9f5201cbafa166900efd2495c65b1bd98e7c7ef26990bd8c6a).
+The retained initializer object closes the earlier ephemeral-object gap.
+The replay map assigns all8405 text-symbol rows to6639 unique input sections;
+zero text rows remain unattributed. All569 input identifiers have object/member
+fingerprints or an explicit linker-synthesized classification.
+
+The six previously unmatched names are classified from actual disassembly:
+
+| Name | Replay attribution and observed role |
+|---|---|
+| _start | Scrt1.o: ABI startup transfers main through __libc_start_main. |
+| __do_init | clang_rt.crtbegin.o: guarded exception-frame registration. |
+| __do_fini | clang_rt.crtbegin.o: guarded DSO finalization/frame deregistration. |
+| _init | crti.o prologue and optional weak profiling hook; crtn.o return tail. |
+| _fini | crti.o/crtn.o platform finalization prologue/return. |
+| compact_initialize | Retained initialize.o: dispatcher to206 rewritten module initializers. |
+
+All206 dispatcher calls match both retained C source and actual assembly.
+Zero-size init/fini symbol extents are not invented; both section input
+contributions remain recorded. The map is exact input-section attribution for
+a byte-identical replay, not reconstruction of the historical link process.
+Weak/dynamic callbacks are not declared semantically harmless or excluded.
+
+Full attribution gate passes4.495s,244804KiB in12GiB/no-swap serial scope.
+Six refusal controls pass0.602s,48240KiB: missing range,overlapping ranges,
+truncated input domain,changed original ELF,changed census fingerprint,and
+Python optimization disabling checks. The first overlap fixture incorrectly
+appended a duplicate outside the text section and failed; skeptic identified
+it, the duplicate now sits beside the real startup entry, and the failed
+receipt/maps remain preserved. Finder and skeptic verified the fix and all
+six results, with no remaining finding; neither invoked Lean/server.
+
+Bulk replay ELF/map/objects/disassembly and negative evidence stay outside Git.
+linker-attribution-receipt.json records exact commands,exits,wall/RSS,script
+hashes and archive path/size/hash with complete member readback. No producer,
+Lean source,theorem,axiom,budget or trust boundary changed. No semantic absence
+certification or RUNTIME_GATE_PASS is claimed. Existing browser,live four-case
+certification and relayed documentation waits remain; no duplicate ticket.
+
+Finder and skeptic also verified final archive/member hashes and compact
+receipt consistency. Owned-document paths and Python syntax/whitespace checks
+pass. The four unchanged global documentation failures remain with the
+existing relayed owners; they were not masked or re-run unchanged. Exact
+browser handoff and request-journal hashes still match the accepted bytes.
+
+## H71 exact-journal browser report intake
+
+Fetched native-browser owner headcc62220dcf1a47771536d75599b0ef588d143d62
+without merging or editing that lane. Both published replay/reconciliation
+manifest hashes match the authenticated dispatch. All343 runtime Lean source
+fingerprints match our native build at both owner build0140eb13 and owner
+headcc62220; bridge and closure script hashes also match. The local original
+537822-byte,84-request journal retains SHAae658ff7, and the committed harness
+retains SHA63a01fa7. Earlier field-only reconciliation had zero exact-object
+matches; the subsequent exact-wire replay report has84. They are distinct.
+
+The owner reports real native/Chromium WASM replay with64proved,16refuted,
+fourpending per backend,including mandatory positive Identity diamond and
+paired controls. This clears the functional execution wait by owner report.
+Its gate used revalidated prior fresh H81 binaries, not new builds for this
+replay;141.646s is functional gate time,not benchmark acceptance. No unchanged
+STOP is rerun. Four diamond cases and original whole-lane limits remain.
+
+Local metadata/source/journal checks pass1.806s,15764KiB in12GiB/no-swap
+scope. The owner's exact handoff and two raw evidence archives are absent on
+this VM. Executed harness SHA37be7c06 and reported report-only lineage cannot
+yet be independently checked here from raw bytes. The local committed harness
+SHA is verified; no parent-commit equality or local browser execution is
+invented. Current exact artifacts are requested through the existing owner
+channel in browser-result-artifact-request.json, with source/destination paths
+and hashes. This requests evidence delivery, not another execution or build.
+
+Bulk copied metadata/source fingerprints stay outside Git, sealed with complete
+archive readback. browser-result-intake-receipt.json records commands,scope,
+local checks,owner-reported results and missing raw evidence separately.
+Finder/skeptic report no intake defect; neither used Lean/server. No producer,
+Lean source,theorem,axiom,budget or trust boundary changed. No source/compiler
+preservation,universal machine correctness or RUNTIME_GATE_PASS is claimed.
+
+Final finder and skeptic independently verified the metadata archive hash,
+all seven members,checker hash and receipt boundaries. No findings. Owned
+document paths,Python syntax and whitespace pass; unchanged global reference
+failures remain with their existing relayed owners.
+
+## H77 exact handoff delivery and H30/H86 historical status
+
+The current native-browser handoff is now physically present at the requested
+owned inbox path. Its7130 bytes match SHAce3b211c7482f7c23761032aef098129c97152578eae9a6cb0484ab7ed594fe0.
+Independent intake checks reconcile its owner/build heads, gate command/exit/
+wall/resources and all decisive fields with the authenticated Git manifests.
+The local metadata gate passes1.807s,15172KiB in12GiB/no-swap scope.
+This verifies the delivered report, not execution of its absent raw evidence.
+
+The replay and reconciliation raw archives remain undelivered. Executed harness
+bytes and original-wire/results inspection remain pending. H71 already routed
+the exact request; H77 fulfills only the handoff file, so no duplicate request
+or runtime/build/STOP rerun is issued. The local status distinguishes verified
+handoff from incomplete raw evidence. browser-h77-intake-receipt.json records
+that boundary and seals the metadata/handoff archive with full member readback.
+
+Repeated H82b notice is source recovery only:618dda88 remains an ancestor,
+its verified bundle/D-HANDOFF and full committed-data H44 split are retained.
+The original untracked direct-check and cache-c9230cc9 bytes are explicitly
+UNVERIFIABLE underH30/H86,not recovery waits. Their old hashes remain reported,
+not locally verified. Regenerated native/cache artifacts have separate actual
+hashes and do not retroactively verify the lost bytes. bulk-manifest.json now
+also labels historical source/gate hash scope rather than treating old rows as
+current-tree pins. No recovered or archived data was discarded.
+
+Finder and skeptic verified these distinctions with no findings; neither used
+Lean/server or reran the browser. No Source/producer/theorem/axiom/budget/trust
+change,source/compiler preservation or RUNTIME_GATE_PASS is inferred. Four
+live storage-diamond certifications and relayed global documentation failures
+remain open alongside the two current raw-archive waits.
+
+Final finder/skeptic packaging review verifies all eight metadata archive
+members and receipt flags. No findings. Owned documentation references,Python
+syntax and whitespace pass; the unchanged global failure remains relayed.
+
+## H77 exact raw archive inspection
+
+Both requested current archives are delivered and locally hash-verified
+(da15f10b replay,40436ffb reconciliation). Safe extraction verifies every
+member type/path,unique name,manifest size and hash:197members,195payload
+files. Exact archived incoming handoff/journal bytes match our originals.
+Saved browser wires reconstruct the entire537822-byte journal byte-for-byte;
+all84 selectors,wire hashes and native stream/inventory/browser result objects
+reconcile. Counts remain64proved,16refuted,fourpending per backend. Exact
+Identity diamond is positive in both compiler settings on both backends.
+This inspects recorded native/Chromium execution;it does not run new queries.
+
+The executed harness decompresses to SHA37be7c06 and the committed harness
+matches63a01fa7 and owner Gitcc62220. Their sole changed line initializes the
+report boundary field;remaining lines match. The authenticated committed owner
+checker419791ae is reused only for data comparison/selector helpers;no older
+checker execution is inferred. Companion source/header/fixture hashes and
+recorded WASM boot/backend/environmentImports fields are checked separately.
+
+There are72 concrete fixture halt expectations(48success,16revert,8panic),
+plus12conditional labels. They are metadata,not72 independently observed
+runtime halt fields. The first inspector assumed every label was concrete and
+failed;that attempt is retained. Corrected inspection passes0.201s. Kernel
+rusage records self20744KiB and child maximum15416KiB,separate maxima;the
+0.2s aggregate sampler missed this short process and reported0. All work ran
+inside12GiB/no-swap scope. No browser/build/benchmark/STOP gate was rerun.
+
+Finder and skeptic independently checked all195payload hashes and exact
+wire/result/harness lineage with no findings;neither used Lean/server.
+Both raw-archive waits are cleared. Bulk and exact archives remain outside Git;
+browser-raw-inspection-receipt.json records reproducible commands,hashes and
+sealed evidence. Historical lost binary/cache remain UNVERIFIABLE.
+
+The already-present68fd8400 master merge was preserved. Fresh origin/master
+e8247d92 and code were checked before this item;the missing SourceCounterexample
+extension is not present. The refreshed global documentation check exits1
+with five missing references. PanicBytes prior reference is resolved;three
+prior references remain and two new references are routed through
+doc-reference-master-update.json. No checker policy or source is weakened.
+Four live diamond certifications,source/compiler preservation,universal
+machine correctness and original final gates remain open;RUNTIME_GATE_PASS
+is not claimed. No other completed census/classification work was repeated.
+
+Final finder/skeptic packaging review verified the16-member sealed evidence
+archive,inspector hash and current documentation routing. No findings. Owned
+references,Python syntax and whitespace pass;global five-reference gate fails
+as recorded. No unchanged browser/build/STOP gate was rerun.

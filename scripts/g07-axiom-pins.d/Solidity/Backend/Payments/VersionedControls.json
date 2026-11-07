@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/Payments/VersionedControls.lean:Solidity.Evm.PaymentControls.oracle_carries_weight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/VersionedControls.lean:Solidity.Evm.PaymentControls.paying_refused_both": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/VersionedControls.lean:Solidity.Evm.PaymentControls.paying_succeeds_both": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

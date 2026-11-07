@@ -1,0 +1,32 @@
+{
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.credit_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.credit_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.debit_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.debit_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.wide_credit_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryExecution.lean:Solidity.Source.MonetaryExecution.wide_zero_debit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

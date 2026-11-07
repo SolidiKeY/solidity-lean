@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "privateCandidateHead": "f7f9ad2d663b0fd3e98f93f05c85e0dfa395438d",
+  "producerHead": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+  "consumerSha256": "2e6aacb94a6781eefcd874d2270bc1c870eb7ca8749c56ec8cce550b6a96a221",
+  "queryLimits": {
+    "nodes": 100000,
+    "depth": 512
+  },
+  "declarations": [
+    {
+      "name": "Solidity.Roadmap.V17.ParallelInterface.observations",
+      "module": "Solidity.Roadmap.V17.ParallelInterface",
+      "kind": "definition",
+      "typeSha256": "5e2c1426318929f24fd0f49ae61a21b7a0007ef097d461e01cfb75f1c818332f",
+      "valueSha256": "3c73c8fcd7f982898334159b4b052ff6fb1fa1db72953593d679a9c0a51245be",
+      "axioms": [
+        "propext"
+      ],
+      "propositionBinders": [],
+      "metadataSha256": "5aefad70ad5c1ebcd94176ea7b03c7b842ee73a0794e6af6ceb22972f6d8743e"
+    },
+    {
+      "name": "Solidity.Roadmap.V17.ParallelInterface.observations_exact",
+      "module": "Solidity.Roadmap.V17.ParallelInterface",
+      "kind": "theorem",
+      "typeSha256": "c6f996c279d654f4c39072027856bb391690388a8912992c2d13d592749e94a3",
+      "valueSha256": "f96a81729c806f1d64fe175d51cd285c0a5de8092e228b7beb173a4e1a8dc84d",
+      "axioms": [
+        "propext"
+      ],
+      "propositionBinders": [],
+      "metadataSha256": "6123e42e59b2344d5534f8c5eef001735cd9a6d4446e97004873c0869981214f"
+    },
+    {
+      "name": "Solidity.Roadmap.V17.ParallelInterface.swapped_refused",
+      "module": "Solidity.Roadmap.V17.ParallelInterface",
+      "kind": "theorem",
+      "typeSha256": "1a170a7515097b6db8c28a2509226fec92c6990e8415ac07f86200d648b6c8b9",
+      "valueSha256": "e1e65cf4aa143b143c569f6b41d07c37ed3cb06e95757ae1810deec102a30079",
+      "axioms": [
+        "propext"
+      ],
+      "propositionBinders": [],
+      "metadataSha256": "2c3bbe4b8bc0ab023c7fb2d1cad7645e8bb656d00e517a0613d7a60fade7222b"
+    },
+    {
+      "name": "Solidity.Roadmap.V17.ParallelInterface.erased_revert_refused",
+      "module": "Solidity.Roadmap.V17.ParallelInterface",
+      "kind": "theorem",
+      "typeSha256": "5588bc3ba29c47d11de90b5fc7b948d115bc531fdf543dfadd378af889e5f8d7",
+      "valueSha256": "69009f336ab6fc7b703b1c02e8b852eec2ef25d0911ada16031c1d7162aa0d88",
+      "axioms": [
+        "propext"
+      ],
+      "propositionBinders": [],
+      "metadataSha256": "7df63cb555142a3e5dfbcf82fff7b2455e5fa1dfc0bed24bc3d9e4e914d9e529"
+    },
+    {
+      "name": "Solidity.Roadmap.V17.ParallelInterface.missing_component_refused",
+      "module": "Solidity.Roadmap.V17.ParallelInterface",
+      "kind": "theorem",
+      "typeSha256": "89ebb4e50044d6ad50f6ec1c265ac76aa6b7fe212629a3a2869a685ad70bd9e1",
+      "valueSha256": "d969185b1f47ca95b6162935cddadbddf8de83c5c9c6ec7d18b90a36f90bc518",
+      "axioms": [
+        "propext"
+      ],
+      "propositionBinders": [],
+      "metadataSha256": "2b2959dc6d2ea30d6f816d51933637ed15f37aeedcd48d8253f5a1c93bad9fbb"
+    }
+  ],
+  "semanticPremisesDischarged": false,
+  "releaseClosed": false,
+  "boundary": "Scoped existing G01/G07 concrete control only; no full source/compiler/EVM or global axiom closure."
+}

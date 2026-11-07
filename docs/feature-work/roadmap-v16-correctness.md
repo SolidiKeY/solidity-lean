@@ -150,3 +150,42 @@ These are constructor-copy byte postconditions, not Source constructor
 specifications, account installation, physical EVM execution or gas adequacy.
 No pending producer field, source admission, G50 deployment or full G51
 specification obligation is discharged by this component.
+
+
+## H55 historical calculus/compiler consumer port
+
+The consumer, 24 semantic controls and strict interface audit are ported from
+the exact eight-file historical export of `e5934822410d79093183ee16cae566d9e5616048`.
+The archive and every file hash were verified before extraction outside Git.
+All newer sections above are retained. The H55 work record is
+[h55-g49-final-theorem.md](h55-g49-final-theorem.md).
+
+[CalculusConsumer](../../tests/h55/g49-final-theorem/staging/CalculusConsumer.lean)
+(staged outside the library until its absent `Solidity.Roadmap.V16.CompilerConsumer`
+prerequisite lands; see the H55 work record) keeps the original six theorem signatures. Its checked
+compiler Input rules out exhausted execution; the genuine calculus diamond
+then gives a successful source postcondition. General target alternatives retain
+payment refusal and candidate representation. The nonpaying theorem removes
+that alternative only with the original syntactic pays equation. Box consumers
+require an actual successful target; callback consumers retain the explicit
+callback-free postcondition condition and do not prove callback bytecode behavior.
+Residual frames remain empty. No formula, rule or approved exhaustion reading
+is changed. These are scoped intrinsic-body consumers, not source admission or
+G49/G50 public correctness.
+
+The controls retain populated core and allocating-memory fixtures, protected
+stack and representation, the complete named 11-element observation vector,
+wrong value/post/alias/frame/allocation/failure controls, payment alternatives,
+invalid input, callback guard, panic and exhausted false-diamond boundaries.
+Their original fixture imports are currently missing from published master.
+No historical pass is asserted as a current proof pass.
+
+The strict audit retains all six contracts, 24 closed controls, dependency/axiom
+pins, producer hashes, 19 corruptions and 2290 open inherited obligations. Its
+original heap-audit dependency is also missing. The bulk premise JSON is not
+tracked; the committed H55 staging manifest pins its exact bytes and provenance.
+The audit accepts its external payload path as the fourth positional argument,
+after metadata, accounting report and output path. Original producer-revision
+and body checks remain unchanged; newer master additions are not overwritten
+to satisfy historical hashes. Registration changes and the historical
+LoopControls import are reserved for central integration.

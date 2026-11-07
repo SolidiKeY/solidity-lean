@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.canonical_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.decorated": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.decorated_base_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.extra_root_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.initialized_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.open_inner_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.reordered_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.unscoped_turn_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.wrong_child": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheckControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.Controls.wrong_index": [
+  "Quot.sound",
+  "propext"
+ ]
+}

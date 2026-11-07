@@ -1,0 +1,42 @@
+{
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_active_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_balance_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_dropped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_dropped_then_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_halt_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_revert_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.request_zero_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequest.lean:Solidity.Source.FailureExecution.requestScope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

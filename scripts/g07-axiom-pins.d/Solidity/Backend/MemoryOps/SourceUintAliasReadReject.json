@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintAliasReadReject.lean:Solidity.Backend.MemoryOps.source_items_cons_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAliasReadReject.lean:Solidity.Backend.MemoryOps.source_uint_alias_write_read_reject_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAliasReadReject.lean:Solidity.Backend.MemoryOps.source_uint_read_into_error_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

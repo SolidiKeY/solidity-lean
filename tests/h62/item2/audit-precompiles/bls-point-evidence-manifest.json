@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/BlsWitnesses.lean",
+      "size_bytes": 9470,
+      "sha256": "3cf59ee48504ecda2a8c0a9a964d484ba7d41c878aaff3578858a7fe6522b574"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/PointEvalWitnesses.lean",
+      "size_bytes": 2718,
+      "sha256": "fd1c291b6060cde77ee9318a097c67ca6c4246b397279fae98a2a036940e19fb"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/bls-pin-messages.json",
+      "size_bytes": 3217,
+      "sha256": "b6870d7991f76cef6b22625a80a34230ec061d49c366c0b2100772148fc6cd8d"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/bls-first424.json",
+      "size_bytes": 1682,
+      "sha256": "713a6b96ace3c8bc5d18dd655267c2d83f82a73d822a1f3fb8f5b42847fe9b5d"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/bls-first424.log",
+      "size_bytes": 1899,
+      "sha256": "883bb94387deec534eddc49b92f5088e3c66e0838e32503acb3a7b343793c610"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/bls-pinned424.json",
+      "size_bytes": 1682,
+      "sha256": "c37d1c7d0690b4489ccfd7b4d2cb11e537582619fa26328d39e70bc23c950eda"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/bls-pinned424.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/point-first424.json",
+      "size_bytes": 2212,
+      "sha256": "486b11a961e49abd06415fc546aca5ce8d08c3e0780d21d823afa44d43cb27e4"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/point-first424.log",
+      "size_bytes": 489,
+      "sha256": "d2e315eeb837f0b7d84635b899a899b22ceb30ec93bfd137810f5f800dd25c1e"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/point-pinned424.json",
+      "size_bytes": 2212,
+      "sha256": "67550d4d9dff614105d786f81d1d42075ce8cb7f362760fc70d5221425f551bd"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/point-pinned424.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "note": "Current file hashes refreshed; historical receipts retain their original recorded source snapshots and are not current acceptance receipts."
+}

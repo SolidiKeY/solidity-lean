@@ -1,0 +1,38 @@
+{
+ "Solidity/Backend/AbiEntry/UIntBindingControls.lean:Solidity.Backend.AbiEntry.UIntBindingControls.bound_argument_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingControls.lean:Solidity.Backend.AbiEntry.UIntBindingControls.dirty_high_bits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingControls.lean:Solidity.Backend.AbiEntry.UIntBindingControls.insufficient_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingControls.lean:Solidity.Backend.AbiEntry.UIntBindingControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/UIntBindingControls.lean:Solidity.Backend.AbiEntry.UIntBindingControls.raw_value_and_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingControls.lean:Solidity.Backend.AbiEntry.UIntBindingControls.short_head": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingControls.lean:Solidity.Backend.AbiEntry.UIntBindingControls.wide_accepts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/UIntBindingControls.lean:Solidity.Backend.AbiEntry.UIntBindingControls.zero_width_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

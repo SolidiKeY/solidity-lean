@@ -1,0 +1,7 @@
+/-! RawGrowingBlock.adapter closes the single Boolean declaration around an
+actual checked Items tail into an existing same-context checked block producer.
+Its Source.execS block correspondence concretely composes the growing sequence
+with actual scope restoration/Out.close, retaining checked/coherent premises
+and reached error state. Drop removes only the bound prefix via typed values.
+Mutation/control/dirty-word controls are in Solidity.Yul.Checks.RawGrowingBlock.
+General growing-for/declaration-group/frontend admission remains separate. -/

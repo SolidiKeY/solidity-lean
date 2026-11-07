@@ -1,0 +1,32 @@
+{
+ "Solidity/Yul/Compilation/ScopedForCompletionControls.lean:Solidity.Yul.Compilation.ScopedForCompletion.Controls.nonzero_recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedForCompletionControls.lean:Solidity.Yul.Compilation.ScopedForCompletion.Controls.phase_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedForCompletionControls.lean:Solidity.Yul.Compilation.ScopedForCompletion.Controls.recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedForCompletionControls.lean:Solidity.Yul.Compilation.ScopedForCompletion.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedForCompletionControls.lean:Solidity.Yul.Compilation.ScopedForCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedForCompletionControls.lean:Solidity.Yul.Compilation.ScopedForCompletion.Controls.zero_recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

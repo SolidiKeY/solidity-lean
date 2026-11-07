@@ -1,0 +1,38 @@
+{
+ "Solidity/Backend/AbiEntry/SizeBranchesControls.lean:Solidity.Backend.AbiEntry.SizeBranchesControls.boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranchesControls.lean:Solidity.Backend.AbiEntry.SizeBranchesControls.escaping_raw_skip_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranchesControls.lean:Solidity.Backend.AbiEntry.SizeBranchesControls.full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranchesControls.lean:Solidity.Backend.AbiEntry.SizeBranchesControls.malformed_size_faults": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranchesControls.lean:Solidity.Backend.AbiEntry.SizeBranchesControls.protected_state": [],
+ "Solidity/Backend/AbiEntry/SizeBranchesControls.lean:Solidity.Backend.AbiEntry.SizeBranchesControls.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranchesControls.lean:Solidity.Backend.AbiEntry.SizeBranchesControls.short": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SizeBranchesControls.lean:Solidity.Backend.AbiEntry.SizeBranchesControls.short_revert_is_terminal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

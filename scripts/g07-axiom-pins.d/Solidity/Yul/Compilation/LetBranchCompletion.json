@@ -1,0 +1,20 @@
+{
+ "Solidity/Yul/Compilation/LetBranchCompletion.lean:Solidity.Yul.Compilation.LetBranchCompletion.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletion.lean:Solidity.Yul.Compilation.LetBranchCompletion.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletion.lean:Solidity.Yul.Compilation.LetBranchCompletion.source_false": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletion.lean:Solidity.Yul.Compilation.LetBranchCompletion.source_true": [
+  "Quot.sound",
+  "propext"
+ ]
+}

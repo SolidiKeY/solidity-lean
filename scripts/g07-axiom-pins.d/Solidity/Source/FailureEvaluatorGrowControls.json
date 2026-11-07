@@ -1,0 +1,32 @@
+{
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.action_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.actual_fixture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.erase_prefix_not_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.fixture_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.Controls.growth_does_not_fix_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEvaluatorGrowControls.lean:Solidity.Source.FailureExecution.PlannedGrow.growAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

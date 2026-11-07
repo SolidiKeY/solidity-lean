@@ -1,6 +1,6 @@
 # DirectRuntime control and tuple packet
 
-Status: all three public modules are registered, and A's canonical composed reader is published at b86ae456. All original obligation controls now pass for both the standalone and canonical readers; owned proofs, native model controls and the full VM gate pass. DirectRuntime still uses its original private readers. Runtime migration and post-migration validation remain pending, so the original assignment is blocked, not complete.
+Status: retired and explicitly paused by the human. DirectRuntime migration is present at 70845978; the older migration wait below is historical and withdrawn. Ten actual production API controls and the fourteen theorem audits pass. The in-flight full build was stopped for retirement and is incomplete. Native production closure validation and other open items transfer to solidity-directruntime-20261104/shared-translator; no whole-goal completion is claimed.
 
 Repository: `/workspace/solidity-lean`. Branch: `codex/solidity-directruntime-20261104/control-tuples`. Original pinned base: `b419c3cf4f642ae519b66bebc26cdf2f7cf93574`. Published dependency checkpoint: `89373e34cdfd6bb5db7054b1c204d01edffc5fa7`, merged into this owned branch without dropping the backfill commit `cfd5359cffb3c64804d9383f8978605f1b21853e`. Shared translator interface increment: `b92fc3a1d170be29180f521c0fb9c959d5aa74cc`. The final committed head is reported separately to avoid a self-referential committed hash.
 
@@ -190,3 +190,15 @@ Fetched and verified published 8bf8321873befa3f35ca31e97e5339a1baee93e6 descendi
 ## Remote dependency audit 3ad22f66
 
 Fetched 3ad22f66d8fc6431378c22e71823436c79dede7f and verified ancestry from 8bf83218. ExecutableAst and Tools.DirectRuntime remain unchanged from b86ae456; DirectRuntime migration is still pending. Remote inspected without adoption; no new Lean gate, cache freshness or completion claim. See evidence/remote-3ad22f-audit.json.
+
+## Human-authorized retirement and stopped handoff (2026-11-06)
+
+The successor queue relay was accepted before retirement: solidity-directruntime-20261104/shared-translator. Only a minimal safe checkpoint is saved; no further implementation continuation is authorized. Existing VM/branch/evidence are preserved. Source change this turn is additive ProductionControls.lean: ten expected results through the landed DirectRuntime.check API. MCP reports zero errors; formal per-file controls and fourteen standard-only theorem axiom reports pass. Independent read-only finder and skeptic report no defect, with no Lean/server/builds/writes. These checks are Lean-hosted production API observations, not native closure or Source/backend adequacy.
+
+The full gate was actively stopped by explicit retirement (exit137, resource_stop=false); only touched and preceding per-file checks passed. It is not a full-gate pass or a proof/timing failure. The queued pinned Lean source fetch was cancelled. A native validation draft is preserved unexecuted outside git; no native production binary was built this turn.
+
+Complete original frozen prompt, original/current work and backfill queue, exact scope and retirement authority are committed under tests/directruntime-20261104/control-tuples/retirement/. Receipt and SHA256SUMS there authenticate small handoff files. Bulk interrupted logs/draft are outside git in /workspace/control-tuples-retirement-70845978/retirement-evidence.tar.gz, with its actual hash in retirement/receipt.json. Original historical evidence remains in /workspace/control-tuples-preserved-316747ed.
+
+Requested goal state is PAUSED. The exposed goal tool only supports complete or blocked, with no pause/get operation; no substitute completion/reset/new goal was used. This capability failure is reported to the coordinator. No model-turn push was made because H71 assigns original branch publication to the host prefetcher. The final head, cumulative owned patch and complete two-ref Git bundle are reported externally with hashes; successor integration is not claimed. No new safe queue item remains authorized to this retired worker.
+
+Successor primitive-return checkpoint: the shared assertion builder now prepares wide primitive return slots with existing lowering. The obsolete returnGuard refusal control is an actual proved-formula check; reference refusal remains. Fresh13source observations give9proved/4explicitunsupported with exact identity/status/reason guards in PrimitiveReturnControls.lean. No Source/native/ABI adequacy or whole-lane completion is inferred; consumer native/WASM recheck remains pending.

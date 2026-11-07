@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "gate_records": "/workspace/migrate-roadmap-evidence/h82-retirement/historical-gates.json",
+  "sha256": "b93eb63b97f430816b1a31f5fc30f70003631a2c60262db651e85f7099cef42e",
+  "count": 7,
+  "note": "Bulk exact archived commands, scripts and module outcomes retained off Git; final SHA256SUMS seals this file. Original generators remain committed."
+}

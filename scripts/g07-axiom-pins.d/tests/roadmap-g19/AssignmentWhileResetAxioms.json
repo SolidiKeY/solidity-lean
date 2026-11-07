@@ -1,0 +1,148 @@
+{
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.block_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.body": [
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.body_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.condition_sub": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.machine": [],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.omitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.omitted_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.omitted_loop_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.omitted_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.self_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.literal_sub": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.loop_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.restore_self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.run_reset_loop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.source_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.source_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.source_literal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.sourceAfter": [],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileResetAxioms.lean:Solidity.Lowering.G19.AssignmentWhileReset.targetAfter": [
+  "propext"
+ ]
+}

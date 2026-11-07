@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "handoff_to": "solidity-inline-assembly5-20261031/vy3-compilation",
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Approved v4.35 Solidity/Syntax/Raw.lean prerequisite fix; ticket accepted per H70, no local delivery found at last check"
+    },
+    {
+      "lane": "solidity-inline-assembly5-20261031/vy3-compilation",
+      "item": "Successor integration, additive proof/type/axiom/refusal validation, registration, full affected/final gates and before/after measurements"
+    }
+  ],
+  "withdrawn": "Earlier exact-file requests for statement-preserving proof-only changes withdrawn under H82; no dependent-definition/statement/interface/budget/axiom/exclusion permission inferred",
+  "state": "Stopped for H82 retirement; tool cannot represent PAUSED; no new implementation continuation authorized"
+}

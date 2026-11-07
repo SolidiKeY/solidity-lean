@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "module": "Solidity.Evm.Compiler",
+  "declarations": [
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.correct",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.memory_input",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.referenceArray_input",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.object_input",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.construction_input",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.object_rep",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.construction_rep",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.Rep",
+      "kind": "definition"
+    },
+    {
+      "name": "Solidity.Evm.Compiler.Compilation.Input",
+      "kind": "definition"
+    }
+  ]
+}

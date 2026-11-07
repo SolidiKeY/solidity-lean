@@ -861,3 +861,752 @@ partial and O02/O03 remain open; this packaging fix establishes no additional
 D6/compiler/EVM/gas theorem and changes no premise or expected verdict.
 
 Final read-only finder and skeptic independently verified the14-file split, unchanged source/scripts/config, both committed hashes, all210 raw files and211 archive entries. No findings; no Lean/server/builds or writes by reviewers.
+
+## Moved lane (Claude VM) — O02 value passes checkpoint — 2026-11-05
+
+Status lines in the sections above that say O02 is "OPEN", "not begun" or that "No
+O02 pass implementation is claimed" are historical (Codex VM) and superseded by this
+section and the ones after it.
+
+Batch moved4-20261105, branch `cloud/moved4-20261105/vo1-optimizer`, started from
+`origin/cloud/vo1-optimizer-move` (cdfa3601) merged with origin/master (aec9adf1,
+already contained). The Codex-VM receipts, `bounded.py`/`bin/lake`/`runtime.toml`
+tooling and the "restore evidence before bounded.py" instruction above apply only to
+that VM and are not used or cited here; every gate below is fresh. No published
+signature of `Optimizer/Pass.lean` changed; O02 only adds modules.
+
+### Delivered passes (all over the existing intrinsic `Val C Γ p` / `Prog C Γ Δ`)
+
+| Pass | Module | Headline theorem (exact) |
+|---|---|---|
+| constant folding | `Optimizer/ConstFold.lean` | `Val.cfold_evalT σ v : v.cfold.evalT σ = v.evalT σ` |
+| fold + dead branches | `Optimizer/StmtFold.lean` | `Prog.cfold_runC P : Prog.runC (Prog.cfold P) = Prog.runC P` |
+| any proved expression pass, lifted | `Optimizer/StmtFold.lean` | `Prog.vopt_runC V P : Prog.runC (Prog.vopt V P) = Prog.runC P` |
+| constant + copy propagation | `Optimizer/Propagate.lean` | `Prog.cprop_runC F P σ (hF : F.Holds σ) : Prog.runC (Prog.cprop F P) σ = Prog.runC P σ`; `Prog.cprop_empty_runC P` (no premise) |
+| expression simplification | `Optimizer/Simplify.lean` | `Val.simp_evalT σ v`; `Prog.simplify_runC P` |
+| unused-variable elimination | `Optimizer/UnusedVar.lean` | `blockDecl_runC … (hi : initSafe init = true) … (hw : P'.wk (.drop .refl) = ⟨Γ₁, h', P⟩)`; `Prog.uve_runC P` (no premise) |
+
+O01 instances (`Preserves SameRun _`): `cfold_preserves`, `vopt_preserves`,
+`cprop_preserves`, `uve_preserves`, where `SameRun P Q := Prog.runC P = Prog.runC Q`
+(equality of the typed run as a function of the typed state: value or halt kind,
+final storage, heap, ledger, locals and heap growth). The pipeline
+`[cprop, simplify, cfold, uve]` is certified in `O02Controls.o02_pipeline_preserves`
+through the unchanged `Preserves.pipeline` (O01 laws). Only the D6 binding remains
+X01's: `SameRun` is stronger than "every observation except gas values" because the
+lowering IR has no gas observation (D1 artifact/gas oracle not yet frozen), so no
+gas value is equated or fabricated.
+
+### Exact behaviour and boundaries
+
+- Failures are kept, never folded: `ofOpt none` (checked overflow outside
+  `checked { }`, zero divisor, out-of-range conversion; a revert in this model, see
+  solc-alignment "Checked arithmetic") leaves the node as written; `assert(false)`
+  (Panic) and `require(false)` are never dropped; inside `checked { }` the elaborator's
+  range `assert`s (`Stmt.guard`) are ordinary `assert`s and keep their Panic. Controls:
+  `overflow_kept`, `overflow_reverts`, `assert_folded`, `assert_panics`.
+- Short circuit: a literal left operand that decides `&&`/`||` drops the right operand
+  exactly when `BinOp.shortT` does.
+- Dead code: `if (lit)` becomes the block of the branch taken; `require(true);`,
+  `assert(true);`, `while (false) …` are dropped from the sequence (with the loop's
+  `LoopAnn`, which the run does not read; a verification layer reading annotations of
+  an optimized program would see none for that loop). No pass recurses into `call`,
+  `callRec`, `callReceiver`, `tryCall` or `catchData` bodies.
+- Positions rewritten: local assignments, local declarations, `require`, `assert`,
+  `transfer`/`send` operands, `if`/`while` conditions, recursively in branches,
+  blocks and loop bodies. Not rewritten (left exactly as written, so trivially
+  preserved): storage/memory path index expressions, `opAssign`/`incDec`, storage
+  writes, calls and their bodies, `try`/`catch`, receiver calls, revert data.
+- Propagation records a fact only from `x = e;` / `T x = e;` whose propagated and
+  folded right side is a literal or a local (never an environment read); assigning a
+  local kills the fact for it and every fact reading it; facts survive local
+  assignments (except killed ones), declarations, `require` and `assert`; other
+  statements reset to no facts; `transfer`/`send` operands are folded but not
+  propagated into; branches,
+  blocks and loop exits reset to no facts; loop bodies and conditions start with no
+  facts. Controls: `prop_constant`, `prop_copy`, `prop_killed`.
+- Simplifier (solc `RuleList.h` reference): `X+0`, `0+X`, `X-0`, `X*1`, `1*X`, `X/1`
+  at `uint`/`int`; `X&&true`, `true&&X`, `X||false`, `false||X`; `s-s → 0`,
+  `s==s → true`, `s!=s → false` only for a simple `s`. Not implemented: `X*0 → 0`
+  (for any `X`; for a compound `X` it would hide a halt), `X-X → 0` for a compound `X`
+  (same reason), bitwise and shift identities, and the wrapping-arithmetic rules
+  stated modulo `2^256`. Negative controls:
+  `simp_sub_overflow_kept`, `unrestricted_sub_wrong`, `simp_mul_zero_kept`,
+  `unrestricted_mul_wrong`.
+- Unused variables: a declaration that is the block's *first statement*, whose
+  initialiser is absent or simple and whose remaining body strengthens (`Prog.str?`, fragment: local
+  assignment/declaration, `require`, `assert`, `revert`, `assume(false)`, `transfer`,
+  `if`, blocks, over path-free values) is removed. Iterating the pass removes a run of leading unused declarations
+  only; a declaration after another kept statement, a declaration at a body's top
+  level outside a block (its removal would change the context type), an unused but
+  assigned local (`x = …` does not strengthen), and any block whose rest uses storage
+  or memory paths, `send`, a loop or a call are left as written. Only an explicit `{ … }` block is a candidate: `if` branches, loop
+  bodies, function bodies and the top-level program are not (an `if (lit)` becomes a
+  block under `Prog.cfold` first). Names: `ConstFold.Prog.str?_wk`,
+  `ConstFold.Prog.uve_runC`, `ConstFold.Prog.cprop_runC` live in namespace
+  `Solidity.Optimizer.ConstFold`. A failing initialiser is kept (`failing_init_kept`,
+  `failing_init_drop_wrong`). Semantics reuse the existing `Prog.run_wk` and
+  `TWkRel.drop` unchanged.
+
+Controls: `tests/fullscope-20261104/vo1/O02Controls.lean` (not imported by the
+generated roots; checked by per-file Lean diagnostics). Axioms of every headline
+theorem and control: `propext`, `Classical.choice`, `Quot.sound` only (the classical
+ones come through the interpreter's `TLoop.run`); no `sorry`, no `native_decide`, no
+heartbeat option.
+
+Registration: the five modules are in the generated `Solidity.lean`
+(`register.sh`), with rows in `docs/module-map/compiler-transport.d/vo1-optimizer.md`
+(`fragments.sh`). `scripts/check-layers.mjs`: 857 core modules, 0 reach the
+elaborator (the Optimizer CORE enumeration stays COORD's, unchanged).
+
+### Composition with `Compilation.correct` (caveat)
+
+`SameRun` is equality of `Prog.runC`; `Compilation.correct` (`Evm/Compiler.lean`) is
+stated over `P.run` (the recursor form; rewrite with `Prog.runR_eq`) and its
+agreement premise reads syntactic properties of the program (`Prog.asserts`,
+`Evm.Prog.pays`, the `Evm.Prog.pushes` frame). A pass can change those
+(`if (false) { push }` changes `pushes`; dropping `assert(true)` changes `asserts`),
+and compilation is partial (`Option`), with no proof here that optimizer output stays
+in the compiled fragment. So composing an O02 pass before the compiler gives the
+compiler theorem about the optimized program, not literally the original's
+statement; the bridge (coverage plus the agreement premises over `SameRun`) is part
+of the open O01 composition item and needs the V09/VY3 adapters. `SameRun` also fixes
+heap typing/contents and final locals, which is exact for O02 but stronger than D6
+for future memory passes (dead allocation, memory dead stores) in O03.
+
+### Remaining O02 obligations
+
+- D6 binding (X01) and D1 artifact/gas oracle: open, waiting on X01.
+- Optimizing inside storage/memory index expressions, compound assignments and call
+  arguments, and recursing into call/try/catch bodies: not done (left as written);
+  these need path-level congruences.
+- Dead-code elimination beyond literal conditions: code after `revert`/`assert(false)`,
+  dead stores and unused pure assignments are not removed.
+- solc rules not implemented (valid under checked semantics): bitwise/shift
+  identities, `X%1`, `X**0`, `X^X`, `X&X`, `!!X` (see the Simplify update below for
+  the ones added later).
+- Unused-variable elimination outside the strengthening fragment and of non-first
+  declarations within one pass: not done.
+
+### O02 checkpoint gates (fresh, this VM) — 2026-11-06
+
+Lean 4.24.0 (elan toolchain `leanprover--lean4---v4.24.0`), 4 cores, 15 GB.
+
+- `gate.sh per-file` over all lane files at 23f40bc5: PASS for `Optimizer/{Pass,Laws,
+  ConstFold,StmtFold,Propagate,Simplify,UnusedVar,CSE,RoadmapComposition,Controls}.lean`
+  and `tests/fullscope-20261104/vo1/{O02Controls,O03Controls,PipelineControls,
+  ValueValidatorControls,YulValidatorControls}.lean` (each `lake env lean FILE`,
+  0 errors; 1–16 s each).
+- Lean MCP diagnostics: no errors or warnings on every touched file.
+- `#print axioms` (in the control files): every headline theorem uses only `propext`,
+  `Classical.choice`, `Quot.sound` (`Val.pbeq_eq`: `propext`, `Quot.sound`).
+- `register.sh --check`, `fragments.sh --check`: PASS. `check-layers.mjs`: 857 core
+  modules, 0 reach the elaborator or the checked parser adapters.
+- `gate.sh checkpoint` (`lake build Solidity`, cold): NOT COMPLETED. The cold library
+  build is 5412 jobs on a mostly sequential chain (single modules up to 410 s, e.g.
+  `Backend/Scalar/PowerBounds`); after ~65 min it had built ~280 modules, so it was
+  stopped. No master Lake artifacts were present in this VM's cache. `gate.sh touched`
+  expands to the same full build because the generated root changed. This is a
+  resource stop, recorded as open: the integrated build needs the coordinator's warm
+  cache.
+
+Reviews (separate read-only finder and skeptic, no Lean server):
+- Finder: no high-severity defect; confirmed `SameRun` non-vacuous and the dead-code
+  rewrites against `Run.lean`. Medium: Simplify doc implied a `s*0` rule (now
+  implemented); `Stmt.uve` doc said "every block" (now "explicit blocks"). Low:
+  Propagate doc ("only across require/assert") corrected; duplicate/dead tactic
+  alternatives removed; unused `ofInt?_val` removed; long lines wrapped; namespace
+  names now cited as `ConstFold.*`. All fixed.
+- Skeptic: proofs hold; O02 not complete in the D6/compiler sense (D6 binding and
+  `Compilation.correct` composition are open, waiting on X01/V09 — disclosed above);
+  disclosure fixes applied for unused-variable coverage, omitted solc rules, thin
+  dead-code elimination, the composition caveat (`asserts`/`pays`/`pushes`, partial
+  compilation, `runR_eq`), stale status lines. Added rules `s*0`, `X**1`, `X>>0`,
+  `s<s`/`s>s`/`s<=s`/`s>=s` and controls for loop propagation, `while(false)` removal,
+  short circuit, a storage write left as written.
+
+## O03 checkpoint: common-subexpression elimination — 2026-11-06
+
+`Optimizer/CSE.lean`. After `x = e;` or `T x = e;` completes, later occurrences of `e`
+are replaced by `x` while `x` and the locals `e` reads are unassigned (solc's
+`CommonSubexpressionEliminator`). Theorems: `Val.pbeq_eq` (typed syntactic equality on
+the pure fragment is equality, no classical decision), `Val.cse_evalT (hA : Avail.Holds A σ)`,
+`ConstFold.Prog.cse_runC A P σ hA`, `ConstFold.Prog.cse_empty_runC P` (no premise),
+`cse_preserves`. Entries survive local assignments only when pure and independent of
+the assigned local (`Val.indep`), and survive declarations, `require`, `assert`; any
+other statement or scope exit clears them; loop bodies start empty. Controls
+(`O03Controls.lean`): `cse_replaced`, `cse_killed`, and the run-level negative control
+`wrong_kill_differs` (the unkilled rewrite yields `1` where the program yields `8`).
+
+O03 remaining: internal-function inlining, unused-function pruning (open, below),
+redundant `sload`/`mload`/store elimination and LICM (wait for X06 aliasing facts; no
+assumed facts). CSE does not look inside storage/memory reads or across calls.
+
+CSE review (separate read-only finder+skeptic, no Lean server): no soundness defect.
+Finder: the docstring did not distinguish entry creation by `x = e` (pure, independent
+of `x`) from `T x = e` (any `e`; impure entries can never match since `Val.pbeq` is
+`false` outside the pure fragment) — docstring fixed; `get_set_ne'`/`get_set'` copy
+`RunFrame`'s lemmas to avoid importing it (kept). Skeptic: `Prog.cse_empty_runC` is
+premise-free run equality; storage-read entries cannot be reused after a storage write
+(storage-writing statements clear entries, and impure entries never match); coverage
+gaps recorded above (no storage/memory read CSE, nothing across joins or into loops,
+syntactic matching only).
+
+## O03 checkpoint: inlining of internal calls — 2026-11-06
+
+`Optimizer/Inline.lean`. A void internal call with value arguments,
+`.call f args .none body` with `args.allVal = true`, becomes
+`{ T₁ x₁ = e₁; …; Tₙ xₙ = eₙ; body' }` (`inlineBlock`), each argument read past the
+parameters before it (`Val.wk (thinUnder _)`) and `body' := (body.wk (thinTop Γ ps)).2.2`.
+Theorems (exact): `bindArgs_runC` (the declarations evaluate the arguments in
+`Args.evalT`'s order with its halts); `inlineBlock_runC f args h body :
+Stmt.runC (inlineBlock args h body) = Stmt.runC (.call f args .none body)`;
+`ConstFold.Prog.inl_runC P` (no premise); `inl_preserves`. The proof reuses the
+existing `Prog.run_wk`, `TWkRel.drop`, `Prog.wk_over`, `TEnv.off_wk` unchanged; the new
+environment lemmas are `put_top`, `put_under`, `drop_put_top`, `off_top`,
+`off_bot_inj` (an environment is determined by the list of its values).
+Controls (`O03Controls.lean`): `call_inlined` (exact inlined syntax), `inlined_ok`/
+`call_ok` and `inlined_reverts`/`call_reverts` on concrete states, `ret_call_kept`.
+
+Not covered (left as written): calls with return values (`CallRet.val/rets/mem/storage`),
+(storage or memory parameters: inlined since the X06 follow-up) `callRec`, receiver calls, `try` self-calls; calls
+inside an inlined body are not inlined in the same pass (run it again).
+
+### Unused-function pruning: open
+
+In the lowering IR an internal callee has no table entry: every `Stmt.call` carries its
+callee's body, so an unused internal function has no representation to prune there.
+In Yul (`Stmt.functions ss bodies rest`) pruning a group that `rest` never calls needs a
+strengthening of Yul syntax over `Member` indices and a fuel-shifted simulation of
+`Yul.Closed.evalStmtNode` (the `functions` node consumes one fuel step), which is not
+done. Open, no claim.
+
+### Remaining O03
+
+- Redundant `sload`/`mload`/store elimination and LICM of memory/storage reads: wait for
+  X06 aliasing facts (VX4, wave B); no assumed aliasing facts.
+- (Superseded by the X06 follow-up below: guarded LICM, `Prog.licm`.) LICM of pure expressions: a hoisted expression may fail when the loop runs zero
+  times, so only failure-free expressions could move; not done.
+- Unused-function pruning (above), inlining with return values/reference parameters.
+
+Inlining review (separate read-only finder+skeptic, no Lean server): no defect in the
+theorem; `inlineBlock_runC` is function equality with the single premise
+`args.allVal = true`, halts and their order match `Args.evalT`, the caller's locals
+match `leaveT`, and nothing else in `TRun.call` changes. Fixed: the module doc named
+`inlineCall_runC` for the main lemma (now `inlineBlock_runC`); coverage text now says
+calls inside `try`/receiver/non-inlined call bodies are not rewritten, and that only
+`Stmt.runC` is preserved (the call name, and gas/code-size/stack-depth effects that
+solc's inliner trades, are not modelled — the latter is a D1/D6 benchmark item).
+Added controls: a two-argument call whose second argument reads the caller's local
+(`two_args_inlined`, `two_args_ok`, `two_args_call_ok`) and the negative control
+`wrong_inline_reverts` (an inliner without re-indexing reverts where the call succeeds).
+
+### Inlining with one value return — 2026-11-06
+
+`inlineBlockVal_runC f args h p r res body : Stmt.runC (inlineBlockVal args h p r res body) =
+Stmt.runC (.call f args (.val p r res) body)` (premise `args.allVal = true` only). The call
+`x = g(args)` (or `g(args);` with the value discarded, `res = none`) becomes
+`{ params; T r; { body' } x = r; }`. It rests on the new `frame_runC`: the weakened body,
+its scope ended, leaves exactly its frame's final locals on top of the caller's locals
+weakened along the heap (`TEnv.append qs (drop body.ext …) (TEnv.wk … σ.env)`), proved from
+`Prog.run_wk`/`TWkRel.drop` with `put_top_gen` and `off_bot_inj`. `inlineCall` now inlines
+`CallRet.none` and `CallRet.val`; `Prog.inl_runC` is unchanged in statement. Controls:
+`ret_call_inlined` (exact syntax), `ret_call_seven`/`ret_inlined_seven` (both leave
+`a = 7` from `a = 5`), `mem_call_kept` (a memory return is left as written). Still not
+inlined: several returns (`rets`), memory/storage returns, reference parameters,
+`callRec`, receiver calls.
+
+Value-return inlining review (read-only finder+skeptic): no blocking issue; statement is
+`Stmt.runC` function equality with premise `args.allVal = true`; order (arguments, `T r`
+default, body in an inner block, `x = r`) matches `enterT`/`take`/`leaveT`; an argument
+reading the assigned caller local sees the old value in both forms. Applied: controls for
+the discarded-return branch and a body reading the return default (`g2_assigned`,
+`g2_call_assigned`, `g2_discarded`, `g2_call_discarded`), the negative control
+`wrong_target_differs` (a wrong target index leaves `a = 5` where the call gives `7`), and
+`storage_arg_kept`; `put_top_gen` documented. Not applied (optional): restating
+`inlineBlock_runC` through `frame_runC`.
+
+### O02 coverage extension — 2026-11-06
+
+`Prog.vopt` (hence `Prog.cfold`, `Prog.simplify`) now also rewrites the value of a storage
+write (`assign l (.val v)`, `push b (some (.val v))`, through `Src.vopt` and
+`Src.vopt_valueT`) and the right side of `opAssign`/`pushOpAssign` (locations: see the location item below). Control: `store_folded`
+(`total = 2 + 3; total += 0 + 1;` → `total = 5; total += 1;`), `store_same`.
+
+Propagation across storage statements: facts now survive `assign`, `delete` and `pop`
+(`KeepsLocals`, `keeps_assign`, `keeps_delete`, `keeps_pop`: every value local and
+environment value unchanged), and the value an `assign` stores is propagated into
+(`Src.opt`, `Src.opt_valueT`). `transfer`/`send` still reset facts (`selfBalance`, an
+environment value, changes). Control `prop_across_store`
+(`uint a = 5; total = a; uint b = a + 1;` → `total = 5; uint b = 6;`).
+
+CSE across storage statements: pure entries (`Val.isPure`) survive `assign`, `delete`,
+`pop` (`Avail.keep`, `Avail.holds_keep` via `Val.evalT_keep` and `KeepsLocals`); impure
+entries (storage/memory reads) are dropped there, so a storage write never leaves a stale
+storage-read entry. Control `cse_across_store`.
+
+## Certified pipeline — 2026-11-06
+
+`Optimizer/Pipeline.lean`: `round Γ Γ' = Pass.pipeline [Prog.inl, Prog.cprop Facts.empty,
+Prog.simplify, Prog.cfold, Prog.cse [], Prog.uve]`, `Prog.optimize n` (n rounds),
+`round_preserves`, `optimize_preserves`, `Prog.optimize_runC n P : Prog.runC
+(Prog.optimize n P) = Prog.runC P` (no premise), all through the unchanged O01
+`Preserves.pipeline`. End-to-end control `e2e_optimized`: `uint a = 2; f(a + 3);` with
+`f(x) { require(x > 3); }` becomes `uint a = 2; { }` in one round (inline, propagate
+`x = 5`, fold `require(5 > 3)` to `true` and drop it, remove the unused `x`).
+For consumers (VO2/VT): `Prog.optimize`/`Prog.optimize_runC` are the stable entry points;
+no published `Pass.lean` signature changed.
+
+Constant folding now also folds index expressions inside storage and memory paths
+(mutual `SPath/Loc/MPath/MLoc/Val.cfold` with `SPath.cfold_resolveT`,
+`Loc.cfold_resolveT`, `MPath.cfold_mvalT`, `MLoc.cfold_addrT`, `Val.cfold_evalT`); the
+statement of `Val.cfold_evalT` is unchanged. Control `index_folded`
+(`balances[2 + 3]` → `balances[5]`). This supersedes the "storage/memory path index
+expressions left as written" item for folding. Propagation and simplification fold read
+paths too (`Val.opt` and `simpFoldPass` end in `Val.cfold`) but do not substitute or
+simplify inside them; CSE leaves them as written.
+`Prog.vopt` also rewrites the storage location of `assign`, `delete`, `push` and `pop`
+(`SPath.vmap`/`Loc.vmap` with `SPath.vmap_resolveT`, `Loc.vmap_resolveT`), so folding
+and simplification reach `x[e] = v`, `delete x[e]`, `x[e].push(v)` indices. Control
+`delete_index_folded`. Compound-assignment receivers (`opAssign`, `pushOpAssign`),
+`pushIncDec` and memory locations are still left as written.
+
+## O02 dead code after a halting statement — 2026-11-06
+
+`Optimizer/DeadCode.lean`. In every scope (block, `if` branch, loop body), the statements
+after one that always halts (`revert`, `assume(false)`, `require(lit false)`,
+`assert(lit false)`; `alwaysHalts_runC`) are removed (`Prog.cut`). Theorems: `cut_scope P σ
+: scopeRun (Prog.cut P).2 σ = scopeRun P σ` (the run with the scope ended is unchanged,
+the halt kept), `ConstFold.Prog.dce_runC P` (no premise), `dce_preserves`. The top-level
+sequence is not cut (its output context is the program's type). `Prog.dce` is a stage of
+`round` (after `Prog.cfold`). Controls: `after_halt_cut`, `after_halt_reverts`,
+`halt_kept_wrong` (dropping the halting `require` itself would change the run).
+
+Review of the storage-surviving facts/CSE entries, path folding, location rewriting and
+the pipeline (read-only finder+skeptic): no soundness issue (`KeepsLocals` holds for
+`assign/delete/pop` since they only replace `storage`; impure CSE entries are dropped
+there; no evaluation reordering; pipeline premise-free). Doc drift fixed: StmtFold
+header (locations of `assign/delete/push/pop`, receivers of compound assignments and
+`pushIncDec` left as written), stale location sentences in this document, `KeepsLocals`
+wording.
+
+Dead local stores (`DeadCode.lean`): `x = e₁; x = e₂;` → `x = e₂;` when `e₁` is simple
+(cannot fail) and `e₂` does not read `x`; `dseCons_runC`, `ConstFold.Prog.dse_runC` (no
+premise), `dse_preserves`; a stage of `round` after `Prog.dce`. Controls:
+`dead_store_removed`, `self_read_kept`, `failing_store_kept`. Storage/memory dead stores
+stay with X06.
+
+## Moved-lane handoff and queue accounting — 2026-11-06
+
+Branch `cloud/moved4-20261105/vo1-optimizer` (Claude VM), from `cloud/vo1-optimizer-move`
+cdfa3601 + origin/master aec9adf1. All work is source + kernel proofs; no compiler/EVM
+evidence, no gas or code-size claims. `Optimizer/Pass.lean` signatures unchanged.
+
+| Item | Status | Evidence |
+|---|---|---|
+| O01 interface, laws, controls | done (inherited) | `Pass`, `Laws`, `Controls`, test controls |
+| O01 composition into `Compilation.correct`/G49 | open, waits on V09/VY3 adapters and X01 D6 | caveat section above |
+| O01 code-size/gas baselines | open, waits on D1 artifact/gas oracle (machine has no gas) | — |
+| O02 constant folding (Panic/revert kept) | done | `Val.cfold_evalT`, `Prog.cfold_runC` |
+| O02 constant + copy propagation | done | `Prog.cprop_empty_runC` |
+| O02 expression simplification (solc rules, checked-safe subset) | done (subset listed) | `Val.simp_evalT`, `Prog.simplify_runC` |
+| O02 dead code (literal branches, satisfied checks, dead loops, code after halts, dead local stores) | done | `Prog.cfold_runC`, `Prog.dce_runC`, `Prog.dse_runC` |
+| O02 unused-variable elimination | done (fragment: leading block declarations) | `blockDecl_runC`, `Prog.uve_runC` |
+| O02 D6 binding | open, X01 | — |
+| O03 inlining of internal functions | done for void and single-value returns with value arguments | `inlineBlock_runC`, `inlineBlockVal_runC`, `Prog.inl_runC` |
+| O03 CSE | done (pure expressions, syntactic) | `Val.pbeq_eq`, `Prog.cse_empty_runC` |
+| O03 unused-function pruning | open (no lowering-IR function table; Yul needs a fuel-shift simulation) | — |
+| O03 redundant sload/mload/store elimination, LICM | done in the X06 follow-up (fragments listed there) | `Prog.rle_empty_runC`, `Prog.dstore_runC`, `Prog.licm_runC` |
+| Certified pipeline | done | `Prog.optimize_runC`, `e2e_optimized` |
+| Final revalidation after integrated prerequisites/V16 | open | — |
+
+Consumers (VO2/VT): `Prog.optimize n` with `Prog.optimize_runC`, the per-pass
+`*_preserves` instances of `Preserves SameRun`, and `ValPass`/`Prog.vopt_runC` for new
+expression passes.
+
+Owner requests (unchanged from the Codex handoff, still open): X01 — frozen D6 relation
+and D1 artifact/gas-oracle API; V09/VY3 — `Compilation.correct` adapters covering
+optimizer output (the agreement premises read `asserts`/`pays`/`pushes`); X06 — aliasing
+facts; COORD — Optimizer entries in `scripts/check-layers.mjs` CORE (not edited here).
+
+Dead-code review (read-only finder+skeptic): no soundness issue (halts are kept and carry
+no state; `ite`/`loop`/`block` drop with the branch's own `Ext`, which `scopeRun` takes;
+`assignLocal` targets only value locals, distinct `TEnv` slots, so no aliasing). Fixed:
+coverage wording (only blocks, `if` branches and loop bodies; `revertData` not treated as
+halting at first (now fixed: `revert` with data halts, `alwaysHalts_runC` covers it); `Val.indep` also rejects storage/memory reads in `e₂`); `o02_pipeline_preserves`
+now includes `Prog.dce` and `Prog.dse`. Added controls `guarded_kept` (non-literal
+`require` not cut), `branch_cut` (cut inside an `if` branch), `different_targets_kept`.
+
+## Checkpoint gate at e272602b — 2026-11-06
+
+`gate.sh checkpoint`, warm-cache resumption across three 2 h task windows (the first was
+lost to a container restart; Lake kept the built modules). Final run (02:48–03:49 UTC):
+
+- `build-touched` and `library` (`lake build Solidity`): PASS, `✔ [5414/5415] Built
+  Solidity`, no build errors in any of the three logs.
+- `check-trust.sh`, `check-orphans.mjs`, `check-layers.mjs`, `register.sh --check`,
+  `fragments.sh --check`: PASS.
+- `check-doc-paths.sh`: FAIL, not this lane. The only missing reference is in
+  `docs/feature-work/after-roadmap-va1.md` (cites a Mathlib test under `Bridge/.lake`),
+  a file this lane does not own or change; the other lines are `ambiguous` warnings.
+- `check-axiom-pins.mjs`: FAIL on its "unrecorded changes" rule only: 0 errors,
+  3735 unrecorded new pins from other lanes' merged modules, none from
+  `Solidity/Optimizer/**` (no optimizer theorem appears in the output). Recording pins
+  edits the shared trust pins, which this lane may not edit; left to the coordinator.
+
+## Lane-end gate `./run-lean.sh` at 6ccdac52 — 2026-11-06
+
+03:49–04:25 UTC, warm cache. Lake built every target, including Bridge and the solc
+TestSuite (`✔ [5832/5833] Built SolkeyTestSuite`), with no Lean errors. `check-layers`,
+`register.sh --check` and `fragments.sh --check` passed. The script exits 1 at its
+`solkeycheck` step: "167 mismatch(es) … parsed 392 taclets, 135 read-bearing, table
+covers 131". These are storage-taclet annotation rows and `save<[Struct<[..]>` tokens
+in the SolKey rule table. This lane changes no `Calculus/`, `scripts/` or SolKey pin
+file, so this is open for the rule-table/SolKey lanes, not for vo1.
+
+## Follow-up 2 (H66): X06 memory optimizations — 2026-11-06
+
+Scope approved by the user (2026-11-06). Three new modules, all over the existing
+intrinsic lowering IR and the existing O01 interface (`Pass`, `Preserves SameRun`); no
+signature of `Optimizer/Pass.lean` changed. "Waits for X06 aliasing facts" in the
+sections above is superseded: the alias analysis below is this lane's own, proved
+against the typed run, with no assumed aliasing facts.
+
+| Pass | Module | Headline theorem (exact) | Kind |
+|---|---|---|---|
+| redundant load elimination | `Optimizer/Loads.lean` | `Prog.rle_empty_runC P : Prog.runC (Prog.rle [] P) = Prog.runC P`; `Prog.rle_runC E P σ (hE : LEnt.Holds E σ)` | run equality |
+| dead store elimination | `Optimizer/DeadStore.lean` | `Prog.dstore_runC P : Prog.runC (Prog.dstore P) = Prog.runC P`; `sstore_dead_runC`, `mstore_dead_runC` | run equality |
+| loop-invariant code motion | `Optimizer/LICM.lean` | `licm_runC a c x e rest (h : LicmOk c x e rest)`; `Prog.licm_runC P : Prog.runC (Prog.licm P) = Prog.runC P` | run equality |
+
+All three are equalities of the typed run (value or halt kind, final storage, heap and its
+typing, ledger, locals), not refinements: no pass removes a behaviour, including errors.
+O01 instances: `rle_preserves`, `dstore_preserves`, `licm_preserves`.
+
+### Redundant load elimination (`Prog.rle`)
+
+Static loads (`Load`): a primitive state variable `v` (`.read (.root v _)`), a primitive
+member `m.f` of a memory local (`.readMem (.field (.var m _) f _)`), a primitive element
+`m[k]` of a memory local at a simple index. Entries `LEnt` record "load `ld` evaluates to
+the simple value `s`" (invariant `LEnt.Holds`); they are created by `x = ld;`/`T x = ld;`
+(holder `x`) and by `v = s;`, `m.f = s;`, `m[k] = s;` with `s` simple (store-to-load
+forwarding), and a later occurrence of a recorded load in any expression position of
+`x = …`, `T x = …`, `require`, `assert`, `if` conditions, storage and memory store values
+is replaced by the holder.
+
+Alias analysis (each rule proved): a local assignment kills entries whose holder or
+location reads the local (`LEnt.reads`); a storage write `l = …` kills only storage
+entries of the state variable `l` starts at (`Loc.root?`, `Loc.resolveT_rootName`,
+`Storage.find_write_other`; a write through a storage alias kills every storage entry)
+and no memory entry; a memory write kills only the memory entries it may alias
+(`MLoc.apartB`, sound by `MLoc.addrT_apart` and `Heap.readAddr_writeAddr_apart`):
+distinct member names of *any* two objects (two memory locals may name the same
+struct), a member and an element, and two elements at distinct literal indices are
+apart; a memory write keeps every storage entry. `require`, `assert` and declarations
+keep entries; every other statement, and the exit of a branch, block or loop, clears
+them; a loop body starts empty. Not covered: loads through storage paths with fields or
+indices (`s.f`, `balances[k]`), loads through memory paths deeper than one step, entries
+across calls, joins or loop back-edges.
+
+### Dead store elimination (`Prog.dstore`)
+
+`v = s; v = e;` → `v = e;` at a primitive state variable when `s` is simple and `e` is
+pure (`Val.isPure`: it reads no storage); `m.f = s₁; m.f = s₂;` / `m[k] = s₁; m[k] = s₂;`
+→ the second store at one static memory location (`mSameB`) when both values are simple;
+applied in every sequence (blocks, branches, loop bodies). Side conditions: the first
+value cannot fail (else its halt is the program's); a state-variable store never fails
+(`write_root`) and the last of two wins (`SFields.set_set`); a memory store fails exactly
+when its address is unset or out of bounds, independently of the value
+(`Heap.writeAddr_none`), so the first store fails exactly when the second would, and the
+heap after both is the heap after the second (`Heap.writeAddr_writeAddr`, from new
+`Objs.set_set`, `MFields.set_set`, `MObj.setElem_setElem`). Only adjacent stores are
+merged; stores through storage paths, aliases or non-simple memory values are kept.
+
+Memory expansion, size and gas: the typed state (`State`: storage, heap typing `H`, heap,
+locals, ledger, balance, transaction) and its step result (`Out`: state and heap-typing
+extension) carry no memory-size or gas field, and the lowering IR has no `msize` or gas
+read. A store at an existing slot leaves the heap typing unchanged (`TRun.assignMem`
+returns `List.prefix_refl`), so there is no expansion effect in this semantics to drop;
+the theorem is equality of the whole typed run, heap typing included. The cost side
+(solc's memory-expansion gas) belongs to the D1 gas oracle (X01), still open.
+
+### Loop-invariant code motion (`Prog.licm`)
+
+`while (c) { x = e; rest }` → `if (c) { x = e; while (c) { rest } }` (`hoist`), applied to
+every loop, innermost first; one hoist per loop per round (`Prog.optimize n` repeats).
+The guard `if (c)` is the zero-iteration side condition, proved: without it a hoisted
+`e` that reverts (e.g. an underflow) would halt a loop that never runs; under it `e` is
+evaluated exactly when the first iteration evaluates it, in the same state, with the same
+halt (`licm_runC`, first iteration matched in `TLoop.hoist_run`). Side conditions
+(`licmB`, packaged as `LicmOk`): `e` and `c` invariant expressions (`Val.invB`: literals,
+locals, environment values, operators, reads of primitive state variables — the
+invariant `sload`s); neither reads `x`; `rest` within `nonpayable` (no memory statement,
+no allocation), writing no local `e` reads and not `x` (`Prog.writesAt`), and only state
+variables `e` does not read (`Prog.storeAt = some L`); invariance across iterations from
+the existing `Prog.run_frame`/`Prog.run_keeps` (`runC_inv`, `runC_local`) and
+`TLoop.run_congr_inv`. Divergence is preserved (`TLoop.run` is the same limit on both
+sides). Not covered: hoisting from the middle of a body, declarations (`T t = e;`
+introduces a local the loop's type does not have), memory loads, loops whose rest reads
+or writes memory, `do`/`for` forms other than the lowered `while`.
+
+### Pipeline and controls
+
+`stages` now runs `[inl, cprop, simplify, cfold, dce, dse, cse, rle, dstore, licm, uve]`;
+`round_preserves`, `optimize_preserves` and `Prog.optimize_runC` (statement unchanged)
+cover them. Controls `tests/fullscope-20261104/vo1/X06Controls.lean` (not imported by the
+generated roots; per-file diagnostics): RLE `rle_forwarded`, `rle_load_load`,
+`rle_other_root`, `rle_mem_apart` (positive), `rle_killed`, `rle_mem_alias` (kept as
+written), negatives `wrong_kill_differs` (kernel) and the aliasing negative
+(`wrongAlias`, `#guard`), witness `entry0_holds`/`rle_entry0` (nonempty entries hold);
+DSE `dstore_removed`, `dstore_mem_removed`, kept `dstore_live_kept`,
+`dstore_failing_kept`, `dstore_mem_other_kept`, negatives `live_runs_two` vs
+`live_dropped_runs_one` and `failing_first_reverts` vs `failing_dropped_returns`
+(kernel), witness `sstore_witness`; LICM `licm_hoisted`, `licm_guarded`, rejected
+`licm_root_rejected`, `licm_local_rejected`, negatives `unguarded` (reverts where the
+loop returns) and `wrongRoot` (`x = 0` vs `2`), witness `licm_witness` (`LicmOk` by
+`decide`); pipeline `e2e_optimized`, `e2e_licm`. Memory and loop runs are pinned with
+`#guard` (the compiled interpreter, as the repository pins initial-store runs) because
+the kernel does not unfold allocation and `TLoop.run` (classical) there; every syntactic
+result and every storage-only run is a kernel `rfl`.
+
+Axioms (`#print axioms` in the controls): `Prog.rle_empty_runC`, `Prog.rle_runC`,
+`Prog.dstore_runC`, `sstore_dead_runC`, `mstore_dead_runC`, `licm_runC`,
+`Prog.licm_runC`, the three `*_preserves`, `Prog.optimize_runC`: `propext`,
+`Classical.choice`, `Quot.sound` only (the classical ones through `TLoop.run`); no
+`sorry`, no `native_decide`, no heartbeat option.
+
+### Backfill: inlining with reference parameters
+
+`bindArgs` now binds every argument kind, so `inlineBlock`/`inlineBlockVal` and their
+theorems lost the premise `args.allVal = true` (a strengthening; `Args.allVal` is
+removed, no other module used it): a storage parameter is declared as the storage alias
+`R storage x = e;` (`declStorage … (some (.path e))`, the identity the call shares) and a
+memory parameter as the memory alias `R memory x = e;` (`declMem … (some (.alias e))`,
+the object by identity, no copy), each read past the parameters before it
+(`SPath.resolveT_wk`, `MPath.mvalT_wk`); `bindArgs_runC` covers the three arms. So
+`Prog.inl` inlines void and single-value calls with any parameters
+(`inlineBlock_runC f args body`, `inlineBlockVal_runC f args p r res body`, no premise).
+Controls: `ref_call_inlined`, `ref_call_same` and the `#guard`ed `balances[1] = 7` runs in
+`X06Controls.lean`; `O03Controls.storage_arg_kept` became `storage_arg_inlined`/
+`storage_arg_same`.
+
+Still open: inlining calls with several returns (`CallRet.rets`), memory or storage
+returns, `callRec`, receiver calls. Design note for `rets`: the call leaves its return
+variables in the caller (`rs ++ Γ`), which no single statement but the call does, so the
+rewrite is at `Prog` level — declare the caller's return locals at their defaults, then a
+block that declares the frame `rs ++ ps` above them (recursing on the binders so that
+`(rs ++ ps) ++ (rs ++ Γ)` is definitional; `List.append_assoc` is not), runs the body
+weakened by `thinTop (rs ++ Γ) (rs ++ ps)` (`frame_runC`), and copies each inner return
+variable to its caller local; the remaining proof is the copy-back sequence against
+`CallRet.leaveT`'s `TEnv.append`, and memory binders (`snocMem`) allocate on entry, after
+the arguments, which the order of declarations must keep.
+
+### Reviews (read-only finder + skeptic, no Lean server) and repairs
+
+No soundness defect found; both confirmed `SameRun` is `Prog.runC` equality, the three
+`*_preserves` instantiate it directly (the `Validator`/`validate_sound` path is not used:
+direct preservation is stronger), the memory rule `MLoc.apartB` is exactly what
+`MAddr.Apart` justifies (index/index only for distinct literals, stronger than needed),
+the LICM zero-iteration, condition-error and `e`-revert cases are matched exactly, and
+`State`/`Out` carry no memory-size or gas field. Applied:
+- LICM copied a written loop invariant (`LoopAnn.inv`/`.invLex`) onto the shortened loop,
+  whose entry state is after `x = e` (invisible to `runC`, wrong for the calculus):
+  `hoist` now requires `LoopAnn.plainB` (unwind bound or automatic); control
+  `licm_annotated_kept`.
+- Doc precision: RLE keeps entries across local value declarations only (storage/memory
+  declarations clear them) and rewrites a store's value, not its location; DSE's `e₂` is
+  `Val.isPure` (no storage and no memory read); LICM's `c` is re-evaluated each iteration
+  and need not be loop-invariant; stale O03 rows above superseded; `rle_killed` doc and
+  the controls header (which now states which controls are `#guard`).
+- Docstrings for every headline lemma; unused binder removed.
+- Controls added: member apartness on aliased memory locals (`rle_member_apart`, kill
+  `rle_member_alias_kept`, runs `4`/`6`), member vs element (`rle_member_index`), memory
+  dead-store negative (`dstore_live_mem_kept`, `#guard` `1` vs `0`), `mstore_witness`/
+  `mstore_witness_run`, kernel zero-iteration controls (`fail_loop_returns`,
+  `unguarded_reverts`, `guarded_returns`), `e` reverting in the first iteration
+  (`licm_rev_hoisted`, `rev_loop_reverts`, `rev_hoisted_reverts`), `rest` writing `x`
+  (`licm_x_rejected`).
+Not applied, recorded: the passes use `match` on `Stmt`/`Prog` like every earlier
+optimizer pass (Gate G0 condition 1 asks for `casesOn` in kernel-evaluated code; the
+controls reduce them by `rfl` in seconds, and the pass family would move together); all
+passes share namespace `Solidity.Optimizer.ConstFold` (the lane's existing convention);
+private copies of `TEnv.get_set(_ne)` and `ArrTy.eq` in `Loads.lean` (avoid importing
+`RunFrame`/`Calculus.TermEq` there).
+
+### RLE extension: keyed storage loads
+
+After the reviews, `Load.sindex` adds primitive entries of a state-variable mapping or
+array at a simple key (`balances[msg.sender]`, `values[i]`) as static loads: load-load
+reuse for both, store-to-load forwarding for mapping entries (`balances[k] = s;`; an array
+element is not forwarded, its bounds check reading the array), killed by any write to
+the same state variable (root granularity: `balances[2] = 7` kills `balances[1]`) and by an
+assignment to a local the key reads; a write to another state variable keeps them
+(`Load.evalT_storage_write`, both the root reference and the entry reference keep their
+root). Controls `rle_keyed`, `rle_keyed_forwarded`, `rle_keyed_kill`,
+`rle_keyed_local_kill`, `rle_keyed_local_store_kept` and the `#guard`ed negative
+(forwarding past the key's assignment reads `5` where the program reads `0`). Still not
+covered: struct members of storage (`s.f`), nested paths, key-sensitive apartness of two
+entries of one mapping (different literal keys).
+
+### X06 gates at c0cc5e178 — 2026-11-06
+
+- MCP diagnostics on every touched file: no errors. `#print axioms` on the headline
+  theorems (`Prog.rle_empty_runC`, `rle_preserves`, `Prog.dstore_runC`,
+  `dstore_preserves`, `licm_runC`, `Prog.licm_runC`, `licm_preserves`,
+  `Prog.optimize_runC`, the witnesses) in `tests/fullscope-20261104/vo1/X06Controls.lean`:
+  `[propext, Classical.choice, Quot.sound]` (`licm_witness`: `[propext, Quot.sound]`);
+  no `sorryAx`, no new axiom.
+- `gate.sh checkpoint` (warm-cache resumption over three task windows): `build-touched`
+  and `library` PASS with no build errors; `trust`, `orphans`, `layers`, `roots` PASS.
+  Module times: `Loads` 12 s, `DeadStore` 9.5 s, `LICM` 6.9 s, `Pipeline` 0.7 s.
+  FAIL, none from this lane: `fragments` (master's `docs/README.md` carries a
+  decisions-20261106 row no fragment produces; identical on `origin/master`),
+  `doc-paths` (the only missing reference is in `after-roadmap-va1.md`), `axiom-pins`
+  (0 errors; 4379 unrecorded pins, none under `Solidity/Optimizer/`).
+- `./run-lean.sh`: stops at `fragments.sh --check` for the same master README row.
+  With that file regenerated locally (`fragments.sh --force`, restored afterwards and
+  not committed): `Build completed successfully (6413 jobs)` (a first attempt lost
+  `Examples/Tactics/{RevertData,OpenLoops}` to the OOM killer, exit 137; the rerun built
+  them). `check-solkey.sh` against the unpinned sibling `../solkey` (`b8d5f88`, not the
+  pin `473da8944c`): 167 mismatches (storage-taclet annotation rows,
+  `save<[Struct<[..]>`), as recorded above. Rerun against the pinned snapshot
+  (`SOLKEY_RULES=tests/migration/solkey/.../solidityProgramRules.key`): OK,
+  "annotations match", 377 taclets, 131 read-bearing, table covers 131.
+
+
+## Constant observers: first G0 repair — 2026-11-07
+
+Re-baselined the existing branch by fast-forward to published
+5da4771e63a4278ed53932ac39a032e3d7aea6ed; old H44 archive hashes still match.
+Current master already contains O02 lowering passes, O03 inlining/CSE/RLE/
+dead stores/LICM and the eleven-stage SameRun pipeline. Earlier rows saying
+those implementations or intrinsic X06 apartness facts are missing are obsolete.
+This is still fragment coverage, not full D6 closure. Unused-function pruning,
+remaining pass coverage, public compiler adapters, D1/D6/artifact binding and
+physical gas/code-size benchmarks remain open. CtxEquiv/Unify explicitly calls
+its D6 relation a stub; no substitute is introduced here.
+
+The existing ledger records indexed matches in optimizer code as an unresolved
+Gate G0 obligation. This small repair replaces only Simple.const? and Val.const?
+in ConstFold.lean with casesOn whose motives generalize the primitive-type
+index (Val's mutual-family motive is motive_5). Exact signatures, constructor
+results, literal proof arguments and transparency are retained. All theorem
+statements and bodies are unchanged; no premise, expected verdict, exclusion,
+axiom or heartbeat changes. These nonrecursive observers need no recursive twin.
+This removes exactly two indexed matches. Recursive folding and the rest of the
+optimizer family remain G0 work; timings do not waive that requirement.
+
+Warned before refactoring and inspected source commits64f81751c/a383b213a;
+no speed-motivated reversal found. Repository per-file gate on the unchanged
+file: PASS,8.358962s total,RSS669380608,cgroup274010112,10 samples; after repair:
+PASS,3.815002s,RSS678596608,cgroup193605632,4 samples (gate rows5s/2s).
+Cache warming confounds this one pair: no speedup claim or gas/code-size
+benchmark follows. Both commands used the same historical runtime config and
+explicit-j1 wrapper. Actual Lean4.24.0 commit797c613, Lake5.0.0-src+797c613.
+The intermediate Val motive-name elaboration failure is retained; corrected
+motive_5 gives MCP0 (6.961470s,RSS1327255552,cgroup888700928,10 samples).
+
+Existing O02Controls and direct observer axiom audit PASS through gate.sh
+per-file:51.563411s,RSS895635456,cgroup592531456,95 samples. Twenty reports
+use only propext/Classical.choice/Quot.sound. Existing overflow/revert, assert
+Panic, short-circuit and invalid-simplification controls are unchanged; this
+proves only the existing lowering-IR results, not source Panic-byte/D6 adequacy.
+Reviewers found ignored audit/config files lacked execution-time fingerprints.
+A focused fresh audit recheck fixes that gap: matching SHA256 before/after,
+PASS2.326856s,RSS523194368,cgroup150966272,2 samples, same five axiom reports.
+Those hashes match the cache snapshots. Earlier ignored-file executions are
+not retrospectively labelled source-stable; the failed broad checkpoint's
+external runtime snapshot is retained without a historical before/after claim.
+
+Required checkpoint attempt: build-touched PASS29s, then library phase times
+out124 at292.166640s,RSS1816416256,cgroup2586542080,561 samples; last sampled
+Lean target Backend.Scalar.PowerBounds. Artifacts retained, no timeout lifted.
+All heavy checks serial under verified12GiB/no swap,threads1,-j1,4GiB admission
+reserve and original aggregate budget. Source stability/cleanup receipts retained.
+External current-runtime.toml mirrors the current lakefile with serial args;
+original tracked historical runtime is unchanged. Full examples/global audits/
+remaining final gates did not complete and remain open. No checkpoint readiness.
+
+Static roots/fragments/trust PASS (6562 sources,289 sites,0 findings). Layers
+FAIL:12 core→non-core closure edges (901 core,0 elaborator/adaptor reach,95 pinned
+allowances). Pin inventory FAIL:11 unrecorded changes,0 errors,99 baselined
+changes. Failures name producer areas, not optimizer changes; COORD owns repairs
+and Optimizer CORE registration. No central allowance, pin or registry edited.
+Separate read-only finder/skeptic reviews confirmed constructor semantics and
+scope; their ignored-input finding was addressed by the fresh bound audit.
+
+H44: all new raw data remains VM-only. Committed const-g0.sha256 has two entries:
+- delivery/const-g0-20261107/evidence.tar.zst:3686986 bytes,
+  SHA7becced85a9e85ec83df9f4df394c257d430ffe32ff35527ee8e1cbccd7eb2b6;
+  56 payload files/11011907 bytes, plus per-file MANIFEST.json.
+- delivery/cache-const-g0-20261107/cache-packet.tar.zst:100769388 bytes,
+  SHA791e86d883e119c24384a819f8245c550118605e8e0694de39611031dff7c3db;
+  checked66-module closure, not full-master cache, coordinator-pending under H41.
+Cache metadata explicitly records a precommit dirty-source snapshot at5da4771e6;
+source SHA256 values are authoritative, with final committed-source binding in
+the handoff. Audit/config snapshots bind to the fresh recheck, not the initial
+ignored-input execution. Never VM ship-cache.sh. Old evidence/packs unchanged.
+O01 remains partial; O02/O03 remain partial/full-scope obligations open. This
+small G0 repair is kernel checked; broad checkpoint/central-policy blockers
+must be resolved before advancing its required validation or claiming closure.
+
+Final finder and skeptic independently confirmed the fresh execution-hash binding, archive hashes/sizes, scope and failure accounting; no remaining finding in this two-observer change. Neither used Lean/server/builds or writes.
+
+
+## H82 compatibility correction — 2026-11-07
+
+The coordinator held284a998737e01be7ebc4e41e0d77f5f07e18c032 because the earlier
+const? rewrite changed existing definition bodies and dropped generated equation
+lemmas. That was not proof-only under H82. This correction explicitly supersedes
+the previous section's claim that existing runtime observers were G0-repaired.
+Old measurements/archives remain immutable records of the rejected proposal;
+they do not describe this corrected implementation or an accepted runtime change.
+Held history is preserved at codex/solidity-fullscope-20261104/vo1-pre-h82-284a9987.
+
+Simple.const? and Val.const? are restored verbatim from published reference
+95d1e9cb29dc5a34d1db68af3ca47e47b75e293f, including the original matcher equations.
+All existing downstream declarations, theorem statements/bodies and callers are
+unchanged versus that reference. The net source delta is32 added lines only:
+Simple.constView?, Val.constView? and their constView?_eq lemmas. New views use
+index-generalizing casesOn, and Val's new view delegates to the new Simple view.
+Each equality states value.constView? = value.const? for every typed input,
+with no additional premise. No global simp attribute or caller redirection.
+Only the NEW views satisfy this G0 observation pattern. Existing runtime callers
+still use the frozen matchers; their G0 obligation remains open. No speedup,
+pass-coverage or D6/compiler/EVM/gas claim is added by the unused helper views.
+
+Validation: ConstFold MCP0,8.002832s,RSS1392562176,cgroup934486016,12 samples.
+Repository per-file gates on ConstFold, CompatibilityAudit and unchanged
+O02Controls all PASS:54.749236s,RSS936792064,cgroup534700032,102 samples.
+Metadata audit confirms precisely Simple.const?.eq_1..eq_4 and
+Val.const?.eq_1..eq_10 (14 equations), and prints their types. New views and both
+agreement lemmas depend only on propext; old evaluation proofs and all15 O02
+axiom reports remain standard-only. Audit file SHA is recorded before/after its
+execution and matches the cache snapshot. Existing positive/negative control
+verdicts, including overflow IR revert and assert Panic, are unchanged; this
+establishes no source Panic-byte/D6 adequacy beyond the existing IR boundary.
+
+gate.sh touched PASS (build-touched29s),30.308200s total,RSS1030500352,
+cgroup573001728,54 samples. Its current-runtime config SHA matches before/after
+and the packet. All heavy work serial under verified12GiB/no swap,threads1,-j1,
+4GiB reserve and unchanged proof/build budgets. Actual Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613. No maxHeartbeats increase, sorry, new axiom or native_decide.
+Broader original checkpoint/full gates were not rerun here; historical timeout
+and central-policy failures retain their original revision bindings and no full
+assignment readiness is claimed. H82 correction is additive proof/helper work,
+not permission to migrate frozen callers or change other definition bodies.
+
+Separate read-only finder/skeptic confirmed the additive32-line delta, exact
+restoration and proof semantics; final ledger/hash review recorded in handoff.
+H44 new raw evidence remains VM-only; const-h82.sha256 commits two pointers:
+- delivery/const-h82-20261107/evidence.tar.zst,1859523 bytes,
+  SHAedd4427b7a74606f67b211dfd50725dbca1373f29609289c643e665c795390d8,
+  29 payload files plus per-file MANIFEST.json.
+- delivery/cache-const-h82-20261107/cache-packet.tar.zst,100864700 bytes,
+  SHA108e48f0aa911c1203cc8a49ebc8def5ea32ce27727437bc1fa99070aaa545be,
+  scoped66-module corrected cache, coordinator-pending under H41.
+Cache HEAD metadata is precommit held base284a; source hashes and final committed
+binding are authoritative. Old packet791e86... is not the corrected-source pack.
+Never VM ship-cache.sh. Coordinator explicitly requested pushing the correction;
+only the assigned codex branch is authorized, with no default-branch push/PR.
+O01/O02/O03 full obligations remain open under their original semantics/budgets.
+
+Final finder and skeptic approved source, restored equations, ledger and artifact hashes; no remaining correction finding. Both were read-only and used no Lean/server/builds.

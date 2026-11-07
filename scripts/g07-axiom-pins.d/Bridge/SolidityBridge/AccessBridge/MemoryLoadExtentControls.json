@@ -1,0 +1,17 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentControls.lean:SolidityBridge.AccessBridge.MemoryLoadExtentControls.endpoint_not_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentControls.lean:SolidityBridge.AccessBridge.MemoryLoadExtentControls.expansion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentControls.lean:SolidityBridge.AccessBridge.MemoryLoadExtentControls.initial_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

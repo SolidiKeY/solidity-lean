@@ -1,0 +1,36 @@
+{
+  "boundary": "Existing source-supported finding, not a new pinned-toolchain kernel proof; no frozen repair authorized.",
+  "findings": [
+    {
+      "id": "H70-V1-CAPACITY",
+      "path": "Solidity/Backend/MemoryCopies/Interface.lean",
+      "parent_source_name": "Solidity.Backend.MemoryCopies.StorageWordCertificate",
+      "field_name": "correct",
+      "qualified_statement": "Solidity.Backend.MemoryCopies.StorageWordCertificate.correct",
+      "kind": "source-supported-capacity-vacuity",
+      "field_contains": "cursor.val + cost < W",
+      "evidence": [
+        {
+          "path": "docs/feature-work/memory-copies.md",
+          "contains": "makes `StorageWordCertificate.correct` hold for empty code"
+        },
+        {
+          "path": "Solidity/Backend/MemoryCopies/Interface.lean",
+          "contains": "\u2200 hs : cursor.val + cost < W"
+        }
+      ],
+      "finding": "At cost = W, cursor.val + W < W is impossible for every natural cursor, so this universal correctness field can hold without any successful fitting execution. This is a conditional-field finding, not a replayed proof of a complete bad compiler certificate.",
+      "area_owners": [
+        "V11"
+      ],
+      "producer_status": "live MemoryCopies file owner unresolved; route through coordinator, not CR or migration reassignment",
+      "repair_options": [
+        "Owner audits and connects the existing V2 nonvacuous companion to downstream contracts with inhabited cases, preserving frozen V1 and retaining its blocker.",
+        "Coordinator obtains human authorization for owner repair tying the public contract to actual fitting allocation and success; this audit does not edit the frozen interface."
+      ],
+      "kernel_status": "blocked by accepted migration prerequisites",
+      "repair_authorization": "none",
+      "no_h55_duplication": "Record existing legacy boundary only; no InterfaceV1/V2 conversion or repair implementation."
+    }
+  ]
+}

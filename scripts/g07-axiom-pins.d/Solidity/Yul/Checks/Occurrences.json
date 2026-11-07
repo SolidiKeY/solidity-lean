@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Checks/Occurrences.lean:Solidity.Yul.OccurrenceSyntax.Prepared.run_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Occurrences.lean:Solidity.Yul.OccurrenceSyntax.Prepared.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

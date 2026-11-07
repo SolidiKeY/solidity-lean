@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean:Solidity.Backend.AbiEntry.DispatchRefusalControls.absent_even_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean:Solidity.Backend.AbiEntry.DispatchRefusalControls.nonzero_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean:Solidity.Backend.AbiEntry.DispatchRefusalControls.nonzero_source_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean:Solidity.Backend.AbiEntry.DispatchRefusalControls.present_zero_not_routing_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean:Solidity.Backend.AbiEntry.DispatchRefusalControls.zero_head_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean:Solidity.Backend.AbiEntry.DispatchRefusalControls.zero_runtime_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

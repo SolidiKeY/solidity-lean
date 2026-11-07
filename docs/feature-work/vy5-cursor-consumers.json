@@ -1,0 +1,314 @@
+[
+  {
+    "file": "Solidity/Yul/Views/NominalMemoryControls.lean",
+    "owner": "VY2",
+    "lines": [
+      77
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/DynamicUintControls.lean",
+    "owner": "VY2",
+    "lines": [
+      180
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/GeneratedRetainedControls.lean",
+    "owner": "VY2",
+    "lines": [
+      8
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/LayoutOriginState.lean",
+    "owner": "VY2",
+    "lines": [
+      23
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/DynamicStoreControls.lean",
+    "owner": "VY2",
+    "lines": [
+      19
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/RecursiveDynamicControls.lean",
+    "owner": "VY2",
+    "lines": [
+      31
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/SignedDynamicControls.lean",
+    "owner": "VY2",
+    "lines": [
+      56
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/MemoryScalarControls.lean",
+    "owner": "VY2",
+    "lines": [
+      132
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/PrimitiveDynamicControls.lean",
+    "owner": "VY2",
+    "lines": [
+      71
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/PackedResidualBoundaryControls.lean",
+    "owner": "VY2",
+    "lines": [
+      86
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/OwnedBoolDeclarationControls.lean",
+    "owner": "VY2",
+    "lines": [
+      6
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/PackedResidualTypedSourceControls.lean",
+    "owner": "VY2",
+    "lines": [
+      19
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/NestedMappingControls.lean",
+    "owner": "VY2",
+    "lines": [
+      101
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/InheritedDeclarationState.lean",
+    "owner": "VY2",
+    "lines": [
+      23
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/TransientSlotControls.lean",
+    "owner": "VY2",
+    "lines": [
+      12
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/MemberDynamicControls.lean",
+    "owner": "VY2",
+    "lines": [
+      66
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/MixedHeapControls.lean",
+    "owner": "VY2",
+    "lines": [
+      207
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/PackedDynamicControls.lean",
+    "owner": "VY2",
+    "lines": [
+      55
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/HeapByteStateControls.lean",
+    "owner": "VY2",
+    "lines": [
+      9
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/ScalarFamilyControls.lean",
+    "owner": "VY2",
+    "lines": [
+      60
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/AggregateStorageControls.lean",
+    "owner": "VY2",
+    "lines": [
+      48
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/NestedDeclarationControls.lean",
+    "owner": "VY2",
+    "lines": [
+      28
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/NominalRetainedControls.lean",
+    "owner": "VY2",
+    "lines": [
+      47
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/RootDeclarationState.lean",
+    "owner": "VY2",
+    "lines": [
+      22
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/FixedDeclarationState.lean",
+    "owner": "VY2",
+    "lines": [
+      14
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Yul/Views/DeclarationControls.lean",
+    "owner": "VY2",
+    "lines": [
+      48
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/LiteralFailureStorageDecodeControls.lean",
+    "owner": "V08",
+    "lines": [
+      15
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/SourceCustomErrorFailureControls.lean",
+    "owner": "V08",
+    "lines": [
+      120
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/LiteralFailureBoolStatementControls.lean",
+    "owner": "V08",
+    "lines": [
+      15
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/LiteralFailureDynamicListErrorControls.lean",
+    "owner": "V08",
+    "lines": [
+      30
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/SourceCustomErrorControls.lean",
+    "owner": "V08",
+    "lines": [
+      25
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/SourceEmitControls.lean",
+    "owner": "V08",
+    "lines": [
+      31
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/LiteralFailureDynamicErrorControls.lean",
+    "owner": "V08",
+    "lines": [
+      16
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/SourceCallableControls.lean",
+    "owner": "V08",
+    "lines": [
+      36
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/SourceDispatchControls.lean",
+    "owner": "V08",
+    "lines": [
+      44
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/SourceEnvironmentControls.lean",
+    "owner": "V08",
+    "lines": [
+      27
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Lowering/V08/WorldImageAccessControls.lean",
+    "owner": "V08",
+    "lines": [
+      148
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Backend/Aggregates/ByteParameterControls.lean",
+    "owner": "V16",
+    "lines": [
+      63
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  },
+  {
+    "file": "Solidity/Backend/MemoryOps/StructDefaults/Controls.lean",
+    "owner": "V11",
+    "lines": [
+      21
+    ],
+    "change": "append explicit empty Source failure cursor; original five fields unchanged"
+  }
+]

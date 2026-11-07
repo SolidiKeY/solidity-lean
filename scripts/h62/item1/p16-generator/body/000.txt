@@ -1,0 +1,50 @@
+/-!
+# Syntax and bounded raw-local Source interface
+
+This import boundary reuses the published declarations without aliases or a
+second representation. Expr and Stmt retain their context/arity/control indices.
+RawFrame.State keeps raw words beside unchanged intrinsic Source locals.
+
+RawSourceAdapter.Adapter and ItemAdapter are indexed by actual same-context
+Source syntax. Their run fields are executable; their correct fields require
+coherent input and exact Source execution equality, including the represented
+world and control result. A consumer accepting an Adapter must receive both
+fields. No instance for arbitrary statements is supplied by this boundary.
+
+These bounded contracts do not establish general assembly admission, arbitrary
+dirty-local Solidity readback, context-changing execution or whole-program
+Source-to-EVM adequacy. RawSourceVoidReturn exports the existing void-return
+slice separately; it does not generalize Adapter's loop-control result.
+
+Concrete inhabited use and refusal/horizon controls already live in
+Solidity.Yul.Checks.RawLiteralScope (adapterTrue, mixed, mixedSource, timeouts).
+The core import boundary deliberately does not import that checks module.
+RawCheckedAdapter.Adapter adds an explicit pipeline parameter and retains
+frame.checked=true in its actual Source agreement field. Its block and
+conditional factories provide concrete mixed checked-word/control producers;
+fromAdapter reuses the older contract without changing it. These factories do
+not provide an instance for arbitrary statements. Inhabited uses and selected
+flow/Source controls live in Solidity.Yul.Checks.RawCheckedAdapter.
+RawCheckedAdapterSequence.Items retains the same checked/coherent contract for
+actual Source item syntax. Its concrete cons and block factories compose
+checked producers, preserving short-circuit flow and exact frames. Nested
+inhabitants are checked in Solidity.Yul.Checks.RawCheckedAdapterSequence.
+No arbitrary-statement producer or general assembly admission follows.
+RawCheckedAdapterIfElse.adapter composes actual checked statement producers as
+branches, including nested sequence/block producers. Its Source law retains
+the supplied producer fields, checked-frame and coherence premises. Concrete
+nested witnesses live in Solidity.Yul.Checks.RawCheckedAdapterIfElse.
+RawCheckedAdapterLoop.loop composes an actual checked body producer as a
+fuelled while statement. Its real fuel induction preserves checked/coherent
+Source agreement and consumes body break/continue exactly as Source does.
+Nested execution and all-fuel controls live in Solidity.Yul.Checks.RawCheckedAdapterLoop.
+RawCheckedAdapterDoWhile.adapter composes an actual checked body producer as
+a body-first loop. Its real fuel induction preserves Source guard ordering,
+control consumption, exact frames and checked/coherent premises. Nested,
+body-order and all-fuel controls live in Solidity.Yul.Checks.RawCheckedAdapterDoWhile.
+RawCheckedAdapterFor.adapter composes a same-context checked initializer and
+body with a present condition and no post statement. It preserves initializer
+effects, errors and Source control rejection before iteration. This does not
+cover context-growing initialization, omitted conditions or post clauses.
+Concrete composition/refusal controls live in Solidity.Yul.Checks.RawCheckedAdapterFor.
+-/

@@ -128,7 +128,7 @@ theorem timestamp_frame {Γ : Source.RCtx} (clock : WorldImage.TimeAligned g tar
 /-- A real journaled balance replacement leaves the account image's code and
 persistent/transient store observations unchanged. This says nothing about
 Image.funds or the whole Source state: the journal and balance really change. -/
-theorem account_balance (owner : Roadmap.Address) (amount : Roadmap.Word)
+theorem account_balance (owner : Roadmap.Address) (amount : Source.Monetary.Balance)
     (address : ContractWorld.Address) :
     WorldImage.AccountImage g kindOf relation
       {source with ex := source.ex.apply (.account owner (fun account => account.withBalance amount))}
@@ -148,7 +148,7 @@ theorem account_transfer (sender recipient : Roadmap.Address) (amount : Roadmap.
     (address : ContractWorld.Address) :
     WorldImage.AccountImage g kindOf relation {source with ex := after} target address ↔
       WorldImage.AccountImage g kindOf relation source target address := by
-  unfold Source.ExecState.transfer at paid
+  unfold Source.ExecState.transfer Source.ExecState.transferNat at paid
   dsimp only at paid
   split at paid
   · split at paid
@@ -156,12 +156,11 @@ theorem account_transfer (sender recipient : Roadmap.Address) (amount : Roadmap.
       rfl
     · cases paid
   · split at paid
-    · rename_i enough
-      cases (Option.some.inj paid)
+    · cases (Option.some.inj paid)
       exact (account_balance
         (source := {source with ex := source.ex.apply (.account sender (fun account =>
-          account.withBalance ⟨(source.ex.world.accounts sender).balance.val - amount.val, by omega⟩))})
-        recipient ⟨(source.ex.world.accounts recipient).balance.val + amount.val, enough.2⟩ address).trans
+          account.withBalance ((source.ex.world.accounts sender).balance - amount.val)))})
+        recipient ((source.ex.world.accounts recipient).balance + amount.val) address).trans
         (account_balance sender _ address)
     · cases paid
 

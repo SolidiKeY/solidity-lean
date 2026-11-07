@@ -1,0 +1,64 @@
+{
+  "base": "4d3790eadb8a5212233bc7d5e345817476b2f590",
+  "master": "5f7bb1441566aaad64a34436904afc61de762fd2",
+  "base_files": 102,
+  "master_files": 103,
+  "added": [
+    "RawFrameLogic.lean"
+  ],
+  "removed": [],
+  "changed": {
+    "RawBoundary.lean": {
+      "base_sha256": "79aa6d744325d8d7ef45eace0b9bb35df06e7449c6cbbc235c5050588a46f9d2",
+      "master_sha256": "69c14e1cd6a40a374feb3168d38cc1ef166d75aca600c02ccc2d8842f2879578",
+      "base_nodes": {
+        "Lean.Parser.Tactic.cases": 32,
+        "Lean.Parser.Tactic.inductionAlt": 24,
+        "Lean.Parser.Term.matchAlt": 4
+      },
+      "master_nodes": {
+        "Lean.Parser.Tactic.cases": 32,
+        "Lean.Parser.Tactic.inductionAlt": 24,
+        "Lean.Parser.Term.matchAlt": 4
+      },
+      "node_content_equal": true
+    },
+    "RawFrame.lean": {
+      "base_sha256": "3acf16df4ca9fde7936c613986163cd5854b359d64d70f52c8c9663ccf3a023c",
+      "master_sha256": "a59c1758e5ba3eea3de29710cefe1d605ccb770dceadd98a4f8757bd572c2d44",
+      "base_nodes": {
+        "Lean.Parser.Tactic.cases": 9,
+        "Lean.Parser.Tactic.inductionAlt": 8
+      },
+      "master_nodes": {
+        "Lean.Parser.Tactic.cases": 15,
+        "Lean.Parser.Tactic.inductionAlt": 8
+      },
+      "node_content_equal": false
+    }
+  },
+  "unchanged_files_verified": 100,
+  "base_totals": {
+    "Lean.Parser.Command.ctor": 20,
+    "Lean.Parser.Tactic.case": 20,
+    "Lean.Parser.Tactic.cases": 833,
+    "Lean.Parser.Tactic.induction": 79,
+    "Lean.Parser.Tactic.inductionAlt": 1347,
+    "Lean.Parser.Term.matchAlt": 440
+  },
+  "master_totals": {
+    "Lean.Parser.Command.ctor": 20,
+    "Lean.Parser.Tactic.case": 20,
+    "Lean.Parser.Tactic.cases": 850,
+    "Lean.Parser.Tactic.induction": 79,
+    "Lean.Parser.Tactic.inductionAlt": 1359,
+    "Lean.Parser.Term.matchAlt": 442
+  },
+  "added_nodes": {
+    "RawFrameLogic.lean": {
+      "Lean.Parser.Tactic.cases": 11,
+      "Lean.Parser.Tactic.inductionAlt": 12,
+      "Lean.Parser.Term.matchAlt": 2
+    }
+  }
+}

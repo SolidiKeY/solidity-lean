@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_abort": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_execute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_more": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_loop_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoop.lean:Solidity.Backend.MemoryCopies.fixedReferenceMemoryLoop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

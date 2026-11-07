@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransport.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarPairedTransport.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

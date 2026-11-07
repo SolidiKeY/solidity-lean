@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "purpose": "H44 off-git retirement data; worker remains STOPPED",
+  "held_head": "f6a4ebf65a677f5138445c8d41c96639981e20cb",
+  "preserved_ref": "refs/heads/codex/h28-held-f6a4-preserved-h44",
+  "archive": {
+    "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/h44-retirement-split-f6a4ebf6/retirement-h82-held-f6a4ebf6.tar.gz",
+    "bytes": 100144,
+    "sha256": "f9ef58f6a1a19d43f81604573b4235c4c9f94ad751d78aebcc8a019ed37b93c1",
+    "file_count": 21,
+    "uncompressed_bytes": 504929
+  },
+  "format": "gzip-compressed POSIX tar; entries rooted at retirement-h82/",
+  "complete_scope_entries": [
+    "ORIGINAL-FROZEN-PROMPT.txt",
+    "ORIGINAL-QUEUE.md",
+    "SCOPE-MANIFEST.json",
+    "OPEN-QUEUE.json"
+  ],
+  "evidence_inventory": {
+    "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/h44-retirement-split-f6a4ebf6/archive-files.json",
+    "bytes": 3624,
+    "sha256": "c4e173ffca968014277157c0dc65661559c0a32a0b9e5dfdf712a5d9eaecf467"
+  },
+  "prior_sealed_handoff": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final",
+  "handoff_to": "solidity-v12-v17-20261031/v17-validation-release"
+}

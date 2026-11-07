@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "guarded_regression": "AST-only observations promoted to intrinsic Scope and stale context dependencies.",
+  "sources": {
+    "scripts/h62/item1/duplication-scanner/bind_project_closure.py": "94d6f2e2437308050d9d7e1c2836d1b75aff195369a287121beafc428a518d43",
+    "scripts/h62/item1/duplication-scanner/scan.py": "8007a8be8a0ed5c9a89ffd20a12b9b6f23c1cd736e4096a513bf56a2ab4ee9b3",
+    "tests/h62/item1/duplication-scanner/ScopeSourceBinding.lean": "cec1b65eb7dcef355a8acdd00ef07f2f753b7ab7f31a576e49ce31c992e89e18",
+    "tests/h62/item1/duplication-scanner/scope-closure-pins.json": "3df819276450deb83c85a63da94a1f79e0dba3cc544062b59fed79ec38647300",
+    "tests/h62/item1/duplication-scanner/test_scope_binding.py": "4ee671b3ae4da4dd3b0fe706a91cf52ead8a12105e0042aff112c705624f20be"
+  },
+  "evidence_sha256": {
+    "acceptance.json": "7371575fa8152517318e3cbe86e752c6d28897abcb4506e534d4e874f1b5726a",
+    "seals.json": "0537b467a4a3ebe5fe93aecca7aa2f4e2b6c209f87d1b9bbe08e9d6f497496fb",
+    "timing-summary.json": "051191d80a0fdf72efbeaac4982383c971f193996b2cca735ec4762a29b68781",
+    "tests.log": "0c11c82822447c238db369fe4067cb1f55f580975726626bb8bbd804647e610d",
+    "reviews.json": "0b92a661ccb3f0e554910ba68df1c0e26ef90e6b46df4387a1c2086a9a1f7b0c",
+    "profile-ast.py": "e6899bf5bf9f62e5bef7f8ad1f8c6d67ca59fe719bdecfd57c08a15cc984143f"
+  },
+  "external_tests": 158,
+  "new_controls": 6,
+  "coverage": {
+    "scope_lexical_rows": 37,
+    "scope_direct_links": 25,
+    "scope_unresolved": 12,
+    "visible_kernel_total": 312,
+    "kernel_type_statuses": {
+      "serialized": 286,
+      "unsupported": 26
+    },
+    "unsupported_reason": "expression metadata",
+    "kernel_without_lexical_link": 287,
+    "mixed_selected_rows": 224,
+    "mixed_unresolved": 199,
+    "unknown_ownership_rows": 224,
+    "original_refusals_preserved": true,
+    "non_Scope_rows_unannotated": true,
+    "incremental_candidate_changes": 0,
+    "Scope_metadata_bindings_identical": true,
+    "keysort_default_unchanged_except_scanner_hash": true,
+    "AST_cli_unchanged_except_scanner_hash_and_fresh_dependency_observations": true
+  },
+  "production_Lean_delta": {
+    "files": 0,
+    "lines": 0
+  },
+  "test_Lean_delta": {
+    "files": 1,
+    "lines": 54
+  },
+  "boundary": "No original theorem witness, ownership, body equivalence or runtime acceptance; original792 obligations and +80.254966536%STOP unchanged."
+}

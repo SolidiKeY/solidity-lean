@@ -1,0 +1,60 @@
+{
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_charged_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_exact_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_failure_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_gas_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_one_short_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_output_data": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_run_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_sample_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_success_iff_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_success_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.identity_unaffordable_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.rejectAll_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BridgeIdentityWitnesses.lean:H62.AuditPrecompiles.Successor.sample_nonempty": []
+}

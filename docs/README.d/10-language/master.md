@@ -1,0 +1,1 @@
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |

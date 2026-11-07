@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarUnwind.skip_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarUnwind.step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

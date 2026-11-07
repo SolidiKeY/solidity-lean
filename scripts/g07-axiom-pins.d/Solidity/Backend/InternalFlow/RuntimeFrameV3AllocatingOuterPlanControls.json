@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlanControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.Controls.actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlanControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.Controls.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlanControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.Controls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

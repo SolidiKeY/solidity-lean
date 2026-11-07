@@ -1,0 +1,31 @@
+{
+ "Solidity/Backend/AbiEntry/SingleWordGateControls.lean:Solidity.Backend.AbiEntry.SingleWordGateControls.fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGateControls.lean:Solidity.Backend.AbiEntry.SingleWordGateControls.full_word_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGateControls.lean:Solidity.Backend.AbiEntry.SingleWordGateControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/SingleWordGateControls.lean:Solidity.Backend.AbiEntry.SingleWordGateControls.raw_dirty_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGateControls.lean:Solidity.Backend.AbiEntry.SingleWordGateControls.raw_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGateControls.lean:Solidity.Backend.AbiEntry.SingleWordGateControls.short_before_fuel": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SingleWordGateControls.lean:Solidity.Backend.AbiEntry.SingleWordGateControls.short_before_malformed_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

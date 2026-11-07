@@ -1,0 +1,11 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarPrefixes.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarPrefixes.at_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarPrefixes.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarPrefixes.returned_value": [
+  "Quot.sound",
+  "propext"
+ ]
+}

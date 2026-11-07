@@ -86,7 +86,7 @@ def addr (n : Nat) (h : n < 2 ^ 160 := by decide) : Address := ⟨n, h⟩
 def LW : Address → SPath → STy := fun _ => L₀
 
 /-- Instance 1's account: 100 wei and `count = 7`. -/
-def acc₁ : Account D₀ L₀ := ⟨⟨100, by decide⟩, 0, none, Storage.empty.write countPath seven⟩
+def acc₁ : Account D₀ L₀ := ⟨100, 0, none, Storage.empty.write countPath seven⟩
 
 /-- Instance 1 holds `acc₁`, every other address nothing; the journal is
 empty. -/
@@ -98,7 +98,7 @@ balances. -/
 theorem transfers :
     (s₀.transfer (addr 1) (addr 2) ⟨200, by decide⟩).isNone = true ∧
       ((s₀.transfer (addr 1) (addr 2) ⟨30, by decide⟩).map fun s =>
-        ((s.world.accounts (addr 1)).balance.val, (s.world.accounts (addr 2)).balance.val)) = some (70, 30) := by
+        ((s.world.accounts (addr 1)).balance, (s.world.accounts (addr 2)).balance)) = some (70, 30) := by
   decide
 
 /-- The operations of a call that sets `count = 8` and a transient slot. -/
@@ -143,5 +143,5 @@ end Solidity.Source.StateExamples
 #guard_msgs in #print axioms Solidity.Source.rollback_transfer
 /-- info: 'Solidity.Source.StateExamples.revert_undoes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Source.StateExamples.revert_undoes
-/-- info: 'Solidity.Source.StateExamples.transfers' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Source.StateExamples.transfers' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Source.StateExamples.transfers

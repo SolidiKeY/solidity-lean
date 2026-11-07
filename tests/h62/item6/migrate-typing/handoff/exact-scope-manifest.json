@@ -1,0 +1,34 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "current_worker_authorization": "Only smallest retirement preservation checkpoint; no new proof implementation or scope takeover.",
+  "h82_owner_agreement_policy": "Statement-preserving proof-only/additive/split/import/doc edits have standing agreement; changing statements, dependent definition bodies, signatures, budgets, axioms or exclusions requires owner agreement and frozen H57 versioned pairs.",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "original_exact_write_scope": [
+    "tests/h62/item6/migrate-typing/**",
+    "scripts/h62/item6/migrate-typing/**",
+    "docs/feature-work/h62-6-migrate-typing.md",
+    "Solidity/Typing/CanonTest.lean",
+    "Solidity/Typing/CleanTail.lean",
+    "Solidity/Typing/CleanTailRun.lean",
+    "Solidity/Typing/Constructibility.lean",
+    "Solidity/Typing/Fits.lean",
+    "Solidity/Typing/HeredRun.lean",
+    "Solidity/Typing/Reachability.lean",
+    "Solidity/Typing/Sorts.lean",
+    "Solidity/Typing/Soundness.lean",
+    "Solidity/Typing/Tight.lean",
+    "Solidity/Typing/TypedRunInv.lean",
+    "Solidity/Typing/Values.lean"
+  ],
+  "original_exact_write_scope_text": "tests/h62/item6/migrate-typing/**; scripts/h62/item6/migrate-typing/**; docs/feature-work/h62-6-migrate-typing.md; Solidity/Typing/CanonTest.lean; Solidity/Typing/CleanTail.lean; Solidity/Typing/CleanTailRun.lean; Solidity/Typing/Constructibility.lean; Solidity/Typing/Fits.lean; Solidity/Typing/HeredRun.lean; Solidity/Typing/Reachability.lean; Solidity/Typing/Sorts.lean; Solidity/Typing/Soundness.lean; Solidity/Typing/Tight.lean; Solidity/Typing/TypedRunInv.lean; Solidity/Typing/Values.lean",
+  "original_lean_source_count": 12,
+  "original_no_generated_edits": [
+    "generated roots",
+    "central module maps",
+    "axiom pins"
+  ],
+  "original_outside_scope": "Existing owned originals outside this scope READ ONLY.",
+  "original_registration": "New additive .lean helpers can live under tests until owner-approved area module registration; supply registration fragments to coordinator.",
+  "owner": "solidity-h62-6-20261106/migrate-typing",
+  "schema_version": 1
+}

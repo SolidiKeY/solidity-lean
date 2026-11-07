@@ -1,0 +1,33 @@
+{
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_try_actual_yield_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_try_coverage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_try_derives": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_try_fragment_coverage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_try_fragment_yield": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_try_token_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.boolean_try_yield": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.BooleanTry.attempt": [],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.try_empty_body_prefix": [],
+ "tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean:Solidity.Frontend.StatementGrammarH28.try_empty_body_prefix_head": []
+}

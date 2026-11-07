@@ -1,0 +1,10 @@
+{
+  "guardedRegression": "Environmentmetadata/identity/errororderkernelguards are standalone testdriver,notnewproductionroot.",
+  "modules": [
+    {
+      "path": "tests/directruntime-20261104/native-browser/environment/MetadataControls.lean",
+      "role": "15metadatafoils/siblings/errorpriority/signatures/axioms",
+      "centralAction": "Proposal only;no sharedgeneratedroot edits"
+    }
+  ]
+}

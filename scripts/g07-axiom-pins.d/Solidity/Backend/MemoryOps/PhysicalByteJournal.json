@@ -16,6 +16,10 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryOps/PhysicalByteJournal.lean:Solidity.Backend.MemoryOps.Physical.readMemory_writeByte_at": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/PhysicalByteJournal.lean:Solidity.Backend.MemoryOps.Physical.revert_live": [
   "Quot.sound",
   "propext"

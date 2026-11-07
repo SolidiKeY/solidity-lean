@@ -1,0 +1,62 @@
+{
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.actual_scope_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.body_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.caught_cut_cannot_succeed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.changed_plan_not_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.completed_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.cut_one_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.cut_zero_suppresses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.dropped_is_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.family_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.heap_alias_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.later_complete_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestHorizonControls.lean:Solidity.Source.FailureExecution.RequestHorizonControls.zero_horizon_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

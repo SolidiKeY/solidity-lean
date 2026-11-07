@@ -1,0 +1,706 @@
+{
+  "nodes": [],
+  "pendingInputs": [
+    {
+      "area": "G49",
+      "id": "G49.01",
+      "inputArtifact": "elaborated G49Final declaration/field export and compatibility validation",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G49.01",
+      "reason": "Published conditional declaration located; types, dependency edges and producers remain unverified.",
+      "source": "Coordinator exact-master inventory plus published representative ownership metadata",
+      "sourceLocator": {
+        "declaration": "Solidity.Roadmap.G49Final.g49_g50_of_fold",
+        "evidence": "static-source-only",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "ownerSlots": [
+          {
+            "name": "Asm",
+            "scope": "binder"
+          },
+          {
+            "name": "backend",
+            "scope": "binder"
+          }
+        ],
+        "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa"
+      }
+    },
+    {
+      "area": "G49",
+      "id": "G49.02",
+      "inputArtifact": "elaborated G49Final declaration/field export and compatibility validation",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G49.02",
+      "reason": "Published conditional declaration located; types, dependency edges and producers remain unverified.",
+      "source": "Coordinator exact-master inventory plus published representative ownership metadata",
+      "sourceLocator": {
+        "declaration": "Solidity.Roadmap.G49Final.g49_g50_of_fold",
+        "evidence": "static-source-only",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "ownerSlots": [
+          {
+            "name": "execution",
+            "scope": "binder"
+          },
+          {
+            "name": "artifact",
+            "scope": "PublicObligations-field"
+          },
+          {
+            "name": "fixed",
+            "scope": "PublicObligations-field"
+          },
+          {
+            "name": "session",
+            "scope": "PublicObligations-field"
+          },
+          {
+            "name": "ifixed",
+            "scope": "PublicObligations-field"
+          },
+          {
+            "name": "isession",
+            "scope": "PublicObligations-field"
+          },
+          {
+            "name": "hashes_source",
+            "scope": "PublicObligations-field"
+          }
+        ],
+        "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa"
+      }
+    },
+    {
+      "area": "G49",
+      "id": "G49.03",
+      "inputArtifact": "elaborated G49Final declaration/field export and compatibility validation",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G49.03",
+      "reason": "Published conditional declaration located; types, dependency edges and producers remain unverified.",
+      "source": "Coordinator exact-master inventory plus published representative ownership metadata",
+      "sourceLocator": {
+        "declaration": "Solidity.Roadmap.G49Final.g49_g50_of_fold",
+        "evidence": "static-source-only",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "ownerSlots": [
+          {
+            "name": "compiler",
+            "scope": "binder"
+          },
+          {
+            "name": "coverage",
+            "scope": "PublicObligations-field"
+          },
+          {
+            "name": "bothPipelines",
+            "scope": "PublicObligations-field"
+          }
+        ],
+        "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa"
+      }
+    },
+    {
+      "area": "G50",
+      "id": "G50.01",
+      "inputArtifact": "elaborated G49Final declaration/field export and compatibility validation",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G50.01",
+      "reason": "Published conditional declaration located; types, dependency edges and producers remain unverified.",
+      "source": "Coordinator exact-master inventory plus published representative ownership metadata",
+      "sourceLocator": {
+        "declaration": "Solidity.Roadmap.G49Final.g49_g50_of_fold",
+        "evidence": "static-source-only",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "ownerSlots": [
+          {
+            "name": "creates_table",
+            "scope": "PublicObligations-field"
+          }
+        ],
+        "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa"
+      }
+    },
+    {
+      "area": "G50",
+      "id": "G50.02",
+      "inputArtifact": "elaborated G49Final declaration/field export and compatibility validation",
+      "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+      "ownerReference": "G50.02",
+      "reason": "Published conditional declaration located; types, dependency edges and producers remain unverified.",
+      "source": "Coordinator exact-master inventory plus published representative ownership metadata",
+      "sourceLocator": {
+        "declaration": "Solidity.Roadmap.G49Final.g49_g50_of_fold",
+        "evidence": "static-source-only",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "ownerSlots": [
+          {
+            "name": "decode",
+            "scope": "binder"
+          },
+          {
+            "name": "decode_reach",
+            "scope": "PublicObligations-field"
+          },
+          {
+            "name": "decode_commutes",
+            "scope": "PublicObligations-field"
+          }
+        ],
+        "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa"
+      }
+    }
+  ],
+  "roots": {
+    "G49": [
+      "G49.01",
+      "G49.02",
+      "G49.03"
+    ],
+    "G50": [
+      "G50.01",
+      "G50.02"
+    ]
+  },
+  "sourceSnapshot": {
+    "aggregateBinder": "obligations",
+    "checkpoint": "5f7c70b16090b25ea706dddf3e666d94fb5a09fe",
+    "declarationLocators": [
+      {
+        "declaration": "Solidity.Roadmap.G49Final.BridgeGoal",
+        "file": "Solidity/Roadmap/G49Final/BridgeGoal.lean",
+        "fileSha256": "28c699e28ad45e131543ee660976f2ec7bdf6f6a76d96ff6ca53e5b510053e71",
+        "line": 13,
+        "sourceForm": "abbrev"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.BridgeGoal.pass",
+        "file": "Solidity/Roadmap/G49Final/BridgeGoal.lean",
+        "fileSha256": "28c699e28ad45e131543ee660976f2ec7bdf6f6a76d96ff6ca53e5b510053e71",
+        "line": 23,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.BridgeGoal.envAbs_eq",
+        "file": "Solidity/Roadmap/G49Final/BridgeGoal.lean",
+        "fileSha256": "28c699e28ad45e131543ee660976f2ec7bdf6f6a76d96ff6ca53e5b510053e71",
+        "line": 29,
+        "sourceForm": "theorem"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.BridgeGoal.need_eq",
+        "file": "Solidity/Roadmap/G49Final/BridgeGoal.lean",
+        "fileSha256": "28c699e28ad45e131543ee660976f2ec7bdf6f6a76d96ff6ca53e5b510053e71",
+        "line": 34,
+        "sourceForm": "theorem"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.BridgeGoal.local",
+        "file": "Solidity/Roadmap/G49Final/BridgeGoal.lean",
+        "fileSha256": "28c699e28ad45e131543ee660976f2ec7bdf6f6a76d96ff6ca53e5b510053e71",
+        "line": 40,
+        "sourceForm": "theorem"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.cert_bridge",
+        "file": "Solidity/Roadmap/G49Final/BridgeGoal.lean",
+        "fileSha256": "28c699e28ad45e131543ee660976f2ec7bdf6f6a76d96ff6ca53e5b510053e71",
+        "line": 47,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.sourceEnv",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "line": 12,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.foldedExport",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "line": 18,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.pipeline",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "line": 27,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.pipeline_env",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "line": 41,
+        "sourceForm": "theorem"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.PublicObligations",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "line": 52,
+        "sourceForm": "structure"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.FoldStatement",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "line": 104,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.g49_g50_of_fold",
+        "file": "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+        "fileSha256": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+        "line": 124,
+        "sourceForm": "theorem"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.pass_chain",
+        "file": "Solidity/Roadmap/G49Final/PassChain.lean",
+        "fileSha256": "350daa7a780d8a694258038e494d97fc1fb314923f44e157bb3b2e0b7b9dc9bf",
+        "line": 18,
+        "sourceForm": "theorem"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.Behaviour",
+        "file": "Solidity/Roadmap/G49Final/PassCorrect.lean",
+        "fileSha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+        "line": 10,
+        "sourceForm": "structure"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.Behaviour.Ready",
+        "file": "Solidity/Roadmap/G49Final/PassCorrect.lean",
+        "fileSha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+        "line": 22,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.PassCorrect",
+        "file": "Solidity/Roadmap/G49Final/PassCorrect.lean",
+        "fileSha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+        "line": 28,
+        "sourceForm": "structure"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.PassCorrect.refl",
+        "file": "Solidity/Roadmap/G49Final/PassCorrect.lean",
+        "fileSha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+        "line": 40,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.PassCorrect.trans",
+        "file": "Solidity/Roadmap/G49Final/PassCorrect.lean",
+        "fileSha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+        "line": 50,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.PassList",
+        "file": "Solidity/Roadmap/G49Final/PassCorrect.lean",
+        "fileSha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+        "line": 70,
+        "sourceForm": "inductive"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.PassList.fold",
+        "file": "Solidity/Roadmap/G49Final/PassCorrect.lean",
+        "fileSha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+        "line": 75,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.public_end_to_end",
+        "file": "Solidity/Roadmap/G49Final/PassCorrect.lean",
+        "fileSha256": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+        "line": 85,
+        "sourceForm": "theorem"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.Behaviour.ofLang",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 11,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.cert_adapter",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 24,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.lowering_adapter",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 43,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.compilation_adapter",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 51,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.execution_adapter",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 58,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.p8b_adapter",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 66,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.SourceProgram",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 74,
+        "sourceForm": "structure"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.source_from_admitted",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 81,
+        "sourceForm": "def"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.source_ready",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 91,
+        "sourceForm": "theorem"
+      },
+      {
+        "declaration": "Solidity.Roadmap.G49Final.PassCorrect.refines",
+        "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+        "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+        "line": 103,
+        "sourceForm": "theorem"
+      }
+    ],
+    "evidence": "static-source-only",
+    "exhaustiveLaneCoverage": false,
+    "files": {
+      "Solidity/Roadmap/G49Final/BridgeGoal.lean": "28c699e28ad45e131543ee660976f2ec7bdf6f6a76d96ff6ca53e5b510053e71",
+      "Solidity/Roadmap/G49Final/FoldedPublic.lean": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925",
+      "Solidity/Roadmap/G49Final/PassChain.lean": "350daa7a780d8a694258038e494d97fc1fb314923f44e157bb3b2e0b7b9dc9bf",
+      "Solidity/Roadmap/G49Final/PassCorrect.lean": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+      "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5"
+    },
+    "freshLeanRun": false,
+    "historicalProducerCheck": {
+      "date": "2026-11-06",
+      "method": "rg for BridgeGoal and each factory name outside this lane's files",
+      "ref": "origin/master",
+      "result": "no delivery found",
+      "sha": "0b2a648b32335f35ff323ff468f75907e926fc13"
+    },
+    "inventorySha256": "af4f1a69410a9df1f408d2e2d9d9b82b39f926ce48c6bb601c16092514ed733e",
+    "metadataFiles": {
+      "tests/h55/g49-final-theorem/bridge-requests.json": "8036609f547bb8c91d547465afb2d46c6466d49d7025ef00e03317c8efa4ae41",
+      "tests/h55/g49-final-theorem/h64-shapes.json": "6c3d3221506bcf288b3c8694d4d6b1d54e49e595b5618c65aed22c593d57f0d0"
+    },
+    "premiseInventoryComplete": false,
+    "producerReportedCheckedDeclarations": [
+      "Solidity.Roadmap.G49Final.PassCorrect.trans",
+      "Solidity.Roadmap.G49Final.PassList.fold",
+      "Solidity.Roadmap.G49Final.public_end_to_end",
+      "Solidity.Roadmap.G49Final.cert_adapter",
+      "Solidity.Roadmap.G49Final.lowering_adapter",
+      "Solidity.Roadmap.G49Final.compilation_adapter",
+      "Solidity.Roadmap.G49Final.execution_adapter",
+      "Solidity.Roadmap.G49Final.p8b_adapter",
+      "Solidity.Roadmap.G49Final.source_from_admitted",
+      "Solidity.Roadmap.G49Final.source_ready",
+      "Solidity.Roadmap.G49Final.pipeline",
+      "Solidity.Roadmap.G49Final.pipeline_env",
+      "Solidity.Roadmap.G49Final.PublicObligations.mk",
+      "Solidity.Roadmap.G49Final.g49_g50_of_fold"
+    ],
+    "producerReportedSourceHashes": {
+      "Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean": "9560a674e2be7f4efeb9601cc25a36f5e93387335c3f023c0c5866b7d7cb3ee6",
+      "Bridge/SolidityBridge/RoadmapV15/P10/FrozenWitness.lean": "ce7d6750d9677644d93e5f6f09ce8809473fc6768411670346e53e43fe3eec9c",
+      "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV1.lean": "2383047dc6035b3f54bccac10b86f087df0eae7271edc84ae960e07b567f536f",
+      "Solidity/Backend/InternalFlow/RuntimeFrameInterfaceV3.lean": "e879b09bb74bfa7231b3e949dec1bbda0676b551150e5df63d00d112cf8041cd",
+      "Solidity/Backend/Passes/Boundary.lean": "72a861f47783401b491066a1195bb32b8841ff73461ef6dcea4d44ae2cf3ee4e",
+      "Solidity/Evm/Compiler.lean": "38565297a2909c6213dbec3aad878f4f04823efdeee7a91c19d2cfee64ef1810",
+      "Solidity/Lowering/P8b/Frozen.lean": "76c73f38899a03bc7d4a94571995427b2139fcf31baeccc79a93be6c04b06e64",
+      "Solidity/Lowering/V08/CreationPremises.lean": "9ce078e744ff61d51b114c2987a6f989cf94988d2e33041f689498574a710dbe",
+      "Solidity/Lowering/V08/WorldImage.lean": "e9c70c8b42c2b5d2d8ba7c682c2f0ddf0232b94011aeb5077265d5497b2a17e6",
+      "Solidity/Lowering/V08/WorldReset.lean": "7ecaecacbe081d185d2c14e0d1a33afa0a708b27d2a87adcb76bea4f00e1b75b",
+      "Solidity/Roadmap/Contracts.lean": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79"
+    },
+    "reportedProducerGaps": [
+      {
+        "deliveredDeclaration": null,
+        "family": "Bare prefix refinement",
+        "locallyVerifiedDelivery": false,
+        "producerReportedStatus": "pending",
+        "requiredFactory": "bare_prefix_bridge"
+      },
+      {
+        "deliveredDeclaration": null,
+        "family": "Compiler Input/Agrees",
+        "locallyVerifiedDelivery": false,
+        "producerReportedStatus": "pending",
+        "requiredFactory": "compiler_agreement_bridge"
+      },
+      {
+        "deliveredDeclaration": null,
+        "family": "P1 frame claims",
+        "locallyVerifiedDelivery": false,
+        "producerReportedStatus": "pending",
+        "requiredFactory": "p1_frame_bridge"
+      },
+      {
+        "deliveredDeclaration": null,
+        "family": "V08 image/reached phase",
+        "locallyVerifiedDelivery": false,
+        "producerReportedStatus": "pending",
+        "requiredFactory": "v08_world_phase_bridge"
+      },
+      {
+        "deliveredDeclaration": null,
+        "family": "P10 opcode-local laws",
+        "locallyVerifiedDelivery": false,
+        "producerReportedStatus": "pending",
+        "requiredFactory": "p10_execution_bridge"
+      }
+    ],
+    "sharedPublicObligations": [
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 56,
+        "name": "sourceApproved",
+        "owner": "VY5 (inline-assembly5/vy5-composition)",
+        "ownerReference": "P8a-SPEC",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 57,
+        "name": "sourceNonVacuous",
+        "owner": "VY5 (inline-assembly5/vy5-composition)",
+        "ownerReference": "P8a-SPEC",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 58,
+        "name": "targetApproved",
+        "owner": "V15 (v12-v17/v15-evm-agreement)",
+        "ownerReference": "G47",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 59,
+        "name": "keccak",
+        "owner": "V15 (v12-v17/v15-evm-agreement)",
+        "ownerReference": "G47",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 60,
+        "name": "coverage",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.03",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 61,
+        "name": "bothPipelines",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.03",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 62,
+        "name": "artifact",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.02",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 64,
+        "name": "fixed",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.02",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 65,
+        "name": "session",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.02",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 66,
+        "name": "ifixed",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.02",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 67,
+        "name": "isession",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.02",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 68,
+        "name": "creates_table",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G50.01",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 71,
+        "name": "hashes_source",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.02",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 79,
+        "name": "decode_reach",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G50.02",
+        "status": "open"
+      },
+      {
+        "container": "Solidity.Roadmap.G49Final.PublicObligations",
+        "evidence": "static-source-only",
+        "line": 85,
+        "name": "decode_commutes",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G50.02",
+        "status": "open"
+      }
+    ],
+    "sourceBinderNames": [
+      "S",
+      "I",
+      "Asm",
+      "V",
+      "lowering",
+      "backend",
+      "execution",
+      "compiler",
+      "decode",
+      "obligations"
+    ],
+    "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa",
+    "sourceInputBindings": [
+      {
+        "name": "S",
+        "owner": "VY5 (inline-assembly5/vy5-composition)",
+        "ownerReference": "P8a-SPEC",
+        "role": "context-or-function",
+        "status": "open"
+      },
+      {
+        "name": "I",
+        "owner": "V16 (v12-v17/v16-correctness-transfer)",
+        "ownerReference": "G18.02",
+        "role": "context-or-function",
+        "status": "open"
+      },
+      {
+        "name": "Asm",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.01",
+        "role": "context-or-function",
+        "status": "open"
+      },
+      {
+        "name": "V",
+        "owner": "V15 (v12-v17/v15-evm-agreement)",
+        "ownerReference": "G47",
+        "role": "context-or-function",
+        "status": "open"
+      },
+      {
+        "name": "lowering",
+        "owner": "V16 (v12-v17/v16-correctness-transfer)",
+        "ownerReference": "P8b",
+        "role": "certificate-package",
+        "status": "open"
+      },
+      {
+        "name": "backend",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.01",
+        "role": "certificate-package",
+        "status": "open"
+      },
+      {
+        "name": "execution",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.02",
+        "role": "certificate-package",
+        "status": "open"
+      },
+      {
+        "name": "compiler",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G49.03",
+        "role": "context-or-function",
+        "status": "open"
+      },
+      {
+        "name": "decode",
+        "owner": "solidity-h55-sol-20261106/g49-final-theorem",
+        "ownerReference": "G50.02",
+        "role": "context-or-function",
+        "status": "open"
+      }
+    ],
+    "sourceTree": "0cc2661ef01b6d7b9f4e5ac932bccfb7a832490b",
+    "theorem": "Solidity.Roadmap.G49Final.g49_g50_of_fold"
+  }
+}

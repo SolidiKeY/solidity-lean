@@ -1,0 +1,23 @@
+{
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.ExecState.storage_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.ExecState.transient_balancesFit": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.MonetaryStorage.applyOp_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.MonetaryStorage.setCell_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/MonetaryStorage.lean:Solidity.Source.MonetaryStorage.writeAt_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

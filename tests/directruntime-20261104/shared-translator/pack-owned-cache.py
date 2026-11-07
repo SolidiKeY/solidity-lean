@@ -10,7 +10,7 @@ def sha(p):
  with p.open('rb') as f:
   for b in iter(lambda:f.read(1048576),b''):h.update(b)
  return h.hexdigest()
-modules=['Solidity/Frontend/ExecutableAst/Shared/'+n for n in ['Boundary','Translate','Scope','Compose','Intrinsic']]+['Solidity/Tools/DirectRuntime']
+modules=['Solidity/Frontend/ExecutableAst/Shared/'+n for n in ['Boundary','Translate','Scope','Compose','Intrinsic']]+['Solidity/Tools/DirectRuntime']+['Solidity/Frontend/ExecutableAst/ControlTuple/'+n for n in ['Adapter','AdmissionControls','IntrinsicControls']]
 mappings={};sources=[];files={}
 allMaps=dict(json.loads(x) for x in Path('/workspace/.setup/cache/lake/inputs/solidity-lean.jsonl').read_text().splitlines())
 for module in modules:
@@ -39,5 +39,5 @@ with tarfile.open(fileobj=proc.stdout,mode='r|') as archive:
   assert h.hexdigest()==expected['sha256'];seen.add(member.name)
 for chunk in iter(lambda:proc.stdout.read(1048576),b''):assert not chunk.strip(b'\0')
 assert proc.wait()==0 and seen==set(files)
-r={'status':'verified-local; coordinator-pending','head':head,'pack':str(pack),'sha256':sha(pack),'bytes':pack.stat().st_size,'verifiedArtifacts':len(files),'inputMappings':len(mappings),'modules':sources,'boundary':'Owned six-module delta only. Requires matching dependency caches/toolchain; not a standalone installation, transfer receipt or native closure proof. No ship-cache.sh invocation.'}
+r={'status':'verified-local; coordinator-pending','head':head,'pack':str(pack),'sha256':sha(pack),'bytes':pack.stat().st_size,'verifiedArtifacts':len(files),'inputMappings':len(mappings),'modules':sources,'boundary':'Owned nine-module delta only. Requires matching dependency caches/toolchain; not a standalone installation, transfer receipt or native closure proof. No ship-cache.sh invocation.'}
 (out/'receipt.json').write_text(json.dumps(r,indent=2)+'\n');print(json.dumps(r))

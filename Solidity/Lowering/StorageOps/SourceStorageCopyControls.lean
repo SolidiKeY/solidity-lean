@@ -36,7 +36,7 @@ private def storage : Source.Storage env.layout env.cellTy :=
 private def state : Source.St env :=
   { ex :=
       { world := ⟨fun a => if a = address then
-          { balance := ⟨19,by decide⟩, nonce := 3, code := some 0, storage := storage }
+          { balance := 19, nonce := 3, code := some 0, storage := storage }
           else Source.Account.empty _⟩
         transient := Source.Transient.empty.set address
           ((Source.Storage.empty : Source.Storage env.layout env.cellTy).write scratch (.int 5 (by decide)))
@@ -98,7 +98,7 @@ theorem readbacks : (readViews initial,readViews copied.2)=
 
 theorem exact_context : copied.2.1=initial.1 ∧ copied.2.2.heap=state.heap ∧ copied.2.2.events=state.events ∧
  copied.2.2.logs=state.logs ∧ copied.2.2.fnLocals=state.fnLocals ∧
- (copied.2.2.ex.world.accounts address).balance=⟨19,by decide⟩ ∧
+ (copied.2.2.ex.world.accounts address).balance=19 ∧
  (copied.2.2.ex.world.accounts address).nonce=3 ∧ (copied.2.2.ex.world.accounts address).code=some 0 := by
  exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
 

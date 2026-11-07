@@ -52,3 +52,13 @@ test('verified/fixed captures reject cancellation, errors, failed proofs and cha
   }
   assert.equal(phaseObserved('proof-broken',failed,failed),true);assert.equal(phaseObserved('proof-broken',proved,proved),false);
 });
+
+test('native capture acknowledgement cannot retain success alongside an internal error',async()=>{
+ const dir=fixture();try{const pending=requestPhase(dir,'ack-error','trace-hidden',{binding:'owned'},1000);await servePhases(dir,'ack-error',async d=>{fs.writeFileSync(path.join(d,'screenshot.png'),png);return{captured:true,screenshot:true};},new Set());const reply=await pending;assert.equal(reply.error,undefined,'internal error cannot accompany accepted capture');}finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('captured status with an error and mismatched source metadata never satisfy the caller',async()=>{
+ for(const wrongHash of [false,true]){const dir=fixture();try{const pending=requestPhase(dir,'poison','trace-hidden',{binding:'current'},1000),p=paths(dir,'trace-hidden'),request=JSON.parse(fs.readFileSync(p.request));const rejected=assert.rejects(pending,/mismatch|failed/);fs.writeFileSync(path.join(p.dir,'screenshot.png'),png);fs.writeFileSync(p.reply,JSON.stringify({runId:request.runId,phase:request.phase,requestId:request.requestId,status:'captured',error:'internal error',metadataHash:wrongHash?'wrong':require('node:crypto').createHash('sha256').update(JSON.stringify(request.metadata)).digest('hex')}));await rejected;}finally{fs.rmSync(dir,{recursive:true,force:true});}}
+});
+
+test('proof hover phase is explicitly allowlisted without permitting arbitrary phase paths',()=>{assert.match(paths('/tmp/root','proof-help-hover').dir,/proof-help-hover$/);assert.throws(()=>paths('/tmp/root','proof-help-hover/../../escape'),/Unknown/);});

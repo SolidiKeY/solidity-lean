@@ -1,0 +1,23 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "expected_tsv_sha256": "1e03f5e2c96ffe742a0792b96845234a5c529b96b05c7648c067fdd5fbefdf41",
+  "scope_cases": 639,
+  "by_contract": {
+    "SolcArrays": 12,
+    "SolcControlFlow": 10,
+    "SolcExpressions": 20,
+    "SolcMappings": 9,
+    "SolcMemory": 11,
+    "SolcStructs": 11,
+    "TestSuite": 566
+  },
+  "by_status": {
+    "derived": 552,
+    "excluded": 1,
+    "proved": 68,
+    "refuted": 11,
+    "skip": 2,
+    "unsupported": 5
+  },
+  "scope_rows_sha256": "0b10ad4d11ae5720a63a6de0825c281803da5916623d8f5357bd11286f89ba2a"
+}

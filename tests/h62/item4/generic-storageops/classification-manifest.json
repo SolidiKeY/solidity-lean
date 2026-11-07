@@ -1,0 +1,81 @@
+{
+  "format": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "inventory_sha256": "30e9490cd6efae5027c910b827a675e3afdc8b614fd462a27b3e0debb4f8af90",
+  "domains_sha256": "3cba6e4aa249dfc5b4ada202ced6bcaf4ff275e3e3ec0aa9161d27399259e698",
+  "classification_sha256": "ea9995ef1ff96bcea13c16b5154127a6c8cfc16fa0cbdabddbdf9d5d9873e945",
+  "totals": {
+    "files": 230,
+    "declarations": 6036,
+    "roles": {
+      "family-proof-claim": 922,
+      "family-definition-or-adapter": 274,
+      "control-fixture-or-adapter": 3214,
+      "private-control-claim": 616,
+      "public-control-claim": 1007,
+      "interface-or-type-definition": 3
+    },
+    "domains": {
+      "represented-composition": 2468,
+      "numeric-access-and-traces": 1592,
+      "intrinsic-graph": 664,
+      "mixed-control-clients": 101,
+      "structured-target": 403,
+      "reached-endpoint": 21,
+      "published-compiler-fragment": 65,
+      "represented-target-adapter": 722
+    },
+    "header_corrections": 105,
+    "input_regimes": {
+      "explicit-or-ambient-parameters": 2082,
+      "no-declaration-or-ambient-parameters": 3552,
+      "universal-result-parameters": 306,
+      "function-or-dependent-result-type": 72,
+      "existential-result-contract": 24
+    },
+    "repeated_source_template_groups": 435,
+    "repeated_source_template_members": 1535,
+    "conclusion_forms": {
+      "equality": 3023,
+      "conjunction": 715,
+      "predicate-or-term-proposition": 1226,
+      "iff": 45,
+      "exists": 123,
+      "let-proposition": 309,
+      "forall": 619,
+      "member": 142,
+      "implication": 131,
+      "inequality": 209,
+      "negation": 88,
+      "not-member": 15,
+      "less-or-equal": 25,
+      "disjunction": 10,
+      "falsehood": 1
+    },
+    "expected_forms": {
+      "option-none": 252,
+      "symbolic-expression": 1034,
+      "option-some": 671,
+      "product-expression": 324,
+      "list-expression": 241,
+      "ok-constructor": 394,
+      "natural-literal": 48,
+      "boolean-literal": 11,
+      "revert-constructor": 47,
+      "error-constructor": 1
+    },
+    "asserted_equalities": {
+      "unavailable-graph-observation": 58,
+      "partial-result-none-exact-origin-retained": 86,
+      "exact-value-or-relational-equality": 1052,
+      "partial-result-present-exact-payload-retained": 590,
+      "whole-ordered-value-or-observation-equality": 565,
+      "partial-operation-no-returned-value": 29,
+      "explicit-ok-result": 393,
+      "explicit-revert-result": 38,
+      "composed-partial-result-none": 31,
+      "explicit-error-result": 1,
+      "published-fragment-refusal": 3
+    }
+  }
+}

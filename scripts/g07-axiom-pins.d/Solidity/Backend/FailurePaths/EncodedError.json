@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/FailurePaths/EncodedError.lean:Solidity.Backend.FailurePaths.EncodedError.arguments_incomplete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedError.lean:Solidity.Backend.FailurePaths.EncodedError.arguments_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedError.lean:Solidity.Backend.FailurePaths.EncodedError.emitted_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedError.lean:Solidity.Backend.FailurePaths.EncodedError.source_incomplete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedError.lean:Solidity.Backend.FailurePaths.EncodedError.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedError.lean:Solidity.Backend.FailurePaths.EncodedError.transient_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/EncodedError.lean:Solidity.Backend.FailurePaths.EncodedError.world_unwind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

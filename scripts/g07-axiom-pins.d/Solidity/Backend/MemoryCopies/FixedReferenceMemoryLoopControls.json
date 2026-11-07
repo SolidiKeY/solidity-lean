@@ -1,0 +1,57 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.actual_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.actual_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.aliased_source_fresh_pointers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.empty_children_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.empty_outer_padding_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.late_refusal_after_successful_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.long_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.pair_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.saturated_completed_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryLoopControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceMemoryLoopControls.wrong_single_child_cursor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

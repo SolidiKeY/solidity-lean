@@ -145,8 +145,8 @@ def link : Roadmap.Address := ⟨4, by decide +kernel⟩
 def codeAt (a : Roadmap.Address) : Option Nat :=
   if a = caller then some 0 else if a = link then some 1 else none
 def source : Source.St E :=
-  ⟨⟨⟨fun a => {Source.Account.empty _ with code := codeAt a, balance := ⟨if a = caller then 7 else 93, by split <;> decide +kernel⟩}⟩,
-      Source.Transient.empty, []⟩, Source.Heap.empty, [], [], ⟨[],.nil⟩⟩
+  ⟨⟨⟨fun a => {Source.Account.empty _ with code := codeAt a, balance := if a = caller then 7 else 93}⟩,
+      Source.Transient.empty, []⟩, Source.Heap.empty, [], [], ⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩
 def program : Source.Program E :=
   {body := fun _ => none, consts := fun _ => none, inits := fun _ => [], ctor := fun _ => none,
     ctorLocals := fun _ => [], baseArgs := fun _ => [], contracts := ["C","L"]}
@@ -583,8 +583,8 @@ open SourceEnvironmentControls
 
 def amount : Roadmap.Word := ⟨5, by decide +kernel⟩
 def operations : List (Source.Op E.layout E.lay E.lay) :=
-  [.account sender (fun account => account.withBalance ⟨88,by decide +kernel⟩),
-   .account self (fun account => account.withBalance ⟨12,by decide +kernel⟩)]
+  [.account sender (fun account => account.withBalance 88),
+   .account self (fun account => account.withBalance 12)]
 def paid : Source.St E := {populated with ex := populated.ex.run operations}
 
 theorem actual_payment : populated.ex.transfer sender self amount = some paid.ex := rfl
@@ -599,17 +599,17 @@ theorem account_images (pipeline : Roadmap.Pipeline) (address : ContractWorld.Ad
 /-- Complete owner/account and nonworld observations, including every old heap
 object and full log/event/function-local payloads, are retained explicitly. -/
 theorem ordered_observations :
-    ((populated.ex.world.accounts sender).balance.val,
-     (populated.ex.world.accounts self).balance.val,populated.ex.journal.length,
-     (paid.ex.world.accounts sender).balance.val,
-     (paid.ex.world.accounts self).balance.val,paid.ex.journal.length,
+    ((populated.ex.world.accounts sender).balance,
+     (populated.ex.world.accounts self).balance,populated.ex.journal.length,
+     (paid.ex.world.accounts sender).balance,
+     (paid.ex.world.accounts self).balance,paid.ex.journal.length,
      (paid.ex.world.accounts self).code,(paid.ex.world.accounts self).nonce,
      (paid.ex.world.accounts self).storage.read saved,
      (paid.ex.transient.cells self).read scratch,paid.heap.next,paid.heap.get 0) =
       (93,7,3,88,12,5,some 0,1,some (.bool true),some (.bool true),1,
         some ⟨.bytes .memory,.bytes [0,255]⟩) ∧
-    (paid.ex.world.accounts sender) = (populated.ex.world.accounts sender).withBalance ⟨88,by decide +kernel⟩ ∧
-    (paid.ex.world.accounts self) = (populated.ex.world.accounts self).withBalance ⟨12,by decide +kernel⟩ ∧
+    (paid.ex.world.accounts sender) = (populated.ex.world.accounts sender).withBalance 88 ∧
+    (paid.ex.world.accounts self) = (populated.ex.world.accounts self).withBalance 12 ∧
     paid.ex.transient = populated.ex.transient ∧ paid.heap = populated.heap ∧
     paid.events = populated.events ∧ paid.logs = populated.logs ∧ paid.fnLocals = populated.fnLocals :=
   ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
@@ -660,7 +660,7 @@ theorem not_whole_image (pipeline : Roadmap.Pipeline) :
   omega
 
 theorem wrong_end_refund :
-    ((SourceTransient.endExecution paid).ex.world.accounts sender).balance.val ≠ 93 := by
+    ((SourceTransient.endExecution paid).ex.world.accounts sender).balance ≠ 93 := by
   change (88 : Nat) ≠ 93
   decide +kernel
 
@@ -955,9 +955,9 @@ theorem frame_inputs : LibraryFrameTransport.FrameInputs sourceFrame
 /-- Exact ordered raw balances, returned-entry context, journals, installed
 identities and selected persistent/transient cells at all paid boundaries. -/
 theorem ordered_observations (pipeline : Roadmap.Pipeline) :
-    ((opened.ex.world.accounts sender).balance.val,(opened.ex.world.accounts self).balance.val,
-     opened.ex.journal.length,(paid.ex.world.accounts sender).balance.val,
-     (paid.ex.world.accounts self).balance.val,paid.ex.journal.length,
+    ((opened.ex.world.accounts sender).balance,(opened.ex.world.accounts self).balance,
+     opened.ex.journal.length,(paid.ex.world.accounts sender).balance,
+     (paid.ex.world.accounts self).balance,paid.ex.journal.length,
      ((world pipeline).balance (EnvironmentProjection.liftAddress sender)).1,
      ((world pipeline).balance (EnvironmentProjection.liftAddress self)).1,
      ((after pipeline).balance (EnvironmentProjection.liftAddress sender)).1,
@@ -1030,8 +1030,8 @@ theorem wrong_skipped_payment (pipeline : Roadmap.Pipeline) :
 
 
 theorem owner_accounts :
-    paid.ex.world.accounts sender = (opened.ex.world.accounts sender).withBalance ⟨88,by decide +kernel⟩ ∧
-    paid.ex.world.accounts self = (opened.ex.world.accounts self).withBalance ⟨12,by decide +kernel⟩ :=
+    paid.ex.world.accounts sender = (opened.ex.world.accounts sender).withBalance 88 ∧
+    paid.ex.world.accounts self = (opened.ex.world.accounts self).withBalance 12 :=
   ⟨rfl,rfl⟩
 
 /-- Two independently executed operations are joined by the proved full
@@ -1257,13 +1257,13 @@ theorem target_atomic (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
   exact ContractWorld.atomic_failure _ _
 
 theorem ordered_states (bytes : Roadmap.Bytes) :
-    ((opened.ex.world.accounts sender).balance.val,(opened.ex.world.accounts self).balance.val,
-     opened.ex.journal.length,(paid.ex.world.accounts sender).balance.val,
-     (paid.ex.world.accounts self).balance.val,paid.ex.journal.length,
-     ((reached bytes).ex.world.accounts sender).balance.val,
-     ((reached bytes).ex.world.accounts self).balance.val,(reached bytes).ex.journal.length,
-     ((rolled bytes).ex.world.accounts sender).balance.val,
-     ((rolled bytes).ex.world.accounts self).balance.val,(rolled bytes).ex.journal.length) =
+    ((opened.ex.world.accounts sender).balance,(opened.ex.world.accounts self).balance,
+     opened.ex.journal.length,(paid.ex.world.accounts sender).balance,
+     (paid.ex.world.accounts self).balance,paid.ex.journal.length,
+     ((reached bytes).ex.world.accounts sender).balance,
+     ((reached bytes).ex.world.accounts self).balance,(reached bytes).ex.journal.length,
+     ((rolled bytes).ex.world.accounts sender).balance,
+     ((rolled bytes).ex.world.accounts self).balance,(rolled bytes).ex.journal.length) =
       (93,7,4,88,12,6,88,12,6,93,7,4) := by
   rw [show (rolled bytes).ex = opened.ex from restored_execution bytes]
   rfl

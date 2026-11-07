@@ -1,0 +1,82 @@
+{
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.body_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.Controls.body_tail_skipped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.Controls.donor_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.Controls.omitted_loop_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.Controls.tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.Controls.wrong_donor_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.items_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.rest_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.source_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentWhileContinueAxioms.lean:Solidity.Lowering.G19.AssignmentWhileContinue.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

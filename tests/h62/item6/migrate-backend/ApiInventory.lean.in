@@ -1,0 +1,138 @@
+import Lean
+import Solidity
+
+/-!
+Metadata export only, after the complete library has passed its prescribed gate.
+Types are serialized as DAGs without expression pretty-printing or expanding
+shared intrinsic terms. Python computes sharing-independent Merkle hashes. All imported
+Backend declarations, including generated/private ones, remain in the inventory.
+Schema 2 retains private-name classification and protected metadata without
+filtering internal-looking generated public names. This does not establish
+module exported-context accessibility or completeness.
+No theorem or trust-policy claim follows from this exporter alone.
+-/
+open Lean Elab Command
+namespace MigrateBackendApiInventory
+
+def nameJson : Name → Json
+  | .anonymous => Json.arr #[Json.str "anonymous"]
+  | .str parent text => Json.arr #[Json.str "str", nameJson parent, Json.str text]
+  | .num parent index => Json.arr #[Json.str "num", nameJson parent, Json.str (toString index)]
+
+def levelJson : Level → Except String Json
+  | .zero => return Json.arr #[Json.str "zero"]
+  | .succ level => return Json.arr #[Json.str "succ", ← levelJson level]
+  | .max left right => return Json.arr #[Json.str "max", ← levelJson left, ← levelJson right]
+  | .imax left right => return Json.arr #[Json.str "imax", ← levelJson left, ← levelJson right]
+  | .param name => return Json.arr #[Json.str "param", nameJson name]
+  | .mvar _ => .error "universe metavariable in exported kernel type"
+
+def binderJson : BinderInfo → Json
+  | .default => Json.str "default"
+  | .implicit => Json.str "implicit"
+  | .strictImplicit => Json.str "strictImplicit"
+  | .instImplicit => Json.str "instImplicit"
+
+abbrev TypeDag := ExprStructMap Nat × Array Json
+
+def exprNode (expression : Expr) : StateT TypeDag (Except String) Nat := do
+  let (cache, _) ← get
+  let key : ExprStructEq := ⟨expression⟩
+  if let some index := cache[key]? then return index
+  let node ← match expression with
+    | .bvar index => pure (Json.arr #[Json.str "bvar", Json.str (toString index)])
+    | .fvar _ => throw "free variable in exported kernel type"
+    | .mvar _ => throw "metavariable in exported kernel type"
+    | .sort level => do
+        let value ← match levelJson level with
+          | .ok result => pure result
+          | .error message => throw message
+        pure (Json.arr #[Json.str "sort", value])
+    | .const name levels => do
+        let values ← match levels.mapM levelJson with
+          | .ok result => pure result
+          | .error message => throw message
+        pure (Json.arr #[Json.str "const", nameJson name, Json.arr values.toArray])
+    | .app function argument =>
+        pure (Json.arr #[Json.str "app", toJson (← exprNode function), toJson (← exprNode argument)])
+    | .lam name type body binder =>
+        pure (Json.arr #[Json.str "lam", nameJson name, toJson (← exprNode type), toJson (← exprNode body), binderJson binder])
+    | .forallE name type body binder =>
+        pure (Json.arr #[Json.str "forallE", nameJson name, toJson (← exprNode type), toJson (← exprNode body), binderJson binder])
+    | .letE name type value body nondep =>
+        pure (Json.arr #[Json.str "letE", nameJson name, toJson (← exprNode type), toJson (← exprNode value), toJson (← exprNode body), Json.bool nondep])
+    | .lit (.natVal value) => pure (Json.arr #[Json.str "natVal", Json.str (toString value)])
+    | .lit (.strVal value) => pure (Json.arr #[Json.str "strVal", Json.str value])
+    | .mdata _ value => pure (Json.arr #[Json.str "mdata", toJson (← exprNode value)])
+    | .proj name index value =>
+        pure (Json.arr #[Json.str "proj", nameJson name, Json.str (toString index), toJson (← exprNode value)])
+  let (cache, nodes) ← get
+  let index := nodes.size
+  set (cache.insert key index, nodes.push node)
+  return index
+
+/-- Runtime metadata control, not a theorem about the modeled backend. -/
+def structuralCacheControl : Except String Unit := do
+  let x := Name.str .anonymous "x"
+  let y := Name.str .anonymous "y"
+  let explicit := Expr.forallE x (.sort .zero) (.sort .zero) .default
+  let implicit := Expr.forallE x (.sort .zero) (.sort .zero) .implicit
+  let renamed := Expr.forallE y (.sort .zero) (.sort .zero) .implicit
+  let (first, state) ← (exprNode explicit).run ({}, #[])
+  let (second, state) ← (exprNode implicit).run state
+  let (third, _) ← (exprNode renamed).run state
+  if first == second || second == third || first == third then
+    throw "structural cache merged distinct binder names or annotations"
+  return ()
+
+def kind : ConstantInfo → String
+  | .axiomInfo _ => "axiom"
+  | .defnInfo _ => "definition"
+  | .thmInfo _ => "theorem"
+  | .opaqueInfo _ => "opaque"
+  | .quotInfo _ => "quotient"
+  | .inductInfo _ => "inductive"
+  | .ctorInfo _ => "constructor"
+  | .recInfo _ => "recursor"
+
+run_cmd do
+  let env ← getEnv
+  let modules := env.header.moduleNames
+  let targets := modules.filter fun name => name.toString.startsWith "Solidity.Backend."
+  let roots := env.constants.fold (init := #[]) fun acc name info =>
+    match env.getModuleIdxFor? name with
+    | some index =>
+      if modules[index.toNat]!.toString.startsWith "Solidity.Backend." then
+        acc.push (name, info, modules[index.toNat]!)
+      else acc
+    | none => acc
+  match structuralCacheControl with
+    | .ok () => pure ()
+    | .error message => throwError "{message}"
+  let header := Json.mkObj [
+    ("schema", Json.num 2),
+    ("module_inventory", Json.arr (targets.map fun name => Json.str name.toString)),
+    ("declaration_count", toJson roots.size)]
+  liftIO do
+    let destination : System.FilePath := @@OUTPUT@@
+    if ← destination.pathExists then
+      throw (IO.userError "refusing to overwrite an existing API export")
+    let temporary := System.FilePath.mk (destination.toString ++ ".partial")
+    IO.FS.withFile temporary .writeNew fun handle => do
+      handle.putStrLn header.compress
+      for (name, info, origin) in roots do
+        let encoded ← match (exprNode info.type).run ({}, #[]) with
+          | .ok (root, (_, nodes)) => pure (Json.mkObj [("root", toJson root), ("nodes", Json.arr nodes)])
+          | .error message => throw (IO.userError s!"{name}: {message}")
+        let row := Json.mkObj [
+          ("name", nameJson name), ("display_name", Json.str name.toString),
+          ("module", Json.str origin.toString), ("kind", Json.str (kind info)),
+          ("level_params", Json.arr (info.levelParams.map nameJson).toArray),
+          ("unsafe", Json.bool info.isUnsafe),
+          ("visibility", Json.str (if isPrivateName name then "private" else "public")),
+          ("protected", Json.bool (isProtected env name)), ("type", encoded)]
+        handle.putStrLn row.compress
+    IO.FS.rename temporary destination
+  logInfo "Backend metadata export: {targets.size} imported modules, {roots.size} declarations"
+
+end MigrateBackendApiInventory

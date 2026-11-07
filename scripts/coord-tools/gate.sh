@@ -21,7 +21,25 @@ run_gate() {
   local name=$1; shift
   index=$((index+1)); local log="$logs/$index.log" start end seconds status cmd
   printf -v cmd "%q " "$@"; start=$(date +%s)
-  if "$@" >"$log" 2>&1; then status=PASS; else status=FAIL; failed=1; fi
+  if "$@" >"$log" 2>&1; then
+    status=PASS
+  else
+    status=FAIL
+    # Retry only failed build steps with the observed shared-cache SIGBUS marker.
+    case "$name" in
+      build-touched|library|examples|run-lean|lean:*)
+        if grep -Fq -- 'Lean exited with code 135' "$log"; then
+          if ! cp -- "$log" "$log.first"; then
+            failed=1
+            printf "FAIL %s log-preservation %s\n" "$name" "$log" >&2
+            return 1
+          fi
+          echo "RETRY-SIGBUS $name" | tee -a "$log"
+          if "$@" >>"$log" 2>&1; then status=PASS; fi
+        fi;;
+    esac
+    [ "$status" = PASS ] || failed=1
+  fi
   end=$(date +%s); seconds=$((end-start))
   printf "%s %s %ss %s\n" "$status" "$name" "$seconds" "$log"
   printf "%s\t%s\t%s\t%s\t%s\n" "$status" "$name" "$seconds" "$log" "$cmd" >> "$logs/gates.tsv"
@@ -29,7 +47,7 @@ run_gate() {
 build_touched() {
   local base=${GATE_BASE:-origin/master}; local targets
   rm -f "$logs/core"
-  targets=$(GATE_CORE_FILE="$logs/core" python3 - "$base" <<'PY'
+  targets=$(GATE_CORE_FILE="$logs/core" GATE_MODE="$mode" python3 - "$base" <<'PY'
 import os,pathlib,subprocess,sys
 base=sys.argv[1]
 def git(*args): return subprocess.check_output(["git",*args],text=True).splitlines()
@@ -61,6 +79,10 @@ while stack:
     for m in rev.get(stack.pop(),()):
         if leaf(m) and m not in leafs: leafs.add(m); stack.append(m)
 out={m for m in out if wide or m in leafs or not leaf(m)}
+# H109: checkpoint never builds the slow library, including transitive importers.
+if os.environ.get("GATE_MODE") == "checkpoint":
+    slow={line.split()[1] for line in pathlib.Path("SoliditySlowExamples.lean").read_text().splitlines() if line.startswith("import ")}
+    out.difference_update(slow)
 print(" ".join(sorted(m for m in out if pathlib.Path(m.replace(".","/")+".lean").is_file())))
 open(os.environ["GATE_CORE_FILE"],"w").write("core" if core else "")
 PY
@@ -69,8 +91,11 @@ PY
   [ -z "$targets" ] || LEAN_NUM_THREADS=1 lake build $targets
 }
 if [ "$mode" = per-file ]; then
-  for file in "${files[@]}"; do run_gate "lean:$file" lake env lean --tstack=131072 "$file"; done
+  for file in "${files[@]}"; do run_gate "lean:$file" lake lean "$file" -- --tstack=131072; done
 else
+  # Merge pre-gates use touched mode: reject the prospective tree before builds.
+  run_gate layers node scripts/check-layers.mjs
+  [ "$failed" -eq 0 ] || exit "$failed"
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
@@ -85,7 +110,6 @@ else
     fi
     run_gate trust bash scripts/check-trust.sh
     run_gate orphans node scripts/check-orphans.mjs
-    run_gate layers node scripts/check-layers.mjs
     run_gate roots bash scripts/coord-tools/register.sh --check
     run_gate fragments bash scripts/coord-tools/fragments.sh --check
     run_gate doc-paths bash scripts/check-doc-paths.sh

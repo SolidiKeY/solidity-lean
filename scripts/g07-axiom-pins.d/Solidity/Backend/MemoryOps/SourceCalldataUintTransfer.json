@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedSourceFreshUints_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedSourceFreshUints_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean:Solidity.Backend.MemoryOps.checkedSourceUints_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean:Solidity.Backend.MemoryOps.overwrite_fresh_uints": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean:Solidity.Backend.MemoryOps.source_cd_uint_checked_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean:Solidity.Backend.MemoryOps.sourceUintTable_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean:Solidity.Backend.MemoryOps.sourceUintTable_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintTransfer.lean:Solidity.Backend.MemoryOps.sourceUintTable_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

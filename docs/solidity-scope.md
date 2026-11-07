@@ -364,6 +364,28 @@ updates; the checker never assigns newly discovered syntax a default scope.
 The normal CI check verifies generated-file consistency without downloading
 upstream sources.
 
+
+## Inline assembly decisions (2026-10-31)
+
+The human answered “Approve these choices for all five lanes” to the
+coordinator's YQ1–YQ7 question. These decisions authorize implementation;
+they do not establish admission or discharge dependency gates.
+
+- YQ1: tiers A–C through lanes VY1–VY5 are authorized.
+- YQ2: refuse gas/msize/pc and own-code codesize/codecopy at admission.
+- YQ3: allow nondeterministic allocation addresses satisfying documented
+  layout; prove refinement and explicitly amend the G01 allocation contract.
+- YQ4: preserve dirty high bits as solc does in each pipeline; record differences.
+- YQ5: Yul calculus rules are Lean-only, marked in the rule map.
+- YQ6: expose both Yul logs and Solidity emit as observations; amend G01.
+- YQ7: refuse non-memory-safe blocks; preserve the pre-existing canonical
+  whole-buffer rethrow exception.
+
+VY2 preparation is recorded in
+[inline-assembly-vy2.md](feature-work/inline-assembly-vy2.md).
+The current manifest reports actual admission. Reopening a row requires
+reviewed implementation and evidence; compiler-dependent observations and
+fork exclusions remain in force.
 ## Inline assembly decisions (2026-10-31)
 
 The human requested one CloudVM per lane VY1–VY5 to solve the inline assembly
@@ -398,6 +420,37 @@ the human subsequently requested inspection and integration of completed work
 from Codex Cloud VMs, worktrees and branches, with delivery to `origin/master`.
 That authorizes serial integration after the existing reviews and validation;
 it does not establish that any assembly implementation is complete.
+
+VY5's [composition backfill](feature-work/inline-assembly-vy5.md)
+changes no admission, observations, feature status, proof budget or prerequisite.
+
+### VY5 human amendments relayed 2026-11-02
+
+H1, resources (verbatim): **“Free disk + 4 GiB reserve”**. The human permits
+removal of VY5-owned stopped containers/regenerable duplicate data; latest sealed
+handoff and all commits remain preserved. RAM reserve is4GiB; hard12GiB cap and
+no-swap remain. Disk headroom is assessed after cleanup, without single-MB holds.
+
+H3, optimized-rethrow-journal-contract (verbatim): **“Per-pipeline”**. Implement a
+reviewed pinned compiler-aware per-pipeline trace contract and validate fresh:
+optimized viaIR omits reverted persistent99/8 stores; record the difference,
+consistent with YQ4. This does not waive bytes/world/log/memory/rollback checks,
+approve compiler-dependent source observations or prove G01/compiler adequacy.
+Original strict report/validator and failed exits remain immutable. See
+`tests/yul-composition/rethrow-trace-contract.json` and the VY5 lane handoff.
+VY5-DISK1 is resolved by H1; no filesystem growth/migration requested.
+
+### H3 continuation: LIB1 and unchecked-add (2026-11-02)
+
+The coordinator relayed that human H3 **“Per-pipeline”** also answers
+LIB1/library-viaIR-error-1834 and unchecked-add. Approved unchecked-add
+expectations are legacy512 and viaIR0; LIB1 requires a reviewed per-pipeline
+library-codegen contract and fresh validation. VY1 owns both implementations.
+VY5 will consume their exact committed results; it does not duplicate the owner,
+re-ask the decisions, assume package availability or mark these gates passed.
+Their status is pending committed producer evidence, not pending human choice.
+Earlier unanswered wording remains historical. Other original decisions/gates
+remain unchanged.
 
 ## Automation lane decisions (2026-10-31)
 

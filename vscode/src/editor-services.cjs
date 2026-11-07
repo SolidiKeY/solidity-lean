@@ -1,5 +1,5 @@
 'use strict';
-const {join}=require('node:path');
+const {join,resolve,sep}=require('node:path');
 const {createHash}=require('node:crypto');
 const {summarize,issueURL}=require('./status-summary.cjs');
 const model=require('./model.cjs');
@@ -108,12 +108,19 @@ function install(vscode,context,servers,reportError){
       const owner=vscode.window.activeTextEditor?.document,version=owner?.version,text=owner?.getText(),epoch=owner?pickerEpochs.get(owner.uri.toString()):lifecycleRevision,active=activeRevision,identitySnapshot=owner&&identities.get(owner.uri.toString());
       const actions=[{label:'Restart Solidity Lean',description:'Restart the language servers',command:'solidityLean.restartServer'},
         {label:'Show verification output',description:'Open the Solidity Lean output channel',command:'solidityLean.showOutput'}];
-      // H49: proof-help action excluded by the human; ordinary output remains available.
+      if(owner&&current(owner)&&summarize(current(owner),owner).help)actions.unshift({label:'Help with a proof',description:'Open project proof guide: docs/calculus.md',proofHelp:'guide'},{label:'Proof documentation index',description:'Open project documentation: docs/README.md',proofHelp:'index'});
       const link=issueURL(identitySnapshot,owner&&current(owner));if(link)actions.push({label:'Report verification issue',description:'Open an issue draft with server and extension versions; no source attached',uri:link,reportIssue:true});
       const selected=await vscode.window.showQuickPick(actions,{matchOnDescription:true,placeHolder:'Pick an action'});
       if(disposed||!actions.includes(selected)||!vscode.workspace.isTrusted)return;
       if(vscode.window.activeTextEditor?.document!==owner||activeRevision!==active)return;
       if(owner?(owner.isClosed||owner.version!==version||owner.getText()!==text||pickerEpochs.get(owner.uri.toString())!==epoch):lifecycleRevision!==epoch)return;
+      if(selected.proofHelp){
+        const state=owner&&current(owner);if(!state||!summarize(state,owner).help)return;
+        const cfg=vscode.workspace.getConfiguration('solidityLean',owner.uri),folder=vscode.workspace.getWorkspaceFolder(owner.uri)?.uri.fsPath,configured=cfg.get('backendPath','');let destination;
+        try{if(!configured&&!folder)throw Error('Missing backend configuration');const fs=require('node:fs'),root=fs.realpathSync(resolve(folder||'.',configured||'.')),index=fs.realpathSync(join(root,'docs/README.md')),guide=fs.realpathSync(join(root,'docs/calculus.md'));if(![index,guide].every(file=>file.startsWith(root+sep)&&fs.statSync(file).isFile()))throw Error('Documentation escapes configured repository');destination=selected.proofHelp==='guide'?guide:index;}
+        catch(cause){reportError(new Error('Project proof documentation is unavailable. Set solidityLean.backendPath to a complete repository containing docs/README.md and docs/calculus.md.',{cause}));return;}
+        await vscode.commands.executeCommand('vscode.open',vscode.Uri.file(destination));return;
+      }
       const destination=selected.reportIssue?issueURL(owner&&identities.get(owner.uri.toString()),owner&&current(owner)):selected.uri;
       if(destination)await vscode.env.openExternal(vscode.Uri.parse(destination));else await vscode.commands.executeCommand(selected.command);
     }),

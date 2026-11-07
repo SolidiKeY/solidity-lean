@@ -60,7 +60,7 @@ def copyExpr {E : Source.Env} {Γ : Source.RCtx} (t : Source.IntTy)
     (i : Source.Idx Γ (.array .calldata (.int t) none)) : Source.RExpr E Γ (ArrayTy t) :=
   .conv (.local i) (by
     apply Or.inl
-    change (Source.STy.same (.int t) (.int t) && true && true)=true
+    change (Source.STy.same (.int t) (.int t) && true && true && _)=true
     rw [Source.STy.same_refl]
     rfl)
 

@@ -1,0 +1,34 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.actual_turn": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.continuation_preserved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.empty_positive_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.extended_branch_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.extra_root_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.missing_allocation_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.nil_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.Controls.nonconditional_refused": [
+  "Quot.sound",
+  "propext"
+ ]
+}

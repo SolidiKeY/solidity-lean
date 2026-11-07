@@ -1,0 +1,7 @@
+/-! RawControlForPost.adapter composes the actual supported Boolean expression
+initializer with grown-context supported condition/post and an actual checked
+body. Its full Source.execS forLoop law joins initializer partial errors,
+iteration and restoration under genuine checked/coherent premises.
+Mutation/continue/break/false-guard and initializer/post timeout witnesses are
+in Solidity.Yul.Checks.RawControlForPost. Other initializer types, declaration
+groups, dirty Source readback and general admission remain separate. -/

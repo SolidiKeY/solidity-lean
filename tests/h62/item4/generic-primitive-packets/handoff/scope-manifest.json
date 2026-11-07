@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-4-20261106",
+  "slug": "generic-primitive-packets",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-4-20261106/generic-primitive-packets",
+  "repository": "/workspace/solidity-lean",
+  "original_owner": "solidity-h62-4-20261106/generic-primitive-packets",
+  "handoff_to": "solidity-compiler10-20261028/memory-reference-structs",
+  "original_write_scope": [
+    "tests/h62/item4/generic-primitive-packets/**",
+    "scripts/h62/item4/generic-primitive-packets/**",
+    "docs/feature-work/h62-4-generic-primitive-packets.md"
+  ],
+  "original_read_only_family": "Solidity/Backend/PrimitivePackets/**",
+  "task_family": "Controls to generic lemmas/data tables in Solidity/Backend/PrimitivePackets; audit9/11/16 as applicable",
+  "exclusions": [
+    "No H55 overlap; Yul Raw/vector generator remains H55; consume rather than duplicate",
+    "No generated roots,central maps,axiom pin edits under original assignment",
+    "No scope expansion or newly claimed candidates without coordinator/registry",
+    "No frozen-interface/statement/premise/exclusion/observation weakening",
+    "No sorry/new axiom/native_decide/trust shortcut/raised maxHeartbeats"
+  ],
+  "h82_standing_update": {
+    "statement_preserving_first_kind": "Proof-only/additive lemma/definition/module split/import/doc fixes no exact-file agreement required; this does not authorize implementing after a human pause/retirement.",
+    "owner_required_for": [
+      "existing statement",
+      "dependent definition body",
+      "interface signature",
+      "proof budget",
+      "axiom set",
+      "exclusion"
+    ],
+    "frozen_interfaces": "H57 versioned pairs",
+    "meaning_axiom_checks": "remain required",
+    "original_agreement_wait": "withdrawn for first-kind edits; no change to trust-sensitive Roadmap failure",
+    "no_Claude_owned_source_edits_or_messages": "retirement instruction retained; no such edits/messages performed"
+  },
+  "actual_source_writes": "All checkout Solidity originals remain byte-identical to base; Hash proof overlay compiled only in external staged copies.",
+  "resource_policy": {
+    "pinned_toolchain": "official leanprover/lean4:v4.35.0 archive per toolchain-pin.json",
+    "archive_sha256": "7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d",
+    "measured_Lean": "4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "measured_Lake": "5.0.0-src+eb6cafb",
+    "heavy_jobs": "serial; LEAN_NUM_THREADS=1; explicit -j1; per-file300s; no proof-budget increase",
+    "memory": "Actual final checks8GiB child cap with min(host available,cgroup remaining)-4GiB reserve; no active swap; no systemd-run",
+    "new_H81_full_text": "Referenced by retirement but not delivered in this thread; obtain exact current policy before new heavy work"
+  },
+  "prompt_provenance": {
+    "source": "Complete visible first assignment message transcribed from this original thread; launcher-rendered wrapper blob not separately exposed",
+    "launcher_rendered_prompt_sha256": "6f981f1156a761c51ec5daff85fc7683198027eaf4dd88c64057cb9de9fdf8a9",
+    "transcript_file": "original-assignment.txt",
+    "transcript_sha256": "f8c69b5efbe46bfe9c8bc567792cddd9a103eec96fa2e07c19d35b515792c0a5",
+    "not_claimed": "No assertion that transcript bytes equal an unavailable launcher-rendered wrapper blob"
+  },
+  "original_vm": "ccarenv_b64_Y2NhcmVudl8wNTVjODQyNGExN2M4MTkxODFjMjUyNzJhMGFiOTdkYQ",
+  "goal": "Original launcher-created goal,unfinished; ID/get_goal not exposed; no new/reset goal",
+  "push_policy": "No H71 lane push permission provided. Original no-push instruction retained; no push performed.",
+  "original_case_inventory": "../census-manifest.json; full raw census in off-git authenticated prior-evidence archive",
+  "complete_coordinator_inputs": "Portable external handoff archive contains verified decisions/audit/finishing-report/ownership/pin/sha256 files; coordinator-local paths are provenance only",
+  "retirement": {
+    "confirmed": true,
+    "handoff_to": "solidity-compiler10-20261028/memory-reference-structs",
+    "broadcasts_cannot_resume": true,
+    "implementation": "STOP; no proof implementation",
+    "goal_pause": "Worker has no PAUSED method; coordinator pauses existing goal after final head report and idle turn",
+    "new_goal": false
+  }
+}

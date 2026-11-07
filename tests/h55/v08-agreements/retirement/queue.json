@@ -1,0 +1,74 @@
+{
+  "full_original_queue": [
+    {
+      "id": "W1",
+      "original": "Unify FrameAgreement (constructor Nat/address vs library Int/caller) with exact adapters preserving both contracts.",
+      "completed": "Standalone common Int contract, exact Nat/Int adapters, both legacy equivalences and round trips checked in tests/h55/v08-agreements/Agreements.lean.",
+      "open": "Promote canonical shared frame into production with acyclic light dependencies; add exact legacy adapters and consume them in production proof bodies while preserving existing records/statements."
+    },
+    {
+      "id": "W2",
+      "original": "Unify OriginWitness, glob/program agreement, and missing producer obligation types. Consume P8a.SourceOrigins unchanged.",
+      "completed": "Standalone indexed/existential origin aliases, exact three-field glob agreement, both body-duty aliases and projection correspondence checked.",
+      "open": "Production shared exports and real consumer reuse not implemented. Preserve fixed creation origin indices versus existential library origin; keep prog/pipeline/fixed exactly; preserve every Out index, antecedent, body/result/state/value relation and all frozen P8a fields."
+    },
+    {
+      "id": "W3",
+      "original": "Controls and consumers within listed files; publish typed interface early and owner-reviewed checkpoint BEFORE g49 composes. V07 P8Bindings is read-only: supply adapter and owner migration request, never edit it.",
+      "completed": "Early typed standalone interface published; readonly accepted_origin adapter and owner request saved; no P8Bindings edits.",
+      "open": "Four production input files remain completely unchanged. Production proof consumers and controls need integration; actual owner review before g49 remains pending. Do not edit V07/P8Bindings."
+    },
+    {
+      "id": "B1",
+      "original": "Backfill: inhabitance and negative controls.",
+      "completed": "Checked populated frame/static zero-value, actual constructor and source-library/independent-target component witnesses, wrong sender/value/address/static/code-address, metadata and false-postcondition controls.",
+      "open": "Retain these controls and rerun against production exports after integration. They are not canonical P8/body/layout/runtime producer inhabitants."
+    },
+    {
+      "id": "B2",
+      "original": "Backfill: migration correspondence proofs.",
+      "completed": "Standalone exact frame round trips, origin/glob/body field correspondences and V07 accepted-source provenance checked.",
+      "open": "Production accessors and type/statement preservation audit not implemented. Preserve generated compatibility constructors/projections and implicit binders; compare old elaborated declaration types and existing guarded axiom sets."
+    },
+    {
+      "id": "V1",
+      "original": "Actual Lean/Lake versions and passing bounded KeySort prerequisite before RUNTIME_GATE_PASS, then full affected-module proof/controls/acceptance gates.",
+      "completed": "Lean4.24.0 and Lake5.0.0-src+797c613; prior bounded KeySort, unchanged four inputs and full standalone helper passed at769bf7d5b1304642ac1995ee4a9c3a770cd948ce.",
+      "open": "Production affected/reverse-dependent gates, actual runtime acceptance, final full repository gates remain pending. Prior standalone pass is not RUNTIME_GATE_PASS. Pin gate waits H67; original inventory gate had0 errors and4140 unrecorded changes."
+    },
+    {
+      "id": "V2",
+      "original": "Record before/after identical conditions; stop and report slowdown >10%.",
+      "completed": "Old source/fixture timings and controlled resource runner saved; speed-motivated history inspected; no production refactor performed.",
+      "open": "Matched warmed repeated per-file forced rechecks before and after production edits not taken. Do not compare cold closure build to cached/no-op build. Stop/report slowdown >10%; no known timing STOP was rerun."
+    },
+    {
+      "id": "R1",
+      "original": "Independent read-only finder and skeptic reviews without Lean server; fixes documented. Terra acceptance must cover entire scope; one item/commit, two failed attempts return to Sol, never increase effort.",
+      "completed": "Independent standalone and follow-up reviews completed; defects fixed; Terra first full-scope read-only review returned NOT ACCEPTED due missing production work.",
+      "open": "Full production checkpoint finder/skeptic reviews and full-scope acceptance remain outstanding. Do not call partial helper full acceptance; do not increase effort or proof budgets."
+    },
+    {
+      "id": "E1",
+      "original": "Export committed patch/bundle, base/head, complete evidence checksums, reviews, cache pack path+sha, limitations and named typed dependencies.",
+      "completed": "Prior exports preserved; retirement cumulative exports and complete original assignment/queue/scope are prepared now. Cache pack remains on this VM, no shipment.",
+      "open": "Successor must retrieve the complete authenticated retirement handoff before new task work and integrate the final stopped head. No automatic implementation continuation by this worker."
+    }
+  ],
+  "retirement_override": "This worker performs no new proof implementation. Open items pass to named survivor only after final stopped/head acknowledgement.",
+  "handoff_to": "solidity-v07-v11-20261030/v08-world-lowering",
+  "waits": [
+    {
+      "lane": "coordinator/H67 G07 inventory",
+      "item": "H67 tip35b9d826d14b26bacdb203b235fcc506a5466f7b is not an ancestor of last fetched master7ae5607c9ecfff4078162115eaaaa48a1ff46eb0. Reviewed central merge and required pin-gate rerun remain pending; no master adoption was performed."
+    },
+    {
+      "lane": "solidity-v07-v11-20261030/v08-world-lowering",
+      "item": "Actual owner-reviewed typed-interface checkpoint before g49 composition remains outstanding. H82 withdraws blanket exact-file requests for statement-preserving edits; only existing statement/depended-definition/interface/budget/axiom/exclusion changes need owner agreement, with H57 versioned pairs for frozen interfaces."
+    },
+    {
+      "lane": "coordinator/goal service",
+      "item": "User requests PAUSED, but no pause operation is exposed. Available stop_goal supports only complete or blocked, not PAUSED. No substitute transition, completion, creation or reset attempted. Worker stops and must not automatically continue."
+    }
+  ]
+}

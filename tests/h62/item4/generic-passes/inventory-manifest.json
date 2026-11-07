@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "totals": {
+    "files": 313,
+    "controls": 83,
+    "declarations": 3519,
+    "control_declarations": 1946
+  },
+  "inventory": "/workspace/h62-generic-passes-evidence/original-census.json",
+  "sha256": "9f5ba355c076e5328e8542a9d478b442a7dc4e6505c5c122b83750fa128c5c94",
+  "audit_matches": {
+    "9": {
+      "scope": "Exact named Passes twin candidates; other audit areas excluded",
+      "files": [
+        "Solidity/Backend/Passes/AssignmentAdditionControls.lean",
+        "Solidity/Backend/Passes/AssignmentAdditionPass.lean",
+        "Solidity/Backend/Passes/AssignmentMultiplicationControls.lean",
+        "Solidity/Backend/Passes/AssignmentMultiplicationPass.lean",
+        "Solidity/Backend/Passes/AssignmentSubtractionControls.lean",
+        "Solidity/Backend/Passes/AssignmentSubtractionPass.lean"
+      ]
+    },
+    "11": {
+      "scope": "Existing producer lemmas are consumed, not duplicated. Local pushes_zero/cost consumers inventoried; Evm and MemoryCopies producers remain owner work.",
+      "files": [
+        "Solidity/Backend/Passes/AllocatingCapture.lean",
+        "Solidity/Backend/Passes/AllocatingControls.lean",
+        "Solidity/Backend/Passes/CaptureTransport.lean",
+        "Solidity/Backend/Passes/ComparisonReferenceCapture.lean",
+        "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean",
+        "Solidity/Backend/Passes/CompilerCallScopeRecognition.lean",
+        "Solidity/Backend/Passes/DeferredCondition.lean",
+        "Solidity/Backend/Passes/DeferredConditionFailure.lean",
+        "Solidity/Backend/Passes/DeferredConditionFailureControls.lean",
+        "Solidity/Backend/Passes/DivergenceControls.lean",
+        "Solidity/Backend/Passes/EffectfulConditionalAssignment.lean",
+        "Solidity/Backend/Passes/FaultControls.lean",
+        "Solidity/Backend/Passes/FixedBooleanFailure.lean",
+        "Solidity/Backend/Passes/FixedBooleanSequence.lean",
+        "Solidity/Backend/Passes/FreshBooleanFailure.lean",
+        "Solidity/Backend/Passes/FreshBooleanPrefix.lean",
+        "Solidity/Backend/Passes/HeapBoundary.lean",
+        "Solidity/Backend/Passes/LoopAllocatingSuffix.lean",
+        "Solidity/Backend/Passes/LoopBoundary.lean",
+        "Solidity/Backend/Passes/LoopCallApplication.lean",
+        "Solidity/Backend/Passes/LoopReframedCompletion.lean",
+        "Solidity/Backend/Passes/LoopReframedFailureControls.lean",
+        "Solidity/Backend/Passes/LoopScopeApplication.lean",
+        "Solidity/Backend/Passes/LoopScopeTerminal.lean",
+        "Solidity/Backend/Passes/MappedSequence.lean",
+        "Solidity/Backend/Passes/MemoryCallApplication.lean",
+        "Solidity/Backend/Passes/MemoryCallBoundary.lean",
+        "Solidity/Backend/Passes/MemoryCallScopeControls.lean",
+        "Solidity/Backend/Passes/MemoryScopeBoundary.lean",
+        "Solidity/Backend/Passes/MemoryScopeControls.lean",
+        "Solidity/Backend/Passes/ReferenceControls.lean",
+        "Solidity/Backend/Passes/ReframedLoops.lean",
+        "Solidity/Backend/Passes/ReframedSequence.lean",
+        "Solidity/Backend/Passes/ReframedTripleControls.lean",
+        "Solidity/Backend/Passes/ReframedTripleWrongOrder.lean",
+        "Solidity/Backend/Passes/RelatedMemoryCapture.lean",
+        "Solidity/Backend/Passes/ReturnedMemoryCapture.lean",
+        "Solidity/Backend/Passes/RevertControls.lean",
+        "Solidity/Backend/Passes/SignedDivisionCapture.lean",
+        "Solidity/Backend/Passes/SignedSubtractionCapture.lean",
+        "Solidity/Backend/Passes/TailControls.lean",
+        "Solidity/Backend/Passes/TripleAllocation.lean",
+        "Solidity/Backend/Passes/TripleControls.lean",
+        "Solidity/Backend/Passes/TripleSuffix.lean",
+        "Solidity/Backend/Passes/UnsignedDependentCapture.lean",
+        "Solidity/Backend/Passes/UnsignedDependentScope.lean",
+        "Solidity/Backend/Passes/ValueContextAllocation.lean",
+        "Solidity/Backend/Passes/ValueSequenceControls.lean"
+      ]
+    },
+    "16": {
+      "scope": "Table+one-lemma approach applied only to six assignment operator/pipeline fixtures. Yul Raw/vector generation remains H55; no duplicate generator.",
+      "files": [
+        "tests/h62/item4/generic-passes/Fixtures.lean"
+      ]
+    }
+  },
+  "boundary": "Exact lexical source signatures and full source hashes; not elaborated type hashes. Full original inventory stays off git under H44."
+}

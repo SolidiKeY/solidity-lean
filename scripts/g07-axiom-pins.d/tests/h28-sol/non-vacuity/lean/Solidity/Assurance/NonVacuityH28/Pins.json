@@ -357,6 +357,31 @@
  "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.empty_object_heap": [
   "propext"
  ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.entered_revert_demand": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.entered_revert_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.entered_revert_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.entered_revert_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.entered_revert_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.environment_simulation": [
   "Classical.choice",
   "Quot.sound",
@@ -391,6 +416,11 @@
   "propext"
  ],
  "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.false_invariant_entry_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.false_loop_stmt_source": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -902,6 +932,56 @@
   "Quot.sound",
   "propext"
  ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_body_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_code_nonempty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_demand": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_joint_layout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.skipped_loop_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.solkey_admission_application": [
   "propext"
  ],
@@ -1057,6 +1137,11 @@
   "propext"
  ],
  "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.write_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.zero_condition_target": [
   "Classical.choice",
   "Quot.sound",
   "propext"

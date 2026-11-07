@@ -1,0 +1,25 @@
+/-! Lane CF2: finite dispatch over reference arguments selects the candidate's arm per tag. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.DispatchArm.chain_select,
+    ``Solidity.DispatchArm.chain_none,
+    ``Solidity.DispatchArm.chain_tag,
+    ``Solidity.Examples.Tactics.FunctionTypes.memAlias_valid,
+    ``Solidity.Examples.Tactics.FunctionTypes.memAlias_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.memDirect_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.storAlias_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleReturn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.structReturn_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.tupleCallee_run,
+    ``Solidity.Examples.Tactics.FunctionTypes.memNoCopy_reason,
+    ``Solidity.Examples.Tactics.FunctionTypes.memUnassigned_halt]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} dispatch theorems use only the standard axioms"
+

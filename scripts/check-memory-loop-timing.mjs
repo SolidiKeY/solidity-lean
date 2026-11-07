@@ -10,7 +10,9 @@ export function cumulativeTiming(result, hashSource) {
   const errors=[];
   if(!result || typeof result!=='object' || Array.isArray(result)) return ['invalid workload record'];
   if(result.kind!=='fresh-original-Derived17-workload' || result.exit_code!==0) errors.push('workload incomplete or failed');
-  if(result.budgetSeconds!==300 || !(Number.isFinite(result.seconds) && result.seconds>=0 && result.seconds<=300)) errors.push('original cumulative 300-second workload budget exceeded or changed');
+  // 300 s everywhere except where REPLAY_BUDGET_S names a runner-calibrated budget (CI: 600, H116).
+  const budget=Number(process.env.REPLAY_BUDGET_S||300);
+  if(result.budgetSeconds!==budget || !(Number.isFinite(result.seconds) && result.seconds>=0 && result.seconds<=budget)) errors.push(`original cumulative ${budget}-second workload budget exceeded or changed`);
   if(!Array.isArray(result.checks)) errors.push('checks must be an array');
   const checks=Array.isArray(result.checks)?result.checks:[];
   if(checks.length!==replayModules.length || new Set(checks.map(x=>x.module)).size!==replayModules.length || replayModules.some(m=>!checks.some(x=>x.module===m))) errors.push('missing, duplicated or unexpected workload member');
@@ -21,7 +23,7 @@ export function cumulativeTiming(result, hashSource) {
     if(typeof c.sourceSha256!=='string' || !/^[a-f0-9]{64}$/.test(c.sourceSha256)) errors.push('invalid source hash');
     if(hashSource && replayModules.includes(c.module) && hashSource(c.module)!==c.sourceSha256) errors.push('source changed since fresh check: '+c.module);
   }
-  if(sum>300 || sum>result.seconds+0.1) errors.push('cumulative member timing inconsistent or past300');
+  if(sum>budget || sum>result.seconds+0.1) errors.push(`cumulative member timing inconsistent or past ${budget}`);
   return errors;
 }
 export function readTiming(path) {

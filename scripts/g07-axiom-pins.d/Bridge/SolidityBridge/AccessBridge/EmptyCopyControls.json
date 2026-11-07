@@ -1,0 +1,37 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean:SolidityBridge.AccessBridge.EmptyCopyControls.accounting": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean:SolidityBridge.AccessBridge.EmptyCopyControls.dirty_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean:SolidityBridge.AccessBridge.EmptyCopyControls.extreme_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean:SolidityBridge.AccessBridge.EmptyCopyControls.gas_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean:SolidityBridge.AccessBridge.EmptyCopyControls.initial_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean:SolidityBridge.AccessBridge.EmptyCopyControls.reached_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean:SolidityBridge.AccessBridge.EmptyCopyControls.short_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

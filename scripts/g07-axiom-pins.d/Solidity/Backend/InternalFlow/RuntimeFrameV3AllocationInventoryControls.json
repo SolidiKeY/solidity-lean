@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocationInventory.Controls.prefixes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

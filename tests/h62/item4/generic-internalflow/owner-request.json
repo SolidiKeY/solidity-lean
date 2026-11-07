@@ -1,0 +1,23 @@
+{
+  "id": "DEP-435-RAW",
+  "type": "dependency_toolchain_migration",
+  "source": [
+    "toolchain-pin.json",
+    "build-run.log",
+    "H62-6-MIGRATE-SYNTAX"
+  ],
+  "owner": "solidity-h62-6-20261106/migrate-syntax",
+  "exact_file": "Solidity/Syntax/Raw.lean",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "request": "Coordinator to relay owner migration of this file for official pinned Lean 4.35.0, then provide a reviewed exact-file overlay/patch and authorization for applying the dependency in this isolated branch. No owner file edits made by generic-internalflow. Do not weaken semantics.",
+  "diagnostics": [
+    "597 String.Slice passed to HashKind.ofName? expecting String",
+    "650 String.Slice.toList absent",
+    "665 String.Slice passed to splitTopCommas expecting String",
+    "682 String.endsWith higher-order mismatch",
+    "684 String.dropRight absent"
+  ],
+  "delivery": "H70 coordinator routing: ticket relay accepted by solidity-h62-6-20261106/migrate-syntax and solidity-v12-v17-20261031/v12-flow-calls. relay.sh is host-only; no VM installation task. Dependency overlay and exact-file owner agreement remain pending; routing grants no original-file edit permission.",
+  "current_routing": "Latest H70: syntax ticket destination migrate-syntax; current V12 delivery pending to claudecloud/move5-20261106/v12-p1. Host journals govern acceptance; no owner agreement or validation inferred.",
+  "H82_disposition": "Exact-file agreement request withdrawn for statement-preserving proof-only edits. Owner still required for statement/semantic definition/interface/budget/axiom/exclusion changes. Retirement: no further implementation; successor owns integration. No Claude-owned source edited or messaged."
+}

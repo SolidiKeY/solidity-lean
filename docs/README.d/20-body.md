@@ -12,6 +12,7 @@
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
 | [lifetime.md](lifetime.md) | Transaction traces from the constructor, whole-contract safety, invariant induction. |
 | [automation.md](automation.md) | The deciding closer: M0–M8, the decision theorem's features and gaps, M7-next. |
+| [feature-work/m7-next.md](feature-work/m7-next.md) | M7-next lane handoff: the route-refusal `Fml.Residue`, `DecisionTheorem'` (not a completeness result), fixtures, reviews and gates. |
 | [complete-verification.md](complete-verification.md) | The exact-reduction pipeline, its stages, tools and limits. |
 | [assurance.md](assurance.md) | Trust gates, the memory compiler's invariants, remaining assurance work. |
 | [rule-repair.md](rule-repair.md) | How to repair a broken rule: semantics first, rejection gates, soundness. |
@@ -90,8 +91,10 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - V10 Source operation clients and remaining integration: [storage operations](feature-work/roadmap-v10-storage-operations.md#source-operation-clients-c145).
 - Registered V10 Source operation clients: [storage operation views and Source clients](feature-work/roadmap-v10-storage-operations.md#operation-views-and-source-clients).
 - [V16 correctness consumers](feature-work/roadmap-v16-correctness.md): scoped actual allocation-memory preservation, bounded Source transaction pairs and exact rollback/specification observations; full composition remains open.
+- [V17 validation/evidence preparation](feature-work/roadmap-v17-validation.md).
 - [P7 transient target](feature-work/p7-transient-target.md): typed transient target, Source correspondence and remaining G39/G42 obligations.
 - [Executable bytecode selection](feature-work/executable-bytecode-selection.md) and [memory defaults and copies](feature-work/memory-copies.md): G45 and G33/G35 statement-only interfaces and premises.
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
 
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
+V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).

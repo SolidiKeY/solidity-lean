@@ -1,0 +1,341 @@
+{
+  "authorization": "H69 human 2026-11-06; frozen statements unchanged",
+  "explicit_false_controls": [
+    {
+      "name": "Solidity.Roadmap.PublicCorrectness.not_alwaysRevert",
+      "criterion": "H69-joint-impossibility",
+      "why_intentional": "Public success from h and hv contradicts universal success denial hrev; intentional anti-always-revert compiler control.",
+      "impossibility_proof": "Solidity.Roadmap.PublicCorrectness.not_alwaysRevert",
+      "additive_proof": "Solidity.H62.AuditRoadmap.no_simultaneous_not_alwaysRevert_witness",
+      "proof_status": "dependency-check-blocked"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.toy_no_event",
+      "criterion": "H69-joint-impossibility",
+      "why_intentional": "Toy.run has exactly the empty event list; asserted membership is an intentional impossible observation.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.toy_no_event",
+      "additive_proof": "Solidity.H62.AuditRoadmap.no_toy_event_witness",
+      "proof_status": "dependency-check-blocked"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.toyEvm_no_event",
+      "criterion": "H69-joint-impossibility",
+      "why_intentional": "Decoded compiled toy run has exactly the empty event list; asserted membership is an intentional impossible observation.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.toyEvm_no_event",
+      "additive_proof": "Solidity.H62.AuditRoadmap.no_toy_evm_event_witness",
+      "proof_status": "dependency-check-blocked"
+    }
+  ],
+  "root_refutations": [
+    {
+      "name": "Solidity.Roadmap.Frontend.Settings.ok_compiler",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Admitted settings intentionally exclude the distinct historical compiler.",
+      "impossibility_proof": "Solidity.Roadmap.Frontend.Settings.ok_compiler",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.malformed_not_admitted",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.malformed_not_admitted",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.badTag_not_admitted",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.badTag_not_admitted",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.trailing_not_admitted",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.trailing_not_admitted",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.linked_not_admitted",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.linked_not_admitted",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_admission_sloppy",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_admission_sloppy",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.Controls.not_nonVacuous_emptySource",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.Controls.not_nonVacuous_emptySource",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.HashPremise.not_of_rootSlots",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Malformed source, trivial compilers, degenerate layout and empty-source controls deliberately refute the displayed bad object.",
+      "impossibility_proof": "Solidity.Roadmap.HashPremise.not_of_rootSlots",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.wrong_reference",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "The allocation fixture intentionally separates its actual and wrong references.",
+      "impossibility_proof": "Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.wrong_reference",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.SourceTransactionConsumer.wrong_original_rollback",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Actual transaction state and ordered events intentionally separate the wrong rollback and event order.",
+      "impossibility_proof": "Solidity.Roadmap.V16.SourceTransactionConsumer.wrong_original_rollback",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.SourceTransactionConsumer.wrong_event_order",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Actual transaction state and ordered events intentionally separate the wrong rollback and event order.",
+      "impossibility_proof": "Solidity.Roadmap.V16.SourceTransactionConsumer.wrong_event_order",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.CreationReturnConsumer.reject_post",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "The actual constructor returns its complete runtime and intentionally refutes altered postconditions or a revert outcome.",
+      "impossibility_proof": "Solidity.Roadmap.V16.CreationReturnConsumer.reject_post",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.CreationReturnConsumer.not_reverted",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "The actual constructor returns its complete runtime and intentionally refutes altered postconditions or a revert outcome.",
+      "impossibility_proof": "Solidity.Roadmap.V16.CreationReturnConsumer.not_reverted",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_arguments",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "The actual constructor returns its complete runtime and intentionally refutes altered postconditions or a revert outcome.",
+      "impossibility_proof": "Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_arguments",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_window",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "The actual constructor returns its complete runtime and intentionally refutes altered postconditions or a revert outcome.",
+      "impossibility_proof": "Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_window",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_failure",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "The actual constructor returns its complete runtime and intentionally refutes altered postconditions or a revert outcome.",
+      "impossibility_proof": "Solidity.Roadmap.V16.CreationReturnConsumer.Controls.wrong_failure",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.SourceSizeControls.wrong_rollback",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Exact allocation panic separates wrong rollback, empty revert, timeout and impossible zero-count premise.",
+      "impossibility_proof": "Solidity.Roadmap.V16.SourceSizeControls.wrong_rollback",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.SourceSizeControls.wrong_empty_revert",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Exact allocation panic separates wrong rollback, empty revert, timeout and impossible zero-count premise.",
+      "impossibility_proof": "Solidity.Roadmap.V16.SourceSizeControls.wrong_empty_revert",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.SourceSizeControls.wrong_timeout",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Exact allocation panic separates wrong rollback, empty revert, timeout and impossible zero-count premise.",
+      "impossibility_proof": "Solidity.Roadmap.V16.SourceSizeControls.wrong_timeout",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.SourceSizeControls.wrong_count_premise",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Exact allocation panic separates wrong rollback, empty revert, timeout and impossible zero-count premise.",
+      "impossibility_proof": "Solidity.Roadmap.V16.SourceSizeControls.wrong_count_premise",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.NativeRevertConsumer.wrong_bytes",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Actual revert and panic observations separate wrong bytes, ordinary diamond and exhausted bounds.",
+      "impossibility_proof": "Solidity.Roadmap.V16.NativeRevertConsumer.wrong_bytes",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.NativeRevertConsumer.wrong_panic_data",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Actual revert and panic observations separate wrong bytes, ordinary diamond and exhausted bounds.",
+      "impossibility_proof": "Solidity.Roadmap.V16.NativeRevertConsumer.wrong_panic_data",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.NativeRevertConsumer.ordinary_diamond_rejected",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Actual revert and panic observations separate wrong bytes, ordinary diamond and exhausted bounds.",
+      "impossibility_proof": "Solidity.Roadmap.V16.NativeRevertConsumer.ordinary_diamond_rejected",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.NativeRevertConsumer.zero_bound_not_revert",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Actual revert and panic observations separate wrong bytes, ordinary diamond and exhausted bounds.",
+      "impossibility_proof": "Solidity.Roadmap.V16.NativeRevertConsumer.zero_bound_not_revert",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.FramedReasonConsumer.wrong_payload",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Framed Error(string) controls intentionally separate wrong payload/readback, bare revert and success.",
+      "impossibility_proof": "Solidity.Roadmap.V16.FramedReasonConsumer.wrong_payload",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.FramedReasonConsumer.wrong_readback",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Framed Error(string) controls intentionally separate wrong payload/readback, bare revert and success.",
+      "impossibility_proof": "Solidity.Roadmap.V16.FramedReasonConsumer.wrong_readback",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.FramedReasonConsumer.empty_reason_not_bare",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Framed Error(string) controls intentionally separate wrong payload/readback, bare revert and success.",
+      "impossibility_proof": "Solidity.Roadmap.V16.FramedReasonConsumer.empty_reason_not_bare",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.FramedReasonConsumer.wrong_success",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Framed Error(string) controls intentionally separate wrong payload/readback, bare revert and success.",
+      "impossibility_proof": "Solidity.Roadmap.V16.FramedReasonConsumer.wrong_success",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Roadmap.V16.CreationLibrarySpec.referenced_rejected",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Changing a referenced library deliberately changes the complete constructor return.",
+      "impossibility_proof": "Solidity.Roadmap.V16.CreationLibrarySpec.referenced_rejected",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Fml.eval3_ff",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Sound refutation certificates rule out truth, validity or derivability; ordinary evaluation premises still need joint witnesses.",
+      "impossibility_proof": "Solidity.Fml.eval3_ff",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Fml.not_holds_of_peelC",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Sound refutation certificates rule out truth, validity or derivability; ordinary evaluation premises still need joint witnesses.",
+      "impossibility_proof": "Solidity.Fml.not_holds_of_peelC",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Fml.not_valid_of_eval3Peel",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Sound refutation certificates rule out truth, validity or derivability; ordinary evaluation premises still need joint witnesses.",
+      "impossibility_proof": "Solidity.Fml.not_valid_of_eval3Peel",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Fml.not_valid_of_peel",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Sound refutation certificates rule out truth, validity or derivability; ordinary evaluation premises still need joint witnesses.",
+      "impossibility_proof": "Solidity.Fml.not_valid_of_peel",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Fml.not_holds_imp_of_eval3",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Sound refutation certificates rule out truth, validity or derivability; ordinary evaluation premises still need joint witnesses.",
+      "impossibility_proof": "Solidity.Fml.not_holds_imp_of_eval3",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Fml.not_holds_imp_of_not_holds",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Sound refutation certificates rule out truth, validity or derivability; ordinary evaluation premises still need joint witnesses.",
+      "impossibility_proof": "Solidity.Fml.not_holds_imp_of_not_holds",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    },
+    {
+      "name": "Solidity.Proves.not_of_not_valid",
+      "criterion": "ordinary-joint-witness-plus-refutation",
+      "why_intentional": "Sound refutation certificates rule out truth, validity or derivability; ordinary evaluation premises still need joint witnesses.",
+      "impossibility_proof": "Solidity.Proves.not_of_not_valid",
+      "outer_hypothesis_witness": "required; not waived by H69"
+    }
+  ],
+  "default_criterion": "ordinary joint satisfiability; positive/mixed results are never classified by substring",
+  "proof_boundary": "Classification is source-reviewed. A reference to an original proof is not a checked proof result."
+}

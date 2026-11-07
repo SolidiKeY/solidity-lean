@@ -1,0 +1,252 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.binding_low": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.bound_delete_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.bound_empty_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.bound_mutation_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.bound_read_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.bound_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.checked_copy_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.checked_rejection_and_omission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.checked_stage_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.checked_zero_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.complete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.copy_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.copy_statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.delete_omission_and_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.delete_prefix_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.delete_reached_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.delete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.delete_wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.element32_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.empty_and_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.empty_delete_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.empty_mutation_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.empty_prefix_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.endpoint_delete_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_delete_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_late_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_refusals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_standalone_padding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.guarded_entry_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_late_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_reached_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.mutation_negatives": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.mutation_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.paired_zero_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_late_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.raw_short_padding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.reached_read_negatives": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.read_driven_mutation_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.read_driven_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.wrong_order_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintCopyControls.lean:Solidity.Backend.MemoryOps.UintCopyControls.wrong_order_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

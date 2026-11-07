@@ -1,0 +1,14 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-2-20261106/audit-v09-passes",
+  "original_write_scope": [
+    "tests/h62/item2/audit-v09-passes/**",
+    "scripts/h62/item2/audit-v09-passes/**",
+    "docs/feature-work/h62-2-audit-v09-passes.md"
+  ],
+  "frozen_area": "docs/module-map/v09-passes.md at base;179files/1259source declarations",
+  "H82": "Standing agreement permits statement-preserving edits. Statement/dependent-definition/interface/budget/axiom/exclusion changes still need owner; frozen changes need H57 versioned pair.",
+  "retirement": "Human-approved stop-and-handoff; no implementation continuation. Successor integration only after final stopped/head acknowledgement.",
+  "handoff_to": "solidity-inline-assembly5-20261031/vy3-compilation",
+  "push": "Not performed: no H71 permission available; original no-push instruction remains binding."
+}

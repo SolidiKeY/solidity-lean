@@ -3,7 +3,7 @@ import Solidity.Yul.Views.OwnedBoolControls
 namespace Solidity.Yul.Views.Controls
 
 def ownedOriginState : Source.EMState originEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D:=originEnv.layout) (originEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D:=originEnv.layout) (originEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def ownedOriginResidual := initialPackedComplement originRegistry originTempRegistry (fun _ => 0)
 def ownedOriginRequest : PackedSlotRequest := ⟨false,account,43,⟨0xab000002,by decide⟩⟩
 def ownedOriginPrepared := prepareRepresentedSlot originRegistry originTempRegistry ownedOriginRequest boolEncodingInitial

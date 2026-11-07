@@ -1,0 +1,79 @@
+# H82 evidence stays on this VM; sha256 + absolute path, preceded by byte size.
+# bytes 950
+2a1756486198b5325a51e371210349a660b44b5d3a28a89ba50bc41e12844476  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/adversarial.log
+# bytes 3675
+43d206138e00baeab8c479d2907297c0759ed3957e6f30ec4598a5212d5e6537  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/archive-bound-replays.log
+# bytes 474383
+fc2082e5276e46a37a3b16c3ea0bbd509aebc96fe88b56f4f1a00741c142fe82  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/axiom-pins.log
+# bytes 289851
+64bdfeac60fe617e915fb7aedddc5b6213dba74727d1cb43610b6b6e869fbffd  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/cache-readiness.log
+# bytes 650
+ec0023356e64a224fd7e582f923c80e6f7a0c8755871b4830ba5c53a674f6b4c  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/consolidation-barrier.json
+# bytes 3701
+0701f8b79a2fa71d1d5e14b8061a97dd8d4353d7f18749792dd85166d7eaf5b6  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/controls/control-gates.json
+# bytes 0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/controls/control-proof-AdvancedControls.log
+# bytes 0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/controls/control-proof-DefensiveControls.log
+# bytes 0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/controls/control-proof-GraphControls.log
+# bytes 0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/controls/control-proof-Trust.log
+# bytes 0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/controls/no-live-lean.log
+# bytes 74
+3034793c396e8f21c4b3bf51389ec7b287c4b096ab9ccadbe4950aea1577cc63  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/controls/serial-resource-preflight.log
+# bytes 261
+cedb9777397132688cf963946ac91f3832402ffba5c3fd85440992a65d19d164  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/controls.log
+# bytes 10315
+c106a257004846bd0a105c9533c1b1db4872c21ecdc007d3f44fbfc676dc8059  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/doc-paths.log
+# bytes 7
+065bcd920cb1f83e23a5a4e2bee05e331c9d92fbfa738d3475f134b831809633  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/docker-version.log
+# bytes 289812
+006debceca42abf0cb97942730f62efc3c851fb258270da06c494a8ba85478e9  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/final-cache-readiness.log
+# bytes 0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/fragments.log
+# bytes 637962
+cc3a4832643d7844d5221f2e40cdf2d912621464a474b7af0ed2b77b405e6445  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/fresh-compiler-results.json
+# bytes 298
+09d8217ce00744e02b4233d4c88254328ffd13654c5acd97f57bd6f917ea8d12  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/fresh-compiler.log
+# bytes 226
+af40afcdc1d7779921fc9e3745865889048a9987c7a69a7101ae62cc4e5eb26e  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/fresh-replay.log
+# bytes 6878
+ba3709ce71901b718804ced186bba094b4b55c0ffae0449abb6050e1c8ca02b9  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/getter-pipelines.log
+# bytes 777
+57850005b798003bf54760803783391f93865e690589dbc5e6001e8fd3524629  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/handoff-status.json
+# bytes 1066
+91892257ba07144d7ad6a614dc95c761e5d1e230e9cf3b2753a2b1a922d18f0e  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/independent-gates.json
+# bytes 231
+535033443b0e4baa365e1f3528e38316e4d911516098ae47365ad8415a402b7f  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/keysort.log
+# bytes 95
+8cf3b28ff9ff623f43c5ea8563222a4d671b8abfbc57dd1b4395942fc8ec1e85  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/layers.log
+# bytes 828
+f6bc28e011060f60f8c2808be0abb6d49bc872b61d78c6a171d736903e08989b  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/readiness.json
+# bytes 1686
+72fabb8d4b9d5e77582a35a3631486dada2fd6cb1d4e2eb87d96fd362790fb3c  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/regressions.log
+# bytes 689
+12901e95a5b5450704c1546a7b8b39cd40d537c2f1e27b93e856c7bef9f0fde7  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/remaining-independent-gates.json
+# bytes 0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/replay-preflight/no-live-lean.log
+# bytes 1522
+08e53c397b77a60d666174b59d86830e3125f6ed34feb07ef0d10345a599da55  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/replay-preflight/replay-preflight.json
+# bytes 74
+3034793c396e8f21c4b3bf51389ec7b287c4b096ab9ccadbe4950aea1577cc63  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/replay-preflight/serial-resource-preflight.log
+# bytes 77
+3d966908e587b0b88152a4b08ff228dfdbbc4b66d0cfac89c62ddbb2373d20d8  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/resources.log
+# bytes 235
+4cd2ab1b576224819866f14d6234317b37dac28026cf939d6a35c082e200119a  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/reviews.json
+# bytes 0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/roots.log
+# bytes 921
+8ed4035d20e3c88d71d55cec5ff413a5f055594e37894a6a863cd5cd2cde1517  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/snapshot-provenance.json
+# bytes 79
+e2868b66f21eb33e974dcd84f946859fb7595d3dc71e9d687cd33b6d32f4cc1e  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/trust-corrected.log
+# bytes 578
+c3a3c345abbd699718be44a33e7569fad993d1c1274bfc8f800a51b3b1870af9  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/trust.log
+# bytes 125428585
+a78a6951b658780f93d634acf3da81f5734ea80f502e329c44a5eda47de29163  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/validated-bulk.tar.gz
+# bytes 173
+c9c3adc779a3e2dbbc5971339a3f9b1a2119137e3b383c9dd46319c45e8d8954  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/versions.log

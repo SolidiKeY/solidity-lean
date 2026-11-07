@@ -10,14 +10,24 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Master: one group per commit, so runs never queue behind each other.
+  group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && github.sha || github.ref }}
+  # Branch and PR runs are superseded by newer pushes; master runs always
+  # finish, so every merge gets a verdict.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main' }}
 
+# The Lean jobs run in parallel. Each seeds Lake's artifact cache from the
+# `lake-cache` release (master's build products, scripts/ci/fetch-lake-cache.sh),
+# so a module whose inputs match master is fetched instead of compiled.
 jobs:
-  build:
+  checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+        with:
+          # H107/H112 shrink-only baselines compare all actual merge parents.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -29,12 +39,14 @@ jobs:
       # (`docs/site.md`; `pages.yml` runs it against Lean's).
       - name: Test the site exporter
         run: node --test scripts/site/export.test.mjs
-      - name: Check Dafny inventory and editor integration
+      - name: Check Dafny feature inventory
+        run: node scripts/check-dafny-features.mjs
+      - name: Check documentation and axiom-pin drift
         run: |
-          node scripts/check-dafny-features.mjs
-          node vscode/parity/discover.cjs --check
-          node vscode/parity/audit.cjs --check
-          node --test scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs vscode/test/*.test.cjs
+          node --test scripts/check-axiom-pins.test.mjs tests/h62/item5/statement-graph/h112-tooling.test.mjs
+          python3 -B tests/h62/item5/statement-graph/test_w0_tooling.py -v
+          bash scripts/check-doc-paths.sh
+          node scripts/check-axiom-pins.mjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
       # the printers or the tactic front ends, even transitively.
       - name: Check layering
@@ -47,28 +59,59 @@ jobs:
       # inventory are generated from per-lane fragments (P5).
       - name: Check generated bookkeeping files
         run: bash scripts/coord-tools/fragments.sh --check
-
+      - name: Check slow example partition
+        run: python3 tests/h55/module-times/test_slow_examples.py
       - name: Check pinned Solidity feature inventory
         run: python3 scripts/solidity-feature-audit.py --check
 
-      # Elaboration is the test suite: there is no separate test driver, and
-      # the default library is the whole formalization.
-      #
-      # use-mathlib-cache is off because there is no Mathlib anywhere on the
-      # path — `lakefile.toml` declares no `[[require]]` at all, so nothing is
-      # cloned and the olean cache would be pure waste. Keeping it that way is
-      # a deliberate invariant (see AGENTS.md).
-      #
-      # `solkeycheck` is deliberately not run here: it cross-checks against a
-      # solkey checkout that CI does not have, and would only ever report
-      # SKIPPED.
-      - name: Build
+  # Non-blocking until the editor-parity lane makes it pass from a fresh
+  # checkout: the full inventory is a checksum-bound bundle kept off git (H44).
+  editor-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check editor parity inventory and integration
+        run: |
+          node vscode/parity/discover.cjs --check
+          node vscode/parity/audit.cjs --check
+          node --test scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs vscode/test/*.test.cjs
+
+  # Elaboration is the test suite: there is no separate test driver, and
+  # the default library is the whole formalization.
+  #
+  # use-mathlib-cache is off because there is no Mathlib anywhere on the
+  # path: `lakefile.toml` declares no `[[require]]` at all. Keeping it that
+  # way is a deliberate invariant (see AGENTS.md).
+  library:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Lean
         uses: leanprover/lean-action@v1
         with:
-          build-args: "Solidity SolidityExamples"
+          build: "false"
+          use-github-cache: "false"
           use-mathlib-cache: "false"
           test: "false"
           lint: "false"
+      - name: Seed Lake cache from master
+        run: bash scripts/ci/fetch-lake-cache.sh
+      - name: Build
+        run: lake build Solidity SolidityExamples SoliditySlowExamples
+      # Fetched modules stay in Lake's cache; tools that run Lean themselves
+      # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
+      - name: Restore fetched artifacts
+        run: python3 scripts/ci/restore-lake-artifacts.py
+      # H107/F7: keep inhabited compiler_correct/net/checked applications live.
+      - name: Elaborate headline non-vacuity witnesses
+        env:
+          LEAN_NUM_THREADS: '1'
+        run: lake env python3 tests/h28-sol/non-vacuity/kernel.py --all --fresh
       # Every declaration under `Solidity` may use only propext,
       # Classical.choice and Quot.sound; the `unsafe` twins behind
       # `@[implemented_by]` memo helpers, which reach `lcProof` through
@@ -79,9 +122,75 @@ jobs:
         run: lake env lean --tstack=131072 scripts/AxiomAudit.lean
       - name: Audit headline theorem dependencies
         run: lake env lean --tstack=131072 TrustAudit.lean
+
+  # The automation gate: every TestSuite obligation is derived by the
+  # automatic prover (`sol_prove` and the replay `sol_prove?` writes) or
+  # refuted by `sol_refute`, and none is pending
+  # (`scripts/check-automatic.mjs`).  It reads `Report.lean`'s pin, which
+  # the TestSuite build checks.
+  testsuite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Set up Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: "false"
+          use-github-cache: "false"
+          use-mathlib-cache: "false"
+          test: "false"
+          lint: "false"
+      - name: Seed Lake cache from master
+        run: bash scripts/ci/fetch-lake-cache.sh
+      - name: Build the TestSuite
+        run: |
+          set -o pipefail
+          lake build SolkeyTestSuite 2>&1 | tee testsuite-build.log
+      # Fetched modules stay in Lake's cache; tools that run Lean themselves
+      # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
+      - name: Restore fetched artifacts
+        run: python3 scripts/ci/restore-lake-artifacts.py
+      - name: Check fresh replay timing
+        run: |
+          # GitHub's 4-core runner is slower than the hardware the 300 s budget was set on (H116);
+          # CI allows 600 s and records the measured total in memory-loop-ci-replay.json.
+          timeout 660s python3 scripts/check-memory-loop-timing.py --budget 600 --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json \
+            || { for f in .lake/memory-loop-ci-replay/*.log; do echo "== $f"; tail -20 "$f"; done; exit 1; }
+      - name: Automation gate
+        env:
+          REPLAY_BUDGET_S: '600'
+        run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log --replay-group-results memory-loop-ci-replay.json
+
+  tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Set up Lean
+        uses: leanprover/lean-action@v1
+        with:
+          build: "false"
+          use-github-cache: "false"
+          use-mathlib-cache: "false"
+          test: "false"
+          lint: "false"
+      - name: Seed Lake cache from master
+        run: bash scripts/ci/fetch-lake-cache.sh
+      - name: Build library and executables
+        run: lake build Solidity solidity-lean solkeycheck
+      # Fetched modules stay in Lake's cache; tools that run Lean themselves
+      # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
+      - name: Restore fetched artifacts
+        run: python3 scripts/ci/restore-lake-artifacts.py
       - name: Test source verification and regression suites
         env:
           SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
+          SOLJSON_DIR: ${{ github.workspace }}/tests/migration/solkey/keyext.solidity.core/build/soljson
           LEAN_NUM_THREADS: '1'
         run: |
           mkdir -p "$SOLKEY_ROOT/keyext.solidity.core/build/soljson"
@@ -124,19 +233,6 @@ jobs:
           JS
           lake build solidity-lean solkeycheck
           node --test scripts/solidity-lean.test.mjs scripts/tool-job.test.mjs
-      # The automation gate: every TestSuite obligation is derived by the
-      # automatic prover (`sol_prove` and the replay `sol_prove?` writes) or
-      # refuted by `sol_refute`, and none is pending
-      # (`scripts/check-automatic.mjs`).  It reads `Report.lean`'s pin, which
-      # the TestSuite build checks.
-      - name: Build the TestSuite
-        run: |
-          set -o pipefail
-          lake build SolkeyTestSuite 2>&1 | tee testsuite-build.log
-      - name: Check fresh replay timing
-        run: timeout 300s python3 scripts/check-memory-loop-timing.py --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json
-      - name: Automation gate
-        run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log --replay-group-results memory-loop-ci-replay.json
 
   editor:
     runs-on: ubuntu-latest

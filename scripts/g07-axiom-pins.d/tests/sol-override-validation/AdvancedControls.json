@@ -1,0 +1,65 @@
+{
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.fallback_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.getter_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.good_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.good_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.good_dispatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.good_original_body": [
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.missing_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.missing_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.modifier_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.private_override_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.private_override_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.receive_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/sol-override-validation/AdvancedControls.lean:Solidity.Frontend.OverrideValidation.AdvancedControls.substituted_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "DEP-SYNTAX-RAW-435: owner migration for Solidity/Syntax/Raw.lean errors at 597,650,665,682,684; ticket accepted under H70; no owner patch received here. Successor must inspect delivered syntax evidence without assuming coordinator-local paths are accessible."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "PERF-DEPENDENCY-RSS: review observed prerequisite RSS increase before accepting migration resources."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78-COMPLETE-PUBLIC-INVENTORY: all original public generated names require exact old/new universes, binder order/kinds, visibility and required shim signatures. Existing 30 named checks plus instance are incomplete; no generated exemption or consumer-rewrite compatibility claim."
+    },
+    {
+      "lane": "COORD",
+      "item": "Existing-goal PAUSED transition unavailable: only stop_goal outcome complete|blocked is exposed; worker stops after handoff and requests coordinator preserve authorized pause without replacement goal."
+    },
+    {
+      "lane": "COORD",
+      "item": "Authoritative H81 current resource policy and later referenced policy texts were not delivered in full here; successor must use its authenticated current inputs before future Lean validation."
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "dbf61c06ab14df73509b243fd4e84887c6b51e36569e60158274e79ef49a1172",
+  "kind": "joint-premise",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Touched.lean:33:touched_index_iff",
+      "theorem": "Solidity.Backend.StorageOps.touched_index_iff",
+      "signature": "theorem touched_index_iff (base : Solidity.Storage.Loc) (stride count i : Nat)\n    (positive : 0 < stride) :\n    base.add (i * stride) \u2208 touched base stride count \u2194 i < count",
+      "signature_sha256": "ef49c31a8b329948323b4874342fba66f3deba24dc0e13228be681b3314966a6",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.positive_index_joint",
+      "status": "kernel-checked exact finite-run input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Touched.lean:56:visit_frame_of_not_touched",
+      "theorem": "Solidity.Backend.StorageOps.visit_frame_of_not_touched",
+      "signature": "theorem visit_frame_of_not_touched {n extent : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (target initial : Fin extent \u2192 Slot G E) (base : Solidity.Storage.Loc)\n    (stride count : Nat) (i : Fin extent) (positive : 0 < stride)\n    (outside : base.add (i.val * stride) \u2209 touched base stride count) :\n    visit target count initial i = initial i",
+      "signature_sha256": "b38bfcfeafe93a961f3490bcaa63e2e12a253be03e82c2ff252d28caa188b959",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.frame_joint",
+      "status": "kernel-checked exact finite-run input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Touched.lean:69:touched_word_iff",
+      "theorem": "Solidity.Backend.StorageOps.touched_word_iff",
+      "signature": "theorem touched_word_iff {N L R : Nat} {H : Pre \u2192 Nat} {P : List Pre}\n    (hH : \u2200 p, H p < N) (hL : L \u2264 N) (hR : R \u2264 N)\n    (regions : RegionsDisjoint N L H (List.range R) P)\n    (base q : Solidity.Storage.Loc) (stride count : Nat)\n    (bounded : \u2200 l \u2208 touched base stride count, l.Bounded L R)\n    (hashed : \u2200 l \u2208 touched base stride count, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (queryBounded : q.Bounded L R) (queryHashed : \u2200 p \u2208 q.pres N H, p \u2208 P) :\n    q.word N H \u2208 (touched base stride count).map (Solidity.Storage.Loc.word N H) \u2194\n      q \u2208 touched base stride count",
+      "signature_sha256": "af764ce04008654514d2ca4905afad1a578b313cd14e72f33beabf398d6e37ec",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.membership_joint",
+      "status": "kernel-checked exact finite-run input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Touched.lean:89:touched_word_nodup",
+      "theorem": "Solidity.Backend.StorageOps.touched_word_nodup",
+      "signature": "theorem touched_word_nodup {N L R : Nat} {H : Pre \u2192 Nat} {P : List Pre}\n    (hH : \u2200 p, H p < N) (hL : L \u2264 N) (hR : R \u2264 N)\n    (regions : RegionsDisjoint N L H (List.range R) P)\n    (base : Solidity.Storage.Loc) (stride count : Nat)\n    (bounded : \u2200 l \u2208 touched base stride count, l.Bounded L R)\n    (hashed : \u2200 l \u2208 touched base stride count, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (distinct : (touched base stride count).Nodup) :\n    ((touched base stride count).map (Solidity.Storage.Loc.word N H)).Nodup",
+      "signature_sha256": "4cc5b450229945b36e5380c0b71d5cbbf1afa6a781cd9853d2f16b09f6cabae3",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.nodup_joint",
+      "status": "kernel-checked exact finite-run input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Touched.lean:101:touched_disjoint_words",
+      "theorem": "Solidity.Backend.StorageOps.touched_disjoint_words",
+      "signature": "theorem touched_disjoint_words {N L R : Nat} {H : Pre \u2192 Nat} {P : List Pre}\n    (hH : \u2200 p, H p < N) (hL : L \u2264 N) (hR : R \u2264 N)\n    (regions : RegionsDisjoint N L H (List.range R) P)\n    (a b : Solidity.Storage.Loc) (sa ca sb cb : Nat)\n    (boundedA : \u2200 l \u2208 touched a sa ca, l.Bounded L R)\n    (boundedB : \u2200 l \u2208 touched b sb cb, l.Bounded L R)\n    (hashedA : \u2200 l \u2208 touched a sa ca, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (hashedB : \u2200 l \u2208 touched b sb cb, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (separate : \u2200 l \u2208 touched a sa ca, \u2200 q \u2208 touched b sb cb, l \u2260 q) :\n    \u2200 l \u2208 touched a sa ca, \u2200 q \u2208 touched b sb cb, l.word N H \u2260 q.word N H",
+      "signature_sha256": "ca5ea3e733576a5bdb9be984b577f04cc8f949e6d63f5efaba96c5f2cdbc9e87",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.disjoint_joint",
+      "status": "kernel-checked exact finite-run input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Touched.lean:117:generated_writes_commute",
+      "theorem": "Solidity.Backend.StorageOps.generated_writes_commute",
+      "signature": "theorem generated_writes_commute {n N L R : Nat} {G : Schema n}\n    {E : TypeGraph.Ty n} {H : Pre \u2192 Nat} {P : List Pre}\n    (hH : \u2200 p, H p < N) (hL : L \u2264 N) (hR : R \u2264 N)\n    (regions : RegionsDisjoint N L H (List.range R) P)\n    (a b : Solidity.Storage.Loc) (sa ca sb cb : Nat)\n    (boundedA : \u2200 l \u2208 touched a sa ca, l.Bounded L R)\n    (boundedB : \u2200 l \u2208 touched b sb cb, l.Bounded L R)\n    (hashedA : \u2200 l \u2208 touched a sa ca, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (hashedB : \u2200 l \u2208 touched b sb cb, \u2200 p \u2208 l.pres N H, p \u2208 P)\n    (separate : \u2200 l \u2208 touched a sa ca, \u2200 q \u2208 touched b sb cb, l \u2260 q)\n    (l q : Solidity.Storage.Loc) (hl : l \u2208 touched a sa ca) (hq : q \u2208 touched b sb cb)\n    (slots : Nat \u2192 Slot G E) (x y : Value G E) :\n    Slots.write (Slots.write slots (l.word N H) x) (q.word N H) y =\n      Slots.write (Slots.write slots (q.word N H) y) (l.word N H) x",
+      "signature_sha256": "0bfafe112a90d1aa56f760cd13e228be8e54bb8ffbf19777eaf01555930c1c3c",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.write_joint",
+      "status": "kernel-checked exact finite-run input reference; independent fidelity reviews passed"
+    }
+  ]
+}

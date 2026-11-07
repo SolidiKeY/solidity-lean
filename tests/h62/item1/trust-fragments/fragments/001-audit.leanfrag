@@ -1,0 +1,38 @@
+/-! Roadmap G07: the inhabited and negative controls of the G01 contracts
+(`Solidity/Roadmap/Controls.lean`, `docs/feature-work/roadmap-g07-gates.md`). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Roadmap.PublicCorrectness.transfer,
+    ``Solidity.Roadmap.PublicCorrectness.not_alwaysRevert,
+    ``Solidity.Roadmap.PublicCorrectness.observes,
+    ``Solidity.Roadmap.PublicCorrectness.rejects,
+    ``Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse,
+    ``Solidity.Roadmap.Admission.rejects,
+    ``Solidity.Roadmap.Controls.toy_publicCorrectness,
+    ``Solidity.Roadmap.Controls.toySource_nonVacuous,
+    ``Solidity.Roadmap.Controls.toySource_approved,
+    ``Solidity.Roadmap.Controls.toyEvm_approved,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler,
+    ``Solidity.Roadmap.Controls.not_admission_sloppy,
+    ``Solidity.Roadmap.Controls.not_nonVacuous_emptySource,
+    ``Solidity.Roadmap.PublicCorrectness.observedBySource,
+    ``Solidity.Roadmap.SourceSpec.NonVacuous.admits,
+    ``Solidity.Roadmap.HashPremise.not_of_rootSlots,
+    ``Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler,
+    ``Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler,
+    ``Solidity.Roadmap.Fixed.Sane.rootSlots_lt,
+    ``Solidity.Roadmap.Controls.toyFixed_keccak]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} roadmap control theorems use only the standard axioms"
+

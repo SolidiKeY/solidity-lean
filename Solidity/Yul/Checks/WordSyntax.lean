@@ -46,4 +46,24 @@ example : prepared [loop [] (lit 0) [pop (call "codesize" [])] []] =
     "compiler:codesize" := by decide
 
 def text := "assembly (\"memory-safe\") { let answer:=mulDiv(7,11,3) function mulDiv(a,b,d)->r{r:=div(mul(a,b),d)} }"
+/-- info: 'Solidity.Yul.ClosedSyntax.Checked.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ClosedSyntax.Checked.unique
+
+/-- info: 'Solidity.Yul.ClosedSyntax.Checked.finalNames_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ClosedSyntax.Checked.finalNames_unique
+
+/-- info: 'Solidity.Yul.WordSyntax.Prepared.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.WordSyntax.Prepared.unique
+
+/-- info: 'Solidity.Yul.WordSyntax.Prepared.program_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.WordSyntax.Prepared.program_unique
+
+/-- info: 'Solidity.Yul.WordSyntax.Prepared.run_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.WordSyntax.Prepared.run_unique
+
 end Solidity.Yul.Checks.WordSyntax

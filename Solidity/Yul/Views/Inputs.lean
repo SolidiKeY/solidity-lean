@@ -40,6 +40,42 @@ theorem calldataload_zero (input : List UInt8) (a : Nat) (ha : input.length ≤ 
       rfl
   exact hz 32
 
+/-- Every live destination byte is the zero-extended input byte at its
+mathematical source offset. Successful native range/admission is separate. -/
+theorem calldatacopy_payload (m : ByteView) (input : List UInt8)
+    (dst src n i : Nat) (inside : i < n) :
+    calldatacopy m input dst src n (dst + i) = calldataBytes input (src + i) :=
+  find_copyBytes m (calldataBytes input) dst src n i inside
+
+/-- Copying calldata preserves every byte outside the destination interval. -/
+theorem calldatacopy_outside (m : ByteView) (input : List UInt8)
+    (dst src n a : Nat) (outside : ¬ (dst ≤ a ∧ a < dst + n)) :
+    calldatacopy m input dst src n a = m a :=
+  copyBytes_outside m (calldataBytes input) dst src n a outside
+
+/-- An empty raw calldata copy leaves the entire byte view unchanged. -/
+theorem calldatacopy_zero (m : ByteView) (input : List UInt8) (dst src : Nat) :
+    calldatacopy m input dst src 0 = m :=
+  copyBytes_zero m (calldataBytes input) dst src
+
+/-- Missing input bytes pad with zero; source advancement never wraps and no
+MCOPY-style source-end range premise is introduced. -/
+theorem calldatacopy_padded_byte (m : ByteView) (input : List UInt8)
+    (dst src n i : Nat) (inside : i < n) (past : input.length ≤ src + i) :
+    calldatacopy m input dst src n (dst + i) = 0 :=
+  (calldatacopy_payload m input dst src n i inside).trans
+    (calldata_zero input (src + i) past)
+
+/-- The whole copied window equals the zero-extended source window, for every
+length and offset. This is a byte-view law, not native range admission. -/
+theorem calldatacopy_readBytes (m : ByteView) (input : List UInt8) (dst src n : Nat) :
+    readBytes (calldatacopy m input dst src n) dst n =
+      readBytes (calldataBytes input) src n := by
+  unfold readBytes
+  apply List.map_congr_left
+  intro i member
+  exact calldatacopy_payload m input dst src n i (List.mem_range.mp member)
+
 /-- Uses the approved fixed hash, without any collision premise. -/
 def keccak256 (fixed : Roadmap.Evm.Fixed) (m : ByteView) (a n : Nat) : Roadmap.Word :=
   ⟨fixed.keccak (readBytes m a n), fixed.keccak_lt _⟩
@@ -86,8 +122,35 @@ def Environment.read (e : Environment) : EnvRead → Roadmap.Word
 def blockhash (e : Environment) (query : Roadmap.Word) : Roadmap.Word :=
   if query.val < e.number.val ∧ e.number.val - query.val ≤ 256 then e.historicalHash query else 0
 
+/-- Every universally supplied environment returns its own historical hash for
+an eligible prior block; no hash value or compiler behavior is assumed. -/
+theorem blockhash_in_window (e : Environment) (query : Roadmap.Word)
+    (past : query.val < e.number.val) (recent : e.number.val - query.val ≤ 256) :
+    blockhash e query = e.historicalHash query :=
+  if_pos ⟨past, recent⟩
+
+/-- Regression boundary: current/future blocks and blocks older than the prior
+256-block window return zero, independently of the historical-hash function. -/
+theorem blockhash_outside_window (e : Environment) (query : Roadmap.Word)
+    (outside : ¬ (query.val < e.number.val ∧ e.number.val - query.val ≤ 256)) :
+    blockhash e query = 0 :=
+  if_neg outside
+
 def blobhash (e : Environment) (i : Roadmap.Word) : Roadmap.Word :=
   e.blobHashes[i.val]?.getD 0
+
+/-- An eligible blob index returns the supplied word at that exact index.
+No blob list is sampled or inferred from program code. -/
+theorem blobhash_in_bounds (e : Environment) (index : Roadmap.Word)
+    (inside : index.val < e.blobHashes.length) :
+    blobhash e index = e.blobHashes[index.val]'inside := by
+  exact congrArg (fun entry => entry.getD 0) (List.getElem?_eq_getElem inside)
+
+/-- Regression boundary: every index beyond the supplied blob list yields zero,
+independently of all other environment fields and hash inputs. -/
+theorem blobhash_outside_bounds (e : Environment) (index : Roadmap.Word)
+    (outside : e.blobHashes.length ≤ index.val) : blobhash e index = 0 := by
+  exact congrArg (fun entry => entry.getD 0) (List.getElem?_eq_none outside)
 
 theorem environment_address_width (e : Environment) :
     (e.read .coinbase).val < 2 ^ 160 ∧ (e.read .origin).val < 2 ^ 160 :=

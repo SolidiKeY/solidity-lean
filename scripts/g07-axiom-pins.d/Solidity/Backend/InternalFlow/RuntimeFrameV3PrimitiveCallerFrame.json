@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerFrame.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.assigned_env": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerFrame.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.assigned_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerFrame.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.discarded_env": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3PrimitiveCallerFrame.lean:Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.discarded_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

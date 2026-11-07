@@ -28,7 +28,7 @@ def rcRaw : SlotView := fun q => if q = 0 ∨ q = 4 ∨ q = 6 then ⟨2^248,by d
   if q = 3000 then ⟨2^248+2*2^24+2^16+1,by decide⟩ else 999
 
 def rcState : Source.EMState rcEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := rcEnv.layout) (rcEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := rcEnv.layout) (rcEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def rcResidual : ResidualJournal complementCarrierOwnership :=
   ⟨fun k => if k.transient then 0 else packedMask rcLayout.registrations rcRaw k.slot,[]⟩
 theorem rc_initial_MemOK : Source.MemOK rcEnv rcState.2.heap.ty rcState :=

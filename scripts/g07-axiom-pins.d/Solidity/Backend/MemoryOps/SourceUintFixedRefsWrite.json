@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.eval_nested_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.resolved_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.same_heap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.write_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,48 @@
+{
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.absent_all": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.empty_receive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.equal_label_no_bypass": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.full_miss_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.malformed_length_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.ordinary_reject_no_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.ordinary_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.padded_collision_fixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/EntryRoutesControls.lean:Solidity.Backend.AbiEntry.EntryRoutesControls.short_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

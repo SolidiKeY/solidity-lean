@@ -1,0 +1,14 @@
+{
+  "guardedRegression": "Environment qualification must retain source/binary identity and distinguish finite observations from complete source/backend proofs.",
+  "reviews": {
+    "finder": "PASS: no blocking finding; independently verified 522 evidence, 5 runtime, 32 cache payloads, 29 gate receipts and all 343 current source pins. Read-only; no Lean/server/build.",
+    "skeptic": "PASS: safe unique archive members, hashes, counts, source-ID/binary bindings, proof-only projection, undelivered producer data, retained failures/STOPs/limits. Read-only; no Lean/server/build."
+  },
+  "evidenceArchive": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-environment/handoff-data/evidence.tar.gz",
+    "bytes": 842207,
+    "sha256": "c3c9ce432635b63557700dc3bb01d217f266943a9bf908e964944e5735d7e705"
+  },
+  "masterAdoptionReceipt": "evidence/master-adoption.json inside evidence archive",
+  "boundary": "Scoped environment qualification only; full queue and runtime/performance holds remain open."
+}

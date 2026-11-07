@@ -53,7 +53,7 @@ def sdWord24Tail : Roadmap.Word := ⟨0xdddddddddddddddddddddddddddddddddddddddd
 def sdRaw : SlotView := fun q => if q = 0 ∨ q = 1 ∨ q = 2 then 0 else if q = 1000 then sdWord0 else if q = 1001 then sdWord1 else if q = 2000 then sdWord24 else if q = 2001 then sdWord24Tail else if q = 3 then 999 else 77
 
 def sdState : Source.EMState sdEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := sdEnv.layout) (sdEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := sdEnv.layout) (sdEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def sdResidual : ResidualJournal complementCarrierOwnership :=
   ⟨fun k => if k.transient then 0 else packedMask sdLayout.registrations sdRaw k.slot,[]⟩
 

@@ -25,7 +25,7 @@ def nestedRaw6 : Roadmap.Word := ⟨0xbbbbbbbbbbbb000000000000000000000000000000
 def nestedInitialRaw (q : Roadmap.Word) : Roadmap.Word := if q = 7 then 55 else ⟨0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee,by decide⟩
 def nestedDeclResidual := initialPackedComplement nestedDeclRegistry nestedDeclRegistry (fun k => nestedInitialRaw k.slot)
 def nestedDeclState : Source.EMState declBoundaryEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := declBoundaryEnv.layout) (declBoundaryEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := declBoundaryEnv.layout) (declBoundaryEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem nested_decl_initial_MemOK : Source.MemOK declBoundaryEnv nestedDeclState.2.heap.ty nestedDeclState :=
   ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩

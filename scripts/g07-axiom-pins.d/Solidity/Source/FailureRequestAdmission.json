@@ -1,0 +1,78 @@
+{
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.admission_frames": [],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.admission_other": [
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.active_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.dropped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.dropped_then_next": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.exact_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.full_nat_balance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.full_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.insufficient_before_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.insufficient_no_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.sufficient_zero_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.AdmissionControls.timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.admitRequestAt": [],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.admitRequestFate": [],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.request_value_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.request_value_unfunded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureRequestAdmission.lean:Solidity.Source.FailureExecution.requestValueScope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

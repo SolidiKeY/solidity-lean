@@ -1,0 +1,61 @@
+{
+  "state": "development-not-frozen",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "Two independent typed storage-update omissions: pop on empty and indexed delete past length, with inhabited successful clearing controls. Development only.",
+  "cases": [
+    {
+      "id": "pop.empty-skipped",
+      "kind": "mutant",
+      "family": "pop-delete",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "source_symbol": "Taclet.storagePopSave",
+      "old": "  | storagePopSave :\n      dl{ \u27e8[ darr.pop(); ]\u27e9 \u21dd\n          { storage := save(delAt(storage, darr[darr.length - 1]), darr.length, darr.length - 1) }\n          \u27e8[ ]\u27e9 }",
+      "new": "  | storagePopSave :\n      dl{ \u27e8[ darr.pop(); ]\u27e9 \u21dd { storage := storage } \u27e8[ ]\u27e9 }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PopBaseline.lean",
+      "oracle_sha256": "555fe41ffee312fb3fdf507040c02ca72ac054a231065de8949664e02af17175",
+      "oracle_declarations": [
+        "H28.PopBaseline.source_link",
+        "H28.PopBaseline.input_inhabited",
+        "H28.PopBaseline.failing_run",
+        "H28.PopBaseline.positive_run"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PopSkippedKill.lean",
+      "witness_sha256": "cac41e9773a515b9d58a98948a9176f5da7c6fbc0381e0538824a3164806e31d",
+      "witness_declarations": [
+        "H28.PopSkippedKill.source_link",
+        "H28.PopSkippedKill.input_inhabited",
+        "H28.PopSkippedKill.checked_kill",
+        "H28.PopSkippedKill.typed_landing",
+        "H28.PopSkippedKill.positive_run"
+      ]
+    },
+    {
+      "id": "delete.array-index-skipped",
+      "kind": "negative-control",
+      "family": "pop-delete",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "source_symbol": "Taclet.storageIndexArrayDelete",
+      "old": "  | storageIndexArrayDelete :\n      dl{ \u27e8[ delete arr[ie]; ]\u27e9 \u21dd { storage := delAt(storage, arr[ie]) } \u27e8[ ]\u27e9 }",
+      "new": "  | storageIndexArrayDelete :\n      dl{ \u27e8[ delete arr[ie]; ]\u27e9 \u21dd { storage := storage } \u27e8[ ]\u27e9 }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/DeleteBaseline.lean",
+      "oracle_sha256": "5bedd7f6795f26c1f6537ad7b1e61b42191bbd1e7e16531dfe20d08c45735b55",
+      "oracle_declarations": [
+        "H28.DeleteBaseline.source_link",
+        "H28.DeleteBaseline.input_inhabited",
+        "H28.DeleteBaseline.failing_run",
+        "H28.DeleteBaseline.positive_run"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/DeleteSkippedKill.lean",
+      "witness_sha256": "ccca00f0e1b59bf171ef78beb5f481f912a2dc67b3314afde971256adac0ca7a",
+      "witness_declarations": [
+        "H28.DeleteSkippedKill.source_link",
+        "H28.DeleteSkippedKill.input_inhabited",
+        "H28.DeleteSkippedKill.checked_kill",
+        "H28.DeleteSkippedKill.typed_landing",
+        "H28.DeleteSkippedKill.positive_run"
+      ]
+    }
+  ]
+}
