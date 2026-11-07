@@ -40,6 +40,32 @@ theorem calldataload_zero (input : List UInt8) (a : Nat) (ha : input.length ≤ 
       rfl
   exact hz 32
 
+/-- Every live destination byte is the zero-extended input byte at its
+mathematical source offset. Successful native range/admission is separate. -/
+theorem calldatacopy_payload (m : ByteView) (input : List UInt8)
+    (dst src n i : Nat) (inside : i < n) :
+    calldatacopy m input dst src n (dst + i) = calldataBytes input (src + i) :=
+  find_copyBytes m (calldataBytes input) dst src n i inside
+
+/-- Copying calldata preserves every byte outside the destination interval. -/
+theorem calldatacopy_outside (m : ByteView) (input : List UInt8)
+    (dst src n a : Nat) (outside : ¬ (dst ≤ a ∧ a < dst + n)) :
+    calldatacopy m input dst src n a = m a :=
+  copyBytes_outside m (calldataBytes input) dst src n a outside
+
+/-- An empty raw calldata copy leaves the entire byte view unchanged. -/
+theorem calldatacopy_zero (m : ByteView) (input : List UInt8) (dst src : Nat) :
+    calldatacopy m input dst src 0 = m :=
+  copyBytes_zero m (calldataBytes input) dst src
+
+/-- Missing input bytes pad with zero; source advancement never wraps and no
+MCOPY-style source-end range premise is introduced. -/
+theorem calldatacopy_padded_byte (m : ByteView) (input : List UInt8)
+    (dst src n i : Nat) (inside : i < n) (past : input.length ≤ src + i) :
+    calldatacopy m input dst src n (dst + i) = 0 :=
+  (calldatacopy_payload m input dst src n i inside).trans
+    (calldata_zero input (src + i) past)
+
 /-- Uses the approved fixed hash, without any collision premise. -/
 def keccak256 (fixed : Roadmap.Evm.Fixed) (m : ByteView) (a n : Nat) : Roadmap.Word :=
   ⟨fixed.keccak (readBytes m a n), fixed.keccak_lt _⟩
