@@ -162,8 +162,10 @@ test('startup actions are explicit, scoped to declared settings and suppressed a
    e.service.emit('serverError',error);e.service.emit('serverError',error);assert.equal(actions.length,1);assert.deepEqual(actions[0].items,['Change configuration','Node.js downloads']);
    if(action==='stale')await e.commands.get('solidityLean.restartServer')();if(action==='disposed')await e.api.dispose();if(action==='closed'||action==='reopened'){e.doc.isClosed=true;e.events.close(e.doc);if(action==='reopened')e.events.open({...e.doc,isClosed:false});}
    choose(action==='stale'||action==='disposed'||action==='closed'||action==='reopened'?'Node.js downloads':action);await tick();
-   assert.equal(commands.length,action==='Change configuration'?1:0);assert.equal(links.length,action==='Node.js downloads'?1:0);
-   if(commands.length)assert.match(commands[0][1],/solidityLean.nodePath/);if(links.length)assert.equal(links[0],'https://nodejs.org/en/download');
+   const contextCommands=commands.filter(c=>c[0]==='setContext'),actionCommands=commands.filter(c=>c[0]!=='setContext');
+   for(const call of contextCommands){assert.equal(call.length,3);assert.match(call[1],/^solidityLean\.verificationTrace\.(CanShow|CanHide|CanCopy)$/);assert.equal(typeof call[2],'boolean');}
+   assert.equal(actionCommands.length,action==='Change configuration'?1:0);assert.equal(links.length,action==='Node.js downloads'?1:0);
+   if(actionCommands.length)assert.match(actionCommands[0][1],/solidityLean.nodePath/);if(links.length)assert.equal(links[0],'https://nodejs.org/en/download');
   }finally{await e.api.dispose();}
  }
 });

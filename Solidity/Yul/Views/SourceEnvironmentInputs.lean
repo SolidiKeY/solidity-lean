@@ -36,8 +36,42 @@ theorem transaction_hash_inputs (environment : Environment) (tx : Source.TxConfi
 theorem transaction_blockhash (environment : Environment) (tx : Source.TxConfig) (query : Roadmap.Word) :
     blockhash (environment.bindTransaction tx) query=blockhash environment query := rfl
 
+/-- Binding actual Source transaction metadata preserves the eligible-block
+hash result for every supplied environment and transaction. -/
+theorem transaction_blockhash_in_window (environment : Environment) (tx : Source.TxConfig)
+    (query : Roadmap.Word) (past : query.val < environment.number.val)
+    (recent : environment.number.val - query.val ≤ 256) :
+    blockhash (environment.bindTransaction tx) query = environment.historicalHash query :=
+  (transaction_blockhash environment tx query).trans
+    (blockhash_in_window environment query past recent)
+
+/-- Regression boundary: transaction binding cannot turn a current/future or
+too-old query into an eligible historical lookup. No Source admission is added. -/
+theorem transaction_blockhash_outside_window (environment : Environment) (tx : Source.TxConfig)
+    (query : Roadmap.Word)
+    (outside : ¬ (query.val < environment.number.val ∧ environment.number.val - query.val ≤ 256)) :
+    blockhash (environment.bindTransaction tx) query = 0 :=
+  (transaction_blockhash environment tx query).trans
+    (blockhash_outside_window environment query outside)
+
 theorem transaction_blobhash (environment : Environment) (tx : Source.TxConfig) (index : Roadmap.Word) :
     blobhash (environment.bindTransaction tx) index=blobhash environment index := rfl
+
+/-- Actual Source transaction binding preserves an eligible supplied blob
+lookup, including the same list entry and dependent index-bound proof. -/
+theorem transaction_blobhash_in_bounds (environment : Environment) (tx : Source.TxConfig)
+    (index : Roadmap.Word) (inside : index.val < environment.blobHashes.length) :
+    blobhash (environment.bindTransaction tx) index = environment.blobHashes[index.val]'inside :=
+  (transaction_blobhash environment tx index).trans
+    (blobhash_in_bounds environment index inside)
+
+/-- Binding actual transaction metadata does not make an out-of-range blob
+index valid. This is a data-binding law, not program or fork admission. -/
+theorem transaction_blobhash_outside_bounds (environment : Environment) (tx : Source.TxConfig)
+    (index : Roadmap.Word) (outside : environment.blobHashes.length ≤ index.val) :
+    blobhash (environment.bindTransaction tx) index = 0 :=
+  (transaction_blobhash environment tx index).trans
+    (blobhash_outside_bounds environment index outside)
 
 theorem transaction_last (environment : Environment) (first last : Source.TxConfig) :
     (environment.bindTransaction first).bindTransaction last=environment.bindTransaction last := rfl
