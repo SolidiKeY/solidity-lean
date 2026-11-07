@@ -1079,3 +1079,26 @@ Lean or its server. Actual Source unit/declarations/statements, resolution,
 elaboration, artifact origin, H24 admission, lifecycle/resource and consumer
 correspondence remain unfinished local work. General mapping-bearing H24,
 physical Y04 and separate 4.35 trust/timing waits and every prior STOP remain.
+
+### C245 — actual LibraryTry statement bodies
+
+SourceAstStatements reuses the existing expression/type/list readers and body
+context. Ordered block mapM retains every supported statement or fails; local
+initializers, returns, conditional branches, try success returns and ordered
+catch signatures/bodies remain intrinsic syntax. Four complete actual function
+bodies in each existing pipeline fixture pass conversion. Runtime controls
+check the x=8 prefix, dirty t.x=9 before t.stru, Error(string memory message)
+handler returning (19,message), and counts of conditions, tries, handlers,
+returns, assignments and calls. Unsupported/malformed/depth cases fail, while
+an empty block succeeds. These are syntax checks, not Source elaboration,
+execution, artifact origin, H24 admission or lifecycle correspondence.
+
+The initial catch-constructor layout and an over-nested test pattern failed;
+corrected layout and decomposed predicates pass. Failed diagnostics, including
+rejected error-recovery artifacts, remain retained. The three measured guards
+are propext-only; no existing statement/definition, budget, axiom policy or
+exclusion was changed. Finder and skeptic reviewed final code read-only without
+Lean/server and found no findings. Declarations, complete Source unit,
+resolveUnit/elaborate and actual origin/admission/resource/lifecycle producers,
+original/consolidated coverage and full final gates remain open. Mapping-bearing
+H24, Y04 physical and separate4.35 waits and all historical STOPs remain.
