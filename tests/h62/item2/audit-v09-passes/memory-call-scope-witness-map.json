@@ -1,0 +1,68 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/MemoryCallScopeControls.lean",
+  "interface_sha256": "fce1be68503ece98d6f6ac3d550d7357d66ae704aef7afe23e40298c080766ba",
+  "joint_witness": "Solidity.Backend.Passes.AuditMemoryCall.Scope.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditMemoryCall.Scope",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.scope_source",
+      "signature_sha256": "aad90dfccd77a8aebfcdd5dbe7c0ac00b308d3340c1bbec7bde92381a3bf6de9",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.suffix_source",
+      "signature_sha256": "4b60d17ba257e5fc05a7b988d4a28b9b11cb486f7706c4f437c498623d5ee051",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.joined_source",
+      "signature_sha256": "352826be49bb1e68a814d4103a1dec76691497d8e9e5090bf9e5fe231c6a0905",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.shared",
+      "signature_sha256": "a5976f2f8e10a84de04b3c4cb22df7ea4cbb31dc7b25ce04d945f130f5577889",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.reached_cost",
+      "signature_sha256": "0cd486ef84ff2eca5d19e6e80c5ab70bcc12881d4e21bf2279b2d279a6872f38",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.suffix_cost",
+      "signature_sha256": "57aea326c62d3021a72072d15b053c2df74be7d5c5e24062db1a75d776cb6a1b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.costs",
+      "signature_sha256": "7395b710d4526764e20af353b857baf347275f0d8ee7a5b819a9b8ca02b3c19d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.private_frame_refused",
+      "signature_sha256": "6d189fb763d2d5a62b814091abc0283bb3cabbc3204b0bef1b758db5a829a947",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryCallScopeBoundary.Controls.final_some",
+      "signature_sha256": "fe97ae8447b06f3de677e55e0bf3216f40869003c500caa47a80de86c62b4781",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditMemoryCall.Scope.joint"
+    }
+  ],
+  "uncovered_private_names": [],
+  "aggregate_selected": 334,
+  "aggregate_remaining": 925,
+  "limits": "All nine selected original scoped-call rows checked, including one actual private kernel identity. Model source/certificate/mapped trace only; no new top-level scope recognition, external CALL/world, native ByteWorld, resource or full Source/G24 adequacy.",
+  "checked_private_names": [
+    "final_some"
+  ],
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.MemoryCallScopeControls.0.",
+  "private_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}
