@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.after_save": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.machine_self": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.numeric_self": [
+  "Quot.sound"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.root_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.run_self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.symbolic_self": [
+  "Quot.sound"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.value_self": [
+  "Quot.sound",
+  "propext"
+ ]
+}

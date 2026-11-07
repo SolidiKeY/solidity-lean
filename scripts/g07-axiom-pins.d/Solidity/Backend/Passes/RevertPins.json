@@ -1,0 +1,167 @@
+{
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.compilation_mapped_join_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.compilation_mapped_revert_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.compilation_triple_join_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.compilation_triple_revert_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.compilation_triple_revert_witness_left_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.joined_halt_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.joined_terminal_failure_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.revert_associations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.asserting_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.coarse_not_source_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.divergence_separate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.immediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.left_sources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.left_targets": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.middle_triple_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.middle_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.ordered_prefixes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.ordinary_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.panic_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.panic_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.panic_recognized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.panic_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.prefix_not_reverted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.recapture_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.recapture_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.recapture_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.shared_revert_maps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.skipped_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.source_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.stale_map": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.third_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.RevertControls.wrong_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.terminal_failure_errors_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

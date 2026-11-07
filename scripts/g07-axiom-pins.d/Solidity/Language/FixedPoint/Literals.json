@@ -1,0 +1,59 @@
+{
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.abiConst?_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.abiConst?_eq_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.explicitConst?_eq_none_iff": [
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.explicitRat?_mobile_route": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.litCommon?_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.litCommon?_solc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileConst?_trunc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileFx?_exact_of_digits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.mobileFx?_inRange": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Literals.lean:Solidity.Language.FixedPoint.Fx.ofLiteral?_isSome_iff_solc": [
+  "Quot.sound",
+  "propext"
+ ]
+}

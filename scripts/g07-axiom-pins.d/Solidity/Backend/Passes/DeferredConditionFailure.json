@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Passes/DeferredConditionFailure.lean:Solidity.Backend.Passes.DeferredConditionFailure.reached_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailure.lean:Solidity.Backend.Passes.DeferredConditionFailure.revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailure.lean:Solidity.Backend.Passes.DeferredConditionFailure.revert_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionFailure.lean:Solidity.Backend.Passes.DeferredConditionFailure.source_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

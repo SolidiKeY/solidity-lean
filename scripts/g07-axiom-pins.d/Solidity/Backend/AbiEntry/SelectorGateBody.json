@@ -1,0 +1,49 @@
+{
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.body_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.condition_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.miss_before_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.run_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.source_executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorGateBody.lean:Solidity.Backend.AbiEntry.SelectorGateBody.whole_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

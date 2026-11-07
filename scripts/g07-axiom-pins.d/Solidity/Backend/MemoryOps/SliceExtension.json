@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.alias_iff_wk": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.old_ne_fresh": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.sliceBounds_keeps": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.sliceElems_alloc": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceExtension.lean:Solidity.Backend.MemoryOps.sliceElems_keeps": [
+  "propext"
+ ]
+}

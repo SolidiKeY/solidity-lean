@@ -1,0 +1,13 @@
+memory.max=12884901888
+memory.swap.max=0
+Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)
+Lake version 5.0.0-src+797c613 (Lean version 4.24.0)
+✖ [2/2] Replaying Solidity.KeySort
+trace: .> LEAN_PATH=/workspace/solidity-lean/.lake/build/lib/lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --tstack=131072 /workspace/solidity-lean/Solidity/KeySort.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/KeySort.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/KeySort.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/KeySort.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/KeySort.setup.json --json
+error: permission denied (error code: 13)
+  file: //.cache
+Failed to save input mappings to the local artifact cache.
+Some required targets logged failures:
+- Solidity.KeySort
+error: build failed
+memory.peak=24719360

@@ -1,0 +1,36 @@
+{
+ "Solidity/Yul/Compilation/WhileWordExecution.lean:Solidity.Yul.Compilation.WhileWordExecution.all_prefixes_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WhileWordExecution.lean:Solidity.Yul.Compilation.WhileWordExecution.finite": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WhileWordExecution.lean:Solidity.Yul.Compilation.WhileWordExecution.lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WhileWordExecution.lean:Solidity.Yul.Compilation.WhileWordExecution.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WhileWordExecution.lean:Solidity.Yul.Compilation.WhileWordExecution.running_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WhileWordExecution.lean:Solidity.Yul.Compilation.WhileWordExecution.selected_parts": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WhileWordExecution.lean:Solidity.Yul.Compilation.WhileWordExecution.turn": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

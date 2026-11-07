@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/V08/WorldResetControls.lean:Solidity.Lowering.V08.WorldResetControls.initial_account": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldResetControls.lean:Solidity.Lowering.V08.WorldResetControls.reached_account": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldResetControls.lean:Solidity.Lowering.V08.WorldResetControls.slots": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldResetControls.lean:Solidity.Lowering.V08.WorldResetControls.source_read_after": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldResetControls.lean:Solidity.Lowering.V08.WorldResetControls.source_read_before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldResetControls.lean:Solidity.Lowering.V08.WorldResetControls.target_complete_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldResetControls.lean:Solidity.Lowering.V08.WorldResetControls.target_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldResetControls.lean:Solidity.Lowering.V08.WorldResetControls.wrong_dirty_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

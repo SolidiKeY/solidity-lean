@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h28-sol-20261104",
+  "slug": "type-grammar",
+  "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "branch": "codex/solidity-h28-sol-20261104/type-grammar",
+  "original_exclusive_writes": [
+    "Solidity/Frontend/TypeGrammarH28/**",
+    "tests/h28-sol/type-grammar/**",
+    "docs/feature-work/h28-type-grammar.md"
+  ],
+  "original_read_only_inputs": [
+    "Solidity/Frontend/Checked/Print.lean",
+    "Solidity/Frontend/Checked/Parser.lean",
+    "Solidity/Frontend/Checked/Check.lean",
+    "Solidity/Source/Syntax.lean"
+  ],
+  "original_scope_is_verbatim_in": "ORIGINAL-FROZEN-PROMPT.md",
+  "original_constraints": [
+    "Core dependency-free and intrinsic;Gate G0",
+    "No H16/H19/H25 Source edits;no frozen H22 Core ExtCall",
+    "No original statement/premise/exclusion/refusal/observation/budget weakening",
+    "No axiom/sorry/admit/unsafe/native_decide trust shortcut;no maxHeartbeats raise",
+    "SOL-QN resolution and SOL-CB constant evaluation excluded",
+    "Read-only array-length syntactic atoms;explicit dependencies",
+    "No operational admission/lowering,parser modification or whole-unit/expression uniqueness backfill"
+  ],
+  "later_authorities": {
+    "H82": "Statement-preserving proof-only/additive lemmas/defs/splits/import/doc fixes may touch any file;existing statement/dependency definition/interface/budget/actual axiom-set/exclusion changes require owner;frozen require H57 versioned pair.",
+    "H41": "No VM ship-cache.sh;verified pack for coordinator pull only.",
+    "retirement": "Human stop-and-handoff overrides implementation continuation. Preserve VM/branch/seals/goals;commit smallest safe preservation checkpoint;no new proof implementation;PAUSED requested,not complete.",
+    "push": "Only original branch if permitted by H71;H71 authorization text unavailable in current thread/repository search,so original no-push constraint retained.",
+    "H67": "G07 inventory reconciliation is a separate one-off job,not lane work. Current recut excludes all scripts/g07-axiom-pins.json and scripts/g07-axiom-pins.d changes."
+  },
+  "handoff_to": "solidity-sol2-20261104/numeric-literals",
+  "reserved_owners": [
+    "H16/Monetary.wide stays producer-owned",
+    "frozen Source/Core ExtCall unchanged",
+    "No Claude-owned source edit or message",
+    "No scope takeover before final stopped/head acknowledgment"
+  ],
+  "resources": {
+    "Lean": "serial LEAN_NUM_THREADS=1 and explicit -j1",
+    "memory_cap_bytes": 12884901888,
+    "swap": "zero child swap;no host swap observed",
+    "headroom_bytes": 4294967296,
+    "proof_budgets": "unchanged"
+  },
+  "proof_boundaries": [
+    "Finite local LengthAtom contracts remain explicit external facts for encountered length expressions.",
+    "Arbitrary expression LengthAtom support,whole-expression/whole-unit uniqueness and whole-compiler correctness are not established.",
+    "Unconditional raw type-yield uniqueness is false;inhabited counterexample retained.",
+    "External solc tests cover grammar acceptance/root-kind/source-span controls,not complete compiler AST equivalence."
+  ],
+  "historical_excluded_edit": "scripts/g07-axiom-pins.json:3554new records only;8154old records unchanged;6492Lean sources/checker unchanged;no actual axiom set or policy change",
+  "current_edit": "Docs/handoff only;no Lean source,statement,definition,axiom set,checker,policy or G07 inventory/fragment changes relative to20e492ee9."
+}

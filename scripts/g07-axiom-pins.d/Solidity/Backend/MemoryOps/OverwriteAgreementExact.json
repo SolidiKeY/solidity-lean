@@ -1,0 +1,43 @@
+{
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.BoolChildRepr.alias_transfer_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.BoolChildRepr.at_heap_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.BoolChildRepr.mixed_alias_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.BoolChildRepr.object_eq": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.boolTransfer_target_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.ExactAgreementControls.accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.ExactAgreementControls.mixed_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.ExactAgreementControls.rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean:Solidity.Backend.MemoryOps.overwriteSlice_target_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

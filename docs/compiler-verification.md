@@ -26,6 +26,8 @@ their common source/machine agreement. The selected path determines its
 explicit input and output state relation; `inFragP` and `compile_correct`
 describe the core path.
 
+Audit: [proof-coverage audit](audits/proof-coverage.md) (2026-11-06), findings F1–F6 on the headline compiler theorem, the compiled fragment and the machine's keccak model.
+
 ## Memory operations
 
 `Compiler.compile` selects one compiler for the whole program, trying the core,

@@ -1,0 +1,2 @@
+trust: 3714 sources, 285 inventoried implementation/recovery sites, 0 findings
+{"command": ["bash", "scripts/check-trust.sh"], "exit": 0, "seconds": 11.458694, "peak_child_rss_kib": 349044, "user_seconds": 10.765658, "system_seconds": 0.701705}

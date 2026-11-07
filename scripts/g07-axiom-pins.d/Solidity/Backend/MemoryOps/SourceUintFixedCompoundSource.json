@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean:Solidity.Backend.MemoryOps.source_uint_fixed_add_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.compound_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.compound_add_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedCompoundSource.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.compound_add_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

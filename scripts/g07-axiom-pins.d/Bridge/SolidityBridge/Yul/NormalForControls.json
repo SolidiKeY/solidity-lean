@@ -1,0 +1,17 @@
+{
+ "Bridge/SolidityBridge/Yul/NormalForControls.lean:SolidityBridge.Yul.NormalFor.Controls.model_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalForControls.lean:SolidityBridge.Yul.NormalFor.Controls.source_seven": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalForControls.lean:SolidityBridge.Yul.NormalFor.Controls.target_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

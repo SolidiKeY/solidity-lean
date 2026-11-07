@@ -1,0 +1,158 @@
+{
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_fault_tail_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_mapped_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_mapped_fault_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_mapped_join_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_mapped_reflect_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_triple_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_triple_fault_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_triple_join_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.compilation_triple_reflect_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.immediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.initial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.last_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.left_sources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.left_targets": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.middle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.middle_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.ordered_prefixes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.reached_maps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.revert_before_spin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.shared_prefix_maps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.source_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.DivergenceControls.third": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.joined_diverge_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.Spin.diverges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.Spin.existing_program": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.Spin.fault_all_tails": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.Spin.iter": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.Spin.memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.Spin.unreachable_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.terminal_reflection_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DivergencePins.lean:Solidity.Backend.Passes.triple_fault_associations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

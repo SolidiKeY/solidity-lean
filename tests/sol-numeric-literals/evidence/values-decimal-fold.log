@@ -1,0 +1,5 @@
+ERROR 192:7 'change' tactic failed, pattern
+  List.foldl (fun acc b => 10 * acc + (b.toNat - 48)) (b.toNat - 48) ds = ?m.241
+is not definitionally equal to target
+  digitsVal (b :: ds) = 10 ^ ds.length * (b.toNat - 48) + digitsVal ds
+diag: 1 errors

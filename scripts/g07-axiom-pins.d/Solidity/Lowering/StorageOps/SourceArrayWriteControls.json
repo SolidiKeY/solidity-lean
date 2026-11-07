@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.fresh_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.retained_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteControls.target_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

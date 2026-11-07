@@ -699,7 +699,7 @@ theorem step_mem {x : Nat} : ∀ {i : Instr} {m m' : Machine} {k : Nat},
   | .sstore, _, _, _, _, h | .mload _, _, _, _, _, h | .mloadAt, _, _, _, _, h
   | .jump _, _, _, _, _, h | .jumpi _, _, _, _, _, h | .call, _, _, _, _, h
   | .revert, _, _, _, _, h | .xor, _, _, _, _, h | .not, _, _, _, _, h | .shl, _, _, _, _, h
-  | .shr, _, _, _, _, h | .exp, _, _, _, _, h | .caller, _, _, _, _, h
+  | .shr, _, _, _, _, h | .exp, _, _, _, _, h | .sar, _, _, _, _, h | .caller, _, _, _, _, h
   | .callvalue, _, _, _, _, h | .timestamp, _, _, _, _, h | .selfbalance, _, _, _, _, h
   | .address, _, _, _, _, h => by
     simp only [Instr.step, Machine.next] at h <;>

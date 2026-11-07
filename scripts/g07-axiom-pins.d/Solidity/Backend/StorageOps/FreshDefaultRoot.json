@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/FreshDefaultRoot.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRoot.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.outside_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

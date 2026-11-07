@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Aggregates/G18SourceMapping.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.copy_phases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMapping.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMapping.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMapping.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

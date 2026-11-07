@@ -1,0 +1,17 @@
+{
+ "Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean:SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.dup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean:SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean:SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1.swap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

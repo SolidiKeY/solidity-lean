@@ -1,0 +1,6 @@
+{
+ "Bridge/SolidityBridge/Yul/ForSource.lean:SolidityBridge.Yul.ForSource.source_loop": [
+  "Quot.sound",
+  "propext"
+ ]
+}

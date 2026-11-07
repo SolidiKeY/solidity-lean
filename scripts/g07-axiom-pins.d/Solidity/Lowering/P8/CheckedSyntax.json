@@ -1,0 +1,18 @@
+{
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.check_sound": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.Controls.actual_source_parses": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.produce_accepted": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.rawB_iff": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.units_only_resolver_obstruction": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedSyntax.lean:Solidity.Lowering.P8.CheckedSyntax.unrecorded_settings_obstruction": []
+}

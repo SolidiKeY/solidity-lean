@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/NumericRetainedCycleControls.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.Controls.collision_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycleControls.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.Controls.executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycleControls.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.Controls.failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycleControls.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.Controls.headers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycleControls.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycleControls.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.Controls.paired_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycleControls.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.Controls.uncleared_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

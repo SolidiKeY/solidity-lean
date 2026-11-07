@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/Yul/ScopedForPrefixes.lean:SolidityBridge.Yul.ScopedForPrefixes.loop_no_finite_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForPrefixes.lean:SolidityBridge.Yul.ScopedForPrefixes.macro_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

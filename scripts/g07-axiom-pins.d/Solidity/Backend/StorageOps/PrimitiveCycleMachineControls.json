@@ -1,0 +1,23 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachineControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.Controls.arbitrary_headers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachineControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.Controls.context_preserved": [],
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachineControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.Controls.dirty_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachineControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.Controls.fullword": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleMachineControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleMachine.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.full_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean:Solidity.Lowering.StorageOps.SourceCaptureReadbackControls.slice_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

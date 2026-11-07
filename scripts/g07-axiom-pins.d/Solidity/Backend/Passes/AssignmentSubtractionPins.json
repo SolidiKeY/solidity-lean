@@ -1,0 +1,73 @@
+{
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.corrupted_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.different_pipelines": [],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.prefix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.reversed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.short_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.source_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.stale_rhs_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.Controls.wrong_order_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentSubtractionPins.lean:Solidity.Backend.Passes.AssignmentSubtractionPass.reached_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

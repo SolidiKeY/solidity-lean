@@ -1,0 +1,235 @@
+import Lean
+import H62AbiWorld.BasicWitnesses
+import H62AbiWorld.CodecWitnesses
+import H62AbiWorld.ControlWitnesses
+import H62AbiWorld.RepresentationWitnesses
+import H62AbiWorld.WindowWitnesses
+
+/-! Independent syntax-spine traversal, deliberately separate from the
+forallTelescope-based hypotheses% implementation. Every witness type must
+match the full package of its original elaborated binder types, and the
+complete original type plus every binder is exported for the fidelity census.
+This is audit tooling; no intrinsic core module imports it. -/
+open Lean Meta Elab Term Command
+
+namespace H62.AbiWorld.Fidelity
+private def spinePackage : Nat → Expr → MetaM Expr
+  | 0, _ => throwError "fidelity traversal budget exhausted"
+  | fuel+1, .forallE name domain body binderInfo =>
+      withLocalDecl name binderInfo domain fun fvar => do
+        let nested ← spinePackage fuel (body.instantiate1 fvar)
+        mkAppM ``Exists #[← mkLambdaFVars #[fvar] nested]
+  | _+1, _ => pure (Lean.mkConst ``True)
+
+elab "#audit_fidelity " original:ident " against " witness:ident : command => do
+  liftTermElabM do
+    let originalName ← realizeGlobalConstNoOverloadWithInfo original
+    let witnessName ← realizeGlobalConstNoOverloadWithInfo witness
+    let originalInfo ← getConstInfo originalName
+    let witnessInfo ← getConstInfo witnessName
+    unless originalInfo matches .thmInfo _ do throwError "original is not a theorem"
+    unless witnessInfo matches .thmInfo _ do throwError "witness is not a theorem"
+    let originalType ← inferType (← mkConstWithFreshMVarLevels originalName)
+    let witnessType ← inferType (← mkConstWithFreshMVarLevels witnessName)
+    let expected ← spinePackage 256 originalType
+    unless ← isDefEq expected witnessType do
+      throwError "witness type differs from original full-binder package"
+    let originalText := (← ppExpr originalType).pretty
+    let witnessText := (← ppExpr witnessType).pretty
+    forallTelescope originalType fun binders _ => do
+      let mut summaries : Array Json := #[]
+      for binder in binders do
+        let declaration ← binder.fvarId!.getDecl
+        summaries := summaries.push (Json.mkObj [
+          ("name",toJson declaration.userName.toString),
+          ("type",toJson (← ppExpr declaration.type).pretty),
+          ("proposition",toJson (← isProp declaration.type)),
+          ("head_constant",toJson (declaration.type.getAppFn.constName?.map Name.toString))])
+      logInfo m!"FIDELITY {(Json.mkObj [
+        ("original",toJson originalName.toString),
+        ("witness",toJson witnessName.toString),
+        ("matched",toJson true),
+        ("binder_count",toJson binders.size),
+        ("binders",Json.arr summaries),
+        ("original_type",toJson originalText),
+        ("witness_type",toJson witnessText)]).compress}"
+end H62.AbiWorld.Fidelity
+
+
+#audit_fidelity Solidity.Backend.AbiWorld.word_length against H62.AbiWorld.CodecWitnesses.word_length_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.padded_length against H62.AbiWorld.CodecWitnesses.padded_length_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.padded_alignment against H62.AbiWorld.CodecWitnesses.padded_alignment_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.padded_bounds against H62.AbiWorld.CodecWitnesses.padded_bounds_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.padded_payload against H62.AbiWorld.CodecWitnesses.padded_payload_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.padded_suffix against H62.AbiWorld.CodecWitnesses.padded_suffix_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.error_tail against H62.AbiWorld.CodecWitnesses.error_tail_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.error_offset against H62.AbiWorld.CodecWitnesses.error_offset_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.error_length_word against H62.AbiWorld.CodecWitnesses.error_length_word_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.error_payload against H62.AbiWorld.CodecWitnesses.error_payload_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.packet_prefix against H62.AbiWorld.CodecWitnesses.packet_prefix_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.packet_byte against H62.AbiWorld.CodecWitnesses.packet_byte_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.padded_injective against H62.AbiWorld.CodecWitnesses.padded_injective_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.error_body_alignment against H62.AbiWorld.CodecWitnesses.error_body_alignment_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.numeral_byte against H62.AbiWorld.CodecWitnesses.numeral_byte_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.numeral_mod against H62.AbiWorld.CodecWitnesses.numeral_mod_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.word_eq_numeral against H62.AbiWorld.CodecWitnesses.word_eq_numeral_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.read_word against H62.AbiWorld.CodecWitnesses.read_word_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.error_roundtrip against H62.AbiWorld.CodecWitnesses.error_roundtrip_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindow.unpadded against H62.AbiWorld.WindowWitnesses.ErrorReadWindow_unpadded_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindow.source_prefix against H62.AbiWorld.WindowWitnesses.ErrorReadWindow_source_prefix_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindow.prefix_readback against H62.AbiWorld.WindowWitnesses.ErrorReadWindow_prefix_readback_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindow.emitted against H62.AbiWorld.WindowWitnesses.ErrorReadWindow_emitted_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.fits_messages against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_fits_messages_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.populated against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_populated_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.older_byte against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_older_byte_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.lengths against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_lengths_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.dirty_padding against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_dirty_padding_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.dirty_differs against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_dirty_differs_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.truncated against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_truncated_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.missing_length against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_missing_length_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.suffix_fills_missing against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_suffix_fills_missing_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.stale_reason_rejected against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_stale_reason_rejected_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.wrong_selector against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_wrong_selector_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.wrong_kind against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_wrong_kind_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.full_packet_differs against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_full_packet_differs_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.exact_capacity against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_exact_capacity_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorReadWindowControls.one_past_capacity against H62.AbiWorld.ControlWitnesses.ErrorReadWindowControls_one_past_capacity_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindow.gap_readback against H62.AbiWorld.WindowWitnesses.ErrorOffsetWindow_gap_readback_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindow.zero_offset against H62.AbiWorld.WindowWitnesses.ErrorOffsetWindow_zero_offset_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindow.emitted against H62.AbiWorld.WindowWitnesses.ErrorOffsetWindow_emitted_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.fits_all against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_fits_all_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.populated against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_populated_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.offsets against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_offsets_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.gap_content_ignored against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_gap_content_ignored_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.gap_bytes_retained against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_gap_bytes_retained_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.wrong_offset against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_wrong_offset_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.truncated_head against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_truncated_head_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.missing_length against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_missing_length_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.truncated_payload against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_truncated_payload_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.zero_alias against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_zero_alias_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.zero_not_reason against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_zero_not_reason_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.reordered_payload against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_reordered_payload_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.older_byte against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_older_byte_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.exact_capacity against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_exact_capacity_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ErrorOffsetWindowControls.one_past_capacity against H62.AbiWorld.ControlWitnesses.ErrorOffsetWindowControls_one_past_capacity_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicReadWindow.decode against H62.AbiWorld.WindowWitnesses.PanicReadWindow_decode_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicReadWindow.error_reject against H62.AbiWorld.WindowWitnesses.PanicReadWindow_error_reject_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicReadWindow.emitted against H62.AbiWorld.WindowWitnesses.PanicReadWindow_emitted_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrame.call_data against H62.AbiWorld.BasicWitnesses.PanicCallFrame_call_data_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrame.selected against H62.AbiWorld.RepresentationWitnesses.Panic.PanicCallFrame_selected_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.application against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_application_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.zero_receiver against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_zero_receiver_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.truncated_not_panic against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_truncated_not_panic_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.full_word_not_byte against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_full_word_not_byte_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.wrong_selector_not_panic against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_wrong_selector_not_panic_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.overflow_wraps against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_overflow_wraps_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.overflow_not_natural against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_overflow_not_natural_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.code_bounds against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_code_bounds_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.emitter_capacity against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_emitter_capacity_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PanicCallFrameControls.emitted_member against H62.AbiWorld.ControlWitnesses.PanicCallFrameControls_emitted_member_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.LibraryResultPacket.word_bytes against H62.AbiWorld.WindowWitnesses.LibraryResultPacket_word_bytes_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.LibraryResultPacket.encoded_values against H62.AbiWorld.WindowWitnesses.LibraryResultPacket_encoded_values_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.LibraryResultPacket.length against H62.AbiWorld.WindowWitnesses.LibraryResultPacket_length_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.LibraryResultPacket.marker against H62.AbiWorld.WindowWitnesses.LibraryResultPacket_marker_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.LibraryResultPacket.offset against H62.AbiWorld.WindowWitnesses.LibraryResultPacket_offset_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.LibraryResultPacket.payload against H62.AbiWorld.WindowWitnesses.LibraryResultPacket_payload_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.bytes_word against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_bytes_word_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.load_word against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_load_word_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.static_go against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_static_go_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.encoded_values against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_encoded_values_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.byte_length against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_byte_length_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.wordAt_window against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_wordAt_window_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.wordAt_index against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_wordAt_index_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.words_readback against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_words_readback_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.decode_transport against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_decode_transport_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.truncated against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_truncated_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransport.emitted against H62.AbiWorld.WindowWitnesses.ReturnWordTransport_emitted_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransportControls.read_three against H62.AbiWorld.ControlWitnesses.ReturnWordTransportControls_read_three_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransportControls.bind_three against H62.AbiWorld.ControlWitnesses.ReturnWordTransportControls_bind_three_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransportControls.truncated_refused against H62.AbiWorld.ControlWitnesses.ReturnWordTransportControls_truncated_refused_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransportControls.zero_demand against H62.AbiWorld.ControlWitnesses.ReturnWordTransportControls_zero_demand_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransportControls.one_demand against H62.AbiWorld.ControlWitnesses.ReturnWordTransportControls_one_demand_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransportControls.too_many_demanded against H62.AbiWorld.ControlWitnesses.ReturnWordTransportControls_too_many_demanded_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransportControls.wrong_order against H62.AbiWorld.ControlWitnesses.ReturnWordTransportControls_wrong_order_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.ReturnWordTransportControls.emitted_application against H62.AbiWorld.ControlWitnesses.ReturnWordTransportControls_emitted_application_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.take_split against H62.AbiWorld.BasicWitnesses.PacketPrefix_take_split_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.take_writes against H62.AbiWorld.BasicWitnesses.PacketPrefix_take_writes_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.boundary against H62.AbiWorld.BasicWitnesses.PacketPrefix_boundary_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.boundary_bytes against H62.AbiWorld.BasicWitnesses.PacketPrefix_boundary_bytes_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.take_terminal against H62.AbiWorld.BasicWitnesses.PacketPrefix_take_terminal_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.checked_writes_tail against H62.AbiWorld.BasicWitnesses.PacketPrefix_checked_writes_tail_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.length_push against H62.AbiWorld.BasicWitnesses.PacketPrefix_length_push_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.offset_push against H62.AbiWorld.BasicWitnesses.PacketPrefix_offset_push_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.complete against H62.AbiWorld.BasicWitnesses.PacketPrefix_complete_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.byte_push against H62.AbiWorld.BasicWitnesses.PacketPrefix_byte_push_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.byte_offset_push against H62.AbiWorld.BasicWitnesses.PacketPrefix_byte_offset_push_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefix.after_terminal against H62.AbiWorld.BasicWitnesses.PacketPrefix_after_terminal_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.payload_length against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_payload_length_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.fits against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_fits_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.boundary_applied against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_boundary_applied_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.byte_applied against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_byte_applied_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.address_applied against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_address_applied_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.before_terminal against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_before_terminal_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.not_early_success against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_not_early_success_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.terminal_modes against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_terminal_modes_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.pending_byte_unchanged against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_pending_byte_unchanged_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.byte_zero_written against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_byte_zero_written_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.crowded_refused against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_crowded_refused_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.PacketPrefixControls.unsupported_tail_unreachable against H62.AbiWorld.ControlWitnesses.PacketPrefixControls_unsupported_tail_unreachable_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytes.word_encoding against H62.AbiWorld.BasicWitnesses.CallerWordBytes_word_encoding_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytes.recovered against H62.AbiWorld.RepresentationWitnesses.Caller.CallerWordBytes_recovered_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytes.raw_revert against H62.AbiWorld.BasicWitnesses.CallerWordBytes_raw_revert_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytes.typed against H62.AbiWorld.RepresentationWitnesses.Caller.CallerWordBytes_typed_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytes.outside_byte against H62.AbiWorld.BasicWitnesses.CallerWordBytes_outside_byte_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.represented against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_represented_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.numeric_load against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_numeric_load_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.loaded_repr against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_loaded_repr_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.image against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_image_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.typed_application against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_typed_application_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.loaded_then_restored against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_loaded_then_restored_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.wrong_symbolic against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_wrong_symbolic_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.old_byte against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_old_byte_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.word300 against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_word300_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CallerWordBytesControls.wrong_low_byte against H62.AbiWorld.ControlWitnesses.CallerWordBytesControls_wrong_low_byte_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.expanded against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_expanded_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.compiles against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_compiles_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.item_bound against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_item_bound_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.offset_bound against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_offset_bound_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.tag_bound against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_tag_bound_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.item_count against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_item_count_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.compiles_bounded against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_compiles_bounded_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.condition_ref against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_condition_ref_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifact.conditional_target against H62.AbiWorld.BasicWitnesses.CheckedAddArtifact_conditional_target_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifactControls.at_zero against H62.AbiWorld.ControlWitnesses.CheckedAddArtifactControls_at_zero_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifactControls.relocated against H62.AbiWorld.ControlWitnesses.CheckedAddArtifactControls_relocated_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifactControls.witnessed against H62.AbiWorld.ControlWitnesses.CheckedAddArtifactControls_witnessed_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifactControls.populated_artifact against H62.AbiWorld.ControlWitnesses.CheckedAddArtifactControls_populated_artifact_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.CheckedAddArtifactControls.wrong_label against H62.AbiWorld.ControlWitnesses.CheckedAddArtifactControls_wrong_label_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWord.represented_counter against H62.AbiWorld.RepresentationWitnesses.Native.NativeParentWord_represented_counter_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWord.encoded against H62.AbiWorld.BasicWitnesses.NativeParentWord_encoded_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWord.readback against H62.AbiWorld.BasicWitnesses.NativeParentWord_readback_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWord.native_parent against H62.AbiWorld.RepresentationWitnesses.Native.NativeParentWord_native_parent_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWordControls.applied against H62.AbiWorld.ControlWitnesses.NativeParentWordControls_applied_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWordControls.initial_nonempty against H62.AbiWorld.ControlWitnesses.NativeParentWordControls_initial_nonempty_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWordControls.wrong_child_word against H62.AbiWorld.ControlWitnesses.NativeParentWordControls_wrong_child_word_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWordControls.wrong_initial_word against H62.AbiWorld.ControlWitnesses.NativeParentWordControls_wrong_initial_word_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWordControls.truncated_parent against H62.AbiWorld.ControlWitnesses.NativeParentWordControls_truncated_parent_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWordControls.suffix_readback against H62.AbiWorld.ControlWitnesses.NativeParentWordControls_suffix_readback_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.NativeParentWordControls.slot_is_not_value against H62.AbiWorld.ControlWitnesses.NativeParentWordControls_slot_is_not_value_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWords.layout against H62.AbiWorld.BasicWitnesses.MutatingEntryWords_layout_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWords.readback against H62.AbiWorld.BasicWitnesses.MutatingEntryWords_readback_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWords.allocated_read against H62.AbiWorld.RepresentationWitnesses.Native.MutatingEntryWords_allocated_read_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWords.represented_element against H62.AbiWorld.RepresentationWitnesses.Native.MutatingEntryWords_represented_element_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWords.observed_activation against H62.AbiWorld.RepresentationWitnesses.Native.MutatingEntryWords_observed_activation_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWordsControls.applied against H62.AbiWorld.ControlWitnesses.MutatingEntryWordsControls_applied_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWordsControls.wrong_order against H62.AbiWorld.ControlWitnesses.MutatingEntryWordsControls_wrong_order_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWordsControls.stale_array against H62.AbiWorld.ControlWitnesses.MutatingEntryWordsControls_stale_array_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWordsControls.child_is_not_mutated_element against H62.AbiWorld.ControlWitnesses.MutatingEntryWordsControls_child_is_not_mutated_element_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWordsControls.no_old_heap_equality against H62.AbiWorld.ControlWitnesses.MutatingEntryWordsControls_no_old_heap_equality_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingEntryWordsControls.truncated against H62.AbiWorld.ControlWitnesses.MutatingEntryWordsControls_truncated_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingWritePhysical.write_prefix against H62.AbiWorld.RepresentationWitnesses.Native.MutatingWritePhysical_write_prefix_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.initial against H62.AbiWorld.ControlWitnesses.MutatingWritePhysicalControls_initial_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.applied against H62.AbiWorld.ControlWitnesses.MutatingWritePhysicalControls_applied_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.wrong_scale against H62.AbiWorld.ControlWitnesses.MutatingWritePhysicalControls_wrong_scale_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.stale_bytes against H62.AbiWorld.ControlWitnesses.MutatingWritePhysicalControls_stale_bytes_hypotheses
+#audit_fidelity Solidity.Backend.AbiWorld.MutatingWritePhysicalControls.word_fit_is_not_byte_fit against H62.AbiWorld.ControlWitnesses.MutatingWritePhysicalControls_word_fit_is_not_byte_fit_hypotheses

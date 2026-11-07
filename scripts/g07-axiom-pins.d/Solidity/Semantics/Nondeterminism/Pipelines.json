@@ -1,0 +1,38 @@
+{
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.circular_not_confined": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.circular_refuted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.circular_rescues": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.circularHonest_confined": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.confinedToy_refutes": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.confinedToy_wrong": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.envToy_no_choice": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.orderToy_not_both": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.Confined.nonVacuous": [],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.Confined.refutes": [],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsBoth_iff_pair": [],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsBoth_iff_settings": [
+  "Quot.sound"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.NonVacuous.refutes": [],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.soundAtOracle_iff_fixed": [
+  "Quot.sound",
+  "propext"
+ ]
+}

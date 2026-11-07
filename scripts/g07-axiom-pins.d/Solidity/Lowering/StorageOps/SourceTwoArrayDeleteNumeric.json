@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteNumeric.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

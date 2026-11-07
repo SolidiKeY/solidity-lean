@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.Controls.empty_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.Controls.fuel_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.Controls.full_target_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.Controls.live_alias_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.Controls.readbacks_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.Controls.wrong_extent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

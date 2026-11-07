@@ -1,0 +1,19 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.boundary_byte_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.byte_truncation": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.checked_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.initial_stack_overflow": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStoreControls.lean:Solidity.Backend.MemoryOps.Physical.ByteStoreControls.overlap_breaks_frame": [
+  "Quot.sound",
+  "propext"
+ ]
+}

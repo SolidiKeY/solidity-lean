@@ -1,0 +1,146 @@
+{
+  "fixtures": [
+    {
+      "output": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "outputSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "compiler": {
+        "version": "0.8.38+commit.1835d247.Emscripten.clang",
+        "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+      },
+      "sourceAnchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "producerWrapperGap": null
+    },
+    {
+      "output": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+      "outputSha256": "ed4031b652bd83ed228bdac24fa8b7b2722f281d9925b95096c8030fc83fb7d5",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "sourceAnchors": [
+        {
+          "name": "Loops.sol",
+          "source": "tests/solc/Loops.sol",
+          "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+        }
+      ],
+      "producerWrapperGap": null
+    },
+    {
+      "output": "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+      "outputSha256": "d4dc2336f0b85c422ffc7f2ba98481dced7827a15476c1f0d42949392b945191",
+      "compiler": {
+        "version": "0.8.38+commit.1835d247.Emscripten.clang",
+        "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+      },
+      "sourceAnchors": [
+        {
+          "name": "lib/Math.sol",
+          "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "lib/Errors.sol",
+          "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "app/Main.sol",
+          "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        }
+      ],
+      "producerWrapperGap": null
+    },
+    {
+      "output": "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+      "outputSha256": "e2f972c4b22e1e9c65caccfaaa5e09bbf9c38d97f75910daf5fa9c37954d0d0c",
+      "compiler": {
+        "version": "0.8.38+commit.1835d247.Emscripten.clang",
+        "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+      },
+      "sourceAnchors": [
+        {
+          "name": "SourceAdmission.sol",
+          "source": "tests/solc/SourceAdmission.sol",
+          "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+        }
+      ],
+      "producerWrapperGap": null
+    },
+    {
+      "output": "tests/directruntime-20261104/shared-translator/fresh/SliceReferenceCopies.raw.json",
+      "outputSha256": "c3be5a595c2a55df51a0674206df8a8a5854f7890611ab06beb45cc7865c1733",
+      "compiler": {
+        "version": "0.8.38+commit.1835d247.Emscripten.clang",
+        "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+      },
+      "sourceAnchors": [
+        {
+          "name": "SliceReferenceCopies.sol",
+          "source": "tests/solc/SliceReferenceCopies.sol",
+          "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+        }
+      ],
+      "producerWrapperGap": null
+    },
+    {
+      "output": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "outputSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "sourceAnchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "producerWrapperGap": null
+    },
+    {
+      "output": "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+      "outputSha256": "31be58f4442d8ca027df3ec9b719bfc0427729092768c47ed41c272e44a4d1c0",
+      "compiler": {
+        "version": "0.8.38+commit.1835d247.Emscripten.clang",
+        "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+      },
+      "sourceAnchors": [
+        {
+          "name": "Group07.sol",
+          "source": "tests/solc/Group07.sol",
+          "sourceSha256": "f302d03b7bf944bd629cd4ce9444941a7d0179132509bcc08e4dd68da6d703ce"
+        }
+      ],
+      "producerWrapperGap": null
+    },
+    {
+      "output": "tests/directruntime-20261104/shared-translator/fresh/TransientSource.raw.json",
+      "outputSha256": "e458cbf9d08bd3342e8efcf4b646469b1f1a374b947872e8a8fd3d3298375843",
+      "compiler": {
+        "version": "0.8.38+commit.1835d247.Emscripten.clang",
+        "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+      },
+      "sourceAnchors": [
+        {
+          "name": "TransientSource.sol",
+          "source": "tests/solc/TransientSource.sol",
+          "sourceSha256": "c08a560914bff75f77891ff2074b9c4edd778e63df93a2db9b703182f84beb3e"
+        }
+      ],
+      "producerWrapperGap": null
+    }
+  ],
+  "boundary": "Actual pinned compiler executions; no source/intrinsic/backend preservation theorem."
+}

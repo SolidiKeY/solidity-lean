@@ -1,0 +1,6 @@
+8d268f148e2110d772fd8c7407964d01ee879e6d70e1f9a84409da602cf8ff30  tests/h62/item2/audit-bytecode-selection/handoff/PROVENANCE.md
+f91fb0deb84dbac4e6ff715da798b2b7f99eaf7f4a919f0e0abebb3d5497bf27  tests/h62/item2/audit-bytecode-selection/handoff/coordinator-updates.txt
+ab5b9aa3ec27a1b1cfff60ce53d04476643d0b3f83bb7a9947e6d7101b8c925e  tests/h62/item2/audit-bytecode-selection/handoff/original-rendered-prompt.txt
+d2b4c540e8a2285aa3f8a2546a7abf1e9a4a42932d980671310a524af2e7ca71  tests/h62/item2/audit-bytecode-selection/handoff/original-work-backfill-queue.md
+27c6c2424b259c9a37e3ab1e5bc6f598f3314eb784d69deee4de341afdffc963  tests/h62/item2/audit-bytecode-selection/handoff/remaining-queue.json
+1ec3563dd2f5b02e85e15dcd872478074dddf8e7a53a391bf5c678a0e9801ff8  tests/h62/item2/audit-bytecode-selection/handoff/scope-manifest.json

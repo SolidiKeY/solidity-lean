@@ -1,0 +1,100 @@
+{
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.FixTy.subsumes_inRange": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.implicit_int_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.ItemsOK.resolved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.Q.toFixedExplicit?_of_toFixed?": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.resolve_iff": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.Resolves.unique": [
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.StmtD.locals_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.bareReturn_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.clashing_illFormed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.counter_wellFormed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.diamond_linearize": [],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.elemType_decode_operand": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.exprCoverage_operand": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.exprCoverage_total": [],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.exprCoverage_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.gasleft_untyped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.ifaceBody_illFormed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.msgValue_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.sameSig_illFormed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.shlTooBig_illTyped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.tooBig_illTyped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/TypingExamples.lean:Solidity.Source.TypingExamples.twoCtors_illFormed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

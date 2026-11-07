@@ -1,0 +1,38 @@
+[
+  {
+    "id": "DRA-OWNER-1",
+    "sources": [
+      "frozen assignment sections 1/4",
+      "DR-A..D reservation audit on coordinator host"
+    ],
+    "question": "Which authoritative mapping should the coverage ledger use for backend owners? The A dispatch names B, C and CR but supplies no backend reservation rows; this VM has no coordinator receipts.",
+    "options": [
+      "Relay reservation-audit rows: record exact worker ownership.",
+      "Relay existing producer/module ownership map: record those owners."
+    ],
+    "status": "resolved by coordinator H30: CR Admission/P8; V11 MemoryOps; V09 Passes; VY5 H16 Source; V08 Lowering/V08; V16 Aggregates/Roadmap; DR-D native/browser scripts"
+  },
+  {
+    "id": "DRA-ENV-1",
+    "sources": [
+      "executor unavailable",
+      "coordinator H30 reattachment"
+    ],
+    "question": "Restore original executor preserving checkout and uncommitted work.",
+    "status": "resolved: same executor reattached; branch/head and uncommitted Intrinsic verified"
+  },
+  {
+    "id": "DR-A-META",
+    "sources": [
+      "Memory.Reader strict typeIdentifier/tryCall requirements",
+      "scripts/solc-ast.mjs existing metadata trimming and builtin normalization",
+      "evidence/adoption-8495/composed-compilation.json"
+    ],
+    "question": "Which producer-owned input contract should CR and DR-D adopt for the canonical executableReader, given that existing normalized fixtures omit required typeIdentifier/tryCall fields? Both choices must retain existing builtin-ID normalization and loop annotations.",
+    "options": [
+      "Retain required compiler metadata with existing normalization: CR/D migrate their producer paths and compatibility fixtures to this explicit input contract.",
+      "Provide an owner-reviewed checked compatibility adapter: CR/D validate equivalent required metadata for normalized fixtures under an explicit adapter contract."
+    ],
+    "status": "resolved by human H68: option 1; retain required typeIdentifier/tryCall metadata, preserve normalization and loop annotations, migrate compatibility fixtures"
+  }
+]

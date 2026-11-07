@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/Aggregates/G18StorageClient.lean:Solidity.Backend.Aggregates.StorageClient.initial_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18StorageClient.lean:Solidity.Backend.Aggregates.StorageClient.initial_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18StorageClient.lean:Solidity.Backend.Aggregates.StorageClient.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18StorageClient.lean:Solidity.Backend.Aggregates.StorageClient.selected_apart": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18StorageClient.lean:Solidity.Backend.Aggregates.StorageClient.updated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

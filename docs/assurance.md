@@ -106,13 +106,20 @@ source and target reversion, and its theorems in the axiom gate):
 | M15 | `delete xs[i]` (a default write) and `delete xs` (rebinding to a fresh empty array) |
 | M16–M18 | the five compound operators, standalone and captured `++`/`--` on elements and locals (`i = xs[i]++` uses the old index) |
 | M20–M22 | primitive struct fields: reads, writes, aliases, mixed struct/array ownership |
-| M23 | primitive-member struct defaults and constructors, allocating literal rebinding |
+| M23 | primitive-member construction and certified finite nonrecursive struct defaults/literals with reference members; allocating rebinding in the first memory path |
 | M24–M25 | field deletion, compound updates and bumps on fields; whole-local struct deletion (allocating) |
 | M26 | `T[] memory xs;` defaults |
 | M27–M28 | typed paths through reference-valued struct fields: nested reads, lengths, child aliases, direct primitive writes, deletion, compound updates |
 | M29 | assigning an existing reference to a struct member (RHS before the parent path; no copy) |
-| M30 | deleting a reference-valued member to a fresh primitive array or primitive-member struct |
+| M30 | deleting a reference-valued member to a fresh primitive array or certified finite struct default |
 | M31 | storage-root to memory copies of primitive-member structs, declarations and allocating rebinding |
+
+The finite reference-bearing defaults/literals use the first memory compiler
+path, with certified child allocation, cursor/capacity, alias preservation,
+separation and the zeroed free region. They do not extend the separate
+reference-array/object or memory-to-storage copy paths. Source struct admission,
+recursive graph copying and solc physical-address agreement remain outside this
+result; see [the path-specific compiler boundaries](compiler-verification.md).
 
 **Rules learned.**  Open the public premises with `Compilation.memory_input`
 instead of normalizing the whole compiler result (that ran past the

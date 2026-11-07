@@ -1,0 +1,134 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "Unsigned maximum overflow prototypes and negative control only; not complete arithmetic/family or nine-family coverage.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+  "inventory_sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/cache-bootstrap/manifest.json",
+  "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec",
+  "cache_root": "/workspace/h28-runtime/prepared-base-6f3eedf0",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "overflow.compound-sub-helper-max",
+      "kind": "mutant",
+      "family": "overflow",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "new": "  let _ := hop\n  .app2 (.binop .sub (BinOp.compound_accepts (op := .sub) rfl hp)) a b",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/OverflowBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/OverflowSubtractKill.lean",
+      "oracle_sha256": "c7af8a42a3a9a6c59c9c41ff31acc712e2e58c76626718e0b01b879e90850808",
+      "witness_sha256": "5ae5c5822db6a0199dc463055692ccaa440734f81113522de84b78a60a494fa3",
+      "oracle_declarations": [
+        "H28.OverflowBaseline.source_link",
+        "H28.OverflowBaseline.input_inhabited",
+        "H28.OverflowBaseline.overflowing_run"
+      ],
+      "witness_declarations": [
+        "H28.OverflowSubtractKill.source_link",
+        "H28.OverflowSubtractKill.input_inhabited",
+        "H28.OverflowSubtractKill.checked_kill",
+        "H28.OverflowSubtractKill.typed_landing"
+      ],
+      "source_symbol": "Tms.Term.binopC",
+      "constructor_id": "Tms.Term.binopC",
+      "mutant_sha256": "5b1f6dc573ab457fc981dea30031915a77715da0d8f3d6f7a7e72d96cc7cb045",
+      "oracle_signature_sha256": {
+        "H28.OverflowBaseline.source_link": "5bf1cd788a4a4642c720cacf517f85cdcfbc74d4e3ee476c3a99304b946e5d17",
+        "H28.OverflowBaseline.input_inhabited": "ce62109c01ad3f5afe5e0501cc059119da27bbf4491b7b7bd88ab3c13e81e90e",
+        "H28.OverflowBaseline.overflowing_run": "5e14ef5daea35f9439465c559743860b230f992b1b6f976dca28e3e0bef37657"
+      },
+      "witness_signature_sha256": {
+        "H28.OverflowSubtractKill.source_link": "c81243a70ab29aeb233eae1a0237732e8aa47be1ee26b16e1fda14a93086bf23",
+        "H28.OverflowSubtractKill.input_inhabited": "c4c80d3e1f8bcc7426c8812d66d5446d2ff097798149da19c6e0f031c34de82a",
+        "H28.OverflowSubtractKill.checked_kill": "e0ab7fe3b5ba8f34fbb6e438aaeb856d4a6c701fd14085ff228a0ec3f47a6dc3",
+        "H28.OverflowSubtractKill.typed_landing": "1135ee061581450a7738aad1ca39a75d0615c1fe63a53adfd11c9afa0a879db3"
+      }
+    },
+    {
+      "id": "overflow.increment-erased-max",
+      "kind": "negative-control",
+      "family": "overflow",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | localIncrement :\n      dl{ \u27e8[ v\u2295\u2295; ]\u27e9 \u21dd { v := v \u00b1 1 } \u27e8[ ]\u27e9 }",
+      "new": "  | localIncrement :\n      dl{ \u27e8[ v\u2295\u2295; ]\u27e9 \u21dd { v := v } \u27e8[ ]\u27e9 }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/OverflowIncBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/OverflowIncSkipKill.lean",
+      "oracle_sha256": "4a309b8fd210e39138400b05d38da2d9f1723eb9682dbf5f8237fc47f05990aa",
+      "witness_sha256": "1c0e362275bdf2c2e48eed44fc9f2ad9f06c1b1657743b9e656937fec39fd730",
+      "oracle_declarations": [
+        "H28.OverflowIncBaseline.source_link",
+        "H28.OverflowIncBaseline.input_inhabited",
+        "H28.OverflowIncBaseline.overflowing_run"
+      ],
+      "witness_declarations": [
+        "H28.OverflowIncSkipKill.source_link",
+        "H28.OverflowIncSkipKill.input_inhabited",
+        "H28.OverflowIncSkipKill.checked_kill",
+        "H28.OverflowIncSkipKill.typed_landing"
+      ],
+      "source_symbol": "Taclet.localIncrement",
+      "constructor_id": "Taclet.localIncrement",
+      "mutant_sha256": "efe103b96b5e310d206a9777b5f255eb6cf4d6430c291215fa697f4d04b25066",
+      "oracle_signature_sha256": {
+        "H28.OverflowIncBaseline.source_link": "1b808de07eb7fc532e28f11e7a1d614fb01e91adbae9d3b8c7d87410bad3d1aa",
+        "H28.OverflowIncBaseline.input_inhabited": "81e88c73eaad2f560bbde6a0185e61be9b8a61162f7aa1a16fa6426723845a23",
+        "H28.OverflowIncBaseline.overflowing_run": "0a08092a06e46e6575e58a7b5b2c6eae60fd53a5347869dc43ac615cc6e35203"
+      },
+      "witness_signature_sha256": {
+        "H28.OverflowIncSkipKill.source_link": "a785ad15d2e77e6f1295afd653f5c93696d7fcfcc57673cd236e08a0bddabacf",
+        "H28.OverflowIncSkipKill.input_inhabited": "6257d2ebdd1b916ec8b23ba922984ef040fc54ee586ade0619967a3f7e7bda95",
+        "H28.OverflowIncSkipKill.checked_kill": "7029ae9e610dd59152a737760486401ee52bf59c0c3901f48af7039d75b102ae",
+        "H28.OverflowIncSkipKill.typed_landing": "8a9bdcabcb7073abb62d3fe583b3c5c1a34d43da0c4b20ba0f9133a1328fd4ab"
+      }
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    }
+  ]
+}

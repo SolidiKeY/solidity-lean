@@ -1,0 +1,15 @@
+{
+ "Solidity/Backend/Environment/ObservationsChecks.lean:Solidity.Backend.Environment.account_address": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/ObservationsChecks.lean:Solidity.Backend.Environment.intrinsic_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/ObservationsChecks.lean:Solidity.Backend.Environment.select_correct": [
+  "Quot.sound",
+  "propext"
+ ]
+}

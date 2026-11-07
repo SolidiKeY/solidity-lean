@@ -1,0 +1,6 @@
+{
+ "tests/upstream/ByteLiterals.lean:literal_ignores_ambient_append": [],
+ "tests/upstream/ByteLiterals.lean:long_literal_exact": [],
+ "tests/upstream/ByteLiterals.lean:long_literal_not_truncated": [],
+ "tests/upstream/ByteLiterals.lean:utf8_literal_exact": []
+}

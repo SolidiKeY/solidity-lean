@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceStructAssignment.lean:Solidity.Backend.MemoryOps.source_struct_assign_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAssignment.lean:Solidity.Backend.MemoryOps.source_struct_member_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.resolved_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

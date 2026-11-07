@@ -1,0 +1,15 @@
+{
+  "command": [
+    "env",
+    "GATE_BASE=f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+    "GATE_LOGS=tests/sol-numeric-literals/evidence/followon-owned-build",
+    "bash",
+    "scripts/coord-tools/gate.sh",
+    "touched"
+  ],
+  "exit": 0,
+  "seconds": 0.467876,
+  "peak_child_rss_kib": 59892,
+  "user_seconds": 0.286937,
+  "system_seconds": 0.094368
+}

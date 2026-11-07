@@ -1,0 +1,25 @@
+{
+  "source": "/workspace/scratch/v17-assignment-blocks-compiler-20261104/reached-collection/execution",
+  "sourceSamplesSha256": "4f65f5f8b99ce6f945a0f8b63555adc4d69647ac4be651c1b2896c82d731a7f3",
+  "sampleIndex": 51,
+  "sample": {
+    "rssBytes": 7217152,
+    "leanWorkers": 0,
+    "leanSupervisors": 1,
+    "leanZombies": 0,
+    "leanTransitions": 0,
+    "unclassifiedLeanWorkers": 1,
+    "unknownLeanProcesses": [
+      {
+        "pid": 1610189,
+        "state": "R",
+        "rssBytes": 0,
+        "arguments": "[lean]"
+      }
+    ]
+  },
+  "historicalCommandExit": 0,
+  "historicalValidationExit": 125,
+  "historicalOverallExit": 125,
+  "boundary": "Exact copied historical failure data; never reclassified by these controls."
+}

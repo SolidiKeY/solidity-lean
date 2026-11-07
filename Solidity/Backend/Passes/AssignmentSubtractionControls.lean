@@ -107,12 +107,7 @@ def reversed : CompiledVal 1 (compiled .legacy).frag (value (C := C) (Γ := Γ) 
 theorem reversed_source :
     (value (C := C) (Γ := Γ) .viaIR .u8).evalT
       (reached .legacy target .u8 i 9 7 (by decide) (by decide)) = .error .revert := by
-  first
-  | (solve | simp only)
-  | (solve | decide)
-  | (solve | omega)
-  | (solve | rfl)
-  | with_unfolding_all rfl
+  with_unfolding_all rfl
 
 theorem wrong_order_reverts (tail : List Word) :
     run ((compiled .legacy).code ++ reversed.code) {machine with stack := tail} = .revert := by

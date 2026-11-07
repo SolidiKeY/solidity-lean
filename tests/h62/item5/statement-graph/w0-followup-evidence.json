@@ -1,0 +1,276 @@
+{
+  "attributions": [
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+      "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+      "introducingCommit": "138f7a568b6aeb4a98fad985b8d7b0c628356c5e",
+      "introducingSubject": "Define H64 constructive pass fold and conditional frozen public theorem",
+      "line": 2,
+      "originFile": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+      "target": "Solidity.Lowering.P8b.Frozen"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/Controls.lean",
+      "fileSha256": "f5cb2cfa5a2d3badec9ac1f855ce8640ea51c859aceebbcf21ee2141981e6a32",
+      "introducingCommit": "e75bad809cfda97eedc97d694eaeeac3243ae353",
+      "introducingSubject": "Add composition interface",
+      "line": 2,
+      "originFile": "Solidity/Yul/Composition/Controls.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.Controls",
+      "target": "Solidity.Source.StateExamples"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/Interface.lean",
+      "fileSha256": "f397d8ca5170fd1bc392d6fe3093d3e80e9ee4c376aff3703f250430d41945fa",
+      "introducingCommit": "e75bad809cfda97eedc97d694eaeeac3243ae353",
+      "introducingSubject": "Add composition interface",
+      "line": 3,
+      "originFile": "Solidity/Yul/Composition/Interface.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.Interface",
+      "target": "Solidity.Backend.Environment.ByteConstants"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/MonetaryLifecycleControls.lean",
+      "fileSha256": "fe30d429244c341decc40d77264d60f1293c3c8abcfb842e377c16b651520888",
+      "introducingCommit": "9572b8d3edd01e1dc11689a85f016d9d25f92af7",
+      "introducingSubject": "Preserve whole natural balances",
+      "line": 2,
+      "originFile": "Solidity/Yul/Composition/MonetaryLifecycleControls.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.MonetaryLifecycleControls",
+      "target": "Solidity.Source.StateExamples"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/P6FrameCorrectness.lean",
+      "fileSha256": "8c77b9c58b2a6bba9164affe7c273a5bf21bf9d699c6a8626709260a3c36e668",
+      "introducingCommit": "705ed8517c55ea42897c6991d252ffd45a2836be",
+      "introducingSubject": "Integrate VY5 P8-SPEC operations and Yul composition",
+      "line": 1,
+      "originFile": "Solidity/Yul/Composition/P6FrameCorrectness.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.P6FrameCorrectness",
+      "target": "Solidity.Backend.MemoryOps.PhysicalFrameImage"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/PhysicalBytes.lean",
+      "fileSha256": "e9ad1835b2dafc295407f1912f5286064b72d40a15737da3be8f220b742de84c",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "line": 2,
+      "originFile": "Solidity/Yul/Composition/PhysicalBytes.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.PhysicalBytes",
+      "target": "Solidity.Yul.Views.Bytes"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "fileSha256": "1cea48b2286f82e8fb478c4f345c59e329908e29e7f99b2923c4db1854505ee7",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "line": 3,
+      "originFile": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.PhysicalControls",
+      "target": "Solidity.Yul.Views.OwnedBoolDeclarationControls"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "fileSha256": "1c4387e7cf69c8475fe60cad52fdac618173e8147017c4bcd3592ab41ba086f8",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "line": 2,
+      "originFile": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.PhysicalFrames",
+      "target": "Solidity.Yul.Views.OwnedBoolFrame"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "fileSha256": "492c975cfb33c7683bd5e134c62aa07cad14cdcf28da59c063bf9b8fb3361e28",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "line": 3,
+      "originFile": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.PhysicalMemory",
+      "target": "Solidity.Yul.Views.MemoryControls"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "fileSha256": "492c975cfb33c7683bd5e134c62aa07cad14cdcf28da59c063bf9b8fb3361e28",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "line": 2,
+      "originFile": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.PhysicalMemory",
+      "target": "Solidity.Yul.Views.MemoryImages"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+      "fileSha256": "c96e935db8d5fd4119e512db0c84e64647650e2dba5419ac1d5afd3b10f02aaa",
+      "introducingCommit": "eb9c75194d65f896c9bc483050ecea67fbe41318",
+      "introducingSubject": "Compose actual catch binding",
+      "line": 1,
+      "originFile": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.SourceCatchBinding",
+      "target": "Solidity.Lowering.Readonly.SourceTryEffects"
+    },
+    {
+      "absentFromAllIntroducingParents": true,
+      "file": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+      "fileSha256": "c96e935db8d5fd4119e512db0c84e64647650e2dba5419ac1d5afd3b10f02aaa",
+      "introducingCommit": "eb9c75194d65f896c9bc483050ecea67fbe41318",
+      "introducingSubject": "Compose actual catch binding",
+      "line": 2,
+      "originFile": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+      "presentAtInitialPinParent": true,
+      "source": "Solidity.Yul.Composition.SourceCatchBinding",
+      "target": "Solidity.Source.FailureRuntimeControls"
+    }
+  ],
+  "authorizedAdditions": 12,
+  "baselineEdges": 107,
+  "baselineSha256": "880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d",
+  "boundary": "Tooling/data/docs only; no Lean imports/statements/definitions/axioms/exclusions/budgets changed; no proof or runtime pass.",
+  "gates": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/h62/item5/statement-graph",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit": 0,
+      "seconds": 2.1777608129996224
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "scripts/check-axiom-pins.test.mjs",
+        "tests/h62/item5/statement-graph/h112-tooling.test.mjs"
+      ],
+      "exit": 0,
+      "seconds": 1.338018292997731
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "scripts/core-import-closure.mjs"
+      ],
+      "exit": 0,
+      "seconds": 0.02529904500261182
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs"
+      ],
+      "exit": 0,
+      "seconds": 0.06568694699672051
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "scripts/coord-tools/gate.sh"
+      ],
+      "exit": 0,
+      "seconds": 0.0021122430043760687
+    },
+    {
+      "command": [
+        "sha256sum",
+        "-c",
+        "scripts/core-import-current-baseline.sha256"
+      ],
+      "exit": 0,
+      "seconds": 0.0029052059981040657
+    },
+    {
+      "command": [
+        "sha256sum",
+        "-c",
+        "scripts/core-import-baseline.sha256"
+      ],
+      "exit": 0,
+      "seconds": 0.0025965879976865835
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/coord-tools/register.sh",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.11679801100399345
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/coord-tools/fragments.sh",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.34493301800102927
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "touched"
+      ],
+      "exit": 0,
+      "seconds": 3.570187247998547
+    }
+  ],
+  "mergePreflight": "gate.sh touched runs layers before build and fails closed; tested actual layer violation with only Lake mocked. Host timer adoption is not executed here.",
+  "originalEdges": 95,
+  "reproduction": {
+    "byteIdentical": true,
+    "command": "node scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs",
+    "sha256": "880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d"
+  },
+  "reviews": "Independent read-only finder/skeptic no Lean/server; history guard in reproducer fixed, output SHA checked, actual layer checker pre-gate negative verified; no outstanding static blocker.",
+  "sourceCommit": "fea090bf9fec1a372ad32952a5e72eb4d7015888",
+  "sourcePins": {
+    ".github/workflows/lean.yml": "2989d01e661f5bb6ecc7eb20f4cd4ebc84ee6e881e4e2b23a7a9f380facb1b0d",
+    "scripts/coord-tools/gate.sh": "cf514a0cb2a39418affbdac127effd462389824dfe06317e870f175b2df283c4",
+    "scripts/core-import-additions-allowlist.json": "2e13b307dd1800a395fda9e87a28a29d720464ecf414922c6ecfddb4ec5753f6",
+    "scripts/core-import-closure.mjs": "b93b498d51de5f78a2bf904f979aa7f60604845562189fae09069602f582ad52",
+    "scripts/core-import-current-baseline.json": "880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d",
+    "scripts/h62/item5/statement-graph/reproduce_core_baseline.mjs": "af2f524f1a663706709e4c02d96301253a08e9ee248e965efb17ffed26bdee4c",
+    "tests/h62/item5/statement-graph/test_w0_tooling.py": "4a566441d4c89fb7c3f04e6782cd6a2dc858260857c9b434b2b117978671b1a7"
+  },
+  "tests": {
+    "focused": 14,
+    "node": 14,
+    "pythonAll": 66
+  },
+  "ticket": "OT-W0-TOOLING follow-up"
+}

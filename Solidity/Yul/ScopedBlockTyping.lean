@@ -532,4 +532,77 @@ theorem checkBlock_iff {F n} (E : Env F n) (c : Control) (body : Syn (.list .yul
     rw [d.complete]
     rfl
 
+/-- The same scoped input determines the complete packed typing result,
+including the final local count, intrinsic environment and derivation. -/
+theorem StatementD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n)
+ (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn .yulStmt) (firstCount secondCount : Nat)
+ (firstEnv : Solidity.Yul.BlockTyping.Env F firstCount)
+ (secondEnv : Solidity.Yul.BlockTyping.Env F secondCount)
+ (first : Solidity.Yul.ScopedBlockTyping.StatementD scope E control tree firstEnv)
+ (second : Solidity.Yul.ScopedBlockTyping.StatementD scope E control tree secondEnv),
+ (⟨firstCount,firstEnv,first⟩ : (count : Nat) × (final : Solidity.Yul.BlockTyping.Env F count) ×
+ Solidity.Yul.ScopedBlockTyping.StatementD scope E control tree final) = ⟨secondCount,secondEnv,second⟩ := by
+  intro X scope F n E control tree firstCount secondCount firstEnv secondEnv first second
+  exact Option.some.inj ((StatementD.complete first).symm.trans (StatementD.complete second))
+
+/-- The same scoped input determines the complete packed typing result,
+including the final local count, intrinsic environment and derivation. -/
+theorem WalkD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n)
+ (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.list .yulStmt)) (firstCount secondCount : Nat)
+ (firstEnv : Solidity.Yul.BlockTyping.Env F firstCount)
+ (secondEnv : Solidity.Yul.BlockTyping.Env F secondCount)
+ (first : Solidity.Yul.ScopedBlockTyping.WalkD scope E control tree firstEnv)
+ (second : Solidity.Yul.ScopedBlockTyping.WalkD scope E control tree secondEnv),
+ (⟨firstCount,firstEnv,first⟩ : (count : Nat) × (final : Solidity.Yul.BlockTyping.Env F count) ×
+ Solidity.Yul.ScopedBlockTyping.WalkD scope E control tree final) = ⟨secondCount,secondEnv,second⟩ := by
+  intro X scope F n E control tree firstCount secondCount firstEnv secondEnv first second
+  exact Option.some.inj ((WalkD.complete first).symm.trans (WalkD.complete second))
+
+/-- The same scoped case syntax determines its packed labels and derivation.
+This is result determinism, not a distinct-label assertion. -/
+theorem CaseD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n)
+ (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn .yulCase) (firstValue secondValue : Solidity.Yul.Word)
+ (first : Solidity.Yul.ScopedBlockTyping.CaseD scope E control tree firstValue)
+ (second : Solidity.Yul.ScopedBlockTyping.CaseD scope E control tree secondValue),
+ (⟨firstValue,first⟩ : (value : Solidity.Yul.Word) × Solidity.Yul.ScopedBlockTyping.CaseD scope E control tree value) = ⟨secondValue,second⟩ := by
+  intro X scope F n E control tree firstValue secondValue first second
+  exact Option.some.inj ((CaseD.complete first).symm.trans (CaseD.complete second))
+
+/-- The same scoped case syntax determines its packed labels and derivation.
+This is result determinism, not a distinct-label assertion. -/
+theorem CasesD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n)
+ (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.list .yulCase)) (firstValue secondValue : List Solidity.Yul.Word)
+ (first : Solidity.Yul.ScopedBlockTyping.CasesD scope E control tree firstValue)
+ (second : Solidity.Yul.ScopedBlockTyping.CasesD scope E control tree secondValue),
+ (⟨firstValue,first⟩ : (value : List Solidity.Yul.Word) × Solidity.Yul.ScopedBlockTyping.CasesD scope E control tree value) = ⟨secondValue,second⟩ := by
+  intro X scope F n E control tree firstValue secondValue first second
+  exact Option.some.inj ((CasesD.complete first).symm.trans (CasesD.complete second))
+
+/-- The fixed scoped checker input determines its entire derivation.
+All syntax and context indices remain explicit. -/
+theorem DefaultD.unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n) (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.opt (.list .yulStmt)))
+ (first second : Solidity.Yul.ScopedBlockTyping.DefaultD scope E control tree), first = second := by
+  intro X scope F n E index tree first second
+  exact Option.some.inj ((DefaultD.complete first).symm.trans (DefaultD.complete second))
+
+/-- The fixed scoped checker input determines its entire derivation.
+All syntax and context indices remain explicit. -/
+theorem InitializerD.unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n) (count : Nat) (tree : Solidity.Source.Syn (.opt .yulExpr))
+ (first second : Solidity.Yul.ScopedBlockTyping.InitializerD scope E count tree), first = second := by
+  intro X scope F n E index tree first second
+  exact Option.some.inj ((InitializerD.fixed_complete first).symm.trans (InitializerD.fixed_complete second))
+
+/-- Exact reconstruction makes the independent typing certificate unique.
+This is about BlockTyping certificates, not the older separate ClosedPure
+certificate-uniqueness draft. -/
+theorem BlockD.unique {X scope F n E c body} (first second : @BlockD X scope F n E c body) :
+    first = second :=
+  Option.some.inj (first.complete.symm.trans second.complete)
+
 end Solidity.Yul.ScopedBlockTyping

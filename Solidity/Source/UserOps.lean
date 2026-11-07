@@ -116,7 +116,7 @@ inductive UdvtTyped (Γ : Ctx) (u : Syn .unit) : Syn .expr → STy → Prop wher
   /-- `T.wrap(x)`: the underlying type, implicitly converted, to `T`. -/
   | wrap {T : String} {x : Syn .expr} {d : Decl} {el : Elem} {σ : STy} :
       Γ.resolve T = Option.some (.decls [d]) → d.underlying? = Option.some el → HasType Γ x σ →
-      σ.implicit Γ.isBase (el.ty .memory) = true →
+      σ.implicit Γ.isBase Γ.mapFree (el.ty .memory) = true →
       UdvtTyped Γ u (.call (.member (.ident T) "wrap") (.positional (.cons x .nil))) (.udvt ⟨d.scope, d.name⟩)
   /-- `T.unwrap(x)`: `T` to the underlying type. -/
   | unwrap {T : String} {x : Syn .expr} {d : Decl} {el : Elem} :

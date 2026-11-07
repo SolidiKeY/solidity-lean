@@ -1,0 +1,3 @@
+# H44/H82 bulk stays on VM. Fresh replay executed before snapshot replacement.
+# bytes 125428585
+a78a6951b658780f93d634acf3da81f5734ea80f502e329c44a5eda47de29163  /workspace/solidity-lean/tests/sol-override-validation/runtime/H82/validated-bulk.tar.gz

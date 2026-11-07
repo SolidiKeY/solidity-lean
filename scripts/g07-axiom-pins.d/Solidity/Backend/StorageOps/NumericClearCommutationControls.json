@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/NumericClearCommutationControls.lean:Solidity.Backend.StorageOps.NumericClearCommutation.Controls.commutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutationControls.lean:Solidity.Backend.StorageOps.NumericClearCommutation.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutationControls.lean:Solidity.Backend.StorageOps.NumericClearCommutation.Controls.overlap_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutationControls.lean:Solidity.Backend.StorageOps.NumericClearCommutation.Controls.overlapping_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutationControls.lean:Solidity.Backend.StorageOps.NumericClearCommutation.Controls.target_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutationControls.lean:Solidity.Backend.StorageOps.NumericClearCommutation.Controls.transported": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

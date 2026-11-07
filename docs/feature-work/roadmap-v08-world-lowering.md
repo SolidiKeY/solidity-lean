@@ -3885,3 +3885,74 @@ initial read; they state no post-state relation. `AssignedCallableContext.transp
 adds the before/after `Related` relation for the integer case only. The target
 run in `SourceClockTransactions.lean` is hand-written, so `paired` is the
 conjunction of two runs, not a derived correspondence.
+
+### Boolean caller-local post relation
+
+`EffectfulCallableArgument.transport_context` strengthens the paired execution
+fixture with a derived `ContextMap.Related` post-local relation, using initial
+value alignment and exact typed slot maps. Its inhabited client skips an unrelated
+target integer slot; stale-source and mutated-live-binding controls reject wrong
+post relations. The actual Source hash allocation and complete existing fixture
+observations remain. This relates caller locals, not Source/target heaps, general
+callee compilation, external frames, library dispatch or complete unit execution.
+
+### Conditional callable arguments
+
+`ConditionalCallable` consumes V07's actual conditional-assignment transport
+before an independently executed, explicitly selected Source integer echo body.
+It derives reached caller-local alignment from initial typed slot/value alignment;
+its heterogeneous client preserves an unrelated target integer and the whole
+populated Source machine. Wrong-branch, stale-snapshot, skipped-write, static-frame
+and low-horizon controls distinguish returned values and effects. This is an
+argument/caller-local component, not general callee, heap, ABI or runtime-frame
+compilation. The sufficient indices do not restrict source admission.
+
+### Cast arguments and raw caller values
+
+`WordCastCallable` consumes V07's signed-assignment/unsigned-cast producer before
+an actual selected Source `uint256` echo call. It derives the reached numeric
+caller relation from initial values and alias reflection. The populated clients
+retain the whole Source machine and exact target Out/vector: storing signed `-1`
+and returning unsigned `2^256 - 1` are distinct observations. Boundary, static,
+raw-timeout and wrong-snapshot/return controls preserve this distinction. This is
+argument/result transport, not general target callee, heap/world, ABI, runtime
+frame, source admission or bytecode adequacy.
+
+### Reached memory-byte hashing
+
+`SourceMemoryKeccak` consumes actual argument execution and reached heap lookup, then derives builtin Keccak execution without another allocation. Real ABI literal and populated write/read/hash/ABI producers inhabit these obligations, retaining the complete reached machine and existing ordered vector. Input-order and allocator controls are not hash noncollision claims. The intrinsic byte observation uses the existing explicit `Fixed.Keccak` contract; canonical compiler, admission, body/frame and unit transport remain open.
+
+The memory-byte hash adapter also propagates exact argument halts and refuses dangling reached references. Its actual mixed-ABI timeout retains the earlier caller-local write; valid old-object hashing retains the whole populated machine. These are explicit Source execution/refusal controls, not automatic rollback, admitted malformed programs, or compiler/frame adequacy.
+
+### Published Decision dependency retry
+
+The published feature-catalogue/HashingNames split justified a new bounded Decision dependency check, including the relocated DecisionHashesChecks verdicts. The unchanged 600-second container guard stopped it in MemRead.Ok after 149 of 282 targets; neither Decision nor its relocated checks was reached. Host monitoring was interrupted by model capacity; recovered logs and unchanged source/config/protected-state bindings do not fill that telemetry gap. The attempt is failed/incomplete, not a full or Decision pass. Canonical source/body/frame/unit producer obligations remain open.
+
+### Payment account-image framing
+
+`WorldImageAccess.account_transfer` derives preservation of code/store AccountImage fields from an actual successful Source transfer, including same-owner and two-update cases. Its populated client retains full account/nonworld observations and ordered journal entries, proves explicit rollback and end without refund, and refutes full Image preservation with unchanged target funds. This is neither a payment-dispatch/compiler theorem nor a replacement for ledger/body/frame/admission producers.
+
+### Installed-account funded fragment
+
+`InstalledPaymentImageControls.actual_client` joins an actual Source transfer and actual payable intrinsic empty-entry call with a proved full reached WorldImage, including funds at every address. Both accounts are explicitly supplied as installed; no deployment or external-call admission is inferred. Complete account/journal/nonworld observations, reset composition and a stale-funds negative retain the boundary: this is a funded fragment, not canonical source dispatch/body/frame/bytecode or whole-unit adequacy.
+
+### Funded rethrow and explicit rollback
+
+`FundedRethrowRollbackControls.funded_client` consumes the actual funded prefix, canonical Source allocation/rethrow and intrinsic paid-frame/revert execution. Exact atomic halts and an explicit Source journal rollback restore the earlier account/funds image while the newly allocated Source heap remains. Ordered states, wrong-mark/heap/payload controls and real timeout boundaries distinguish raw errors from rollback; this does not establish catch selection, source call admission or compiler/frame/bytecode adequacy.
+
+### H24 admission companion
+
+Creation and library premise inputs now consume the published `DeclarationGraphAdmission.Producer`, retaining its original P8a producer through `.base` and the exact H15 declaration-graph admission/refusal obligation. The two consumers and their import closure kernel-check with all 27 existing axiom guards unchanged. This supplies no producer inhabitant or new constructor/body/frame/whole-unit adequacy.
+
+### Unsigned update callable arguments
+
+`UnsignedUpdateCallable` consumes V07's actual local update execution and captured
+operand before the selected Source integer echo body. Prefix returns the wrapped
+new value; postfix returns the old value, while both retain the changed caller
+local. Initial read/alias alignment derives the post-local relation. The populated
+uint8 clients cover both pipelines, static mode, 255 increment/0 decrement,
+subsequent caller reads, unrelated target locals/live heap aliases, exact low-fuel
+timeouts and wrong-return/snapshot negatives. Complete Source machine equality
+retains all existing account, transient, heap, journal, event/log and fnLocals
+observations. This is argument/caller-local transport, not compiled target callee,
+canonical SourceSpec/admission, ABI/body/frame or bytecode adequacy.

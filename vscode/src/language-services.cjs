@@ -157,3 +157,24 @@ function signatureHelp(text,point,analysis){
     activeParameter:Math.min(argument,Math.max(0,declarations[0].parameters.parameters.length-1))};
 }
 module.exports={offset,position,applyChanges,byteRange,index,completion,signatureHelp,contains,validIdentifier,receiverMembers};
+
+// Display-only compiler provenance; never a proof input or editing authority.
+function hoverContent(index,target){
+  const origin=index.origins.get(target),range=index.nodeRange(target);let description;
+  if(origin&&range&&['FunctionDefinition','ContractDefinition','StructDefinition','EnumDefinition','ModifierDefinition'].includes(target.nodeType)){
+    const snippet=origin.text.slice(offset(origin.text,range.start),offset(origin.text,range.end));
+    const bodyRange=target.body?.src?index.nodeRange(target,target.body.src):null;
+    let bodyStart=bodyRange?offset(origin.text,bodyRange.start)-offset(origin.text,range.start):null;
+    if(bodyStart===null){let depth=0;for(const token of require('./solidity-text.cjs').tokens(snippet)){if(token.kind==='comment')continue;if(['(', '['].includes(token.text))depth++;else if([')', ']'].includes(token.text))depth--;else if(token.text==='{'&&depth===0){bodyStart=token.start;break;}}}
+    description=(bodyStart===null?snippet:snippet.slice(0,bodyStart)).trim().replace(/;$/,'');
+  }
+  if(!description)description=`${target.name||target.kind}: ${target.typeDescriptions?.typeString||target.nodeType}`;
+  let documentation=typeof target.documentation==='string'?target.documentation:target.documentation?.text;
+  const docRange=origin&&target.documentation?.src?index.nodeRange(target,target.documentation.src):null;
+  if(docRange){const raw=origin.text.slice(offset(origin.text,docRange.start),offset(origin.text,docRange.end));
+    if(raw.startsWith('///'))documentation=raw.split(/\r?\n/).map(line=>line.replace(/^\s*\/\/\/ ?/,'')).join('\n');
+    else if(raw.startsWith('/**'))documentation=raw.slice(3,-2).split(/\r?\n/).map(line=>line.replace(/^\s*\* ?/,'')).join('\n');
+  }
+  return (documentation?.trim()?documentation.trim()+'\n':'')+'```solidity\n'+description+'\n```';
+}
+module.exports.hoverContent=hoverContent;

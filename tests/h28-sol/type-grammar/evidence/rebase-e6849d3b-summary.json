@@ -1,0 +1,579 @@
+{
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "rebased_onto": "e6849d3bdf516099d20c33d3581d523449764018",
+  "old_head": "cf84aab245d42b6a24b5f8b436018a7af2d428aa",
+  "source_scope": "All18modules unchanged;allregistered;explicit read-only LengthAtom boundaries preserved.",
+  "backup_ref": "refs/codex-backups/type-grammar/pre-e6849d3b",
+  "rebase_receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/receipt.json",
+  "preserved_files": 509,
+  "pruned_local_runtime_assets": 485,
+  "history_commits_preserved": 29,
+  "proof_modules": [
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Boundaries.lean",
+      "sha256": "66724d8f22cb2bd3dade3c2bc6d8a3ae4209b30a48ef389e9c7cb26e8217d971",
+      "theorem_count": 28
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Composition.lean",
+      "sha256": "a4221306ef32b0be942e508d52d962c0d5b1e8bbe02a71cb614dcf033650299a",
+      "theorem_count": 16
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Counterexamples.lean",
+      "sha256": "19f2e110beeeacf6a9d9896a0d313707120547b67e2b0de0cad56ca9bba19d9d",
+      "theorem_count": 2
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Exactness.lean",
+      "sha256": "58765322178ba2e8bd951d1460ee01cba3ee93e47c48123ff1e4b61ccd9d6562",
+      "theorem_count": 32
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Layouts.lean",
+      "sha256": "bbad6065ac81a1f2bda430776824e03adf352674eae6b3116d51a1019080c590",
+      "theorem_count": 8
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserArrays.lean",
+      "sha256": "762b89814e72994c0b2b24a6a57755dc0884dec47e9eb1d2f38e64b11cdf832e",
+      "theorem_count": 32
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserBasics.lean",
+      "sha256": "931f56f7bad2b381515116adf288dbfad826a718ba388dc5d7d808483b93508e",
+      "theorem_count": 18
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserChecks.lean",
+      "sha256": "804b474d15c68525233b22c7898c0d75e908bfd06f975f29d052b7ccb4aeca52",
+      "theorem_count": 10
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserContexts.lean",
+      "sha256": "8ab669999ed030a7d2cef6e8586128ecc2d78057cae40441ce344e1d16b04371",
+      "theorem_count": 19
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserDynamicClosure.lean",
+      "sha256": "71b7f2f83fd530632426a76e875cee17a946981c42948cc463cfd5d3f127e3e2",
+      "theorem_count": 20
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserFnAttrs.lean",
+      "sha256": "4171d25788dbcd017a21525ea8985b53fefbfd684765b38667cc0712f2d9bebc",
+      "theorem_count": 24
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserFunctions.lean",
+      "sha256": "a9cf3f1d2cb40f0bc583166b933b5eeb84b2d01c675816af0aa014ff8a59a1c6",
+      "theorem_count": 32
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserLengths.lean",
+      "sha256": "414106275e03eb2af39b7c9ef48cfb989491c5172087c1a52529b306744ad09b",
+      "theorem_count": 26
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserMapping.lean",
+      "sha256": "f24ef81c6df5030eeb2a9525ad6fa9eaeffde396cfe9436881a487bddf7cea43",
+      "theorem_count": 44
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserParams.lean",
+      "sha256": "d729236599a907ec89eac239f3d0e17c376dcc557d5694e60a9d963877f86d97",
+      "theorem_count": 39
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserPaths.lean",
+      "sha256": "dcd685799be0e7c3837fa9703394e528de1932e4c19f0095464b4eeeb7df8789",
+      "theorem_count": 21
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserReady.lean",
+      "sha256": "8fb3756765d5639f27750d7313e9045eed16112b9068a5026d5e89825224f02a",
+      "theorem_count": 19
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/TypeRegions.lean",
+      "sha256": "6af64706d53c975a897435f97beb21063cd029359ded26632720c0dd9669cea4",
+      "theorem_count": 54
+    }
+  ],
+  "statement_count": 444,
+  "axioms": {
+    "none": 177,
+    "propext": 267
+  },
+  "axiom_names_match_complete_historical_inventory": true,
+  "historical_acceptance_sha256": "ba2904f485490afae745a61f783c14d4c19d30ae190abb749fed31301fd64c6c",
+  "constructor_inventory": {
+    "type_constructors": [
+      "elem",
+      "fnType",
+      "mapping",
+      "userType",
+      "array"
+    ],
+    "elementary": [
+      "address",
+      "addressPayable",
+      "bool",
+      "string",
+      "bytes",
+      "int",
+      "fixedBytes",
+      "fixed"
+    ],
+    "mapping_keys": [
+      "elem (not addressPayable)",
+      "path"
+    ],
+    "function_fields": [
+      "params",
+      "visibility",
+      "mutability",
+      "returns"
+    ],
+    "visibility": [
+      "internal",
+      "external",
+      "priv",
+      "pub"
+    ],
+    "mutability": [
+      "pure",
+      "view",
+      "payable"
+    ],
+    "data_locations": [
+      "memory",
+      "storage",
+      "calldata"
+    ],
+    "names": [
+      "parameter optional",
+      "mapping key optional",
+      "mapping value optional"
+    ],
+    "function_layouts": [
+      "attrs []",
+      "attrs [vis]",
+      "attrs [mutab]",
+      "attrs [vis, mutab]",
+      "attrs [mutab, vis]"
+    ],
+    "array_lengths": [
+      "none",
+      "some expr (read-only syntactic atom)"
+    ],
+    "parser_fuel_edges": {
+      "typeName": "1 + maximum(base child cost, suffix cost)",
+      "typeSuffix": "one per suffix plus terminal check; static length calls expr",
+      "fnType": "one + paramsParen / returnsOpt",
+      "mappingType": "one + value typeName",
+      "paramsParen": "one + param, each element",
+      "param": "one + typeName",
+      "returnsOpt": "one + paramsParen; explicit returns must be nonempty"
+    },
+    "exclusions": [
+      "SOL-QN name resolution",
+      "SOL-CB constant evaluation",
+      "operational type admission/lowering",
+      "whole-unit or expression uniqueness"
+    ]
+  },
+  "fixtures": [
+    {
+      "id": "elementary-all-dimensions",
+      "file": "fixtures/positive/elementary-all-dimensions.sol",
+      "source_sha256": "a26840e71b0de429d9a6adef9681d24b026f25e7194db0a19914511e29caf485",
+      "expected_accept": true,
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "id": "mapping-all-elementary-keys",
+      "file": "fixtures/positive/mapping-all-elementary-keys.sol",
+      "source_sha256": "3bf9ef9def423a8947b875262897556ec8309df6a3cefeeee285b56520ce9911",
+      "expected_accept": true,
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "id": "qualified-paths",
+      "file": "fixtures/positive/qualified-paths.sol",
+      "source_sha256": "bc320377d303ec7454348d9589b95fe2854c6e34f1f904281b31ebc29b5f19d9",
+      "expected_accept": true,
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "id": "mapping-names-values",
+      "file": "fixtures/positive/mapping-names-values.sol",
+      "source_sha256": "57237bd40354d54367ea694b260c86af262442b28471e531b1ceedc6dbf55f48",
+      "expected_accept": true,
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "id": "function-layouts-params-returns",
+      "file": "fixtures/positive/function-layouts-params-returns.sol",
+      "source_sha256": "7ed95e1aea6a060351786833306c67f1d3c552da8e33d8d6c191433d7a9b88a7",
+      "expected_accept": true,
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "id": "nested-arrays-functions-mappings",
+      "file": "fixtures/positive/nested-arrays-functions-mappings.sol",
+      "source_sha256": "b569f7595afe60b6101a17d87fd7f9119e6f2ddd9dd0b4e388b14b9552dccecb",
+      "expected_accept": true,
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "id": "payable-mapping-key",
+      "file": "fixtures/negative/payable-mapping-key.sol",
+      "source_sha256": "2ec916789ec97db081084a61a0166601c568545baec801699bd27b58a16e7981",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "array-mapping-key",
+      "file": "fixtures/negative/array-mapping-key.sol",
+      "source_sha256": "cf592a8eb43794310eaee37e36c9f4b2f706045fc8126432c9ee108a30db3ff9",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "function-mapping-key",
+      "file": "fixtures/negative/function-mapping-key.sol",
+      "source_sha256": "e7d7acffbd82bfdc5640f98f26fe07b99e5561722d1787111533fc09bf14c3f5",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "mapping-mapping-key",
+      "file": "fixtures/negative/mapping-mapping-key.sol",
+      "source_sha256": "bf706ab8e90841125f0ae61c525fbf9086a2cf4c0145f321cd81d9b81d6fd66f",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "mapping-missing-arrow",
+      "file": "fixtures/negative/mapping-missing-arrow.sol",
+      "source_sha256": "30e39b96be60757578150be851b0cf11ce6cd7ef9d4ce6f726244c341ccdbe17",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "mapping-two-key-names",
+      "file": "fixtures/negative/mapping-two-key-names.sol",
+      "source_sha256": "f79a197b0e128995a0afe1746ed66470f1b3220faac4fb15d99fdbdf3a16f0a9",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "mapping-two-value-names",
+      "file": "fixtures/negative/mapping-two-value-names.sol",
+      "source_sha256": "4afa7b1407ccba42c886cedda5750bbd2bcb3d96829a838d13b74ee1f8d6b2e3",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "mapping-missing-close",
+      "file": "fixtures/negative/mapping-missing-close.sol",
+      "source_sha256": "ac0574f9fe39aedb0cba629d759bcc9d9b416ed7c62b78aff4ba77ae9f3bbab2",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "array-missing-close",
+      "file": "fixtures/negative/array-missing-close.sol",
+      "source_sha256": "3b4e420905afe019f120d4a6e0d3358b6225c5f72bacf153de6c59728f708ea8",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "array-length-comma",
+      "file": "fixtures/negative/array-length-comma.sol",
+      "source_sha256": "7261503e0ff927805ab9bddbeb8ad37f0beebb8f514beb0f5128265176e9d5ba",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "function-trailing-param-comma",
+      "file": "fixtures/negative/function-trailing-param-comma.sol",
+      "source_sha256": "e237340689b4d4cb438b7d34409671086a608d70e042e9a5bab26d6402aaed53",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "function-leading-param-comma",
+      "file": "fixtures/negative/function-leading-param-comma.sol",
+      "source_sha256": "1e58c69e11edeb67abe9649beadae64f8fbdfc60d5b5b0fce1be5ecfbd2117dc",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "function-empty-returns",
+      "file": "fixtures/negative/function-empty-returns.sol",
+      "source_sha256": "b5815e63fed3b56cb2dce24e5f9ba7c496213b342ce93acc08b43eb330c1d586",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "function-repeat-mutability",
+      "file": "fixtures/negative/function-repeat-mutability.sol",
+      "source_sha256": "563278d0f73991ca3cdea6e71225ba5604321ab8d4a4dbfc9907e10721b34f6f",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "function-repeat-visibility",
+      "file": "fixtures/negative/function-repeat-visibility.sol",
+      "source_sha256": "5e17525ab256ca93fdb67c7e916a550be09c1d62c3a6e94372d73a7216a9e75e",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "parameter-repeat-location",
+      "file": "fixtures/negative/parameter-repeat-location.sol",
+      "source_sha256": "694a4503acbeb78fc8a5b7b4688c91226565eb8ab9703e948f9bf6a30da58ef9",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "return-trailing-comma",
+      "file": "fixtures/negative/return-trailing-comma.sol",
+      "source_sha256": "365fe0e969b0a81c5f33ba0be2e33d2ab35f96fb41129f83e9c2f1065d81fa89",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "qualified-trailing-period",
+      "file": "fixtures/negative/qualified-trailing-period.sol",
+      "source_sha256": "fb7ac43ce87ca3a5924d7b5291b34d6100f5c032fe0ce4874ff2d626ec7d565e",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "qualified-double-period",
+      "file": "fixtures/negative/qualified-double-period.sol",
+      "source_sha256": "f1bc470c12ba25e7ba6d0a231fe1b894c57dfd22727d0382b9db88f2a702ba23",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "qualified-keyword-part",
+      "file": "fixtures/negative/qualified-keyword-part.sol",
+      "source_sha256": "4801f3aa4be5ae8267b6f248016206a35d5f788f4b477812592729174bcaef7b",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "function-missing-close",
+      "file": "fixtures/negative/function-missing-close.sol",
+      "source_sha256": "e6165ba8fd93dd6db39262a5b76ec6e249364fdba1f2cc10db3c1ecaa532cf47",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "array-wrong-close",
+      "file": "fixtures/negative/array-wrong-close.sol",
+      "source_sha256": "12d8f128e33e9664e7de99a0a80d16a1af522fe7741400125d9a94dfed637090",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "id": "function-wrong-close",
+      "file": "fixtures/negative/function-wrong-close.sol",
+      "source_sha256": "d002bcf2f3bfd52ac654802aa8639f908686b6472db1858937744247608c3505",
+      "expected_accept": false,
+      "accepted": false,
+      "passed": true
+    }
+  ],
+  "fixture_count": 29,
+  "parser_cases": {
+    "positive": 13218,
+    "negative": 23,
+    "failures": 0
+  },
+  "gates": {
+    "runtime": {
+      "command": "python3 -B tests/h28-sol/type-grammar/run_bounded.py runtime",
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 3.35818466800265,
+      "sampled_peak_rss_bytes": 250560512,
+      "minimum_vm_or_host_headroom_bytes": 13794291712,
+      "receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/raw-gates/runtime-receipt.json",
+      "receipt_sha256": "07a291e12f1d7c72be7ef172dca7a16ec7b8e5fbaafe06f2e0a9841fb74d1b48"
+    },
+    "solc": {
+      "command": "python3 -B tests/h28-sol/type-grammar/run_bounded.py solc",
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 4.25977129500825,
+      "sampled_peak_rss_bytes": 238608384,
+      "minimum_vm_or_host_headroom_bytes": 13468073984,
+      "receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/raw-gates/solc-receipt.json",
+      "receipt_sha256": "9fbf7e66d7e68794f0edd452615aeed352d9336392b8675cc50f8d2851b77f93"
+    },
+    "axioms": {
+      "command": "python3 -B tests/h28-sol/type-grammar/run_bounded.py axioms",
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 11.663062998006353,
+      "sampled_peak_rss_bytes": 315351040,
+      "minimum_vm_or_host_headroom_bytes": 13303193600,
+      "receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/raw-gates/axioms-receipt.json",
+      "receipt_sha256": "4cb0418b2653b264df8a59d15e9805066ce847d8ce3cbb2e6789b87d4e1022ea"
+    },
+    "controls": {
+      "command": "python3 -B tests/h28-sol/type-grammar/run_bounded.py lean-fixtures",
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 8.505434261998744,
+      "sampled_peak_rss_bytes": 372568064,
+      "minimum_vm_or_host_headroom_bytes": 13088452608,
+      "receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/raw-gates/controls-receipt.json",
+      "receipt_sha256": "be5a50bf37f9a871a83bf1c874f00f9b7c68bab449f6fbc26896b88d19da5790"
+    },
+    "full": {
+      "command": "python3 -B tests/h28-sol/type-grammar/final_policy.py full",
+      "exit": 1,
+      "guard": null,
+      "elapsed_s": 232.3593749760039,
+      "sampled_peak_rss_bytes": 2547249152,
+      "minimum_vm_or_host_headroom_bytes": 7866126336,
+      "receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/raw-gates/full-receipt.json",
+      "receipt_sha256": "f46003f1c7cd1dfaa1626a08d4ea85024d345115e05783aed3ee18c57a578add"
+    },
+    "build": {
+      "command": "python3 -B tests/h28-sol/type-grammar/final_policy.py build",
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 2.8486710069992114,
+      "sampled_peak_rss_bytes": 109752320,
+      "minimum_vm_or_host_headroom_bytes": 7914950656,
+      "receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/raw-gates/build-receipt.json",
+      "receipt_sha256": "0001be962a493f1e14bf7ce50889ee55f11c36b47123c03e3377c9a8447c05bb"
+    },
+    "solkey": {
+      "command": "python3 -B tests/h28-sol/type-grammar/final_policy.py solkey",
+      "exit": 0,
+      "guard": null,
+      "elapsed_s": 1.2766907009936403,
+      "sampled_peak_rss_bytes": 7696384,
+      "minimum_vm_or_host_headroom_bytes": 7975202816,
+      "receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/raw-gates/solkey-receipt.json",
+      "receipt_sha256": "17bdae7e3e8764241f4ab36eb4f57201b45a3bcbc57172ebdb4543491ebec6d7"
+    }
+  },
+  "full_stage_results": [
+    [
+      "build-touched",
+      "PASS"
+    ],
+    [
+      "run-lean",
+      "PASS"
+    ],
+    [
+      "trust",
+      "PASS"
+    ],
+    [
+      "orphans",
+      "PASS"
+    ],
+    [
+      "layers",
+      "PASS"
+    ],
+    [
+      "roots",
+      "PASS"
+    ],
+    [
+      "doc-paths",
+      "PASS"
+    ],
+    [
+      "axiom-pins",
+      "FAIL"
+    ],
+    [
+      "testsuite",
+      "PASS"
+    ],
+    [
+      "corpus",
+      "PASS"
+    ],
+    [
+      "automatic-strict",
+      "PASS"
+    ]
+  ],
+  "acceptance": "ownedproofs+controls complete;integrated whole assignment BLOCKED solely by sharedaxiom-pin inventory",
+  "blocker": {
+    "command": "node scripts/check-axiom-pins.mjs",
+    "errors": 0,
+    "unrecorded_changes": 479,
+    "owned_typegrammar_entries": 0,
+    "inventory_modified": false,
+    "all_notes": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/unrecorded-pins.txt",
+    "details": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/pin-blocker.json"
+  },
+  "cache_receipt": "/workspace/scratch/h28-type-grammar/rebase-e6849d3b/cache-h41/receipt.json",
+  "cache_pack_sha256": "da52ab498a74f0760aaa71ab9e8b8eb4386e95776383c1f8c518756f38946981",
+  "historical_status_superseded": "Prior root-registration blockers in historical ledgers are superseded by current passing roots/orphans;do not rewrite historical evidence.",
+  "not_claimed": [
+    "unconditional arbitrary-expression LengthAtom support",
+    "whole-expression or whole-compiler correctness",
+    "passingfullintegratedgate",
+    "cache delivery or freshness"
+  ],
+  "questions": [],
+  "reviews": {
+    "finder": {
+      "agent": "/root/inventory_finder",
+      "mode": "read-only;no Lean server",
+      "verdict": "accepted;no finding",
+      "verified": "rebasefidelity/509files/29historycommits;18modulehashes/444statements;29fixturehashes;7gateoutcomes;current479sharedpinblocker;historicalrootsuperseded"
+    },
+    "skeptic": {
+      "agent": "/root/inventory_skeptic",
+      "mode": "read-only;no Lean server",
+      "verdict": "accepted;no confirmed finding",
+      "verified": "fulloriginalqueue no unfinishedownedproof/fixture obligation withinLengthAtom boundary;thinledger/sourcehashes/allcoverage;no gate/trustwaiver;currentsharedpins blockwholegoal;H41pullpending"
+    },
+    "remaining": "shared479unrecordedpins and passingrequired fullrerun;no ownedtypegrammar entries"
+  }
+}

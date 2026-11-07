@@ -1,0 +1,53 @@
+{
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.argument_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.body_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.caller_restored": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.entered8_actual": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.local_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.result_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.value_not_constant": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/PureArgumentCallable.lean:Solidity.Lowering.V08.PureArgumentCallable.value8_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

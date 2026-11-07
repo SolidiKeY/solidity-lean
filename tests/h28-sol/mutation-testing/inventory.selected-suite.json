@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "state": "frozen-selected-attribution-index",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "inventory": [
+    {
+      "id": "Taclet.storageIndexReadArrayFind",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 483,
+      "line_end": 484,
+      "span_sha256": "c24fa6e47b31c91076ffeeba79a94d76eabdc12837bcd795c456939fe5c736fa"
+    },
+    {
+      "id": "Taclet.storageIndexArrayDelete",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 523,
+      "line_end": 525,
+      "span_sha256": "77733807888e2bd84abcca1457cb950a11ff7d3c827d884f8c466414da918537"
+    },
+    {
+      "id": "Taclet.localIncrement",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 583,
+      "line_end": 584,
+      "span_sha256": "df81cc7e16872a6ab8c5dadd5f7b27a87b4eef7d53a6c1da034f51aad4510196"
+    },
+    {
+      "id": "Taclet.storagePushAddAssign",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 620,
+      "line_end": 623,
+      "span_sha256": "de9aafbd3ece21e4d4055759e3f49ab11ebb485b21ada8f178abbc0dfef97577"
+    },
+    {
+      "id": "Taclet.storagePush_unfold_leftCallReceiver",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 699,
+      "line_end": 701,
+      "span_sha256": "4304ed292258ace7fb05c0b00fcf64256cefbbd0cfbdf79ffd5c6a6cf69a7897"
+    },
+    {
+      "id": "Taclet.storagePopSave",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 704,
+      "line_end": 707,
+      "span_sha256": "f1c5c44f7e0e71077879fa3634365fa0d784b2c494a7316437485e6ba4b1beaa"
+    },
+    {
+      "id": "Taclet.sendNoCallbackBox",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 746,
+      "line_end": 753,
+      "span_sha256": "7c88131242704fa624a172c15d28ad5696d4ed20789af7df3c8a6e6ff8a5caaa"
+    },
+    {
+      "id": "Taclet.requireSimple",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 866,
+      "line_end": 867,
+      "span_sha256": "e581230776fe5466fa55d6edcc91d4784ad430ad9c581a7bc4e229ad799426fe"
+    },
+    {
+      "id": "Taclet.revertDiamond",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 878,
+      "line_end": 885,
+      "span_sha256": "65fb796ca227f32bb03c183497a01d2d34a4a235a0273a7ecb6e1e063e5d9b79"
+    },
+    {
+      "id": "Tms.Term.binopC",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 95,
+      "line_end": 98,
+      "span_sha256": "79dba3c73c04a143f0dc63fb6c5cc385be457dafd9b5c813c42832a5962c0878"
+    },
+    {
+      "id": "Tms.STerm.pushSlot",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 156,
+      "line_end": 157,
+      "span_sha256": "4557db38e3be3db2069066ede69e7bb8edde9f46ffb239af6f6c63f61e13c1d3"
+    },
+    {
+      "id": "Premise.expandCall",
+      "file": "Solidity/Calculus/Rules.lean",
+      "line_start": 373,
+      "line_end": 398,
+      "span_sha256": "ad75ee27d9c5350b6eec3ab7be4176311a2760c78fe96116b6591c62b9e33b31"
+    }
+  ],
+  "coverage_note": "Every selected source span is enumerated. This is an execution attribution index; the exhaustive candidate census remains 290 declarations / 308 units. Unselected candidates are not exclusions, equivalents or proved sound."
+}

@@ -1,4 +1,5 @@
 import Solidity.RevertBytes
+import Solidity.Backend.Environment.Namespace
 
 /-!
 # Exact observations of the published Error(string) codec
@@ -10,9 +11,9 @@ This independent backfill does not establish G40 or G41 compilation.
 namespace Solidity.Backend.AbiWorld
 open Semantics
 
-/-- A published ABI word occupies exactly 32 bytes. -/
-theorem word_length (n : Nat) : (wordBytes n).length = 32 := by
-  simp only [wordBytes, List.length_map, List.length_range]
+/-- Compatibility name for the existing environment word-length theorem. -/
+theorem word_length (n : Nat) : (wordBytes n).length = 32 :=
+  Environment.wordBytes_length n
 
 /-- Padding has its exact length, with no bound on the input list. -/
 theorem padded_length (bs : List UInt8) :
@@ -72,11 +73,11 @@ theorem error_payload (bs : List UInt8) :
     ((encodeError bs).drop 68).take bs.length = bs := by
   rw [error_tail, padded_payload]
 
-/-- Appending a later packet cannot alter any byte in the first packet. -/
+/-- List prefix identity; no decoder, memory or execution relation is asserted. -/
 theorem packet_prefix (packet suffix : List UInt8) :
     (packet ++ suffix).take packet.length = packet := List.take_left
 
-/-- Pointwise noninterference applies to every byte, not just aligned words. -/
+/-- List indexing before an append boundary; this is not runtime noninterference. -/
 theorem packet_byte (packet suffix : List UInt8) (i : Nat) (hi : i < packet.length) :
     (packet ++ suffix)[i]? = packet[i]? := List.getElem?_append_left hi
 

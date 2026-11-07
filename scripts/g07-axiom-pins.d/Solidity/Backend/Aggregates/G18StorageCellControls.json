@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Aggregates/G18StorageCellControls.lean:Solidity.Backend.Aggregates.StorageClient.negative_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

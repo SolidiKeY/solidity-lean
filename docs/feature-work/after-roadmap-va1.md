@@ -1,0 +1,5088 @@
+# VA1 decision lane: setup and open work
+
+Status: **partial; VA1-Q1 boundary revision authorized; AU01/AU02 work active**, 2026-11-01. Base `8bd8742ad987d566f7ba7624372cec1c020be07c`,
+branch `codex/solidity-automation-20261031/va1-decision`, checkout
+`/workspace/solidity-lean`. Exact AQ1/AQ2 receipt is recorded in
+[solidity-scope.md](../solidity-scope.md), checkpoint
+`717069361a21755914e78caf13d1df2ca76a0284`. No full implementation/completion claim.
+
+## Runtime recovery
+
+Existing official release `/workspace/.setup/tools/lean-4.24.0-linux`:
+Lean 4.24.0, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`;
+Lake 5.0.0-src+797c613. No installation required. The existing activation
+script remains unchanged; task commands override threads to 1 and open files to 2.
+
+The local managed Docker daemon reports 28.4.0. Unprivileged task containers
+use UID/GID 1000:1000, network none, identical `/workspace` mount and
+`--memory=12g --memory-swap=12g`. Actual cgroup files report
+`memory.max=12884901888`, `memory.swap.max=0`. No LSP/build overlap.
+Writer lock held outside the container. No daemon changes or other containers touched.
+Image: Debian bookworm-slim digest
+`sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3`.
+
+First KeySort command failed: `lake lean -j1 --tstack=131072 Solidity/KeySort.lean`,
+exit 1, unknown short option `-j`. Corrected per `lake help lean`:
+`lake lean Solidity/KeySort.lean -- -j1 --tstack=131072`, exit 0, `KEYSORT_PASS`.
+A measurement rerun passed with sampled aggregate peak RSS 305800 kB
+(sum of process RSS, including shared pages), cgroup charged-memory peak
+116174848 bytes, host MemAvailable 17557116 kB before and 17549608 kB after.
+This is **RUNTIME_GATE_PASS for setup**, not an assignment completion gate.
+Full commands, selected container inspection and raw logs are retained under
+`/workspace/va1-evidence/docker-recovery`; prior setup failures remain retained.
+
+## Source audit started
+
+`Calculus/Decision.lean` already separates non-hash `Covered` completeness from
+`hashCovered` completeness. The bridge must account for both routes:
+`decideGoal_complete` requires no hash; `decideGoal_complete_hash` handles hashes.
+The integrated handoffs describe closed original pins for two-anchor KeY int,
+ledger quantifiers, negative memory block, parameter/struct witnesses and
+written-memory hashing. These are reused, not reimplemented. The checked
+producer-source replays and remaining gap census are recorded below.
+
+## Queue accounting (current)
+
+- Baseline/setup: exact approvals, frozen ancestry, runtime/KeySort, integrated
+  producer replays, memory/array gap census and measured checks recorded.
+  Exhaustive remaining shape/reason census and baseline reproduction are partial.
+- AU01 theorem: meaningful decidable Residue, exhaustive target-to-covered/hash
+  bridge and DecisionTheorem-prime remain open. Existing census/nonvacuity and
+  countermodel controls and the constructive uint source-grammar bridge below
+  are partial progress, not a theorem substitute.
+- AU01 performance: hash/main splits and unchanged DecisionArrays replay checks
+  pass below 300 s. Array split and replay interpretation profiles are now checked below;
+  broader performance/full gates remain open; no milestone eligibility claimed.
+- AU02 fixed arrays: seven concrete array shapes reproduced; standalone fixed
+  storage-vector reconstruction/negative-block lemmas and controls checked.
+  Pipeline integration, fixed/nested array gap closure remain open.
+- AU02 broader memory and halting OR: integrated narrower deliveries reused;
+  remaining generalized implementation/proofs and controls open.
+- AU02 program-free boundary: original false requirement/counterexample retained;
+  direct human Q1 revision recorded. Exact coefficient-family boundary checked;
+  broader M4 source characterization remains open.
+- AU02 formula-derived fuel/511-node bound: open; no fixed budget raised/hidden.
+- Backfill: checked splits, independent fixed-vector lemmas, coefficient-family
+  boundary, negative/axiom controls delivered; Residue reason census/bridge and
+  remaining program-free/coverage work are partial/open.
+- Validation: owned per-file/focused gates, strict automatic, layers/orphans and
+  trust pass as recorded. Full run fails at host reserve in unchanged frontend
+  TypeExamples; ownership Q2 pending. Axiom inventory/docs strict failures remain
+  exact-base findings; they are not waived or claimed passing.
+- No AU05/AU06/compiler/VA2 work, changed exclusions/premises/budgets or
+  publication. Original full persistent goal remains incomplete and unmodified.
+
+## Reviews and delivery
+
+Approval setup: independent finder and skeptic found no issues. Docker recovery:
+independent read-only finder and skeptic verified actual limits, exit codes and
+formatting without Lean/server. Skeptic noted missing build peak RSS; the
+measurement rerun above supplies a sampled aggregate peak, distinct from charged memory.
+Completed checkpoint reviews are recorded below; unimplemented milestones still
+require their own reviews. No push, merge, PR or tag.
+The persistent goal was not changed during recovery; get_goal is unavailable
+to this worker. Coordinator owns journaled status-only reactivation.
+
+## VA1-Q1: false reverse-inclusion obligation
+
+The standalone [kernel counterexample](after-roadmap-va1/coverage-counterexample.lean)
+is `∀ uint x; (1 + 1) * x = x + x`, containing only a value quantifier and
+an equation, hence no program or update. Its two kernel certificates prove
+`inTarget {} = false` and `Covered = true`. Both use `decide +kernel`; axiom
+sets are `[propext]` and `[propext, Classical.choice, Quot.sound]`.
+Bounded per-file MCP returned complete diagnostics with success=true, no errors
+or dependency failures. Existing MCP dependency cleanup warnings are retained.
+
+`Tm.litValue?` recognizes direct literals only: source `(1+1)` and `x` are
+both nonliteral for multiplication admission. Preparation folds `(1+1)` before
+coverage checking. Thus the assigned unconditional program-free inclusion
+`Covered ⊆ inTarget` is false with the required unchanged predicates. This
+does not refute AU01's forward target-to-coverage obligation or soundness.
+No target, waiver, hash/validity premise or budget was changed.
+
+The cold Decision closure passed (259 jobs; Decision itself 31s). The
+notation import passed (72 jobs). The initial ternary probe had unsupported
+notation; the unused-update candidate was not Covered. Those failures are
+retained, not counted as counterexamples. Only the folded-factor witness
+above is certified.
+
+Independent read-only finder and skeptic both confirmed the witness, its
+program-free syntax, exact kernel certificates and impossibility of the
+unconditional inclusion; neither used Lean/server/build or wrote files.
+
+**VA1-Q1** (sources: AU02 program-free inclusion; frozen Decision definitions;
+standalone kernel witness): should the false reverse-inclusion requirement be
+replaced by the certified boundary/counterexample while preserving both
+predicates and completing the other assigned obligations, or retained
+unchanged (which keeps the full lane blocked)? No option is recommended.
+This is a scope correction, not approval to change a semantic premise.
+
+All remaining queue entries above remain open. This evidence checkpoint
+is not an AU01/AU02 implementation milestone or final gate pass.
+
+## Independent AU01 hash performance work (2026-11-01)
+
+VA1-Q1 is still pending. The false reverse inclusion, frozen predicates,
+committed witness and original requirements are unchanged. Other work does not
+depend on that decision. VA2 sharing/notation ownership was not touched.
+
+The original hash file failed before profiling due to stale Constructibility
+artifacts; the affected Hashing import closure rebuilt successfully (230 jobs,
+401.48 s total; its final module 117 s). No source repair was made there.
+Trace profiling polluted guard messages; dedicated profiling and an ordinary
+full-file check hit the 12 GiB host-reserve guard. All failures are retained.
+The first six original verdicts in an IO timing harness took 0.8764 s combined.
+Flushed command markers then located compilation/inlining and kernel coverage
+reductions. Scheduling alone was not established as a complete repair.
+
+`DecisionHashes` remains a facade; all public fixture names, definition bodies,
+theorem conclusions and 15 original guarded evaluations/expected messages are
+preserved. `noinline` changes only its verdict observer's compilation. New
+files use the existing serial-elaboration convention. Splitting may add import
+overhead; speed history and exact replays were reviewed before changes.
+
+The five-string family is checked per kind and composed; `famBound = 4`,
+algorithms, budgets and the original five-string inputs are unchanged. Coverage
+proofs select actual existing hash routes. Function-level projection equalities
+and structural list membership avoid an observed recursion-depth failure
+without increasing that limit. The mixed-kind coverage proof reuses its
+original `coveredK2` certificate. All nine printed axiom sets are standard.
+
+| Module | Per-file MCP seconds | Affected build seconds | Sampled peak RSS kB | Minimum available host GiB |
+|---|---:|---:|---:|---:|
+| DecisionHashCore | 45.91 | 41.46 | 5355456 | 12.63 |
+| DecisionHashUpdates | 27.63 | 24.37 | 5370996 | 12.76 |
+| DecisionHashFamilyCheck | 29.80 | 28.77 | 4214224 | 13.15 |
+| DecisionHashFamilies | 44.59 | 42.50 | 5628552 | 12.51 |
+| DecisionHashQuantifiers | 15.95 | 14.88 | 3368952 | 14.68 |
+| DecisionHashThreeKinds | 30.94 | 29.70 | 5993368 | 12.12 |
+| DecisionHashMixed | 28.77 | 27.61 | 5721100 | 12.40 |
+| DecisionHashKeys | 54.88 | 50.98 | 5446052 | 12.04 |
+| DecisionHashKinds | 3.18 | 2.07 | 1077032 | 16.28 |
+| DecisionHashes | 3.15 | 2.07 | 1220464 | 16.16 |
+
+These are fresh file checks with warm dependency artifacts, not a clean full
+build. Each run verifies cgroup `memory.max=12884901888`, `memory.swap.max=0`,
+uses one Lean thread and explicit `-j1`, holds the original writer lock and
+monitors aggregate RSS and the 12 GiB available-host reserve. No LSP/build
+overlap. Logs, exact commands, source hashes and measured samples are under
+`/workspace/va1-evidence/independent-20261101`. Stopped checks remain failures.
+Scratch probes were preserved outside the library tree for the orphan gate.
+
+Core/updates/family/quantifier/three-kind/mixed/key modules and both facades
+have complete passing MCP results and builds below 300 s. This verifies the
+hash-file subtask only. Downstream consumer/full gates and the entire AU01
+performance checkpoint remain open; no milestone or full assignment pass is
+claimed. The published memory-loop prerequisite was not needed or consumed;
+no other VM's performance is credited as this VM's result.
+
+Remaining independent work: Decision/DecisionArrays profiling and splits; the
+meaningful decidable Residue, forward target/coverage/hash bridge and nonvacuity
+controls; all AU02 array/memory/halting-OR/formula-fuel children; independent
+array/coverage backfill and final validation. Only the false unconditional
+reverse-inclusion obligation is held specifically for VA1-Q1.
+
+### Static and preservation checks for this partial checkpoint
+
+- Registration: 1041 reachable, zero orphaned. Layer gate: 180 core modules,
+  zero elaborator reachability. Strict automatic gate: 491 automatic, 61
+  step-budget proofs, 11 refuted, zero manual/pending. Trust: 1056 sources,
+  248 inventoried sites, zero findings. All four commands exited 0.
+- Source comparison against `8bbd5606`: all 82 original declarations, all
+  definition bodies, all theorem signatures and all 15 guarded observations
+  are preserved. Only the three documented coverage-proof bodies changed.
+- The nine printed axiom sets passed the automatic standard-axiom audit.
+  Full `check-axiom-pins.mjs` still exits 1: 404 unrecorded changes, zero
+  axiom errors, versus 403 at the frozen base. Tracked pins/sets are identical.
+  The extra untracked pin was `foo []` in the pre-existing optional Mathlib
+  cache ([the pinned upstream SplitIfs test](https://github.com/leanprover-community/mathlib4/blob/f897ebcf72cd16f89ab4577d0c826cd14afaafc7/MathlibTest/SplitIfs.lean)).
+  The cache and inventory were preserved in that earlier run. This full gate
+  is not reported as passing.
+- Strict documentation paths still exit 1 with 48 missing references and 37
+  ambiguous references, exactly the frozen-base findings after qualifying
+  this lane's ambiguous `Calculus/Decision.lean` citation. Differential result:
+  zero new findings. No unrelated references were rewritten.
+- KeySort passed again under the current container cap and 12 GiB host
+  reserve in 2.08 s, with actual Lean/Lake versions and `KEYSORT_PASS` retained.
+
+The baseline comparison uses the clean detached read-only worktree
+`/workspace/va1-doc-base-8bd8742a` at the exact frozen commit. Raw failed
+validation-driver attempts remain retained alongside the corrected comparisons.
+Downstream consumer/full builds, final strict inventories and the remaining
+original queues are still open; this is checked owned progress, not completion.
+
+### Downstream consumer and final review
+
+The unchanged direct consumer `Solidity.Examples.Decision` was checked with
+`timeout 300 lake -f .va1-lakefile.toml build Solidity.Examples.Decision`.
+It exited 124 after 300.68 s, without a host-reserve stop. This is a failed
+required affected check, not a pass. Main Decision profiling/splitting remains
+the next independent AU01 child; Hash/DecisionArrays/full-milestone completion
+is not claimed.
+
+Independent final read-only finder and skeptic reviews found no code or
+documentation issues in the checked hash split. They confirmed source/hash
+identity, the 82 original declarations and 15 guards, standard axiom sets,
+actual typed route membership and narrow acyclic registrations. They used no
+Lean server or build and wrote no files. The final consumer timeout is retained
+as an explicit open obligation.
+
+## Independent main Decision performance checkpoint (2026-11-01)
+
+Parent `90572ad37459f12dc560e9f3b8fd646263da2d3f`; frozen base and prior
+approval/counterexample/sealed deliveries are preserved. VA1-Q1 remains pending.
+This checkpoint completes the main-file split subtask, not AU01/AU02 or the
+whole performance milestone. No other producer's source was changed.
+
+The unchanged main consumer timed out after 300.68 s. A marked copy of the
+exact frozen-base source also timed out (124, 301.64 s, no resource stop):
+markers measured about 50.54 s for the original lines 309–371 coverage block,
+112.71 s for ledger-payment controls and 66.13 s for the next APF controls.
+Those are section wall times including elaboration/compiled guards, not a
+clean arithmetic-search benchmark. Speed history `0cd7a473` and `12240168`
+was inspected; the existing exact sorted/array replay certificates remain.
+
+`Examples/Decision.lean` is now a compatibility facade over 13 serial sections.
+Every original public name, definition, theorem statement and all 56 guarded
+commands/expected messages remain. The only original proof body changed is
+`gapThreeKinds_covered`: exact `tk3`/`swPrefix` outputs are certified as `some`,
+and the eight unchanged `coveredK3` conjuncts are checked separately before
+selecting the existing RIPEMD-first `HashTry` list entry. Private `getD .tt`
+values have explicit `*_some` certificates, so their fallbacks cannot establish
+coverage on failure. No predicate, hash/validity premise, decision default,
+expected observation, algorithm budget or heartbeat/recursion limit changed.
+
+The first split mistakenly reused the existing `Examples/DecisionKInt.lean`
+filename. Independent finder and skeptic caught it before dependent checks;
+the original file was restored byte-identical and the new section renamed
+`DecisionGapKInt`. All new destination paths were checked against HEAD.
+The restored original consumer now builds successfully.
+
+### Actual bounded gates
+
+All checks use the original writer lock, one Lean thread, explicit `-j1`,
+`--tstack=131072`, the existing task container hard 12 GiB/no-swap bound and
+12 GiB available-host reserve; no LSP/build overlap. Per-file MCP results are
+complete, with no warnings/errors/dependency failures. Commands are
+`timeout 300 .venv/bin/python …/diagnostic.py Solidity/Examples/<module>.lean`
+and `timeout 300 lake -f .va1-lakefile.toml build Solidity.Examples.<module>`,
+inside the recorded runner. Each raw JSON retains the exact Docker/command
+argv, versions, source SHAs, elapsed time, actual exit and resource samples.
+
+| Module | Fresh-file MCP seconds | Subsequent module build seconds |
+|---|---:|---:|
+| `DecisionCore` | 5.33 | 4.25 |
+| `DecisionArithmetic` | 88.32 | 87.14 |
+| `DecisionMapping` | 26.60 | 24.33 |
+| `DecisionGapCore` | 6.34 | 5.29 |
+| `DecisionGapKInt` | 7.42 | 6.34 |
+| `DecisionLedger` | 109.00 | 108.44 |
+| `DecisionAPF` | 61.76 | 61.58 |
+| `DecisionBlocks` | 13.95 | 12.77 |
+| `DecisionRefutations` | 10.88 | 8.55 |
+| `DecisionOperators` | 105.92 | 103.17 |
+| `DecisionThreeKindCoverage` | 28.73 | 27.62 |
+| `DecisionGapHashes` | 50.27 | 45.67 |
+| `DecisionStorageArrays` | 47.77 | 46.74 |
+| `Decision` | 3.16 | 2.10 |
+
+These are dependency-warm fresh-file checks, not a clean full build. The warm
+same-source facade rebuild passed in 1.01 s. Actual versions remain Lean
+4.24.0 (`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`) and Lake 5.0.0-src+797c613.
+Across the selected passing module runs, peak sampled aggregate RSS was
+5,665,384 kB (sum of process RSS including shared pages); minimum sampled host
+available memory was 12.0115 GiB. Each run verified `memory.max=12884901888`
+and `memory.swap.max=0` before Lean. The previously passing bounded KeySort
+output remains retained; no new runtime pass is inferred from installation.
+
+The original `Examples/DecisionArrays.lean` consumer passed complete MCP in
+38.23 s and build in 36.11 s. Its existing 280-line coherent certificate and
+`@[csimp]` exact replay were reused without source edits; these timings do not
+benchmark or rerun its potentially enormous original arithmetic search.
+The unchanged `Examples/DecisionKInt.lean` consumer built in 23.33 s.
+A single bounded `lake env lean -j1 --tstack=131072 …/axioms.lean` audit passed
+in 116.72 s: all 141 moved public theorem names were checked, and every axiom
+set is a subset of `[propext, Classical.choice, Quot.sound]`.
+
+### Retained failed experiments and review
+
+The original and marked main-file 300 s timeouts remain failures. Hash-gap
+checks and isolated route attempts stopped on the host reserve (actual Docker
+143, wrapper 75); none is counted as a pass. Conjunction unfolding hit the
+unchanged recursion limit, and a composition initially left a literal true
+conjunction unsolved; the corrected proof uses explicit `Bool.true_and`.
+Lean's temporary recovery `sorryAx` in that failed probe is retained, and is
+absent from the final 141-theorem audit. The marked hash copy located the
+later whole-module stop after the first certificate, at the mixed-kind proof;
+a separate certificate module resolves the retained-heap accumulation.
+A two-instance partition also stopped; the verified shared-instance proof
+was retained. An initial native route timer did not force the value before
+the stop timestamp; its timings were discarded. Correct forced timing gives
+0.080–0.145 s per compiled route, all true; this is external profiling, not a
+kernel certificate. Two extracted family-word numeral candidates were not
+incorporated. A probe outside the Lean project returned a tool path error
+(despite process exit 0); it was not a passing diagnostic. All raw failures
+and owned probe sources are preserved outside the library tree.
+
+Independent read-only finder and skeptic reviews confirmed the repaired
+filename, exact original source/guard preservation, unreachable certified
+fallbacks, all eight unchanged conditions, existing route membership and
+absence of semantic/budget changes. Neither used Lean/server/build or wrote
+files. Final documentation/source review is recorded in the evidence directory.
+
+Evidence: `/workspace/va1-evidence/decision-next`, with actual runner logs under
+`/workspace/va1-evidence/independent-20261101/va1-ind-main-*`. The source audit
+binds every passing target to its final SHA; the original main file is verified
+byte-identical to the frozen base. Scratch probes were preserved outside the
+library before final static gates. Delivery staging after this checkpoint commit is
+`/workspace/va1-evidence/decision-next/delivery`; packaging and checksum
+verification must complete before the final report claims those artifacts.
+
+### Remaining obligations after this checkpoint
+
+AU01's meaningful decidable Residue/reason census, nonvacuity controls and
+forward target-to-coverage/hash bridge are still open and independent of Q1.
+The overall performance milestone, broader Decision consumers and final full
+affected import closure/run-lean gates are not complete. AU02 fixed/nested
+arrays, broader memory, halting OR, formula-derived fuel/511-node bound and
+all corresponding positive/refuted/unknown controls/proofs remain open or
+unreproduced. Backfill independent array/coverage lemmas and residue census
+remain open. Only the false unconditional program-free reverse inclusion is
+held for VA1-Q1. Neither frozen predicate nor that original requirement was
+changed. No milestone eligibility, publication, full goal completion or other
+VM's workload pass is claimed. The persistent goal was not reset or stopped.
+
+Final static checks for the main split: registration/layer/strict automatic/trust
+commands passed (1054 reachable, zero orphans; 180 core modules, zero elaborator
+reachability; 491 automatic, 61 step-budget, 11 refuted, zero manual/pending;
+1069 sources, 248 inventoried sites, zero trust findings). Axiom inventory still
+exits 1 with 1206 pins, zero errors and 404 unrecorded changes, byte-identical
+to the previous checkpoint output. Strict doc paths still exit 1 with the
+exact frozen-base 85 findings (48 missing, 37 ambiguous), zero added/removed.
+Neither failed full gate is reported as passing. The final finder and skeptic
+found only premature artifact-sealing wording; it was corrected to pending
+packaging before commit. Actual packaging verification belongs to the external
+identity/manifest after commit.
+
+## Frozen-source baseline and kernel gap census checkpoint
+
+Parent `2d70adc0ea5d4b6dbd87c86569a6d4ec2b02b123`; full goal remains
+incomplete. The human answered VA1-Q1 during this checkpoint, as recorded in
+`docs/solidity-scope.md`: **"Authorize the certified boundary revision"**.
+This supersedes only the false unconditional reverse inclusion. Earlier
+pending-Q1 statements describe their historical checkpoints; the original
+requirement and `8bbd5606` counterexample remain, and earlier seals are untouched.
+The supported boundary is not formulated or proved by this census checkpoint.
+
+### Reproduced integrated deliveries, reused without source changes
+
+The following files were checked byte-for-byte against the frozen base
+`8bd8742ad987d566f7ba7624372cec1c020be07c`, then passed complete bounded per-file
+MCP and affected builds on this VM (same runner, actual cgroup cap/no swap,
+threads1/-j1, writer lock and 12 GiB host reserve, no build/LSP overlap).
+
+| Frozen module | MCP seconds | Build seconds |
+|---|---:|---:|
+| `Examples/DecisionMemory.lean` | 65.67 | 65.98 |
+| `Examples/DecisionQuantLedger.lean` | 14.90 | 15.11 |
+| `Examples/DecisionWrittenMemory.lean` | 20.50 | 14.83 |
+
+The unchanged KeY-int consumer already passed its affected build in 23.33 s.
+The six historical unknown pins are reused: two-anchor int and ledger
+quantifiers now proved; negative array memory, the given-heap parameter,
+fresh struct and written-memory hash now refuted. Exact public certificate
+pointers include `gapKIntTwoAnchors_goal_verdict`,
+`DecisionQuantLedger.original_goal_proved`, `gapMemParam_verdict`,
+`gapMemStruct_countermodel`, and `DecisionWrittenMemory.original_kernel_verdict`
+with `original_realized_covered`. The original negative-array verdict guard
+also passes; no new exact-verdict theorem is claimed for that native guard.
+All existing controls, states, hash premises, definitions and expected outputs
+are retained. These Lean guards/native evaluations do not assert external
+EVM/compiler agreement. Kernel certificates and native guard evidence are
+separate, as recorded by their original sources.
+
+### Actual remaining target gaps, without a Residue shortcut
+
+New `Examples/DecisionGapCensus.lean` imports and reuses the original fixtures.
+For each row it kernel-proves `inTarget {} = true`, `decideGoal = unknown`,
+and `Covered = false`:
+
+| Existing fixture | Syntactic reason |
+|---|---|
+| `memParamSame` | Given-heap memory parameter; the finite witness fallback returns countermodels, not global validity from one checked heap. |
+| `memStructReversed` | Field/literal equality with the field on the right, outside the exact classifier's orientation. |
+| `memStructBuried` | RHS literal below addition, outside the direct-literal schema. |
+
+The hidden-parameter fixture already has the producer's global
+`memParamSame_valid` proof and positive local check, while its global verdict
+remains unknown. The positive `memStructSame` target pin pairs with existing
+coverage/validity certificates; the realized struct countermodel and full
+child observations are retained. Thus these are actual inhabited controls,
+not a renamed coverage/unknown complement. No `Residue`, bridge or completed
+decision theorem is defined or claimed by this module, and the census is not
+exhaustive. No other producer's source or old observation was edited.
+
+The ten new facts passed complete MCP in 3.15 s and module build in 2.08 s.
+A separate public-name axiom audit passed in 9.55 s: exact ten-name coverage,
+only subsets of `[propext, Classical.choice, Quot.sound]`, no `sorryAx`.
+Actual source SHAs, raw commands/results and baseline identities are saved in
+`/workspace/va1-evidence/baseline-next`, with runner logs
+`/workspace/va1-evidence/independent-20261101/va1-ind-baseline-*` and
+`va1-ind-census-*`. Independent read-only finder and skeptic source reviews
+found no issues; neither used Lean/server/build or wrote files. Final docs and
+static checkpoint gates are recorded with this checkpoint's delivery.
+
+### Current requirement and remaining queue
+
+VA1-Q1 is answered, not pending. After finishing this safe census checkpoint,
+VA1 must formulate and prove the human-authorized precise program-free
+boundary, preserve both predicate definitions byte-for-byte and retain the
+counterexample, with explicit supported/outside classes and inhabited
+positive/negative controls. This is not permission to restate the old false
+claim with an unexplained stronger precondition. The exact human receipt and
+scope are in `docs/solidity-scope.md` alongside the original obligation.
+
+AU01's meaningful decidable Residue, structural target/coverage/hash bridge,
+DecisionTheorem-prime and exhaustive reason census remain open. AU02 array,
+memory, halting-OR and formula-derived fuel children and remaining backfill
+are still open. Full affected closure/run-lean and strict inventory resolution
+remain incomplete. No full-goal completion, milestone eligibility, push,
+merge, PR or tag is authorized or claimed. Original VM/thread/branch/goal,
+frozen base, checkpoint/seal ancestry and all original unrelated obligations
+are preserved.
+
+Census final checkpoint static results: registration 1055 reachable/zero
+orphans, layers 180 core/zero elaborator paths, strict automatic 491 automatic/
+61 step-budget/11 refuted/zero manual or pending, trust 1070 sources/248
+inventoried sites/zero findings; all four passed. Axiom inventory still exits 1
+with zero errors and 404 unrecorded changes (output identical to the prior
+checkpoint); doc paths still exit 1 with the exact 85 frozen-base findings.
+Independent final read-only finder and skeptic found no source, receipt or
+documentation issues. They independently confirmed the frozen producer and
+predicate file identities. Packaging follows commit; no artifact seal is
+claimed until its actual bundle/patch/checksum verification succeeds.
+
+## Human-authorized supported coefficient-family boundary
+
+Parent `d17f161d075cf74ff04ecc958eeed8a1bcc02a4a`. The exact human Q1 answer
+is recorded with the original requirement in `docs/solidity-scope.md`:
+**"Authorize the certified boundary revision"**. This checkpoint proves a
+sharp boundary for the explicit family below. It does **not** prove general
+program-free reverse inclusion or the broader M4 source characterization.
+Those classes and all other original obligations remain outside this result.
+
+### Exact supported class and public statement
+
+For every contract `C`, waiver setting `w` and locally closed typed uint term
+`c : Tm C [] (.val .uint)`, `coefficientLeaf c` is the intrinsic program-free
+formula `∀ uint x; c * x = x + x`, with `c` weakened under the binder so it
+cannot depend on `x`. Locally closed does not mean state-independent: `c` may
+read the state. No coverage, source-admission or successful-verdict assumption
+is imposed on `c` in the primary theorem.
+
+The public theorem `Solidity.Decide.CoefficientBoundary.coefficientLeaf_inTarget`
+in `Calculus/DecisionCoefficientBoundary.lean` has the explicit signature:
+
+```lean
+theorem coefficientLeaf_inTarget {C : Contract} (w : Waivers)
+    (c : Tm C [] (.val .uint)) :
+    (coefficientLeaf c).inTarget w = c.isLitV
+```
+
+Thus, **within this family**, source admission is equivalent to direct source
+literal shape. The existing `Tm.isLitV` test checks syntax, not whether
+preparation can compute a constant. The proof handles weakening, positive
+binder traversal, operator admission, mapping-key agreement and the negative
+hash-pair restriction separately. It does not call coverage to establish
+admission. `covered_boundary` explicitly restricts this stronger family
+identity to covered members; its coverage hypothesis is intentionally unused.
+That corollary is not the old false unconditional inclusion with a disguised
+premise, and arbitrary coefficients are not claimed covered or decidable.
+
+Other formula shapes, different right-hand sides, additional or negative/hidden
+binders and updates/programs are outside the supported family. The larger M4
+source characterization and all AU01/AU02 completeness claims stay open.
+`hiddenParameter_outside_family` certifies an actual separately checked
+program-free target/unknown control outside the family by constructor shape;
+its target/unknown/not-Covered certificates remain in the census module.
+
+### Inhabited, independently checked controls
+
+`Examples/DecisionCoefficientBoundary.lean` uses notation for the concrete
+formulas and named exact equalities to the family. The actual observed triples
+`(inTarget {}, Covered, verdict)` were reproduced before adding the new guard:
+
+| Source coefficient | Triple | Kernel semantic certificate |
+|---|---|---|
+| `2` | `(true, true, "proved")` | Exact proved verdict, `ValidH`, then ordinary `Valid` using the existing no-hash equivalence. |
+| `3` | `(true, true, "refuted")` | An inhabited returned state with exact refuted verdict and `¬ holdsH`; ordinary countermodel follows from the existing no-hash equivalence. |
+| `(1+1)` | `(false, true, "proved")` | Exact proved verdict and validity; retains the coverage/source-admission mismatch. |
+
+Coverage and all three target flags are independently kernel checked.
+Semantic certificates use exactly `decideGoal_sound`, `decideGoal_refutes`,
+`Fml.validH_iff` and `Fml.holdsH_iff`; the no-hash facts are kernel proved for
+these controls. No new validity/hash premise, default or source exclusion is
+introduced. Existing examples/expected observations, predicates, strategy,
+fuel/node/time/test/heartbeat/recursion budgets and unrelated profiles are
+unchanged. These are model/kernel and native Lean controls, not an external
+EVM/compiler agreement claim.
+
+The original `coverage-counterexample.lean` remains byte-identical to
+`8bbd5606e55f6ceadcbe611c2475370466d88ae9`. The public standalone
+[retained-source link](after-roadmap-va1/coefficient-boundary-link.lean) embeds
+that entire original file verbatim after one import and proves
+`retained_family_eq` plus `retained_family_boundary`. Its original false/true
+observations and both old certificates replay successfully. No earlier seal
+or failure was erased. The entire `Calculus/Decision.lean` file, including both
+predicate definitions, remains byte-identical to the frozen base; source hashes
+are retained in the evidence directory.
+
+### Actual gates, trust and failures
+
+All commands use the same task-owned local Docker runner, actual 12 GiB
+aggregate cgroup cap/no swap, explicit `-j1`, threads1, original writer lock and
+12 GiB host reserve, without LSP/build overlap. The evidence runner adds only
+source hashing for the new files; resource checks and policies are unchanged.
+Actual Lean 4.24.0/Lake 5.0.0-src+797c613 versions are recorded before each run.
+
+| Source | Complete MCP seconds | Build seconds |
+|---|---:|---:|
+| `Solidity/Calculus/DecisionCoefficientBoundary.lean` | 6.52 | 5.40 |
+| `Solidity/Examples/DecisionCoefficientBoundary.lean` | 8.68 | 6.34 |
+| `docs/feature-work/after-roadmap-va1/coefficient-boundary-link.lean` | 6.55 | standalone MCP |
+
+The public axiom audit checked all 27 boundary/control theorem names in 20.37 s,
+with only subsets of `[propext, Classical.choice, Quot.sound]`. The retained-source
+link separately prints the two old and two new public axiom reports. Selected
+passing runs peaked at sampled aggregate RSS 2,343,272 kB (including shared
+pages) and stayed above 15.5145 GiB host available. These are dependency-warm
+fresh-file checks, not a cold full project build.
+
+Raw failed probes remain retained: the first helper lacked explicit
+`Option.isSome` reduction; a broad unfolding probe hit the unchanged recursion
+limit and looping-simp warnings; a new ordinary-countermodel signature used the
+wrong `Fml.holds` namespace, then was corrected to the existing `holds`.
+No failed probe is counted as a passing theorem. The completed proofs use
+explicit signatures/typed intermediates and `simp only`; no `sorry`, new axiom,
+new dependency or native-trust shortcut was introduced. Diagnostic probes were
+preserved outside the library before static gates.
+
+Independent read-only finder and skeptic source reviews found no issues in
+the sharp family identity, substantive bridges, separate semantic controls or
+retained-source link. Both required and confirmed the family/general-M4
+limitation and the intentionally redundant covered corollary. Neither used
+Lean/server/build or wrote files. Final delta/docs/static reviews and packaging
+are recorded with this checkpoint; sealing follows commit and is not claimed
+until actual patch/bundle/checksum verification.
+
+Evidence and public reports: `/workspace/va1-evidence/boundary-next`.
+The exact-source passing gates are verified against the final file hashes.
+
+### Full assignment remains incomplete
+
+This supported-family result is useful checked progress under the approved
+revision, not completion of the broader M4 source boundary. AU01 Residue,
+DecisionTheorem-prime, structural target/coverage/hash bridge and exhaustive
+reason census are still open. AU02 fixed/nested array, broader memory,
+halting-OR and formula-derived fuel/511-node obligations, corresponding controls,
+remaining independent backfill and final affected/full gates remain open.
+Existing strict axiom/documentation inventory failures are not waived. No
+milestone eligibility, publication, push, merge, PR/tag or whole-goal completion
+is claimed. The original goal identity/objective was not reset or stopped.
+
+Boundary checkpoint final resource rechecks also explicitly print aggregate RSS,
+host MemAvailable and cgroup current/peak **before** Lean/LSP starts. They retain
+the same 12 GiB/no-swap cap and 12 GiB host reserve. All five warm rechecks
+passed: core MCP/build 6.56/2.23 s, controls MCP/build 9.80/2.08 s, retained link
+MCP 6.59 s. Pre-build RSS snapshots were 2960–3288 kB; host MemAvailable was
+17,240,320–17,261,308 kB. Raw output retains actual `memory.max=12884901888`,
+`memory.swap.max=0`, versions and measurements. This adds observability to the
+owned runner; no installed guard policy or resource/proof budget changed.
+
+Final boundary static gates: 1057 reachable/zero orphans; 180 core modules/zero
+elaborator paths; strict automatic 491 automatic/61 step-budget/11 refuted/
+zero manual or pending; trust 1072 sources/248 inventoried sites/zero findings.
+All four pass. Axiom inventory still exits 1 with 1206 pins, zero errors and
+404 unrecorded changes, byte-identical to the previous checkpoint output.
+Strict doc paths still exit 1 with the exact 85 frozen-base findings and no
+added/removed findings. Neither full failed gate is reported as passing.
+Independent final read-only finder and skeptic found no source/docs findings,
+confirmed the ordinary semantic and outside-family proofs, original byte
+identities, source-hash/gate matches, exact class limitation and open queue.
+Neither used Lean/server/build or wrote files. Packaging remains post-commit,
+with actual verification required before claiming a seal.
+
+
+## Array reproduction and full-gate checkpoint (2026-11-01)
+
+`Examples/DecisionArrayGaps.lean` distinguishes seven current AU02 shapes:
+fixed-array bounded blocks (positive and false), arrays below mapping keys,
+fixed arrays below keys, arrays below fields, arrays of structures, and arrays
+of arrays. Each has separate kernel proofs of `inTarget {} = true`,
+`Covered = false`, and actual `decideGoal = .unknown`. These are new named
+reproduction inputs, not edits to existing verdict expectations. Fixed-array
+reads already have an existing covered route; the reproduced blocks do not.
+
+Six positive inputs have ordinary `Fml.Valid` proofs by their index-one
+instance. The seventh constructs an intrinsic `[0,0,1]` root, proves its exact
+storage shape, proves `¬ holds fixedBadState fixedBad`, and hence proves
+`¬ Fml.Valid fixedBad`. This separates semantic truth/falsehood from the
+current incomplete pipeline. No hash premise is needed for these hash-free
+inputs. The observer output is external execution; all 21 classifications,
+six validity claims and three negative-state claims are kernel theorems.
+This census is not a Residue definition, completeness bridge or AU02 fix.
+
+Exact-source per-file MCP passed in 15.96 s, the affected module build in
+13.78 s, and all 30 public axiom reports in 20.12 s. The reports contain only
+subsets of `[propext, Classical.choice, Quot.sound]`. Evidence, source hashes,
+commands, actual versions, cgroup/pre-build measurements and sampled aggregate
+RSS are retained in `/workspace/va1-evidence/array-next`; `verified-gates.json`
+checks the final source against all three runs. The runner enforces aggregate
+12 GiB/no swap and the 12 GiB host reserve, one Lean check at a time, thread
+one and explicit `-j1`. The unchanged 300 s guard and all proof budgets remain.
+Earlier failed `rfl`/countermodel probes are retained, not counted as passes.
+Scratch probes were preserved outside the library before static gates.
+
+Independent read-only finder and skeptic reviews found no issues in the
+seven classifications, six semantic proofs or intrinsic countermodel. Both
+confirmed that this is reproduction, not pipeline completion, and neither
+used Lean/server/build or wrote files. Final documentation/static review and
+post-commit packaging are recorded separately below when complete.
+
+### Actual full validation failure and VA1-Q2
+
+The stock `./run-lean.sh` was attempted at head
+`3b07ff8e08be6f7564abf3d9cce6ec330617f97d` through the owned bounded
+runner. `.va1-full-lakefile.toml` adds only weak `-j1` options to each existing
+library/executable; its normalized configuration is otherwise identical.
+No installed wrapper, guard or tracked lakefile was changed.
+The full run stopped after 366.51 s when host MemAvailable fell below the
+required 12 GiB reserve: actual Docker exit 137, wrapper exit 75, no OOM kill,
+maximum observed Lean processes one. Sampled aggregate RSS peaked at
+3,973,344 kB; minimum host available was 12,862,623,744 bytes. The active
+TypeExamples job was inferred from the newest setup timestamp. A separate
+fresh focused `Solidity.Frontend.Checked.TypeExamples` check confirmed that
+module independently crosses the reserve: 53.59 s, actual exit 143/wrapper 75,
+peak sampled aggregate RSS 4,190,480 kB, minimum host available
+12,766,621,696 bytes. Both gates FAILED; neither is a timeout/resource pass.
+Raw commands/output/measurements are in `/workspace/va1-evidence/full-next`,
+especially `failure-summary.json`. No unchanged stopped build was repeated.
+
+Fetched published master `099bfbe185731c354b12a40f28ccf5d98534c779` remains
+a descendant of the frozen base and contains no TypeExamples repair. The
+assigned branch was not rebased or reset. TypeExamples is byte-identical to
+the frozen base and belongs to the frontend source lane. No other lane file
+was edited and no foreign host performance is credited as a local pass.
+
+**VA1-Q2 — pending**, sources: full-validation gate, frontend ownership,
+12 GiB host reserve. Should the source lane repair TypeExamples, or may VA1
+perform a narrow exact-preservation performance split?
+
+1. Keep source-lane ownership: full validation waits for a published repair;
+   independent VA1 proof work continues. Recommended because the launch
+   explicitly reserves frontend work to other producers.
+2. Authorize VA1 only TypeExamples/split modules/necessary registrations:
+   preserve every input, observation and budget, with gates and reviews.
+
+This is an ownership question, not a request to weaken the reserve, theorem
+or any exclusion/premise. No answer is inferred. VA1-Q1 is already answered
+by the direct human approval recorded above; it is not this blocker. All
+remaining original queue and backfill obligations remain incomplete.
+
+Array checkpoint static gates: 1058 reachable/zero orphans, 180 core modules/
+zero elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/
+zero manual or pending, and trust 1073 sources/248 inventoried sites/zero
+findings all pass. A direct trust-script invocation initially failed because
+it lacked the required NUL-delimited file list; that raw failure is retained
+and the sanctioned `bash scripts/check-trust.sh` passed. Axiom inventory
+continues to fail with 1206 pins/zero errors/404 unrecorded changes, identical
+to the prior checkpoint. Doc paths continue to fail with the exact 85
+frozen-base findings, with zero added/removed. The entire Decision source and
+original 8bbd5606 counterexample remain byte-identical. Independent final
+finder and skeptic documentation/evidence reviews found no issues; neither
+used Lean/server/build or wrote files. All original open obligations and Q2
+remain. Export verification follows the commit; no full-goal pass is claimed.
+
+
+## Fixed storage-vector reconstruction backfill (2026-11-01)
+
+`Calculus/FixedArrayFloor.lean` reuses integrated `MemFloor` index laws and
+`ArrayCut.vecOf`; those deliveries are unchanged. For all types `E`, lengths
+`n`, vectors `v : SVec E n`, breakpoints `B` containing `(n : Int)` and natural
+indices `k`, `fixedFloorVec_slot` proves
+`(fixedFloorVec B v).toList[k]? = v.toList[mxFloorIndex B k]?`.
+This preserves optional reads even beyond length; the default used during
+construction is unreachable below length. `fixedFloorIndex_toNat` certifies
+the corresponding uint index; `fixedFloorVec_find` proves actual
+`SVal.findM` equality along `.atF i q` for every typed continuation
+`q : Path E U`, including nested array/struct elements.
+
+`fixedFloorVec_block_reads` realizes a finite block and exterior reads in one
+reconstructed vector. `fixedFloorVec_negative_iff` quantifies over all
+`v : SVec E n`, with vector-dependent breakpoint lists retaining length and
+every exterior read. The full universally quantified block implication is
+equivalent to its finite-instance counterpart. `P : Option (SVal E) → Prop`
+sees the optional element, not its index; `Q` sees only retained optional
+reads. The forward proof applies its full-block hypothesis to a potentially
+different vector, then transfers `Q` back by retained-read equality. No
+completion/decision premise is assumed. This vector-level boundary does not
+recognize arbitrary intrinsic formulas, establish whole-state/alias
+agreement, transfer arbitrary guards or change a closer verdict. It does
+not replace AU01 or present a stronger premise as the original theorem.
+
+`Examples/FixedArrayFloor.lean` proves inhabited changed/retained uint reads,
+reads at/past length, empty bool and nested-array controls. Omitting the
+length breakpoint demonstrably changes definedness and invalidates the read
+identity. The Boolean input `[true,false]` fails its full block; its different
+reconstruction satisfies it. `bool_finite_boundary` specializes the
+quantified iff to that inhabited type. These are kernel proofs, not
+source/EVM test evidence or pipeline coverage.
+
+Core per-file MCP passed in 3.15 s and fresh focused build in 2.08 s
+(final warm source-record recheck 1.02 s). Controls MCP/build passed in
+4.27/2.08 s. All 20 public theorem axiom reports passed in 3.21 s with only
+standard axioms. Exact commands, versions, source hashes, cgroup/pre-build
+measurements and sampled aggregate RSS are in
+`/workspace/va1-evidence/fixed-floor-next/verified-gates.json` and raw logs.
+The one-second warm recheck finished before an in-container RSS sample,
+recorded as null; its pre-build measurements remain. Other checks retain
+aggregate RSS samples. The unchanged 300 s/proof budgets, hard 12 GiB/no-swap
+cap, 12 GiB host reserve, serial thread-one/explicit `-j1` checks remain.
+Failed empty-vector `rfl` and open-lambda inference/decide probes are retained,
+not counted as passes. No predicate, pipeline, old pin, model, dependency or
+other-lane source changed.
+
+Independent read-only finder and skeptic found no logical issues, confirming
+the exact length/retention premises, index-independent `P`, read-only `Q` and
+vector-level scope. The skeptic suggested an inhabited specialization; the
+Boolean specialization and changing reconstruction address it. Neither
+reviewer edited or used Lean/server/build. Final delta/static review and
+packaging follow below when actually checked.
+
+This completes the standalone fixed-array backfill lemma/control increment,
+not AU02 implementation. AU01 Residue/DecisionTheorem-prime/structural bridge,
+broader M4 boundary, AU02 pipeline children including formula-derived fuel
+and final full validation remain incomplete. Q1 is answered; Q2 remains
+pending and blocks only frontend repair/full validation. Prior seals and
+failures remain.
+
+Fixed-vector final static gates pass: 1060 reachable/zero orphans, 180 core/
+zero elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/
+zero manual or pending, trust 1075 sources/248 inventoried sites/zero findings.
+Axiom inventory still fails with 1206 pins/zero errors/404 unrecorded changes,
+byte-identical to the prior checkpoint; doc paths still fail with the exact
+85 frozen-base findings and no added/removed findings. Decision and retained
+counterexample byte identities pass. Final independent finder/skeptic delta
+and handoff reviews found no issues. The cumulative export includes prior
+raw evidence and seals, with actual post-commit verification required.
+
+The first commit attempt failed with actual Git exit 128: `No space left
+on device`. Root overlay was full (32 GiB); source/evidence survived.
+Saved non-secret state/cap/driver evidence for the eleven stopped
+`va1-ind-fixed-floor-*` containers, then removed only those task-owned
+temporary containers. All bind-mounted files, images/caches and other
+containers were preserved; free space recovered to 746 MiB. Exact commands
+and before/after `df` are retained in `fixed-floor-next/disk-recovery`.
+The failed commit is retained as a setup failure, not a passing gate.
+
+
+## DecisionArrays split and interpreted replay profile (2026-11-01)
+
+Inspected speed history before the warned refactor, especially `12240168`
+(`Check array replay`): the exact normalized `normalized2 := .tt` certificate
+and closed `@[csimp]` replay intentionally avoid the expensive original
+arithmetic search. Both are preserved. A fresh-file baseline profile of the
+unchanged source passed in 38.42 s: tactic execution 15.9 s, kernel type
+checking 16.7 s, interpretation 73.8 ms. This is the existing certified
+closed regression, not a benchmark of unreplayed generic countermodel search.
+
+`Examples/DecisionArrayCore.lean` now owns the original fixtures and eight
+public coverage/answer certificates. `Examples/DecisionArrayReplay.lean` keeps all
+private arithmetic templates, reduction proofs, replay certificate and
+unchanged guarded `['proved','refuted','proved']` observation together.
+`DecisionArrays.lean` is the compatible import facade. All 26 declarations,
+their signatures/bodies/budgets and the csimp/guard suffix are preserved;
+`source-preservation.json` records exact block comparisons. Only wrappers,
+imports and the stale module-doc certificate location changed. No private
+identifier is used across modules, no other producer file was edited, and
+shared module-map registrations are narrow additions.
+
+Dependency-warm checks with initially fresh module files: Core MCP/build
+6.32/5.23 s, Replay MCP/build 40.58/36.14 s, facade MCP/build 4.19/3.13 s,
+array-gap consumer MCP/build 15.98/14.81 s. After the review doc correction,
+Core/facade MCP rechecks passed in 7.43/42.58 s; the latter also refreshed
+its changed import. The final combined facade/consumer closure build passed
+in 15.88 s. Final replay profiling passed in 37.18 s: tactic execution
+16.8 s, type checking 15.1 s, interpretation 49.8 ms. Each checked file is
+below the unchanged 300 s guard; the split adds import overhead, and no
+overall speedup or cold full-build time is claimed. These are measured
+cache/source identities, not another host's results.
+
+A public/private Lean axiom audit passed in 25.49 s, printing all eight
+public certificates and every original private proof, including the exact
+csimp theorem, plus generated theorem reports. All use only subsets of
+`[propext, Classical.choice, Quot.sound]`. Final source hashes and measured
+aggregate RSS/headroom are checked in
+`/workspace/va1-evidence/array-split-next/verified-gates.json`; raw stdout,
+stderr, profiler categories, commands and actual Lean/Lake versions remain.
+The hard aggregate 12 GiB/no-swap cap, 12 GiB host reserve, one thread,
+explicit `-j1`, writer lock and no LSP/build overlap remain. New containers
+are task-owned ephemeral checks so temporary layers do not refill the disk;
+all mounted caches, source and evidence remain. No proof/time/search budget,
+decision pipeline, frozen predicate, old expected verdict or premise changed.
+
+Independent read-only finder and skeptic confirmed exact code/replay
+preservation and acyclic imports. Finder caught a stale 'certificate below'
+reference; skeptic caught the facade's extra EOF blank line. Both were
+corrected before final gates. Neither edited or used Lean/server/build.
+Final documentation/static review and sealing follow when actually complete.
+The original AU01 theorem/Residue/bridge and AU02 integrations remain open;
+this finishes the requested array-example split increment, not the full lane.
+
+Array-split final static checks: 1062 reachable/zero orphans, 180 core/zero
+elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/zero
+manual or pending, trust 1077 sources/248 inventoried sites/zero findings
+pass. A new shorthand path reference was corrected; its raw failed output
+remains. Final doc paths fail only with the exact 85 frozen findings and
+zero added/removed; axiom inventory still fails with the identical 1206 pins/
+zero errors/404 unrecorded changes. Neither failure is waived or passing.
+`cache-identity.json` records source and retained build-artifact hashes for
+the affected import closure; the whole-project cold gate remains failed.
+Final independent read-only documentation/evidence reviews found no remaining
+issues. Frozen Decision source is byte-identical, as are both predicates.
+No whole-goal completion or publication is claimed.
+
+
+## Fixed storage-root agreement backfill (2026-11-01)
+
+`Calculus/FixedArrayRoot.lean` lifts the checked vector reconstruction to
+actual `Storage.set` and `State.withStorage`. For every contract `C`, root
+name `a`, intrinsic element type `E`, length `n`, root-type witness
+`h : C.rootType a = some (.ref (.fixed E n))`, storage and breakpoints
+containing `(n : Int)`, `fixedFloorRoot_find` proves optional path equality
+through `.atF i q` for every uint `i` and typed continuation `q : Path E U`.
+`fixedFloorValue` uses the intrinsic value view, not an indexed runtime
+match. `fixedFloorRoot_word`/`fixedFloorRoot_has` derive actual storage
+observations. `fixedFloorIndex_fix` and `fixedFloorRoot_retained` separately
+prove unchanged reads when the natural uint index is a retained breakpoint.
+
+`fixedFloorRoot_get_ne` preserves every other typed root without requiring
+a length breakpoint; `fixedFloorRoot_other_word`/`_other_has` specialize
+this to observations. `fixedFloorState_frame` quantifies over every context
+and retains the actual heap typing, heap, environment, ledger, self balance
+and transaction. Only the selected storage root is rebuilt. These are
+construction/agreement proofs, not arbitrary formula or alias agreement,
+APF recognition or pipeline completeness. A future integration still needs
+its scoped source/reconstruction relation and index-set proof.
+
+`Examples/FixedArrayRoot.lean` reuses existing Probe/vector fixtures. It
+checks changed/retained/halted root reads and a non-default mapping entry
+at a different root, plus general retained-path agreement. The original
+state satisfies `fixedArr[1] = 9`; the rebuilt state refutes that same
+formula. This kernel countercontrol prevents extending the preservation
+claim to unretained observations. No existing input or verdict is changed.
+
+Core per-file MCP/build passed in 4.19/3.10 s; controls MCP/build passed in
+5.25/3.12 s. All 18 public theorem axiom reports passed in 3.21 s with only
+standard axioms. Exact commands, source hashes, versions, cgroup/pre-build
+measurements and aggregate RSS/headroom samples are retained in
+`/workspace/va1-evidence/fixed-root-next/verified-gates.json` and raw logs.
+The unchanged 300 s/proof limits, aggregate 12 GiB/no swap, 12 GiB host
+reserve, serial one-thread/explicit `-j1` checks and writer lock remain.
+
+Independent read-only finder and skeptic found no issues in the typed root
+update, precise length/retention premises, optional continuation reads,
+other-root frame or concrete negative control. Neither edited or used
+Lean/server/build. Final docs/static review and sealing follow when checked.
+This completes the storage-root agreement backfill stage, not AU02
+integration or a Residue shrink. AU01 theorem/Residue/bridge and all
+remaining original AU02/full gates stay open. Q1 is answered; Q2 remains
+pending for frontend repair ownership only.
+
+Fixed-root final static gates pass: 1064 reachable/zero orphans, 180 core/
+zero elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/
+zero manual or pending, trust 1079 sources/248 inventoried sites/zero
+findings. Axiom inventory still fails with the identical 1206 pins/zero
+errors/404 unrecorded changes; doc paths still fail with exactly 85 frozen
+findings and zero added/removed. Neither is a pass or waived. Decision and
+retained counterexample byte identities pass. Both final independent
+read-only documentation/evidence reviews found no issues. Post-commit export
+verification follows; original goal/branch/base and all previous seals remain.
+
+
+## AU01 constructive uint source bridge (2026-11-01)
+
+Independent read-only design reviews identified that the existing gap list
+is not exhaustive: admitted updates/local histories, formation/compound
+terms, additional binder sorts, nondefault waiver settings, KeY-int shapes,
+separate normalization/prefix/lifting/node/OR bounds and independent hash
+routes all need accounting. No complement-of-Covered/unknown test or
+'outside this first grammar' catch-all was introduced as Residue. The
+first constructive source-to-prepared-grammar increment follows those reviews.
+
+`Calculus/DecisionUIntGrammar.lean` defines `Tm.UIntLinear` as an intrinsic
+predicate on existing scoped uint terms: local/literal, checked addition/
+subtraction, multiplication with one direct literal operand. No new IR,
+operator or semantic model is introduced. Every member is admitted by the
+frozen term predicate for every waiver setting and hash-position flag.
+It is hash-free, contains no mapping keys and satisfies existing Theory/
+interpreter agreement. `fold2_preserves_num` handles actual literal
+folding, including failures retained as `.err`.
+
+`UIntSourceLocs ρ` states that each typed uint local binding is present and
+in the existing numeric source grammar. It is independent of any verdict
+or coverage test. Its empty-initialization and actual `pushQ .uint`
+preservation proofs supply inhabited environments, rather than assuming
+translation succeeds. For every contract/context/source term in this
+grammar and every such environment, `uintLinear_toL`/`uintLinear_toLT`
+construct an actual output `l` with `t.toL ρ = some l` (respectively `toLT`)
+and `l.Src false true .num`.
+
+`Calculus/DecisionUIntFormula.lean` defines the intrinsic quantifier-free
+logical source grammar over these equations (`tt`, equality, negation,
+conjunction, implication). `qfUIntLinear_toLS` constructs one actual `ψ`
+with **both** `φ.toLS true ρ = some ψ` and `φ.toLS false ρ = some ψ`, plus
+`ψ.Src false true`. The proof retains exact optional equality where both
+checked arithmetic operands may halt. Structural target, mapping-key and
+negative-hash checks establish `qfUIntLinear_inTarget` for closed members,
+for every waiver setting. Closed members are ground arithmetic; scoped
+local-variable results are exercised under a real pushed uint binder.
+
+This is a source-translation/admission bridge increment. It does not yet
+prove program/update normalization, quantified-prefix closure, parameter
+binding, source-derived resource bounds, `leafOf?` success, generic
+`Covered` or target-to-coverage completeness. It is not a Residue definition
+or replacement for DecisionTheorem-prime. Reads, state terms, comparisons,
+updates and binders remain outside this first grammar, without being
+new exclusions from the original assignment or frozen target.
+
+`Examples/DecisionUIntBridge.lean` verifies a pushed local and the actual
+translated output, missing-binding failure with a false environment
+invariant, nonlinear syntax outside the grammar, and logical combinations
+at both polarities. Two **different** checked subtractions (`x-1`, `x-2`)
+both halt at zero and their source equation holds; at one only the right
+term halts and the equation fails. The exact `LFml.optEq` output is pinned.
+The quantified negative leaf has a concrete State.init countermodel and a
+certified actual refuted verdict, derived using existing Covered completeness
+and that semantic countermodel; this is not an arithmetic-search timing.
+Positive controls reuse the existing exact direct-two source/certificate
+and kernel-compute the actual proved tag of a closed logical combination.
+Decision-result validity/refutation statements retain `Fml.ValidH`/
+`Fml.holdsH`; ordinary concrete countermodels are stated separately. The
+negative leaf explicitly checks hash-freedom before the no-hash completeness
+and ordinary-validity specialization. Existing unknown array/
+memory pins, observations and decision functions remain unchanged.
+
+Final exact-source MCP checks passed in 12.78 s (terms), 6.31 s (formulas)
+and 5.26 s (controls). Focused builds passed in 12.69/5.20/4.16 s. All
+52 public theorem axiom reports passed in 13.74 s with only standard axioms.
+Commands, source hashes, actual versions and aggregate RSS/headroom are in
+`/workspace/va1-evidence/uint-bridge-next/verified-gates.json` and raw logs.
+The same hard 12 GiB/no-swap cap, 12 GiB host reserve, serial thread one/
+explicit `-j1`, writer lock and unchanged 300 s/proof budgets remain.
+Failed constructor-spelling, tactic-probe, polarity reduction, refutation
+case-equality and unavailable verdict-equality-instance attempts are retained,
+not counted as passing checks. Scratch was preserved outside the library
+before static gates; final source has no unfinished proof or new axiom.
+
+Independent read-only finder and skeptic source/control reviews found no
+issues. Both explicitly confirmed that the local-binding invariant is
+substantive/noncircular and that normalization, prefix/atom closure, bounds,
+coverage and the exhaustive residue/bridge remain open. The added pushed-
+local and distinct both-halting controls address the skeptic's requested
+nonvacuity cases. Neither reviewer edited or used Lean/server/build. Final
+documentation/static review and sealing follow when actually checked.
+The full original goal remains incomplete; Q1 is answered and Q2 remains
+pending for frontend repair/full validation only.
+
+Uint-bridge final static gates pass: 1067 reachable/zero orphans, 180 core/
+zero elaborator paths, strict automatic 491 automatic/61 budget/11 refuted/
+zero manual or pending, trust 1082 sources/248 inventoried sites/zero
+findings. Axiom inventory still fails with identical 1206 pins/zero errors/
+404 unrecorded changes; strict doc paths still fail with exactly 85 frozen
+findings and zero added/removed. Neither is waived or passing. Entire
+Decision source and original counterexample byte identities pass. Final
+independent read-only handoff/evidence reviews found no issues. Cumulative
+post-commit patch/bundle/checksum export follows; full goal stays incomplete.
+
+
+## Positive uint-prefix pipeline checkpoint
+
+`Calculus/DecisionUIntPrefix.lean` connects the constructive arithmetic
+source grammar to the existing pipeline for exactly one positive uint
+binder over one equation. For every contract C, binder name x, and terms
+`a b : Tm C [.val .uint] (.val .uint)` satisfying the intrinsic UIntLinear
+grammar, `uintPrefix_sourceReduction` constructs a body ψ with the actual
+source reduction projected by `.map (·.leaf)` equal to
+`some (LFml.all 0 .uint ψ)` and
+`ψ.Src false true`. `uintPrefix_leafOf` proves the actual prepared result is
+`some (LFml.all 0 .uint ψ).elim.condSimp.prenex`. It assumes neither coverage
+nor translation/verdict success. A generic conditional composition helper
+is discharged using the independently proved actual normalizer and reducer
+facts for this family. Equal-polarity comparison uses structural reflexivity
+of existing typed terms/formulas, with no new comparison or trust shortcut.
+
+The normalizer proof has two formula nodes (one binder, one equation),
+independently of term size; it makes no arbitrary-term timing claim. Its
+all-primitive signature is normalization only; constructive arithmetic
+source reduction is specialized to uint. The Src conclusion describes the
+reducer body **before** preparation. This checkpoint does not prove Src
+preservation through preparation, parameter closure, inExact, resource bounds,
+Covered, broader M4 boundary or the exhaustive Residue/DecisionTheorem-prime.
+No complement of this first grammar is designated Residue. Original AU02
+pipeline children and formula-derived fuel remain open; vector/root backfill
+lemmas are not presented as their completion.
+
+`Examples/DecisionUIntPrefix.lean` pins the exact `.all 0` translation of
+actual distinct partial subtractions and the precise prepared output. It
+reuses their semantic countermodel and certified refuted verdict, preserves
+the missing-local/nonlinear refusals, and supplies both literal-multiplication
+directions and an unused binder. The direct-two positive reuses its existing
+proved result and ValidH certificate. No expected verdict or semantic/default
+observation changed. Both frozen predicates and the original 8bbd5606
+counterexample remain byte-identical. Human Q1 remains answered by the exact
+recorded approval; Q2 is pending only for frontend repair/full validation.
+
+Final per-file MCP, focused serial builds and public axiom commands/timings,
+source hashes, versions and sampled aggregate RSS/headroom are retained in
+`/workspace/va1-evidence/uint-prefix-next`. The hard 12 GiB/no-swap cap,
+12 GiB host reserve, thread one/explicit -j1, writer lock and original budgets
+remain unchanged. Failed dependent-rewrite/map-bind transport probes are
+retained as failures. Independent finder and skeptic reviewed the source
+statements read-only without Lean/server/build and found no substantive issue;
+their requested exact output, partial, multiplication and unused-binder
+controls are now present. Final reviews and static results follow below once
+actually checked. Whole-goal and milestone eligibility remain incomplete.
+
+Final prefix reviews found no substantive issue; the finder requested precise
+`.map (·.leaf)` wording for the certified reducer result and it was applied.
+All 21 public theorem axiom reports contain only propext, Classical.choice
+and Quot.sound. Final exact-source MCP passed in 5.26 s (core) and 5.20 s
+(controls); focused builds in 4.17/3.10 s; axiom audit in 13.78 s. Static
+checks pass with 1069 reachable/zero orphans, 180 core/zero elaborator paths,
+491 automatic/61 budget/11 refuted/zero manual or pending, and trust
+1084 sources/248 inventoried sites/zero findings. Axiom inventory remains
+FAIL (1206 pins/zero errors/404 unrecorded), byte-identical to the preceding
+gate. Strict doc paths remain FAIL with exactly the same 85 frozen findings
+(48 missing/37 ambiguous), zero new findings. Full validation's actual source-
+matched resource failures remain failures; no unchanged stopped full build
+was repeated. The owned stopped array-check containers were removed only
+after saving nonsecret state/bounds/mount metadata to recover disk; all
+mounted caches, artifacts, failures and other containers are preserved.
+The whole original goal and remaining queue are incomplete.
+
+
+## Halting-OR APF census checkpoint
+
+`Examples/DecisionHaltingOrGaps.lean` reproduces the actual remaining guard-
+floor gap, distinct from already-covered Boolean lowering. Intrinsic FloorProbe
+has a uint mapping and uint scalar. Its negative block quantifies uint i,j with
+guard `((i <= j && i < value - 1) || i <= i)` and conclusion `balances[i] = 0`.
+The block implying `balances[1] = 0`, the zero-index variant and the false
+companion implying `balances[1] = 1` each have public kernel target=true,
+Covered=false and actual decideGoal=unknown certificates. These new baseline
+pins change no previous expected observation or pipeline behavior.
+
+`floorClaim_one_valid` proves the positive claim at every intrinsic state by
+the (1,0) instance, which skips the partial subtraction. `floorBad_countermodel`
+proves that the inhabited default State satisfies the entire negative block
+and falsifies the false companion. Its arbitrary-key mapping read uses the
+existing typed total-path/default-storage theorem, not a postulated state or
+new premise. The zero-index pin receives no unsupported semantic claim.
+
+The default-state guard returns `some true` at keys (2,1) and `none` at collapsed
+keys (1,1); `floorIn 0 [0,1]` actually collapses them. This set is illustrative,
+not proved to be the collector's set or a complete reconstruction Setting.
+It does not refute GuardP.floors: its definedness premises exclude this shape.
+Unknown/noncoverage pins do not identify the sole failing stage. The AU02
+instantiation/floor repair and meaningful Residue shrink remain open.
+
+Separate closed/binder Boolean cases retain public kernel proved/refuted
+certificates through existing soundness/refutation interfaces, an inhabited
+countermodel and ordinary-false versus halt controls. A halted outer-OR left
+operand is not recovered by either right literal; optional reflexive equality
+retains both-halting equality. The finder rejected Boolean-only probes as
+sufficient APF reproduction, and this correction is retained. No arbitrary OR
+completeness, new exclusion or weakened premise is claimed.
+
+Final exact-source MCP passes in 23.59 s, focused affected build in 20.25 s,
+all 23 public axiom reports in 17.99 s, with only standard axioms or none.
+Commands, source hashes, actual versions, hard-cap verification, prebuild and
+sampled aggregate RSS/host headroom are in
+`/workspace/va1-evidence/halting-or-next/verified-gates.json` and raw logs.
+Hard 12 GiB/no-swap, host reserve 12 GiB, thread one/explicit -j1, writer lock
+and all original budgets remain unchanged. Failed missing-scratch, operator-
+spelling, type-inference, tactic-insertion and path-law attempts are retained.
+An evidence parser initially rejected the valid no-axioms report form and
+exited 1; corrected aggregation verifies all names/forms without altering the
+passing Lean audit. Scratch is preserved outside the library before gates.
+
+Independent final read-only finder and skeptic source reviews found no issues;
+neither edited or used Lean/server/build. No compiler, semantics/default,
+predicate, pipeline, premise or previous verdict changed. Q1 remains answered;
+Q2 remains pending only for frontend repair/full gates. Global Residue/theorem/
+bridge, broader revised boundary and AU02 pipeline/fuel work remain open. This
+census is not AU02 completion or milestone/full-goal eligibility. Final static
+and documentation reviews follow once actually checked.
+
+Final halting-OR static gates pass: 1070 reachable/zero orphans, 180 core/
+zero elaborator paths, 491 automatic/61 budget/11 refuted/zero manual or
+pending, trust 1085 sources/248 inventoried sites/zero findings. Axiom
+inventory remains FAIL with byte-identical 1206 pins/zero errors/404
+unrecorded changes. Strict docs remain FAIL with the same 85 frozen findings,
+zero added/removed. Entire frozen Decision source and retained counterexample
+identities pass. Final independent read-only finder/skeptic documentation/
+evidence reviews found no issues. Full validation's earlier actual source-
+matched resource failures remain failures; Q2 and all remaining original
+obligations stay open. This checked checkpoint is census progress only.
+
+
+## Numeric leaf-preparation checkpoint
+
+`Calculus/DecisionLeafPreparation.lean` proves closure of the **existing**
+intrinsic LTm.Num P E grammar through actual storage-read elimination and
+conditional simplification, for every contract, primitive type, parameter
+predicate P and environment predicate E. The unchanged predicates survive;
+no new IR, term representation, preparation function or budget is introduced.
+The seq case explicitly constructs the Boolean definedness guard using two
+seqL closures. It does not treat Boolean false as failure. The resulting
+numeric evidence supplies the existing Src grammar and has zero conditionals.
+
+`uintLinear_toL_numeric` constructs actual numeric translation from intrinsic
+UIntLinear syntax and numeric local bindings; it is not inferred from the
+broader Src grammar, which admits additional cut operators. The real initial
+uint prefix discharges the binding premise. For every typed source term in
+that grammar under one uint binder, `uintLinear_prefix_prepared_numeric`
+constructs an actual toLT output l whose eliminated/simplified term remains
+Num with parameter predicate `q = (.uint,0)` and false environment predicate.
+This means **only the permitted atom**, not that every term mentions it:
+literal-only terms may mention no parameter. No coverage/verdict success is
+assumed in this family theorem.
+
+The controls prove that a false-but-returning Boolean seq guard returns seven,
+a failed guard still halts before/after preparation, nested numeric sequencing
+preserves the same restrictions, and optional equality holds for two halted
+operands while strict leaf equality rejects them. Timestamp input retains its
+specific allowed-environment predicate; msgValue is rejected under that
+predicate. An orElse term remains outside Num. The actual source decrement
+reuses the constructive preparation theorem. A kernel node-growth witness
+explicitly prevents interpreting grammar closure as size preservation.
+
+These are term-level closure/source-transport proofs. Formula/prefix closure,
+prepared parameter enumeration/bounds, full revised M4 boundary, Residue,
+DecisionTheorem-prime and exhaustive target-to-coverage/hash bridge remain
+open. This does not close AU02 pipeline children or formula-derived fuel.
+Both frozen predicates, old counterexample, old verdicts and proof budgets
+remain unchanged. Q1 remains answered; Q2 holds frontend repair/full gates
+only. The original full goal remains incomplete.
+
+Final exact-source per-file MCP passes in 4.23 s (core) and 4.21 s (controls),
+focused builds in 3.09/3.16 s, all 28 public axiom reports in 4.15 s with only
+standard axioms or none. Full commands, source-hash matches, actual versions,
+verified hard cap/prebuild and measured aggregate RSS/host reserve are in
+`/workspace/va1-evidence/leaf-preparation-next/verified-gates.json` and raw logs.
+The same 12 GiB/no-swap, 12 GiB host reserve, thread one/explicit -j1 and
+writer lock remain. Initial missing explicit Boolean sort and redundant simp
+argument diagnostics are retained; final diagnostics have no errors/warnings.
+The blank-line goal probe is not counted as a proof. Independent read-only
+finder/skeptic source/control reviews found no issues; the skeptic's permitted-
+atom wording correction was applied and rechecked. Neither reviewer edited or
+used Lean/server/build. Final static/documentation checks follow.
+
+Final numeric-preparation static gates pass: 1072 reachable/zero orphans,
+180 core/zero elaborator paths, 491 automatic/61 budget/11 refuted/zero
+manual or pending, trust 1087 sources/248 inventoried sites/zero findings.
+Axiom inventory remains FAIL with byte-identical 1206 pins/zero errors/404
+unrecorded changes. Strict docs remain FAIL with the same 85 frozen findings,
+zero new findings. Frozen Decision and original counterexample byte identities
+pass. Final independent read-only finder and skeptic documentation/evidence
+reviews found no issues. Exact cumulative patch/bundle/checksum sealing follows.
+Whole goal and all outstanding queue obligations remain incomplete.
+
+
+## Actual numeric formula/prefix bridge checkpoint
+
+`Calculus/DecisionNumericFormula.lean` connects numeric preparation to the
+actual formula and prefix pipeline. The supported family is precisely one
+positive uint binder over `a=b`, with typed scoped a,b in the intrinsic
+UIntLinear grammar. The theorem quantifies every contract and binder name.
+`uintPrefix_inTarget` proves admission by the **entire unchanged** inTarget
+predicate for every Waivers setting; `uintPrefix_hashFree` proves hash-freedom.
+Neither changes validity/hash premises for other formulas or the frozen
+DecisionTheorem, Waivers, predicates, exclusions or observations.
+
+`uintPrefix_prepared_facts` constructs a body ψ such that the **actual**
+leafOf? result is `some (LFml.all 0 .uint ψ)`, ψ is in the existing Src grammar
+for either conditional flag (cut operators enabled), its actual enumerated
+parameters satisfy `q=(uint,0)`, and its condMax is two. The permitted atom
+need not occur: literal-only terms produce no body parameters. This composes
+actual numeric toLT/toL outputs, both polarity translations, the checked
+comparison/source reducer, the unchanged normalizer and full leaf preparation.
+It does not assume coverage, verdict success or translation success in the
+family theorem. The conditional helper's actual translation hypotheses are
+discharged by the independent source grammar construction.
+
+`uintPrefix_prepared_liftedExact` proves that this actual prepared leaf passes
+the existing liftedExact depth/source/parameter check. A dependent recognizer
+result is explicitly transported across stripAll's body equality. This is
+**not** Covered or a general node/cut bound. condMax measures conditional
+lifting weight, not nodes; optional equality repeats operands across several
+equations/implications. The unchanged 511-node/cut obligation, formula-derived
+fuel, other source classes, broader revised M4 boundary, exhaustive Residue/
+DecisionTheorem-prime/target-to-covered-or-hash bridge remain open. No complement
+of this first grammar is called Residue. Other original AU02 children remain
+open; the APF unsafe-OR unknowns are retained unchanged.
+
+Generic lower-level numeric equation helpers prove source, parameter and
+lifting facts for supplied numeric operands. They do not assert arbitrary
+operands semantically translate arbitrary source a,b. The actual source-family
+construction explicitly closes that gap. Source grammar has no body binders;
+the prenex reasoning here is not arbitrary quantified-formula closure.
+
+`Examples/DecisionNumericFormula.lean` exercises the real distinct partial
+subtractions, their actual source/fragment result, all-waiver/hash facts,
+both-halting semantics and existing certified refutation. A strict literal
+prefix has an exact prepared leaf, **empty** parameter list, unused binder,
+actual kernel proved tag, ValidH and separate ordinary validity. Nested
+sequencing tests the generic lower-level helper explicitly separately, and
+an extra atom is rejected by the exact permitted-parameter predicate.
+
+Final exact-source MCP passes in 5.23 s (core), 4.16 s (controls), focused
+builds in 4.15/3.21 s, all 27 public axiom reports in 13.79 s with only standard
+axioms or none. Source hashes, commands, versions, verified hard cap/prebuild
+and measured aggregate RSS/host reserve are retained in
+`/workspace/va1-evidence/numeric-formula-next/verified-gates.json` and raw logs.
+The same 12 GiB/no-swap, 12 GiB host reserve, thread one/explicit -j1, writer
+lock and all budgets remain. Failed singleton/forall simplification, optional
+parameter tuple, conditional-weight reduction, dependent strip recognizer and
+empty-context length rewrites are retained as failures. No unfinished proof,
+new axiom, dependency, evaluator or premise change is introduced.
+
+Independent read-only finder and skeptic final source/control reviews found
+no issues, including the actual source connection, unused binder and clear
+node-bound limitation. Neither edited or used Lean/server/build. Q1 remains
+answered, Q2 pending for frontend repair/full gates only. This is AU01 bridge
+progress, not whole-lane completion. Final static/documentation checks follow.
+
+Final numeric-formula static gates pass: 1074 reachable/zero orphans,
+180 core/zero elaborator paths, 491 automatic/61 budget/11 refuted/zero
+manual or pending, trust 1089 sources/248 inventoried sites/zero findings.
+Axiom inventory remains FAIL with byte-identical 1206 pins/zero errors/404
+unrecorded changes. Strict docs remain FAIL with the same 85 frozen findings,
+zero added/removed. Frozen Decision and original counterexample byte identities
+pass. Final independent finder/skeptic documentation/evidence reviews found
+no issues; neither edited or used Lean/server/build. Latest-head full build is
+pending; prior exact-source resource failures are retained and not relabeled.
+Q2 and the remaining original queue remain open. This reviewed proof checkpoint
+is not milestone publication eligibility or full-goal completion.
+
+
+## Sufficient source-derived body-node bound checkpoint
+
+`Calculus/DecisionNumericBounds.lean` uses the existing intrinsic Tm.size,
+without changing any representation, evaluator or runtime/proof/node budget.
+Literal folding never increases its original binary node. For every actual
+UIntLinear term under the real fresh uint prefix, the translated numeric
+output is elimination-fixed, conditional-simplification-fixed, and has no
+more nodes than its source. The local shape/size hypotheses of the generic
+helper are explicitly discharged by that fresh binding; the family theorem
+assumes only the intrinsic source grammar. This is narrower than general Num
+sequencing, which earlier controls showed can grow under elimination.
+
+`optEq_nodes` counts **seven copies of each operand plus thirteen nodes**.
+`uintPrefix_prepared_sourceBound` constructs the actual prepared body ψ with
+its source/parameter/lifting facts and
+`ψ.nodes <= 7*(a.size+b.size)+13`. The sufficient corollary derives the existing
+511 body cap from source sum <=71 (in fact <=510). It is not a necessary
+criterion, a new exclusion, a runtime/fuel increase or completion of AU02's
+formula-derived fuel obligation. It bounds the stripped body, not the outer
+universal node. Literal magnitude is not counted by Tm.size, so no uniform
+runtime claim follows. Separate cut identity/bound, lift identity, relevant
+resource booleans and generic Covered remain open.
+
+The actual controls expose the following distinct boundaries:
+
+| Source case | Raw size sum | Prepared body | Covered | Actual outcome |
+|---|---:|---:|---|---|
+| near symbolic limit | 70 | 503 | true | Coverage and direct ordinary validity certified; search not profiled |
+| larger symbolic pair | 72 | 517 | false | **proved**, with public kernel tag, ValidH and ordinary validity |
+| larger literal source | 82 | 27 | true | proved, with kernel tag and separate validity |
+| both literal subtractions fail | 6 | 27 | true | optional equality valid |
+| one subtraction fails, other side returns | 4 | 3 | true | concrete State.init countermodel and certified actual refutation |
+
+The 517-node formula also has hashCovered=false and is hash-free. Guarded
+execution reports both original dependentReduction? and quantReduction?
+return some; decideLeafA takes the first successful route. These route
+observations are external guarded executions; the actual global proved tag,
+coverage/hash flags, body count and validity have separate public kernel
+proofs. Covered is sufficient, not a complete characterization of every
+answered input. The initial expectation that an over-cap leaf might be unknown
+was rejected by reproduction before any pin: its **proved** outcome is
+retained. It is not inferred to lie in Residue. Similarly the larger source
+that folds small proves source sum >71 cannot classify a gap or unknown.
+No previous expected verdict/observation was changed.
+
+Final exact-source per-file MCP passes in 4.23 s (core) and 28.89 s (controls),
+focused builds in 4.12/24.40 s, all 40 public axiom reports in 23.40 s with only
+standard axioms or none. Initial classification/route executions pass in
+7.45/8.61 s. Full commands, source hashes, versions, hard-cap/prebuild outputs,
+measured aggregate RSS and host reserve are in
+`/workspace/va1-evidence/numeric-bounds-next/verified-gates.json` and raw logs.
+The same 12 GiB/no-swap, 12 GiB host reserve, thread one/explicit -j1, writer
+lock and unchanged proof/300 s guards remain. Typed-match reduction,
+reflexive-inequality and tactic-layout failures are retained; final diagnostics
+have no errors/warnings. No sorry, axiom, dependency or predicate/function
+change is introduced.
+
+Independent read-only finder and skeptic final source/control reviews found
+no issues. Both emphasized sufficient-not-necessary sizing and preservation of
+the uncovered-but-proved control; no unexplained Residue/unknown classification
+follows. Neither edited or used Lean/server/build. Q1 remains answered; Q2
+pending only for frontend repair/full gates. Full Residue/theorem/bridge,
+broader revised M4 and all other open AU02/full-gate obligations remain open.
+This checked source bound is not whole-lane completion. Final static/docs
+reviews follow once actually checked.
+
+Final source-bound static gates pass: 1076 reachable/zero orphans,
+180 core/zero elaborator paths, 491 automatic/61 budget/11 refuted/zero
+manual or pending, trust 1091 sources/248 inventoried sites/zero findings.
+Axiom inventory remains FAIL with byte-identical 1206 pins/zero errors/404
+unrecorded changes. Strict docs remain FAIL with the same 85 frozen findings,
+zero added/removed. Frozen Decision and original counterexample byte identities
+pass. Final independent finder/skeptic documentation/evidence reviews found
+no issues; neither edited or used Lean/server/build. Latest-head full gate
+remains pending; earlier source-matched resource failures remain failures.
+Q2 and all remaining original obligations stay open. This is a reviewed
+source-bound checkpoint, not milestone eligibility or full-goal completion.
+
+
+### Actual source-to-coverage bridge checkpoint (2026-11-01)
+
+`DecisionNumericCoverage` proves the actual existing parser accepts numeric
+terms at either conditional flag and that cutting them introduces no definition
+or fresh atom. Strict and optional equality preserve these facts, including the
+existing optional equality's nested definedness implications. Actual preparation
+also has zero conditionals; existing conditional-lift identities then preserve
+the full prefix. These are proofs about the original functions, not added
+recognizers, axioms, premises on success, or a second calculus.
+
+`uintPrefix_Covered` has explicit quantifiers over every contract C, binder name,
+and a,b : Tm C [.val .uint] (.val .uint), with a.UIntLinear, b.UIntLinear and
+**a.size + b.size ≤ 71**. It proves (primitivePrefixEq name a b).Covered=true by
+constructing actual leafOf? output, both parser modes, bound parameters, the
+original lifting-weight check, body bound and cut bound. The raw size condition
+implies the existing 511-node conditions by the previously checked exact copy
+count; it is sufficient only. It is not a new limit, exclusion, general fuel
+bound, Residue definition or necessity assertion. Larger sources that fold small
+and the uncovered-but-proved 517-node example remain outside this theorem's
+premise without being classified as unknown.
+
+`uintPrefix_decided` discharges original hasHash=false structurally and invokes
+existing completeness. `uintPrefix_certified` proves the actual returned verdict
+is proved with **Fml.ValidH**, or refuted with an explicit State C [] and
+**¬Fml.holdsH** at that state. No hash or validity premise is weakened. The
+existing `uintPrefix_inTarget` theorem supplies target admission for all Waivers;
+this checkpoint establishes a constructive target-to-coverage subfamily, not the
+exhaustive target/Residue theorem or unconditional reverse inclusion. The Q1
+human-controlled revision, both frozen predicates and original counterexample
+remain unchanged.
+
+Controls apply the generic theorem to the inhabited symbolic 70-node/503-body
+case, strict literal equality with an unused binder, partial subtraction equality,
+both failed operands, and a genuinely false failed/returned pair. Actual positive
+and refuted certificates and the both-halt/one-halt semantic distinction are
+retained. Countercontrols reuse the 72-node/517-body uncovered-but-proved result,
+82-node source folding to covered, and an existing admitted memory unknown.
+No previous pin or expected observation changes.
+
+Exact-source per-file MCP is clean in 8.45 s (core) and 5.18 s (controls), focused
+builds pass in 6.32/3.10 s, and all **30 public axiom reports** pass in 25.48 s
+with only propext/Classical.choice/Quot.sound or none. Commands, source hashes,
+actual Lean 4.24.0/Lake 5.0.0-src+797c613 output, cgroup memory.max=12884901888,
+memory.swap.max=0, prebuild resources and aggregate measurements are retained in
+`/workspace/va1-evidence/numeric-coverage-next/verified-gates.json` and raw logs.
+Maximum sampled aggregate RSS across these checks is 1971140 KiB; minimum host
+available is 16623378432 bytes, above the required 12 GiB reserve. All use the
+original writer lock, thread one, explicit Lean -j1 and unchanged 300 s budget;
+there is no LSP/build overlap. Intermediate dependent-transport, optional-form
+shape and Boolean-interface failures are retained. No proof-budget increase,
+sorry, new axiom, dependency, default or predicate change occurs.
+
+Independent read-only finder and skeptic final source/control reviews both found
+no issues; neither edited or used Lean/server/build. Static gates pass: 1078
+reachable/zero orphans, 180 core/zero elaborator reachability, 491 automatic/61
+budget/11 refuted/zero manual or pending, and trust 1093 sources/248 inventoried
+sites/zero findings. Axiom inventory remains FAIL1 with byte-identical 1206 pins,
+zero errors/404 unrecorded changes. Strict docs remain FAIL1 with the same 85
+frozen findings and zero added/removed. The entire original Decision source and
+8bbd5606 counterexample pass byte-identity checks. Raw failures are preserved.
+Final independent finder and skeptic documentation/evidence reviews found no
+discrepancies; exact source hashes match the passing records and all unfinished
+obligations/failures remain explicit. Neither edited or used Lean/server/build.
+
+The original full queue remains incomplete: meaningful global Residue and
+DecisionTheorem-prime/exhaustive target/hash bridge, broader revised program-free
+M4 boundary, full baseline/performance validation, fixed/nested array pipeline
+integration, broader memory blocks, actual halting-OR guard-floor repair, general
+formula-derived fuel, and affected/full final gates remain open. Existing checked
+vector/root reconstruction, source subfamily bridges, module splits and controls
+are completed backfill, not substitutes for those children. Q1 is answered; Q2
+holds only frontend repair/full validation. Latest-source full ./run-lean.sh is
+pending; earlier source-matched resource failures remain failures. No milestone
+eligibility, publication or full-goal completion is claimed.
+
+
+### Parallel interface checkpoint (2026-11-01)
+
+The human authorized concurrent implementation scheduling. The concrete numeric
+coverage and fixed-array interfaces are specified in
+[parallel-interface.md](after-roadmap-va1/parallel-interface.md), including exact
+checked producer head, source hashes, typed signatures, witnessed clients, real
+premises and outstanding combined-tree gates. VA2 needs no future VA1 theorem
+to consume this package privately. It does not imply full Residue/AU02 closure
+or authorize integration/publication. Q2 remains held only for frontend repair.
+The immutable incremental Git bundle and committed-source archive will be
+exported under /workspace/va1-evidence/parallel-interface-next after review and
+commit; no changing checkout is presented as a checked dependency.
+
+
+### One-way negative-chain instantiation component (2026-11-01)
+
+`Calculus/DecisionNegativeInstantiation.lean` implements negativeChainInst on
+actual intrinsic LFml C formulas. It instantiates only negative quantifier-free
+chains of a chosen primitive K, through the original LFml.inst. Positive chains
+remain unchanged; traversal stops at unselected binders. Original per-sample
+strict definedness guards and substitution are reused. No future producer fact,
+array-root recognition or floor reconstruction premise is assumed.
+
+LFml.negativeChainInst_sound is quantified over every contract, primitive K,
+typed sample list List (LTm C (.val K)), formula, polarity, State C [] and AEnv.
+At positive polarity, satisfaction of the finite instance implies the original;
+at negative polarity, the original implies its finite instances. The proof
+handles negation/conjunction/implication and uses existing LFml.inst_sound at
+the chain. LFml.valid_of_negativeChainInst transports global validity in that
+one direction only. Quantifier-free formulas are preserved at both polarities.
+The generic negativeChainInst_instance_client proves a chain implies its actual
+guarded finite instances for arbitrary typed body contents.
+
+`Examples/DecisionNegativeInstantiation.lean` applies the component to a bounded
+read of the actual fixedArr storage root of the existing Probe contract. Its
+index-one sample is inhabited at State.init; proof uses holds_subst1, the
+index_fixed/empty-prefix path interface, default storage fields and fixed-vector
+list laws, preserving the concrete witness. Positive-chain and halted-sample
+controls retain the original behavior. A Boolean formula is globally valid
+while its one-point finite instance is false: original_valid,
+finite_instance_invalid and no_equivalence explicitly refute the converse.
+The old fixedBlock global unknown is reused unchanged.
+
+This is an independently implemented one-way proof interface for future
+array/memory positive-instance consumers, not exact Prep, refutation transport,
+a decision branch, new coverage or a Residue shrink. It does not close the
+source fixedBlock pin or the entire AU02 fixed/nested-array child. Exact floor
+reconstruction, source/pipeline integration, complete target coverage and other
+original obligations remain open. No decision predicate/model/default/pin,
+observation, refusal, hash premise or proof/test/resource budget changes.
+
+Exact-source per-file MCP is clean in 5.28/5.26 s, focused builds pass in
+4.20/3.11 s and all 14 public axiom reports pass in 5.22 s with only standard
+axioms or none. Actual Lean 4.24.0/Lake 5.0.0-src+797c613, hard memory.max
+12884901888/swap.max 0, thread one/explicit -j1, prebuild resource checks and
+measurements are retained in
+/workspace/va1-evidence/negative-inst-next/verified-gates.json and raw logs.
+Maximum sampled aggregate RSS is 1362820 KiB; minimum host available is
+17103032320 bytes, above 12 GiB. All checks are serial under the original
+writer lock, with no LSP/build overlap and unchanged 300 s bounds. Initial
+congruence-name and concrete conversion/substitution/path/vector failures are
+retained; final diagnostics have zero errors/warnings.
+
+Independent read-only finder and skeptic final source/control reviews found
+no issues; neither edited or used Lean/server/build. Static gates pass:
+1080 reachable/zero orphans, 180 core/zero elaborator paths, strict automatic
+491/61 budget/11 refuted/zero manual or pending, trust 1095 sources/248 sites/
+zero findings. Inventory FAIL1 remains byte-identical 1206 pins/zero errors/
+404 unrecorded changes. Strict docs FAIL1 retains the same 85 frozen findings,
+zero added/removed. Original Decision source and counterexample byte identities
+pass. Final finder documentation/evidence review found no issues. Skeptic
+found the AU02 paragraph appended under unrelated cancellation tests; it was
+moved into the owned M7-next section before commit. No other findings. Neither
+reviewer edited or used Lean/server/build.
+
+The PARALLEL-INTERFACE export is already committed at
+144a2a9db73067e67e778515ccd932630070fea6 with the checked numeric implementation
+at 782dcff93a13fd1a19f0f45e6246146815555ef5. Its immutable 367-file committed
+import-closure archive and incremental bundle are under
+/workspace/va1-evidence/parallel-interface-next. Bundle SHA256:
+c49eddeaeaaa5b01512e0d88d8aa831b6979dfe937f4a592138980e8c96caf62;
+source archive SHA256:
+50c814969bea1f901c429244d51b97e8f152c3eaecb4d55153a52cd6ae9ce60d.
+Bundle verify, source-blob hash verification and SHA256SUMS check pass. An initial
+raw-SHA range bundle export refused as empty (exit128); the named assigned ref
+plus explicit frozen-base exclusion repaired it, with failure retained. No
+history reset, producer substitution or changing-checkout dependency snapshot.
+VA2 may consume these actual checked interfaces now; combined-tree final gates
+remain open. This proof-only component is later than that immutable export and
+is delivered separately at its own checked commit.
+
+All original AU01/AU02 obligations, incomplete baseline/performance/general-fuel
+work and pending/failed full gates remain as previously listed. Q1 is answered;
+Q2/frontend repair remains held without blocking this independent work. No new
+goal, reset, stop/completion, push, merge or tag publication is performed.
+
+## AU02 independent fixed-array path reconstruction — 2026-11-01
+
+`Calculus/DecisionFixedArrayPath.lean` adds `fixedFloorAtPath` on the
+existing intrinsic `Path T (.ref (.fixed E n))` and actual optional lookup/save
+APIs. `fixedFloorAtPath_exists` discharges save success from actual prefix
+presence using the existing save theorem. `fixedFloorAtPath_reconstruction`
+quantifies every typed element continuation and every diverging path: with
+explicit `(n : Int) ∈ B`, successful indexed reads equal original reads at
+`fixedFloorIndex B i`; diverging reads are unchanged. Absent prefixes return
+none. No default object is installed. Existence itself needs no length premise.
+
+`Examples/DecisionFixedArrayPath.lean` has inhabited mapping-key and nested
+fixed-array clients, an actual changed 9-to-7 interior read, unchanged sibling
+key, absent outer index refusal and missing-length definedness countercontrol.
+These are kernel value/path facts, not EVM tests or an array pipeline certificate.
+Only one selected prefix is reconstructed; simultaneous prefixes, collector,
+source grammar, finite-instance equivalence and coverage integration remain open.
+No decision source, predicate, observation, refusal, expected verdict or budget
+changed. Registrations are exactly two additive imports and two module-map rows.
+
+Raw exact-source commands, outputs, versions and resources are retained in
+/workspace/va1-evidence/fixed-path-next. Per-file core MCP 4.316s and controls MCP
+4.202s pass with zero errors/warnings/dependency failures. Focused core build
+3.096s and controls build 3.098s pass. Fifteen public theorem/control axiom reports
+pass in 3.125s, using only propext/Classical.choice/Quot.sound. Every Lean command
+runs under the original writer lock, threads1/-j1, hard aggregate 12GiB/no-swap,
+verified cgroup values and prebuild OS reserve. Maximum sampled aggregate RSS
+1371352 KiB; minimum sampled host available 17150767104 bytes, above the 12GiB reserve.
+Initial bind-alias and reserved-identifier MCP failures remain retained.
+
+Static gates: 1082 reachable/zero orphans, 180 core/zero elaborator reachability,
+strict automatic 491 automatic/61 budget/11 refuted/zero manual or pending,
+trust 1097 sources/248 sites/zero findings. Inventory FAIL1 is byte-identical to
+prior checkpoint: 1206 pins, zero errors, 404 unrecorded changes. Strict docs
+FAIL1 retains existing missing/ambiguous references; no full-gate pass is claimed.
+Original Decision source remains byte-exact to the frozen base. Finder and skeptic
+read-only reviews found no confirmed issues; neither edited or ran Lean/server/
+builds. Skeptic's suspected existential elaboration issue was resolved by the
+actual clean diagnostics and standard-axiom reports.
+
+The immutable PARALLEL-INTERFACE export at 144a2a9d remains available unchanged;
+this later component will be exported separately after commit and bundle verification.
+AU01 meaningful Residue/global DecisionTheorem-prime and exhaustive target/hash
+bridge, broader revised program-free boundary, AU02 pipeline children/general
+formula-derived fuel, remaining baseline/performance and final full validation
+remain open. Q2 producer-owned TypeExamples repair is still held. Independent
+owned work continues; the full original goal remains incomplete.
+
+Final documentation review found the new module-map rows outside their table;
+both rows were moved beside the existing Decision modules before commit. No
+source/proof findings. Original raw failures and earlier seals are preserved.
+
+## AU01 independent decidable source grammar — 2026-11-01
+
+`Calculus/DecisionUIntShape.lean` implements `Tm.uintLinearShape`, exactly
+characterizing the existing intrinsic `Tm.UIntLinear` grammar. Generalized
+`UIntLinearAt` is false at other sorts. Literal recognition returns a typed
+value plus equality with the original term. `uintBinaryEvidence` consumes
+actual optional subderivations; main `uintLinearEvidence` follows structural
+recursion. `uintLinearShape_sound`, `uintLinearShape_complete` and
+`uintLinearShape_iff` prove both directions, supplying a constructive Decidable
+instance without a classical decision oracle. `uintShapePrefix_Covered` and
+`uintShapePrefix_certified` feed the actual existing numeric coverage/certificate
+bridge with unchanged sufficient `a.size + b.size ≤ 71` and exact `ValidH`/
+`holdsH` conclusions. No Covered/verdict/complement test defines the syntax.
+
+The accepted syntax is precisely uint locals, literals, addition/subtraction
+and multiplication with a direct literal operand. Other sorts, observations,
+environment reads, other operators and nonliteral products are outside this
+specific grammar. Rejection alone implies neither unknown nor invalidity nor
+absence of coverage/target admission. This is a concrete decidable component
+for the unfinished residue census, not the global Residue/DecisionTheorem-prime.
+
+Controls check nested addition/subtraction and both literal-product orders,
+reject symbolic products and folded nonliteral coefficients, use the Decidable
+instance for positive/negative grammar membership, apply the real coverage and
+certified-result bridges, and retain the inhabited partial-arithmetic countermodel.
+No source/predicate/default/observation/verdict/pin/budget change is made.
+Registrations are two additive imports and two adjacent module-map rows.
+
+Finder caught initial kernel-evaluated indexed matches violating Gate G0.
+Warned before repair and inspected intrinsic speed history and existing TermEq
+recursors. Replaced indexed dispatch with explicit generalized-index Tm/Op0/Op2
+casesOn and structural recursion. Remaining matches concern types/operators or
+parameter-only Option witnesses. No compiled twin is introduced. Rejected
+source is retained in evidence, together with match/equation-generation, proof,
+layout and local probe failures. Finder and independent skeptic re-reviewed the
+repair read-only and found no remaining source issue; no Lean/server/build/edits.
+
+Exact repaired-source gates in /workspace/va1-evidence/linear-shape-next:
+core MCP 5.261s, core build 3.093s, controls MCP 4.275s, controls build 3.099s,
+14 public theorem/control axiom reports 8.475s, all pass. MCP diagnostics have
+zero errors/warnings/dependency failures; axioms are only standard
+propext/Classical.choice/Quot.sound. Every check uses the original writer lock,
+thread1/-j1, hard aggregate12GiB/no-swap with actual cgroup verification and
+12GiB host reserve. Maximum sampled aggregate RSS 1528452 KiB; minimum host available
+17069674496 bytes. Actual Lean4.24.0/Lake5.0.0-src+797c613 versions are retained.
+
+Static gates pass: 1084 reachable/zero orphans, 180 core/zero elaborator reach,
+491 automatic/61 budget/11 refuted/zero manual or pending, trust1099 sources/
+248 sites/zero findings. Inventory FAIL1 remains byte-identical to the preceding
+checkpoint (1206 pins, zero errors, 404 unrecorded changes); strict docs FAIL1
+retains existing missing/ambiguous references. Original Decision source remains
+byte-exact to frozen base. These failures and the TypeExamples full-gate failure
+remain failures; no unchanged failed heavy gate was repeated as an endpoint.
+
+The earlier fixed-path checkpoint is committed at
+4d44b034dddd81a1bfa2acb02478552e7db2d23d and sealed at
+/workspace/va1-evidence/fixed-path-next/delivery. Initial sealing rejected a
+stale all-source hash from the pre-rename controls; this failure is retained,
+focused core check refreshed, then all274 source hashes matched committed blobs.
+Patch/bundle/handoff/evidence/checksums verify. The immutable parallel-interface
+export at144a2a9d remains unchanged and usable independently.
+
+All original global residue/theorem/hash bridge, broader revised M4 boundary,
+AU02 fixed/nested-array pipeline, memory/halting-OR/general-fuel children,
+remaining baseline/performance/backfill and final concrete full gates remain
+incomplete. Q1 approval is retained; only Q2 frontend ownership repair remains
+held. This checkpoint does not claim a residue shrink or lane completion.
+
+Final finder and skeptic documentation reviews found one shared label incorrectly
+calling the AU01 recognizer AU02; changed to AU01/AU02 proof components before
+commit. No other findings. Both reviews remained read-only without Lean/server.
+
+## AU02 independent numeric logical formula bounds — 2026-11-01
+
+`Calculus/DecisionNumericLogic.lean` extends the numeric preparation component
+to quantifier-free logical combinations, using a proof predicate on actual
+`LFml` rather than a replacement IR. `LFml.UIntQF` has tt, strict numeric uint
+equality, not, and, imp; optional source equality uses the existing expansion.
+It retains exact parameter/environment predicates on existing Num evidence.
+Structural proofs establish parser acceptance, parameter closure, no cuts,
+zero conditionals, conditional weight at most two and preparation preservation.
+The tt weight is zero, handled without assuming every body has equality weight.
+
+`Fml.uintQFWeight` uses generalized-index casesOn/structural recursion. Each
+source equation contributes `7 * (a.size + b.size) + 13`, counting optional
+copies; logical constructors add their subweights and one node. Unsupported
+constructors return zero, which is explicitly NOT admission evidence: every
+bound theorem independently requires the intrinsic `QFUIntLinear` predicate.
+`qfUIntLinear_prefix_sourceBound` proves both actual source-polarity translations,
+numeric logical shape, elimination/simplification fixedness and a node bound
+from the original scoped source. `qfUIntLinear_formula_bound` derives the
+unchanged 511-node exact tests when the original source weight is at most511.
+No fuel/node/conditional/proof budget is changed or hidden.
+
+`qfUIntPrefix_inTarget` and `qfUIntPrefix_hashFree` establish the frozen source
+boundary for every admitted logical body and waiver setting. The conditional
+interface `qfUIntLogic_Covered_of_leaf` still requires the actual `leafOf?`
+equation; no assumed future theorem or semantic oracle substitutes for it.
+General source-reducer traversal and normalization remain open. This is NOT
+the global target bridge, Residue theorem or full formula/fuel completion.
+
+`Examples/DecisionNumericLogic.lean` has nontrivial positive/refuted logical
+clients. Their actual leaf equations are kernel proofs. Coverage consumes
+nodes derived from the ORIGINAL source: source weights141/197 conservatively
+bound actual lowered bodies117/173. Ordinary validity and an inhabited
+State.init countermodel are proved. Separate kernel `positive_verdict` and
+`negative_verdict` certify .proved and an actual returned refuting State with
+not holdsH, using original completeness/soundness/refutations and discharged
+hash-freedom. Executable guard observations remain separate native evidence.
+A foreign-parameter numeric body is rejected by the unchanged exact admission
+check; shape alone cannot waive closed-prefix parameters. No verdict changes.
+
+Raw commands/results/source identities are in
+/workspace/va1-evidence/numeric-logic-next. Core MCP 5.254s, focused core build
+2.032s, controls MCP 7.396s, focused controls build 6.325s, and46 public axiom reports
+11.655s pass. MCP diagnostics contain zero errors/warnings/dependency failures;
+axioms are standard propext/Classical.choice/Quot.sound only. Checks hold the
+original writer lock, thread1/-j1, hard aggregate12GiB/no-swap with actual
+cgroup values verified before Lean and12GiB host reserve. Maximum sampled
+aggregate RSS 2043800 KiB; minimum host available 16707321856 bytes. Actual pinned
+Lean4.24.0/Lake5.0.0-src+797c613 versions retained. Initial parser-strip,
+root-namespace, congruence-name and missing-sort failures are retained.
+
+Independent read-only finder and skeptic source/control reviews found no
+confirmed issues, including the added exact kernel verdict certificates.
+Neither edited or used Lean/server/build. Static gates pass:1086 reachable/
+zero orphans,180 core/zero elaborator reach,491 automatic/61 budget/11 refuted/
+zero manual or pending, trust1101 sources/248 sites/zero findings. Inventory
+FAIL1 remains byte-identical prior1206 pins/zero errors/404 unrecorded changes;
+strict docs FAIL1 retains the same85 frozen findings. Decision source is
+byte-exact to frozen base. Full run remains failed/pending as already recorded;
+no unchanged resource-stopped heavy gate is repeated as an endpoint.
+
+This separately exportable component needs no VA2 sharing implementation.
+General traversal proofs for the concrete existing normalizer/source compiler
+are identified next dependencies within the owned proof work; no whole lane
+wait, API simulation or foreign source change is assumed. The existing immutable
+parallel-interface export remains available; newer committed components are
+exported cumulatively at their own heads.
+
+All global AU01 Residue/DecisionTheorem-prime/exhaustive target/hash bridge,
+broader revised program-free boundary, AU02 fixed/nested-array pipeline,
+remaining memory/halting-OR/general-fuel, baseline/performance/backfill and
+required final gates remain incomplete. Q1 is answered; Q2/frontend repair
+stays held without blocking independent work. Goal/VM/branch remain unchanged;
+no push, merge, PR or tag.
+
+## AU02 actual numeric logical source traversal — 2026-11-01
+
+`Calculus/DecisionNumericTraversal.lean` proves traversal of the existing
+public `ExactAt.ofFormula?`, without changing any reducer/normalizer API or
+budget. For every intrinsic QFUIntLinear body over the fresh uint context,
+`qfUIntLinear_exact_source` takes any fuel at least the original-source
+`uintQFWeight` and returns an actual ExactAt certificate, its exact leaf and
+both real toLS polarity equations. The proof is induction on the existing
+fuel and actual source constructors, not a simulation or assumed oracle.
+
+`qfUIntPrefix_sourceReduction` proves the actual public sourceReduction?
+route on the positive prefix at the unchanged2048 budget, assuming explicitly
+`φ.uintQFWeight ≤ 2047` and reserving one step for its binder.
+`qfUIntPrefix_source_coverageFacts` instead requires `φ.uintQFWeight ≤ 511`
+and joins that actual certificate to numeric logical shape, fixed preparation
+and the formula-derived511-node body bound.
+The general program-normalizer traversal that precedes leafOf? remains open;
+no complete source-to-leaf, global Residue/DecisionTheorem-prime or full fuel
+completion is claimed. This discharges one previously explicit conditional
+integration obligation, independently of VA2 sharing and held frontend work.
+
+`Examples/DecisionNumericTraversal.lean` has actual source certificates for
+the nontrivial positive/refuted logical clients and identifies the positive
+certificate leaf exactly. Source weight141 supplies a real certificate; fuel3
+actually refuses that nested body while fuel4 succeeds. Hence the structural
+bound is sufficient, not necessary/minimal and never an unknown classifier.
+Zero fuel refusal and the previous exact kernel proved/refuted certificates
+are retained. No native guard is presented as a kernel verdict proof.
+
+The normalizer implementation is unchanged and its concrete source identity
+recorded in producer-identity.json: ProgramReduction SHA256
+46fa4337ca525f3347eadab053c3458385b73a56bb7aef0d06d21e68a3c6f7e2.
+An inspection-only probe of its generated private numeric name failed exit1
+with identifier/parser errors; the actual public ofFormula? signature printed.
+The failure is retained. No private alias, producer replacement, frontend
+repair or source/API edit was introduced or assumed. Decision, ProgramReduction
+and ExactUpdates remain byte-exact to frozen base. General normalization is
+still an owned proof obligation, not a whole-lane wait or new semantic hold.
+
+Raw gates at /workspace/va1-evidence/numeric-traversal-next: core MCP 5.269s,
+focused core build 3.107s, controls MCP 4.232s, controls build 2.098s,14 public
+axiom reports 11.716s, all pass. Diagnostics contain zero errors/warnings/failed
+dependencies, axioms standard propext/Classical.choice/Quot.sound only. Actual
+Lean4.24.0/Lake5.0.0-src+797c613 observed in bounded task containers; every check
+holds original writer lock, thread1/-j1, verified12GiB aggregate/no-swap and
+12GiB host reserve before Lean. Maximum sampled aggregate RSS1538380 KiB, minimum
+host available17120419840 bytes. Initial parameter-index reduction failure retained.
+
+Independent read-only finder/skeptic source/control reviews found no issues;
+neither edited or used Lean/server/build. Static gates pass:1088 reachable/
+zero orphans,180 core/zero elaborator reach,491 automatic/61 budget/11 refuted/
+zero manual or pending, trust1103 sources/248 sites/zero findings. Inventory
+FAIL1 remains identical1206 pins/zero errors/404 unrecorded changes; strict docs
+FAIL1 retains same85 frozen findings. Original full TypeExamples resource failure
+remains a failure and latest concrete full validation remains pending. No
+unchanged failed heavy check was repeated as an endpoint.
+
+New exact interfaces and nontrivial clients will be exported after commit and
+verification, separately from immutable144a2a9d export. The planned exact-head
+PARALLEL-INTERFACE package is under /workspace/va1-evidence/numeric-traversal-next.
+All global AU01 obligations, broader revised program-free boundary, AU02 array
+pipeline/memory/halting-OR/general-fuel/normalizer obligations, remaining baseline/
+performance/backfill and final gates remain incomplete. Q1 answered; Q2 held
+only for frontend repair/full gates. No goal/VM reset, push/merge/PR/tag.
+
+## AU02 independent simultaneous fixed-array pair — 2026-11-01
+
+`Calculus/DecisionFixedArrayPair.lean` proves typed path divergence symmetry
+and extension through every typed continuation, then composes two actual
+fixedFloorAtPath saves. `fixedFloorPair_exists` derives both saves from actual
+prefix presence plus divergence; it assumes no future save theorem.
+`fixedFloorPair_reconstruction` constructs both original-floored lookup
+equations and the complete frame for queries diverging from both prefixes.
+Element types E/F, lengths n/m, breakpoint lists and every result type remain
+intrinsic and independent. Each indexed equation retains its own length
+membership premise; existence itself requires no breakpoint-membership premise.
+`fixedFloorPair_second_absent` preserves refusal of a missing second prefix.
+
+`Examples/DecisionFixedArrayPair.lean` inhabits the generic API with actual
+mapping-key values and saves. Both selected observations change (11→9 and
+9→7), a third key retains9, and an absent fixed-array sibling refuses. An
+overlapping-prefix counterexample breaks the first lookup equation even with
+both length breakpoints retained. Thus length membership cannot replace the
+explicit divergence premise. These are kernel value/path facts, not EVM tests,
+arbitrary-family reconstruction, overlapping nested composition, collector
+integration or decision/Residue closure. No source predicate, model, default,
+observation, verdict, refusal or budget is changed.
+
+Raw gates at /workspace/va1-evidence/fixed-pair-next: core MCP 5.388s, core
+build 4.172s, controls MCP 6.322s, controls build 3.179s,18 public axiom reports
+4.207s, all pass. Complete diagnostics have zero errors/warnings/dependency
+failures; axioms standard propext/Classical.choice/Quot.sound only. Original
+writer lock, thread1/-j1, verified hard12GiB aggregate/no-swap and12GiB host
+reserve apply to each check. Actual Lean4.24.0/Lake5.0.0-src+797c613 retained.
+Maximum sampled aggregate RSS1211216 KiB; minimum host available17203998720 bytes. Initial
+escaped-constructor and dependent-induction failures are retained.
+
+Independent finder and skeptic source/control reviews found no issues, read-only
+without edits/Lean/server/build. Static gates pass:1090 reachable/zero orphans,
+180 core/zero elaborator reach,491 automatic/61 budget/11 refuted/zero manual or
+pending, trust1105 sources/248 sites/zero findings. Inventory FAIL1 remains
+byte-identical prior1206 pins/zero errors/404 unrecorded changes; strict docs
+FAIL1 retains same85 frozen findings. Original Decision is byte-exact to base.
+Prior full TypeExamples resource failure remains retained, latest full gate
+pending; no unchanged stopped heavy build was repeated as an endpoint.
+
+The numeric logical source-traversal checkpoint is committed/sealed at
+0a773e1130eb75c073cb129431343de7532be541. Its new immutable PARALLEL-INTERFACE
+bundle and370-file complete local import-closure source archive are under
+/workspace/va1-evidence/numeric-traversal-next. Bundle SHA256:
+14d4d92f0a3564b4fac68ff042d616d439cecdd6374c67f65093fb463c83d7e7;
+archive SHA256:
+0f53bc6039428dc21a5ef3a1c48aae2f0099d0517c4cd8e84cccbb96767e425e.
+Both independent reviewers verified every file against exact committed blobs,
+bundle/base/head and checksums; no findings. Source-only/combined-final-gatefalse
+limits and unresolved normalizer identity are explicit, never assumed. Finder's
+first relative checksum invocation used the wrong directory; its corrected
+export-directory invocation passed. Neither reviewer ran Lean/server/build.
+
+All global Residue/theorem/bridge, broader revised program-free boundary,
+AU02 actual fixed/nested-array pipeline, broader memory/halting-OR/general-fuel/
+normalizer proofs, remaining baseline/performance/backfill and final gates
+remain incomplete. Q1 answered; Q2 remains only frontend repair/full-gate hold.
+Next array pipeline work must reuse these checked components and audit existing
+bounded/boolean preparations before implementing any additional expansion.
+Goal/VM/branch unchanged; no push, merge, PR or tag.
+
+## AU02 exact literal-bounded uint preparation — 2026-11-01
+
+`Calculus/DecisionBoundedUInt.lean` proves `boundedUInt_inst_iff` for every
+Contract/state/valuation/binder/canonical uint literal bound and every
+quantifier-free LFml body. The body may contain arbitrary existing typed
+storage/memory/ledger/hash terms and partial operands. Its actual guarded
+finite instances are equivalent at every starting state; no flooring, new
+validity/hash premise, semantic oracle or assumed future fact is used.
+Complete samples use the real canonical uint round-trip, not a guessed domain.
+
+Term and formula literal-substitution node counts and the real conjunction
+builder yield the proved estimate `bound.val.toNat * (body.nodes + 5) + 1`.
+`boundedUIntStep` checks that estimate against the unchanged511-node limit
+BEFORE allocating samples. This is a per-expansion guard, not a bound on the
+whole recursively prepared formula: all original whole-result checks remain
+required. An oversized or unsupported quantifier is retained after its children
+are prepared; its body may already have changed pointwise-equivalently. No budget
+is raised.
+Candidate extraction uses generalized-index LTm/Op2 casesOn and the existing
+literal inspector, then `boundedUIntGuard?` verifies equality with the actual
+strict guard through LFml.same. It cannot infer meaning from candidate data.
+
+`boundedUIntExpand` builds an actual existing LFml with pointwise equivalence
+bottom-up. `boundedUIntPrep` uses that theorem to preserve both polarities and
+return the SAME original refuting state. This is a concrete semantic reduction,
+not a new formula IR or a completion certificate. It is NOT hooked into the
+decision pipeline in this checkpoint. Decision/ArrayBlock/HashPremise remain
+byte-exact to frozen base; both frozen Covered/inTarget definitions, Waivers,
+DecisionTheorem, observations and expected verdicts remain unchanged.
+
+`Examples/DecisionBoundedUInt.lean` has actual frozen-source fixedBlock/fixedBad
+leaves that become quantifier-free with exact pointwise meaning. Controls cover
+zero-bound truth, oversized preservation, wrong binder/truth value/nonvariable
+left operand refusals, strict versus optional halting, and a missing-sample
+counterexample: truncated samples pass while the original universal is false;
+complete samples retain that refutation. Kernel facts are distinct from native
+classification/performance observations. Before-pipeline probe reproduces both
+assigned pins as `(true,false,unknown)`; raw output and exact source identities
+are retained. No verdict improvement/array-child completion is claimed yet.
+
+Raw gates at /workspace/va1-evidence/bounded-uint-next after the review wording
+correction: final core MCP 5.308s, focused core build 4.168s, final controls MCP
+5.245s, controls build 4.221s,37 public theorem/runtime-definition axiom reports
+7.369s and executable warm profile 4.161s, all pass. Complete MCP diagnostics have zero errors/warnings/
+dependency failures. Axioms standard propext/Classical.choice/Quot.sound only;
+no sorry/admit/native trust shortcut. Original writer lock, thread1/-j1,
+verified hard12GiB aggregate/no-swap and12GiB host reserve apply. Actual pinned
+Lean4.24.0/Lake5.0.0-src+797c613 observed. Maximum sampled aggregate RSS1708188 KiB;
+minimum host available17002926080 bytes.
+
+Initial successful warm executable preparation measurements (single invocation, imports/cache
+already warm, noinline wrapper/IO input and forced output): real fixed leaf
+qf=true 628067 ns; oversized1000 qf=false 57927 ns; oversized2^128 qf=false 31677 ns.
+The wording-only exact-source repeat measured316116/23065/23245 ns respectively.
+These are preparation timings, not full decision/cold-build/EVM results. Initial
+list API, missing node import/argument order, conjunction arithmetic, candidate
+elaboration and free-variable kernel-decision failures are retained. The local
+probe initially targeted a declaration line instead of its tactic; corrected
+positioned probes selected the closed arithmetic proof. The external profiler
+initially had a missing namespace/name collision; original source/failure retained,
+corrected profiler passes. No failed/stopped gate is relabeled passing.
+
+Independent finder and skeptic source/control reviews found no issues, including
+added refusal controls and exact allocation/meaning boundaries; neither edited
+or ran Lean/server/build. Static gates pass:1092 reachable/zero orphans,180 core/
+zero elaborator reach,491 automatic/61 budget/11 refuted/zero manual or pending,
+trust1107 sources/248 sites/zero findings. Inventory FAIL1 unchanged1206 pins/
+zero errors/404 unrecorded changes; strict docs FAIL1 same85 frozen findings.
+Original full TypeExamples resource failure retained; latest full gate pending.
+
+Next owned integration must first inspect speed history and warn, retain the
+irreducible slot/length/APF preparation boundaries, then check a narrow concrete
+pipeline change. Before/after classifications and kernel proved/refuted controls
+are required before changing any assigned expected unknown pin. Unrelated
+expectations and all budgets remain frozen. No producer-owned frontend repair.
+All global AU01 residue/theorem/exhaustive target/hash bridge, broader revised
+program-free boundary, remaining AU02 array/memory/halting-OR/general-fuel/
+normalizer work, baseline/performance/backfill and final gates remain incomplete.
+Q1 answered; Q2 only frontend repair/full-gate hold. Original goal/VM/branch
+preserved; no stop/reset/new goal, push, merge, PR or tag.
+
+
+## Checked bounded-array pipeline increment (2026-11-01)
+
+Parent a878df9d84e9485728ad668e92f4b885c3740ace; frozen base and assigned branch
+unchanged. Before changing ArrayBlock, inspected speed history
+7c044e6a22b226be8b9a810c795a104ac4c87820 and warned about checking costs.
+The old irreducible length/APF implementation is retained as baseBlockPrep.
+blockPrep preserves that exact Prep when its body is quantifier-free or the
+original OR-guarded folded array parser succeeds; only unsupported shapes try
+the committed exact boundedUIntPrep followed by the original length/APF stages.
+The old OR cap precedes fallback lifting. blockPrep_preserves_qf and
+blockPrep_preserves_parsed certify equality of the entire original preparation,
+including normalized forms. All whole-result budgets, source predicates,
+DecisionTheorem, Waivers, hash premises and observations remain unchanged.
+Decision and HashPremise are byte-exact to frozen base; the existing replay
+sources/templates are unchanged from this checkpoint's parent.
+
+Initial hook FAIL1 after911.379s: prepending finite preparation changed two old
+replay normal forms. Raw failure and first source variant retained. Conservative
+repaired affected build FAIL1 after954.361s with resource_stop=false: every old
+consumer, including original ArrayReplay in39s, passed, then four obsolete
+fixed-block noncoverage/unknown assertions failed. This is the observed assigned
+improvement, not a hidden failure: fixedBlock/fixedBad now have inTarget=true,
+Covered=true. All five other assigned array pins remain inTarget=true,
+Covered=false, unknown, with their kernel certificates unchanged.
+
+Only those two assigned classifications changed. fixedBlock_covered and
+fixedBad_covered are kernel facts. fixedBlock_proved derives the actual .proved
+verdict from coverage, structural hash-freedom and the original fixedBlock_valid.
+fixedBad_refuted returns an actual state with decideGoal fixedBad = .refuted σ
+and ¬ Fml.holdsH σ fixedBad, using completeness and the original false-control
+semantics. That returned state is not asserted equal to the independent
+fixedBadState countermodel, which remains intact. Both original formulas are
+unchanged. The owned negative-instantiation consumer now uses
+original_fixed_block_proved; its no_equivalence counterexample remains intact.
+All zero/oversized/wrong-guard/partial-equality/omitted-sample controls remain.
+This closes the two concrete fixed bounded-block pins, not arbitrary fixed-array
+formulas or the whole AU02 fixed-array child.
+
+Final exact-source gates in /workspace/va1-evidence/bounded-pipeline-next:
+
+- ArrayBlock MCP19.157s; gap MCP18.088s; negative-consumer MCP4.281s;
+  bounded-controls MCP5.261s: pass, no errors/warnings/dependency failures.
+- Gap target build16.928s pass; serial affected consumer build138.128s pass
+  (377 jobs; includes memory, numeric traversal, negative instantiation, bounded
+  controls, fixed pairs, memory census and halting-OR controls). Previous changed
+  source rebuild used warm upstream caches; no cache-clearing/full-cold claim.
+  All rebuilt files remained below unchanged300s; largest observed109s ledger.
+- 16 public axiom reports19.135s pass: standard propext/Classical.choice/Quot.sound
+  only. Actual executable verdict observer3.110s pass: fixedBlock proved,
+  fixedBad refuted. Warm per-call/output observations14629093/15252752ns;
+  these are interpreted Lean runtime observations, not kernel or EVM evidence.
+
+Every Lean operation used the original writer lock, LEAN_NUM_THREADS=1/-j1,
+verified aggregate memory.max12884901888 and memory.swap.max0 before Lean,
+and12GiB host reserve. Actual Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613
+observed. Final gates' maximum sampled aggregate RSS2522128KiB;
+minimum host available16335290368bytes. No resource stops.
+Original KeySort setup pass remains separate from final full gate completion.
+Independent finder and skeptic final reviews found no additional issues after
+the known consumer update; neither ran Lean/server/build or edited files.
+Full notes, initial failures, source identities and reason census retained.
+
+Original queue accounting: baseline/reason census partial; AU01 meaningful
+Residue/DecisionTheorem-prime/exhaustive target-and-hash bridge open; module
+split/performance checkpoints delivered but overall milestone eligibility open.
+AU02 concrete fixed pins improved, standalone fixed/path/pair lemmas delivered;
+general fixed/nested arrays, broader memory blocks, halting-OR repair, broader
+human-revised program-free boundary, general formula-derived fuel/normalizer
+closure and final full validation remain open. Backfill numeric source traversal,
+shape/coverage bounds, fixed-path reconstruction, negative controls and axiom
+checks delivered incrementally; remaining global bridge/reason census, complete
+profiling/baseline and final affected/full gates remain. Q1 approved only the
+certified boundary revision; Q2 frontend repair ownership remains pending.
+Do not repeat the unchanged stopped frontend full build or claim another VM's
+published workload as a local gate. No whole-goal completion, stop/reset/new
+objective, push, merge, PR or tag. The immutable numeric PARALLEL-INTERFACE at
+0a773e11 with370-file concrete closure, typed interfaces, clients and explicit
+normalizer premise remains available unchanged. Further owned normalizer/Residue
+implementation is ready independently of Q2; persistent full goal incomplete.
+
+Static checkpoint gates:1092 reachable/zero orphans;180 core/zero elaborator
+reach; strict automatic491/61 step budgets/11 refuted/zero manual or pending;
+trust1107 sources/248 sites/zero findings: all pass. Inventory FAIL1 unchanged
+1206 pins/zero errors/404 unrecorded changes. Strict docs FAIL1 same85 frozen
+findings (48 missing/37 ambiguous); no added/removed findings. Exact source
+comparison confirms frozen Decision, HashPremise and ProgramReduction bytes,
+and replay/Core/facade unchanged from parent. Reviews caught automation text
+appended outside M7-next and list spacing; both routine doc issues fixed.
+All proof and full-goal limits above remain.
+
+
+## Actual numeric normalizer/coverage bridge (2026-11-01)
+
+Parent7092917807ce3918f5196028093fd210db36f069. New owned modules
+Calculus/DecisionNumericNormalization and Examples/DecisionNumericNormalization;
+shared edits are exactly two additive imports in Solidity.lean and two module-map
+rows. No producer source, frozen predicate, premise, observation or budget change.
+
+A proof-local actualNormalization captures the real private normalizeCore through
+its public ProgramNormalization.ofFormula? wrapper. Typed unification/change
+assigns the actual function; the saved probe prints that exact private function.
+Concrete constructor equations and public proofs kernel-check against it. This
+is not a copied algorithm, an oracle, or an assumed future producer API.
+
+The initial identity plan failed: DeclarationReduction.andFormula/impFormula
+remove tt operands. Raw errors/source retained. The public counterexample
+normalization_changes_syntax certifies a five-node tt conjunction collapses to tt.
+Rather than strengthen the input class or change the producer, the proved
+invariant keeps both depth and shared node state explicit. With original source
+weight≤each resource, the actual returned certificate has QFUIntLinear formula,
+weight≤original weight, and initial budget≤remaining+original weight. Sequential
+branches use the real remaining state from the first child. Original traversal
+weight, not smaller normalized output weight, bounds consumption.
+
+Public interfaces, for every contract/context and intrinsic source φ:
+qfUIntLinear_normalization budget h hw returns actual d with ofFormula? budget φ
+=some d, d.formula.QFUIntLinear and d.formula.weight≤φ.weight. For one positive
+uint binder with original body source weight≤511, qfUIntPrefix_normalization
+reserves one node/depth step of unchanged
+2048 and returns an actual normalized body χ with the same grammar/bound.
+leafOf_of_normalized_to composes through the possibly different normalized source.
+qfUIntPrefix_logic_Covered derives Covered directly from φ.QFUIntLinear and
+φ.uintQFWeight≤511, with no supplied leaf/normalizer equation. The source-derived
+bound feeds actual lowering/preparation node proofs. qfUIntPrefix_logic_boundary
+adds inTarget w=true under every frozen waiver setting and structural hash-freedom.
+qfUIntPrefix_logic_answered and qfUIntPrefix_logic_certified give an actual nonunknown
+answer with unchanged ValidH or returned-state ¬holdsH certificate. No reversed
+unconditional inclusion or global DecisionTheorem-prime is claimed.
+
+Inhabited positive/refuted clients use truth conjunction/implication around the
+existing partial-arithmetic logical bodies (source weights143/199), consume only
+the syntax/bound interface, and retain ordinary semantic proof/countermodel.
+Actual smart normalization equations are separate controls, not supplied bridge
+premises. Five-node collapse with depth4 but sharedbudget4 refuses;budget5 returns
+tt. A short implication succeeds at actual budget3 while source weight>3,
+showing the sufficient bound is not minimal. Zero-budget refusal and a retained
+keyed-array unknown are kernel checked. No expected existing verdict changes.
+
+Raw gates /workspace/va1-evidence/normalizer-next: core bridge MCP10.624s;
+core target9.496s (new file7.3s); final controls MCP7.394s; controls/import-closure
+build6.454s (367jobs,new file4.2s);27 public axiom reports19.155s; executable
+warm verdict observer3.118s: all pass under unchanged300s per-file limit.
+MCPs have zero items/dependency failures. Existing dependency warning replays are
+retained; no new module warnings. Axioms are subsets of standard
+propext/Classical.choice/Quot.sound only. Actual observations proved/refuted take
+6623234/6273696ns including output. These interpreted Lean observations are
+separate from kernel certificates, no EVM/full-cold/cache-clearing claim.
+
+Original writer lock, LEAN_NUM_THREADS=1/-j1, verified hard aggregate12GiB/no-swap
+and12GiB host reserve before every Lean process. Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613 observed; maximum sampled aggregate RSS2149556KiB,
+minimum host available16453763072bytes; no resource stops. Initial private-name probe,
+false identity attempt and Option bind/map equation failures remain raw failures;
+constructor equations were repaired against the actual computation. Both
+independent read-only source reviews found no logical/scope issues; no Lean/server/
+build or edits by reviewers. Exact producer ProgramReduction stays frozen.
+
+This removes the previous numeric PARALLEL-INTERFACE's normalizer premise for
+this bounded logical family. Old immutable packages/seals remain unchanged; new
+committed interface package will record exact new head/source closure, signatures,
+clients and remaining limits. Global meaningful Residue/DecisionTheorem-prime/
+exhaustive target/hash bridge, remaining array/memory/halting-OR/revised-M4/general
+fuel work, census/performance/backfill and final affected/full validation remain
+open. Source-derived sufficient traversal/node bounds are proved for this family;
+runtime fuels remain unchanged and full AU02 formula-derived-fuel work remains
+open. Earlier TypeExamples resource stops and pending Q2
+frontend ownership hold remain; no unchanged failed full build was repeated.
+Q1 only revises the false reverse inclusion. Original full goal stays incomplete,
+with independent work ready; no stop/reset/new goal, VM, push, merge, PR or tag.
+
+Static gates:1094 reachable/zero orphans,180 core/zero elaborator reach, strict
+automatic491/61 step budgets/11 refuted/zero manual or pending, trust1109 sources/
+248 sites/zero findings: pass. Inventory FAIL1 same1206 pins/zero errors/404
+unrecorded changes; strict docs FAIL1 same85 frozen findings, none added/removed.
+Frozen Decision/HashPremise/ProgramReduction bytes confirmed. Final skeptic asked
+for explicit≤511 on the prefix-interface description and precise fixed-fuel
+sufficiency wording; both clarified, with no source or semantic change.
+
+
+## Exact decidable reversed-field reason component (2026-11-01)
+
+Parentc2b5d00f7f05292a00f86c87de314807c4b05d7d. New owned modules
+Calculus/DecisionResidueReasons and Examples/DecisionResidueReasons; shared
+registration edits exactly two additive imports and two module-map rows.
+Audited integrated memory handoffs/APIs first. MemStructCut, MemStructWitness,
+MemoryWitness and original DecisionMemory fixtures/observations remain unchanged;
+no heap witness or parameter enumeration delivery is recreated. Decision,
+HashPremise, both frozen predicates, all budgets and global strategy unchanged.
+
+ReversedFreshField is an intrinsic source witness for every contract/context:
+exactly one map-free fresh struct, a direct primitive literal on the left, and
+a primitive field read on the right. It records x/s/f/p/value, actual field lookup,
+existing map-free admission and complete syntax equality. The parser reuses
+producer allocView/eqView/literalTerm and full typed-term equality, then enumerates
+actual struct fields. No target, coverage or verdict is queried. The one-line
+reason is that the existing fresh-struct schema requires the field on the left
+and a direct literal on the right.
+
+reversedFreshField_witness proves recognition soundness;
+reversedFreshField_complete proves every exact typed source witness is recognized,
+using successful lookup membership and finite field search. reversedFreshField_iff
+identifies the Boolean with Nonempty(ReversedFreshField φ); a computable Decidable
+instance decides that proposition without a coverage/unknown oracle. This is one
+precise named reason component, not the exhaustive Fml.Residue union or its bridge.
+Matching does not assert that every global decision must remain unknown.
+
+The same typed witness yields an independently usable MemoryWitness.Answer.
+counterState reuses exactly the producer children/adopted heap BEFORE parent
+allocation; counterState_refutes transports its existing field countermodel by
+equation symmetry at the SAME state. hashFree and counterState_refutesH expose
+structural hash-freedom and unchanged ¬holdsH, with no new validity/hash premise.
+The global pipeline is deliberately unchanged at this reason-component checkpoint.
+
+Inhabited controls: original reversed0, another literal5 and Boolean reversal
+all classify true. Supported normal/reflexive/fixed/Boolean equations, another
+real compound-RHS gap, given-heap parameters and map-bearing sources classify
+false. Exact Decidable positive/negative propositions execute under kernel decide.
+originalState = producer gapMemStruct_state by kernel equality, with ordinary and
+hash-premised refutation plus nonvalidity. Original target/notCovered/unknown
+certificates are reused unchanged. A covered reflexive source stays outside this
+class, so it is neither fixture equality nor all fresh memory.
+
+A new control initially guessed mappingReversed.inTarget=false; the kernel
+proved that assertion false. Saved failed source/raw retained. The actual control
+now proves inTarget=true, while the existing map-free class guard rejects it.
+This distinguishes target admission from producer recognition; no predicate,
+expected existing verdict, premise or exclusion changed. This map-bearing target
+shape remains unaccounted for in the eventual exhaustive reason census.
+
+Raw gates /workspace/va1-evidence/residue-reasons-next: final core MCP5.278s
+(clean, actual core source SHA retained); final core target4.125s (67jobs,newfile
+1.5s); final controls MCP5.258s; new import-closure target3.187s (350jobs,newfile
+1.3s);29 public theorem/decider/state/answer axiom reports8.423s; actual classifier
+observer3.102s: pass. All below unchanged300s; dependencies cached, no full-cold
+or cache-clearing claim. Axioms subsets of propext/Classical.choice/Quot.sound.
+Warm observer with output original/five/bool=true, supported/otherGap/mapping=false;
+per-call/output1761496/69455/105289/9454/2714/43746ns. These are source-class
+observations, not kernel or EVM evidence and not global verdict timings.
+
+Original writer lock/thread1/-j1, verified hard aggregate12GiB/no-swap and12GiB
+host reserve before Lean; Lean4.24.0 commit797c613/Lake5.0.0-src+797c613 observed.
+Maximum final sampled aggregate RSS1437456KiB/minimum host available17204912128bytes,
+no resource stops. Initial structure-field syntax, dependent-body rewrite,
+Option/true-guard completeness and new false mapping-admission assertion failures
+retained. Multi-attempt tool process exited0 but candidates had parser errors
+because replacement removed a constructor closing bracket: NOT proof passes.
+Final source uses explicit equality composition; all complete-file MCPs are clean.
+
+Both independent read-only source reviews found no remaining issues after adding
+completeness/Decidable; neither ran Lean/server/build or edited files. Exact source
+family, producer state/premises and limits retained. Global Residue/theorem/exhaustive
+target/hash bridge, other array/memory/OR/revised-M4/formula-dependent-fuel children,
+remaining census/performance/backfill and final affected/full validation remain
+open. Q2 frontend repair held, old TypeExamples resource failures retained; no
+unchanged full failure repeated. Original full goal incomplete with ready work;
+no stop/reset/new goal/VM, push, merge, PR or tag. Existing concrete numeric
+PARALLEL-INTERFACE atc2b5d00f remains immutable and independently audited.
+
+Static gates:1096 reachable/zero orphans,180 core/zero elaborator reach, strict
+automatic491/61 step budgets/11 refuted/zero manual or pending, trust1111 sources/
+248 sites/zero findings: pass. Inventory FAIL1 unchanged1206 pins/zero errors/404
+unrecorded changes; strict docs FAIL1 same85 frozen findings, none added/removed.
+All29 actual axiom sets independently parsed/audited as standard-only. Frozen
+Decision/HashPremise/ProgramReduction and all three memory producer modules
+byte-exact; original DecisionMemory unchanged from parent. Final finder caught
+resource aggregation missing the final source-matched core MCP; corrected to
+include all six final passing checks. Both source/docs reviews otherwise clean.
+
+
+## Exact nonliteral uint-field reason component (2026-11-01)
+
+Parent6cae581963831b65de639e0a79e81dfd79f18243. New owned modules
+Calculus/DecisionCompoundFieldReason and Examples/DecisionCompoundFieldReason;
+shared registrations exactly two additive imports and two module-map rows.
+Existing reason, arithmetic decoder, memory producer and global decision code
+are unchanged. No predicate, premise, observation or budget change.
+
+NonliteralUIntFreshField is a second exact source family, distinct from reversal:
+one map-free fresh struct, direct uint field on the left, and an actual RHS in
+the existing Tm.UIntLinear grammar whose root is not a direct primitive literal.
+The witness carries complete source equality. Existing uintLinearShape evidence
+is reused rather than duplicating arithmetic parsing. The parser uses producer
+alloc/eq views, field lookup and full typed term comparison. Soundness,
+completeness, iff Nonempty and a constructive Decidable instance kernel-check
+for every intrinsic contract/context. No coverage, target or verdict is queried.
+One-line cause: the existing field schema expects a direct literal RHS, whereas
+this uint-linear RHS has a nonliteral root. Structural hash-freedom is proved.
+
+Controls: original memStructBuried,2+3 and partial0-1 classify true; direct
+literals/reflexivity/reversal/Boolean/fixed/given-heap/map-bearing controls false.
+Both reason tags remain distinct on the actual old fixtures. Exact witness-family
+positive/negative decisions execute under kernel decide. Map-bearing input stays
+target-admitted while the existing map-free schema refuses it; no exclusion added.
+
+The actual buried fixture is now proved false at the UNCHANGED producer
+child heap gapMemStruct_state. Pointwise sum01_eval/denote (for every contract/
+context/state) transports0+1 to literal1, then the existing producer fieldEq_refutes
+supplies the same before-parent counterstate. Ordinary and exact hash-premised
+countermodel/nonvalidity follow. zeroMinusOne.eval=none is separately checked;
+classification does not imply a terminating/literal-valued RHS. Original target,
+notCovered and globalunknown pins remain unchanged. No generic countermodel for
+every class member or global pipeline integration is claimed.
+
+Important acyclic integration boundary: this proof-layer module depends on
+Decision through UIntShape→NumericCoverage→NumericBounds→NumericFormula→
+LeafPreparation→UIntPrefix→UIntFormula→UIntGrammar. It cannot be imported directly
+back into Decision. Actual dependency path is saved in integration-dependency.json;
+a concrete lower-level interface is required before production integration.
+The earlier reversed-field component has no such dependency and can progress
+independently. No cyclic import or assumed future API was introduced.
+
+Raw gates /workspace/va1-evidence/compound-reason-next: final core MCP5.252s,
+core target3.179s (270jobs,newfile1.6s), controls MCP5.292s, controls/import-closure
+build3.159s,25 public axiom reports6.300s, actual source-class observer3.100s:
+pass. MCP zero items/dependency failures; all below unchanged300s, warm dependency
+caches retained. Axioms standard-only. Class observer original/another/partial=true,
+direct/reversed/mapping=false; per-call/output1781756/41632/23245/14461/4056/35433ns.
+These source-class runtime observations are separate from kernel/EVM evidence
+and global verdict profiling. Initial hash lemma Boolean grouping failure/source
+retained, fixed with explicit typed equality composition; no theorem weakened.
+
+Writer lock/thread1/-j1, verified hard aggregate12GiB/no-swap and12GiB host reserve
+before every Lean process. Lean4.24.0 commit797c613/Lake5.0.0-src+797c613 observed.
+All-six final gates maximum aggregate sampled RSS1614752KiB/minimum host available
+17127366656bytes, no resource stops. Both independent read-only reviews found no
+source issue; neither used Lean/server/build or edited files.
+
+Global Fml.Residue/DecisionTheorem-prime/exhaustive target/hash bridge, remaining
+AU02/backfill/performance/full gates remain open. The next ready independent
+implementation is reversed-field Answer integration with exact old-answer/state
+preservation. Producer handoff explicitly permits certified mxTop=none fallback
+composition; keep cut-first routing and preserve producer implementation/heap
+observations. Compound integration remains the narrow dependency above, not a
+whole-lane block. Q2 frontend repair held; original full goal incomplete. No
+stop/reset/new goal/VM, push, merge, PR or tag.
+
+Final source strengthening: NonliteralUIntFreshField.schema_refuses proves the
+actual producer fieldEquation returns none on every class member. Typed
+UIntLinear evidence excludes its reflexivity branch; nonliteral root excludes
+its literal branch. This certifies the one-line cause for that schema only,
+not globalunknown. Both independent reviewers found no issue.
+
+Exact strengthened-source final gates supersede the initial25-report timings
+above: core MCP5.350s/core build4.206s; controls MCP4.246s/closure4.156s;26 public
+axiom reports7.377s; observer3.103s, all pass. Final warm observer outputs unchanged,
+times1834515/34933/20771/13210/3936/32789ns including output. All-six final resource
+aggregate maxRSS1664380KiB/minhost17153732608bytes; no stops. Initial raw gates/profile
+remain retained. Full global obligations and production-cycle limits above unchanged.
+
+Final static gates:1098 reachable/zero orphans;180 core/zero elaborator reach;
+strictautomatic491/61 budgets/11 refuted/zero manual or pending; trust1113 sources/
+248 sites/zero findings: pass. Inventory FAIL1 unchanged1206 pins/zero errors/404
+unrecorded changes; strictdocs FAIL1 same85 frozen findings. All26 actual axiom
+sets audited standard-only. Both final docs reviews clean; finder independently
+recomputed all-six resource extrema. Frozen decision/hash/program/memory producer
+bytes unchanged. No full-gate or whole-goal completion claim.
+
+
+## Checked reversed-field global route (2026-11-01)
+
+This closes the assigned orientation gap, not AU01/AU02 as a whole.
+Calculus/DecisionMemoryExtension preserves every successful original producer
+Answer, including its state transformer, and lazily consults the exact reversed
+source witness only on none. Decision changes only the shared helper in
+decideStruct/memCovered and matching completeness proof; the original public
+decideStruct_complete signature and array-cut-first route remain. No producer
+implementation or heap-observation graph is rewritten.
+
+Calculus/DecisionMemoryCoverage proves for every C, closed φ:Fml C [], and
+w:ReversedFreshField φ: actual preparation/hoist identities, cut_none,
+hasAllocAll, memCovered, Covered, inTarget under every waiver setting,
+answeredness and an actual returned refutation under the unchanged holdsH
+reading. No coverage/route/verdict premise is supplied. The generic existential
+does not identify a chosen countermodel. Separately, the original fixture
+kernel-proves decideGoal memStructReversed = .refuted gapMemStruct_state by rfl;
+decideGoal_refutes certifies that exact before-parent child-heap state. UInt-five
+and Bool clients prove actual Covered/returned refutation. Mapping, buried and
+given-heap unknowns, and all old normal/signed/fixed/heap observations remain.
+Only the assigned guarded tuple changes [unknown,unknown,refuted] to
+[refuted,unknown,refuted], after actual improved output and matching certificates.
+Earlier unknown seals remain historical evidence superseded for this one pin.
+
+Exact-name Covered/inTarget/Waivers/DecisionTheorem declaration slices are
+byte-identical frozen base. Covered behavior intentionally expands through
+memCovered; no unchanged-extension or false reverse-inclusion claim is made.
+An initial prefix selector matched CoveredA: preservation-selector-failure.json
+records the evidence bug and the corrected exact-name check. HashPremise,
+ProgramReduction, MemStructCut, MemStructWitness and MemoryWitness whole files
+remain byte-identical frozen base. Shared registrations are two additive root
+imports and two module-map rows; no Rules edit.
+
+Evidence: /workspace/va1-evidence/reversed-integration-next. Initial affected
+build FAIL1 after891.866s only on the observed improved tuple; raw output kept.
+Its certified update passed memory MCP/build69.261/68.193s. Review found a stale
+comment; its fix invalidated dependencies. Refreshed MCP auto-setup overlapped
+LSP and dependency compilation and stopped at host reserve: FAIL137/wrapper75,
+102.066s, resource_stop=true, max sampled RSS6100448KiB, minimum host available
+12852588544bytes. Repair: sanctioned explicit-j1 affected build without LSP
+first, then warm diagnostics; no guard or proof budget changed.
+Affected376-job build PASS953.647s; largest reported file110s (ledger),
+arithmetic95/operators106/memory67/array replay36s, all below300s. This is an
+affected cache invalidation, not a claimed fresh/full project gate. Each raw
+metadata JSON retains actual command, source hashes, toolchain and cache context.
+Final warm MCP helper4.240/coverage4.177/Decision33.250/Memory69.149/census5.247/
+controls5.246s pass; low-level reason MCP5.215s passes. Public24-theorem axiom
+report PASS22.300s, only existing propext/Classical.choice/Quot.sound, no new axioms.
+
+Runtime-only profile PASS3.095s: original/literal-five/Bool refuted and
+buried/mapping/given-heap unknown. Observation timings include printing:
+3.988/.291/.262ms and .394/.156/1.335ms respectively. Initial harness FAIL1
+mixed StandardExample/Gaps in one typed list; exact failing source/output kept,
+repaired only in that external harness. Kernel certificates are separate;
+no compiler/EVM check or other-VM timing is claimed.
+
+Final checks hold original writer lock, threads1/Lean-j1, one task child,
+actual memory.max12884901888/swap.max0, host reserve12884901888bytes. Passing
+sampled aggregate RSS max5313100KiB (shared pages included), charged cgroup peak
+4470992896bytes, host available min13200699392bytes. resources.json retains
+all extrema and failed measurement samples. Initial metrics aggregation failed
+parsing OCI error text as an integer; fixed to use only successful numeric
+samples and retained failed samples/error description. The failed LSP auto-setup
+overlap above is not hidden; final diagnostics used already emitted dependencies.
+Strict automatic491/61budgets/11refuted, layers180core, reachability1100 and
+trust1115sources/248sites pass. Same85 docs and404 inventory findings remain
+FAIL, identical to retained frozen-base analysis; no findings/pins deleted.
+
+Independent read-only finder: no source findings; suggested UInt/Bool clients
+implemented and checked. Skeptic: stale comment confirmed/fixed, final no
+findings; independently verified exact-name frozen declarations, nonvacuity,
+old Answer/state preservation and retained controls. Neither used Lean/server,
+builds or edits. reviews.txt retains results. PARALLEL-INTERFACE export remains pending until commit; it must use
+only the checked committed tree: actual modules/signatures, exact producer
+hashes/premises, nontrivial clients, complete import closure and immutable
+bundle/archive/checksums. Source-only handoff; final combined/full closure open.
+
+Every original open queue remains accounted for: global meaningful Residue,
+DecisionTheorem-prime/exhaustive target/hash bridge, nested/general arrays,
+compound/given-heap broader memory, halting OR, broader revised M4 boundary,
+formula-derived runtime fuel, remaining profiling/backfill and final/full gates.
+Held VA1-Q2/producer TypeExamples repair is not resumed. Next independent child:
+given-heap literal-read reflexive source family using existing MxObs syntax and
+extractor, with validity over every heap/binder value. No whole-goal completion,
+goal mutation, publication, push/merge/PR/tag.
+
+
+## Given-heap literal-read source certificate (2026-11-01)
+
+Independent owned AU01 reason-census/AU02 broader-memory progress. Low-level
+Calculus/DecisionGivenHeapReason.lean imports only existing MemObserve,
+MemStructCut and HashPremise. For every contract C/context Γ, its intrinsic
+GivenHeapLiteralReadReflexive witness retains the complete equation for one
+box-bound dynamic uint array, with the same direct literal-index read on both
+sides. Parser reuses producer eqView and mxObsReadKey?, checking both entire
+terms against MxObs.read reconstruction. Exact soundness/completeness/iff and
+computable Decidable membership are proved without target/Covered/verdict tests.
+One-line reason: the existing finite given-heap fallback searches countermodels
+at one heap, which cannot establish validity over every heap and binder value.
+Generic validity explicitly quantifies over every State C Γ and optional binder
+value, including unset; Theory equality reflexivity needs no evaluation-definedness
+premise. hashFree and validH preserve the existing interpretation, and .answer
+provides MemoryWitness.Answer.proved from that universal proof. No one-state
+checker result is promoted to validity.
+
+Proof-layer Calculus/DecisionGivenHeapBoundary.lean separately imports Decision,
+keeping the low-level Answer acyclic and ready for later pipeline consumption.
+Its target theorem proves closed-family admission for every waiver setting.
+Additional candidate_answer and candidate_route certify existing negative-state
+selection: the actual checkMemoryAt negative branch returns exactly the producer
+candidate; hashfalse/LeafAunknown/noalloc/checker-isNo premises explicitly select
+that existing global route. Both old parameter and alias clients discharge every
+premise by rfl/kernel decide and retain exact candidate-state equality plus
+returned holdsH refutations. No coverage/pipeline extension is claimed here.
+Decision, Covered/inTarget/DecisionTheorem/Waivers, producer implementations,
+semantics/defaults and all old observations are unchanged since2e992aaf.
+
+Examples/DecisionGivenHeapReason.lean supplies original/another-index inhabited
+source decisions, universal validity and actual targets; the original remains
+unknown/notCovered and the second remains unknown. Generic actual fixed-array,
+diamond and fresh-allocation refusal theorems cover every body. Clients refuse
+unequal keys, computed index, direct literal reflexivity, fresh source and old
+negative parameter/alias forms. Valid computed/literal refusals distinguish
+classification from validity. Actual read observations pin a defined value1,
+out-of-bounds none and unset none, over the unchanged producer candidate heap
+and initial heap. Both empty/nonempty root states satisfy the proved family.
+
+Actual new fixture correction: dl![.diamond] on a leaf-only hidden declaration
+elaborates to exactly memParamSame (box source), kernel rfl equality checked;
+it is therefore a positive classification. The initial combined negative claim
+was kernel-disproved and retained with exact failing source/hash. The correction
+records actual source identity, not a changed default or notation; the genuine
+intrinsic diamond refusal remains universally proved. Initial generic refusal
+signatures also required explicit Fml constructor receivers. Completeness needed
+one final Option.pure reduction; MCP blank-line/multiline replacement probes had
+syntax errors, which are not counted as proof passes. Raw diagnostics and exact
+hash-verified failing snapshots are in /workspace/va1-evidence/given-heap-reason-next.
+
+Both optional exact old returned-state rfl proofs failed. They were not treated
+as passing observations or weakened: candidate_answer now normalizes the producer
+let and splits the real checker; candidate_route establishes the memory verdict
+before collapsing outer fallback matches. An intermediate rewrite had already
+been discharged by cases; its failed raw/source is retained. Final client proofs
+preserve the original exact-state statements and certify actual returned holdsH.
+Reviewers explicitly distinguished earlier source targets from kernel validation.
+
+Final gates: core MCP5.250s, boundary MCP5.274s, clients MCP5.332s, emitted affected
+client/import closure3.095s pass. Core/boundary emissions4.125/3.096s passed at
+the corresponding stages. All use pinned Lean4.24.0 commit797c613/Lake5.0.0,
+original writer lock, threads1/Lean-j1, one task container, no LSP/build overlap,
+actual memory.max12884901888/swap.max0 and host reserve12884901888bytes. Exact
+sampled resource extrema: RSS1463088KiB (shared pages included), charged peak
+630624256bytes, minimum host available17068548096bytes; resources.json retains
+10 failed measurement samples, excluded only from numeric extrema, never from raw evidence.
+Public36-declaration axiom audit PASS16.948s contains only existing standard
+propext/Classical.choice/Quot.sound subsets; no new axioms/sorry/trust shortcuts.
+Runtime profile PASS3.163s: original/another-index true+unknown; computed-index
+false+unknown; diamond-notation true+unknown; parameter/alias negatives false+
+refuted. Timings including printing2.996/.355/.250/.310/.613/.217ms respectively.
+Kernel proofs and runtime-only profiling are distinguished; no EVM result claimed.
+
+Static reachability1103, layers180core, strict automatic491/61budgets/11refuted,
+trust1118sources/248sites and whitespace pass. Same85 docs and404 inventory
+findings remain FAIL, identical to prior exact-frozen-base analysis. Three root
+imports and three module-map rows are narrow additions, no Rules changes.
+Independent read-only finder/skeptic final source reviews report no findings;
+real syntax identity, universal certificate, explicit routing premises, exact
+old counterstates and remaining unknowns all reviewed without Lean/server/builds
+or edits. reviews.txt retains results. Immutable checked committed export/seal
+remains pending until this checkpoint commits; existing2e992aaf artifacts stay.
+
+Original full queue remains incomplete: global Residue/DecisionTheorem-prime and
+exhaustive target/Covered/hash bridge, general/nested arrays, wider memory beyond
+these exact families, halting OR, broader revised M4 boundary, formula-derived
+runtime fuel, remaining performance/backfill and final/full gates. The new valid
+Answer is not yet consumed by decideMem; that integration is ready owned work,
+not blocked by held producer TypeExamples/VA1-Q2. No goal/status reset, whole-lane
+completion or publication authorization is inferred.
+
+
+## Certified given-heap pipeline integration (2026-11-01)
+
+The ready4feb9c source certificate is now consumed. New
+Calculus/DecisionGivenHeapExtension.lean lazily wraps every successful existing
+countermodel as an Answer.refuted with exactly that state; only none consults the
+exact all-heap reflexive literal-read Answer. Decision adds decideGiven with
+sound/refutes/complete and exact countermodel-state preservation, uses it only
+in the no-allocation memory branch, and adds the exact source class to
+memCovered. Fresh-array cut and fresh-struct fallback order are unchanged.
+Both Covered/inTarget direct definitions, Waivers and DecisionTheorem signatures/
+bodies remain byte-identical frozen base; adjacent documentation is corrected.
+Covered behavior intentionally expands via memCovered. Producer implementations,
+HashPremise, ProgramReduction, MemObserve and held frontend TypeExamples remain
+whole-file byte-identical base (static-differential.json). No producer API,
+semantics/default, exclusion, hash premise or proof/resource budget changes.
+
+Generic GivenHeapLiteralReadReflexive.noAlloc is derived from full source syntax.
+The proof layer now proves actual memCovered/Covered and decideGoal φ=.proved
+for every C, closed φ:Fml C [], witness w of this exact source class. No coverage,
+verdict or route premise is supplied. Actual completion plus hash freedom rules
+out unknown; w.validH plus existing refutation soundness rules out refuted.
+Existing negative candidate_route retains all its original explicit premises,
+now using decideGiven_preserves_countermodel to retain exact states.
+
+Original memParamSame and another literal-index source improve
+(target=true,Covered=false,unknown)→(true,true,proved), with actual positive
+holdsH certificates. The parent guard changes only its assigned first tag:
+[unknown,refuted]→[proved,refuted]. Its all-state source certificate is proved
+before that update; no truth at one checked heap is promoted. NumericCoverage's
+assigned memory conjunct and Census/own example aliases use the actual proved
+certificate; the entire preceding numeric prefix (including517-node
+Covered=false/hashCovered=false/proved and folded-large controls) is byte-identical.
+The prior4feb9c unknown/noncoverage seals remain immutable historical evidence.
+Computed-index, buried-field and mapping target controls remain unknown/noncovered;
+old parameter/alias actual returned candidate states and holdsH refutations,
+reversed exact child-heap refutation, all given-heap defined/OOB/unset observations
+and all existing signed/array/heap outputs remain.
+
+Raw evidence: /workspace/va1-evidence/given-heap-integration-next. Warned before
+core import/cache invalidation and inspected06a8d16/f31-related speed history.
+Helper MCP3.159/build3.261s pass. First Decision MCP FAIL34.135s on invalid
+Bool.or_eq_true.mp use; elaboration-recovery sorryAx cascades were nonpasses,
+not source axioms or changed expected reports. Fixed proof MCP34.303/build31.906s
+pass unchanged guards. Generic bridge MCP4.170/build3.096s passes.
+Finder/skeptic found stale comments and one missed numeric consumer. Stopped only
+our first affected container at211.373s/exit137, resource_stop=false; explicit
+stop command/reason retained. Repaired source, verified four frozen direct
+definitions and numeric prefix, then Decision MCP37.684s passed before restarting.
+This was a changed-tree repair, not an unchanged stopped-build endpoint.
+
+Cold changed-tree affected run FAIL1 after1002.578s, resource_stop=false: old
+reversed coverage proof expected the prior Boolean shape. Independent consumers
+completed (Memory68s, ledger114s, arithmetic90s, remaining files below300s).
+Repaired that proof by deriving new given-class=false from the existing exact
+fresh witness, preserving its statement. MCP4.242s passes; warm selected closure
+PASS380jobs22.358s. Final8 edited-file MCPs pass: helper4.323, Decision36.289,
+boundary4.160, Memory74.940, census5.327, given controls5.241, reversed5.262,
+numeric30.951s. No file exceeds unchanged300s.
+
+First public68 audit FAIL1/57.421s: the edited NumericCoverage example was checked
+in MCP but omitted from emitted targets, leaving an old olean. No theorem/axiom
+expectation was changed; explicit complete affected target list now includes it.
+Complete affected build PASS3.147s; unchanged68 audit PASS60.736s, all only existing
+propext/Classical.choice/Quot.sound subsets. This emission correction, failed
+raw report and final actual declarations are retained. Runtime-only profile
+PASS3.099s confirms actual target/Covered/verdict for both positives, both exact
+negative candidate refutations, reversed refutation and three remaining unknowns.
+Timings including printing3.724/.379/.588/.273/.560/.305/1.711/.328/.303ms
+(original, another-index, computed, diamond-notation, negative-param, alias,
+reversed, buried, mapping). No EVM/other-host performance claim.
+
+All final commands hold original writer lock, one task child, threads1/Lean-j1,
+actual memory.max12884901888/swap.max0 and host reserve12884901888bytes. Exact
+passing extrema: sampled RSS4611476KiB, charged cgroup peak3427799040bytes,
+host available minimum14261637120bytes. resources.json retains19 failed
+measurement samples. Each gate JSON
+records command/toolchain/head/source hashes and raw output. Passing original
+KeySort setup evidence remains separate from full validation. Static strict
+automatic, reachability/layers/trust and whitespace pass; same85 docs/404 inventory
+findings remain FAIL, compared to frozen-base analysis, with no findings hidden.
+Full ./run-lean.sh remains pending the held producer TypeExamples/VA1-Q2 repair;
+no unchanged stopped full/frontend gate was repeated or claimed passing.
+
+Independent read-only finder/skeptic source reviews found the missed consumer/
+comments and verified their repairs, exact old states, all-heap positive proofs,
+remaining unknowns and preserved numeric controls. Final reversed coverage repair
+reviewed with no further findings; neither reviewer used Lean/server/builds or
+edits. Final documentation/export review and committed package seal are pending
+until this checkpoint is committed. Prior2e992aaf and4feb9c seals are retained.
+
+Whole original assignment remains partial: meaningful global Residue union,
+DecisionTheorem-prime/exhaustive target/Covered/hash bridge, fixed/nested/general
+arrays, broader compound/memory blocks, halting OR, broader revised M4 boundary,
+formula-derived runtime fuel, remaining performance/backfill and final/full gates
+are open. Ready next owned children: minimal UInt syntax/recognizer de-layering
+for the compound-field certificate (warn/inspect history before refactor), and
+exact formula-work consumption proof without raising runtime2048/511 budgets.
+No AU05/AU06, VA2/compiler/decoder takeover, scope/goal reset or publication.
+
+
+## Acyclic UInt syntax/recognizer prerequisite (2026-11-01)
+
+Owned compound-field dependency repair after sealedb14b8c77. Warned before
+possible cache invalidation and inspected f31bd931/c5952b99 speed history.
+Calculus/DecisionUIntSyntax.lean now contains the existing intrinsic
+Tm.UIntLinear inductive and Decide.uintLinear_hashFree proof. Lower
+Calculus/DecisionUIntRecognizer.lean contains the entire existing typed evidence
+parser, shape soundness/completeness/iff and constructive instance. All three
+blocks move byte-for-byte exactly once (moved-block-identities.json); no new
+arithmetic/decoder or untyped representation. Original Grammar imports Syntax
+and retains translations/agreement/admission; original Shape imports Recognizer
+and retains the existing coverage/certification wrappers. Public names/types
+remain, including generated Solidity.instDecidableUIntLinear, confirmed in both
+ilean records. Generalized casesOn/structural recursion layout is unchanged.
+CompoundFieldReason now imports Recognizer instead of the high Shape facade.
+Its actual69-module local closure no longer reaches Decision; no source imports
+are missing (acyclic-low-closure.json). This removes the documented integration
+cycle; it does not yet supply the generic compound countermodel or pipeline hook.
+
+All gates pass under pinned4.24.0/5.0.0, original writer lock, serial threads1/
+Lean-j1, one child and actual memory.max12884901888/swap.max0 plus12GiB host
+reserve: Syntax MCP7.397/build6.298s, Recognizer MCP4.156/build3.089s,
+Compound MCP5.263s, Grammar compatibility MCP10.604/build8.440s, complete listed
+affected consumers39.522s, Shape compatibility MCP4.167s. Public27 actual type/
+axiom declarations checked through original imports pass6.320s, only existing
+standard axiom subsets. No budget, verdict, source classification or semantic
+observation changes. Every command/source hash/raw output and sampled resource
+extremum/failed measurement is retained in /workspace/va1-evidence/uint-layer-next.
+Measured sampled RSS2062040KiB, cgroup peak1147629568bytes, host available
+minimum16535592960bytes;18 unsuccessful measurement samples remain retained.
+No separate runtime speedup claim or EVM evidence is made for a verbatim move.
+
+Reachability1106, layers180core, strict automatic491/61budgets/11refuted,
+trust1121sources/248sites and whitespace pass. Same85 documentation/404 inventory
+findings remain FAIL and match frozen-base analysis. Decision whole file is
+unchanged fromb14; the four frozen direct definitions, hash/validity premises,
+producer implementations and all previous controls remain. Shared registrations
+are two additive root imports/two module-map rows, no Rules edits.
+Independent read-only finder/skeptic source reviews report no findings and verify
+actual blocks/names/graph; neither used Lean/server/builds or edits. Final docs/
+export review and committed sealing remain pending. Previous seals retained.
+
+Next concrete missing theorem is optional-denotation independence for a UIntLinear
+term in a memory-only context, including partial expressions. That proof can
+then certify a closed compound fresh-field equation at the producer child heap
+before parent allocation, choosing a differing field for some RHS or a defined
+field against none. No such theorem is assumed here. Outer scalar contexts need
+separate treatment; no all-context countermodel or global memory completion is
+claimed. All original Residue/theorem/hash bridge, arrays, memory/OR/M4/fuel,
+performance/backfill/full gates and held VA1-Q2 remain incomplete. No publication
+or goal reset/completion.
+
+
+## Closed compound-field countermodel certificate (2026-11-01)
+
+After sealed23ba6991, Calculus/DecisionUIntConstant.lean proves, explicitly for
+all C:Contract/R:RefTy/t:Tm C [mem R] (val uint), evidence h:t.UIntLinear and
+arbitrary σ/τ:State C [mem R], equality t.denote σ=t.denote τ. This is equality
+of full Option readings across different heaps, not only agreement on successful
+evaluation. Impossible scalar locals are eliminated structurally; literals and
+pure arithmetic use existing actual denotations. No halting/default premise,
+evaluator change or fresh arithmetic implementation is introduced.
+
+Calculus/DecisionCompoundCertificate.lean reuses the existing map-free field
+realization and defines the exact producer child heap before parent allocation.
+For every C, closed φ:Fml C [], NonliteralUIntFreshField witness w and arbitrary
+initial σ, it constructs ¬holds(w.counterState σ)φ. Evaluate the constant RHS
+option at the child state with unset memory local. In some v, existing
+fieldEq_refutes selects a differing parent field; optional-denotation independence
+transports the RHS at each parent. In none, a parent with field0 has defined
+some0 reading, contradicting RHS none. Thus partial arithmetic is retained;
+no value is substituted for an undefined expression. Same-state holdsH refutation
+uses the unchanged hashFree/holdsH_iff route, and .answer is a real typed
+MemoryWitness.Answer.refuted. CounterState can be formed contextually; refutation/
+Answer are deliberately restricted to closed leaves. Outer scalar contexts
+require separate invariance arguments and are not claimed here.
+
+Examples/DecisionCompoundCertificate.lean obtains actual parser witnesses for
+original buried0+1, another2+3 and partial0-1. All three counterstates kernel-equal
+existing gapMemStruct_state before parent allocation. Actual optional Theory
+readings are pinned some1/some5/none, alongside ordinary/holdsH countermodels,
+inhabited typed Answers and target admission (including partial RHS). All three
+global verdicts remain unknown; no producer fixture or expected global verdict
+changed. Existing literal/reversed refutations and mapping unknown remain.
+Decision and source-class files are whole-file unchanged from23ba; four frozen
+direct predicates/statement, hash/validity premises and all budgets remain.
+
+Raw evidence /workspace/va1-evidence/compound-certificate-next. All8 gates pass:
+constant MCP4.283/build3.095s, generic certificate MCP5.263/build3.108s,
+controls MCP5.210/build4.120s, public13-declaration actual type/axiom audit6.314s,
+runtime-only profile3.098s. Only existing standard axioms; no sorry/new axioms or
+native trust shortcut. Profile confirms original/another/partial class=true,
+Covered=false,unknown; direct/reversed controls class=false,Covered=true,refuted;
+mapping class=false,Covered=false,unknown. Timings including printing
+2.907/.375/.280/1.113/.455/.556ms. This is not EVM evidence or pipeline integration.
+All use pinned4.24.0/5.0.0, original writer lock, threads1/Lean-j1, hard12GiB/
+no-swap container and12GiB host reserve; raw metadata/resources.json retains
+measured aggregate RSS1444280KiB (shared pages included), cgroup peak612163584bytes,
+host available minimum17211600896bytes and16 unsuccessful measurement samples.
+
+Reachability1109/layers180core/strict automatic491/61budgets/11refuted/trust1124
+sources/248sites and whitespace pass. Same85 docs/404 inventory findings remain
+FAIL, unchanged against frozen-base analysis. Three root imports/three module-map
+rows are additive. Independent read-only finder/skeptic reviews find no issues,
+including genuine optional-none handling, closed scope, exact producer state and
+remaining unknowns; neither used Lean/server/builds or edits. Final documentation/
+export review and committed seal remain pending; old seals are preserved.
+
+Ready next owned work: lazily compose this actual Answer after existing struct
+answers and prove actual source-to-Covered/returned-refutation routing, then
+update only assigned pins with matching certificates. All original global
+Residue/DecisionTheorem-prime/hash bridge, arrays, wider memory, halting OR,
+broader revised M4 boundary, formula-derived runtime fuel, performance/backfill
+and final/full gates remain incomplete. Held VA1-Q2/producer TypeExamples repair
+is untouched. No goal reset/completion or publication.
+
+
+## Closed compound-field pipeline integration (2026-11-02)
+
+After sealed27b3e854, DecisionCompoundExtension lazily composes the actual closed
+nonliteral-UInt fresh-field Answer after every original/reversed struct Answer.
+The exact existing Answer and state transformer are preserved on success.
+Decision uses the combined helper in both decideStruct and memCovered; old
+decideStruct_complete/complete_merged signatures remain and a combined lemma is
+added. Fresh-array cut-first and given-heap routes are unchanged.
+DecisionCompoundCoverage derives preparation/hoist/cut, no-given overlap,
+all-waiver target, Covered and actual global returned refutation from each closed
+source witness. No supplied coverage/verdict/route premise; holdsH refutation
+uses unchanged hash-free completeness and soundness. Generic returned-state
+certificates are existential, not equality to a separately chosen counterstate.
+
+Original buried0+1, another2+3 and partial0-1 improve from unknown to certified
+refuted. The assigned Memory tuple becomes three refuted results; all controls
+have matching kernel certificates. Exact constructed producer-state equalities,
+optional some1/some5/none, ordinary/hash countermodels and target pins remain.
+Mapping/computed-key unknowns, given-heap proved results, prior reversed exact
+returned state and existing negative candidate states remain unchanged. The
+517-node uncovered-but-proved control is retained. Four direct frozen
+declarations Covered/inTarget/Waivers/DecisionTheorem match the exact base;
+memCovered behavior intentionally expands through the helper. No producer,
+semantic observation, hash/validity premise, dependency or proof budget changes.
+Two root imports/two module-map rows are narrow additive registrations.
+
+Raw commands/source hashes in /workspace/va1-evidence/compound-integration-next.
+Final ten per-file MCP checks pass: helper4.313, Decision34.051, certificate4.163,
+coverage4.242, reversed coverage4.263, Memory71.147, census5.284, compound reason
+5.246, compound controls4.339 and reversed controls5.283 seconds. Repaired
+affected build passes391jobs in1038.366s; every module retains the300s guard.
+All edited Lean files are explicitly emitted before the public54-declaration
+axiom/type audit46.881s and actual verdict profile3.109s, both passing. Axiom
+sets contain only existing propext/Classical.choice/Quot.sound subsets. Profile
+(target,Covered,tag): compound three=(true,true,refuted); literal/reversed same;
+given=(true,true,proved); mapping/computed=(true,false,unknown); existing negative/
+alias=(true,false,refuted). Verdict evaluation including printing ranges
+0.304–3.545ms. These are interpreted local observations and kernel certificates,
+not EVM tests or full import-closure completion.
+
+Original writer lock, pinned Lean4.24.0/Lake5.0.0-src+797c613, threads1/Lean-j1,
+one job/container with actual memory.max12884901888 and swap.max0 plus12GiB host
+reserve are retained. Initial affected build was intentionally stopped after
+confirmed stale comments: Docker137,86.821s, resource_stop=false; exact stop and
+raw failure remain. Comments were corrected before repaired build; no unchanged
+failed build was repeated. Final sampled aggregate RSS5316616KiB, cgroup peak4431269888bytes and minimum
+host available13346336768bytes are recorded in resources.json, retaining22
+unsuccessful measurement samples. No runtime/full-gate pass follows merely from these subset gates.
+
+Reachability1111/layers180core/strict automatic491/61budgets/11refuted/trust1126
+sources/248sites and whitespace pass. Same85 doc findings (48 missing/37
+ambiguous) and404 inventory differences remain FAIL, retained against frozen
+base analysis. Earlier full-run/TypeExamples resource failures remain failures;
+VA1-Q2 is held and its source is untouched. Independent read-only finder/skeptic
+source reviews are recorded in this evidence directory; committed export/package
+review remains pending until the immutable export exists. Neither reviewer runs
+Lean/server/builds or edits. Their two confirmed
+stale-comment findings were corrected before final checks.
+
+Global meaningful Residue union, DecisionTheorem-prime/exhaustive target/hash
+bridge, keyed/field/struct/nested arrays, wider memory, halting OR, broader revised
+program-free M4 boundary, formula-derived runtime fuel, remaining performance/
+backfill and full gates remain incomplete. Existing standalone fixed-array,
+numeric and source-work components remain delivered. Ready owned work includes
+actual keyed-array syntax/coverage and exact formula-normalizer work; VA2 sharing
+is not a prerequisite to those. No whole-goal completion/reset or publication.
+
+
+## Exact formula-work normalization component (2026-11-02)
+
+After sealed4b8bf63f, owned DecisionNumericNormalization defines intrinsic
+Fml.normalizationWork with generalized Fml.casesOn/structural recursion: truth/
+equality1, not/positive prefix add1, conjunction/implication add both child work
+plus1. Other constructors receive a fallback number without any success theorem.
+The exact real private normalizer view already linked to ProgramNormalization
+now has a proved shared-state invariant: for all C/Γ/φ.QFUIntLinear and fuel/
+budget each at least φ.normalizationWork, an actual reduction d and remainder
+rest satisfy actualNormalization fuel φ budget=some(d,rest) and
+rest+φ.normalizationWork=budget. Aggregate work is a sufficient depth bound,
+not a separately computed minimal height. Both children consume visits before
+smart truth collapse; term arithmetic does not consume extra formula visits.
+
+Public qfUIntLinear_normalization_by_work accepts only syntax evidence and a
+source-work budget inequality. qfUIntLinear_normalization_at_work removes that
+inequality by choosing actual computed work. qfUIntPrefix_normalization_by_work
+constructs a real equivalent DeclarationReduction for one positive uint binder
+at body-work+1. No supplied output/certificate/normalizer premise, new axiom,
+model change or trust shortcut. This certifies real normalization, not the later
+source translation/cut/exhaustive decision theorem. Runtime2048 and511-node cut
+remain unchanged; deriving the whole requested formula-dependent decision bound
+is still open. Existing weight-based APIs/proofs stay unchanged.
+
+Inhabited clients pin counts collapsed5/short3/positiveBody9/negativeBody11;
+actual generic certificates for collapsed and both positive-prefix formulas;
+5-versus4 truth-collapse consumption; arithmetic weight strictly above visits;
+prefix10-versus9 and12-versus11 successes/refusals. Existing positive proved,
+negative returned refutation and below-key unknown controls remain unchanged.
+No new verdict/default/refusal/profile/pin changes. No imports/registrations or
+producer files change in this checkpoint; four frozen direct definitions and
+exact hash premises remain intact.
+
+Raw evidence /workspace/va1-evidence/normalizer-work-next. Final current-tree
+core MCP12.801s, client MCP7.413s, explicitly emitted affected client/build6.305s
+and public11-declaration type/axiom audit9.507s pass. All edited files are emitted
+before audit. Existing standard axiom subsets only. Initial recursor positivity
+proof used looping simp and failed11.659s; explicit definitional constructor
+proofs fix it without budget changes. Initial client all-conjunction decide
+failed6.397s because equality of optional proof certificates has no Decidable
+instance; exact definitional equalities fix it. Both failure sources and raw
+outputs are retained. Neither failed attempt counts as pass.
+
+Same original writer lock, pinned Lean4.24.0/Lake5.0.0-src+797c613, threads1/
+Lean-j1, one bounded job and actual memory.max12884901888/swap.max0 plus12GiB
+host reserve. Final measured aggregate RSS2245356KiB, cgroup peak1289093120bytes,
+minimum host available16426991616bytes;9 failed measurement samples retained.
+Strict automatic/layers/trust/reachability/whitespace pass; broad docs85 and
+inventory404 differences remain FAIL against frozen base. Existing full-gate/
+TypeExamples resource failures remain failures and VA1-Q2 remains held.
+
+Independent read-only finder/skeptic reviews verify real shared-state accounting,
+both-branch collapse controls and unchanged later budgets. Skeptic identified
+ordinary indexed pattern matching; generalized recursor fixes G0 before final
+checks. No final source findings. Reviewers run no Lean/server/build or edits.
+Committed package review/export seal remains pending until actual export.
+
+All original global Residue/DecisionTheorem-prime/target/hash completeness,
+keyed/field/struct/nested arrays, broader memory, halting OR, broader revised M4
+boundary, full formula-derived runtime fuel, remaining performance/backfill and
+final/full gates remain open. This independent fuel component does not consume
+VA2 sharing ownership or TypeExamples repair. Prior seals/failures and original
+goal identity are preserved; no push/merge/tag or whole-goal completion.
+
+
+## Necessary and sufficient normalizer work (2026-11-02)
+
+After sealede645f435, owned DecisionNumericNormalization strengthens the real
+normalizer proof without altering any existing function or sufficient theorem.
+For every C/Γ/φ.QFUIntLinear/fuel/budget/d/rest, successful actualNormalization
+fuel φ budget=some(d,rest) implies rest+φ.normalizationWork=budget, without
+sufficient-budget hypotheses. Success inversion recovers both actual child
+computations and their real intermediate remainder. Zero fuel/budget contradict
+success. This preserves truth-collapse order and arbitrary partial UInt terms.
+
+Public qfUIntLinear_normalization_iff_work proves, for all such φ and budget,
+(ProgramNormalization.ofFormula? budget φ).isSome=true iff
+φ.normalizationWork≤budget. Public qfUIntLinear_normalization_below_work derives
+actual none for every smaller budget. This is exact minimum shared public budget
+(the same number initializes fuel and shared nodes), not minimum independent
+depth. Original state-bound proof, source-derived sufficiency/prefix, runtime2048
+and later511-node cut remain unchanged. This is not an exhaustive decision-fuel
+implementation or a Residue/coverage theorem. No supplied output/coverage/verdict
+premise, oracle, new axiom, weakened observation or increased budget.
+
+Clients characterize all budgets, including surplus values: collapsed truth
+branches succeed iff5≤budget; numeric positive/negative bodies iff9/11≤budget.
+Generic below-work refusal produces the concrete4-node branching failure.
+Existing computed source counts, exact/+1 prefix boundaries and original
+proved/refuted/below-key unknown controls remain unchanged. No imports, producer
+files, registrations or expected verdicts change. Decision/HashPremise/
+ProgramReduction and held TypeExamples remain byte-identical to prior checkpoint.
+
+Raw evidence /workspace/va1-evidence/normalizer-minimum-next. Final core MCP
+12.799s, core emit9.631s, client MCP7.468s, affected client emit6.283s, public
+8-declaration type/axiom audit9.519s pass. Only existing standard axiom subsets.
+The first induction mistakenly fixed rest (11.790sFAIL); generalization was
+correct but argument order then failed11.654s. A per-file goal query inspected
+the real induction signature, and final repair passes. Both failed sources/
+raw outputs and inspected goal remain; none is a passing gate. Final source/client
+MCPs report success with no items/failed dependencies.
+
+Original lock, pinned Lean4.24.0/Lake5.0.0-src+797c613, serial threads1/Lean-j1,
+actual memory.max12884901888/swap.max0 and12GiB host reserve retained. Measured
+aggregate RSS2170740KiB, cgroup peak1312038912bytes, host available minimum
+16416120832bytes;9 unsuccessful resource measurements retained. Static strict
+automatic/layers/reachability/trust/whitespace pass. Broad docs85/inventory404
+findings remain FAIL and earlier fullgate/TypeExamples stops remain failures.
+No unchanged stopped full build repeated. No EVM evidence is claimed.
+
+Independent read-only finder/skeptic source reviews report no findings; both
+verify actual successful-child accounting and exact shared-budget scope. Neither
+uses Lean/server/builds/edits. Final docs/export reviews and immutable committed
+package seal remain pending until performed. Original full goal remains partial:
+global meaningful Residue/DecisionTheorem-prime/target/hash bridge, keyed/field/
+struct/nested arrays, broader memory, halting OR, revised broader program-free M4
+boundary, whole-pipeline formula-derived fuel/511 bound, remaining performance/
+backfill/final full gates and held VA1-Q2 are open. Prior seals/approvals/failures
+preserved; no goal reset/completion, scope takeover or publication.
+
+
+## Actual typed-prefix storage observations (2026-11-02)
+
+After sealede757deb2, actual array-gap staging in array-key-next distinguishes
+concrete blockers before repair. Fixed root/bad controls collect3 reads, pass
+Src/lifting/flattening with235/223 nodes. Fixed-below-key, dynamic-below-key and
+below-field pass prefix/free-parameter coverage, bounded preparation and cut,
+but collect0 reads and fail arithmetic Src/flattening (57/61/47 nodes); lifting
+still succeeds. Arrays of structs/arrays stop earlier at leafOf?. Thus the
+root-only ElemPath restriction is not evidence that the whole cut returns none.
+No source-family gap cause is conflated or expected verdict changed.
+
+Owned DecisionFixedArrayStorage now connects existing SVal fixedFloorAtPath to
+actual Storage.set at an arbitrary intrinsically typed root/prefix. Absence
+remains none. For all contracts/root types/fixed lengths/continuation types,
+success plus the unchanged length-breakpoint premise transports full optional
+find, real Storage.obs.word and Storage.obs.has to floored indices, including
+undefined/out-of-range observations. Diverging same-root paths retain lookup;
+other roots retain complete values. No successful-prefix/save premise is
+assumed beyond the actual optional result; existing presence supplies existence.
+This is the previously missing real-storage observation layer, not another
+vector/path proof or a collector/coverage implementation.
+
+Inhabited clients use actual mapping and nested-fixed storage roots. Selected
+row value9 becomes7; non-default sibling key stays9 and another-root sentinel
+stays42. Presence distinguishes in-range2 from out-of-range3. An absent nested
+outer prefix refuses reconstruction, without installing a default. Omitting
+the length breakpoint gives an actual false presence-transport control.
+No default/observation/predicate/decision/classifier changes. Two imports/two
+module-map rows are narrow additive registrations. Producer files and all five
+array unknown pins remain unchanged.
+
+Raw /workspace/va1-evidence/array-key-next. Detailed stage replay4.172s, final
+core MCP5.264s, client MCP4.161s, explicit affected emit3.154s and14 public
+type/axiom declarations4.197s all pass. Initial stage harness mistakenly used
+--run without main: exit1/3.148s retained with source; corrected invocation
+adds detailed observations and passes. It is not a failed theorem or a passing
+gate. No proof failures or proof-budget increases in this component. Only
+existing standard axiom subsets. Original lock, Lean4.24.0/Lake5.0.0-src+797c613,
+threads1/Lean-j1, hard memory.max12884901888/swap.max0 plus12GiB host reserve
+remain enforced. Sampled aggregate RSS1387204KiB, cgroup peak526958592bytes,
+minimum host available17157500928bytes;9 failed measurements retained.
+
+Reachability1113/layers180core/strict automatic491/61budgets/11refuted/trust1128
+sources/248sites and whitespace pass. Same broad85 docs/404 inventory findings
+remain FAIL against frozen-base analysis; old full/TypeExamples resource failures
+remain failures. No EVM or full combined-tree evidence claimed. Independent
+read-only finder/skeptic source reviews find no issues; neither uses Lean/server/
+builds or edits. Final documentation/export review and committed seal remain
+pending until performed.
+
+Global meaningful Residue/DecisionTheorem-prime/target/hash bridge, general
+keyed/field/struct/nested array collector/coverage and reconstruction composition,
+wider memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511
+bound, remaining performance/backfill/full gates and held VA1-Q2 remain open.
+No other lane scope taken; prior seals/goal identity/failures preserved.
+
+
+## Decidable map-guard reversed-field reason (2026-11-02)
+
+After sealed820d41b5, owned DecisionMappingFieldReason adds a separately named
+MappingReversedFreshField source family: all C/Γ, exact fresh-struct binder,
+actual primitive-field lookup, direct literal on the left/field on the right,
+complete intrinsic source equality, and (Ty.ref(struct s)).mapFree=false.
+“Mapping-bearing” names this actual syntactic guard; no separate equivalence
+with a semantic contains-mapping predicate is claimed. The one-line reason is
+that the existing fresh-struct realization requires a map-free struct whereas
+this source fails that structural guard. No new target exclusion is introduced.
+
+Recognition uses actual allocView/eqView/literalTerm, field enumeration and full
+Tm.beqR comparisons. Public soundness/completeness/iff and constructive Decidable
+prove exact membership without querying target/Covered/decideGoal. Generic
+hashFree and schema_refuses prove only actual boundAnswer refusal for every
+body of that binder, not all-route/global unknown. Separate high
+DecisionMappingFieldBoundary proves target admission for every existing waiver
+setting and every closed member. No child-heap realization, countermodel,
+coverage or future theorem is assumed; the map-free children premise is
+unavailable here and remains a substantive proof obligation.
+
+Actual original mappingReversed0 and new mappingOne1 both inhabit the class,
+are hash-free/admitted, and remain globally unknown by kernel computation.
+Supported map-free original/five/Bool reversals, map-bearing reflexive, compound
+RHS and given-heap shapes are negative controls. Constructive proposition
+decisions also have inhabited positive/negative controls. Existing verdicts,
+source definitions, frozen predicates/premises/budgets remain unchanged. Three
+root imports/three map rows are narrow additive registrations.
+
+Raw /workspace/va1-evidence/mapping-reason-next. Final core MCP5.260s, boundary
+MCP4.175s, client MCP4.241s, explicit affected emission3.106s and15 public
+type/axiom reports5.244s pass; only existing standard axiom subsets. Initial
+client MCP4.218s failed because a Gaps formula was mixed into a StandardExample
+list. The same given-heap input is now a separate conjunct, preserving intrinsic
+contract typing and every expectation. Failed source/output retained; review
+alone was not claimed to establish elaboration. No budget increase or coercion.
+
+Same original writer lock, pinned Lean4.24.0/Lake5.0.0-src+797c613, threads1/
+Lean-j1, hard memory.max12884901888/swap.max0 and12GiB host reserve. Sampled
+aggregate RSS1533308KiB, cgroup peak612241408bytes, minimum host available
+17164214272bytes;9 unsuccessful measurements retained. Required static gates
+pass except unchanged broad85 documentation/404 inventory findings, retained
+against frozen-base analysis. Earlier full/TypeExamples resource stops remain
+failures; VA1-Q2 remains held and its source untouched. Kernel/Lean evidence
+only, no EVM claim.
+
+Independent read-only finder/skeptic source reviews report no findings after
+the intrinsic-contract control repair. They verify exact family/premises and
+specific-schema versus global-verdict distinction; neither uses Lean/server/
+builds/edits. Final docs/export review and committed package seal remain pending
+until performed. Global Residue union/exhaustive target/hash bridge and
+DecisionTheorem-prime remain open, as do general array collector/coverage, wider
+memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511 bound,
+remaining performance/backfill and final full gates. Goal/VM/branch and prior
+seals/failures preserved; no push/merge/PR/tag or whole-goal completion.
+
+
+## Exact bounded-instance semantic certificates (2026-11-02)
+
+After sealed1f0e5cfd, owned DecisionBoundedInstance proves for all C/index/bound/
+value/qf bodies, under the explicit in-range literal inequality, validity of
+(all index uint (uintBelow index bound implies body)) implies the actual
+body.subst1 at that returning literal. The proof uses existing guard/set and
+substitution semantics; arbitrary typed partial/storage observations are allowed.
+BoundedUIntLiteralInstance retains complete source equality, qf evidence and
+in-range premise. Actual guard and full consequent comparisons provide an exact
+recognizer with soundness/completeness/iff and constructive Decidable. Membership
+is parameterized by the supplied literal, not existential search over all values.
+No target/Covered/unknown oracle, future theorem or semantic assumption is stored.
+
+DecisionBoundedInstanceSource closes the actual UniversalPrefix and reverses
+prenex, conditional simplification and elimination through real SourceReduction
+certificates. Its hash-reading theorem retains the existing explicit hasHash=false
+premise. Concrete clients compute source/prefix/witness data for original
+dynamic-below-key and below-field, obtaining actual Valid/ValidH certificates.
+The existing Covered=false and global unknown observations remain unchanged.
+Fixed-below-key refuses this exact recognizer in both the probe and a checked
+actual source/prefix client; its unknown/noncoverage pins remain. This is genuine
+semantic certificate transport, not general array collector/coverage integration.
+
+Warned before dependency refactoring and inspected116cb4c4 history. Existing
+leafTerm_beq_self/leafFormula_same_self move byte-for-byte once from UIntPrefix
+to lower DecisionLeafEquality, preserving names/signatures/proofs/recursion layout.
+The rest of UIntPrefix is byte-identical except its new import. New low205-module
+closure excludes main Decision, verified in acyclic-low-closure.json. This avoids
+duplicating equality/decoder work; no representation/compiler API changes.
+Four root imports/four map rows are additive; shared existing rows are untouched.
+
+Controls include actual keyed/field witnesses, fixed refusal, supplied literal
+out-of-range refusal, full consequent mismatch and unsupported quantified body
+refusal. Refusal is distinct from invalidity: quantified-body fixture is valid.
+The new test originally confused strict LFml.eq with optional equality. Failed
+source/output are retained. Original strict test definitions remain unchanged;
+their antecedent is proved false and mismatched implication vacuously valid.
+Separate existing LFml.optEq fixtures now give an inhabited antecedent, actual
+all-state certificate and genuine None-versus-Some countermodel at State.init.
+No strict operation/default/observation or existing expected verdict was changed
+to rescue those mistaken test claims. Implicit err-sort and anonymous optEq-name
+errors are also retained. Final client diagnostics have no items/dependency errors.
+
+Raw /workspace/va1-evidence/bounded-instance-next. Seven final gates pass:
+five per-file MCP checks equality4.260/core5.243/source4.173/compatibility5.245/
+controls5.233s, complete22-module nonaggregate affected closure392jobs63.191s,
+and28 public type/axiom reports9.668s. Existing standard axiom subsets only, no
+sorryAx. This is a warm affected build, not a new cold/full pass. Every edited
+file is explicitly emitted before audit; aggregate Solidity/Main full gate remains
+pending under unchanged VA1-Q2. All per-module300s guards remain.
+Initial low-module import was insufficient: MCP4.347s/build3.106s FAIL. I started
+that prewarm before inspecting the failed MCP; subsequent helpers explicitly
+require passing diagnostics first. Correct ExactReduction import fixed it;
+proof text remains verbatim. External probe spacing failure and all test/semantic
+failures remain nonpasses with exact sources/raw outputs; no unchanged retry.
+
+Original writer lock, Lean4.24.0/Lake5.0.0-src+797c613, threads1/Lean-j1, hard
+memory.max12884901888/swap.max0 and12GiB host reserve remain enforced. Sampled
+aggregate RSS3790376KiB, cgroup peak2676498432bytes, minimum host available
+15041462272bytes;13 unsuccessful measurements retained. Reachability1120, layers
+180core, strict automatic491/61budgets/11refuted, trust1135sources/248sites and
+whitespace pass. Same85 docs/404 inventory findings remain FAIL against frozen
+base analysis; prior full/TypeExamples resource stops remain failures.
+
+Independent read-only finder/skeptic reviews find no final source/gate issues and
+verify strict/optional distinction and actual conditional source transport. Neither
+uses Lean/server/builds/edits. Final docs/export reviews and committed seal remain
+pending until performed. All original global Residue/DecisionTheorem-prime/
+exhaustive target/hash bridge, general array collector/decision integration, wider
+memory, halting OR, broader revised M4 boundary, whole-pipeline fuel/511 bound,
+remaining performance/backfill and full gates remain open. Kernel/Lean evidence
+only, no EVM claim. Goal/VM/branch/prior seals/failures preserved; no publication
+or whole-goal completion.
+
+
+## Formula-derived bounded literal search (2026-11-02)
+
+After sealed4040f2ad, owned DecisionBoundedInstanceSearch derives candidate
+literals from the actual uint guard bound. It checks the unchanged existing
+boundedUIntEstimate bound (imp guard body)≤511 BEFORE uintSamples allocation.
+Each candidate is rechecked by the exact supplied-literal recognizer and each
+hit retains its complete source witness. BoundedLiteralHit.valid is universal
+validity from that schema, not promotion of finite-state checks. Generic
+boundedUIntLiteralSearch_complete proves discovery for every in-range exact
+instance witness whose original source estimate fits. No all-target completeness,
+new fuel/node budget, default or observation change.
+
+BoundedUIntSourceHit retains real SourceReduction/UniversalPrefix outputs and
+the found witness; boundedUIntSource? computes those existing producers. Valid
+and ValidH follow through the checked prior transport, with the unchanged
+explicit hash-free premise. No assertion that arbitrary SourceHit values are
+recognized or decidable. SourceReduction and prefix limits remain unchanged.
+Actual keyed/field hits select literal1 after candidate0; generic completeness
+is instantiated on the actual key witness. Optional equality finds0 while the
+mismatched consequent refuses. Fixed-below-key remains outside this helper.
+Zero produces an empty candidate search; maximum uint fails the estimate
+before allocation. Their explicit true formulas remain valid. Existing three global unknown pins remain unchanged.
+Two root imports/two map rows are narrow additive registrations.
+
+Raw /workspace/va1-evidence/bounded-search-next. Five final gates pass: core
+MCP5.274s, clients MCP5.242s, explicit affected emission4.178s,15 public
+type/axiom reports9.424s, interpreted profile3.107s. Existing standard axiom
+subsets only. Profile key/field/optional=true; fixed/mismatch/zero/maximum=false.
+Times including printing3.294/.701/.159/.753/.135/.056/.089ms respectively.
+The maximum bound demonstrates early operational rejection, not a larger sample
+allocation. No EVM or global decision/performance completion claim.
+Initial intrinsic-contract inference/dependent-branch/keyword errors4.278s
+and budget rewrite attempts4.502/5.304s remain FAIL with exact sources/raw output.
+Final branch proof exposes the same source estimate and splits its actual check;
+no premise or budget was weakened. No source sorry/admit/new axiom.
+
+Original lock, Lean4.24.0/Lake5.0.0-src+797c613, threads1/Lean-j1, actual hard
+memory.max12884901888/swap.max0 and12GiB host reserve remain enforced. Sampled
+aggregate RSS1682260KiB, cgroup peak612401152bytes, minimum host available
+17084649472bytes;12 unsuccessful measurements retained. Reachability1122,
+layers180core, strict automatic491/61budgets/11refuted, trust1137sources/248sites
+and whitespace pass. Same broad85 docs/404 inventory findings remain FAIL
+against frozen-base analysis. Prior full/TypeExamples stops remain failures;
+VA1-Q2 remains held and no unchanged stopped full build is repeated.
+
+Root disk was measured at236MiB free after prior sealed exports; all old files/
+caches are preserved. Subsequent intermediate delivery uses a prerequisite Git
+bundle against the exact frozen8bd8742a base, plus an explicit pointer/checksum
+to the preserved standalone bundle at
+/workspace/va1-evidence/bounded-instance-next/delivery/va1.bundle. The task-owned
+incremental sealer verifies reconstruction in a fresh temporary bare repository
+and full object fsck, then removes only its own temporary verification directory.
+The original sealer and every prior standalone bundle remain unchanged. This is
+a packaging/resource choice, not a theorem, guard, goal or scope revision.
+Exact reconstruction/export checks remain pending until actually performed.
+
+Independent read-only finder/skeptic source reviews find no issues and distinguish
+estimate-qualified discovery/actual source transport from collector/decision
+integration; neither runs Lean/server/builds or edits. Final docs/export reviews
+and committed seal remain pending. Full original goal remains incomplete:
+global Residue/DecisionTheorem-prime/exhaustive target/hash bridge, general array
+collector/decision integration, wider memory, halting OR, broader revised M4
+boundary, whole-pipeline fuel/511 bound, remaining performance/backfill/full gates
+and held VA1-Q2 remain open. No goal/VM/branch reset or publication.
+
+
+### Ground numeric leaf interface checkpoint (partial)
+
+Added `Calculus/DecisionNumericGround.lean`: `uintLinear_ground_sourceBound`
+proves actual closed-term translation with numeric grammar and structural size;
+`LFml.UIntQF.ground_exact_tests` discharges the real zero-prefix exact tests,
+with no local/environment parameters and the unchanged actual nodes≤511 premise.
+`qfUIntGround_Covered_of_leaf` requires the explicit actual `leafOf?` equation;
+it supplies neither source discovery nor arbitrary target/hash/answeredness.
+This is an independently usable AU01/approved-boundary component, not global
+Residue, DecisionTheorem-prime or unconditional Covered→inTarget.
+
+`Examples/DecisionNumericGround.lean` checks actual tt/nottt leaves and coverage,
+inhabited optional None/None equality, an actual None/Some countermodel, and
+free-parameter nonmembership. No old source, predicate, verdict or budget changes.
+Two additive root imports and two module-map rows register only these modules.
+Owned M7-next prose now distinguishes initial census results from later fixed
+array/compound memory closures. Finder found no issues. Skeptic's confirmed
+prose finding (the census file itself is absent at the frozen base) was fixed
+by saying initial VA1 census; no source findings. Both reviews were read-only,
+without Lean/server/builds. Exact raw evidence: /workspace/va1-evidence/ground-next.
+
+Final per-file MCP core4.175s/client4.176s, affected import-closure build3.094s
+and nine public signature/axiom reports5.236s pass; only existing propext,
+Classical.choice and Quot.sound, no sorryAx. Initial stripAll projection and
+implicit primitive-type diagnostic failures are retained as failures.
+Sampled aggregate RSS1382108KiB; cgroup peak436056064bytes; minimum host available17320701952bytes, actual hard12GiB/no swap and12GiB host reserve. 8 unsuccessful measurement samples retained.
+
+Static gate commands/exits are saved in static-gates.json. Existing axiom-pin
+inventory/docs findings remain failures, not hidden passes. Earlier full and
+TypeExamples resource stops remain failures and VA1-Q2 remains held. No unchanged
+failed heavy full gate is rerun as a completion endpoint. Full original queue
+remains incomplete: closed formula source discovery, global meaningful decidable
+Residue/DecisionTheorem-prime/exhaustive target/hash bridge, five general array
+routes, wider memory, negative halting-OR, broader revised program-free boundary,
+whole-pipeline fuel/511 derivation, remaining profiling/backfill and full gates.
+AQ1/AQ2/Q1 decisions and all old seals/failures remain. No goal mutation or
+publication. Parallel package and cumulative prerequisite bundle export follow
+this checked source commit; final concrete integration remains open.
+
+
+### Ground numeric source-discovery checkpoint (partial)
+
+`Calculus/DecisionNumericGroundSource.lean` removes the previous supplied-leaf
+premise for every contract and closed `Fml.QFUIntLinear` formula with source
+`uintQFWeight≤511`. It proves both actual translations and structural node
+bounds, actual `ExactAt.ofFormula?` traversal, real source reduction/preparation,
+and actual normalization grammar/weight preservation. `qfUIntGround_logic_Covered`
+composes these real producers. `qfUIntGround_logic_boundary` quantifies all waiver
+settings and proves frozen inTarget, Covered and hash freedom; answered/certified
+results retain actual `ValidH`/`¬holdsH`. This is a precise supported family,
+not the original false unconditional reverse inclusion, exhaustive Residue or
+full DecisionTheorem-prime. No predicate/model/source default/budget change.
+
+Concrete clients use partial unsigned0-1: optional equality of two failures is
+proved; failure versus literal0 is refuted at exactly State.init Bank; a logical
+combination is covered/answered. Actual source weights55/41/139 and all-waiver
+boundary proofs avoid supplied normalizer/leaf/verdict premises. Free-parameter
+and other gap controls remain in earlier preserved modules. Broader numeric
+syntax, mixed/broader prefixes and other original clauses remain outside this
+supported theorem. Two owned root imports/two module-map rows register modules;
+our four new numeric rows are placed in the existing numeric table. No other
+producer registrations are rewritten.
+
+Raw evidence: /workspace/va1-evidence/ground-source-next. Core/client MCP
+5.280/5.271s, affected closure build4.199s and20public signature/axiom reports
+23.479s PASS. No sorryAx/new axiom/native shortcut; only existing propext,
+Classical.choice and Quot.sound. Raw initial Option-bind proof, reserved
+identifier/constructor/Decidable-client failures are retained, never counted as
+passes. Independent read-only finder/skeptic checked source and scopes without
+Lean/server/builds; constructor finding fixed, map table placement finding fixed.
+The previous sealed ground export had two metadata findings (nested named-arg
+signature truncation and prose instead of leafOf? signature); original sealed
+artifacts stay immutable and separate ground-next/PARALLEL-INTERFACE-corrected.json
+repairs both, independently verified and bound by ground-next/FINAL-SHA256SUMS.
+Measured aggregate RSS1711796KiB; cgroup peak633901056bytes; minimum host available17091850240bytes. Hard12GiB/no swap, threads1/-j1 and12GiB host reserve enforced; 9 failed measurements retained.
+
+Static commands/exits remain in static-gates.json, including known failing
+inventory/docs gates. Prior full/TypeExamples resource stops and pending VA1-Q2
+remain failures/held. No full goal completion or milestone publication is claimed.
+Remaining original queue: global meaningful decidable Residue/reasons union,
+DecisionTheorem-prime/exhaustive target/hash bridge, five general array routes,
+wider memory, halting-OR guard, broader revised M4 boundary, whole-pipeline
+fuel/511 derivation, remaining baseline/backfill/performance and affected/full
+final gates. Original8bb counterexample/AQ1/AQ2/Q1 decisions and all previous
+failures/seals preserved. No goal/VM/thread reset, no push/merge/PR/tag.
+
+
+### Intrinsic source-instance checkpoint (partial)
+
+`Calculus/DecisionSourceInstance.lean` certifies actual `Fml.instLit` guarded
+literal instances before LFml translation, using the existing AllLeft declaration
+landing and `substU_holds` theorem. `SourceUIntLiteralInstance φ bound value`
+retains the entire source equation and actual computed substitution equation;
+its parser is sound/complete and membership constructively decidable at the
+supplied bound/literal. The consequent is a primitive equation; arbitrary
+source formulas are not asserted to be recognized. The body retains arbitrary
+typed partial observations; this is not a semantic oracle or finite-test lift.
+`SourceUIntLiteralChain` lifts real certificates through original primitive
+universal binders with structural recursion and no new fuel. Hash transport
+requires unchanged explicit `hasHash=false`; no general chain-completeness or
+global decision/coverage integration is claimed.
+
+Concrete clients construct actual parser witnesses for all five original open
+array shapes: below key, fixed below key, below field, array of structs and array
+of arrays. The last two still have actual leafOf?=none; the source certificates
+supply ValidH without assuming a repaired compiler. In-range mismatched RHS and
+out-of-range literals are refused. The original false fixed-array countermodel
+proves that false source cannot inhabit the certificate chain. Original global
+unknown pins and every existing observation remain unchanged. Target/Covered
+integration and general array realization remain open; no AU02 completion claim.
+
+Finder/skeptic confirmed a G0 issue in initial ordinary indexed matches. After
+warning and inspecting normalizer e645/e757 and MemStructCut view history, new
+views and chain dispatch now use generalized Fml.casesOn; structural recursion
+is retained. Both reviewers confirmed repair, semantic soundness/noncircularity
+and exact supplied-parameter scope, without Lean/server/builds. Failed guard
+proof, dependent-view transport, congruence-name, completeness and pre-G0 attempts
+are retained raw. After adding the actual three-zero-cell storage state, original-antecedent
+equality and all in-range read proofs, final core/client MCP4.240/5.284s,
+affected closure build4.160s and18public signature/axiom reports6.277s PASS; no sorryAx/new axiom/native trust.
+Raw commands/results: /workspace/va1-evidence/source-instance-next. Two owned
+root imports/two rows register modules; only owned M7-next status prose changes.
+Measured aggregate RSS1586756KiB, cgroup peak707776512bytes, minimum host available17141420032bytes; actual hard12GiB/no swap, threads1/-j1,12GiB host reserve. 6 failed measurements retained.
+
+Required static automatic/import/trust gates pass; existing inventory/docs
+failures remain recorded. Prior full/TypeExamples stops and held VA1-Q2 remain.
+Disk measured about63MiB free: no existing files/caches/artifacts are removed.
+This intermediate evidence archive contains this checkpoint's raw delta plus
+an exact path/SHA256 prerequisite to the preserved cumulative ground-source-next
+archive. Both are checksum-bound; the full evidence directory remains intact.
+The prior full-archive helper is preserved. Final concrete whole-lane closure,
+final full validation and final full handoff remain open; this is incremental
+packaging, not an assignment-completion certificate or relaxed resource guard.
+Remaining queue: global meaningful Residue/DecisionTheorem-prime/exhaustive target
+and hash bridge; actual array decision/collector integration; broader memory,
+halting-OR, broader approved program-free boundary, whole-pipeline fuel/node
+bound, remaining profiling/backfill and full gates. No other lane's producer,
+predicate/default/pin/budget is changed. Original decisions, counterexample,
+seals and failed gates preserved; no goal reset/mutation, push, merge or PR.
+
+
+### Uncapped numeric flattening checkpoint (partial)
+
+`Calculus/DecisionNumericFlatten.lean` proves actual existing `flattenFuel?`
+execution for every `LTm.Num P E` term from its structural depth/shared-node
+requirements: output is exactly `Flattened.pure`, remainder is r−nodes, and no
+511 premise occurs. Sequencing, failed terms, literals, environments, linear
+binary and unary constructors retain their actual syntax/partial semantics.
+`numeric_formula_flattenFuel` proves the corresponding actual `LFml.UIntQF`
+formula execution, unchanged formula and empty reads. Formula-derived wrappers
+and the zero-remainder theorem instantiate these bounds directly. Private pure
+certificates are not assumed results: proofs establish equality with the real
+flattener constructor by constructor. No producer or runtime default is changed.
+
+This is the independent read-free traversal part of the original AU02 fuel
+obligation. It does not remove the global exactBounded cap or establish later
+arithmetic compilation/read-layout/path realization above 511, and does not
+prove a necessary minimum depth. Existing normalizer-work, cut expansion,
+flattening and arithmetic-compiler resource obligations stay distinct.
+
+The new client constructs a genuine 517-node optional-equality/failed-sequencing
+body, proves its actual flattening/zero remainder and all-state inhabitance,
+and proves that same body's unchanged exactBounded test remains false. Strict
+failure-versus-value equality stays false. Small tests isolate insufficient
+depth and insufficient shared nodes; exact successful resources are pinned.
+The original global 517-node uncovered-but-proved control remains unchanged.
+Initial implicit failed-term sort, dependent induction hypotheses and concrete
+unfolding recursion failures are retained. Symbolic structural-size and zero
+remainder proofs fix them without increasing any checking/proof budgets.
+
+Final bounded MCP core/client6.312/4.174s, affected closure build3.136s,
+20 public signature/axiom reports5.296s and interpreted profile3.103s PASS.
+All imports/dependencies were warm; the final build compiled the new client in
+1.1s (381 jobs including cached dependencies). No clean/full build is claimed.
+For the identical interpreted input n=238/budget517, first and repeated calls
+were1.181521/0.376247ms including printing; budget516 refused in0.301995ms.
+These are actual flattener-stage timings, not decision verdict or cold-build
+measurements. Raw evidence: /workspace/va1-evidence/numeric-flatten-next.
+Aggregate sampled RSS 1642620 KiB; cgroup peak 841723904 bytes; minimum host available 17017274368 bytes. Actual hard 12GiB/no swap, threads1/-j1 and 12GiB host reserve; 8 failed measurements retained.
+
+Independent read-only finder/skeptic reviewed source and controls without Lean,
+server or builds; no source findings. Both verified the actual producer equality,
+nonvacuous partial controls and stage limits. Required strict automatic/layer/
+trust/whitespace gates pass. Strict docs still FAIL with exactly the frozen
+base's 85 findings; exact list/raw hashes compared in docs-vs-frozen-base.json.
+The existing axiom inventory discrepancy still FAILS; no pass is invented.
+No sorryAx/new axiom/native trust shortcut. Two additive root imports/two rows
+register owned modules; M7-next prose records only this restricted progress.
+
+Intermediate delta evidence references the prior source-instance archive and
+its cumulative ground-source prerequisite, each by absolute path/SHA256; all
+older artifacts/caches are preserved. Full original goal remains incomplete:
+global meaningful Residue/reason union/DecisionTheorem-prime/exhaustive target
+and hash bridge; actual general array decision/collector integration; wider
+memory and halting OR; broader approved M4 boundary; later compiler/general
+formula-derived fuel; remaining backfill/performance and affected/full gates.
+Prior full/TypeExamples resource stops remain failures, VA1-Q2 remains held,
+and no unchanged stopped build is repeated. No goal mutation/publication.
+
+
+### Actual numeric source-to-flattener stages checkpoint (partial)
+
+`Calculus/DecisionNumericStages.lean` composes actual public normalization,
+source reduction, leaf preparation and node-derived numeric flattening. Closed
+QFUIntLinear source weight≤2048, or a positive uint binder with body weight≤2047,
+yields the real numeric leaf, preserved grammar and nodes bounded by original
+source weight, then an actual flattener result with unchanged body and no reads.
+No caller-supplied normalizer/leaf equations or future compiler facts appear.
+The one prefix reserves one existing traversal step. These are source-to-body
+stages, not flattening a quantified wrapper or proving later compiler/global
+coverage completeness.
+
+The owned normalization file adds only `qfUIntPrefix_normalization_sourceFuel`.
+Removing that new lemma reproduces parent7ea6b573 byte-for-byte; every old
+signature, proof, constant and runtime function remains unchanged. The old511
+coverage theorem is not rewritten. Actual clients use the ORIGINAL517-node
+source (with source weight517), identify its actual numeric body's517 nodes,
+and derive actual flattening. A genuinely refuted closed source also reaches
+these stages, with its old countermodel certificate retained. Original large
+source target/Covered=false/hashCovered=false/proved observations are unchanged.
+
+Final bounded MCP normalizer/core/client11.754/5.230/4.178s; affected closure
+build3.115s;12 public signature/axiom reports11.573s; interpreted profile3.097s
+PASS. No sorryAx/new axiom/native trust or checking-budget change. Inputs and
+imports were warm; no clean/full-build claim. Identical original517 input
+first/repeated staged+global observations took51.244484/43.993072ms including
+printing; negative ground1.089172ms. These timings include target, coverage,
+hash coverage, actual source/flatten traversal and the existing global verdict.
+Raw exact commands/source hashes: /workspace/va1-evidence/numeric-stages-next.
+Sampled aggregate RSS 2189256 KiB; cgroup peak 1279426560 bytes; minimum host available 16422653952 bytes. Actual hard 12GiB/no swap, threads1/-j1 and12GiB host reserve; 15 unsuccessful measurements retained.
+
+The complete owned reverse import closure has six nonaggregate modules; all
+were built. Additional Examples/DecisionNumericNormalization consumer build
+passes in5.311s, replaying original numeric and array controls. Aggregate
+Solidity remains part of the held final full gate (affected-closure.json).
+
+Read-only finder/skeptic source reviews found no issues and checked actual
+producer composition, one-step prefix accounting and explicit stage limits;
+neither used Lean/server/builds. Two additive root imports/two module-map rows
+register owned modules; no shared producer or reserved lane code is rewritten.
+Required strict automatic/layer/trust/whitespace gates pass. Strict docs still
+FAIL with exactly the frozen base's85 findings; full list/raw hashes compared.
+Existing axiom inventory and prior full/TypeExamples stops remain failures.
+VA1-Q2 remains held; no unchanged failed full build is repeated.
+
+Disk measured about16MiB free before packaging. All prior files/caches/artifacts
+remain intact. The required immutable prerequisite Git bundle now serves as
+this checkpoint's concrete source package, with full import-closure blob hashes
+and literal signatures; a redundant source tar is omitted. Reconstruction from
+the saved standalone base bundle, exact committed head and full fsck is required
+before export success. Delta evidence references the numeric-flatten and earlier
+source-instance/ground-source archives by path/SHA256; no source simulation is
+substituted. Final combined integration/whole-lane handoff remain open.
+
+Remaining original queue: global meaningful Residue/reasons union and
+DecisionTheorem-prime/exhaustive target/hash bridge; actual array decision and
+collector integration; wider memory and halting OR; broader approved M4 boundary;
+later compiler/path/read-layout formula-derived fuel; remaining baseline/backfill,
+performance and full gates. Original decisions, counterexample, failures and
+seals preserved. No goal reset/mutation, push, merge, PR or publication.
+
+
+## Partial-OR reason component (2026-11-02)
+
+Parent checkpoint3e9c0ad25c50d269b5d30551f9edbb72427313b8; original branch/base,
+VM/thread/goal and earlier approvals/counterexample/seals are preserved. No
+producer dependency or VA2 work is replaced. VA1-Q2 remains held. This is an
+owned AU01 reason-census/target-bridge increment; the global theorem stays open.
+
+Calculus/DecisionHaltingOrReason defines PartialOrRoots with actual root-type
+proofs, PartialOrBlockAt with its complete two-uint-binder source equation, an
+exact parser and named constructive decidable membership at supplied typed
+roots/literals. This is not discovery of those parameters and never examines
+Covered or decideGoal. The one-line reason identifies the APF OR requirement
+for left-operand definedness. Hash-freedom follows from the full source syntax.
+Calculus/DecisionHaltingOrBoundary proves actual prepared-source translation,
+actual ApfTm parser result, failing left.guardDs and guard.guardB, and generic
+all-waiver target admission. The supported class is this exact source family;
+other OR shapes/partial operations and global reconstruction remain outside.
+
+The existing valid floorClaim1 and false floorBad are inhabited members, as is
+floorClaim0. Existing actual-state countermodel and valid proof are retained.
+The client extracts the real guard from the complete leafOf? output, checks
+its actual collected mapping root, and proves the actual parser refuses that
+guard. A sibling replacing checked subtraction by the scalar passes guardB;
+that total sibling and a no-OR sibling are nonmembers. Covered/proved closed
+Boolean OR is also outside. Existing target/noncoverage/global-unknown pins
+are unchanged. No class-wide global unknown theorem, floors counterexample or
+complete reconstruction Setting is claimed.
+
+Read-only finder and skeptic reviews completed without Lean/server/builds.
+Skeptic requested a full-leaf link and positive total-guard control; both were
+added and kernel checked. Final source/docs reviews found no remaining issue.
+Three additive imports/three module-map rows only; existing producers, frozen
+Covered/inTarget/DecisionTheorem definitions and hash premises are unchanged.
+Frozen-predicate hashes and parent source preservation are saved in evidence.
+
+Final bounded MCP source/boundary/client4.244/7.457/5.250s PASS; owned boundary
+build5.248s PASS;27 public signature/axiom reports10.589s PASS with only existing
+standard axioms. Affected build first FAILED errno28 while writing the original
+Lake artifact cache; exact exit1/raw failure retained. No unchanged retry or
+cache deletion occurred. Installed Lake Config/Env.lean documents LAKE_CACHE_DIR;
+a new task-owned existing-VM /tmp/va1-owned-lake-cache-20261102 bind was verified
+uid1000/writable with9GiB available and actual cgroup memory.max12884901888 /
+swap.max0 before retry. The recovered affected build PASS4.199s. Original cache
+is untouched; replacement artifact cache initially empty, checkout oleans warm.
+This tmpfs cache is ephemeral and not required as a source dependency artifact.
+No cold/full source-build claim. Runtime limits/host reserve remain unchanged.
+
+Interpreted profile PASS3.127s: valid unknown16.777037ms, false unknown9.732406ms,
+covered Boolean OR0.550090ms, repeated valid unknown9.768732ms, including printing.
+Actual input identities and commands are retained; no budgets/verdicts changed.
+Sampled aggregate RSS 1715568 KiB; cgroup peak 1550999552 bytes; minimum host available 16142057472 bytes; 13 unsuccessful samples retained.
+Hard12GiB/no swap, threads1/-j1, single writer/build and12GiB host reserve applied.
+
+Strict automatic/layer/trust/whitespace pass. Initial new shorthand doc path
+finding was fixed and its raw failure retained. Strict docs still FAIL with
+exactly85 frozen-base findings; axiom inventory still FAIL404 unrecorded changes
+(previously recorded versus base403). Prior full/TypeExamples resource failures
+remain failures; no unchanged full gate was repeated. Aggregate Solidity/full
+run-lean gate and final concrete integration remain pending.
+
+Planned immutable export (pending bundle/export audit at commit time):
+/workspace/va1-evidence/halting-or-reason-next/
+PARALLEL-INTERFACE.bundle and JSON catalog, with actual committed module/type/
+signature hashes, nontrivial witnessed client and explicit unresolved premises.
+delivery/original.patch and va1.bundle are cumulative to the original frozen
+base; saved standalone prerequisite bundle, exact reconstruction/fsck and all
+prior archive hashes are required and retained. Evidence is a delta archive
+plus prior-evidence.json references, not a replacement for earlier seals. Final
+identity/checksum files must bind the actual resulting committed head; the
+artifact review and export checks are not yet claimed by this source commit.
+
+Remaining entire original queue is partial: exhaustive meaningful Residue union,
+DecisionTheorem-prime and all target/coverage/hash routes; actual fixed/nested
+array decision integration, wider memory and halting-OR reconstruction; broader
+approved M4 boundary; later compiler/read-layout formula-derived fuel; remaining
+baseline/backfill, slow-module performance and full strict/axiom gates. Q1 revision
+is approved as previously recorded; Q2/producer TypeExamples repair remains held.
+No new exclusion/premise, model/semantic change, axiom/sorry/native trust shortcut,
+proof-budget increase, goal mutation, push/merge/PR/tag publication occurred.
+
+This increment is kernel proof evidence only; no EVM/external-test validation
+is claimed. Interpreted timings are observations, not a semantic oracle.
+
+
+## Numeric compiler and actual read-free stages (2026-11-02)
+
+Parent35608a543e4f85b7037b105c8aef10bd7c85eb36 and every earlier seal/decision,
+original VM/thread/branch/base/goal are preserved. This advances the original
+AU02 formula-derived-fuel work independently of held VA1-Q2 and VA2 ownership.
+No producer/compiler source is edited. Speed history inspected:0cfcf368,
+744d0966,361b389c; this is a new consumer proof module, not a producer refactor.
+
+Calculus/DecisionNumericCompiler defines a computable maximum equation-operand
+depth on existing LFml syntax. UIntQF plus that depth≤1023 derives the existing
+LFml.Arith constructor premises and actual leafArithmetic? success over its
+actual collected typed parameters/environment. Fuel1024 is unchanged. Neither
+aggregate formula nodes≤511 nor an assumed compiler equation is a premise.
+The real returned certificate gives validity equivalence over states/atoms.
+
+The proof also reaches actual readFlatten? and flattenedArithmetic? outputs.
+Existing numeric cut identity is proved, the actual cut formula's intrinsic
+index is retained, structural formula nodes supply traversal resources, and
+the genuinely empty read layout discharges alias requirements. The arithmetic
+encoding's semantic equivalence comes from its actual checked producer output.
+No general storage-read/path reconstruction is assumed or claimed. Optional
+failure and strict equality semantics remain distinct. Source-stage theorems
+compose actual ground/positive-prefix discovery; the positive prefix remains
+present and only its actual numeric body is compiled. Source weight≤1023 is
+a sufficient theorem premise, not a runtime-budget change or necessary class.
+
+The exact existing517-node optional-failure body has equation depth2 and an
+actual valid LeafArithmetic/FlattenedArithmetic output; its exactBounded stays
+false. Strict failed equality yields actual encodings proved not valid. The
+unchanged2048 producer call succeeds on the same large body. The original517
+source also reaches its real body's arithmetic and full flattened certificates.
+A shallow symbolic nonlinear product is actually refused by the direct compiler
+and outside the inductive grammar despite equation depth2, with an inhabited
+countermodel. Old target/Covered/hashCovered/proved pins are unchanged. These
+results do not turn noncoverage into unknown or assert whole decision completion.
+
+Final bounded MCP core/client6.568/5.472s PASS, affected build4.147s PASS;
+28 public signature/axiom reports13.778s PASS, standard axioms only. Interpreted
+profile3.096s PASS: optional517 5.394082ms, original517-source-body 11.781751ms,
+strict-failed 0.137898ms, repeated optional517 4.107623ms, including printing.
+All observed stages match expected controls. Checkout inputs/oleans warm;
+previously repaired task-owned artifact cache reused. No cold-source build claim.
+Raw failed alias rewrites/Option normalization/dependent-cut rewrite and exact
+source snapshot remain retained; no checking budget or expected pin was changed.
+Sampled aggregate RSS 1508188 KiB; cgroup peak 511741952 bytes; minimum host available 15712313344 bytes; 12 unsuccessful samples retained.
+Actual hard12GiB/no swap, threads1/-j1, writer lock and12GiB host reserve applied.
+
+Finder/skeptic independent read-only source/docs reviews found no issue; neither
+used Lean/server/builds. Two additive root imports/two module-map rows register
+owned modules. Strict automatic/layer/trust/whitespace pass. Strict docs still
+FAIL with exactly85 frozen-base findings; axiom inventory still FAIL404 changes.
+Earlier full/TypeExamples stops remain failures, Q2 held and source untouched.
+This is kernel evidence; no EVM/external-test or final combined/full gate claim.
+
+Planned export, pending checks at source commit:
+/workspace/va1-evidence/numeric-compiler-next/PARALLEL-INTERFACE.json and bundle
+will carry actual committed modules, dependent signatures, unchanged producer
+facts, nontrivial clients and unresolved premises. Cumulative original.patch /
+va1.bundle, committed handoff, delta evidence and prior archive checksums must
+be reconstructed/audited before delivery success. Root disk measured approximately3.4MiB free before packaging;
+no prior files/caches/seals are deleted. Parallel and delivery bundle paths may
+hard-link the same immutable committed bundle; the evidence archive references
+that separate source package by hash rather than storing a redundant copy.
+All original files remain available; the supported cache still lives on the
+existing VM tmpfs as previously documented. Final manifest binds exact head.
+
+Whole original queue remains partial: exhaustive meaningful Residue/reasons,
+DecisionTheorem-prime and target/coverage/hash bridge; fixed/nested-array decision
+integration; broader memory and partial-OR reconstruction; broader approved M4
+boundary; remaining nonnumeric/path/read-layout formula-derived fuel, baseline/
+backfill/performance and full checks. Q1 boundary revision is approved, Q2 held.
+Numeric read-free compiler composition is now independently proved; it does not
+remove the broader producer's511 premise or alter global Covered/inTarget.
+No new exclusion/premise/model/default, axiom/sorry/native shortcut, budget/pin
+change, goal mutation, push/merge/PR or tag publication occurs.
+
+
+## Source-chain completeness and exact preparation (2026-11-02)
+
+Parent52b24d4ede5eb66ccae66d1386071f71a9cd5248, original branch/base/VM/thread/
+goal, decisions and all earlier seals are preserved. This closes the explicitly
+open completeness point for the existing SourceUIntLiteralChain parser and
+provides an independently consumable AU02 array preparation component. It does
+not redo the existing source-instance/inhabited-array proofs or take VA2 work.
+
+Calculus/DecisionSourceChain proves the existing structural parser complete for
+every actual chain at supplied bound/literal parameters, exact membership iff
+and constructive Decidable membership. No coverage/verdict predicate defines
+that source family. sourceUIntLiteralReduction? computes the real chain and
+uses its existing AllLeft/instLit validity proof to construct the existing
+DeclarationReduction.certified output. The returned formula is truth with
+pointwise equivalence at every original typed state. No arbitrary validity or
+future completion certificate is an input. Parameter discovery and global
+normalizer/decision registration remain open; no global observations change.
+
+Clients reuse the actual struct/nested/key/fixed-key/field witnesses from the
+previous checked source-instance delivery. They obtain actual preparation
+outputs and retain the existing constructed three-cell state satisfying the
+original antecedent. The real false fixed-array model excludes preparation
+for every bound/value pair, including mismatch and out-of-range controls.
+Existing raw leaf refusal and all five global unknowns are pinned unchanged.
+The pointwise source equivalence preserves original partial-read behavior.
+
+Final bounded MCP core/client4.190/4.174s PASS; affected build3.188s PASS;
+17 public signature/axiom reports7.365s PASS with only existing standard axioms.
+Interpreted profile3.177s PASS, combined source/preparation/original-decision
+observations including printing: struct8.268905ms, nested4.045509ms,
+key23.833236ms, fixed-key13.824990ms, field11.788651ms; false-fixed28.098717ms,
+closed truth0.480725ms and repeated struct3.676121ms. Original unknown/refuted/
+proved controls match exactly. These are warm checkout/cache measurements,
+not a cold source/full build or a separate parser-only timing claim.
+Sampled aggregate RSS 1444520 KiB; cgroup peak 391716864 bytes; minimum host available 15699496960 bytes; 11 unsuccessful samples retained.
+Actual hard12GiB/no swap, threads1/-j1, existing writer lock and12GiB host reserve
+apply. No Lean/build overlap or proof-budget increase. Two narrow additive root
+imports/module-map rows; existing parser, source witnesses, normalizer, predicates
+and solver files are byte-for-byte preserved versus parent. Finder/skeptic
+read-only source reviews found no issue; neither used Lean/server/builds.
+A trailing-blank documentation failure was fixed and its raw exit retained.
+Strict automatic/layer/trust/whitespace pass; strict docs retain the exact85
+frozen-base findings and axiom inventory retains404 unrecorded changes. Earlier
+full/TypeExamples failures stay failures; Q2 and producer repair remain held.
+Kernel model evidence only; no EVM/external-test validation is claimed.
+
+Storage boundary: root filesystem had approximately0.8MiB left after focused
+outputs. No protected file/cache/artifact was removed. New evidence/export data
+uses the existing same-VM tmpfs, actual directory
+/tmp/va1-evidence-20261102/source-chain-next, through the retained workspace
+alias /workspace/va1-evidence/source-chain-next. This storage is ephemeral across
+VM reboot and must be retrieved before any VM teardown/reboot. Source checkout,
+branch, commits and original goal identity remain in their original locations.
+The task-owned extra container bind changes no resource/network/user guard.
+All prior source bundles/archives remain on their original workspace paths.
+
+Planned immutable export, pending checks at source commit: this evidence folder
+will contain actual committed module/signature/import hashes, producer facts,
+nontrivial clients, cumulative original.patch/Git bundle, committed handoff,
+delta archive and SHA256 manifest. The two bundle paths may hard-link one
+immutable source package; delta evidence references it separately. Fresh
+standalone-prerequisite reconstruction, exact head/fsck and independent artifact
+reviews are required before export success. Final identity/checksums bind head.
+
+Remaining whole queue is partial: exhaustive meaningful Residue/reasons union,
+DecisionTheorem-prime and complete target/Covered/hash bridges; global array
+preparation/discovery/decision integration, generic nested-array reconstruction;
+broader memory and partial-OR reconstruction; broader approved M4 boundary;
+remaining general formula-derived fuel, baseline/backfill/performance and full
+gates. This source-chain completeness/preparation backfill is completed only at
+its stated interface. Q1 revision approved; Q2 held. No predicate/default/model/
+expected-verdict/exclusion change, new axiom/sorry/native shortcut, goal mutation,
+push/merge/PR or tag publication occurs.
+
+
+## Four array source-reason classes and H6 setup (2026-11-02)
+
+Parent1021e1c257ecc6afce5b780336efe2d1f096c646 and all original decisions,
+source/VM/branch/base/goal identities and earlier seals are preserved. The
+coordinator message received2026-11-02 quotes human H6 (VA1-Q2): "VA1 splits it".
+This exact receipt is recorded in docs/solidity-scope.md and verified before
+any TypeExamples edits. Q2 is resolved only for a narrow performance-only split;
+statements, observations and budgets stay unchanged. TypeExamples still matches
+frozen base, SHA256c7f9a497e4666f60708c746b190250070d208b03a0b24f39a973f5488c40a6b5.
+The Claude Code session is now coordinator; the Codex listener/auditor is retired.
+No continuation/goal is created or reset. The authorized split is next work.
+
+Calculus/DecisionArrayReasons defines four separately named source families and
+one-line reasons: ArrayBelowKeyAt, ArrayBelowFieldAt, ArrayOfStructAt and
+ArrayOfArrayAt. Generalized intrinsic Op/IndexTy/Tm/Fml constructor dispatch
+recognizes the immediate storage-read path. Membership also retains the actual
+SourceUIntLiteralChain with its complete source equation/substitution evidence.
+At supplied bounds/literals the parser is complete, membership constructive and
+decidable, and reason kinds are disjoint. It never calls Covered or decideGoal.
+
+The supported class is valid literal-instance chains with those immediate path
+shapes, not all array goals, negative companions or exhaustive Residue. Reasons
+identify general source bridges still open, not universal parser refusal or
+unknown theorems. Five actual existing unknown pins inhabit the four classes.
+The existing actual three-cell state/antecedent is retained. Direct fixed-root
+covered targets are outside these classifiers; wrong-kind, wrong-bound and
+out-of-range controls distinguish them. The real false fixed-array model rules
+out every parameter/kind pair. Hash-free validity uses the existing explicit
+hasHash=false premise; no hash premise, exclusion or observation changes.
+
+Finder/skeptic found ordinary indexed Op matching in five new helpers and an
+overstated nonresidual-control name. Helpers now use generalized casesOn,
+including IndexTy, and the theorem is covered_fixed_targets. Both confirmed the
+fixes. A keyword case-label syntax error and a negative-control simplification
+failure were fixed with raw diagnostics/attempt results retained. No producer,
+calculus strategy, proof budget or original expected verdict was changed.
+
+Final bounded MCP core/client5.294/5.323s PASS; affected build4.230s PASS;
+20 public signature/axiom reports8.547s PASS with standard axioms only. Initial
+profile FAILED on missing ToString for the diagnostic enum tuple; exact script
+and exit retained. Repaired diagnostic printing profile PASS3.147s. New source
+kind/classification plus original target/Covered observations, including print:
+key18.458669ms, fixed-key11.661746ms, field6.544393ms, struct1.542825ms,
+nested2.767431ms, covered-fixed5.009861ms, false-fixed5.632519ms,
+wrong-bound8.518738ms, repeated key9.506677ms. Global unknowns are separately
+kernel-pinned unchanged; this profile does not claim verdict-only timings.
+Warm checkout/import/cache identity, not a cold/full-build result.
+Sampled aggregate RSS 1440544 KiB; cgroup peak 455675904 bytes; minimum host available 15722323968 bytes; 12 unsuccessful samples retained.
+Actual hard12GiB/no swap, threads1/-j1, original writer lock and12GiB host reserve
+apply. Two additive root imports/two module-map rows. Strict automatic/layer/
+trust/whitespace pass; docs retain exactly85 frozen-base findings, inventory
+retains404 unrecorded changes. All actual failures remain failures. Prior full/
+TypeExamples resource stops are not rerun unchanged or promoted to success;
+H6 now authorizes repairing their split. No EVM/external validation is claimed.
+
+### Same-VM Git storage recovery
+
+At head1021e1c2 root free space fell to528384bytes. All1218 loose Git objects,
+including unreachable ones, received byte-verified backups and canonical SHA1
+checks. A verified persistent79KB seed pack of48 owned handoff blobs preceded
+205 duplicate-only removals (157 already packed plus48 seed); a verified1.23MB
+pack preceded removal of the remaining1013 duplicates. Official git prune-packed
+removed only redundant representations after exact dry-run membership checks.
+All35631 distinct object ID/type/size entries, refs, index and worktree status
+were identical throughout;37030 is the packed-entry count, not distinct objects.
+Baseline plus five transaction fscks passed; all32 journal commands passed.
+Source head/branch/data, old packs/caches and prior artifacts are untouched.
+Root free space rose528384→12001280bytes. No reset, reachability pruning, source
+change or runtime/proof-gate pass follows from this storage operation.
+
+The transaction self-held the original writer lock; finder/skeptic independently
+verified byte backups, pack hashes, complete object catalogs and all invariants.
+Missing optional /usr/bin/time, EXDEV output-mode failure and a read-only output
+write failure are retained. Supported stdout packing/explicit strict indexing
+resolved setup; its own failed auxiliary files remain raw evidence. Host Git
+metadata maintenance used one thread/16MiB delta cache; measured child maxRSS is
+not represented as an aggregate cap. Lean/LSP bounds were unchanged. A separate
+byte-backup compression/verification job passed under the existing hard container
+bounds; no original backup was removed.
+
+Persistent recovery evidence/checksums:
+/workspace/va1-evidence/git-storage-recovery; raw encoding backups additionally
+remain in /tmp/va1-evidence-20261102/git-storage-recovery (ephemeral). Canonical
+Git object contents are persistent in the original repository. Source-chain
+sealed artifacts now have a byte-identical persistent mirror at
+/workspace/va1-evidence/source-chain-next-persistent; all original tmpfs files and
+workspace alias remain. This supersedes the retrieval risk for the source-chain
+handoff itself; optional raw encoding backups still require retrieval before
+VM reboot/teardown. No installed coordinator/guard code or daemon was changed.
+
+Planned export, pending checks at source commit:
+/workspace/va1-evidence/array-reasons-next carries committed modules/signatures,
+actual producer facts, nontrivial witnessed clients, cumulative patch/bundle,
+committed handoff and delta evidence plus all prior archive checksums. Exact-head
+fresh reconstruction/fsck, source hashes and independent artifact reviews are
+required before export success. One immutable bundle may have two hard-linked
+paths; final manifest binds the resulting committed head.
+
+Whole original queue remains partial: exhaustive meaningful Residue/reasons union,
+DecisionTheorem-prime and all target/Covered/hash bridges; actual fixed/nested
+array pipeline integration and negative companions; broader memory/partial-OR
+reconstruction; broader approved M4 boundary; remaining general formula-derived
+fuel and baseline/backfill/performance/full gates. H6 performance-only TypeExamples
+split is authorized next; there are no unanswered VA1-Q1/Q2 choices. Other scope
+holds remain authoritative. No new premise/exclusion/model/default/test-budget,
+axiom/sorry/native shortcut, expected-verdict change, goal mutation, push/merge/
+PR or tag publication occurs.
+
+## H6 TypeExamples performance repair — checked owned progress, full lane partial
+
+Human receipt: H6 (VA1-Q2), **“VA1 splits it”**, received from the coordinator on
+2026-11-02. This authorizes the narrow TypeExamples performance split only. The
+exact receipt/setup record was committed in7162b5990cb3c1ff27123f3149ee8bb5609613a8.
+AQ1/AQ2 and the earlier Q1 boundary revision remain as recorded; there is no new
+semantic choice or publication authorization. Parent7162b5990cb3c1ff27123f3149ee8bb5609613a8,
+frozen base8bd8742ad987d566f7ba7624372cec1c020be07c, repository
+`/workspace/solidity-lean`, assigned branch unchanged. Export identity records the
+full new committed head.
+
+The compatibility facade retains the original G09 module documentation and both
+original axiom guards. Nineteen new local modules divide shared helpers, type names,
+constructor certificates, corpus membership/observations, declarations and printing.
+The ten original helper definitions and all nineteen theorem signatures are exact;
+fifteen proof bodies are exact. Only `declCorpus_accepted`, `declCtors_covered`,
+`declCorpus_in_profile` and `print_roundtrip` change proof bodies. Each consumes
+actual kernel-checked equations about the same two original corpus members.
+Constructor-list facts support only acceptance/coverage; separate unchanged profile
+and printing observations supply their stronger controls. Named copies of the
+original predicates avoid closed-match elaboration, without altering observations.
+No parser/render/compiler/model/predicate/default/pin/budget change is made.
+Source imports remain acyclic; shared root/module-map edits are19 additive imports
+and19 corresponding rows. Speed history de018add/4da9ace6 was inspected and cache
+invalidation was warned before moving declarations.
+
+Exact evidence: `/workspace/va1-evidence/typeexamples-split`. Its
+`final-preservation.json` independently locates every original public signature and
+helper body; `source-reviews-final.json` records finder/skeptic no-findings reviews,
+without Lean/server/build use. All40 final per-file MCP/build gates pass. Maximum
+module diagnostic17.042351 s; maximum module build14.878989 s, all below unchanged
+300 s. Diagnostics use fresh LSP sessions with existing dependency oleans; builds
+use the preserved input-keyed artifact cache. No clean whole-tree/cache-restore
+measurement is claimed. Existing whole-tree cold/stopped evidence is retained.
+The unchanged ExprExamples consumer also passes diagnostics33.418695 s and
+build30.100227 s. Both facade guards pass. Forty public axiom reports contain only
+standard axioms. Strict automatic, trust, orphan, layer and whitespace gates pass;
+strict docs retain the exact frozen85 failures and inventory retains the existing
+404-pin drift. These failures are not waived or relabeled.
+
+Runtime identity: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake5.0.0-src+797c613. Repaired runner KeySort passes2.085986 s with actual
+`KEYSORT_PASS` output. Every selected job asserts cgroup memory.max12884901888 and
+swap.max0 before Lean, uses user1000, threads1, explicit-j1, one file/job at a time
+and12GiB host reserve. Selected sampled aggregate RSS3196268KiB, cgroup peak
+3161939968 bytes, minimum host available12904087552 bytes;48 unsuccessful sampling
+attempts are retained. Setup runtime success is not whole-goal success.
+
+The useful interpreted profile reads runtime strings from files and checks equality
+with the original corpus before measuring. Timings include forced result printing:
+acceptance25.667343 ms, constructor coverage193.022090 ms, profile20.178848 ms,
+roundtrip65.422621 ms, repeated coverage189.768514 ms. The earlier constant-foldable
+microtimings are preserved but not used as parser-cost evidence. The FilePath type
+error and failed closed-match/recursion/snippet attempts retain their actual raw
+failures and source snapshots. No recursion or heartbeat limit was increased.
+
+Full closure is unfinished. TrustAudit first fails because PaymentSource.olean is
+missing. After the demonstrated TypeExamples repair, unchanged `./run-lean.sh`
+under the bounded runner builds additional imports, then is explicitly stopped for
+root disk exhaustion: exit137,68.471818 s; the automatic memory stop flag is false.
+This is an operator disk stop, not an OOM/pass assertion. Only one Lean process was
+observed. Native output relocation alone did not cover library growth. The tracked
+run script/lakefile and all proof budgets remain unchanged; a package-wide binDir
+candidate was not used, because the original checker requires its original path.
+Further full checks require a demonstrated output/storage repair, not an unchanged
+retry. Whole-lane strict/full gates remain failed or pending.
+
+Storage preservation: a task-owned minimal Docker image with read-only existing
+host tools removes the old VFS Debian-image copy cost. Initial missing-awk probe127
+and fixed probe0 are retained. No daemon restart/install/privilege/policy change.
+The generated checker executable's distinct private copy and original path retain
+its exact SHA; its immutable canonical cache copy remains on root. `restore-binary-view.py`
+reconstructs that executable view after tmpfs loss. This lower-layer
+file relocation recovered zero space, as recorded, and is not called a repair.
+Eighteen immutable raw source archives,164341760 bytes across19 paths, already have
+byte-exact members in unchanged persistent sealed root archives. Verified/fsynced
+private views preserve their original paths; lossless duplicate representation
+removal recovered142229504 bytes. All original archives/seals remain unchanged.
+`restore-raw-views.py --check` verifies all18 groups. Raw views are ephemeral and
+need restoration after tmpfs loss; their bytes remain durably archived on root.
+The independent finder streamed all members/views/targets and found zero mismatches.
+No cache or work payload is discarded, and no mutable build/cache inode is shared.
+
+Original queue accounting: baseline/backfill census remains partial; global
+decidable Residue/DecisionTheorem-prime/exhaustive target/hash bridge remain open.
+The independently checked numeric, array-source and fuel components are not those
+global claims. AU02 general fixed/nested/key/field/struct array integration, broader
+memory, halting-OR reconstruction, broader certified program-free boundary and
+general formula-derived511-node fuel obligations remain open. Both frozen predicates
+and the8bbd5606 counterexample remain intact. Full validation is incomplete, so this
+is not a locally eligible milestone-m7-next or a publication/whole-goal claim.
+A ready next owned child is finite source-literal parameter discovery using actual
+SourceUIntLiteralChain witnesses; occurrence premises cannot be omitted when a
+quantified body ignores its variable. It needs no VA2 prerequisite and is not yet
+implemented or claimed as coverage/exhaustiveness.
+
+Evidence boundary: the H6 results are kernel parser/control facts and external
+runtime/resource/build measurements. They do not establish EVM execution or solc
+equivalence, or the unfinished global Decision/residue theorem.
+
+Final checkpoint reviews: independent read-only finder and skeptic both report
+no source or handoff findings. They verified the45-gate/40-report census, exact
+source preservation and stated partial/full-storage limits; neither used Lean,
+a server or a build. The finder additionally streamed every durable raw member
+and view. Review records are in the checkpoint evidence, not assumed passes.
+
+
+## Finite source-literal discovery checkpoint (2026-11-02)
+
+This completes the ready child identified after H6, without a VA2 prerequisite.
+`Solidity/Calculus/DecisionSourceDiscovery.lean` traverses explicit intrinsic term
+constructors on the equation/implication/universal skeleton consumed by the existing
+source-chain parser. Bounds are direct source uint literals; instance candidates
+are those literals plus zero. It never expands a numeric bound into all uints or
+consults Covered, inTarget, decideGoal or semantic validity to discover a hit.
+Every hit carries the actual unchanged SourceUIntLiteralChain parser witness.
+This is not an exhaustive literal inventory of program/update formulas.
+
+`SourceUIntLiteralChain.bound_mem` derives bound occurrence structurally.
+`sourceUIntLiteralDiscovery_complete` quantifies over every contract/context,
+formula, bound, value and genuine chain; it explicitly requires the value to
+belong to sourceUIntDiscoveryValues. No unconditional value-occurrence claim is
+made. Witness extraction, iff and constructive Decidable characterize the
+independently stated SourceUIntLiteralCandidate family. The parameters theorem
+proves membership for the actual returned hit. Preparation computes an existing
+DeclarationReduction to tt with equivalence at every original typed state; it
+uses a computed source proof. ValidH transport retains exactly hasHash=false.
+No global pipeline registration or predicate/decision definition changes occur.
+
+`Solidity/Examples/DecisionSourceDiscovery.lean` reuses all five original array
+fixtures and genuine source-chain witnesses. Each has actual discovery, computed
+preparation and hash-free validity; the original inhabited three-cell antecedent
+is retained. A real false fixed-array source refuses discovery. A covered/proved
+fixed source overlaps the class, while proved tt lies outside it; this is neither
+a complement-of-coverage nor an unknown-test family. An ignored binder has a
+successful supplied value2 witness absent from the source candidates, while the
+actual algorithm returns bound3/value0. This control explains the explicit value
+premise and zero fallback. All five original global unknown pins are unchanged.
+
+Final per-file MCP diagnostics pass (core4.265901 s, client4.297064 s); focused
+builds pass (core2.093987 s, affected client2.095132 s). Axiom reports pass in
+11.897824 s:28 public reports, standard axioms only. Interpreted profile passes
+2.120069 s; IO-loaded indices and noinline reporting force actual discovery:
+fixture0 first3.005531 ms/repeat0.131368 ms, fixtures1–4 respectively0.786626,
+0.429908,0.325731,0.249927 ms; covered fixed0.195906 ms; false fixed0.325902 ms;
+tt0.009374 ms. These are warm imported parser evaluations including result
+printing, not cold elaboration or a global decision/full performance claim.
+Raw initial tactic/type failures and exact failed client source are retained.
+
+The six selected checks use the same pinned Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b
+and Lake5.0.0-src+797c613, hard cgroup memory.max12884901888/swap.max0 before
+Lean, threads1/-j1 and one heavy job at a time under the original writer lock.
+Measured sampled aggregate RSS1641308KiB, cgroup peak632340480 bytes, minimum
+host available14772842496 bytes;6 unsuccessful sampling attempts remain recorded.
+The earlier actual KeySort pass and runtime identity remain sealed in H6 evidence;
+no new runtime/full pass is inferred from these source checks.
+
+Independent read-only finder and skeptic both report no source findings. They
+checked finite candidates, genuine parser witnesses, the explicit value premise,
+actual returned parameters, hash transport, preparation and overlap/miss/false/zero
+controls; neither used Lean/server/build. Evidence is
+`/workspace/va1-evidence/source-discovery-next`. Committed parallel interface, bundle, cumulative patch and checksum-bound delivery
+are pending export and verification after the source checkpoint commit.
+
+Whole-goal accounting remains partial: global meaningful decidable Residue,
+DecisionTheorem-prime and exhaustive target/Covered/hash bridge are unproved.
+General fixed/nested/key/field/struct array integration, broad memory, partial-OR
+reconstruction, broad certified program-free boundary and general formula-derived
+511-node fuel remain open, along with remaining baseline/performance/backfill and
+full gates. Both frozen predicates, the8bbd5606 counterexample, all budgets and
+observations remain unchanged. The H6 full run's real disk stop137 is retained;
+no unchanged full retry occurred. Strict-doc/pin inventory baseline failures stay
+failures. This is incremental source preparation, not milestone-m7 eligibility,
+whole-lane completion or EVM/solc equivalence.
+
+Current static gates: strict automatic, trust, orphan, layer and whitespace pass.
+The strict doc output is byte-exact frozen output (85 findings:48 missing and37
+ambiguous references), exit1; inventory retains the existing404-versus403 drift.
+Both reviewers identified premature export wording; it now explicitly says pending.
+No source findings remain.
+
+
+## Computed source answers and narrow data interfaces (2026-11-02; pre-rebase checkpoint)
+
+The finite source-discovery component now feeds the real decision pipeline.
+`DecisionSourceAnswer` preserves every old given-heap Answer, including its exact
+counterstate function, and consults computed source-chain discovery only after an
+old miss. A structural constructor prefilter is proved complete for every genuine
+SourceUIntLiteralChain; it excludes no discovered member. Positive answers use the
+actual parser witness's pointwise validity, not a supplied validity oracle.
+
+Decision's existing memory coverage helper includes the finite source family on
+its no-fresh-allocation route. `sourceUIntLiteral_covered` explicitly requires
+hasAllocAll=false and a computed discovery hit. `sourceUIntLiteral_proved` additionally
+requires exactly hasHash=false, then proves the public decideGoal result is proved.
+The old decideGiven_complete signature remains available; the extended premise has
+a separately named decideGiven_complete_sources theorem. Existing countermodels
+retain their original returned states. Two older coverage proofs needed only Bool
+simplification updates for the new disjunct; their signatures and claims are unchanged.
+
+All five assigned original fixtures (arrays of structs/arrays, below keys, fixed
+arrays below keys, below fields) now have kernel-certified Covered=true and public
+proved verdicts. Their formulas and target pins are unchanged. Only the authorized
+five-fixture expectations/aliases changed, through the actual coverage/proved bridge.
+The original false fixed-array countermodel, its refuted verdict, inhabited positive
+heap, raw source-translation refusals, direct fixed-array controls, discovery miss
+and unused-binder controls remain. This closes the recognized finite literal-instance
+subclass, not arbitrary arrays or negative-array reconstruction.
+
+The direct Covered and inTarget definitions, DecisionTheorem, Waivers, decideLeaf
+and decideGoal are byte-identical to the preceding checkpoint; Covered, inTarget,
+DecisionTheorem and Waivers also match the frozen base. Covered's extension grows
+through its memCovered helper, as intended for this certified pipeline increment.
+ProgramNormalization, sourceReduction, AutoComplete, HashPremise and Rules were not
+edited. The retained8bbd5606 false-inclusion counterexample replays successfully.
+
+The original qualified Gaps contract and memParamSame fixture are now produced by
+DecisionGapData and DecisionMemoryParameterData. Existing litU/isT/allU/gapMemory and
+verdict declarations move verbatim to DecisionMemoryFixtureData and DecisionVerdictData.
+Legacy modules re-export their moved declarations. Memory and coefficient/numeric
+clients import these actual narrow producers instead of the full regression chain;
+no contract fields, models, source formulas, old guard outputs or proof budgets change.
+Original Core/GapCore imports remain. Their wider regression closure is still a final
+gate obligation; no source-only package is called a validated full combined tree.
+
+Evidence: /workspace/va1-evidence/source-route-next. Eleven final route/consumer MCP
+checks pass, including Decision36.483709s, ArrayGaps11.826802s, coefficient9.640639s
+and numeric-normalization7.500916s. The memory entry point passes diagnostics79.505923s
+and build76.377834s after the two confirmed proof fixes. Public axiom audit passes
+38.718518s with standard axioms only. Actual interpreted verdict+coverage profile
+passes2.099618s: five assigned positives are proved/covered, fixedBad is refuted/covered,
+tt remains proved; first/repeated struct samples7.777154/2.431295ms including printing.
+These are warm imported evaluations, not a cold whole-build or EVM/solc claim.
+
+Current runtime KeySort passes1.208761s:377 taclets parsed,131 read-bearing, table131;
+annotations match and actual KEYSORT_PASS is retained. Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613. Every Lean/LSP job uses the original writer lock, threads1/-j1,
+hard cgroup memory.max12884901888/swap.max0, one heavy job and12GiB host reserve.
+
+The private build-output view exposes original artifacts read-only. Full run failed
+137/215.901191s at the host-reserve guard; root disk remained available. Unchanged
+hash regression rebuilds also reached that guard. Hash split/factoring experiments
+and all actual failures are preserved outside the checkout; original HashCore is
+restored byte-exactly. The last stopped legacy import attempt's newest setup file
+is HashThreeKinds; no semantic/kernel error is inferred from a resource stop.
+No unchanged heavy retry or full-gate pass is claimed.
+
+Lossless cache representation recovery verifies484 exact private/persistent olean
+pairs (1534924784 bytes). Their logical paths/content remain; canonical files are
+read-only in every future task runner. Private duplicate storage removal raised
+MemAvailable from14926572 to16417916KiB. Live view mtimes become canonical mtimes;
+saved mode/mtime permit exact private-copy restoration. Both write paths reject
+EROFS in the probe. Actual later cache writes that hit views remain failed gates;
+only the observed private entry is materialized before a distinct retry. Original
+canonical bytes are never modified. Use cache-view-run.py/full-cache-view-run.py;
+old unprotected runners are historical and unsafe for these views. cache-views.py
+checks or materializes entries under the original lock. All old seals remain.
+
+Independent read-only finder/skeptic reviews confirmed exact moved declarations,
+old public completeness compatibility, genuine computed witnesses, filter completeness,
+unchanged false controls and direct frozen predicates. They verified all484 cache
+pairs/protections (finder hashes; skeptic metadata distinction). Confirmed findings
+were fixed; neither reviewer used Lean/server/build. Final documentation/artifact
+reviews and post-rebase validation are pending at this source checkpoint.
+
+Whole queue remains incomplete: baseline/backfill census; meaningful global decidable
+Residue, DecisionTheorem-prime and exhaustive target/Covered/hash bridge; remaining
+Decision performance/full gates; general fixed/nested/key/field/struct arrays, broad
+memory, partial-OR reconstruction, broader certified program-free boundary and
+formula-derived511-node fuel. Earlier source/numeric/fuel components and these five
+certified positives do not replace those obligations. Strict-doc/inventory frozen
+failures remain failures. No milestone-m7 eligibility or whole-goal completion claim.
+
+Registry update: H6 is already committed16409976c7768737459f7473cf3adb6208326b4f,
+with the sealed TypeExamples bundle/manifest available for coordinator retrieval.
+Current item remains AU01; AU02 follows. AU05 is newly assigned only after AU02 and
+verified integration/rebase of VA2 ae1a1d56; its real master Hash and SS-CP5-HASHED
+inputs must be inspected, never assumed. AU03/AU04, G46.05 and SS-CP5-HASHED production
+remain outside this work. Coordinator announces master a3205e6a1a1be1471fa0dc91688eca032d8acd85;
+fetch, ancestry verification and required rebase precede the final handoff. No AU05
+implementation, walk changes, push, merge, PR, tag publication or goal reset occurred.
+
+## Derived source allocation boundary and VA2 rebase (2026-11-02)
+
+The assigned branch now descends from published master
+`a3205e6a1a1be1471fa0dc91688eca032d8acd85`. Its rebased implementation parent is
+`172a66d19a1be9c21edc926ade4b007f2e3b6107`; the original checked source parent
+`dd67b75573d2399a30222eda2ac5d279e6d50e01` remains at
+`refs/va1/pre-a320-source-route` and in the checksum-bound pre-a320 bundle.
+The original frozen base remains `8bd8742ad987d566f7ba7624372cec1c020be07c`.
+Both independent rebase reviewers verified preservation of all previous owned
+implementation/control sources and 720 master-only files. Shared conflicts
+retain both approval records, both lane handoff links and additive registrations.
+Master's rules, sharing sources and memory-loop 987/973 controls are unchanged.
+The published ProgramReduction callRets signature now uses RetBinders; this
+is an incoming producer change, not an owned replacement. HashPremise is
+byte-identical to the preserved pre-rebase source.
+
+### Exact supported source class and proofs
+
+`Solidity/Calculus/DecisionSourceBoundary.lean` proves for arbitrary Contract C,
+Ctx Γ, Fml C Γ and uint bound/value:
+
+```lean
+SourceUIntLiteralChain.noAlloc
+    (w : SourceUIntLiteralChain bound value φ) : φ.hasAllocAll = false
+```
+
+The leaf witness contains an actual literal substitution returning a primitive
+equation. Constructor inversion proves that its original body cannot conceal
+an allocation formula; induction handles the primitive universal prefix.
+No coverage/verdict test or validity oracle supplies this syntax fact.
+For closed formulas, `sourceUIntLiteralDiscovery_covered` now derives actual
+Covered=true from actual discovery alone. `sourceUIntLiteralDiscovery_proved`
+retains the exact additional premise φ.hasHash=false and proves the public
+verdict equals proved. Existing theorem signatures and algorithm definitions
+are unchanged by this proof increment. Covered, inTarget, DecisionTheorem and
+Waivers remain frozen.
+
+The client module `Solidity/Examples/DecisionSourceBoundary.lean` applies these
+interfaces to all five unchanged assigned formulas, reuses their actual
+inhabited three-cell antecedent and false fixed-array countermodel, and proves
+a fresh-allocation formula is outside both discovery and the genuine witness
+family. That last control claims neither global unknown nor failed coverage.
+Hash freedom and target admission do not follow from this source grammar.
+This is not the wider revised Q1 boundary, exhaustive Residue, DecisionTheorem-prime
+or general array/memory/fuel completion. The original 8bbd5606 counterexample
+and all earlier seals/failures remain preserved.
+
+### Actual gates and resource evidence
+
+All commands below ran through the task-owned cache-view runner with the
+original writer lock, LEAN_NUM_THREADS=1, explicit Lean -j1, measured aggregate
+RSS, hard child memory.max=12884901888 and memory.swap.max=0, plus the 12 GiB
+host reserve. No simultaneous LSP/build was used. MCP serve now explicitly
+selects the same bounded private Lake configuration; the prior wrapper is saved.
+Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, and
+Lake 5.0.0-src+797c613 were observed in each container.
+
+- `lake -f .va1-lakefile.toml build Solidity.Calculus.Decision`: final repaired
+  attempt passes in 40.768735s. Earlier read-only cache-write failures are
+  retained individually, including each bounded retry-ceiling failure.
+- Per-file MCP on DecisionSourceBoundary: passes in 5.326549s with no messages;
+  focused build passes in 3.170577s. The prior Boolean-precedence diagnostic
+  remains raw evidence; its parentheses were corrected without changing claims.
+- Client import closure: final attempt passes in 13.906184s. Client MCP passes
+  in 3.159535s with no messages; focused build passes in 2.085079s.
+- `lake -f .va1-lakefile.toml env lean -j1 --tstack=131072` on the public
+  source-boundary audit: 14 reports, pass 9.678974s; only propext, Classical.choice
+  and Quot.sound. No sorry/admit/new axiom or native shortcut was introduced.
+- Bounded `run-keysort.sh`: pass 1.020872s. Actual output: parsed 377 taclets,
+  131 read-bearing, table covers 131; annotations match the actual solkey file;
+  KEYSORT_PASS. This supports the runtime check, not whole-lane completion.
+
+The post-rebase host-reserve stop is retained as process exit 143/wrapper 75,
+resource_stop=true: sampled host availability 12753010688 bytes was below
+12884901888. Its latest setup was HashReduction; it is not a passing gate.
+Subsequent independently reviewed lossless views recovered 503520360 private
+cache bytes and 256229288 private output bytes, preserving canonical payloads,
+saved metadata and read-only canonical mounts. HashReduction then elaborated
+in 32 s without another reserve stop; its cache-write failure was separately
+repaired before the final passing closure. After that pass, another verified
+603506320 duplicate cache bytes were released to provide diagnostic headroom.
+Live view mtimes can differ from saved private mtimes; restoration metadata
+is retained. These are incremental/cache-identity-specific checks, not a fresh
+full default build or EVM evidence. All original stopped full gates remain open.
+
+Raw evidence, repair manifests and immutable pre-rebase artifacts are under
+`/workspace/va1-evidence/source-route-next`. The separate source-only rebased
+interface package is `post-a320-interface`; its prerequisite receipt lists
+all 11 bundle prerequisites, each a verified ancestor of frozen base 8bd. Independent
+finder/skeptic verified all 340 archived files, 42 interfaces, patches and checksums.
+The new checked proof checkpoint will have its own exact-head export; the
+earlier immutable source-only package remains unchanged.
+
+### Independent reviews and remaining queue
+
+Read-only finder and skeptic, neither using Lean/server/build, both report
+no source findings for the final boundary and client modules. They confirmed
+that no-allocation is derived, the hash premise remains explicit, target
+admission is not asserted, positives are inhabited and countermodels survive.
+Both separately verified the 113 output duplicate identities before memory
+recovery; artifact prerequisite wording was corrected in a separate receipt.
+Registration and static checks are recorded in the accompanying checkpoint
+evidence. The new exact-head export is pending the following source commit.
+
+The full assignment remains incomplete: exhaustive Residue/DecisionTheorem-prime
+and target/Covered/hash bridge; remaining baseline reproduction and Decision
+performance work; general fixed/nested/key/field/struct array, broader memory,
+halting-OR and wider revised program-free boundary; general formula-derived
+511-node fuel; remaining backfill and affected/full strict/trust/docs gates.
+H6's narrow TypeExamples split remains delivered at preserved 16409976 and
+rebased 4eb9a695; its post-master consumer/full gates are not claimed here.
+AU05 is now assigned after AU02; VA2's publication prerequisite is present,
+but no AU05 implementation or SS-CP5-HASHED premise has been consumed. No
+AU03/AU04 work is redone, and no push/merge/PR/tag publication is performed.
+
+Checkpoint static results: orphan, layer, strict automatic, static trust and
+staged whitespace checks pass. The strict documentation gate still fails:
+48 missing and 38 ambiguous references, compared with the exact frozen-base
+48 missing/37 ambiguous raw result. The single additional citing document
+is byte-identical to integration base a3205e6a, where both candidate modules
+already exist; no new owned documentation finding was introduced. The axiom
+inventory gate fails with 1858 pinned theorems, 0 errors and 438 unrecorded changes.
+Its expected inventory is not rewritten to hide drift. These failed gates
+remain explicit unfinished obligations despite the 14 passing public proof
+audits; see boundary-static-gates.json and boundary-docs-vs-frozen-base.json
+in the external evidence directory.
+
+## AU01 nonliteral given-heap reason census (2026-11-02)
+
+Parent: `f61970a33f464a2c89136af94130ab60e02f8633`, on the original assigned
+branch after the verified a3205e6a rebase. Before implementation, an external
+probe copied the existing computed-index declaration and unknown pin byte
+for byte, preserving the namespace, contract and scoped notation while
+importing only their actual core/surface/contract data. It kernel reproduces
+`(target=true, Covered=false, verdict=unknown)` and ordinary validity in
+5.349083s. The unchanged original fixture stays in its existing module.
+Provenance and the probe are in `/workspace/va1-evidence/computed-read-next`.
+
+### Precise new syntax and unchanged observations
+
+`GivenHeapLinearReadReflexive φ` records one box-bound dynamic uint-array
+declaration, an original intrinsically typed index in Tm.UIntLinear, its
+nonliteral-root check, and the full equation identifying φ with two identical
+direct reads at that index. The independent Boolean recognizer reuses
+Tm.uintLinearEvidence/uintLinearShape and the existing mxReadView/mxAddressView;
+it does not add a numeric decoder or inspect target/coverage/verdicts.
+Recognition is sound and complete for this exact family, yielding a constructive
+Decidable instance. The one-line reason states that the current positive
+given-heap schema accepts literal indices rather than this nonliteral family.
+
+Validity is Theory equality of identical denotations, over every original
+heap and optional binder value. It assumes no index-definedness premise and
+does not reinterpret program equality. Hash freedom follows the unchanged
+UIntLinear theorem; ValidH uses the existing exact hash-free transport.
+For arbitrary C and every Waivers value, each closed member is proved in
+the frozen inTarget predicate using existing uint admission and map-key
+lemmas. The old literal family is disjoint and its public API is unchanged.
+Generic literal/fixed/fresh/actual-diamond source exclusions are also proved.
+
+No decision function, coverage helper, original unknown pin, predicate,
+observation or budget changes in this checkpoint. In particular the original
+computed-index shape is still unknown and uncovered. No claim that every
+member is unknown is made, and no AU02 global closing route is registered.
+This supplies an actual remaining syntactic reason, not the complete global
+Residue union, exhaustive target bridge or DecisionTheorem-prime.
+
+### Witnesses, gates and independent review
+
+The three new modules are
+`Solidity/Calculus/DecisionGivenHeapComputedReason.lean`,
+`Solidity/Calculus/DecisionGivenHeapComputedBoundary.lean` and
+`Solidity/Examples/DecisionGivenHeapComputedReason.lean`. Their controls
+include the exact original computed-index source body, a folded-zero index,
+checked subtraction failure, a contextual uint local, valid nonlinear syntax
+refused by the class, full-term unequal-read refusal, and real binder-mode
+refusals. A concrete nonempty heap distinguishes defined read, bounds failure,
+checked-index failure and unset reference; a separate typed two-cell heap
+provides two defined unequal values for the countermodel.
+
+The first negative-control draft tried to reduce evaluator failure directly
+to a Theory denotation. MCP rejected that change. The raw failure and draft
+are retained; the same unequal-read formula now uses two defined cells and
+the existing holds_eq_of_eval bridge. No existing expected result was edited.
+
+All checks use the original writer lock and bounded serial runner: explicit
+Lean -j1/LEAN_NUM_THREADS=1, child memory.max=12884901888 and swap.max=0,
+12 GiB host reserve, measured aggregate RSS and no LSP/build overlap.
+
+- Reason MCP: pass 4.229635s, no errors/warnings; focused build pass 3.162756s.
+- Boundary focused build: pass 2.112224s; MCP pass 4.264515s after an import
+  dependency failure was retained and its precise closure built.
+- Controls MCP: pass 5.325998s, no errors/warnings; build pass 3.102458s.
+- Public axiom audit: 30 reports, pass 6.408368s; only propext, Classical.choice
+  and Quot.sound. No sorry/admit/new axiom/native shortcut or budget increase.
+
+Read-only finder and skeptic, neither using Lean/server/build, both report
+no source findings. They separately confirm exact syntax, all-heap reflexivity,
+derived admission, preserved observations, contextual and partial-index
+controls, scoped refusals and the defined-read countermodel bridge. Final
+registration/static checks and the exact committed export follow separately;
+no global/full-gate completion is asserted.
+
+The H6 split also now has post-master aggregate evidence on this same parent:
+MCP pass 3.169910s and focused build pass 1.023226s. All 20 split modules are
+byte-identical to the preserved original 16409976 split. The checksummed
+receipt is `/workspace/va1-evidence/source-route-next/H6-post-a320`; these
+are warm aggregate/import checks, not the full memory consumer gates.
+
+All original remaining AU01/AU02/backfill/full-gate obligations listed above
+remain open. AU05 has not started. No publication, push, merge, PR or tag.
+
+Final checkpoint static gates: orphan/layer/strict automatic/static trust and
+staged whitespace pass. Strict documentation and axiom inventory remain
+failed, with outputs byte-identical to the preceding reviewed checkpoint:
+86 documentation findings versus frozen 85, and 1858 pins/0 errors/438 unrecorded
+inventory changes. No new finding or expected-inventory edit is introduced.
+Bounded KeySort passes in 1.023272s with the actual 377/131 output and the pinned
+Lean/Lake versions. The full goal remains incomplete. Exact-head packaging
+is pending the following source commit.
+
+
+### Positive-key partial-OR source certificate increment (2026-11-02)
+
+Parent `6d601aa8e20e76e894a32cdea4d86be2ab567c87`; integration base remains
+`a3205e6a1a1be1471fa0dc91688eca032d8acd85`. This is an independently useful
+AU01 source-certificate increment, not the full Residue theorem or an AU02
+pipeline improvement. No walk, guard recognizer or verdict route changes.
+
+`Solidity/Calculus/DecisionHaltingOrCertificate.lean` proves, for every
+contract C, typed PartialOrRoots C, binder names, value and strictly positive
+uint key, validity of the actual sourceClaim whose result equals its block
+value. `sourceGuard_positive` chooses the second binder zero: key <= 0 is
+false, AND bypasses checked scalar subtraction, and OR evaluates key <= key.
+`sourceClaim_positive_valid`, `PartialOrBlockAt.valid_positive` and
+`PartialOrBlockAt.validH_positive` retain the exact source equation and
+matching result literal. Hash transport uses existing hashFree and holdsH_iff;
+there is no scalar-definedness or extra hash-model premise.
+
+`Solidity/Examples/DecisionHaltingOrCertificate.lean` supplies generic clients,
+keys one/two, and initial_block: the antecedent holds in an actual intrinsic
+initial state for every binder pair. The zero-key guard halts at the stated
+initial-state assignment. That is neither invalidity of the zero-key claim
+nor a proof that positivity is necessary. The original false-claim countermodel,
+unknown controls and APF refusal proofs remain byte-for-byte unchanged.
+
+Before implementation, the exact source-shaped baseline reproduced target=true,
+Covered=false and interpreted unknown (5.295853s). Two failed draft probes
+(wrong Surface path, then insufficient rfl reduction of Covered/verdict) remain
+raw evidence. Final core MCP passes 3.155464s/build 2.093133s; finalized client
+build passes 8.608177s after observed private read-only cache aliases were
+materialized, MCP passes 12.113983s without errors/warnings. Earlier failed
+diagnostics/builds and the unsuccessful direct initial-map rfl remain raw.
+The twelve public axiom reports pass 3.189104s, only propext/Classical.choice/
+Quot.sound. KeySort passes 1.015942s with the actual pinned Lean/Lake versions.
+All runs retain explicit -j1/thread1, 12 GiB child hard cap/no swap, 12 GiB host
+reserve, aggregate RSS samples and original writer lock; no LSP/build overlap.
+
+Independent read-only finder and skeptic used no Lean/server/build and found
+no logical issue. The skeptic requested explicit antecedent inhabitance; the
+added initial_block was reviewed without findings. Shared root/module-map
+registrations are narrow additive hunks. Evidence directory and intended
+exact-head export location: `/workspace/va1-evidence/partial-or-next`.
+
+Per H12, this increment uses touched-module diagnostics/builds and public axiom
+reports. Full build/TestSuite/docs/strict/trust/cumulative gates are deferred
+to the next lane checkpoint, not rerun each turn. Earlier full resource failures,
+86 documentation findings and 438 unrecorded axiom-inventory changes remain
+unresolved prior checkpoint results, not current passes. All original open
+AU01/AU02/backfill obligations above remain open. No AU05, publication or push.
+
+
+### AU02 computed-index given-heap pipeline increment (2026-11-02)
+
+Parent `0909c50a6424c170c99a18f0f2387ea1780e10d7`; frozen base and original
+branch/goal unchanged. Before this item, `git fetch origin master` succeeded
+in a task-owned private bare audit store on `/tmp`; published master was
+`eba99fe7c2e00926d0c830e56af34e0699d804c4`. Its Decision/old-extension files
+match the integrated a320 base and contain no competing computed-source
+route. This is a published-source audit, not a claim of rebasing onto eba99.
+The checkout remains rebased on a320 and preserves the prior checkpoint seals.
+
+The actual original computed-index formula was reproduced before edits at
+0909: target=true, Covered=false, verdict=unknown, with all-heap validity
+already proved (5.340749s). `DecisionGivenHeapComputedExtension` now appends
+its independently recognized all-heap source certificate after every old
+source answer. Generic preservation theorems retain the complete old Answer
+and exact counterstate function. No candidate-state success becomes validity.
+Decision consumes the new wrapper; both old completeness signatures remain.
+An additive memCovered disjunct uses exact source membership and derives
+no-allocation from its source equation. Fml.Covered, Fml.inTarget and
+DecisionTheorem declarations are byte-identical to the frozen 8bd base and
+parent; old source/literal producers, low classifier and HashPremise are
+byte-identical to the parent.
+
+Supported closed class: a box-bound dynamic uint array with identical direct
+reads at a nonliteral UIntLinear index. Generic memCovered/covered/proved
+lemmas have no supplied coverage or target premise. Existing hashFree plus
+all-heap validity retains the original hash reading. Fixed/fresh/diamond
+binders, unequal reads and nonlinear indices remain outside this source
+classifier; no general prefix, fixed-array or broad-memory completion follows.
+The previous AU01 source-reason entry above is historical: this increment
+closes its assigned concrete computed-index gap, not the global Residue union.
+
+Exactly three obsolete assigned assertions improve transparently, using real
+parser witnesses and proof certificates: the old computed_index_unknown and
+retained_computed_unknown become proved assertions; retained_computed_uncovered
+becomes covered. Their source formulas are unchanged. The computed 0+1,
+in-bounds 0+0 and checked-subtraction 0-1 companions now each evaluate to
+(target=true,Covered=true,proved). Theory reflexivity includes undefined
+optional readings; no program-equality or EVM observation has changed.
+Original unequal-read/two-defined-cell countermodels, literal-family positives,
+nonlinear and actual binder refusals, defined/bounds/partial/unset observations,
+and exact parameter/alias negative candidate states remain checked. No unrelated
+expected verdict is edited. Two old coverage proofs needed only Boolean
+normalization and a left-disjunction lift; signatures and original certificates
+are unchanged. Their raw failed change-pattern diagnostics and the initial
+incorrect Bool lemma projection remain retained.
+
+Focused verification (unchanged 300s cap, warm private post-a320 cache):
+- Extension MCP/build pass 4.333120s/2.141194s.
+- Decision MCP/build pass 39.671163s/39.757047s.
+- Computed boundary build/MCP pass 2.133153s/4.278327s after retained dependency diagnostics.
+- Computed controls MCP/build pass 4.233966s/3.130652s.
+- Reversed/compound compatibility MCP pass 4.237175s/3.160721s.
+- Old consumer closure: DecisionMemory passes in 72s; total 76.395288s
+  first attempt fails only on the reported private GapCensus read-only cache
+  alias. After the verified 44KiB private materialization, build passes
+  3.128546s; final consumer MCP passes 4.297389s.
+- Public axiom/verdict probe passes 32.083359s: 33 reports, only propext,
+  Classical.choice and Quot.sound; actual three interpreted results printed.
+- Bounded KeySort passes 1.016087s: parsed377/read-bearing131/covered131,
+  actual Lean4.24.0 and Lake5.0.0-src+797c613. No whole-tree runtime pass claimed.
+
+Every check uses original writer lock, explicit Lean-j1/thread1, child hard
+memory.max12884901888/swap.max0, 12GiB host reserve and no overlapping LSP/build.
+Passing-check maximum sampled aggregate RSS2426264KiB, maximum measured
+cgroup peak1297518592bytes, minimum sampled host available13498638336bytes.
+These are actual samples, not another VM's timings or a cold full-tree gate.
+Independent read-only finder/skeptic used no Lean/server/build and report no
+source findings. They checked old-answer preservation, exact certificate
+improvements, unchanged negative controls and necessary compatibility lifts.
+
+Per H12 only focused checks and narrow registration/whitespace checks run for
+this increment. Full run-lean/TestSuite/docs/strict/trust/cumulative gates remain
+for a lane checkpoint; prior failed gates and full raw resource failures stay
+retained. Remaining original AU01 theorem/exhaustive Residue/hash bridge,
+profiling/splits, AU02 array/memory/halting-OR/prefix children, wider revised
+program-free boundary and general formula-derived fuel/backfill remain open.
+No AU05/AU06, push, merge, PR, tags or goal reset/completion.
+Evidence directory and intended exact-head export:
+`/workspace/va1-evidence/computed-read-pipeline`. New large exports will use
+owned `/tmp` storage with a stable delivery symlink, preserving all old files
+and avoiding checkout disk pressure.
+
+
+### AU02 fixed-array given-heap increment (2026-11-02)
+
+Parent `7053d076b96be101f3249494f85270726ac7badc`; original branch, base and
+goal unchanged. Fresh `git fetch origin master` in the private bare audit
+store succeeds at `1db639a2239195365250c26fe8d054c89b8507b5`. Its Decision and
+MemoryWitness are byte-identical to the integrated a320 base, and the fixed
+source route is absent. Existing storage fixed-array and fresh fixed-memory
+work is reused; this is the separately reproduced given-heap gap.
+
+Before edits, an intrinsic box-bound fixed uint[3] read-at-one reflexive leaf
+is target=true, Covered=false, unknown, yet valid over every heap (5.384699s).
+`DecisionGivenHeapFixedReason` states its exact source class for any intrinsic
+length and UIntLinear key (literal or computed). The constructive parser
+retains the fixed length and checks both complete reads through the bound
+pointer. Sound/complete membership, iff/Decidable, all-heap validity and
+hashFree/validH are proved without inspecting coverage or a verdict.
+
+`DecisionGivenHeapFixedExtension` runs only after every prior computed/source
+answer misses. Generic preservation retains all old Answers and exact negative
+state functions. Decision adds the fixed branch to the memory helper, derives
+no-allocation from its source equation and keeps every old completeness signature.
+The original Fml.Covered, Fml.inTarget and DecisionTheorem declarations are byte
+identical to both 8bd and the parent. Old literal/computed classifiers, answer
+producers and HashPremise remain byte-identical; the computed boundary needs
+only one extra Bool.true_or simplification. No rule/walk/observation/default or
+proof, time, fuel, node, source-profile or expected-old-verdict change.
+
+`DecisionGivenHeapFixedBoundary` derives actual admission under every waiver,
+no-allocation, memory coverage and global proved verdicts from the actual source
+witness, with no supplied target or coverage premise. Existing hashFree transport
+keeps the original hash reading. This supports exactly box-bound fixed primitive
+uint arrays and identical direct UIntLinear reads, not general fixed-array
+closure, nested/struct arrays or arbitrary prefixes.
+
+`Examples/DecisionGivenHeapFixed` certifies literal, computed, partial-index,
+out-of-bounds and intrinsic zero-length controls: all five actual interpreted
+results are (true,true,proved). Zero length is an intrinsic model control, not
+Solidity-source acceptance. A real State.alloc object [1,2,3] proves defined
+reads and supplies the unequal-read countermodel. Unset/bounds/partial evaluator
+failures remain none. Program == at an unset read is separately refuted, so
+Theory reflexivity is not confused with successful program evaluation.
+Actual diamond/fresh/dynamic/non-read/unequal-read sources are refused by this
+classifier; contextual uint keys classify, valid nonlinear ones do not. Same-type
+and different-length outer pointers are refused by complete address matching.
+No existing unknown expectation is edited in this increment.
+
+Focused warm private-cache checks, all at the unchanged 300s cap:
+- Reason MCP/build pass5.353211s/2.087987s; extension MCP/build3.183807s/2.088852s.
+- Decision MCP/build36.645824s/39.880308s.
+- Fixed boundary MCP/build4.244007s/2.097308s; controls MCP/build5.385056s/3.138099s.
+- Edited computed compatibility MCP4.286391s; previous computed controls build3.177496s.
+- Old literal/negative consumer closure passes83.707117s; DecisionMemory itself73s.
+- Public probe passes33.368531s:48 standard-only axiom reports and five actual
+  interpreted verdict triples. Bounded KeySort passes1.021121s with actual
+  Lean4.24.0/Lake5.0.0-src+797c613 and parsed377/read-bearing131/covered131.
+
+Initial lower-layer noAlloc name failure, stale-dependency diagnostics and the
+boundary's leftover dynamic-context annotation/unused simp warning are retained
+raw, with their exact draft sources. The allocation fact now resides in the high
+boundary, preserving acyclic imports; no premise or expected result was weakened.
+Independent read-only finder and skeptic used no Lean/server/build and found no
+source/control issue. Registration/whitespace checks pass. Every check preserves
+original writer lock, one thread/explicit -j1, hard12GiB/no swap,12GiB host reserve
+and no LSP/build overlap. Passing-check maximum sampled aggregate RSS2426136KiB,
+maximum measured cgroup peak1298989056bytes, minimum host available13418770432bytes.
+No fresh full-tree cache/timing pass is claimed.
+
+Checkout disk fell below the existing full-wrapper32MiB floor. A journaled,
+byte-for-byte relocation of VA1's sealed partial-OR bundle to owned /tmp preserves
+its original access path, exact SHA256 and both original manifests; no cache,
+source or other task was removed. Available checkout space rose32309248 to
+35471360bytes. Exact receipt: /workspace/va1-evidence/fixed-given-next/disk-recovery.json.
+New large exports use owned /tmp storage through a stable delivery link.
+
+Per H12, full run-lean/TestSuite/docs/strict/trust/cumulative gates are reserved
+for a lane checkpoint, with prior failed gates retained. Remaining original
+AU01 exhaustive Residue/DecisionTheorem-prime/hash bridge, profiling/splits,
+AU02 general arrays/memory/halting-OR/prefix children, wider revised program-free
+boundary and formula-derived fuel/backfill remain open. Next ready constructive
+bridge candidate is two positive uint prefixes over an intrinsic QFUIntLinear
+body; the existing one-prefix facts can be generalized without changing budgets.
+That candidate is not implemented or claimed proved here. No AU05/AU06,
+push/merge/PR/tag, goal reset or whole-lane completion.
+Evidence and intended exact-head export: /workspace/va1-evidence/fixed-given-next.
+
+
+## H1 recovery and published Decision split integration (2026-11-03)
+
+The human resource answer was “Free disk + 4 GiB reserve”. Only the two
+task-runner host-reserve thresholds change, from12GiB to4GiB; aggregate cap
+12884901888bytes, swap0, threads1, explicit Lean-j1, original writer lock and
+300s per-module limits remain. Read-only finder verified every other runner
+byte unchanged. Both kernel reclaim interfaces denied permission; raw failures
+are retained. Two older owned delivery directories were losslessly relocated
+to owned/tmp storage, preserving original paths and every file SHA256. Checkout
+headroom increased to281251840bytes; latest seals and all commits remain.
+
+The preserved pre-rebase checkpoint is a7adb92bce1e57e8dbb0d672d6eb9fc92a08b3ef
+(refs/va1/pre-cd240-a7adb92b); the published split base is
+cd24006f59687bc4f594a2f5cb311b6ea5e9969f. This integration retains the canonical
+Decision/DecisionFeatures/DecisionGaps/DecisionGapOperators arrangement. Six
+exact duplicate data definitions are re-exported from existing data modules;
+legacy section entrypoints retain cumulative imports. The staged three-kind
+proof moves byte-exactly except its import into
+`Solidity/Examples/DecisionThreeKindProof.lean`. Its public interface remains
+`Solidity.Examples.Decision.gapThreeKinds_covered :
+gapThreeKinds.hashCovered = true`. Root registration is generated by register.sh.
+No formula, expected-output observation, predicate, premise or proof budget changes.
+
+H1 focused validation uses Lean4.24.0(commit797c613) and
+Lake5.0.0-src+797c613. Bounded KeySort passes: parsed377 taclets,131read-bearing,
+covered131, OK annotations match. HashReduction passes the toolkit per-file
+gate31s and the serial build30.28s. The371-entry main dependency closure passes,
+then33 additional affected compatibility/control entries pass,404 total, at most one
+Lean compiler observed. Every checked module is below300s. Main canonical
+build timings: Decision55.50s, Features116.47s, Gaps205.93s, Operators164.43s;
+extracted proof30.45s. These are local focused rebuilds with a mixture of
+verified cached and rebuilt dependencies, not a fresh full-tree timing.
+
+Per-file toolkit MCP diagnostics pass with zero errors on all18 edited/example
+and unchanged fixed-checkpoint files, stopping the server after each file.
+The a7 fixed boundary and controls remain byte-identical and pass underH1.
+Its48 public axiom reports contain only standard axioms; five actual interpreted
+controls each return(true,true,proved). The split theorem signature and axiom
+probe pass independently. This is kernel proof and Lean interpreter evidence,
+not external EVM testing. Raw initial KeySort/cache-alias/permission failures
+remain failures in the record; they were repaired only through writable
+byte-verified task-owned generated copies, without changing immutable caches.
+
+Independent read-only finder and skeptic used no Lean/server/build. They found
+no source issue:319 named declarations,56 output comments and68guard/eval/print
+commands preserved; exact proof/data extraction, unchanged Calculus files and
+acyclic imports. Evidence: /workspace/va1-evidence/h1-recovery, with exact
+commands/resources/raw gates and reviews.json. The prior blocked seal remains
+/tmp/va1-cd240-blocked-17a564f0; its stop is not retroactively marked passing.
+
+All original unfinished obligations remain: exhaustive meaningful Residue and
+DecisionTheorem-prime/target-Covered-hash bridge; remaining array/memory/halting-OR
+children, broader approved Q1 boundary and formula-derived511fuel; remaining
+baseline/backfill and full build/TestSuite/strict/trust/axiom/docs/cumulative
+gates. AU05 has not started. No full-lane pass, publication or goal completion.
+
+Documentation-path gate remains failed, not passed. The first run found49
+missing references. The owned TODO incorrectly cited its proposed module as an
+existing file; it now explicitly names a proposed module instead. Exact frozen
+base comparison retains raw failures. All remaining missing references are
+inherited from the frozen base; a further Arms basename ambiguity comes from
+published source outside this adaptation. No unrelated documentation is rewritten
+to mask the gate. Final whole-lane documentation validation remains open.
+
+
+## Independent two-prefix numeric source producer (2026-11-03)
+
+After fetching origin/master0538c8660100bd94f25cc8b71909948dc316d1de, source/log
+inspection found no published Decision/residue implementation to duplicate.
+This incremental producer is built on checked9ffc64a5; newer unrelated published
+changes are not silently treated as a combined-tree pass.
+
+`Calculus/DecisionNumericTwoPrefix.lean` proves
+`uintLinear_two_prefix_sourceBound`: every intrinsic UIntLinear uint term in
+the actual two-uint context translates through two real pushQ operations, with
+only atoms0/1, no environment atoms, elimination/conditional identities and
+leaf term nodes≤original source term size. The inner local maps to atom1, the
+outer to atom0, and the third intrinsic context case is impossible. There is
+no coverage/parser/verdict/validity premise, fixed511 premise or new runtime
+function. The existing generic source-bound proof is reused after discharging
+all actual environment obligations. Both predicates and every budget are unchanged.
+
+`Examples/DecisionNumericTwoPrefix.lean` constructs a source using both locals,
+checks its exact translated order, instantiates the producer and kernel-proves
+that actual inExact rejects foreign atom2 below the two binders. Two concrete
+leaves are separately kernel-certified inTarget/Covered; their guarded Lean
+interpreter outputs are proved/refuted, with the original gapHashNegForall
+unknown retained. This does not prove general two-prefix coverage or transfer
+the interpreter observations into an extra semantic theorem.
+
+H14 automation-first trials retain all six default failures on the generic
+producer and combined controls. The actual refusal goal then used MCP goal and
+lean_multi_attempt: rfl passed; decide/omega/simp only/sol_prove/sol_chain failed.
+An initial MCP diagnostics-unavailable result and the generic-C decide+kernel
+control error are retained with exact draft sources. The final refusal uses
+the successful rfl proof, with the same expected false result.
+
+Final producer MCP/build pass3.253s/1.207s; control MCP/build7.469s/6.132s; public
+interface/axiom/verdict probe7.453s. Six public axiom reports contain only the
+standard axioms. The focused serial ledger reaches412total, including the
+eight additional producer/control entries after the404-entry H1 checkpoint.
+Hard12GiB/no swap,4GiB reserve, one thread, explicit-j1,300s and writer lock
+remain; no LSP/build overlap. Source/control registrations use register.sh.
+
+Independent read-only finder and skeptic found no issue, with no Lean/server/
+build/writes. Evidence and raw failures: /workspace/va1-evidence/two-prefix-next.
+TERRA-TODO lists a fourth routine exact-test adapter; it is unproved and unused.
+Sol retains the actual source-formula, both-polarity, source-size and semantic
+bridge work. All original AU01/AU02/backfill/full-gate obligations remain open
+as above; the inherited failing documentation gate remains failed.
+
+
+## Two-prefix equality source producer (2026-11-03)
+
+Fresh origin/master inspection at8a6d4c5680167f1f22bdedc4dc6751ab432760a3
+found no duplicate Decision implementation. The development tree remains based
+on consumed cd240 source plus this lane; newer unrelated published work is not
+claimed as a validated combined tree.
+
+`Calculus/DecisionNumericTwoPrefixFormula.lean` proves
+uintTwoPrefix_eq_sourceBound for arbitrary UIntLinear operands in the actual
+two-uint context. Both actual toLS polarities yield the same existing LFml,
+with UIntQF atoms0/1, no environment atoms, elim/condSimp identities and
+ψ.nodes≤7*(a.size+b.size)+13. The proof uses actual term translations, the
+existing optional/strict equality polarity fact and prepared-node estimate.
+No coverage/parser/validity/verdict/future-helper or fixed511 premise is supplied;
+no runtime/default/predicate/strategy/proof/fuel/node budget changes.
+
+`Examples/DecisionNumericTwoPrefixFormula.lean` supplies an arbitrary-contract
+client comparing the two-local sum against literal5, not merely reflexivity.
+The actual positive and negative translations both have5nodes. A separate closed
+forallEqualsFive leaf is kernel-certified inTarget/Covered and interpreted as
+refuted; the previous positive source remains proved and the approved unread-hash
+control remains unknown. These are finite source/coverage and guarded Lean
+interpreter checks, not a general source/coverage or external EVM theorem.
+
+Six default automation attempts failed before the hard proof. An initial MCP
+diagnostics-unavailable result is preserved; focused dependency/setup build
+then passes, followed by zero-error per-file MCP. Producer build/MCP
+1.307s/3.171s; client build5.930s, client MCP7.454s; public signature/client/axiom
+probe7.432s. The cumulative focused ledger reaches416entries. Three inspected
+public axiom reports contain only propext/Classical.choice/Quot.sound. Raw size
+and verdict outputs are [some5,some5] and [proved,refuted,unknown].
+
+A transient exec-server disconnect occurred after both client build and probe
+returned0. Provider metadata still said running while actual execution was
+unavailable and retained diagnostics were absent. Access later returned with
+the original committed HEAD, edits and logs intact; both source SHA256 values
+match the passing probe. No VM, thread, goal or Docker-daemon reset/replacement was
+requested. Raw recovery receipt: two-prefix-formula-next/transport-recovery.json.
+
+Independent finder and skeptic first gave explicitly text-only reviews during
+the outage, then reviewed actual saved source and raw axioms after recovery.
+Both found no issue and used no Lean/server/build/writes. H1 hard12GiB/no swap,
+4GiB reserve, serial-j1/threads1,300s and original writer lock remain.
+Evidence: /workspace/va1-evidence/two-prefix-formula-next.
+
+TERRA-TODO T5 contains only routine logical-constructor assembly over this checked
+source producer; it is unproved and unused. General logical-prefix normalization,
+source reduction, target/coverage/soundness, exhaustive Residue/DecisionTheorem-prime
+and all other original unfinished AU01/AU02/backfill/full gates remain open.
+The inherited documentation-path failure remains failed.
+
+
+## Constructive numeric formula syntax recognition (2026-11-03)
+
+Fresh publication audit at6510c302ff8c276cd2f69e9c0524bd22c1d90d8a found no
+QFUIntLinear decidability implementation. The existing term recognizer is
+reused, not reimplemented. No newer unrelated master code is claimed integrated.
+
+`Calculus/DecisionUIntFormulaRecognizer.lean` adds
+Fml.qfUIntLinearDecidable, its constructive instance and qfUIntLinearShape.
+They decide the exact existing QFUIntLinear predicate from the prior VA1
+checkpoint: tt, uint equality of UIntLinear operands, not/and/imp. Indexed
+constructor cases produce either actual positive evidence or its negation.
+Other primitive equalities and source constructors are rejected by impossible
+indexed cases. Recursion follows actual formula subterms; term decisions use
+the existing constructive UIntLinear instance. No classical/noncomputable
+decision shortcut, target/Covered/hashCovered/parser/verdict query, semantic
+profile/default change or new fuel/proof budget occurs.
+
+`Examples/DecisionUIntFormulaRecognizer.lean` checks a genuine two-input logical
+combination and rejects symbolic multiplication. Boolean identity and an
+actual quantified positive leaf are kernel-certified target/Covered despite
+being outside this grammar. Consequently a syntax rejection is explicitly NOT
+a Residue classification or an unknown verdict. The actual profile vector is
+[true,false,false,false], with retained verdict controls[proved,refuted,unknown].
+This is residue-census groundwork, not the exhaustive source census or bridge.
+
+All seven default/instance automation attempts failed before implementation.
+The generic control's decide free-variable error is retained with its exact
+draft. Actual MCP goal/multi_attempt then found only
+`exact of_decide_eq_true rfl` successful; the final proof is kernel reduction
+of the constructive decision data, with no native trust shortcut.
+
+Classifier MCP passes3.219s; its focused build reuses the checked artifact in
+0.302s with zero Lean compilers observed, not a cold compile timing. Control
+MCP/build passes7.501s/6.437s; public interface/axiom/probe7.433s. Five inspected
+axiom reports contain only standard axioms. The cumulative focused ledger has
+418entries, with its historical cache/rebuild boundaries retained.
+
+Independent finder and skeptic used no Lean/server/build/writes and found no
+issue in constructor exhaustiveness, negative witnesses, recursion, instance
+selection or boundary controls. Existing grammar definitions, inTarget, Covered,
+Waivers, observations and all resource/proof/time/node/fuel budgets stay unchanged.
+H1 remains hard12GiB/no swap,4GiB reserve, one thread/explicit-j1, original lock
+and no LSP/build overlap. Evidence: /workspace/va1-evidence/qf-recognizer-next.
+
+TERRA-TODO T6 is an optional convenience iff over the already checked decision
+data, unproved and unused. The assigned global Residue must still be an
+independent meaningful/exhaustive syntactic gap census, not the complement
+of this profile or any coverage/verdict test. Actual unknown residual examples,
+substantial nonresidual bridges including the hash route, DecisionTheorem-prime,
+remaining AU02/backfill and full gates are not discharged here. The inherited
+documentation-path gate remains failed as previously compared to frozen base.
+
+
+## Restart recovery and isolated H6 relay — 2026-11-03
+
+The same VM restarted with source/commits intact at8b2c420f, but its `/tmp`
+exports and private runtime views were lost. Earlier `/tmp` artifact paths are
+historical unavailable paths, not current retrievable seals. No goal or VM was
+recreated. Root disk free was265125888bytes; checksum-recorded duplicate-cache
+and superseded-bundle cleanup restored over2GB headroom. All advertised bundle
+heads were checked in Git before deleting those superseded copies. Deduplicated
+build/cache views must remain read-only, or be privately materialized before
+future writes. Cleanup receipts remain in the H1 evidence directory.
+
+At the coordinator's request, H6 was relayed in a separate worktree at
+`/workspace/va1-h6-relay`, exact baseed7c42a7e7964315dc14d0ca76557067b5a24a35,
+headf9196141543da99440452ff90659d0fa69252487. The original assigned branch was
+preserved. This consumes fb58217b without60dd172d: UnitExamples is outside the
+32-module source import closure. All20 focused split files pass, with baseline
+97.9125s and split maximum19.5993s; no300s guard or observation changed. These
+are fresh elaborations with existing exact-source dependency outputs, not a
+cold full build. The bounded runner observed memory.max12884901888 and swap0,
+serial-j1/threads1, maximum sampled RSS5034200KiB and minimum host available
+11622682624bytes. Finder and skeptic reviewed source and focused evidence
+read-only. The finder's stale cherry-picked document link was fixed and both
+reviewers reported no remaining findings.
+
+Sealed H6 dependency package:
+`/workspace/va1-evidence/h6-relay-20261103/package`.
+Its checksum-list digest isa6901b5586c30b549da0a25e072a3e4ef6ce023c46373cfc94a739b4736f7ef1.
+The coordinator integrates this relay; MRS/MIC still need their concrete full
+gates. No push/merge/tag or whole-lane completion occurred.
+
+AU01 resumed with independent exact-source bridge decomposition: T7 records
+the routine two-binder adapter over the checked two-prefix producer. It requires
+neither pending T4/T5 nor VA2 sharing. T7 is only a Markdown statement, unproved
+and unused; there is no new Lean assumption. The hard producer remains checked,
+while normalization, global Residue/DecisionTheorem-prime/exhaustive hash bridge,
+all open AU02/backfill and full-validation obligations remain open.
+
+
+## Two-binder normalization producer — 2026-11-03
+
+H22 freeze respected: no ExtCall structure, helper or construction changed.
+Fetched origin/master4b43613e; no published replacement for this owned producer
+was found. The assigned branch/base remain unchanged. This is an additive proof,
+not a normalizer refactor; prior exact-work/speed history was inspected.
+
+`qfUIntTwoPrefix_normalization_sourceFuel` in
+`Solidity/Calculus/DecisionNumericNormalization.lean` has explicit quantifiers over
+any contract, two names, and a body in two uint locals. Its premises are actual
+QFUIntLinear syntax and body.uintQFWeight≤2046. It proves the actual public
+2048-budget normalizer returns two binders around a body retaining the grammar
+and a nonincreasing source-weight bound. The existing state-producer theorem and
+two actual_all equations account for both visits. No successful-normalization,
+coverage, validity or future-helper premise is assumed. This sufficient source
+weight criterion is not presented as a necessary bound or the full511-node
+coverage theorem. T4/T5/T7 remain unproved and unused.
+
+Required automation was attempted first. An initial scratch-goal namespace error
+was corrected and its raw failures retained. rfl/decide/omega/simp only did not
+solve the valid goal; sol_prove/sol_chain implementations were unavailable in
+that core-only import environment. The producer then passed a focused kernel
+file check in9.647s; emitting its private checked output took about10s. No shared
+build/cache output was overwritten.
+
+The committed client
+`docs/feature-work/after-roadmap-va1/two-prefix-normalization-client.lean`
+uses both locals in a sum compared to five, wrapped by conjunction with truth.
+Its actual public2048 normalization certificate passes, while fuel1 returns
+none. Guarded evaluation is[true,false], and actual decision controls remain
+[proved,refuted,unknown]. The client passed in7.453s against the new private
+producer output. All three public axiom reports contain only propext,
+Classical.choice and Quot.sound. These are kernel/source and interpreted
+controls, with no external EVM claim.
+
+Per-file MCP diagnostics were attempted but remain FAILED/unavailable, reporting
+“Lean did not finish; the file is not known clean.” The initial private socket
+permission failure was repaired. Private writable output/cache views and server
+stderr capture did not resolve the diagnostic failure; the raw result has
+success=false, timed_out=false, failed_dependencies=[]. Server stderr reports
+“Watchdog error: Cannot read LSP message: Stream was closed”. No diagnostic pass
+is inferred from the independent kernel passes. The checkpoint therefore remains
+partial for diagnostic/final validation. Raw commands, permission/import/diagnostic
+failures and outputs remain in
+`/workspace/va1-evidence/two-prefix-normalization-next`.
+
+All checks used the actual local Docker daemon, memory.max12884901888,
+memory.swap.max0, H1 reserve4GiB, -j1/threads1 and the original writer lock.
+No build/LSP overlap occurred. General Residue/DecisionTheorem-prime/exhaustive
+hash bridge, remaining AU02/backfill and whole-lane gates remain open.
+
+
+## Exact two-binder work and repaired MCP — 2026-11-03, pre-H21/H22 rebase
+
+`qfUIntTwoPrefix_normalization_iff_work` quantifies over any contract/context,
+two binder names, a body in `.val .uint :: .val .uint :: Γ`, QFUIntLinear evidence
+and an arbitrary budget. It proves actual public normalization succeeds iff
+`body.normalizationWork + 2 ≤ budget`. This is an exact traversal-work statement,
+not CPU cost, decision completeness or the whole511-node bound. The proof handles
+budgets0/1, unfolds two actual binder visits, and reuses the checked body iff.
+No output-success, coverage, validity, future-helper or new hash premise is assumed.
+
+The inhabited both-local sum=5 ANDtt client now proves success iff5≤budget.
+Adjacent4/5 controls evaluate[false,true], despite smart output collapse. Existing
+2048/1 controls and[proved,refuted,unknown] observations are retained unchanged.
+Producer and client pass complete actual-file MCP diagnostics and focused kernel
+checks. The producer's focused build is9.407s with one compiler. The actual-file
+checks, not candidate snippets, establish proof acceptance. Standard automation
+was tried through lean_multi_attempt first. Candidate failures and an interrupted
+client attempt with no recorded exit remain raw failures/incomplete evidence.
+All public reports contain only the existing standard axioms.
+
+The old MCP failure is now diagnosed and repaired, without changing installed
+tools/guards. Raw LSP diagnostics exposed read-only private `.hash`/setup/output
+aliases hidden by the summary. Private metadata and each target's output files
+were materialized; canonical build/cache files stayed read-only. A serial291-module
+core import preparation and93 additional client/KeySort imports passed:384 unique
+modules, maximum141.017s, at most one compiler, unchanged300s bound. An independent
+skeptic found an unbounded termination wait; the runner now uses a2s TERM grace,
+then process-group KILL and a bounded wait. Exit137 for that repair stop and the
+37 retained prefix results are preserved. All later results passed.
+
+Actual bounded KeySort passes: parsed377 taclets,131 read-bearing, table covers131;
+annotations match. Lean4.24.0, Lake5.0.0-src+797c613. The child cgroup verifies
+memory.max12884901888 and memory.swap.max0; -j1/threads1, H1reserve4GiB, original
+writerlock and no simultaneous LSP/build. This establishes runtime setup only,
+not whole-lane success. Old superseded bundle copies were checksum-recorded and
+removed only with retaining Git refs. Private cache blobs were removed only after
+byte equality with retained checked build outputs. Latest sealed exports remained.
+Raw evidence is `/workspace/va1-evidence/mcp-recovery-20261103`.
+
+Independent read-only finder and skeptic report no proof/control findings; their
+runner termination finding was fixed and re-reviewed. These checks concern the
+pre-rebase source only. H6 is published and closed, not resubmitted. The coordinator
+has now announced H22 and H21 landings: next action is a preservation-first rebase
+onto current origin/master at/after b4d2b5aa9, regeneration via the new repository
+registration script, and focused replay. No post-rebase pass is claimed here.
+General Residue/DecisionTheorem-prime/exhaustive hash bridge, all remaining AU02
+and backfill children, newer-master integration and full end-of-lane gates remain
+open. Earlier failed gates/seals and original approved decisions are not erased.
+
+
+## H21/H22 concrete-tree replay — 2026-11-03
+
+Rebased the owned history onto published master
+`603eef898f3a4a058a59e8fa7331b77f8cf6ec05`; the replayed proof head is
+`efafe7dd5dce4f932c6bdd605df5d2074bb00eba`. Original frozen base remains
+`8bd8742ad987d566f7ba7624372cec1c020be07c`. The pre-rebase checked checkpoint
+`caf5748c23c18f7c383d36e8560e2c3d2b3c01cb` and its seal are retained.
+H6 is already published and is not resubmitted.
+
+The generated roots now retain H21's core/examples separation; registration
+was regenerated by `scripts/coord-tools/register.sh`. The135 owned module-map
+rows moved to the calculus/examples area files. The hash checks reuse master's
+definitions-only DecisionHashes and HashingNames modules; DecisionHashesChecks
+imports the owned split. Removed68 duplicate definitions and25 attached
+relocated-definition docstrings; retained theorem/control source and expected
+messages. The only difference in the definitions root against this master is
+`attribute [noinline] verdict`. Every Calculus/Decision module is byte-identical
+to the checked pre-rebase checkpoint. Owned changed files construct no ExtCall.
+Covered, inTarget, DecisionTheorem and Waivers remain byte-for-byte identical
+to the frozen base; the approved Q1 boundary revision does not change them.
+
+Actual bounded checks on this concrete tree:
+
+- Serial affected import/check closure:326 modules pass; maximum89.909s
+  (Calculus.Taclet), maximum one Lean compiler, each unchanged300s limit.
+- DecisionNumericNormalization:8.390s; producer and inhabited normalization
+  client each have zero per-file MCP errors and pass repository per-file gates
+  in9s/7s. Public axiom reports contain only propext, Classical.choice, Quot.sound.
+- Examples.Decision:56.166s. All nine hash split modules and their facade pass;
+  slowest split DecisionHashKeys:56.766s. The seven edited hash files each
+  have zero per-file MCP errors, with MCP stopped after each pair.
+- Fresh sanctioned KeySort passes:377 taclets,131 read-bearing, table covers131;
+  annotations match the pinned rules file. Lean4.24.0 commit797c613, Lake
+  5.0.0-src+797c613. RUNTIME_GATE_PASS applies to this checked runtime only.
+- register.sh --check, module-map.py origin/master, git diff --check and
+  check-doc-paths.sh exit0; doc paths retain46 ambiguity notices, all resolve.
+
+All jobs use the original writer lock, LEAN_NUM_THREADS=1, explicit-j1, task
+Docker memory.max12884901888 and memory.swap.max0; no LSP/build overlap.
+The326-module run records aggregate RSS maximum5202716KiB and cgroup peak
+5970898944bytes, with no resource stop. Parent snapshot limit17179869184bytes,
+current4889378816bytes; subsequent runners check effective parent/host admission
+against the human-authorized4GiB reserve. Disk was reclaimed before replay;
+shared Lake cache and prior sealed deliveries are preserved.
+
+Raw evidence is `/workspace/va1-evidence/h21-h22-rebase-20261103`. Retain the
+initial SpecSyntax read-only private-cache failure and KeySort exit1 plus its
+exposed SolkeyCheck.ilean read-only failure. Each was repaired by materializing
+private output/cache aliases, leaving canonical/shared artifacts read-only.
+The repaired checks pass; these failures are not reclassified as passes.
+Finder and skeptic independently found no source integration issues. Skeptic's
+future-runner timeout/resource-stop findings were fixed and re-reviewed:
+2s forced-kill grace and forced failure on resource_stop. Neither reviewer used
+Lean or a server. Reports and exact commands remain in the evidence directory.
+
+The whole lane is partial: global meaningful Residue, DecisionTheorem-prime,
+exhaustive target/Covered/hash bridge, full approved program-free boundary,
+broader AU02 arrays/memory/halting-OR and whole-formula511-node derivation remain
+open. Baseline census/backfill and T1–T7 are partial/unproved; no helper is assumed.
+AU05 is assigned next but not started; producer-owned hash prerequisites are
+not replaced. Full affected reverse closure, full run-lean/TestSuite, strict,
+trust/axiom and frozen-base cumulative final gates remain pending. No EVM test
+or final integration pass is claimed. A separately reviewed two-uint-prefix
+normalization-over-budget reason is design-only, not a new exclusion or theorem.
+
+
+## Decidable source-budget reason and H1 recovery — 2026-11-04
+
+Published scheduled master059eb83d4e1d494f42c532513ffbcd3e65adaf75 is merged
+on this task branch at4cbebde068c694ad7361687e39b5dfcb5342ca12. Checkpoint
+3019534c and its latest seal remain intact. Frozen base stays8bd8742a; no
+H16 Source or ExtCall implementation was edited by this checkpoint.
+
+`Calculus/DecisionNormalizationResidue.lean` implements a new independently
+decidable source-reason class, `Fml.NormalizationBudgetResidue`. Recognition
+matches two outer uint forall binders, checks the existing QFUIntLinear body
+grammar and requires body.normalizationWork+2>2048. It returns a witness indexed
+by that complete intrinsic source. The one-line reason names those actual
+formula visits. It never consults Covered, inTarget, normalization success or
+any decision verdict. This is one source-budget reason; global Fml.Residue,
+DecisionTheorem-prime and the exhaustive coverage/hash bridge remain open.
+
+The public certificate theorem has explicit contract/context/source quantifiers:
+`normalizationBudgetResidue_normalizer_none {C : Contract} {Γ : Ctx}
+{φ : Fml C Γ} (h : φ.NormalizationBudgetResidue) :
+ProgramNormalization.ofFormula? 2048 φ = none`.
+Its indexed-witness theorem uses the existing exact two-prefix work theorem;
+the class theorem extracts the actual Option witness. No successful
+normalization, coverage, translation, validity or future-helper premise is
+supplied. No normalizer/511-node/proof budget was increased.
+
+`Examples/DecisionNormalizationResidue.lean` supplies a real member over Gaps:
+a1024-leaf conjunction of an arithmetic equation using both actual uint locals.
+Its source work is2049 visits. The512-leaf sibling needs1025 visits. Kernel
+proofs certify membership, target admission, hash absence, rejection of wrong
+sort/additional binder/havoc shapes, the large source's normalization failure
+and the sibling's normalization success. Small non-residual inTarget sources
+have a certified proved verdict and an actual returned refutation state.
+`reflexive_validH` and `small_countermodel` use the unchanged exact goal hash
+premise through decideGoal_sound/refutes. All printed axiom reports contain
+only propext, Classical.choice and Quot.sound.
+
+Fresh public observations are preserved as interpreted guard pins:
+[unknown,unknown,refuted,proved,unknown] for the large source, sibling, small
+source, reflexive source and existing gapHashNegForall. The sibling remains
+unknown despite normalizing successfully and lies outside this class. These
+large unknown observations are not kernel equality theorems or a global
+completeness result. No existing expected verdict was edited. Original frozen-
+base baseline replay and broader reason census remain incomplete.
+
+Actual focused gates: both files have zero per-file MCP errors; repository
+per-file kernel gates pass in2s/15s; the concrete consumer module builds.
+Fresh bounded KeySort parses377 taclets,131 read-bearing, covers131 and matches
+the pinned rules. Lean4.24.0, Lake5.0.0-src+797c613. Trust0findings; orphans0;
+layers0; axiom-pins0errors/unrecorded changes. Strict classification records
+491automatic,61with a step budget,11refuted,0manual,0pending, explicitly without
+cumulative timing. Registration is script-generated and module-map rows are
+limited to the owned area files. Full reverse closure/run-lean/TestSuite/timing
+and cumulative final gates remain pending.
+
+Raw failures remain under `/workspace/va1-evidence/normalization-residue-next`:
+initial MCP cache-incomplete failure and raw fatal diagnostic; missing rg PATH
+entry (fixed using installed /usr/local/bin/rg); and the direct-reduction
+normalizer client attempt stopped by the effective4GiB reserve guard, exit1.
+The successful client uses the existing structural certificate. The stopped
+attempt is not a pass. Every Lean/LSP job uses the original writer lock,
+LEAN_NUM_THREADS=1, explicit-j1, hard memory.max12884901888, swap.max0 and the
+unchanged300s bound, with no LSP/build overlap. memory.reclaim is not writable.
+
+H1 cleanup receipt: `/workspace/va1-evidence/disk-recovery-20261104`.
+Independent finder/skeptic approved removing362 unreferenced private cache
+blobs (942586290bytes) after SHA inventory and two completed clean auxiliary
+worktrees. The sole H6 config was preserved and verified; both commits/refs,
+all source work, protected `/workspace/.setup/cache/lake`, current thin-build,
+and latest seals remain. Free bytes rose from937959424 to2255536128. Cache
+reconstruction was temporarily needed for MCP; it stays task-private and the
+protected cache remains read-only. Final free bytes are recorded in the final
+cleanup receipt; shipment fit still requires the coordinator's actual missing
+artifact/pack sizes plus its2GiB reserve.
+
+AU01 global theorem/bridge, remaining AU02 array/memory/halting-OR/approved
+program-free boundary/whole-formula511-node derivation, baseline/backfill and
+T1–T7 remain partial or unproved. AU05 is assigned next but not started.
+No EVM test or whole-lane completion is claimed.
+
+Independent read-only finder and skeptic reviews found no proof/scope issues
+and approved this incremental checkpoint. Neither used Lean or a server. Exact
+review receipts are in normalization-residue-next/independent-reviews.json.
+
+## Numeric fuel converse checkpoint · 2026-11-04
+
+Adopted published master6f3eedf0788ee1f8a3bcf230558c712ecdca04d5 in merge
+793c0bc7e31705d5af7a72d046c39bdbf8926c5f. The accepted producer snapshot
+8744e543 remains an ancestor. Master's imported DecisionUIntConstant/UIntSyntax
+are byte-identical to that snapshot. The sole module-map conflict retained the
+owned detailed rows without duplicates. The unchanged upstream V08 blank-EOF
+whitespace failure is retained in post-6f3eedf0/upstream-whitespace.json.
+
+New `Calculus/DecisionNumericFuel.lean` proves successful traversal consumes
+exactly the term/formula node count. Its explicit public signatures quantify
+over intrinsic terms/formulas, the existing Num/UIntQF grammar, arbitrary
+depth/shared fuel/start and the actual successful dependent result. No supplied
+coverage or semantic-validity certificate is assumed. The public theorem
+`numeric_formula_flattenAt_iff_nodes`, for every `φ.UIntQF P E`, budget and
+start, states `(flattenFormulaAt? budget start φ).isSome = true ↔
+φ.nodes ≤ budget`. Its reverse direction reuses the existing sufficiency proof;
+the new forward direction derives the bound from exact consumption. The
+strictly-below-node theorem proves actual Option refusal. The typed signature
+and immutable module hashes are exported in the checkpoint interface package.
+
+The concrete client uses a real uint parameter:511-node conjunction and its
+512-node negation. Kernel proofs quantify over every budget/start, in addition
+to concrete511 success/512 refusal. An existing generic API call at512 is a
+mathematical control, not increased production admission. A quantified formula
+remains refused; the error-sequence control confirms both syntactic children
+consume fuel despite semantic failure. No existing pin or observation changed.
+
+Automation attempts precede hand proof steps and are retained. Initial literal
+reduction/virtual-overlay errors, missing dependency artifacts, and an ambiguous
+error sort are retained as failures; canonical source fixes pass. No sorry,
+admit, new axiom, native trust shortcut, default/model/predicate edit, proof or
+time budget increase was introduced. All printed public theorem/control axiom
+sets contain only propext, Classical.choice and Quot.sound.
+
+Focused verification: both files have zero MCP errors; repository per-file
+kernel checks pass in2s and5s; the consumer builds in5.6s. Fresh KeySort parses
+377 taclets,131 read-bearing, covers131 and matches the pinned rules. Actual
+Lean4.24.0 and Lake5.0.0-src+797c613 were observed. The final bounded job exits0
+in25.678s, memory.max12884901888 and swap.max0, with one thread/explicit-j1 and
+the original writer lock. Sampled aggregate RSS peaks at3065376KiB, cgroup
+peak1349992448bytes; effective host/parent available memory stays above
+7243173888bytes, exceeding the4GiB reserve. No LSP/build overlap.
+Raw commands, MCP attempts, diagnostics, axiom prints, gates and resource samples
+are in `/workspace/va1-evidence/numeric-fuel-necessity-next`.
+
+This closes the numeric-flattener necessity component only. Global meaningful
+Residue/DecisionTheorem-prime/exhaustive target-Covered/hash bridge, remaining
+AU02 arrays/memory/halting-OR/approved program-free boundary, whole-source511
+bound, baseline/backfill and T1–T7 remain open; AU05 remains next and unstarted.
+Full combined build/TestSuite/strict timing/reverse closure/final audits remain
+pending. The existing predicates, exact hash premises and8bbd counterexample
+remain unchanged. This is kernel proof of a syntactic traversal boundary, not
+an EVM test or whole-lane completeness claim.
+
+Independent read-only finder and skeptic both pass with no confirmed findings;
+neither used Lean/server/build or wrote files. Exact receipts are retained in
+numeric-fuel-necessity-next/independent-reviews.json. Static checkpoint audits
+pass: trust0findings, orphans0, layers0, roots current, doc paths resolve,
+axiom pins0errors/unrecorded changes and strict automatic classification. The
+strict classification is not the pending cumulative timing/full-build gate.
+
+## Withheld hash selection repaired · 2026-11-04
+
+Published master b419c3cf4f642ae519b66bebc26cdf2f7cf93574 is adopted in
+879ee34a85f2597dc4b9cf7db9c2090b104d7f12; roots were regenerated by script.
+The original branch, frozen8bd base, prior checkpoints/seals and three private
+Lake configs are preserved. The withheld SourceBoundary leaf is not represented
+as integrated; its sourceUIntLiteral dependencies remain unpublished.
+
+The full hash split already has an imports-only facade in this branch. Selecting
+only its Core/Quantifiers files against master's monolithic Checks duplicates
+six declarations. The coherent minimal relay is committed at
+269ef06693bf1a3095ce33a9876de054271e3b6c in `/workspace/va1-hash-split-relay`
+(source commit ba12e332, then published-master merge). Its atomic integration
+unit contains Core, Quantifiers AND the matching Checks removal/reexport edit,
+plus generated roots, map rows and focused documentation. Use the relay patch;
+do not select only the two new files. It contains no unpublished Calculus API.
+
+All14 public theorem signatures and15 complete guarded observations/messages
+are mechanically preserved, each declaration occurs exactly once, and both
+new source files are byte-identical to40c894e4. All278 concrete import-closure
+modules are unchanged by6f3eedf0..b419c3cf. Actual first Lake builds take
+46/16/255s; fresh per-file kernel checks46/16/257s. The exact-head touched gate
+passes with a2s cached rebuild. The unchanged published monolith reaches the
+unchanged300s guard, exit124; that failed comparison is retained, not relabeled
+as a pass. No proof budget or expected verdict changed.
+
+All three MCP diagnostics report zero errors. A concrete three-module import
+client checks all14 public declarations/axiom reports and passes in29s. Only
+propext, Classical.choice and Quot.sound occur. Fresh KeySort parses377 taclets,
+131 read-bearing, covers131 and matches the pinned rules. Lean4.24.0 and
+Lake5.0.0-src+797c613 are observed. The successful final focused job exits0 in
+549.436s cumulatively: hard12884901888byte cap, swap.max0, thread1/explicit-j1,
+original writer lock; sampled aggregate RSS peaks6271012KiB, observed cgroup
+peak8349110272bytes, minimum sampled effective headroom4617924608bytes.
+RUNTIME_GATE_PASS applies to this actual focused job, not the whole lane.
+
+Read-only finder/skeptic both pass. Canonical static trust/orphan/layer/root/
+doc-path/axiom-pin/module-map audits and strict classification pass. Strict
+classification is not cumulative timing. Cache-write failures, preparation
+timeouts, standalone missing-object failures, reserve stops and teardown
+interpreter correction are retained under
+`/workspace/va1-evidence/hash-split-relay-20261104`. Cache trace exports were
+restored from intact outputs; missing standalone object aliases materialized.
+H1 read-only page reclamation changed no file bytes or protected artifacts.
+Neither stopped jobs nor the monolithic timeout count as passing gates.
+
+The repair is source/kernel checking and existing interpreted control replay;
+no EVM execution or cryptographic premise strengthening is claimed. Global
+Residue/DecisionTheorem-prime/exhaustive Covered/hash bridge, remaining AU02
+arrays/memory/halting-OR/approved program-free boundary/whole-source fuel,
+baseline/backfill/T1–T7, AU05 and all final combined lane gates remain open.
+Cache shipment is still unproven/not attempted: it needs the reported pack and
+unpacked delta plus4GiB free after staging; current disk admission is recorded
+in the exported receipt. No original goal transition or publication occurred.

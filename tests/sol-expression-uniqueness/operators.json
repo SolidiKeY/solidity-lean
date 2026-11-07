@@ -1,0 +1,92 @@
+[
+  {
+    "enum": "PrefixOp",
+    "constructors": [
+      "inc",
+      "dec",
+      "not",
+      "bitNot",
+      "delete",
+      "neg"
+    ],
+    "identity": "Solidity.Frontend.ExpressionUniqueness.unaryPrefix_word_unique",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.prefix_suffix_refused"
+  },
+  {
+    "enum": "SuffixOp",
+    "constructors": [
+      "inc",
+      "dec"
+    ],
+    "identity": "Solidity.Frontend.ExpressionUniqueness.unarySuffix_word_unique",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.suffix_prefix_refused"
+  },
+  {
+    "enum": "MulOp",
+    "constructors": [
+      "mul",
+      "div",
+      "mod"
+    ],
+    "identity": "Solidity.Frontend.ExpressionUniqueness.mulDivMod_word_unique",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.mulDivMod_right_nested_refused"
+  },
+  {
+    "enum": "AddOp",
+    "constructors": [
+      "add",
+      "sub"
+    ],
+    "identity": "Solidity.Frontend.ExpressionUniqueness.addSub_word_unique",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.addSub_right_nested_refused"
+  },
+  {
+    "enum": "ShiftOp",
+    "constructors": [
+      "shl",
+      "sar",
+      "shr"
+    ],
+    "identity": "Solidity.Frontend.ExpressionUniqueness.shift_word_unique",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.shift_right_nested_refused"
+  },
+  {
+    "enum": "OrderOp",
+    "constructors": [
+      "lt",
+      "gt",
+      "le",
+      "ge"
+    ],
+    "identity": "Solidity.Frontend.ExpressionUniqueness.order_word_unique",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.order_right_nested_refused"
+  },
+  {
+    "enum": "EqOp",
+    "constructors": [
+      "eq",
+      "ne"
+    ],
+    "identity": "Solidity.Frontend.ExpressionUniqueness.equality_word_unique",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.equality_right_nested_refused"
+  },
+  {
+    "enum": "AssignOp",
+    "constructors": [
+      "assign",
+      "bitOr",
+      "bitXor",
+      "bitAnd",
+      "shl",
+      "sar",
+      "shr",
+      "add",
+      "sub",
+      "mul",
+      "div",
+      "mod"
+    ],
+    "identity": "Solidity.Frontend.ExpressionUniqueness.assign_word_unique",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.assignment_left_nested_refused"
+  }
+]

@@ -1,0 +1,52 @@
+{
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.explicit_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.fuel_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.live_fixed_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.malformed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.no_dynamic_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.same_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.snapshot_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.Controls.source_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

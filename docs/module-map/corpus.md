@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/corpus.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The solkey corpus
 
 `SolidityCorpus` (`lake build SolidityCorpus`): each function of solkey's `.sol`

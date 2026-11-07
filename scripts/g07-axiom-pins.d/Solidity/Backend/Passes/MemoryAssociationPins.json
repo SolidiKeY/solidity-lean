@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/Passes/MemoryAssociationPins.lean:Solidity.Backend.Passes.MemoryAssociation.Controls.both_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryAssociationPins.lean:Solidity.Backend.Passes.MemoryAssociation.Controls.both_outputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryAssociationPins.lean:Solidity.Backend.Passes.MemoryAssociation.input_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryAssociationPins.lean:Solidity.Backend.Passes.MemoryAssociation.output_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryAssociationPins.lean:Solidity.Backend.Passes.MemoryAssociation.public_left": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryAssociationPins.lean:Solidity.Backend.Passes.MemoryAssociation.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryAssociationPins.lean:Solidity.Backend.Passes.MemoryAssociation.terminal_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

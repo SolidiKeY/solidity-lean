@@ -1,0 +1,12 @@
+{
+  "command": [
+    "bash",
+    "tests/h28-sol/type-grammar/mcp.sh",
+    "diag",
+    "Solidity/Frontend/TypeGrammarH28/Composition.lean"
+  ],
+  "exit": 1,
+  "tool_wall_s": 0.489133603,
+  "stdout": "ERROR 161:28 Application type mismatch: hp has type p.yield input = some (a, middle) but is expected to have type some (a, middle) = some (a, middle). diag: 1 errors",
+  "resolution": "Case elimination already rewrote the existential goal; replace the two equality witnesses with rfl. No statement or premise changed."
+}

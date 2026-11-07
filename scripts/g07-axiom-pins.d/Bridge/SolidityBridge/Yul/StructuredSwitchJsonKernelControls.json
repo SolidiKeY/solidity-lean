@@ -1,0 +1,32 @@
+{
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.checkedFromParse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.compiledFromParse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.compilesFromParse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.packetFromParse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.prepared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

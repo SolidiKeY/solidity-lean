@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeatControls.bad_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeatControls.bad_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeatControls.bad_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeatControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeatControls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeatControls.overlap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeatControls.represented_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRepeatControls.self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

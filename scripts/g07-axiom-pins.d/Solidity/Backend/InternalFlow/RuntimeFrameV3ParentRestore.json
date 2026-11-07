@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ParentRestore.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ParentRestore.Checks.parent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,82 @@
+{
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.first_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.origins": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.positive_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.reached_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.reached_prefix_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.second_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.source_first_panic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.source_second_panic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.stale_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.wrong_failure_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.wrong_order_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.wrong_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentControls.lean:Solidity.Backend.Passes.UnsignedDependentControls.zero_quotient_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

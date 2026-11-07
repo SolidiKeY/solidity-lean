@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Compilation/GuardedForCompilationControls.lean:Solidity.Yul.Compilation.GuardedForCompilation.Controls.high_only_taken": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForCompilationControls.lean:Solidity.Yul.Compilation.GuardedForCompilation.Controls.skipped_code_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForCompilationControls.lean:Solidity.Yul.Compilation.GuardedForCompilation.Controls.skipped_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForCompilationControls.lean:Solidity.Yul.Compilation.GuardedForCompilation.Controls.skippedArtifact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForCompilationControls.lean:Solidity.Yul.Compilation.GuardedForCompilation.Controls.taken_code_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForCompilationControls.lean:Solidity.Yul.Compilation.GuardedForCompilation.Controls.taken_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForCompilationControls.lean:Solidity.Yul.Compilation.GuardedForCompilation.Controls.takenArtifact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,6 @@
+{
+  "perFile": "failed: missing AnonLocalCapture.olean",
+  "freshDependencyBuild": "interrupted by A after source/Raw frontend dependencies rebuilt; Docker exit137; never a passing baseline",
+  "baselineSource": "baseline-source.lean.txt",
+  "runtimeBeforeAfter": "pending"
+}

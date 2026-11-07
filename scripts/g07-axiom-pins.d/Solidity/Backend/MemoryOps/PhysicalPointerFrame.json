@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalPointerFrame.lean:Solidity.Backend.MemoryOps.Physical.pointer_eight_not_numeric": [],
+ "Solidity/Backend/MemoryOps/PhysicalPointerFrame.lean:Solidity.Backend.MemoryOps.Physical.PointerFrame.write": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalPointerFrame.lean:Solidity.Backend.MemoryOps.Physical.reference_store_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalPointerFrame.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.pointer_write": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/QueryReduction.lean:Solidity.Decide.ExactReduction.countermodelFromReads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/QueryReduction.lean:Solidity.Decide.ReadReduction.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

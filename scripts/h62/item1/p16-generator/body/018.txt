@@ -1,0 +1,6 @@
+/-! RawU8GrowingSequence.run/correct joins an existing supported uint8 initializer
+with an actual checked Items tail, reusing RawIntegerSequence's indexed result
+and projection. The Source.execItems law retains checked/coherent premises.
+Checks exercise arithmetic consumption of the new local, older mutation,
+control restoration, dirty words and pipeline-specific initializer timeout effects.
+Block closure and general initializer admission remain separate obligations. -/

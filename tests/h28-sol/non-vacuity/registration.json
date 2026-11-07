@@ -1,0 +1,135 @@
+{
+  "modules": [
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.AllocatorGrowth",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/AllocatorGrowth.lean",
+      "description": "AllocatorGrowth H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Calculus",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean",
+      "description": "Calculus H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.CallbackFrames",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CallbackFrames.lean",
+      "description": "CallbackFrames H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Callbacks",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Callbacks.lean",
+      "description": "Callbacks H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.CheckedFamilies",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CheckedFamilies.lean",
+      "description": "CheckedFamilies H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.CheckedObjects",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CheckedObjects.lean",
+      "description": "CheckedObjects H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Environments",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Environments.lean",
+      "description": "Environments H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Families",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean",
+      "description": "Families H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Fragile",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Fragile.lean",
+      "description": "Fragile H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.HeapQueries",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/HeapQueries.lean",
+      "description": "HeapQueries H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.JointWorld",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/JointWorld.lean",
+      "description": "JointWorld H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Locals",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Locals.lean",
+      "description": "Locals H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.LogicalGates",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LogicalGates.lean",
+      "description": "LogicalGates H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.LoopContracts",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean",
+      "description": "LoopContracts H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.MemoryControls",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/MemoryControls.lean",
+      "description": "MemoryControls H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.MemoryInputs",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/MemoryInputs.lean",
+      "description": "MemoryInputs H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Originals",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Originals.lean",
+      "description": "Originals H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Outcomes",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Outcomes.lean",
+      "description": "Outcomes H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Pins",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean",
+      "description": "Pins H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Preconditions",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Preconditions.lean",
+      "description": "Preconditions H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.PrimitiveFamilies",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/PrimitiveFamilies.lean",
+      "description": "PrimitiveFamilies H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.ScalarPremises",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/ScalarPremises.lean",
+      "description": "ScalarPremises H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Signatures",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Signatures.lean",
+      "description": "Signatures H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.Storage",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Storage.lean",
+      "description": "Storage H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.TailSensitive",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/TailSensitive.lean",
+      "description": "TailSensitive H28 local evidence"
+    },
+    {
+      "module": "Solidity.Assurance.NonVacuityH28.VacuityControls",
+      "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/VacuityControls.lean",
+      "description": "VacuityControls H28 local evidence"
+    }
+  ],
+  "central_registration": "deferred to integrator by exclusive-scope assignment"
+}

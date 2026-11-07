@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/NumericClearCommutation.lean:Solidity.Backend.StorageOps.NumericClearCommutation.clear_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutation.lean:Solidity.Backend.StorageOps.NumericClearCommutation.clear_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutation.lean:Solidity.Backend.StorageOps.NumericClearCommutation.clear_log": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutation.lean:Solidity.Backend.StorageOps.NumericClearCommutation.clear_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutation.lean:Solidity.Backend.StorageOps.NumericClearCommutation.log_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericClearCommutation.lean:Solidity.Backend.StorageOps.NumericClearCommutation.sequence_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

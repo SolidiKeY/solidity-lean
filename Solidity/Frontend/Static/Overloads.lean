@@ -120,29 +120,29 @@ theorem lookup_sub_inheritedFns {E : Env} {c x : String} {d : Decl}
 def paramsOf (E : Env) (d : Decl) : Option (List STy) := (d.fnSig E).map Prod.fst
 
 /-- Whether a function's parameters accept the argument types. -/
-def accepts (E : Env) (isBase : DeclName → DeclName → Bool) (σs : List STy) (d : Decl) : Bool :=
+def accepts (E : Env) (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) (σs : List STy) (d : Decl) : Bool :=
   match paramsOf E d with
-  | Option.some ps => argsFit isBase σs ps
+  | Option.some ps => argsFit isBase mapFree σs ps
   | Option.none => false
 
 /-- **Overload selection**: the candidates whose parameters accept the
 argument types; resolved when exactly one does. -/
-def selectOverload (E : Env) (isBase : DeclName → DeclName → Bool) (cands : List Decl)
+def selectOverload (E : Env) (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) (cands : List Decl)
     (σs : List STy) : Option Decl :=
-  match cands.filter (accepts E isBase σs) with
+  match cands.filter (accepts E isBase mapFree σs) with
   | [d] => Option.some d
   | _ => Option.none
 
-theorem selectOverload_unique {E : Env} {isBase : DeclName → DeclName → Bool} {cands : List Decl}
-    {σs : List STy} {d : Decl} (h : selectOverload E isBase cands σs = Option.some d) :
-    d ∈ cands ∧ ∀ d', d' ∈ cands → accepts E isBase σs d' = true → d' = d := by
+theorem selectOverload_unique {E : Env} {isBase : DeclName → DeclName → Bool} {mapFree : DeclName → Bool} {cands : List Decl}
+    {σs : List STy} {d : Decl} (h : selectOverload E isBase mapFree cands σs = Option.some d) :
+    d ∈ cands ∧ ∀ d', d' ∈ cands → accepts E isBase mapFree σs d' = true → d' = d := by
   unfold selectOverload at h
   split at h
   · rename_i d₀ hf
     cases h
-    have hm : d ∈ cands.filter (accepts E isBase σs) := by rw [hf]; exact List.mem_singleton.mpr rfl
+    have hm : d ∈ cands.filter (accepts E isBase mapFree σs) := by rw [hf]; exact List.mem_singleton.mpr rfl
     refine ⟨(List.mem_filter.mp hm).1, fun d' hd' hfit => ?_⟩
-    have : d' ∈ cands.filter (accepts E isBase σs) := List.mem_filter.mpr ⟨hd', hfit⟩
+    have : d' ∈ cands.filter (accepts E isBase mapFree σs) := List.mem_filter.mpr ⟨hd', hfit⟩
     rw [hf] at this
     exact List.mem_singleton.mp this
   · cases h

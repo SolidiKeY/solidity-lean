@@ -1,0 +1,11 @@
+{
+  "command": [
+    "bash",
+    "run-lean.sh"
+  ],
+  "exit": 1,
+  "seconds": 0.549007,
+  "peak_child_rss_kib": 183336,
+  "user_seconds": 0.397688,
+  "system_seconds": 0.14965699999999998
+}

@@ -1,0 +1,10 @@
+{
+ "Solidity/Frontend/Checked/Certificate.lean:Solidity.Frontend.Checked.checkUnits_sound": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/Certificate.lean:Solidity.Frontend.Checked.produce_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

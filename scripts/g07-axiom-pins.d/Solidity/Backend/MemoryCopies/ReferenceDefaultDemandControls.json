@@ -1,0 +1,62 @@
+{
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.actual_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.empty_parent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.huge_child_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.huge_parent_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.long_parent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.semantic_demands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.token_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.two_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.unselected_account": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.unused_huge_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/ReferenceDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.ReferenceDefaultDemandControls.wrong_cursor_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

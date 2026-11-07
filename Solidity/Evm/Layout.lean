@@ -405,7 +405,8 @@ theorem leavesF_occ : ∀ (fuel : Nat) (T : Ty) (s : Slot) (o : Nat), o ∈ leav
 
 /-- The operators compiled at operand type `p`: arithmetic and comparisons
 at `uint` and `int`, `**` at `uint` (the only type it takes), `==`/`!=` at any
-type, `&&`/`||` at `bool`, and the bitwise, shift and wrapping operators at
+type, `&&`/`||` at `bool`, `>>` at `uint` and `int` (`SAR` on the clamped
+count, `sarCode`), and the other bitwise, shift and wrapping operators at
 `uint`, the only type they take. -/
 def binInFrag : BinOp → PrimTy → Bool
   | .add, p | .sub, p | .mul, p | .div, p | .mod, p => p != .bool
@@ -413,7 +414,8 @@ def binInFrag : BinOp → PrimTy → Bool
   | .eqB, _ | .neB, _ => true
   | .and, p | .or, p => p == .bool
   | .pow, p => p == .uint
-  | .band, p | .bor, p | .bxor, p | .shl, p | .shr, p => p == .uint
+  | .shr, p => p != .bool
+  | .band, p | .bor, p | .bxor, p | .shl, p => p == .uint
   | .addW, p | .subW, p | .mulW, p | .powW, p => p == .uint
 
 /-- The unary operators compiled: `!` (at `bool`, the only type it takes),
@@ -529,6 +531,11 @@ def uTail : BinOp → List Instr
   | .mulW => [.mul]
   | .powW => [.swap 1, .exp]
 
+/-- `… a n → … a >> n` (`n` on top) on `int`s: `SAR` on the count clamped
+to `0` when negative, since the source reads a negative count as `0` (its
+`toNat`) where raw `SAR` would read it as a huge unsigned count. -/
+def sarCode : List Instr := [.dup 1, .push (w[0]), .sgt, .iszero, .mul, .sar]
+
 /-- `… x y → … x ⊕ y` (`y` on top) on `int`s, two's complement, with solc's
 guards (`checked_add_t_int256` and its siblings): `+` reverts unless the
 wrapped sum is below `y` exactly when `x` is negative, `-` unless `x` is
@@ -552,8 +559,9 @@ def sTail : BinOp → List Instr
   | .ge => [.sgt, .iszero]
   | .eqB => [.eq]
   | .neB => [.eq, .iszero]
+  | .shr => sarCode
   | .pow | .and | .or => []
-  | .band | .bor | .bxor | .shl | .shr | .addW | .subW | .mulW | .powW => []
+  | .band | .bor | .bxor | .shl | .addW | .subW | .mulW | .powW => []
 
 /-- An operator's tail at its operand type: signed at `int`. -/
 def binTail : PrimTy → BinOp → List Instr

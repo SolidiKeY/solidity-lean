@@ -1,0 +1,11 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalStructChild.lean:Solidity.Backend.MemoryOps.Physical.assign_struct_child_physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructChild.lean:Solidity.Backend.MemoryOps.Physical.bool_array_cells_eq": [
+  "Quot.sound",
+  "propext"
+ ]
+}

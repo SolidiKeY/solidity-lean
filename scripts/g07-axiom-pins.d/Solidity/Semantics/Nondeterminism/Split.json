@@ -1,0 +1,5 @@
+{
+ "Solidity/Semantics/Nondeterminism/Split.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsBoth_of_pipelineBlind": [],
+ "Solidity/Semantics/Nondeterminism/Split.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsFor_artifact": [],
+ "Solidity/Semantics/Nondeterminism/Split.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsFor_of_oracleBlind": []
+}

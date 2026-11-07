@@ -1,0 +1,85 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_declaration": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_old_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroData": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroData_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroVal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroVal_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_zeroElems_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.source_uint_zeroElems_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.eval_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.sourceUintFixedObject_wk": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean:Solidity.Backend.MemoryOps.sourceUintFixedObject_zero": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,21 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "scope_modules": 354,
+  "local_closure": 1075,
+  "external_local_modules": 721,
+  "external_solidity_modules": 713,
+  "vendor_modules": [
+    "LeanTeX",
+    "LeanTeX.Basic",
+    "LeanTeX.Builtins",
+    "LeanTeX.Defs",
+    "LeanTeX.LatexChar",
+    "LeanTeX.LatexCmd",
+    "LeanTeX.MkAppN",
+    "LeanTeX.RuleSyntax"
+  ],
+  "unresolved_nonstdlib_imports": [],
+  "source_dirs": [
+    "vendor/LeanTeX"
+  ]
+}

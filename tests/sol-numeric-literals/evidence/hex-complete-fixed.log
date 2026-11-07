@@ -1,0 +1,6 @@
+ERROR 103:13 `simp` made no progress
+ERROR 103:13 `simp` made no progress
+ERROR 103:13 `simp` made no progress
+ERROR 103:13 `simp` made no progress
+ERROR 100:9 (kernel) declaration has metavariables 'Solidity.Frontend.NumericLiteralProofs.HexDigits.complete'
+diag: 5 errors

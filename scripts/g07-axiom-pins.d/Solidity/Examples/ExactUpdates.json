@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/ExactUpdates.lean:Solidity.Decide.updateGuard_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

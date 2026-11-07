@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/Tactics/ExternalTryUniversal.lean:Solidity.Examples.Tactics.ExternalTryUniversal.no_normal_source_family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/ExternalTryUniversal.lean:Solidity.Examples.Tactics.ExternalTryUniversal.source_profile_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

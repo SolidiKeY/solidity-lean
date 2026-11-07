@@ -1,0 +1,34 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean:Solidity.Backend.StorageOps.RecursiveSelfCopyControls.all_runtime_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean:Solidity.Backend.StorageOps.RecursiveSelfCopyControls.malformed": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean:Solidity.Backend.StorageOps.RecursiveSelfCopyControls.ordered_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean:Solidity.Backend.StorageOps.RecursiveSelfCopyControls.retained_aliases": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean:Solidity.Backend.StorageOps.RecursiveSelfCopyControls.slot_presence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean:Solidity.Backend.StorageOps.RecursiveSelfCopyControls.varying_readback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean:Solidity.Backend.StorageOps.RecursiveSelfCopyControls.wrong_extent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean:Solidity.Backend.StorageOps.RecursiveSelfCopyControls.wrong_mapping": [
+  "Quot.sound",
+  "propext"
+ ]
+}

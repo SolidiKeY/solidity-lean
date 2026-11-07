@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/RuntimeReturnCapture.lean:Solidity.Backend.Passes.RuntimeReturnCapture.capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

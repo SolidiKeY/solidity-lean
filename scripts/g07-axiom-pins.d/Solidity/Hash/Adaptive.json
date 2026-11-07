@@ -1,0 +1,22 @@
+{
+ "Solidity/Hash/Adaptive.lean:Solidity.Hash.eagerAdaptiveBound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/Adaptive.lean:Solidity.Hash.keccak_eager_collision_prob_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/Adaptive.lean:Solidity.Hash.keccak_eager_region_prob_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/Adaptive.lean:Solidity.Hash.two_mul_eager_stopped_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

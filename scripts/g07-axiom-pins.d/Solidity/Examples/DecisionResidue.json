@@ -1,0 +1,102 @@
+{
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.arrayBlock_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.dependent_witnesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.exhausted_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.fixedArray_witnesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.floorBad_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.floorValid_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.hash_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.hashBudget_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.kenc_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.kint_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.ledger_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.ledgerBlock_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.mapping_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.mapping_routeRefusals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.memory_witnesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.quant_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.quantLedger_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.residue_not_claimed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.sibling_residue_without_reason": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.storageArray_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

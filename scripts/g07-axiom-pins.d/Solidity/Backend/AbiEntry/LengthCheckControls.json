@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.boundaries": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.fuel_before_panic": [],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.inhabited_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.raw_eager_array_panic": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.raw_eager_bytes_panic": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.raw_lazy_revert": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.short_before_panic": []
+}

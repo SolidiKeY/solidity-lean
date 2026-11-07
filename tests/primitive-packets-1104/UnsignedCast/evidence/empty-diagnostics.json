@@ -1,0 +1,7 @@
+{
+  "removed_zero_byte_files": [
+    "tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint/core",
+    "tests/primitive-packets-1104/UnsignedCast/evidence/checkpoint-first-reserve-failure/core"
+  ],
+  "reason": "Empty artifacts of controlled container termination; no diagnostic content existed. Raw logs/receipts preserved."
+}

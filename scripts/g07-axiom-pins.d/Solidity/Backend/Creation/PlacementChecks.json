@@ -1,0 +1,11 @@
+{
+ "Solidity/Backend/Creation/PlacementChecks.lean:Solidity.Backend.Creation.fetch_encode": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/PlacementChecks.lean:Solidity.Backend.Creation.Placement.installs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/Passes/ShiftCapture.lean:Solidity.Backend.Passes.ShiftCapture.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCapture.lean:Solidity.Backend.Passes.ShiftCapture.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCapture.lean:Solidity.Backend.Passes.ShiftCapture.native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCapture.lean:Solidity.Backend.Passes.ShiftCapture.physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCapture.lean:Solidity.Backend.Passes.ShiftCapture.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCapture.lean:Solidity.Backend.Passes.ShiftCapture.reader_emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCapture.lean:Solidity.Backend.Passes.ShiftCapture.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCapture.lean:Solidity.Backend.Passes.ShiftCapture.whole_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

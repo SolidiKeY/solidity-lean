@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "finder": {
+    "agent": "/root/finder_census",
+    "mode": "independent read-only; no Lean/server/tests/edits",
+    "result": "Original assignment,495exact scope entries, full queues complete; transcript hash matches. Export findings: authenticate copied prior payloads and normalize tar modes. Both fixed."
+  },
+  "skeptic": {
+    "agent": "/root/skeptic_census",
+    "mode": "independent read-only; no Lean/server/tests/edits",
+    "result": "Exact H82 instruction/receipt source gap closed; all3receipt hashes match; successor acceptance accurately user-attributed. Copied prior-payload authentication finding fixed."
+  },
+  "changes": "Copied payload hashes now checked against original absolute-path entries in authenticated prior manifest; tar mode=0644 and pax headers cleared. Full assignment validation remains incomplete.",
+  "final_recheck": {
+    "finder": "Both exporter findings resolved; copied prior payloads authenticated and tar modes/PAX normalized; no remaining preservation findings.",
+    "skeptic": "Copied payloads checked against authenticated prior manifest with duplicate-path rejection; finding closed; no remaining retirement-only defects.",
+    "mode": "Independent read-only; neither ran tests or Lean."
+  }
+}

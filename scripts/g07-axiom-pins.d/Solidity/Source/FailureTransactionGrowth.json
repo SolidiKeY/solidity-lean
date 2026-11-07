@@ -1,0 +1,7 @@
+{
+ "Solidity/Source/FailureTransactionGrowth.lean:Solidity.Source.FailureExecution.runTxWithPlan_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

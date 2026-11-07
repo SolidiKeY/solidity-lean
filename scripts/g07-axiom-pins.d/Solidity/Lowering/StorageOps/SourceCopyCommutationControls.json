@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.Controls.all_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.Controls.explicit_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.Controls.journal_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.Controls.runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.Controls.same_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.Controls.state_nonidentity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean:Solidity.Backend.StorageOps.SourceCopyCommutation.Controls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

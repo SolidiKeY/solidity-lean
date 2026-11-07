@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.Controls.backward": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.Controls.collision_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.Controls.commutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.Controls.dependent_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.Controls.forward": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotCommutation.Controls.stable_logs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

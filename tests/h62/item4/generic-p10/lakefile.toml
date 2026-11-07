@@ -1,0 +1,13 @@
+name = "generic-p10"
+version = "0.1.0"
+defaultTargets = ["GenericP10"]
+enableArtifactCache = true
+
+# Standalone additive test package. No core/Bridge root or registry changes.
+[[require]]
+name = "solidity-bridge"
+path = "../../../../Bridge"
+
+[[lean_lib]]
+name = "GenericP10"
+weakLeanArgs = ["--tstack=131072", "-j1"]

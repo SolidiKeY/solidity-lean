@@ -1,0 +1,179 @@
+{
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.actual_root_operations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.actual_root_push": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.bad_region_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.both_regrown_aliases": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.capacity_failure_commutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.capacity_failure_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.copy_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.disjoint_numeric_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.disjoint_root_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.empty_failure_commutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.empty_failure_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.generated_mixed_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.generated_pop_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.generated_sequence_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.generated_symbolic_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.graph_disjoint_pop_push": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.graph_disjoint_pops": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.graph_disjoint_push_pop": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.graph_disjoint_pushes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.malformed": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.numeric_disjoint_pop_push": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.numeric_disjoint_pops": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.numeric_disjoint_push_pop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.numeric_disjoint_pushes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.numeric_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.pop_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.pop_push_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.primitive_reuse_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.push_prefix_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.push_root_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.push_root_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.retained_vs_live": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.root_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.same_target_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.second_accesses_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.shared_prefix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.wrong_order_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PathRepresentationControls.lean:Solidity.Backend.StorageOps.PathRepresentationControls.wrong_order_root": [
+  "Quot.sound",
+  "propext"
+ ]
+}

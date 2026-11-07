@@ -1,0 +1,245 @@
+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part04
+
+/-! # Generated direct structural word-table proof.
+No scanner changes, equation generation, or raised budgets. -/
+namespace Solidity.Frontend.NumericLiteralProofs
+open Solidity.Frontend.Checked Solidity.Source
+
+theorem table_prefix_97_110_111_110_121_109 (r : Bytes) (n : NumLit) :
+    solWordTable ([97, 110, 111, 110, 121, 109] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h111 : b = 111
+    · subst b
+      exact table_prefix_97_110_111_110_121_109_111 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 111) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h111] at h
+      cases h
+
+theorem table_prefix_97_115_115_101_109_98 (r : Bytes) (n : NumLit) :
+    solWordTable ([97, 115, 115, 101, 109, 98] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h108 : b = 108
+    · subst b
+      exact table_prefix_97_115_115_101_109_98_108 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 108) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h108] at h
+      cases h
+
+theorem table_prefix_99_97_108_108_100_97 (r : Bytes) (n : NumLit) :
+    solWordTable ([99, 97, 108, 108, 100, 97] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h116 : b = 116
+    · subst b
+      exact table_prefix_99_97_108_108_100_97_116 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 116) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h116] at h
+      cases h
+
+theorem table_prefix_99_111_110_115_116_97 (r : Bytes) (n : NumLit) :
+    solWordTable ([99, 111, 110, 115, 116, 97] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h110 : b = 110
+    · subst b
+      exact table_prefix_99_111_110_115_116_97_110 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 110) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h110] at h
+      cases h
+
+theorem table_prefix_99_111_110_115_116_114 (r : Bytes) (n : NumLit) :
+    solWordTable ([99, 111, 110, 115, 116, 114] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h117 : b = 117
+    · subst b
+      exact table_prefix_99_111_110_115_116_114_117 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 117) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h117] at h
+      cases h
+
+theorem table_prefix_99_111_110_116_105_110 (r : Bytes) (n : NumLit) :
+    solWordTable ([99, 111, 110, 116, 105, 110] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h117 : b = 117
+    · subst b
+      exact table_prefix_99_111_110_116_105_110_117 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 117) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h117] at h
+      cases h
+
+theorem table_prefix_99_111_110_116_114_97 (r : Bytes) (n : NumLit) :
+    solWordTable ([99, 111, 110, 116, 114, 97] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h99 : b = 99
+    · subst b
+      exact table_prefix_99_111_110_116_114_97_99 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 99) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h99] at h
+      cases h
+
+theorem table_prefix_99_111_112_121_111_102 (r : Bytes) (n : NumLit) :
+    solWordTable ([99, 111, 112, 121, 111, 102] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.reserved : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+
+theorem table_prefix_100_101_102_97_117_108 (r : Bytes) (n : NumLit) :
+    solWordTable ([100, 101, 102, 97, 117, 108] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h116 : b = 116
+    · subst b
+      exact table_prefix_100_101_102_97_117_108_116 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 116) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h116] at h
+      cases h
+
+theorem table_prefix_100_101_102_105_110_101 (r : Bytes) (n : NumLit) :
+    solWordTable ([100, 101, 102, 105, 110, 101] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.reserved : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+
+theorem table_prefix_100_101_108_101_116_101 (r : Bytes) (n : NumLit) :
+    solWordTable ([100, 101, 108, 101, 116, 101] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.tok (.kw .delete) : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+
+theorem table_prefix_101_120_116_101_114_110 (r : Bytes) (n : NumLit) :
+    solWordTable ([101, 120, 116, 101, 114, 110] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h97 : b = 97
+    · subst b
+      exact table_prefix_101_120_116_101_114_110_97 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 97) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h97] at h
+      cases h
+
+theorem table_prefix_102_97_108_108_98_97 (r : Bytes) (n : NumLit) :
+    solWordTable ([102, 97, 108, 108, 98, 97] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h99 : b = 99
+    · subst b
+      exact table_prefix_102_97_108_108_98_97_99 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 99) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h99] at h
+      cases h
+
+theorem table_prefix_102_117_110_99_116_105 (r : Bytes) (n : NumLit) :
+    solWordTable ([102, 117, 110, 99, 116, 105] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h111 : b = 111
+    · subst b
+      exact table_prefix_102_117_110_99_116_105_111 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 111) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h111] at h
+      cases h
+
+theorem table_prefix_105_109_109_117_116_97 (r : Bytes) (n : NumLit) :
+    solWordTable ([105, 109, 109, 117, 116, 97] ++ r) ≠ .tok (.num n) := by
+  intro h
+  cases r with
+  | nil =>
+    with_unfolding_all change (.other : WordClass) = .tok (.num n) at h
+    cases h
+  | cons b r =>
+    by_cases h98 : b = 98
+    · subst b
+      exact table_prefix_105_109_109_117_116_97_98 r n h
+    ·
+      delta solWordTable solWordTable.match_1 at h
+      change (dite (b = 98) (fun _ => _) (fun _ => (.other : WordClass))) = .tok (.num n) at h
+      rw [dif_neg h98] at h
+      cases h
+
+end Solidity.Frontend.NumericLiteralProofs

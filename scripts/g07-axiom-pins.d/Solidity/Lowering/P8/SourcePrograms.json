@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.accept_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.accept_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.elaborateUnits_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.elaborateUnits_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.elaborateUnits_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.elaborateUnits_tail_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.produce_input_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourcePrograms.lean:Solidity.Lowering.P8.SourcePrograms.units_program_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

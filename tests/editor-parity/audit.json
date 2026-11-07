@@ -29,7 +29,8 @@
       "registrationSites": 609,
       "allUnportedSites": "unexamined",
       "method": "Read-only skeptic rediscovered features before reading the inventory; separate source scanner enumerated test files and registration sites before inventory reconciliation."
-    }
+    },
+    "inventoryTransport": "Tracked evidence path is a digest descriptor. Full inventory is restored from docs/dafny-editor-inventory-manifest.json and verified by vscode/parity/inventory.cjs; missing/corrupt payload fails explicitly, never counts as an empty inventory or a pass."
   },
   "finderReview": [
     {
@@ -160,5 +161,137 @@
     "result": "Local eight-hover batch slower than Dafny across repeated trials; synchronous generation fingerprint scans measured separately as a plausible contributor.",
     "evidence": "tests/editor-parity/stdio-baseline.json#localConcurrencyInvestigation",
     "status": "partial: cause investigated; production freshness validation not altered"
+  },
+  "mechanicalContinuation20261105": {
+    "status": "blocked",
+    "fullParityEstablished": false,
+    "originalRowsRetained": 93,
+    "appendedMechanicalRows": 177,
+    "frozenRows": 270,
+    "reviews": {
+      "finder": "All reported integrity defects resolved after final read-only review; no remaining demonstrated gate defect. No Lean server used.",
+      "skeptic": "Mixed-status mutation of real fixed-phase feedback now rejected; original valid trace accepted. No additional demonstrated false pass. No Lean server used."
+    },
+    "repairs": [
+      "Correlated initialization, URI/versioned open/edit/break/fix and shutdown feedback",
+      "Dynamic capability discovery",
+      "Hash trace/local candidate source state in judge cache inputs",
+      "Write failed reports for fatal setup errors",
+      "Reject malformed versions and repository-root external-state symlinks",
+      "Require every successful/fixed symbol status to be Correct; regression prevents marker masking"
+    ],
+    "validation": {
+      "nodeTests": {
+        "passed": 120,
+        "skipped": 2,
+        "failed": 0
+      },
+      "sourceInventory": "passed",
+      "freshLiveInventory": "passed",
+      "parityGate": {
+        "exitCode": 1,
+        "passedRows": 0,
+        "report": "tests/editor-parity/parity-gate-report.json"
+      },
+      "modelCalls": 0
+    },
+    "evidence": [
+      "tests/editor-parity/lifecycle/dafny-lsp.jsonl",
+      "tests/editor-parity/lifecycle/phases.json",
+      "vscode/test/parity-gate.test.cjs",
+      "tests/editor-parity/parity-gate-report.json"
+    ],
+    "blockers": [
+      "Official VS Code 1.108.0 download returned HTTP403 through configured proxy after launcher DNS failure",
+      "Lean/Lake unavailable on PATH; required systemd user scope unavailable"
+    ],
+    "remaining": "Actual paired screenshot difference discovery, candidate reproduction for every row, all per-row independent judgments, full adversarial/performance benchmark evidence, repository final Lean gates and KeySort."
+  },
+  "recovery_c0ef3ec7": {
+    "status": "partial",
+    "goalState": "blocked and untouched",
+    "frozenRows": 270,
+    "completeRows": 0,
+    "controllerEvidence": "tests/editor-parity/recovery-c0ef3ec7/controller-regressions.tap",
+    "serviceMeasurements": "tests/editor-parity/recovery-c0ef3ec7/services-reviewed.json",
+    "harnessEvidence": "tests/editor-parity/recovery-c0ef3ec7/harness-regressions.tap",
+    "nodeTests": {
+      "passed": 140,
+      "skipped": 2,
+      "failed": 0
+    },
+    "reviews": {
+      "finder": "Confirmed all reported controller, phase and symbol-evidence defects repaired; no further demonstrated issue in reviewed slice.",
+      "skeptic": "Confirmed scoped crash/disposal and expected-outcome phase fixes; no additional demonstrated defect. Neither review used Lean."
+    },
+    "limits": "No real VS Code screenshots, kernel proof, proof benchmark/scaling or final resource-gated Lean build; all rows remain noncomplete."
+  },
+  "recovery_5bad5756": {
+    "status": "partial",
+    "goalState": "blocked and untouched",
+    "frozenOriginalRows": 270,
+    "addedScenarios": 23,
+    "totalRows": 293,
+    "completeRows": 0,
+    "implementedFamilies": [
+      "behavior:expanded-related-diagnostics",
+      "behavior:symbol-lookup-and-diagnostic-migration",
+      "behavior:hover-before-verification-completes",
+      "behavior:testing-exclusions-and-state-transitions"
+    ],
+    "nodeTests": {
+      "passed": 166,
+      "skipped": 2,
+      "failed": 0
+    },
+    "evidence": "tests/editor-parity/recovery-5bad5756/",
+    "reviewRepairs": [
+      "Retain unverified sibling migrated diagnostics",
+      "Discard stale proof display when dependency change is discovered during analysis",
+      "Assert distinct full imported primary/secondary ranges",
+      "Assert full reference ranges/columns/messages and write passed metadata only after exit0"
+    ],
+    "limits": [
+      "No symbol table migration or custom postcondition decoration",
+      "No real VS Code/rendered/native automatic Testing parity",
+      "No local Lean proof or full/timed strict/KeySort evidence",
+      "Comment-only native reference behavior differs and retained failed attempts are not passes",
+      "No independent row judgments or complete rows"
+    ]
+  },
+  "lookupRecovery": {
+    "audit": "bdbc1491-ce27-4879-824d-938fded7be2a",
+    "status": "partial",
+    "review": "tests/editor-parity/recovery-bdbc1491/reviews.md",
+    "regressions": "177 passed, 2 runtime skips; no parity/kernel certification",
+    "gate": "exit 1; 0/302 rows; none complete"
+  },
+  "structuralLookupRecovery": {
+    "status": "partial",
+    "evidence": "tests/editor-parity/recovery-structural",
+    "regressions": "181 passed, 2 runtime skips; 15 focused lookup tests",
+    "gate": "0/309 rows; no complete rows or per-row model calls",
+    "scope": "compiler/service/synthetic evidence only; no renderer or kernel proof"
+  },
+  "startupRecovery": {
+    "status": "partial",
+    "evidence": "tests/editor-parity/recovery-startup",
+    "regressions": "196 passed,2 runtime skips; native startup/service observations passed",
+    "obligations": 326,
+    "boundary": "No rendered equivalence, kernel proof, real proof performance or paired row judgments"
+  },
+  "versionLifecycleRecovery": {
+    "status": "partial",
+    "evidence": "tests/editor-parity/recovery-version",
+    "regressions": "210 passed,2 runtime skips; native+injected ordered matrix passed",
+    "obligations": 342,
+    "boundary": "No rendered parity, compiler/EVM agreement, kernel proof or paired row judgments"
+  },
+  "statusSummaryRecovery": {
+    "status": "partial",
+    "evidence": "tests/editor-parity/recovery-status",
+    "regressions": "227 passed,2 runtime skips; native compiler/status+injected controller and pinned-source comparison passed",
+    "obligations": 363,
+    "boundary": "Not rendered parity, compiler/EVM agreement, kernel proof or paired row judgments"
   }
 }

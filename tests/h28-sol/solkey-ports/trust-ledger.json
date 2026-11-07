@@ -1,0 +1,753 @@
+[
+  {
+    "name": "Solidity.SolkeyAgreementH28.fresh_iff_absent",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "538700944f44112db4794f3c1b42b1319fca8a8b358720e918e528c24e3113ac",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.fresh_iff_absent : \u2200 (H : Solidity.HTy) (id : Nat),\n  Solidity.SolkeyAgreementH28.Fresh H id \u2194 \u2200 (R : Solidity.RefTy) (r : Solidity.HRef H R), r.id \u2260 id\n",
+    "statement_sha256": "cbc4b791b988dab37433fcf7c9a37d716f28e78246a22e7c9376904164d1ad66",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.write_typing",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "01a42cab7b4ce418d88aca00b6de1b8baa1c4733e41e9d49219d3a0781aa7b26",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.write_typing : \u2200 {H : Solidity.HTy} {T : Solidity.Ty}\n  {m n : Solidity.Grown H fun x => Unit} {a : Solidity.MAddrT T} {v : Solidity.MvT T},\n  m.writeT a v = some n \u2192 n.H' = m.H'\n",
+    "statement_sha256": "f2bd5fc65902a709d7b678fe3de87df8e6fa2f9a2826466dd785e38147328eaa",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.newFromWrite",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "4562b28f074e3d71a99cbdaf549c1574d069c4f61c36786b7e73755a896cd25d",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.newFromWrite : \u2200 {H : Solidity.HTy} {T : Solidity.Ty}\n  {m n : Solidity.Grown H fun x => Unit} {a : Solidity.MAddrT T} {v : Solidity.MvT T},\n  m.writeT a v = some n \u2192\n    \u2200 (id : Nat), Solidity.SolkeyAgreementH28.Fresh n.H' id \u2194 Solidity.SolkeyAgreementH28.Fresh m.H' id\n",
+    "statement_sha256": "f79f60fdcf9bedbca74035904a034f3001567b85d26ce6c48c0c87ee8433aae4",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Writes.typing",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "d0dfb3ac87aded431d74c6be56a74a4947a08ad70ac62359e34c65d3eb73899b",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.Writes.typing : \u2200 {H : Solidity.HTy} {m n : Solidity.Grown H fun x => Unit},\n  Solidity.SolkeyAgreementH28.Writes m n \u2192 n.H' = m.H'\n",
+    "statement_sha256": "3de2c52c80d2abd711cd792574ea9253f490b0bc3ffe715537ef18bfd77cf54f",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Writes.fresh_iff",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "9a4c8155a3cc00ede3669c93e7ce5742e9e52b2765e42744b18153dccbf492d5",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.Writes.fresh_iff : \u2200 {H : Solidity.HTy} {m n : Solidity.Grown H fun x => Unit},\n  Solidity.SolkeyAgreementH28.Writes m n \u2192\n    \u2200 (id : Nat), Solidity.SolkeyAgreementH28.Fresh n.H' id \u2194 Solidity.SolkeyAgreementH28.Fresh m.H' id\n",
+    "statement_sha256": "4443dcd3faed1d849f5b23bdf4819f8ef0885dd02c4c8f12b9ef7e645cea7ca2",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Writes.separate",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "44cc0a5c58b557d09478656667e8219fbaf9465cf791c29f3d0f72c18c76190b",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.Writes.separate : \u2200 {H : Solidity.HTy} {m n : Solidity.Grown H fun x => Unit},\n  Solidity.SolkeyAgreementH28.Writes m n \u2192\n    \u2200 {R : Solidity.RefTy} (r : Solidity.HRef m.H' R) (id : Nat),\n      Solidity.SolkeyAgreementH28.Fresh m.H' id \u2192 Solidity.SolkeyAgreementH28.Fresh n.H' id \u2227 r.id \u2260 id\n",
+    "statement_sha256": "79bbb97e6561e379e74e2ad05b2826422b058f33b811814f68e7913735af6662",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.newFromCopySt",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "acc88023cab2e3ab507af1f521949908a47a327f8b97199ad1410162b2b8a1b2",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.newFromCopySt : \u2200 {H : Solidity.HTy} (hp : Solidity.Heap H) {T : Solidity.Ty}\n  (v : Solidity.SVal T) (hm : T.mapFree = true) (id : Nat),\n  Solidity.SolkeyAgreementH28.Fresh (Solidity.SVal.copyStToM hp v hm).H' id \u2192 Solidity.SolkeyAgreementH28.Fresh H id\n",
+    "statement_sha256": "c8ed3e5b482eca04b36d765af9c1155706c12ffa6e73f6dd69ff967266513d4e",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.copy_witness",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "5c6bb78c0bbfc962122b673f04e451fdaa1297c2b878d8b5aaae1b66cfd5441a",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.copy_witness : \u2200 {H : Solidity.HTy} (hp : Solidity.Heap H) {R S : Solidity.RefTy}\n  (v : Solidity.SVal (Solidity.Ty.ref R)) (hm : (Solidity.Ty.ref R).mapFree = true) (old : Solidity.HRef H S),\n  have g := Solidity.SVal.copyStToM hp v hm;\n  Solidity.SolkeyAgreementH28.Fresh H g.val.id \u2227\n    \u00acSolidity.SolkeyAgreementH28.Fresh g.H' g.val.id \u2227 (Solidity.HRef.wk \u22ef old).id \u2260 g.val.id\n",
+    "statement_sha256": "7b4e4b84704a1b42e39fbef8fc9adb8a5e0b08a04936f93dde72c9966a8f034f",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.copy_not_converse",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "2ebff5654dc05481e2375bb2855a9309d3d92f7a838a1cd90e209d94c242be6a",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.copy_not_converse : \u2200 {H : Solidity.HTy} (hp : Solidity.Heap H) {R : Solidity.RefTy}\n  (v : Solidity.SVal (Solidity.Ty.ref R)) (hm : (Solidity.Ty.ref R).mapFree = true),\n  \u00ac\u2200 (id : Nat),\n      Solidity.SolkeyAgreementH28.Fresh H id \u2192 Solidity.SolkeyAgreementH28.Fresh (Solidity.SVal.copyStToM hp v hm).H' id\n",
+    "statement_sha256": "af8c6ccaacd0cfe3a4a3f12edf476198ef00a54c42aa75054548d0101e06f6ff",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Operations.prefix",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "d898eee54f40814c5dee416fb578c64e880661b35e00777acf54f57adf7c3724",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.Operations.prefix : \u2200 {H K : Solidity.HTy} {hp : Solidity.Heap H} {hq : Solidity.Heap K},\n  Solidity.SolkeyAgreementH28.Operations hp hq \u2192 H <+: K\n",
+    "statement_sha256": "d2b04efd48ad88abb4b7943f0ef1ce7efa7f0fcbaa909292f88594c2cd9ea9b4",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Operations.fresh_back",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "ec00cf5dc81d5aa77d02db9015d74e19ea788bca27e7e84917bb35ca0e31ccb8",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.Operations.fresh_back : \u2200 {H K : Solidity.HTy} {hp : Solidity.Heap H}\n  {hq : Solidity.Heap K},\n  Solidity.SolkeyAgreementH28.Operations hp hq \u2192\n    \u2200 (id : Nat), Solidity.SolkeyAgreementH28.Fresh K id \u2192 Solidity.SolkeyAgreementH28.Fresh H id\n",
+    "statement_sha256": "a7ff018139718eac065676367fb0b0cde20acf00a4c8e32f517047d04436edbe",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Operations.separate",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "766bb0050fd4251afbb36e0ea481a4ab267a540e97cc88cf2dd2c9f1bc57d227",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.Operations.separate : \u2200 {H K : Solidity.HTy} {hp : Solidity.Heap H} {hq : Solidity.Heap K}\n  (h : Solidity.SolkeyAgreementH28.Operations hp hq) {R : Solidity.RefTy} (r : Solidity.HRef H R) (id : Nat),\n  Solidity.SolkeyAgreementH28.Fresh K id \u2192 (Solidity.HRef.wk \u22ef r).id = r.id \u2227 (Solidity.HRef.wk \u22ef r).id \u2260 id\n",
+    "statement_sha256": "d124650f1a3d4cfb9c6d5edd801b77bc400eaf36e913ae9092961d8a95f6813c",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.copy_then_witness",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "c17b06e01e4acbfeb385f5a20eb0c7b4d364b076c8c577bb89787906427d3505",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.copy_then_witness : \u2200 {H K : Solidity.HTy} (hp : Solidity.Heap H) {R S : Solidity.RefTy}\n  (v : Solidity.SVal (Solidity.Ty.ref R)) (hm : (Solidity.Ty.ref R).mapFree = true) (old : Solidity.HRef H S)\n  {hq : Solidity.Heap K} (suffix : Solidity.SolkeyAgreementH28.Operations (Solidity.SVal.copyStToM hp v hm).heap hq),\n  let g := Solidity.SVal.copyStToM hp v hm;\n  have root := Solidity.HRef.wk \u22ef g.val;\n  root.id = g.val.id \u2227\n    Solidity.SolkeyAgreementH28.Fresh H root.id \u2227\n      \u00acSolidity.SolkeyAgreementH28.Fresh K root.id \u2227 (Solidity.HRef.wk \u22ef old).id \u2260 root.id\n",
+    "statement_sha256": "fe60fa27e811414c552ed109cd765cdc3d6a8dd457ea5cd984da325a6c9a34b3",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.copies_ordered",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "baa30ba80d71894f14271eb2fea38de9365c61a1eaf8d6f5678bd850ceb6d505",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.copies_ordered : \u2200 {H K : Solidity.HTy} (hp : Solidity.Heap H) {R S : Solidity.RefTy}\n  (v : Solidity.SVal (Solidity.Ty.ref R)) (hv : (Solidity.Ty.ref R).mapFree = true) {hq : Solidity.Heap K}\n  (middle : Solidity.SolkeyAgreementH28.Operations (Solidity.SVal.copyStToM hp v hv).heap hq)\n  (w : Solidity.SVal (Solidity.Ty.ref S)) (hw : (Solidity.Ty.ref S).mapFree = true),\n  (Solidity.HRef.wk \u22ef (Solidity.SVal.copyStToM hp v hv).val).id < (Solidity.SVal.copyStToM hq w hw).val.id\n",
+    "statement_sha256": "1ccd549f2d1855519385a53f9dac161648fe7888ab97647d23481b4bde72d649",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.copy_mirror",
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "declaration_sha256": "7e19f3452260e29d1b30a2986c73d159739a360653db1ce8b9744f115fdaae33",
+    "compiler_statement": "@Solidity.SolkeyAgreementH28.copy_mirror : \u2200 {H : Solidity.HTy} (hp : Solidity.Heap H) {T : Solidity.Ty}\n  (v : Solidity.SVal T) (hm : T.mapFree = true),\n  Solidity.SVal.Mirrors (Solidity.SVal.copyStToM hp v hm).heap (List.length H) v (Solidity.SVal.copyStToM hp v hm).val\n",
+    "statement_sha256": "9d521acdb136865d33c066cf7bbdce31e3e2d58c4ff5b532a58b309f1074b084",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/ledger-kernel-final.log",
+    "compiler_log_sha256": "1b3102e5850187e79585519c7e40649c0aa2766a45e8f5fb55e32b2a09d14b0f"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.index_primitive",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "2bd6a56a1a625e34406df5ed93f207cfeba2ef0036d7a1f8a13728621e1f6e88",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.index_primitive : Solidity.SolkeyAgreementH28.Controls.m.writeT\n    Solidity.SolkeyAgreementH28.Controls.at0 Solidity.SolkeyAgreementH28.Controls.one =\n  some Solidity.SolkeyAgreementH28.Controls.m1\n",
+    "statement_sha256": "68522c2079233fc9c544c656d2d28356866253e5fbbc35000213bf470fe36bce",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.index_read_changed",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "8c7884ff385a6787441ed7d613ae84cb557c209b581f345068dfdcdf6d5f40f9",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.index_read_changed : Solidity.SolkeyAgreementH28.Controls.m1.readId\n      Solidity.SolkeyAgreementH28.Controls.at0 =\n    some Solidity.SolkeyAgreementH28.Controls.one \u2227\n  Solidity.SolkeyAgreementH28.Controls.m.readId Solidity.SolkeyAgreementH28.Controls.at0 =\n    some Solidity.SolkeyAgreementH28.Controls.z\n",
+    "statement_sha256": "1d97323dcc6282ad8c8a82fd192f8a1b9d6cf2feb325bae4b5f4dd7ffb34e46f",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.write_reverse",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "04db008939cbd6eb4cd078e599681ce91bb48db293c53caa0b55c8ed542d1363",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.write_reverse : Solidity.SolkeyAgreementH28.Fresh\n    Solidity.SolkeyAgreementH28.Controls.m.H' 1 \u2192\n  Solidity.SolkeyAgreementH28.Fresh Solidity.SolkeyAgreementH28.Controls.m1.H' 1\n",
+    "statement_sha256": "1a301bff5c20bbe57c63b3bceb47bde49f854970e8c9086be6e386a978d6aa9e",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.write_forward",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "11007d6a9a2b22b09e32bc0bba085e292c5d56468218d0751fd6b1ce5addd4ad",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.write_forward : Solidity.SolkeyAgreementH28.Fresh\n    Solidity.SolkeyAgreementH28.Controls.m1.H' 1 \u2192\n  Solidity.SolkeyAgreementH28.Fresh Solidity.SolkeyAgreementH28.Controls.m.H' 1\n",
+    "statement_sha256": "0897b07f6e43877e67a509abb5e9acb0df1aec649dca50cba61cbc95f8d8803d",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.nil_writes",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "52858491a2532e0ecb64e9f95ba7a59be294895a9c2f01d735c83fbc3dd29562",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.nil_writes : Solidity.SolkeyAgreementH28.Writes\n  Solidity.SolkeyAgreementH28.Controls.m Solidity.SolkeyAgreementH28.Controls.m\n",
+    "statement_sha256": "174f051348372bf6ab8b767f0253bc43fe1a3b2688fba819ac0e7246e15d78cf",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.nonempty_writes",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "9a14636b1008cb67e8a1bb13d4497b51c24fbd4644224591477725240bee4dcf",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.nonempty_writes : Solidity.SolkeyAgreementH28.Writes\n  Solidity.SolkeyAgreementH28.Controls.m Solidity.SolkeyAgreementH28.Controls.m1\n",
+    "statement_sha256": "106c858d0a050573088a2f0a40b79b61ebffd53e9271f2d902ab1ab1f5e32433",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.overwrite_back",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "8c552024a3d487abdc8ca6468b52bf05fb31e0341c1726ae5cf8d24858eb971e",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.overwrite_back : Solidity.SolkeyAgreementH28.Controls.m1.writeT\n    Solidity.SolkeyAgreementH28.Controls.at0 Solidity.SolkeyAgreementH28.Controls.z =\n  some Solidity.SolkeyAgreementH28.Controls.m\n",
+    "statement_sha256": "b39c23bdfce81336d8348578f85cf84de6582e88659d4625589376802b306e13",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.multiple_writes",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "b86c1f1a2d86ff85c7e61d922bf39d19b79a86314a3234a4d29bf4a4a51c6e12",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.multiple_writes : Solidity.SolkeyAgreementH28.Writes\n  Solidity.SolkeyAgreementH28.Controls.m Solidity.SolkeyAgreementH28.Controls.m\n",
+    "statement_sha256": "9137667988a392ba5ec91b990889e0e33f3ce2a4e5647cceae84b6a608890380",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.sequence_separation",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "c1bc023635d65ea441a344fcd9f85a0a9b49c4ee61c6bf6afca050c4cc71f0ce",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.sequence_separation : Solidity.SolkeyAgreementH28.Fresh\n    Solidity.SolkeyAgreementH28.Controls.m.H' 1 \u2227\n  Solidity.SolkeyAgreementH28.Controls.old.id \u2260 1\n",
+    "statement_sha256": "a711470d985ad0d1021b3b03451a230149d87b2814b6c4ec73bbaee164f7932f",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.allocated_not_fresh",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "2c06a2573023e12f188958040446e57af95365a3b15c016cf8bfef073a45f47b",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.allocated_not_fresh : \u00acSolidity.SolkeyAgreementH28.Fresh\n    Solidity.SolkeyAgreementH28.Controls.m.H' 0\n",
+    "statement_sha256": "33cf9403d638c98391ec329715cf491e94047e76f7238a5e43acfabc29c6292f",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.threshold_boundary",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "267e6fa42acc05f5573c1c02e248a478df26875873c9d48bded66eba2a24ab1a",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.threshold_boundary : Solidity.SolkeyAgreementH28.Fresh\n  Solidity.SolkeyAgreementH28.Controls.m.H' 1\n",
+    "statement_sha256": "7d0a953e46bf6244023c9eff973955352776662d9ae6ace30bdd21ca69de4e9a",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.failed_identity",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "dd0edf752f6e97a9374c30eb871a17ab03000d372ed57671363c952f6ff1a17d",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.failed_identity : Solidity.SolkeyAgreementH28.Controls.m.writeT\n    (Solidity.MAddrT.index 9 Solidity.ArrTy.dyn Solidity.SolkeyAgreementH28.Controls.z)\n    Solidity.SolkeyAgreementH28.Controls.one =\n  none\n",
+    "statement_sha256": "c21ab76ed430836da7c0ed7d8fe070789c9d9f0f81f6638998ac0a4e0f9ad1a3",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.failed_index",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "6f0ffa4fa7a38ca2bcd602d63e370d134df93727a7db96b481f2be8174eb8bef",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.failed_index : Solidity.SolkeyAgreementH28.Controls.m.writeT\n    (Solidity.MAddrT.index 0 Solidity.ArrTy.dyn Solidity.SolkeyAgreementH28.Controls.one)\n    Solidity.SolkeyAgreementH28.Controls.one =\n  none\n",
+    "statement_sha256": "ba7cde6e103dcd2d3d6944a57978976c827529deb082ec9a29a102c9f24fc0d2",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.field_primitive",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "e84c6ff3b01af4fe6073d80c85c85e7ccb8ec993ca3b4d84f762d809b2b9ccea",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.field_primitive : Solidity.SolkeyAgreementH28.Controls.tokenMem.writeT\n    (Solidity.MAddrT.field 0 \u22ef) Solidity.SolkeyAgreementH28.Controls.one =\n  some Solidity.SolkeyAgreementH28.Controls.tokenOne\n",
+    "statement_sha256": "18eaef5e38dd14a419e15b55a1efdac5b91908d9ea9376cf65e7c0ea936c36b5",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.field_reference",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "f8678ef81e5518fe6d71538b6b0a320937f553678ec77e13e50ecb670f1885a9",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.field_reference : Solidity.SolkeyAgreementH28.Controls.refs.writeT\n    Solidity.SolkeyAgreementH28.Controls.tokenField 0 =\n  some Solidity.SolkeyAgreementH28.Controls.refs\n",
+    "statement_sha256": "d87c907f0f93841ace48140d2841ac0b6711b8909be86c20950a4f55a5e73140",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.failed_reference",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "a6fe468fe5c76299bc6a40587959013ef257d9aeb2352b67774dd102fb7ef4af",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.failed_reference : Solidity.SolkeyAgreementH28.Controls.refs.writeT\n    Solidity.SolkeyAgreementH28.Controls.tokenField 1 =\n  none\n",
+    "statement_sha256": "e4ced64e4a8c61670c07fd7402098bb29e63993d366fbde54fbfe6ba211d428c",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.index_reference",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "0acae377be0327fc6ba5010637732dfbc3e8f3e714b57bc76b20f480b9791025",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.index_reference : Solidity.SolkeyAgreementH28.Controls.refArr.writeT\n    (Solidity.MAddrT.index 1 Solidity.ArrTy.dyn Solidity.SolkeyAgreementH28.Controls.z) 0 =\n  some Solidity.SolkeyAgreementH28.Controls.refArr\n",
+    "statement_sha256": "8b0ca49dfe426deb861d569c98e9dbedf38998636d53ca66baa1d8b4ee911353",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.fixed_index",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "fc7855873ccdb1b9583f5de84c73407717bf0f84c8d3c130988cff0bc41ec091",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.fixed_index : Solidity.SolkeyAgreementH28.Controls.fixedMem.writeT\n    (Solidity.MAddrT.index 0 Solidity.ArrTy.fixed Solidity.SolkeyAgreementH28.Controls.z)\n    Solidity.SolkeyAgreementH28.Controls.z =\n  some Solidity.SolkeyAgreementH28.Controls.fixedMem\n",
+    "statement_sha256": "7bb72197c303430d937857612103c4e23c95b90a38f76b8bbe6c03c781fa58bc",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.primitive_no_alloc",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "0fa3edcfd45fd7e7b093d9e05e32642ad652c4f4850406a08d99a64f34912c12",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.primitive_no_alloc : (Solidity.SVal.copyStToM\n      Solidity.SolkeyAgreementH28.Controls.hp (Solidity.SVal.prim Solidity.SolkeyAgreementH28.Controls.z) \u22ef).H' =\n  [Solidity.RefTy.array Solidity.Ty.uint]\n",
+    "statement_sha256": "9bee76a605d9276f4a3a5cbd9f28cb45c6290e1726266f38216e273acc0da50f",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.primitive_threshold",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "27dde886974c06c8edb28f77eef0f0d81ad8d51ff861835c93e039a76cd0db09",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.primitive_threshold : Solidity.SolkeyAgreementH28.Fresh\n    (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp\n        (Solidity.SVal.prim Solidity.SolkeyAgreementH28.Controls.z) \u22ef).H'\n    1 \u2194\n  Solidity.SolkeyAgreementH28.Fresh [Solidity.RefTy.array Solidity.Ty.uint] 1\n",
+    "statement_sha256": "9f69832f6e3ce5c96858c329550468f1fa7f6bf4de2bf4939bed841dbcc64f71",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.empty_array_alloc",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "b4d440dbffc93fcef0f9e253322b0a41413817d5c473a28fb96b637bc899991b",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.empty_array_alloc : (Solidity.SVal.copyStToM\n        Solidity.SolkeyAgreementH28.Controls.hp Solidity.SolkeyAgreementH28.Controls.emptyArr \u22ef).val.id =\n  1\n",
+    "statement_sha256": "96cf421dd9cd0132c51fb481d8099aceada9e3cad67f471b10fd4460f0d5a053",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.live_array_alloc",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "f5a58782f63a5dc729d22c8f9fd8435fa1afe45104415ad26438b4ddbbe06a6c",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.live_array_alloc : (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp\n        Solidity.SolkeyAgreementH28.Controls.liveArr \u22ef).val.id =\n  1\n",
+    "statement_sha256": "22ab6c0ade6606d09d8264b2bb2af0ceceac972300526998710d56848023e7b0",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.empty_fixed_alloc",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "aff352c224c7066ae6c9e55e2415200744a2a626fa5c34fd41eec0903b4ba0c7",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.empty_fixed_alloc : (Solidity.SVal.copyStToM\n        Solidity.SolkeyAgreementH28.Controls.hp Solidity.SolkeyAgreementH28.Controls.emptyFixed \u22ef).val.id =\n  1\n",
+    "statement_sha256": "ee6f0cfb9408a8289e9f4ddfe94ec5eee91b683686f4e2bdf22a5dd9224ad524",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.live_fixed_alloc",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "bfef3b29d864b8e9ce788c7d437b86b5fefb62392daab49a5f7d817cbd8154e9",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.live_fixed_alloc : (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp\n        Solidity.SolkeyAgreementH28.Controls.liveFixed \u22ef).val.id =\n  1\n",
+    "statement_sha256": "9ef27e4f95839f6630feced5250623656759367342f05331a19533cf24801881",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.token_alloc",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "90b0a06b9a714f3acd7d5d1cff3b248aa1d932c7cb697cca3441362db52e379b",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.token_alloc : (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp\n        Solidity.SolkeyAgreementH28.Controls.token \u22ef).val.id =\n  1\n",
+    "statement_sha256": "312c660a699bd07bca1d58f8d9dc7369dc5eb5ef25e9d57d52bc9e498fcb230f",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.person_alloc",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "324cfeaedfde5a8b97ae9c1cc236a7e2774213f4f9b2dfc5531f59514203cfec",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.person_alloc : (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp\n        Solidity.SolkeyAgreementH28.Controls.person \u22ef).val.id =\n  3\n",
+    "statement_sha256": "ebf6c440bbb378360a0c342e254460a46c9f75523d8e6a3e5d53687420c50716",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.nested_allocations",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "5d6f8f4a468fc423d2eb05551844ded5a69e218f50214cf2125aa29ef9eb907c",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.nested_allocations : (Solidity.SVal.copyStToM\n      Solidity.SolkeyAgreementH28.Controls.hp Solidity.SolkeyAgreementH28.Controls.nested \u22ef).H' =\n  [Solidity.RefTy.array Solidity.Ty.uint, Solidity.RefTy.struct \"Token\", Solidity.RefTy.struct \"Token\",\n    Solidity.RefTy.array (Solidity.Ty.ref (Solidity.RefTy.struct \"Token\")), Solidity.RefTy.struct \"TokenBucket\"]\n",
+    "statement_sha256": "8d25fcabe453939bff5bbdcd8d48638aa5e35aec1dcf2ac906906b4b2e6758a4",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.nested_root",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "2697c9d8cd4ae5da6af15d0bd5a7973baf79c640ce38a3b7d36dfa9031d5f512",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.nested_root : (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp\n        Solidity.SolkeyAgreementH28.Controls.nested \u22ef).val.id =\n  4\n",
+    "statement_sha256": "6c7eeb930f4ef172276fdfebbdc25c7a901481e500107580e4c4fbbf1612856c",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.nested_mirror",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "e42ff7246716b9285b80bd48015e64e30a7cb8560ad7f6601d26052ca7b9329c",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.nested_mirror : Solidity.SVal.Mirrors\n  (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp Solidity.SolkeyAgreementH28.Controls.nested \u22ef).heap 1\n  Solidity.SolkeyAgreementH28.Controls.nested\n  (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp Solidity.SolkeyAgreementH28.Controls.nested \u22ef).val\n",
+    "statement_sha256": "57b2f6524581eec1de0613dd915446ecc3510185393ecfd8e51f83537301c046",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.converse_rejected",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "5dac198a17c9bc42be2f6614fd40a53bcce31554a36a18680795dc10fedabe36",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.converse_rejected : \u00ac\u2200 (id : Nat),\n    Solidity.SolkeyAgreementH28.Fresh [Solidity.RefTy.array Solidity.Ty.uint] id \u2192\n      Solidity.SolkeyAgreementH28.Fresh\n        (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.hp Solidity.SolkeyAgreementH28.Controls.nested\n            \u22ef).H'\n        id\n",
+    "statement_sha256": "bb7d243ebf31abacb1b769c62cf615fb4da79b6781cf281ab689519175762f3c",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.suffix_write_success",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "a32d86042f441fd989f35a7e895f2386f032fdfded845d5f2b0aec4b9fac2207",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.suffix_write_success : Solidity.SolkeyAgreementH28.Controls.copied.heap.writeAddr\n    (Solidity.MAddr.index (Solidity.HRef.wk \u22ef Solidity.SolkeyAgreementH28.Controls.old) Solidity.ArrTy.dyn\n      Solidity.SolkeyAgreementH28.Controls.z)\n    Solidity.SolkeyAgreementH28.Controls.one =\n  some Solidity.SolkeyAgreementH28.Controls.suffixHeap\n",
+    "statement_sha256": "92ed4dd55c6027200696fd29bf8cfb9e228d64b9c71058f6c25c3294f3146ff8",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.mixed_suffix",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "439739e9ea676470bfbe2c480b062d6b30c031dec4137428c8c9ba0d958242a2",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.mixed_suffix : Solidity.SolkeyAgreementH28.Operations\n  Solidity.SolkeyAgreementH28.Controls.copied.heap\n  (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.suffixHeap Solidity.SolkeyAgreementH28.Controls.emptyArr\n      \u22ef).heap\n",
+    "statement_sha256": "9117f62522e4072c5714a44002cf7de4426d26752c5bff65f7839a82b9d38a32",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.copied_witness_survives",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "15dee34757c8cb7d2f92c9ca5d156013316b5e503d0177eb31467fb2d37f95b0",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.copied_witness_survives : have root :=\n  Solidity.HRef.wk \u22ef Solidity.SolkeyAgreementH28.Controls.copied.val;\nroot.id = Solidity.SolkeyAgreementH28.Controls.copied.val.id \u2227\n  Solidity.SolkeyAgreementH28.Fresh [Solidity.RefTy.array Solidity.Ty.uint] root.id \u2227\n    \u00acSolidity.SolkeyAgreementH28.Fresh\n          (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.suffixHeap\n              Solidity.SolkeyAgreementH28.Controls.emptyArr \u22ef).H'\n          root.id \u2227\n      (Solidity.HRef.wk \u22ef Solidity.SolkeyAgreementH28.Controls.old).id \u2260 root.id\n",
+    "statement_sha256": "6b9803e2cfdd813cc5e9285dc9c9139e779eaf28a32fa45d52474ad18d5df0a4",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.copy_order",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "f4080386f4289b571d7f99dffb19973a1b028dced06bc2f84b5038d159670827",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.copy_order : (Solidity.HRef.wk \u22ef\n      Solidity.SolkeyAgreementH28.Controls.copied.val).id <\n  (Solidity.SVal.copyStToM\n        (Solidity.SVal.copyStToM Solidity.SolkeyAgreementH28.Controls.suffixHeap\n            Solidity.SolkeyAgreementH28.Controls.emptyArr \u22ef).heap\n        Solidity.SolkeyAgreementH28.Controls.token \u22ef).val.id\n",
+    "statement_sha256": "bd6f9a805a59405b51af0192e353c70ad73ec5fb81049bbe654dd5c8fbc2b722",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.map_refusal",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "3135c7303b379a23f66aeecc4f2c3804d5da7a09c176eb6799e658011462a223",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.map_refusal : (Solidity.Ty.ref\n      (Solidity.RefTy.mapping Solidity.PrimTy.uint Solidity.Ty.uint)).mapFree \u2260\n  true\n",
+    "statement_sha256": "caca3069bad5e350ea9a3737215596abb52ab63eae5ff3b6aaef92139e734c98",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.empty_fields_no_alloc",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "73a4368069d2ed2442d42a471f7087a5ef4a49f16571fd0d9f5c20a17bd7471e",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.empty_fields_no_alloc : (Solidity.SFields.copyStToM\n      Solidity.SolkeyAgreementH28.Controls.hp Solidity.SFields.nil \u22ef).H' =\n  [Solidity.RefTy.array Solidity.Ty.uint]\n",
+    "statement_sha256": "0f0f0b1fc78c59a908db4811da911a112c753ce7976e45360289ab53bf77afae",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.unknown_struct_refusal",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "2d3bb9dfbea1dba489fbda1b64cbe0cd1a9116e6e9a589578667e5d0da3cc4a5",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.unknown_struct_refusal : (Solidity.Ty.ref\n      (Solidity.RefTy.struct \"UnknownH28\")).mapFree \u2260\n  true\n",
+    "statement_sha256": "7e68303e302f5a45449e12ac7428220cf9a08cad960681efcb41db5eb9082f6e",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.fixed_reference",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "cfa57d082936b382956a28feb6bbb075ddee760b48a6fb83ce6fa258ef85fe2a",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.fixed_reference : Solidity.SolkeyAgreementH28.Controls.fixedRefs.writeT\n    (Solidity.MAddrT.index 1 Solidity.ArrTy.fixed Solidity.SolkeyAgreementH28.Controls.z) 0 =\n  some Solidity.SolkeyAgreementH28.Controls.fixedRefs\n",
+    "statement_sha256": "23820a59bd04fbbc36cfdf54b3d7c7cbf8f7d8a8baa1072d190b98811587f825",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.bool_write",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "c7c1d4d003df0c139c81e76131a88feaf8eef5282a1c34620dda3deda8e2ba49",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.bool_write : Solidity.SolkeyAgreementH28.Controls.boolMem.writeT\n    (Solidity.MAddrT.index 0 Solidity.ArrTy.dyn Solidity.SolkeyAgreementH28.Controls.z) false =\n  some Solidity.SolkeyAgreementH28.Controls.boolMem\n",
+    "statement_sha256": "d90fcf48b5356b8ec359954c1adf22857b30a8f96d72377d1f22dc93ff937c19",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.int_write",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "61b654b026ae744e1b21898b4f068c79edf1b2493fcf515e319e4cd890f70cce",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.int_write : Solidity.SolkeyAgreementH28.Controls.intMem.writeT\n    (Solidity.MAddrT.index 0 Solidity.ArrTy.dyn Solidity.SolkeyAgreementH28.Controls.z) Solidity.PrimTy.int.dflt =\n  some Solidity.SolkeyAgreementH28.Controls.intMem\n",
+    "statement_sha256": "0fe78bab6b86c0867d0ab5a20040b1d0b8480fa228756304a0a34975192afa5a",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.nested_fixed_root",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "e9b6836d23a23e0cec6ea87aa7a9876dfea503fb3038e5accdfd9ac3eef1855b",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.nested_fixed_root : (Solidity.SVal.copyStToM\n        Solidity.SolkeyAgreementH28.Controls.hp Solidity.SolkeyAgreementH28.Controls.nestedFixed \u22ef).val.id =\n  5\n",
+    "statement_sha256": "d964f7f37fe0bd97ba38f43a340c80019640d022784a124b005857788ca5772d",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.nested_child_id",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "68493ab5a98456d6ffb1dac26105c4870395860f1a38dbdc237d746475296d6a",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.nested_child_id : Solidity.SolkeyAgreementH28.Controls.child.id = 3\n",
+    "statement_sha256": "5f9e3ce749bd0c24705a9a9021eda4608d78e67af77bac690de9d6c63737f741",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.nested_child_survives",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "5a5d616edfd4a69e9c93b5ab33b4910e7ea322ae5599935ffec585117b694c34",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.nested_child_survives : (Solidity.HRef.wk \u22ef\n        Solidity.SolkeyAgreementH28.Controls.child).id =\n    3 \u2227\n  (Solidity.HRef.wk \u22ef Solidity.SolkeyAgreementH28.Controls.old).id \u2260\n    (Solidity.HRef.wk \u22ef Solidity.SolkeyAgreementH28.Controls.child).id\n",
+    "statement_sha256": "a8835e8ead70730d4928987ad3c9c8d280bca5ffd4c144c55f0cf127f13e6846",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.writes_cannot_allocate",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "c6e1960ae444e02997a022704f829ec27764c74a2d02d8a79d31b6acd948ee6c",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.writes_cannot_allocate : \u00acSolidity.SolkeyAgreementH28.Writes\n    Solidity.SolkeyAgreementH28.Controls.m Solidity.SolkeyAgreementH28.Controls.expanded\n",
+    "statement_sha256": "1518c66d9238ecfcac83ffdc78931b8dd14a32235e6f3b731bef03bd596d84c2",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.operations_cannot_shrink",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "e142d7488629c9293c0206a2dcd095aa18f73a6c423beb44df3a557e84f73659",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.operations_cannot_shrink : \u00acSolidity.SolkeyAgreementH28.Operations\n    Solidity.SolkeyAgreementH28.Controls.hp ()\n",
+    "statement_sha256": "d6de0952c0e40f6cd093e8e6b5ca837252c595f056c7b97fd021326be311c4c9",
+    "axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  },
+  {
+    "name": "Solidity.SolkeyAgreementH28.Controls.shadow_not_allocated",
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "declaration_sha256": "c50747ec7a7329e333774cc0638f261ed8677028d4605ea1bf9e41e45bcaa22a",
+    "compiler_statement": "Solidity.SolkeyAgreementH28.Controls.shadow_not_allocated : (Solidity.SVal.copyStToM\n      Solidity.SolkeyAgreementH28.Controls.hp Solidity.SolkeyAgreementH28.Controls.shadowArray \u22ef).H' =\n  [Solidity.RefTy.array Solidity.Ty.uint, Solidity.RefTy.array (Solidity.Ty.ref (Solidity.RefTy.struct \"Token\"))]\n",
+    "statement_sha256": "94a5e3b1e212673e1dbbf264eb65944eba63682eec205ebda21dcba4107bb9ea",
+    "axioms": [
+      "propext"
+    ],
+    "compiler_log": "tests/h28-sol/solkey-ports/evidence/controls-kernel-final.log",
+    "compiler_log_sha256": "47c0f7befef9892f7f1dd4701b065234bc8cce1d394a8487c17a76cab7fbb401"
+  }
+]

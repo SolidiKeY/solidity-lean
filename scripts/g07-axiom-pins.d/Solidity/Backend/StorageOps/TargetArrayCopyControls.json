@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/TargetArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetArrayCopyControls.all_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetArrayCopyControls.grow_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetArrayCopyControls.incremental_source_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetArrayCopyControls.overlapping_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetArrayCopyControls.self_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetArrayCopyControls.shrink": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetArrayCopyControls.whole_prefix_clear_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

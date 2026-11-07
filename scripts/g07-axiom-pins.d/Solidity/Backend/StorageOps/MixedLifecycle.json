@@ -1,0 +1,106 @@
+{
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.graphPops_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPush": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPush_failed_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPush_failed_second": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPush_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPush_log_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPush_realized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPush_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPush_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPushAccesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.popPushLog": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPop_failed_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPop_failed_second": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPop_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPop_log_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPop_realized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPop_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPop_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPopAccesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycle.lean:Solidity.Backend.StorageOps.MixedLifecycle.pushPopLog": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

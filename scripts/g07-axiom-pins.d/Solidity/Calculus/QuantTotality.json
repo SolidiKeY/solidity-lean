@@ -1,0 +1,17 @@
+{
+ "Solidity/Calculus/QuantTotality.lean:Solidity.Decide.quantReduction?_isSome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/QuantTotality.lean:Solidity.Decide.QuantReduction.valid_of_sentence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/QuantTotality.lean:Solidity.Decide.QuantReduction.verify": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

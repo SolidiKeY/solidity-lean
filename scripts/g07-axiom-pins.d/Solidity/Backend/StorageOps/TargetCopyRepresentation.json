@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/TargetCopyRepresentation.lean:Solidity.Backend.StorageOps.TargetCopyRepresentation.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyRepresentation.lean:Solidity.Backend.StorageOps.TargetCopyRepresentation.initial_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyRepresentation.lean:Solidity.Backend.StorageOps.TargetCopyRepresentation.numeric_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

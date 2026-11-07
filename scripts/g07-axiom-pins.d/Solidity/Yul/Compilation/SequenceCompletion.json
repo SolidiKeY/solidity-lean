@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/SequenceCompletion.lean:Solidity.Yul.Compilation.SequenceCompletion.artifact_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompletion.lean:Solidity.Yul.Compilation.SequenceCompletion.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompletion.lean:Solidity.Yul.Compilation.SequenceCompletion.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

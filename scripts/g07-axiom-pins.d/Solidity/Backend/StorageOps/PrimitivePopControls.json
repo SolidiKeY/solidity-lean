@@ -1,0 +1,277 @@
+{
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.absent_executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.absent_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.empty_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.empty_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.full_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.header_only_counter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.negatives": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_absent_live_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_cycle_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_cycle_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_cycle_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_cycle_full_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_cycle_wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_default_live_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_evolving_write_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_fresh_push_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_live_read_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_live_read_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_live_read_wrong_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_live_write_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_live_write_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_live_write_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_push_capacity_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_push_changed_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_push_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_push_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_push_wrong_targets": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_regrown_read_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_represented_clear_absent_garbage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_represented_clear_after_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_represented_clear_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_represented_clear_current_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_represented_clear_failed_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_represented_clear_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_represented_clear_physical_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_reused_push_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_runtime_clear_after_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_runtime_clear_all_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_runtime_clear_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_runtime_clear_lengths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_runtime_clear_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_runtime_clear_prefix_restart": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_zero_reuse_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.primitive_zero_reuse_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.regrow_executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.regrow_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.target_pop_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.target_pop_changed_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.target_pop_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.target_pop_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.target_pop_empty_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.target_pop_wrong_slots": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitivePopControls.lean:Solidity.Backend.StorageOps.PrimitivePopControls.wrong_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

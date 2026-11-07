@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/FreshArrayHistoryControls.lean:Solidity.Backend.StorageOps.FreshArrayHistory.Controls.bad_history": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistoryControls.lean:Solidity.Backend.StorageOps.FreshArrayHistory.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistoryControls.lean:Solidity.Backend.StorageOps.FreshArrayHistory.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistoryControls.lean:Solidity.Backend.StorageOps.FreshArrayHistory.Controls.outer_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistoryControls.lean:Solidity.Backend.StorageOps.FreshArrayHistory.Controls.readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistoryControls.lean:Solidity.Backend.StorageOps.FreshArrayHistory.Controls.target_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistoryControls.lean:Solidity.Backend.StorageOps.FreshArrayHistory.Controls.total_and_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

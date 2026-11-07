@@ -1,0 +1,17 @@
+{
+  "command": [
+    "env",
+    "SHIP_ALLOW_HEAD=1",
+    "LAKE_CACHE_DIR=/workspace/.setup/cache/lake",
+    "SHIP_STATE=/workspace/sol-numeric-literals-h35-cache-ship",
+    "bash",
+    "scripts/coord-tools/ship-cache.sh",
+    "--dry-run",
+    "/workspace/solidity-lean"
+  ],
+  "exit": 1,
+  "seconds": 3.370637,
+  "peak_child_rss_kib": 25328,
+  "user_seconds": 1.548284,
+  "system_seconds": 1.8212609999999998
+}

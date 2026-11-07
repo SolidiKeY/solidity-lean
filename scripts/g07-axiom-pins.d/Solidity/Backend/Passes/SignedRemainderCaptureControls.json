@@ -1,0 +1,76 @@
+{
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.capacities": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.corrupt_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.guard_required": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.minimum_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.minimum_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.negative_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.no_horizon_promotion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.observations": [],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.origin_and_component": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.recapture_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.wrong_euclidean": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.zero_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedRemainderCaptureControls.lean:Solidity.Backend.Passes.SignedRemainderCaptureControls.zero_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

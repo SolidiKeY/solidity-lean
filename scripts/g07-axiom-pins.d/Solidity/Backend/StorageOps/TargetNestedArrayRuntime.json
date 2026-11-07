@@ -1,0 +1,8 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedArrayRuntime.lean:Solidity.Backend.StorageOps.TargetNestedArrayRuntime.afterCopy": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayRuntime.lean:Solidity.Backend.StorageOps.TargetNestedArrayRuntime.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

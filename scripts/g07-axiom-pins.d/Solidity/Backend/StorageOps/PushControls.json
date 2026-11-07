@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/StorageOps/PushControls.lean:Solidity.Backend.StorageOps.PushControls.capacity_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushControls.lean:Solidity.Backend.StorageOps.PushControls.fresh_reuse_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushControls.lean:Solidity.Backend.StorageOps.PushControls.scalar_reset_ordered": [
+  "Quot.sound",
+  "propext"
+ ]
+}

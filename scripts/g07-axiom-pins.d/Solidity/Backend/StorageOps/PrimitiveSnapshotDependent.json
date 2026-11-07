@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependent.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

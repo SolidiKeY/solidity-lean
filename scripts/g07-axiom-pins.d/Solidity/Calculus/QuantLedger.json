@@ -1,0 +1,37 @@
+{
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.closeLedgerQuantifiers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QArith.closedLedgerTruth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QArith.repositionClosedLedger": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QDefs.compileQuantLedger": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QuantLedgerBody.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QuantLedgerBody.verify": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/QuantLedger.lean:Solidity.Decide.QuantLedgerReduction.verify": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

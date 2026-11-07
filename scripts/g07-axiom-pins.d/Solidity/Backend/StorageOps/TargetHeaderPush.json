@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/StorageOps/TargetHeaderPush.lean:Solidity.Backend.StorageOps.TargetHeaderPush.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetHeaderPush.lean:Solidity.Backend.StorageOps.TargetHeaderPush.numeric_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetHeaderPush.lean:Solidity.Backend.StorageOps.TargetHeaderPush.represented_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetHeaderPush.lean:Solidity.Backend.StorageOps.TargetHeaderPush.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetHeaderPush.lean:Solidity.Backend.StorageOps.TargetHeaderPush.source_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

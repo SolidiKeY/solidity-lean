@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/ExactReduction.lean:Solidity.Decide.ExactReduction.elim_holds_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,31 @@
+
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/direct-check:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000001411b0 <initialize_Lean_Server_Utils>:
+  1411b0:	50                   	push   %rax
+  1411b1:	e8 aa c6 14 01       	call   128d860 <lean_inc_heartbeat>
+  1411b6:	bf 18 00 00 00       	mov    $0x18,%edi
+  1411bb:	e8 a0 0b 17 01       	call   12b1d60 <mi_malloc_small>
+  1411c0:	48 85 c0             	test   %rax,%rax
+  1411c3:	74 1f                	je     1411e4 <initialize_Lean_Server_Utils+0x34>
+  1411c5:	48 b9 01 00 00 00 18 	movabs $0x2001800000001,%rcx
+  1411cc:	00 02 00 
+  1411cf:	48 89 08             	mov    %rcx,(%rax)
+  1411d2:	48 c7 40 08 01 00 00 	movq   $0x1,0x8(%rax)
+  1411d9:	00 
+  1411da:	48 c7 40 10 01 00 00 	movq   $0x1,0x10(%rax)
+  1411e1:	00 
+  1411e2:	59                   	pop    %rcx
+  1411e3:	c3                   	ret
+  1411e4:	e8 67 04 0d 01       	call   1211650 <lean_internal_panic_out_of_memory>
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section __lcxx_override:
+
+Disassembly of section .plt:

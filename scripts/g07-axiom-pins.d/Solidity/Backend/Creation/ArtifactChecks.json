@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Creation/ArtifactChecks.lean:Solidity.Backend.Creation.Artifact.args_slice": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ArtifactChecks.lean:Solidity.Backend.Creation.Artifact.runtime_slice": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ArtifactChecks.lean:Solidity.Backend.Creation.Immediate.read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ArtifactChecks.lean:Solidity.Backend.Creation.wrapper_size": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

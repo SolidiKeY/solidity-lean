@@ -1,0 +1,55 @@
+{
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.empty_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.full_budget_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.last_complete_cell_fits": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.nested_actual_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.nested_actual_spans": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.nested_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.nested_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.next_cell_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.wrong_cursor_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedDefaultControls.lean:Solidity.Backend.MemoryCopies.BudgetedDefaultControls.zero_budget_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/V08/SourceSessionControls.lean:Solidity.Lowering.V08.SourceSessionControls.no_transaction_budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionControls.lean:Solidity.Lowering.V08.SourceSessionControls.second_transaction_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionControls.lean:Solidity.Lowering.V08.SourceSessionControls.second_world": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionControls.lean:Solidity.Lowering.V08.SourceSessionControls.session_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionControls.lean:Solidity.Lowering.V08.SourceSessionControls.wrong_ancestor_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceSessionControls.lean:Solidity.Lowering.V08.SourceSessionControls.wrong_final_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalStructReference.lean:Solidity.Backend.MemoryOps.Physical.assign_struct_reference_physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

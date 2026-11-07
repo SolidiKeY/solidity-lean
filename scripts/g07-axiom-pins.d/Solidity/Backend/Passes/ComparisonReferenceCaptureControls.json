@@ -1,0 +1,92 @@
+{
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.equality_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.false_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.frame_eight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.native_order_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.signed_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.signedness_distinguished": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.source_component": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.stale_pointer_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.tails": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.true_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.wrong_order_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.wrong_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCaptureControls.lean:Solidity.Backend.Passes.ComparisonReferenceCaptureControls.wrong_reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

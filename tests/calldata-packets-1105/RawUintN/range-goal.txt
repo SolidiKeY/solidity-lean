@@ -1,0 +1,2 @@
+∀ (n : Solidity.Backend.CalldataPackets.RawUintN.Width) (w : Nat),
+  (n.intTy.lo ≤ (w : Int) ∧ (w : Int) ≤ n.intTy.hi) ↔ w < 2^n.bits

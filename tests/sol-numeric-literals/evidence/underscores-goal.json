@@ -1,0 +1,20 @@
+{
+  "command": [
+    "scripts/coord-tools/lean-mcp",
+    "goal",
+    "Solidity/Frontend/NumericLiteralProofs/Underscores.lean",
+    "77"
+  ],
+  "exit": 0,
+  "seconds": 0.576,
+  "container_memory_peak_bytes": 2810642432,
+  "minimum_parent_headroom_bytes": 15555842048,
+  "resource_stop": false,
+  "log": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/underscores-goal.log",
+  "container": "sol-nl-proof-worker",
+  "limits": {
+    "memory_max": 12884901888,
+    "memory_swap_max": 0,
+    "lean_num_threads": 1
+  }
+}

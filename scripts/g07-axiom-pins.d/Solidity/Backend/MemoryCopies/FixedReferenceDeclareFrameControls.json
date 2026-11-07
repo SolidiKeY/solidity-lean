@@ -1,0 +1,20 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceDeclareFrameControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceDeclareFrameControls.copy_preserves_inhabited_gap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceDeclareFrameControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceDeclareFrameControls.declaration_preserves_live_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceDeclareFrameControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceDeclareFrameControls.nonempty_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceDeclareFrameControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceDeclareFrameControls.old_object_overlaps_gap_refuted": [
+  "propext"
+ ]
+}

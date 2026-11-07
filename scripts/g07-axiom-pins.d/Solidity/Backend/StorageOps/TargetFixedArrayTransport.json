@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/StorageOps/TargetFixedArrayTransport.lean:Solidity.Backend.StorageOps.TargetFixedArrayTransport.numerics": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayTransport.lean:Solidity.Backend.StorageOps.TargetFixedArrayTransport.prefix_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayTransport.lean:Solidity.Backend.StorageOps.TargetFixedArrayTransport.stores": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayTransport.lean:Solidity.Backend.StorageOps.TargetFixedArrayTransport.toSlot_add": []
+}

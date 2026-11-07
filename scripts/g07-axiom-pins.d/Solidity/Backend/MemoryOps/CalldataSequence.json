@@ -1,0 +1,84 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_all_len": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_none_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_none_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.boolTransfer_result_lookup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_none_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_some_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintSequence_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintSequence_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintSequence_none_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.checkedUintSequence_some_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_all_len": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_none_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_none_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequence.lean:Solidity.Backend.MemoryOps.uintTransfer_result_lookup": [
+  "Quot.sound",
+  "propext"
+ ]
+}

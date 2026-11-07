@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.actual_mixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.actual_new_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.actual_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.actual_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.selected_demands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.selected_primitive_struct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.unselected_struct_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.unused_huge_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SelectedDefaultDemandControls.lean:Solidity.Backend.MemoryCopies.SelectedDefaultDemandControls.wrong_cursor_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

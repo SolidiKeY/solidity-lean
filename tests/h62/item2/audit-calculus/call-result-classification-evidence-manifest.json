@@ -1,0 +1,52 @@
+{
+  "scope": "twenty-one static call-result roles; cache source comparison is observation only",
+  "counts": {
+    "role_reviewed": 170,
+    "role_pending": 5113,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/call-result-classification-v13/evidence.tar.gz",
+      "bytes": 872529,
+      "sha256": "1475cf6ea4c39b3bfc46364b42c7f468e25c0e8d0127d3e6e3d56dec09233af8"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-result-classification-v13/inputs.json",
+      "bytes": 1196,
+      "sha256": "5117ee129ab83827eb4d46581d0565c94c5e12305bbd663e141d49afe1bb56e5"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-result-classification-v13/gates.json",
+      "bytes": 2709,
+      "sha256": "594f48da749acaf14db53acf2fc7bb3e6909967817e8ee095ce547b8bab320c6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-result-classification-v13/reviews.md",
+      "bytes": 1280,
+      "sha256": "fe3a062ba23c20b648dbd262c37de127e95c8499fcdad86b877494fe9ad55387"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-result-classification-v13/doc-gate.json",
+      "bytes": 1274,
+      "sha256": "c65fcd08aca21bde2435386152cb791bd6757a103ba25e9fe29f5cf64713f458"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-result-classification-v13/cache-observation.json",
+      "bytes": 1272,
+      "sha256": "23ea1688d3070674f913584f20f617309b133a77989b1bfbf64c282d166495fa"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-result-classification-v13/cache-closure-recheck.json",
+      "bytes": 10442,
+      "sha256": "f087f50e3959be425efc184e5db522e38644c5d564463bede7ea14bb60b072d9"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/call-result-classification-v13/semantic-roles-reviewed.json",
+      "bytes": 501484,
+      "sha256": "635f2eb29bbd46e1be790cb0e25c446dc3a88388ab02a79cf5955efec3ab8105"
+    }
+  ]
+}

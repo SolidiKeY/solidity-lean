@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_fresh": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_fresh_index": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.captureAfterAlloc_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.checked_interstage_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.checked_interstage_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.checked_interstage_success": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageGrowth.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

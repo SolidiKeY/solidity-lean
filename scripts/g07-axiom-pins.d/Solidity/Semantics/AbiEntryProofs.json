@@ -1,0 +1,18 @@
+{
+ "Solidity/Semantics/AbiEntryProofs.lean:Solidity.AbiEntry.eager_cref": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/AbiEntryProofs.lean:Solidity.AbiEntry.mdec_cval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/AbiEntryProofs.lean:Solidity.AbiEntry.verdict_revert_iff": [
+  "propext"
+ ],
+ "Solidity/Semantics/AbiEntryProofs.lean:Solidity.AbiEntry.verdict_run_entry": [
+  "propext"
+ ]
+}

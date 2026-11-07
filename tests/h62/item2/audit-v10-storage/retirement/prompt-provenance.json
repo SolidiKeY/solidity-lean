@@ -1,0 +1,8 @@
+{
+  "source": "Complete original assignment message transcribed from the original thread visible in this conversation; no raw history/get_goal tool exposed",
+  "assignment_file": "original-user-assignment.txt",
+  "assignment_file_sha256": "a529bdac9515cddb03f2a9c55b7ed5705be9a493ecd3942e4d4f9bdf95804b38",
+  "reported_rendered_prompt_sha256": "0e845778882354cbb69d4838c90e96af54c1fab07e9d82b32b28a7c178ce7d13",
+  "rendered_prompt_byte_match": false,
+  "limitation": "Original rendered-prompt byte hash differs from this thread-text transcript. Full message, owner map, work/backfill queue and scope are preserved; no claim of renderer-byte identity. Survivor/coordinator must retain the original renderer artifact for that fingerprint."
+}

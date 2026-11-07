@@ -1,0 +1,73 @@
+{
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.Binding.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.Binding.body_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.Binding.code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.Binding.composed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.Binding.decoded_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.Binding.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.Binding.short_before_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.Binding.whole_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.decoded_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.early_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.gated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBody.lean:Solidity.Backend.AbiEntry.SignedEntryBody.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

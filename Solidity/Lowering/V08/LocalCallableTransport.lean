@@ -277,6 +277,36 @@ theorem transport {C : Contract} {Γ : Ctx} (p : Roadmap.Pipeline) (extra : Nat)
   refine ⟨source_actual p extra old rhs,?_,rfl⟩
   rw [assigned_condition_operand_run,initialRead]
 
+/-- Caller-local strengthening of the paired fixture result. Initial value
+alignment and exact typed slot maps derive the POST relation; no desired
+post-state preservation is assumed. This is not a heap/world or callee-body
+compiler relation. The actual Source callee's hash allocation is retained. -/
+theorem transport_context {C : Contract} {Γ : Ctx} (p : Roadmap.Pipeline) (extra : Nat)
+    (old rhs : Bool) (target : State C Γ)
+    (write read : Idx Γ (.val .bool)) (initialRead : TEnv.get read target.env = rhs)
+    (m : ContextMap [.bool,.bool] Γ)
+    (R : (τ : Source.STy) → (u : LTy) → Source.Val E.layout τ → u.TDenote C target.H → Prop)
+    (initial : m.Related R (locals old rhs) target.env)
+    (writeMap : m.slot (.here : Source.Idx [.bool,.bool] .bool) = ⟨.val .bool,write⟩)
+    (readMap : m.slot (.there .here : Source.Idx [.bool,.bool] .bool) = ⟨.val .bool,read⟩) :
+    (Source.evalE (g p) f (extra+26) expression).run (locals old rhs,SourceCallableControls.populated) =
+      (.ok (.val (.bool rhs)),(locals rhs rhs,
+        SourceKeccak.afterLiteral SourceCallableControls.populated SourceCallableControls.binary)) ∧
+    (assignLocalOperand write read).run target =
+      .ok (⟨target.setLocal write rhs,List.prefix_refl _⟩,.prim rhs) ∧
+    m.Related R (locals rhs rhs) (target.setLocal write rhs).env ∧
+    (target.setLocal write rhs).glob = target.glob := by
+  have actual := transport p extra old rhs target write read initialRead
+  have reached : m.Related R
+      ((locals old rhs).set (.here : Source.Idx [.bool,.bool] .bool)
+        ((locals old rhs).get (.there .here)))
+      (TEnv.set write (TEnv.get read target.env) target.env) :=
+    ContextMap.related_assign m R (locals old rhs) target.env initial
+    (.here : Source.Idx [.bool,.bool] .bool) (.there .here) write read writeMap readMap
+  rw [initialRead] at reached
+  change m.Related R (locals rhs rhs) (target.setLocal write rhs).env at reached
+  exact ⟨actual.1,actual.2.1,reached,actual.2.2⟩
+
 def live : PrimTy.uint.Denote := integerValue Source.IntTy.u256 42 (by decide +kernel)
 def target {C : Contract} (base : State C []) (old rhs : Bool) :
     State C [.val .bool,.val .uint,.val .bool] :=
@@ -298,6 +328,57 @@ theorem inhabited {C : Contract} (base : State C []) (p : Roadmap.Pipeline)
   have applied := transport p extra old rhs (target base old rhs)
     .here (.there (.there .here)) rfl
   exact ⟨applied.1,applied.2.1⟩
+
+/-- Exact positions skip the independent live uint local. -/
+def contextSlots : ContextMap [.bool,.bool] [.val .bool,.val .uint,.val .bool] :=
+  ((ContextMap.empty.cons .bool (.val .bool)).wk (Thin.drop .refl)).cons .bool (.val .bool)
+
+def BoolValues {C : Contract} {H : HTy} (τ : Source.STy) (u : LTy)
+    (source : Source.Val E.layout τ) (value : u.TDenote C H) : Prop :=
+  match τ,u with
+  | .bool,.val .bool => source = .bool value
+  | _,_ => False
+
+theorem context_initial {C : Contract} (base : State C []) (old rhs : Bool) :
+    contextSlots.Related BoolValues (locals old rhs) (target base old rhs).env := by
+  intro τ index
+  cases index with
+  | here => rfl
+  | there index => cases index with
+    | here => rfl
+    | there index => cases index
+
+/-- Inhabited post relation for both pipelines and Boolean branches, with the
+actual hash-allocating Source body. No heap relation is inferred from locals. -/
+theorem context_client {C : Contract} (base : State C []) (p : Roadmap.Pipeline)
+    (extra : Nat) (old rhs : Bool) :
+    (Source.evalE (g p) f (extra+26) expression).run
+      (locals old rhs,SourceCallableControls.populated) =
+      (.ok (.val (.bool rhs)),(locals rhs rhs,
+        SourceKeccak.afterLiteral SourceCallableControls.populated SourceCallableControls.binary)) ∧
+    operand.run (target base old rhs) =
+      .ok (⟨(target base old rhs).setLocal .here rhs,List.prefix_refl _⟩,.prim rhs) ∧
+    contextSlots.Related BoolValues (locals rhs rhs) ((target base old rhs).setLocal .here rhs).env := by
+  have actual := transport_context p extra old rhs (target base old rhs)
+    .here (.there (.there .here)) rfl contextSlots BoolValues
+    (context_initial base old rhs) rfl rfl
+  exact ⟨actual.1,actual.2.1,actual.2.2.1⟩
+
+theorem wrong_context_snapshot {C : Contract} (base : State C []) :
+    ¬ contextSlots.Related BoolValues (locals true false)
+      ((target base true false).setLocal .here false).env := by
+  intro wrong
+  have value := wrong (.here : Source.Idx [.bool,.bool] .bool)
+  change Source.Val.bool true = .bool false at value
+  cases value
+
+theorem wrong_context_live_binding {C : Contract} (base : State C []) :
+    ¬ contextSlots.Related BoolValues (locals false false)
+      (((target base false false).setLocal .here false).setLocal (.there (.there .here)) true).env := by
+  intro wrong
+  have value := wrong (.there .here : Source.Idx [.bool,.bool] .bool)
+  change Source.Val.bool false = .bool true at value
+  cases value
 
 def observe {C : Contract} (state : State C [.val .bool,.val .uint,.val .bool]) :
     Bool × Option Int × Bool :=
@@ -646,8 +727,8 @@ theorem payload_clients (p : Roadmap.Pipeline) :
 /-- These populated input fields are retained by the complete Source result
 above, not inferred from a smaller balance-only projection. -/
 theorem populated_fields (bytes : Roadmap.Bytes) :
-    ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.sender).balance.val = 93 ∧
-    ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.this).balance.val = 12 ∧
+    ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.sender).balance = 93 ∧
+    ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.this).balance = 12 ∧
     ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.sender).nonce = 3 ∧
     ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.this).nonce = 1 ∧
     ((SignedCallableControls.populated bytes).ex.world.accounts SignedCallableControls.frame.this).code = some 0 ∧
@@ -930,3 +1011,29 @@ theorem closed_client (p : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
 #guard_msgs in
 #print axioms Solidity.Lowering.V08.AssignedCallableContext.closed_client
 end Solidity.Lowering.V08.AssignedCallableContext
+
+/-- info: 'Solidity.Lowering.V08.EffectfulCallableArgument.transport_context' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.EffectfulCallableArgument.transport_context
+/-- info: 'Solidity.Lowering.V08.EffectfulCallableArgument.context_initial' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.EffectfulCallableArgument.context_initial
+/-- info: 'Solidity.Lowering.V08.EffectfulCallableArgument.context_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.EffectfulCallableArgument.context_client
+/-- info: 'Solidity.Lowering.V08.EffectfulCallableArgument.wrong_context_snapshot' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.EffectfulCallableArgument.wrong_context_snapshot
+/-- info: 'Solidity.Lowering.V08.EffectfulCallableArgument.wrong_context_live_binding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Lowering.V08.EffectfulCallableArgument.wrong_context_live_binding

@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.early_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.initial_views": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.reached_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.reached_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDeclareAliasControls.lean:Solidity.Backend.MemoryOps.SourceUintFixedDeclareAliasControls.word_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

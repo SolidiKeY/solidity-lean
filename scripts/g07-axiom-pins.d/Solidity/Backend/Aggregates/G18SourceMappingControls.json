@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.cells": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.complete_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.negative_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.state_cells": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.static_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18SourceMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Controls.wrong_phase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

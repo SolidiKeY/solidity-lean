@@ -1,0 +1,192 @@
+{
+  "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+  "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "phases": [
+    {
+      "name": "lake-version",
+      "command": [
+        "/workspace/scratch/h28-runtime/lean-4.24.0-linux/bin/lake",
+        "--version"
+      ],
+      "exit": 0,
+      "seconds": 0.1424921300058486,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/lake-version.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "lean-version",
+      "command": [
+        "/workspace/scratch/h28-runtime/lean-4.24.0-linux/bin/lean",
+        "--version"
+      ],
+      "exit": 0,
+      "seconds": 0.05110281000088435,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/lean-version.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "KeySort",
+      "command": [
+        "lake",
+        "build",
+        "Solidity.KeySort"
+      ],
+      "exit": 0,
+      "seconds": 0.23526607299572788,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/KeySort.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "owned-build",
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Frontend.LiteralGrammarH28.Body",
+        "Solidity.Frontend.LiteralGrammarH28.BodyControls",
+        "Solidity.Frontend.LiteralGrammarH28.BodyPins",
+        "Solidity.Frontend.LiteralGrammarH28.BoundaryControls",
+        "Solidity.Frontend.LiteralGrammarH28.BoundaryPins",
+        "Solidity.Frontend.LiteralGrammarH28.Classification",
+        "Solidity.Frontend.LiteralGrammarH28.EncodingValue",
+        "Solidity.Frontend.LiteralGrammarH28.FragmentCompleteness",
+        "Solidity.Frontend.LiteralGrammarH28.Fragments",
+        "Solidity.Frontend.LiteralGrammarH28.FullControls",
+        "Solidity.Frontend.LiteralGrammarH28.FullPins",
+        "Solidity.Frontend.LiteralGrammarH28.Global",
+        "Solidity.Frontend.LiteralGrammarH28.Hex",
+        "Solidity.Frontend.LiteralGrammarH28.HexControls",
+        "Solidity.Frontend.LiteralGrammarH28.HexEncoding",
+        "Solidity.Frontend.LiteralGrammarH28.HexPins",
+        "Solidity.Frontend.LiteralGrammarH28.ModeGrammar",
+        "Solidity.Frontend.LiteralGrammarH28.ProofSafety",
+        "Solidity.Frontend.LiteralGrammarH28.Quoted",
+        "Solidity.Frontend.LiteralGrammarH28.Roundtrips",
+        "Solidity.Frontend.LiteralGrammarH28.Scanner",
+        "Solidity.Frontend.LiteralGrammarH28.Split",
+        "Solidity.Frontend.LiteralGrammarH28.TaggedEncoding",
+        "Solidity.Frontend.LiteralGrammarH28.WordTable"
+      ],
+      "exit": 0,
+      "seconds": 5.2882096669927705,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/owned-build.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "axioms",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/FullPins.lean"
+      ],
+      "exit": 0,
+      "seconds": 4.762235733011039,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/axioms.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "HexControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/HexControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.3600277170044137,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/HexControls.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "BodyControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/BodyControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.6982758300000569,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/BodyControls.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "BoundaryControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/BoundaryControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.7252284830028657,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/BoundaryControls.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "FullControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/FullControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 6.030831518990453,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/FullControls.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "inventory-audit",
+      "command": [
+        "python3",
+        "-B",
+        "tests/h28-sol/literal-grammar/audit.py",
+        "tests/h28-sol/literal-grammar/evidence/full-pins-build-02.log"
+      ],
+      "exit": 0,
+      "seconds": 0.12158529300359078,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/inventory-audit.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    },
+    {
+      "name": "roots",
+      "command": [
+        "bash",
+        "scripts/coord-tools/register.sh",
+        "--check"
+      ],
+      "exit": 1,
+      "seconds": 0.1752539360022638,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-b86-precommit/roots.log",
+      "preserved_head": "59c3e31c820830d179a1b24911dcf8f3f6b001af",
+      "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+      "tree": "exactauthorizedin-progressmerge;24Leanbytesunchanged"
+    }
+  ]
+}

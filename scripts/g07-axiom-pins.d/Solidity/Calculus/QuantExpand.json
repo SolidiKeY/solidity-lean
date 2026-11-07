@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/QuantExpand.lean:Solidity.Decide.expandPrep_valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,167 @@
+{
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.allocation_input_reservation_shrink": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.allocator_reservation_shrink": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.compilation_reframed_triple_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.compilation_reframed_triple_fault_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.compilation_reframed_triple_join_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.compilation_reframed_triple_join_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.compilation_reframed_triple_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.compilation_reframed_triple_revert_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.compilation_reframed_triple_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.positive_allocation_refuses_zero_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleControls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleControls.first_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleControls.middle_room": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleControls.saved_tail_corruption": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleControls.second_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleControls.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleControls.wrong_zero_cost_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.before_loop_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.block_code_split": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.complete_effect_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.consumer_before_loop_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.effects_before_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.effects_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.effects_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.first_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.prefix_relations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.read_refuses_short_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.read_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.second_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.split_consumer": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.triple_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.wrong_order_is_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.wrong_order_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedTriplePins.lean:Solidity.Backend.Passes.ReframedTripleWrongOrder.wrong_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

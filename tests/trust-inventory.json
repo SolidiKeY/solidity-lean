@@ -1,5 +1,15 @@
 [
   {
+    "file": "Solidity/Calculus/Assumptions.lean",
+    "kind": "opaque",
+    "code": "| opaque deriving DecidableEq, Repr, Inhabited"
+  },
+  {
+    "file": "Solidity/Calculus/Assumptions.lean",
+    "kind": "opaque",
+    "code": "hash : HashReading := .opaque zeroAddress : ZeroAddressReading := .noCode"
+  },
+  {
     "file": "Solidity/Calculus/CallFunctionSearch.lean",
     "kind": "override",
     "code": "@[implemented_by subtermsM]"
@@ -1373,6 +1383,16 @@
     "file": "Solidity/Evm/MemoryRecursiveRoom.lean",
     "kind": "override",
     "code": "@[implemented_by progallocatesM]"
+  },
+  {
+    "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+    "kind": "override",
+    "code": "@[implemented_by expressionPathAnyM]"
+  },
+  {
+    "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+    "kind": "override",
+    "code": "@[implemented_by referencesM]"
   },
   {
     "file": "Solidity/Frontend/Testing.lean",

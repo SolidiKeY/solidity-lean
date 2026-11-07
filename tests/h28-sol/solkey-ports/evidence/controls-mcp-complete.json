@@ -1,0 +1,21 @@
+{
+  "command": [
+    "scripts/coord-tools/lean-mcp",
+    "diag",
+    "tests/h28-sol/solkey-ports/Controls.lean"
+  ],
+  "source_sha256": {
+    "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean": "3bc1a168b9476e28fb43f4a1294c109fda3fef0de10c12255006f3077dcf8030",
+    "tests/h28-sol/solkey-ports/Runtime.lean": "67c8f2b121751d13ae52e6f878fbd69c3f718b5623d895425d2d9de0cbca796b",
+    "tests/h28-sol/solkey-ports/Ledger.lean": "9fc7e7a943b1de3012dababb990e3ec2540cbfef461df247e58f9972da222ab0",
+    "tests/h28-sol/solkey-ports/Controls.lean": "d8a5c95f413b8f3206d3362234a6cc6b5d931af20025e913b8c1c9424f542c57"
+  },
+  "exit": 0,
+  "seconds": 0.8484571540000161,
+  "max_rss_kib": 14380,
+  "lean_num_threads": "1",
+  "memory.max": "12884901888",
+  "memory.swap.max": "0",
+  "memory.peak": "1123676160",
+  "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+}

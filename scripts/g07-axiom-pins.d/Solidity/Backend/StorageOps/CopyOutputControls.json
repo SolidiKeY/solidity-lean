@@ -1,0 +1,51 @@
+{
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.absent_retained_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.alias_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.alias_full_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.complete_graph_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.complete_numeric_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.fixed_recursive_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.full_nested_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.recursive_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.recursive_trace_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputControls.lean:Solidity.Backend.StorageOps.CopyOutputControls.slot_combinations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

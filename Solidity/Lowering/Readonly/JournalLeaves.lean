@@ -10,7 +10,7 @@ variable {E : Env} {Γ : RCtx}
 theorem debit_history (a : Address) (v : Word) (locals : Locals E.layout Γ)
     (state : St E) (mode : Bool) :
     History state.ex mode ((debit a v : EM E Γ Bool).run (locals, state)).2.2.ex := by
-  by_cases fits : v.val ≤ (state.ex.world.accounts a).balance.val
+  by_cases fits : v.val ≤ (state.ex.world.accounts a).balance
   · simp only [debit, EM.st, EM.modSt, bind, pure, ExceptT.bind,
       ExceptT.pure, ExceptT.bindCont, ExceptT.run, ExceptT.mk, StateT.bind,
       StateT.pure, StateT.get, StateT.modifyGet, modify, modifyGet, get,

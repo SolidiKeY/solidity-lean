@@ -1,0 +1,10 @@
+{
+  "operation": "posix_fadvise POSIX_FADV_DONTNEED on task-owned tool/build cache regular files while no Lean/Lake job exists",
+  "files": 16390,
+  "file_bytes": 4915738673,
+  "before_memory_current": 11645218816,
+  "after_memory_current": 7954550784,
+  "ancestor_limit": "17179869184",
+  "errors": [],
+  "boundary": "Only reclaimable cache pages advised away; no files deleted/modified, no proof/memory/reserve/swap limits changed. Interrupted checkpoint copied verbatim."
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/NestedOlderComposition.lean:Solidity.Backend.StorageOps.NestedOlderComposition.older_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

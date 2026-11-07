@@ -1,0 +1,57 @@
+{
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.explicit_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.false_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.fuel_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.live_fixed_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.malformed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.no_dynamic_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.same_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.snapshot_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopy.Controls.source_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

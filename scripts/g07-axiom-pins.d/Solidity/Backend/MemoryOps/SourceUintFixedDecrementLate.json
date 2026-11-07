@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLate.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_decrement_late_underflow_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLate.lean:Solidity.Backend.MemoryOps.source_uint_fixed_decrement_horizon_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

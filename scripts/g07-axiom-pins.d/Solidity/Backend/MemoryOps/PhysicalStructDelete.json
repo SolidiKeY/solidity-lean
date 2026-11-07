@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalStructDelete.lean:Solidity.Backend.MemoryOps.Physical.delete_struct_child_physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -29,7 +29,7 @@ changed source still requires Lean checking. It is not assertion-level caching.
 Receiver completion, formatting, quick fixes, workspace symbols, project imports,
 cross-file rename and function scheduling are implemented in
 [version 0.5](compiler-project-services.md). Assertion splitting, specification-text
-refactoring and complete Dafny protocol equivalence remain open. The [88-feature inventory](../dafny-editor-features.json) keeps these
+refactoring and complete Dafny protocol equivalence remain open. The [checksum-bound editor inventory](../dafny-editor-features.json) keeps these
 limits visible. The [extension guide](../../vscode/README.md) documents operation
 and [comparison guide](../dafny-editor-parity.md) documents measurement scope.
 

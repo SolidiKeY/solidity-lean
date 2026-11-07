@@ -372,6 +372,9 @@ private theorem stail_simT {op : BinOp} (hop : binInFrag op .int = true) (hand :
     decide_eq_decide.2 ⟨fun h => h ▸ rfl, sgn_inj ha hb⟩
   cases op <;> first | exact absurd hop (by decide) | exact absurd rfl hand | exact absurd rfl hor | skip
   all_goals simp only [BinOp.evalNum, BinOp.arithInt, some_bind']
+  case shr =>
+    rw [sar_tail m m.stack ha hb]
+    exact out_int_ok (sarShr_range (sgn b) (sgn_range ha)) rfl
   · rw [sadd_tail m m.stack ha hb]; exact out_int_if m
   · rw [ssub_tail m m.stack ha hb]; exact out_int_if m
   · rw [smul_tail m m.stack ha hb]; exact out_int_if m

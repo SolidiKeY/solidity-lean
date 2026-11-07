@@ -27,7 +27,8 @@ theorem machineAgreement : MachineAgreement := by
   intro program environment horizon
   rfl
 
-#print axioms machineAgreement
+/-- info: 'Solidity.Lowering.P8.SpecExecution.machineAgreement' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms machineAgreement
 
 /-- The graph of the actual Source machine, before any unimplemented
 failure-resource extension. This is not a frozen OperationalReference: its

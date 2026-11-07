@@ -1,0 +1,99 @@
+{
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.address_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.address_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.address_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.addressOfInteger_observe": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.addressValue_injective": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.allowed_from": [],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.allowed_to": [],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.direct_int_rule": [],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.from_assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.from_local_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.from_uint_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.integer_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.source_from_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.source_from_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.source_from_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.source_from_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.source_to_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.source_to_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.source_to_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.source_to_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.to_assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/AddressConversions.lean:Solidity.Lowering.V07.AddressConversions.to_local_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

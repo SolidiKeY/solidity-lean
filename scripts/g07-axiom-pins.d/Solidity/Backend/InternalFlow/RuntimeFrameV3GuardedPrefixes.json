@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3GuardedPrefixes.lean:Solidity.Backend.InternalFlow.RuntimeFrame.GuardedPrefixes.success_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

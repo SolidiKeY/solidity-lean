@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "module": "Solidity/Yul/Composition/DoWhilePhysical.lean",
+  "sourceCases": 50,
+  "nativeComparisons": 0,
+  "fullProofGate": "pending",
+  "original24": "pending",
+  "sixGeneralCombinations": "pending",
+  "boundary": "actual Source doWhile selected constructor laws; no Source try/raw resume/compiler/world/G01 adequacy"
+}

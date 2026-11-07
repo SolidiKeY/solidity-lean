@@ -1,0 +1,24 @@
+{
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Attached.call_at": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Attached.declaration_at": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Attached.info_unique": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.checked_unique": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Located.descend_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.Located.node_unique": [],
+ "Solidity/Frontend/SolcJson/CallMetadataPath.lean:Solidity.Frontend.CallMetadata.walk_append": [
+  "Quot.sound",
+  "propext"
+ ]
+}

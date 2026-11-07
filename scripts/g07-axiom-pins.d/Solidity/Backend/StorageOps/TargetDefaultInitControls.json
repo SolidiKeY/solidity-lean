@@ -1,0 +1,31 @@
+{
+ "Solidity/Backend/StorageOps/TargetDefaultInitControls.lean:Solidity.Backend.StorageOps.TargetDefaultInit.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInitControls.lean:Solidity.Backend.StorageOps.TargetDefaultInit.Controls.frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInitControls.lean:Solidity.Backend.StorageOps.TargetDefaultInit.Controls.mapping_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInitControls.lean:Solidity.Backend.StorageOps.TargetDefaultInit.Controls.omitted_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInitControls.lean:Solidity.Backend.StorageOps.TargetDefaultInit.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInitControls.lean:Solidity.Backend.StorageOps.TargetDefaultInit.Controls.readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

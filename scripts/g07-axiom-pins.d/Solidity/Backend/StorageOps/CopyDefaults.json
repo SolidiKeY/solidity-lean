@@ -1,0 +1,61 @@
+{
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.demands": [],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.demands_array": [],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.demands_fixed": [],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.demands_mapping": [],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.demands_node": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.demands_prim": [],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.listed_properties": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.listed_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.mem_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.numeric_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.numeric_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.numericInit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDefaults.lean:Solidity.Backend.StorageOps.CopyDefaults.updates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

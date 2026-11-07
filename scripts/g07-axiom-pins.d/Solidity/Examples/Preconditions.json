@@ -1,0 +1,17 @@
+{
+ "Solidity/Examples/Preconditions.lean:Solidity.Examples.Preconditions.badPostEntry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Preconditions.lean:Solidity.Examples.Preconditions.impossibleEntry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Preconditions.lean:Solidity.Examples.Preconditions.possibleEntry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

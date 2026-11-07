@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/LetScopeCompilationControls.lean:Solidity.Yul.Compilation.LetScopeCompilation.Controls.body_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompilationControls.lean:Solidity.Yul.Compilation.LetScopeCompilation.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompilationControls.lean:Solidity.Yul.Compilation.LetScopeCompilation.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetScopeCompilationControls.lean:Solidity.Yul.Compilation.LetScopeCompilation.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

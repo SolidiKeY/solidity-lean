@@ -1,0 +1,60 @@
+import Solidity.Source.ElaborateExamples
+
+/-! Diagnostic baseline of the unchanged Source; these rejection facts are
+NOT desired immutable support and are not registered as completion tests. -/
+namespace Solidity.Source.ImmutableBaseline
+open Solidity.Source.Examples
+open Solidity.Source.ElaborateExamples (num stmt)
+
+def items : Syn (.list (.item .body)) :=
+  .cons (stmt (.assign .assign (.ident "x") (num 7))) .nil
+def stateDecl (kind : Option Constness) (init : Bool := false) : Syn (.part false) :=
+  .stateVar u256 (some .pub) kind none false "x" (if init then .some (num 7) else .none)
+def ctor : Syn (.part false) := .constructor .nil .nil false none (.block items)
+def setter : Syn (.part false) :=
+  .function (.ident "set") .nil (some .external) none .nil false none .nil (.some (.block items))
+def ctorUnit (kind : Option Constness) : Syn .unit :=
+  .unit (.cons (.contract false "C" .none .nil (.cons (stateDecl kind) (.cons ctor .nil))) .nil)
+def initUnit : Syn .unit :=
+  .unit (.cons (.contract false "C" .none .nil (.cons (stateDecl (some .immutable) true) .nil)) .nil)
+def setUnit : Syn .unit :=
+  .unit (.cons (.contract false "C" .none .nil
+    (.cons (stateDecl (some .immutable) true) (.cons setter .nil))) .nil)
+def E : Env := (ctorUnit (some .immutable)).env
+def ctorDecl : Decl := ⟨.constructor, "", some "C", false, ctor⟩
+def setterDecl : Decl := ⟨.function, "set", some "C", false, setter⟩
+def frame : Frame := ⟨[], [], [], [], items, false, false⟩
+
+theorem immutable_ctor_currently_rejected (p : Solidity.Roadmap.Pipeline) :
+    (elaborate (resolveUnit {pipeline := p} (ctorUnit (some .immutable)))).isSome = false := by
+  cases p <;> decide +kernel
+
+def immutable_initializer_accepted (p : Solidity.Roadmap.Pipeline) : Bool :=
+  (elaborate (resolveUnit {pipeline := p} initUnit)).isSome
+#eval (immutable_initializer_accepted .legacy, immutable_initializer_accepted .viaIR)
+
+theorem ordinary_immutable_write_rejected (p : Solidity.Roadmap.Pipeline) :
+    (elaborate (resolveUnit {pipeline := p} setUnit)).isSome = false := by
+  cases p <;> decide +kernel
+
+def mutable_ctor_accepted (p : Solidity.Roadmap.Pipeline) : Bool :=
+  (elaborate (resolveUnit {pipeline := p} (ctorUnit none))).isSome
+#eval (mutable_ctor_accepted .legacy, mutable_ctor_accepted .viaIR)
+
+theorem same_frame : ctorDecl.frame? E = some frame ∧ setterDecl.frame? E = some frame := ⟨rfl, rfl⟩
+
+theorem missing_phase_in_context :
+    (match ctorDecl.frame? E with | some f => some (f.ctx E (some "C")) | none => none) =
+    (match setterDecl.frame? E with | some f => some (f.ctx E (some "C")) | none => none) := rfl
+
+def constructor_accepted (p : Solidity.Roadmap.Pipeline) : Bool :=
+  (elaborate (resolveUnit {pipeline := p} (ctorUnit (some .immutable)))).isSome
+def ordinary_accepted (p : Solidity.Roadmap.Pipeline) : Bool :=
+  (elaborate (resolveUnit {pipeline := p} setUnit)).isSome
+#eval s!"H12_SOURCE_ACCEPTANCE pipeline=legacy ctor={constructor_accepted .legacy} initializer={immutable_initializer_accepted .legacy} ordinary={ordinary_accepted .legacy} mutable={mutable_ctor_accepted .legacy}"
+#eval s!"H12_SOURCE_ACCEPTANCE pipeline=viaIR ctor={constructor_accepted .viaIR} initializer={immutable_initializer_accepted .viaIR} ordinary={ordinary_accepted .viaIR} mutable={mutable_ctor_accepted .viaIR}"
+
+#print axioms immutable_ctor_currently_rejected
+#print axioms ordinary_immutable_write_rejected
+#print axioms missing_phase_in_context
+end Solidity.Source.ImmutableBaseline

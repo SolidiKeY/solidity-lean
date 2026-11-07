@@ -218,4 +218,31 @@ theorem Checked.old_result {root X F n decls input scope locals functions paths 
       (ScopedNames.targetEnv decls scope locals) paths rhs = some certificate.typed :=
   certificate.typed.complete
 
+/-- The same supplemental assignment input determines its entire certificate.
+Namespace certificates do not add lexical or physical execution guarantees. -/
+theorem Checked.unique : ∀ (root X : List Solidity.Yul.ExternalType) (F : List Solidity.Yul.Sig) (n : Nat)
+ (decls : Solidity.Yul.ExternalNames root) (input : Solidity.Yul.ScopedNames.Checked decls)
+ (scope : Solidity.Yul.ExternalScope root X) (locals : List (String × Fin n))
+ (functions : Solidity.Yul.FunctionNames F) (paths : List (List String))
+ (rhs : Solidity.Source.Syn .yulExpr) (first second : Solidity.Yul.ScopedAssignments.Checked input scope locals functions paths rhs),
+ first = second := by
+  intro root X F n decls input scope locals functions paths rhs first second
+  exact Option.some.inj ((Checked.complete first).symm.trans (Checked.complete second))
+
+/-- Certificate equality preserves the exact generated intrinsic statement
+at the same chosen control index. No execution refinement is inferred. -/
+theorem Checked.statement_unique : ∀ (root X : List Solidity.Yul.ExternalType) (F : List Solidity.Yul.Sig) (n : Nat)
+ (decls : Solidity.Yul.ExternalNames root) (input : Solidity.Yul.ScopedNames.Checked decls)
+ (scope : Solidity.Yul.ExternalScope root X) (locals : List (String × Fin n))
+ (functions : Solidity.Yul.FunctionNames F) (paths : List (List String))
+ (rhs : Solidity.Source.Syn .yulExpr) (control : Solidity.Yul.Control)
+ (first second : Solidity.Yul.ScopedAssignments.Checked input scope locals functions paths rhs),
+ Solidity.Yul.ScopedAssignments.Checked.statement first control =
+ Solidity.Yul.ScopedAssignments.Checked.statement second control := by
+  intro root X F n decls input scope locals functions paths rhs control first second
+  exact congrArg
+    (fun certificate : Checked input scope locals functions paths rhs =>
+      Checked.statement certificate control)
+    (Checked.unique root X F n decls input scope locals functions paths rhs first second)
+
 end Solidity.Yul.ScopedAssignments

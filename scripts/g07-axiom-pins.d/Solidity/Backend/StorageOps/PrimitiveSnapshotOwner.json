@@ -1,0 +1,20 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwner.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwner.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.fixed_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwner.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.primitive_slot": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwner.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

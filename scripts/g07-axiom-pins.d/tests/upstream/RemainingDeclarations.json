@@ -1,0 +1,15 @@
+{
+ "tests/upstream/RemainingDeclarations.lean:Solidity.Frontend.staticCompilerLength_agrees": [
+  "propext"
+ ],
+ "tests/upstream/RemainingDeclarations.lean:Solidity.Upstream.RemainingDeclarations.scalar_projection_keeps_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/RemainingDeclarations.lean:Solidity.Upstream.RemainingDeclarations.scalar_projection_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

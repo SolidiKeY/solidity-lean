@@ -1,0 +1,77 @@
+{
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.actual_emission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.actual_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.actual_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.boundary_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.concrete_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.concrete_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.dirty_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.equal_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.model_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.oversized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.shifted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.statement_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.statement_update": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecutionControls.lean:Solidity.Yul.Compilation.WordExecution.Controls.zero_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

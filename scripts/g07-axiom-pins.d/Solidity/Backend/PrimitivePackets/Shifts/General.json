@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/PrimitivePackets/Shifts/General.lean:Solidity.Backend.PrimitivePackets.Shifts.General.expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/General.lean:Solidity.Backend.PrimitivePackets.Shifts.General.public_selection": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/General.lean:Solidity.Backend.PrimitivePackets.Shifts.General.runtime_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/General.lean:Solidity.Backend.PrimitivePackets.Shifts.General.selected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/General.lean:Solidity.Backend.PrimitivePackets.Shifts.General.selected_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/General.lean:Solidity.Backend.PrimitivePackets.Shifts.General.source_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/General.lean:Solidity.Backend.PrimitivePackets.Shifts.General.target": [
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/General.lean:Solidity.Backend.PrimitivePackets.Shifts.General.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

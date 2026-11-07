@@ -1,0 +1,66 @@
+{
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.actual_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.identities": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.initial_observations": [],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.saved_tail_wrong": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.source_heap_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.target_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.wrong_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.Controls.wrong_pipeline_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EffectfulReferencePairPins.lean:Solidity.Backend.Passes.EffectfulReferencePair.payment_free": [
+  "propext"
+ ]
+}

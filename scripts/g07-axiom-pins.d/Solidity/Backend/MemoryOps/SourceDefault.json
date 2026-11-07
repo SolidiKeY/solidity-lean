@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_lowfuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.source_bool_default_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.default_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDefault.lean:Solidity.Backend.MemoryOps.word_empty_allocator_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

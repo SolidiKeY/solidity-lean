@@ -1,0 +1,57 @@
+{
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemParam_countermodel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemParam_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemParam_verdict": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.gapMemWrite_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memAck_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memoryAlias_differentContents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memoryAlias_equalContents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memoryParameter_emptyDomains": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memParamAliasBad_countermodel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memParamSame_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionMemory.lean:Solidity.Examples.Decision.memParamSame_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/ReturnedStorageCapture.lean:Solidity.Backend.Passes.ReturnedStorageCapture.readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,1214 @@
+{
+  "syntax_sha256": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+  "rows": [
+    {
+      "constructor": "nil",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_nil",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "cons",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_cons",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "none",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_none",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "some",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_some",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "unit",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_unit",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "pragma",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_pragma",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "importPath",
+      "role": "import",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_importPath",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "importSymbols",
+      "role": "import",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_importSymbols",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "importStar",
+      "role": "import",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_importStar",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "importAlias",
+      "role": "import",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_importAlias",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "contract",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        2,
+        3,
+        4
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_contract",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "interface",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_interface",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "library",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_library",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "topPart",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_topPart",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "inherit",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 0,
+          "name": "base",
+          "type": "IdPath"
+        }
+      ],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_inherit",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "constructor",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        4
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_constructor",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "function",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 6,
+          "name": "override",
+          "type": "Option (List IdPath)"
+        }
+      ],
+      "syntax_children": [
+        1,
+        4,
+        7,
+        8
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_function",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "modifier",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 3,
+          "name": "override",
+          "type": "Option (List IdPath)"
+        }
+      ],
+      "syntax_children": [
+        1,
+        4
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_modifier",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "fallback",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 5,
+          "name": "override",
+          "type": "Option (List IdPath)"
+        }
+      ],
+      "syntax_children": [
+        0,
+        3,
+        6
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_fallback",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "fbNoParams",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_fbNoParams",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "fbParams",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_fbParams",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "receive",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 4,
+          "name": "override",
+          "type": "Option (List IdPath)"
+        }
+      ],
+      "syntax_children": [
+        2,
+        5
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_receive",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "struct",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_struct",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "structMember",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_structMember",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "enum",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_enum",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "udvt",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_udvt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "stateVar",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 3,
+          "name": "override",
+          "type": "Option (List IdPath)"
+        }
+      ],
+      "syntax_children": [
+        0,
+        6
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_stateVar",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "constant",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_constant",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "event",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_event",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "eventParam",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_eventParam",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "error",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_error",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "errorParam",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_errorParam",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "usingPart",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_usingPart",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "usingPath",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 0,
+          "name": "lib",
+          "type": "IdPath"
+        }
+      ],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_usingPath",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "usingAliases",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_usingAliases",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "usingAlias",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 0,
+          "name": "fn",
+          "type": "IdPath"
+        }
+      ],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_usingAlias",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "positional",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_positional",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "named",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_named",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "namedArg",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_namedArg",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "modInv",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 0,
+          "name": "name",
+          "type": "IdPath"
+        }
+      ],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_modInv",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "param",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_param",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "elem",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_elem",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "fnType",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        3
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_fnType",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "mapping",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 0,
+          "name": "key",
+          "type": "MapKey"
+        }
+      ],
+      "syntax_children": [
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_mapping",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "userType",
+      "role": "explicit-path",
+      "direct_fields": [
+        {
+          "position": 0,
+          "name": "path",
+          "type": "IdPath"
+        }
+      ],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_userType",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "array",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_array",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "varDecl",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_varDecl",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "index",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_index",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "slice",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_slice",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "member",
+      "role": "member-chain",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_member",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "callOptions",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_callOptions",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "call",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_call",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "payableConv",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_payableConv",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "metaType",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_metaType",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "unaryPrefix",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_unaryPrefix",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "unarySuffix",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_unarySuffix",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "exp",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_exp",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "mulDivMod",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_mulDivMod",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "addSub",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_addSub",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "shift",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_shift",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "bitAnd",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_bitAnd",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "bitXor",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_bitXor",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "bitOr",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_bitOr",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "order",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_order",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "equality",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_equality",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "and",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_and",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "or",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_or",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "cond",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_cond",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "assign",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_assign",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "new",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_new",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "tuple",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_tuple",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "inlineArray",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_inlineArray",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "ident",
+      "role": "identifier-head",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_ident",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "lit",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_lit",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "litUnit",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_litUnit",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "elemType",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_elemType",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "declVar",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_declVar",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "declTuple",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2,
+        3
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_declTuple",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "exprStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_exprStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "blockStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_blockStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "simpleStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_simpleStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "ifStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_ifStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "forStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_forStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "whileStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_whileStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "doWhile",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_doWhile",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "continueStmt",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_continueStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "breakStmt",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_breakStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "tryStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_tryStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "catchPlain",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_catchPlain",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "catchSig",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1,
+        2,
+        3
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_catchSig",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "returnStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_returnStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "emit",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_emit",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "revert",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_revert",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "assembly",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_assembly",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "block",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_block",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "stmtItem",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_stmtItem",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "uncheckedItem",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_uncheckedItem",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulBlock",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulBlock",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulLet",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulLet",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulAssign",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulAssign",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulExprStmt",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulExprStmt",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulIf",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulIf",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulFor",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulFor",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulSwitch",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        0,
+        1,
+        2
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulSwitch",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulCase",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulCase",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulLeave",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulLeave",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulBreak",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulBreak",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulContinue",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulContinue",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulFun",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        3
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulFun",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulPath",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulPath",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulCall",
+      "role": "recursive",
+      "direct_fields": [],
+      "syntax_children": [
+        1
+      ],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulCall",
+      "status": "kernel-fixture-ready"
+    },
+    {
+      "constructor": "yulLit",
+      "role": "no-solidity-qualified-path",
+      "direct_fields": [],
+      "syntax_children": [],
+      "kernel_fixture": "ConstructorFixtures.fixture_yulLit",
+      "status": "kernel-fixture-ready"
+    }
+  ]
+}

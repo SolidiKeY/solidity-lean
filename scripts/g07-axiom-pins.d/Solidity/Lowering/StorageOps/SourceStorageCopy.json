@@ -1,0 +1,52 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.captured_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.element_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.load_array": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.load_elems": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.set_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.store_array": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.store_elems": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.store_leaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopy.lean:Solidity.Backend.StorageOps.SourceStorageCopy.write_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

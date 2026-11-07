@@ -1,0 +1,4820 @@
+{
+  "schemaVersion": 1,
+  "basis": "dc2718096308da55e57e713a4d3b37aec4d47606",
+  "boundary": "Syntactic search plus independent read-only finder review. Arm hits can include helper matches. Neither per-constructor elaboration correctness nor exact axiom signatures are certified.",
+  "sourceSha256": {
+    "Solidity/Syntax/Elab/Values.lean": "1f11c77e3d374d273755f7146714c170b8b370834cfe92eb9d0c267da8128e66",
+    "Solidity/Syntax/Elab/Arms.lean": "518335dc8c62d9f7bb493b32f372c5f96cb38dc142ce4d0061406d136699d194",
+    "Solidity/Syntax/Elab/Stmt.lean": "37af387a108b618627ed2b309711d7f6b624a45eb06fa7d05c1acf32bb596591",
+    "Solidity/Syntax/Elab/Lower.lean": "45c15f74514675e02f8f4eb2c0aa20ae8c86c2cb0bf2fc8f8720e9a572dc0c41",
+    "Solidity/Calculus/StmtSound.lean": "ff66c6a0f12b79df3d97c2129872af5400ace11f24e897944b50a485839d390a",
+    "Solidity/Calculus/SoundStep.lean": "44af31acf55715beb6cce124f0b80890793763f2654864dec196c07f8a1b4e3e",
+    "Solidity/Theory/Bridge/Denote.lean": "dfb71b1ad5c191193e1e7fa687aad5e99b5b59e879b410e2516a647e6163ec76"
+  },
+  "counts": {
+    "RawExpr": 17,
+    "RawStmt": 42
+  },
+  "constructors": [
+    {
+      "family": "RawExpr",
+      "constructor": "num",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 322,
+          "arm": "| .num n => return .val .uint (.simple (\u2190 litAt C \u0393 .uint n))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 323,
+          "arm": "| .unop .neg (.num n) => return .val .int (.simple (\u2190 litAt C \u0393 .int (-(n : Int))))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 467,
+          "arm": "| .num n => return .simple (\u2190 litAt C \u0393 p n)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 469,
+          "arm": "| .unop .neg (.num n) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 946,
+          "arm": "| k :: .num n :: more => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 957,
+          "arm": "| .index t (.num m) => (abiTyExpr? t).map (.fixed \u00b7 m)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1311,
+          "arm": "| .num _ => none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1648,
+          "arm": "| none => pure (.call \"uint8\" [.call bytesIndexName [b, i, .num n]])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1861,
+          "arm": "| some v => .num (v % ((2 ^ 256 : Nat) : Int)).toNat"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1870,
+          "arm": "| some v => .num (v % ((2 ^ 256 : Nat) : Int)).toNat"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1874,
+          "arm": "| .addW, some v => if v < 0 then .binop .subW (word a) (.num v.natAbs) else .binop op (word a) (word b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1875,
+          "arm": "| .subW, some v => if v < 0 then .binop .addW (word a) (.num v.natAbs) else .binop op (word a) (word b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1881,
+          "arm": "| some v => .num (v % ((2 ^ 256 : Nat) : Int)).toNat"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1896,
+          "arm": "| .unop .bnot a => return .binop .subW (.num (2 ^ n - 1)) a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 355,
+          "arm": "| .call \"#bytesIndex\" [b, i, .num n] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 379,
+          "arm": "| .num _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 739,
+          "arm": "| some bs => .num bs.length"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 742,
+          "arm": "| .num m => .num ((m + 31) / 32 * 32)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1485,
+          "arm": "| .pushIncDec op b => some (if op.isIncrement then .add else .sub, b, .num 1)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1503,
+          "arm": "| .mul, some _ => return \u2190 push [] (.num 0)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1511,
+          "arm": "| .mul => .binop .mul R (.num 0)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1519,
+          "arm": "| _, _ => return \u2190 push [] (.binop op (.num 0) r)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 136,
+          "arm": "| .index e _ => .index (shape e) (.num 0)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 904,
+          "arm": "| .index b (.num _) => stableTarget b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 768,
+          "arm": "| .lit n _ => if n < 0 then .unop .neg (.num n.natAbs) else .num n.toNat"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 855,
+          "arm": "| .num m => .num (m + n)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 856,
+          "arm": "| _ => .binop .add a (.num n)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 884,
+          "arm": "| .bool => .ternary e (.num 1) (.num 0)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 901,
+          "arm": "| .uint n => abiBytes r (.num (o + 32 - n / 8)) w (n / 8)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 902,
+          "arm": "| .bool => abiBytes r (.num (o + 31)) w 1"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 903,
+          "arm": "| .bytesN n => abiBytes r (.num o) w n"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 904,
+          "arm": "| _ => abiBytes r (.num o) w 32"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 915,
+          "arm": "| .uint n => abiLitBytes r (.num (o + 32 - n / 8)) v (n / 8)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 916,
+          "arm": "| .bool => abiLitBytes r (.num (o + 31)) v 1"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 917,
+          "arm": "| .bytesN n => abiLitBytes r (.num o) v n"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 918,
+          "arm": "| _ => abiLitBytes r (.num o) v 32"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 948,
+          "arm": "| some (.num b), .num c => .num (b + c)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1017,
+          "arm": "| .num k => .num (k * 2 ^ shift)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1021,
+          "arm": "| a => .binop .shl a (.num shift))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1023,
+          "arm": "| .prim _, .num n => pure (RevPart.bytes (Semantics.wordBytes n))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1173,
+          "arm": "| .fixed e n => abiSeqSizeGen e (.num n) (.index v)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1175,
+          "arm": "| _ => pure ([], .num 32)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1227,
+          "arm": "| .fixed e n => abiSeqWriteGen r e (.num n) (.index v) p"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1468,
+          "arm": "| .index (.name t) (.num m) => (valueKind? t).map (.fixed \u00b7 m)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1530,
+          "arm": "| .num l => if l < 32 * n then .revert else .require (.binop .ge len (.num (32 * n)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1531,
+          "arm": "| _ => .require (.binop .ge len (.num (32 * n)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1617,
+          "arm": "| some bs => pure (some (.num (Keccak.keccak256Nat bs / 2 ^ 224), rest))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1618,
+          "arm": "| none => pure (some (.binop .shr (.call \"keccak256\" [s]) (.num 224), rest))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "name",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 51,
+          "arm": "| .name x, m =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 277,
+          "arm": "| .call (.name _) _ => []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 325,
+          "arm": "| .name x =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 846,
+          "arm": "| .name x =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 886,
+          "arm": "| .name \"this\" | .env .selfAddress => some (.env .selfAddress)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 904,
+          "arm": "| .name x =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 955,
+          "arm": "| .name t =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1130,
+          "arm": "| .name g =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1156,
+          "arm": "| .name g =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1222,
+          "arm": "| e@(.name _) => if narrowWhole C \u0393 e then some e else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1292,
+          "arm": "| .name _ => none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1312,
+          "arm": "| .name x =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1383,
+          "arm": "| .name x =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1421,
+          "arm": "| .name x =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 2046,
+          "arm": "| .name _, .path (.ref _) _ | .name _, .mpath (.ref _) _ => return ([], e)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 2062,
+          "arm": "| .name name => localShape ec name"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 380,
+          "arm": "| .name _ => (intTyOf C \u0393k k).any fun (p, n) => p == .uint && n == 256"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 740,
+          "arm": "| none => .name L"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 786,
+          "arm": "| none => abiBytes r (atO 0) (.name L) 32"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1213,
+          "arm": "| none => .requireReason c (.name x))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1313,
+          "arm": "| .call (.name f) args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1422,
+          "arm": "| .call (.field (.name n) g) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1424,
+          "arm": "| .call (.name f) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1432,
+          "arm": "| .call (.name _) _ => s"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1435,
+          "arm": "| .call e args => .call (.name callValueName) (e :: args)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1439,
+          "arm": "| .call (.name f) as =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1580,
+          "arm": "| .call (.name f) as => pure [(RawExpr.call f as, whole)]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1695,
+          "arm": "| .val p (.simple (.local x)) => elabCall f args (some (x.name \u0393.names, p)) (widthIn C (\u2190 ctx) l)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1741,
+          "arm": "| some r => narrowPost C (.name x) r"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1904,
+          "arm": "| some T, .name n =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1919,
+          "arm": "| .call (.name \"constructor\") args => elabCtor args"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1920,
+          "arm": "| .call (.name f) args => elabCall f args none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 259,
+          "arm": "| .name n => match Var.ofName n with"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 379,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call g as)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 380,
+          "arm": "| none => .call (.name g) as"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 522,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call y args)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 523,
+          "arm": "| none => .call (.name y) args"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 902,
+          "arm": "| .name _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 134,
+          "arm": "| .name x =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 194,
+          "arm": "| .send (some T) (.name x) e a g =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 253,
+          "arm": "| [n], e => pure [.assign (.name n) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 260,
+          "arm": "| rs, e@(.call ..) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 262,
+          "arm": "| rs, e@(.ternary _ (.call ..) (.call ..)) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 696,
+          "arm": "| _ => throw s!\"modifier {m.name}: the reference parameter {n} is in memory or storage\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 770,
+          "arm": "| .local i => .name (toString (i.name ns))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 980,
+          "arm": "| some (.uint, n), _ => some (unsigned (n / 8) (.call T [.name w]))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1463,
+          "arm": "| .name t =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1468,
+          "arm": "| .index (.name t) (.num m) => (valueKind? t).map (.fixed \u00b7 m)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1516,
+          "arm": "| .call f [.name base, o, L] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1581,
+          "arm": "| .tuple s, .name t => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1586,
+          "arm": "| .fixed kk m, .index (.name t) _ => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1590,
+          "arm": "| .arr kk, .name t => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1628,
+          "arm": "| .name g =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1747,
+          "arm": "| some (x, _), [(_, v)] => [.assign (.name (toString x)) (.name v)]"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "bool",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 324,
+          "arm": "| .bool b => pure (.val .bool (.simple (.bool b)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1073,
+          "arm": "| .prim .bool => some \"bool\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1320,
+          "arm": "| .unop .not _ => some (.bool, 256)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1350,
+          "arm": "| .bool _ => some (.bool, 256)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1086,
+          "arm": "| .error _ => .cons (.assert (.simple (.bool false))) .nil) recDepth)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1823,
+          "arm": "| .bool => .simple (.bool false)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1916,
+          "arm": "| .val .bool (.simple (.local y)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 806,
+          "arm": "| .expr e => do pure (.val (\u2190 loopExpr \u0393 .bool e \"invariant\"))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 387,
+          "arm": "| none, [] => pure (.bool true)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 486,
+          "arm": "| .forLoop a i c u b => (a, c.getD (.bool true), i, u, b, false)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 489,
+          "arm": "| _ => ({}, .bool true, [], [], [], false)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 769,
+          "arm": "| .bool b => .bool b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 818,
+          "arm": "| .bool => 1"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 827,
+          "arm": "| .bool => .bool"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 876,
+          "arm": "| .bool, .bool b => some (if b then 1 else 0)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 877,
+          "arm": "| .bool, _ => none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 884,
+          "arm": "| .bool => .ternary e (.num 1) (.num 0)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 892,
+          "arm": "| .bool => abiBytes r (o.addN 31) w 1"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 902,
+          "arm": "| .bool => abiBytes r (.num (o + 31)) w 1"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 916,
+          "arm": "| .bool => abiLitBytes r (.num (o + 31)) v 1"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1024,
+          "arm": "| .prim _, .bool b => pure (RevPart.bytes (Semantics.wordBytes (if b then 1 else 0)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1044,
+          "arm": "| .bool => \"bool\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1683,
+          "arm": "| .ok (.val .bool _) => pure .bool"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1736,
+          "arm": "| some .bool, some .bool => true"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "field",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 278,
+          "arm": "| .call (.field _ m) _ => if [\"push\", \"pop\", \"transfer\"].contains m then [] else [()]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 344,
+          "arm": "| .field e f => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 365,
+          "arm": "| some T => pure (.path T (.loc (.field b f h)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 369,
+          "arm": "| some T => pure (.mpath T (.loc (.field b f h)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 781,
+          "arm": "| .path (.prim p) (.loc (.field b f h)) => pure ([], \u27e8\u0393, p, .field b f h\u27e9)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 789,
+          "arm": "| .mpath (.prim p) (.loc (.field b f h)) => pure ([], \u27e8\u0393, p, .mfield b f h\u27e9)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 809,
+          "arm": "| @OpLoc.field _ _ s _ b f h =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 858,
+          "arm": "| .field e f => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 894,
+          "arm": "| .field r g =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1225,
+          "arm": "| e@(.field b _) => if narrowWhole C \u0393 e then some e else narrowBase? \u0393 b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1291,
+          "arm": "| .field b _ => narrowBase? \u0393 b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1355,
+          "arm": "| .field e f =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1401,
+          "arm": "| e@(.field b g) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1430,
+          "arm": "| .field _ \"length\" => none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1431,
+          "arm": "| e@(.field f m) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1536,
+          "arm": "| some (r, g) => do pure (.field (\u2190 fnPure \u0393 r) g)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1568,
+          "arm": "| some (r, g) => do pure (.field (\u2190 fnPure \u0393 r) g)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1572,
+          "arm": "| .field e m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1589,
+          "arm": "| none => do pure (.field (\u2190 fnPure \u0393 e) m)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1743,
+          "arm": "| .field b \"length\" => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1748,
+          "arm": "| .field b f => do pure (.field (\u2190 bytesPure \u0393 b) f)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1791,
+          "arm": "| .call (.field b \"push\") [o], .call f [r] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1903,
+          "arm": "| .field e f => do pure (.field (\u2190 narrowPure unc \u0393 e) f)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 98,
+          "arm": "| .field e f => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 497,
+          "arm": "| \"abi.encodeCall\", [.field r _, _] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 726,
+          "arm": "| .field b g => enumLit? C \u0393n b g"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1303,
+          "arm": "| .call (.field e m) args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1422,
+          "arm": "| .call (.field (.name n) g) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1433,
+          "arm": "| .call e@(.field _ m) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1568,
+          "arm": "| .call (.field b \"push\") [a] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1863,
+          "arm": "| .call (.field (.call f args) \"push\") values => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1872,
+          "arm": "| .call (.field (.call f args) \"pop\") [] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1874,
+          "arm": "| .call (.field e \"push\") args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1892,
+          "arm": "| .call (.field e \"pop\") [] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1896,
+          "arm": "| .call (.field e \"transfer\") [a] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 137,
+          "arm": "| .field e f => .field (shape e) f"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 903,
+          "arm": "| .field b _ => stableTarget b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 78,
+          "arm": "| .index base _ | .field base _ => base.inlineArrayRoot"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 133,
+          "arm": "| .field _ \"length\" => pure (.named \"uint\")"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1166,
+          "arm": "| .bytes => pure ([], (abiPad (.field v \"length\")).addN 32)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1174,
+          "arm": "| .tuple _ ms => abiTupleSizeGen (ms.map fun (f, mt) => (mt, .field v f))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1228,
+          "arm": "| .tuple _ ms => abiTupleWriteGen r (ms.map fun (f, mt) => (mt, .field v f)) p"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1624,
+          "arm": "| e@(.field _ _) =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "index",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 372,
+          "arm": "| .index e k => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 374,
+          "arm": "| .path (.ref (.mapping kp V)) b => pure (.path V (.loc (.index .map b (\u2190 check \u0393 kp k))))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 375,
+          "arm": "| .path (.ref (.array E)) b => pure (.path E (.loc (.index (.arr .dyn) b (\u2190 check \u0393 .uint k))))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 376,
+          "arm": "| .mpath (.ref (.array E)) b => pure (.mpath E (.loc (.index .dyn b (\u2190 check \u0393 .uint k))))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 782,
+          "arm": "| .path (.prim p) (.loc (@Loc.index _ _ _ k _ it b i)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 784,
+          "arm": "| some ie => pure ([], \u27e8\u0393, p, .index it b ie\u27e9)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 790,
+          "arm": "| .mpath (.prim p) (.loc (.index a b i)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 814,
+          "arm": "| @OpLoc.index _ _ R _ _ it b i =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 853,
+          "arm": "| .index e _ => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 957,
+          "arm": "| .index t (.num m) => (abiTyExpr? t).map (.fixed \u00b7 m)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1223,
+          "arm": "| e@(.index b k) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1290,
+          "arm": "| .index b k => (narrowBase? \u0393 b).orElse fun _ => narrowWholeUse? \u0393 k"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1353,
+          "arm": "| .index e k => (pathWidth? C \u0393 (.index e k)).orElse fun _ => some (.uint, 256)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1405,
+          "arm": "| e@(.index ..) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1426,
+          "arm": "| e@(.index b _) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1591,
+          "arm": "| .index a b => do pure (.index (\u2190 fnPure \u0393 a) (\u2190 fnPure \u0393 b))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1730,
+          "arm": "| .index b i => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1904,
+          "arm": "| .index e k => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 109,
+          "arm": "| .index e k => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 136,
+          "arm": "| .index e _ => .index (shape e) (.num 0)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 904,
+          "arm": "| .index b (.num _) => stableTarget b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 78,
+          "arm": "| .index base _ | .field base _ => base.inlineArrayRoot"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 129,
+          "arm": "| .index b _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1173,
+          "arm": "| .fixed e n => abiSeqSizeGen e (.num n) (.index v)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1227,
+          "arm": "| .fixed e n => abiSeqWriteGen r e (.num n) (.index v) p"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1468,
+          "arm": "| .index (.name t) (.num m) => (valueKind? t).map (.fixed \u00b7 m)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1586,
+          "arm": "| .fixed kk m, .index (.name t) _ => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "binop",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 385,
+          "arm": "| .binop op a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 418,
+          "arm": "| true => pure (.val _ (.binop op h rfl (\u2190 check \u0393 p a) (\u2190 check \u0393 p b)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 475,
+          "arm": "| .binop op a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 494,
+          "arm": "| false => checkVia \u0393 p (.binop op a b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1266,
+          "arm": "| .binop _ a b | .opAssign _ a b => (narrowWholeUse? \u0393 a).orElse fun _ => narrowWholeUse? \u0393 b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1324,
+          "arm": "| .binop op a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1446,
+          "arm": "| .binop op a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1592,
+          "arm": "| .binop op a b => do pure (.binop op (\u2190 fnPure \u0393 a) (\u2190 fnPure \u0393 b))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1749,
+          "arm": "| .binop op a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1799,
+          "arm": "| .binop op _ _, some (p, n) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1837,
+          "arm": "| .binop .div a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1874,
+          "arm": "| .addW, some v => if v < 0 then .binop .subW (word a) (.num v.natAbs) else .binop op (word a) (word b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1875,
+          "arm": "| .subW, some v => if v < 0 then .binop .addW (word a) (.num v.natAbs) else .binop op (word a) (word b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1876,
+          "arm": "| _, _ => .binop op (word a) (word b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1886,
+          "arm": "| .binop op a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1896,
+          "arm": "| .unop .bnot a => return .binop .subW (.num (2 ^ n - 1)) a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1901,
+          "arm": "| .binop op a b => do narrowWrapNode C unc \u0393 (.binop op (\u2190 narrowPure unc \u0393 a) (\u2190 narrowPure unc \u0393 b))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 131,
+          "arm": "| .binop op a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 749,
+          "arm": "| .arr _ => if std then .binop .add acc ((words L).addN 32) else .binop .add acc (words L)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1511,
+          "arm": "| .mul => .binop .mul R (.num 0)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1519,
+          "arm": "| _, _ => return \u2190 push [] (.binop op (.num 0) r)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 111,
+          "arm": "| .binop op a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 856,
+          "arm": "| _ => .binop .add a (.num n)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 949,
+          "arm": "| some b, o => .binop .add b o"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1021,
+          "arm": "| a => .binop .shl a (.num shift))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1530,
+          "arm": "| .num l => if l < 32 * n then .revert else .require (.binop .ge len (.num (32 * n)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1531,
+          "arm": "| _ => .require (.binop .ge len (.num (32 * n)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1618,
+          "arm": "| none => pure (some (.binop .shr (.call \"keccak256\" [s]) (.num 224), rest))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "unop",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 323,
+          "arm": "| .unop .neg (.num n) => return .val .int (.simple (\u2190 litAt C \u0393 .int (-(n : Int))))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 428,
+          "arm": "| .unop op a => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 432,
+          "arm": "| true => pure (.val _ (.unop op h rfl v))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 469,
+          "arm": "| .unop .neg (.num n) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1267,
+          "arm": "| .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1320,
+          "arm": "| .unop .not _ => some (.bool, 256)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1321,
+          "arm": "| .unop .toInt _ => some (.int, 256)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1322,
+          "arm": "| .unop .toUint _ => some (.uint, 256)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1323,
+          "arm": "| .unop _ a => intTyOf \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1450,
+          "arm": "| .unop .bnot a => bytesOf? \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1593,
+          "arm": "| .unop op a => do pure (.unop op (\u2190 fnPure \u0393 a))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1756,
+          "arm": "| .unop op a => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1802,
+          "arm": "| .unop .neg _, some (.int, n) => if n < 256 then some (.int, n) else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1836,
+          "arm": "| .unop .neg a => if a.isLit then return e else return neg a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1896,
+          "arm": "| .unop .bnot a => return .binop .subW (.num (2 ^ n - 1)) a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1902,
+          "arm": "| .unop op a => do narrowWrapNode C unc \u0393 (.unop op (\u2190 narrowPure unc \u0393 a))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 177,
+          "arm": "| .unop op a => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 120,
+          "arm": "| .unop op a => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 768,
+          "arm": "| .lit n _ => if n < 0 then .unop .neg (.num n.natAbs) else .num n.toNat"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 883,
+          "arm": "| .int _ => .unop .toUint e"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "ternary",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 420,
+          "arm": "| .ternary c a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 911,
+          "arm": "| .ternary _ a _ => fnTyOfExpr \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 967,
+          "arm": "| .ternary _ a _ => exprShape \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1004,
+          "arm": "| .ternary _ a b => stringReason? \u0393 a && stringReason? \u0393 b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1017,
+          "arm": "| .ternary _ a b => dynamicBytesExpr \u0393 a && dynamicBytesExpr \u0393 b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1030,
+          "arm": "| .ternary _ a b => do shapeCheck \u0393 ws a; shapeCheck \u0393 ws b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1135,
+          "arm": "| .ternary _ a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1268,
+          "arm": "| .ternary c a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1281,
+          "arm": "| e@(.ternary c a b) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1334,
+          "arm": "| .ternary _ a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1391,
+          "arm": "| .ternary _ a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1451,
+          "arm": "| .ternary _ a b => joinBytes (bytesOf? \u0393 a) (bytesOf? \u0393 b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1594,
+          "arm": "| .ternary c a b => do pure (.ternary (\u2190 fnPure \u0393 c) (\u2190 fnPure \u0393 a) (\u2190 fnPure \u0393 b))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1764,
+          "arm": "| .ternary c a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1910,
+          "arm": "| .ternary c a b => do pure (.ternary (\u2190 narrowPure unc \u0393 c) (\u2190 narrowPure unc \u0393 a) (\u2190 narrowPure unc \u0393 b))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 181,
+          "arm": "| .ternary c a b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 186,
+          "arm": "| .ternary _ a b => stringsOnly a && stringsOnly b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 306,
+          "arm": "| _, _ => pure (P, .ternary c a b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 913,
+          "arm": "| .ternary c a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 262,
+          "arm": "| rs, e@(.ternary _ (.call ..) (.call ..)) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 884,
+          "arm": "| .bool => .ternary e (.num 1) (.num 0)"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "incDec",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 434,
+          "arm": "| .incDec .. => throw \"`++` or `\u2212\u2212` under a short-circuit operator or in a conditional's branch\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1267,
+          "arm": "| .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1340,
+          "arm": "| .incDec _ e => intTyOf \u0393 e"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1595,
+          "arm": "| .incDec op e => do pure (.incDec op (\u2190 fnPure \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1768,
+          "arm": "| .incDec op e => do pure (.incDec op (\u2190 bytesPure \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1911,
+          "arm": "| .incDec op e => do pure (.incDec op (\u2190 narrowPure unc \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 307,
+          "arm": "| .incDec op e => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1238,
+          "arm": "| .incDec op e, .ok (.val _ (.simple (.local _))) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1279,
+          "arm": "| s@(.declPush ..) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1376,
+          "arm": "| .assign l _ | .opAssign _ l _ | .incDec _ l | .delete l =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1846,
+          "arm": "| .incDec op l => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1849,
+          "arm": "| true => pure (pre ++ [.of \u0393 (.incDec op hp t)] ++ (\u2190 narrowCheck C p (widthIn C (\u2190 ctx) l) l))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 128,
+          "arm": "| .incDec _ l | .assign l _ | .opAssign _ l _ => inlineExprTy \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 714,
+          "arm": "| .incDec op l => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "newArr",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 437,
+          "arm": "| .newArr .. => throw \"`new` stands only on the right of `=`\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 966,
+          "arm": "| .newArr T _ => ((elabTyW C T).toOption.map (\u00b7.2)).getD []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1267,
+          "arm": "| .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1513,
+          "arm": "| .newArr R _ => (elabTyW C R).map (\u00b7.1)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1596,
+          "arm": "| .newArr T e => do pure (.newArr T (\u2190 fnPure \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1769,
+          "arm": "| .newArr T e => do pure (.newArr T (\u2190 bytesPure \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1912,
+          "arm": "| .newArr T e => do pure (.newArr T (\u2190 narrowPure unc \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 348,
+          "arm": "| .newArr T n => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1241,
+          "arm": "| .newArr T n, _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1265,
+          "arm": "| .declMemory T x (some (.newArr T' n)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1677,
+          "arm": "| .assign l (.newArr T n) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1780,
+          "arm": "| .declMemory T x (some (.newArr T' n)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 109,
+          "arm": "| .newArr T _ =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "call",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 277,
+          "arm": "| .call (.name _) _ => []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 278,
+          "arm": "| .call (.field _ m) _ => if [\"push\", \"pop\", \"transfer\"].contains m then [] else [()]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 279,
+          "arm": "| .call _ _ => [()]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 443,
+          "arm": "| .call \"address\" [a] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 453,
+          "arm": "| .call f _ => throw s!\"the call {f}(\u2026) under a short-circuit operator or in a conditional's branch\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 912,
+          "arm": "| .call g args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 942,
+          "arm": "| .call f (t :: rest) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 958,
+          "arm": "| .call \"#abiArrayType\" [t] => (abiTyExpr? t).map .array"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 959,
+          "arm": "| e@(.call ..) => (abiEnumBelow? e).bind fun (t, _) => abiTyExpr? t"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 968,
+          "arm": "| .call \"#sliceCopy\" [v] | .call \"#sliceRaw\" [v, _, _]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 969,
+          "arm": "| .call \"#sliceDesc\" [v, _, _] => exprShape \u0393 v"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 970,
+          "arm": "| .call f as =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1005,
+          "arm": "| .call \"string\" [a] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1009,
+          "arm": "| .call \"string.concat\" as => as.attach.all fun \u27e8a, _ha\u27e9 => stringReason? \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1029,
+          "arm": "| .call \"#array\" _ => pure () -- checked on the inferred memory local after hoisting"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1139,
+          "arm": "| .call g _ => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1229,
+          "arm": "| .call \"#array\" as => as.findSome? (narrowWholeAt? \u0393)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1230,
+          "arm": "| .call f as =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1234,
+          "arm": "| .call \"bytes\" [v] => v"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1341,
+          "arm": "| .call f _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1390,
+          "arm": "| .call \"address\" [_] => if m == \"#address\" then some 20 else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1396,
+          "arm": "| .call f _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1436,
+          "arm": "| .call f _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1514,
+          "arm": "| .call f _ => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1532,
+          "arm": "| .call f (h :: as) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1590,
+          "arm": "| .call f as => do pure (.call f (\u2190 as.mapM (fnPure \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1648,
+          "arm": "| none => pure (.call \"uint8\" [.call bytesIndexName [b, i, .num n]])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1664,
+          "arm": "| .call \"#array\" as => pure (.call \"#array\" as)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1665,
+          "arm": "| .call f as => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1676,
+          "arm": "| .call \"bytes\" [value] => value"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1686,
+          "arm": "| .call \"bytes\" [_] => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1709,
+          "arm": "| none => .call (tyName .uint (8 * n)) [a]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1717,
+          "arm": "| some n => .call (abiBytesMark n) [a]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1729,
+          "arm": "| none => pure (.call f as')"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1791,
+          "arm": "| .call (.field b \"push\") [o], .call f [r] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1862,
+          "arm": "| none => .call \"uint\" [a]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1871,
+          "arm": "| none => .call \"uint\" [l]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1882,
+          "arm": "| none => .call \"uint\" [a]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1913,
+          "arm": "| .call f as => do pure (.call f (\u2190 as.mapM (narrowPure unc \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 355,
+          "arm": "| .call \"#bytesIndex\" [b, i, .num n] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 371,
+          "arm": "| .call \"#sliceIndex\" [off, len, k, _past] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 399,
+          "arm": "| .call \"#sliceAt\" [view, k] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 406,
+          "arm": "| .call \"#sliceLength\" [view] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 412,
+          "arm": "| .call \"#sliceDecode\" (view :: rest) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 418,
+          "arm": "| .call \"#sliceCopy\" [view] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 448,
+          "arm": "| .call \"#array\" args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 454,
+          "arm": "| .call f args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 505,
+          "arm": "| .call g [x] => if (abiBytesMark? g).isSome then x else sel"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 511,
+          "arm": "| .call g [x] => if (abiBytesMark? g).isSome then x else a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 523,
+          "arm": "| .call g [x] => if (abiBytesMark? g).isSome then x else a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1246,
+          "arm": "| .call f args, .ok (.val _ (.simple (.local _))) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1254,
+          "arm": "| .decl T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1303,
+          "arm": "| .call (.field e m) args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1313,
+          "arm": "| .call (.name f) args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1361,
+          "arm": "| .tupleAssign ts (.call \"#sliceDecode\" (view :: rest)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1363,
+          "arm": "| .tupleDecl ts (.call \"#sliceDecode\" (view :: rest)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1373,
+          "arm": "| .call \"#array\" _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1415,
+          "arm": "| .call \"string\" [_] | .call \"string.concat\" _ => !stringReason? C \u0393 e"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1422,
+          "arm": "| .call (.field (.name n) g) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1424,
+          "arm": "| .call (.name f) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1432,
+          "arm": "| .call (.name _) _ => s"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1433,
+          "arm": "| .call e@(.field _ m) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1435,
+          "arm": "| .call e args => .call (.name callValueName) (e :: args)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1439,
+          "arm": "| .call (.name f) as =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1442,
+          "arm": "| .call _ as' => pure as'"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1450,
+          "arm": "| .tupleDecl _ (.call \"abi.decode\" [d, .tuple ts]) | .tupleAssign _ (.call \"abi.decode\" [d, .tuple ts]) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1568,
+          "arm": "| .call (.field b \"push\") [a] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1575,
+          "arm": "| .call f _ => ((lookupBy f funs).bind (\u00b7.ret)).any"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1580,
+          "arm": "| .call (.name f) as => pure [(RawExpr.call f as, whole)]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1692,
+          "arm": "| .assign l (.call f args) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1727,
+          "arm": "| .decl T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1744,
+          "arm": "| .declStorage T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1788,
+          "arm": "| .declMemory T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1863,
+          "arm": "| .call (.field (.call f args) \"push\") values => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1872,
+          "arm": "| .call (.field (.call f args) \"pop\") [] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1874,
+          "arm": "| .call (.field e \"push\") args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1892,
+          "arm": "| .call (.field e \"pop\") [] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1896,
+          "arm": "| .call (.field e \"transfer\") [a] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1919,
+          "arm": "| .call (.name \"constructor\") args => elabCtor args"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1920,
+          "arm": "| .call (.name f) args => elabCall f args none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1921,
+          "arm": "| .call .. => throw \"only push, pop and transfer are calls on a receiver\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2052,
+          "arm": "| .call h [a] => if funs.any (\u00b7.1 == h) then e else a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 379,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call g as)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 380,
+          "arm": "| none => .call (.name g) as"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 522,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call y args)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 523,
+          "arm": "| none => .call (.name y) args"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 598,
+          "arm": "| .call f args (.storage (.array E) r) body =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 610,
+          "arm": "| .call f args (.storage (.array E) r) body =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 915,
+          "arm": "| .call f args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 77,
+          "arm": "| .call \"#array\" _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 105,
+          "arm": "| .call \"#sliceCopy\" [view] => inlineExprTy \u0393 view"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 106,
+          "arm": "| .call \"#sliceRaw\" [base, _, _]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 107,
+          "arm": "| .call \"#sliceDesc\" [base, _, _] => inlineExprTy \u0393 base"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 108,
+          "arm": "| .call \"#array\" es => return .fixed (\u2190 inlineArrayTy \u0393 es) es.length"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 114,
+          "arm": "| .call f _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 260,
+          "arm": "| rs, e@(.call ..) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 262,
+          "arm": "| rs, e@(.ternary _ (.call ..) (.call ..)) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 779,
+          "arm": "| .call (rs := rs) _ as (.rets _) b => if h : rs = \u03c1 then some \u27e8_, _, as, h \u25b8 b\u27e9 else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 780,
+          "arm": "| .call _ as (.val p r _) b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 784,
+          "arm": "| .call _ as .none b => if h : ([] : Ctx) = \u03c1 then some \u27e8_, _, as, h \u25b8 b\u27e9 else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 980,
+          "arm": "| some (.uint, n), _ => some (unsigned (n / 8) (.call T [.name w]))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1490,
+          "arm": "| .call f _ => f == sliceViewName"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1516,
+          "arm": "| .call f [.name base, o, L] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1618,
+          "arm": "| none => pure (some (.binop .shr (.call \"keccak256\" [s]) (.num 224), rest))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1721,
+          "arm": "| .call g [_] =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "modular",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 438,
+          "arm": "| .modular op a b k => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1274,
+          "arm": "| .modular _ a b k => [a, b, k].findSome? (narrowWholeUse? \u0393)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1597,
+          "arm": "| .modular op a b k => do pure (.modular op (\u2190 fnPure \u0393 a) (\u2190 fnPure \u0393 b) (\u2190 fnPure \u0393 k))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1770,
+          "arm": "| .modular op a b k => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1914,
+          "arm": "| .modular op a b k => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 329,
+          "arm": "| .modular op a b k => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "named",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 270,
+          "arm": "| .decl (.named t) x _ => if fnTy? t then [(x, t)] else []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 454,
+          "arm": "| .named f .. => throw s!\"the constructor {f}(\\{\u2026}) under a short-circuit operator or in a conditional's branch\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1270,
+          "arm": "| .named f _ as =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1598,
+          "arm": "| .named f ns as => do pure (.named f ns (\u2190 as.mapM (fnPure \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1772,
+          "arm": "| .named f ns as => do pure (.named f ns (\u2190 as.mapM (bytesPure \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1786,
+          "arm": "| .decl (.named T) _ (some o), .decl T' x (some r) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1916,
+          "arm": "| .named f ns as => do pure (.named f ns (\u2190 as.mapM (narrowPure unc \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 320,
+          "arm": "| .named f ns args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 923,
+          "arm": "| .decl (.named t) x _ => if fnTy? t then [(x, t)] else []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1463,
+          "arm": "| .named t =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 325,
+          "arm": "| some (e, false), _ => some (.array (.named e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 326,
+          "arm": "| none, some (st, false) => some (.named st)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 338,
+          "arm": "| some (e, false), _ => .declMemory (.array (.named e)) y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 339,
+          "arm": "| some (e, true), _ => .declStorage (.array (.named e)) y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 340,
+          "arm": "| none, some (st, false) => .declMemory (.named st) y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 341,
+          "arm": "| none, some (st, true) => .declStorage (.named st) y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 342,
+          "arm": "| none, none => .decl (.named c) y (some a)]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 415,
+          "arm": "| some (e, false), _ => pure (.array (.named e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 416,
+          "arm": "| none, some (st, false) => pure (.named st)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 560,
+          "arm": "| some (e, false), _ => pure (.array (.named e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 561,
+          "arm": "| none, some (st, false) => pure (.named st)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 31,
+          "arm": "| .named s =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 44,
+          "arm": "| .named s, .named t =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 58,
+          "arm": "| .named s =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 125,
+          "arm": "| .named f _ _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 133,
+          "arm": "| .field _ \"length\" => pure (.named \"uint\")"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 139,
+          "arm": "| .prim p => pure (.named (tyName p (widthIn C \u0393 e)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 144,
+          "arm": "| .prim p => pure (.named (tyName p (widthIn C \u0393 e)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 585,
+          "arm": "| some (e, _) => pure (.named e)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 588,
+          "arm": "| .ref (.struct name), _ => pure (.named name)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1135,
+          "arm": "| .uint 160 => if (lookupBy (k ++ \"#address\") ws).isSome then .named \"address\" else .named \"uint160\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1136,
+          "arm": "| kk => .named kk.tyName"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1142,
+          "arm": "| .ref (.struct s) => .named s"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1143,
+          "arm": "| .ref (.mapping ..) => .named \"uint\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1154,
+          "arm": "| none => .named \"uint\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1453,
+          "arm": "| .named E => (lookupBy E C.enums).isSome"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "env",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 455,
+          "arm": "| .env k => pure (.val .uint (.simple (.env k rfl)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 886,
+          "arm": "| .name \"this\" | .env .selfAddress => some (.env .selfAddress)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1388,
+          "arm": "| .env k =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2080,
+          "arm": "| .env .selfAddress => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 757,
+          "arm": "| .env .msgSender => .env .selfAddress"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 758,
+          "arm": "| .env .msgValue => v"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 771,
+          "arm": "| .env k _ => .env k"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "tuple",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 456,
+          "arm": "| .tuple _ => throw \"a tuple is the right-hand side of a tuple assignment or of a `return`\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1273,
+          "arm": "| .tuple as => as.findSome? (narrowWholeUse? \u0393)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1599,
+          "arm": "| .tuple as => do pure (.tuple (\u2190 as.mapM (fnPure \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1721,
+          "arm": "| .tuple os, .tuple vs => .tuple ((os.zip vs).map fun (o, a) => mark o a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1773,
+          "arm": "| .tuple as => do pure (.tuple (\u2190 as.mapM (bytesPure \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 653,
+          "arm": "| .tuple _ => throw \"a tuple is the right-hand side of a tuple assignment or of a `return`\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 719,
+          "arm": "| .tuple _, _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 750,
+          "arm": "| .tuple _ => acc"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 796,
+          "arm": "| .tuple s =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1450,
+          "arm": "| .tupleDecl _ (.call \"abi.decode\" [d, .tuple ts]) | .tupleAssign _ (.call \"abi.decode\" [d, .tuple ts]) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1555,
+          "arm": "| .tupleAssign ts (.tuple values) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1942,
+          "arm": "| some (.tuple (first :: second :: rest)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1947,
+          "arm": "| some (.tuple _) => throw \"a loop's lexicographic variant needs at least two components\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 940,
+          "arm": "| .tuple es =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 252,
+          "arm": "| [_], .tuple es => throw s!\"`return` of {es.length} values from a function that returns one\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 254,
+          "arm": "| rs, .tuple es =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 820,
+          "arm": "| .dyn | .arr _ | .tuple _ => 0"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 849,
+          "arm": "| .tuple s => ((AbiKind.ofStruct s).map List.length).getD 1"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1082,
+          "arm": "| .tuple _ ms => ms.any (\u00b7.2.dynamic)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1089,
+          "arm": "| .tuple _ ms => (ms.map (\u00b7.2.headSize)).sum"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1095,
+          "arm": "| .tuple _ ms => ms.all (\u00b7.2 matches .val _)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1104,
+          "arm": "| .tuple _ ms => ms.flatMap fun (f, t) => t.valKeys (key ++ \".\" ++ f)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1174,
+          "arm": "| .tuple _ ms => abiTupleSizeGen (ms.map fun (f, mt) => (mt, .field v f))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1228,
+          "arm": "| .tuple _ ms => abiTupleWriteGen r (ms.map fun (f, mt) => (mt, .field v f)) p"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1403,
+          "arm": "| .tuple s ms =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1466,
+          "arm": "| some s => if (AbiKind.ofStruct s).isSome then some (.tuple s) else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1581,
+          "arm": "| .tuple s, .name t => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1621,
+          "arm": "| .tuple as => as"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "assign",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 435,
+          "arm": "| .assign .. | .opAssign .. =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 851,
+          "arm": "| .assign l _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1262,
+          "arm": "| .assign a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1452,
+          "arm": "| .assign l _ | .opAssign _ l _ => bytesOf? \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1600,
+          "arm": "| .assign l r => do pure (.assign l (\u2190 fnPure \u0393 r))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1774,
+          "arm": "| .assign l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1788,
+          "arm": "| .assign l o, .assign l' r => pure (.assign l' (\u2190 toBytesAt? C \u0393 (bytesOf? C \u0393 l) o r))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 115,
+          "arm": "| .assign target _ => storageMappingAlias? C ec target"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 654,
+          "arm": "| .assign l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1222,
+          "arm": "| .assign l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1376,
+          "arm": "| .assign l _ | .opAssign _ l _ | .incDec _ l | .delete l =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1542,
+          "arm": "| .assign l r =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1614,
+          "arm": "| .assign l r =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1677,
+          "arm": "| .assign l (.newArr T n) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1692,
+          "arm": "| .assign l (.call f args) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1707,
+          "arm": "| .assign l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1713,
+          "arm": "| .path (.prim p) (.loc l) => do pure [.of \u0393 (.assign l (.val (\u2190 checkIn C \u0393 p r)))]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1719,
+          "arm": "| _ => do pure [.of \u0393 (.assign l (\u2190 ElabM.lift (checkStorageCopy C \u0393 R r)))]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 379,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call g as)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 522,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call y args)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 128,
+          "arm": "| .incDec _ l | .assign l _ | .opAssign _ l _ => inlineExprTy \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 253,
+          "arm": "| [n], e => pure [.assign (.name n) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1747,
+          "arm": "| some (x, _), [(_, v)] => [.assign (.name (toString x)) (.name v)]"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawExpr",
+      "constructor": "opAssign",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 435,
+          "arm": "| .assign .. | .opAssign .. =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1266,
+          "arm": "| .binop _ a b | .opAssign _ a b => (narrowWholeUse? \u0393 a).orElse fun _ => narrowWholeUse? \u0393 b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1452,
+          "arm": "| .assign l _ | .opAssign _ l _ => bytesOf? \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1601,
+          "arm": "| .opAssign op l r => do pure (.opAssign op l (\u2190 fnPure \u0393 r))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1776,
+          "arm": "| .opAssign op l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1789,
+          "arm": "| .opAssign op l o, .opAssign _ l' r =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 666,
+          "arm": "| .opAssign op l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1295,
+          "arm": "| .opAssign op l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1376,
+          "arm": "| .assign l _ | .opAssign _ l _ | .incDec _ l | .delete l =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1828,
+          "arm": "| .opAssign op l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1843,
+          "arm": "| true, true => pure (pre ++ [.of \u0393 (.opAssign op hop hp t (\u2190 checkIn C \u0393 p r))] ++ post)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 128,
+          "arm": "| .incDec _ l | .assign l _ | .opAssign _ l _ => inlineExprTy \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 711,
+          "arm": "| .opAssign op l e => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "assign",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 435,
+          "arm": "| .assign .. | .opAssign .. =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 851,
+          "arm": "| .assign l _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1262,
+          "arm": "| .assign a b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1452,
+          "arm": "| .assign l _ | .opAssign _ l _ => bytesOf? \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1600,
+          "arm": "| .assign l r => do pure (.assign l (\u2190 fnPure \u0393 r))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1774,
+          "arm": "| .assign l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1788,
+          "arm": "| .assign l o, .assign l' r => pure (.assign l' (\u2190 toBytesAt? C \u0393 (bytesOf? C \u0393 l) o r))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 115,
+          "arm": "| .assign target _ => storageMappingAlias? C ec target"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 654,
+          "arm": "| .assign l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1222,
+          "arm": "| .assign l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1376,
+          "arm": "| .assign l _ | .opAssign _ l _ | .incDec _ l | .delete l =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1542,
+          "arm": "| .assign l r =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1614,
+          "arm": "| .assign l r =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1677,
+          "arm": "| .assign l (.newArr T n) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1692,
+          "arm": "| .assign l (.call f args) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1707,
+          "arm": "| .assign l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1713,
+          "arm": "| .path (.prim p) (.loc l) => do pure [.of \u0393 (.assign l (.val (\u2190 checkIn C \u0393 p r)))]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1719,
+          "arm": "| _ => do pure [.of \u0393 (.assign l (\u2190 ElabM.lift (checkStorageCopy C \u0393 R r)))]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 379,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call g as)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 522,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call y args)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 128,
+          "arm": "| .incDec _ l | .assign l _ | .opAssign _ l _ => inlineExprTy \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 253,
+          "arm": "| [n], e => pure [.assign (.name n) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1747,
+          "arm": "| some (x, _), [(_, v)] => [.assign (.name (toString x)) (.name v)]"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "decl",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 270,
+          "arm": "| .decl (.named t) x _ => if fnTy? t then [(x, t)] else []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1786,
+          "arm": "| .decl (.named T) _ (some o), .decl T' x (some r) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 564,
+          "arm": "| .prim _ => RawStmt.decl rawType y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 923,
+          "arm": "| .decl (.named t) x _ => if fnTy? t then [(x, t)] else []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1254,
+          "arm": "| .decl T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1262,
+          "arm": "| .decl T x (some r) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1278,
+          "arm": "| s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1727,
+          "arm": "| .decl T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1734,
+          "arm": "| .decl T x init => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 342,
+          "arm": "| none, none => .decl (.named c) y (some a)]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 179,
+          "arm": "| .decl T x i =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 604,
+          "arm": "| .prim _ => pure (.decl rt x (some value))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "declStorage",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1278,
+          "arm": "| s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1530,
+          "arm": "| .declStorage T _ (some e) | .declMemory T _ (some e) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1612,
+          "arm": "| .declStorage T _ (some e) | .declMemory T _ (some e) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1623,
+          "arm": "| .declStorage T x _ | .declMemory T x _ | .declStoragePush T x _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1744,
+          "arm": "| .declStorage T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1750,
+          "arm": "| .declStorage T x init => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 339,
+          "arm": "| some (e, true), _ => .declStorage (.array (.named e)) y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 341,
+          "arm": "| none, some (st, true) => .declStorage (.named st) y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 182,
+          "arm": "| .declStorage T x i =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "declMemory",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 565,
+          "arm": "| .ref _ => RawStmt.declMemory rawType y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1265,
+          "arm": "| .declMemory T x (some (.newArr T' n)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1278,
+          "arm": "| s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1466,
+          "arm": "| _ => .declMemory T y (some (one i)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1530,
+          "arm": "| .declStorage T _ (some e) | .declMemory T _ (some e) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1612,
+          "arm": "| .declStorage T _ (some e) | .declMemory T _ (some e) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1623,
+          "arm": "| .declStorage T x _ | .declMemory T x _ | .declStoragePush T x _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1780,
+          "arm": "| .declMemory T x (some (.newArr T' n)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1788,
+          "arm": "| .declMemory T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1794,
+          "arm": "| .declMemory T x init => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 338,
+          "arm": "| some (e, false), _ => .declMemory (.array (.named e)) y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 340,
+          "arm": "| none, some (st, false) => .declMemory (.named st) y (some a)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 185,
+          "arm": "| .declMemory T x i =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "delete",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1268,
+          "arm": "| .delete target => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1376,
+          "arm": "| .assign l _ | .opAssign _ l _ | .incDec _ l | .delete l =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1808,
+          "arm": "| .delete e => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "opAssign",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 435,
+          "arm": "| .assign .. | .opAssign .. =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1266,
+          "arm": "| .binop _ a b | .opAssign _ a b => (narrowWholeUse? \u0393 a).orElse fun _ => narrowWholeUse? \u0393 b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1452,
+          "arm": "| .assign l _ | .opAssign _ l _ => bytesOf? \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1601,
+          "arm": "| .opAssign op l r => do pure (.opAssign op l (\u2190 fnPure \u0393 r))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1776,
+          "arm": "| .opAssign op l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1789,
+          "arm": "| .opAssign op l o, .opAssign _ l' r =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 666,
+          "arm": "| .opAssign op l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1295,
+          "arm": "| .opAssign op l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1376,
+          "arm": "| .assign l _ | .opAssign _ l _ | .incDec _ l | .delete l =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1828,
+          "arm": "| .opAssign op l r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1843,
+          "arm": "| true, true => pure (pre ++ [.of \u0393 (.opAssign op hop hp t (\u2190 checkIn C \u0393 p r))] ++ post)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 128,
+          "arm": "| .incDec _ l | .assign l _ | .opAssign _ l _ => inlineExprTy \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 711,
+          "arm": "| .opAssign op l e => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "incDec",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 434,
+          "arm": "| .incDec .. => throw \"`++` or `\u2212\u2212` under a short-circuit operator or in a conditional's branch\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1267,
+          "arm": "| .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1340,
+          "arm": "| .incDec _ e => intTyOf \u0393 e"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1595,
+          "arm": "| .incDec op e => do pure (.incDec op (\u2190 fnPure \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1768,
+          "arm": "| .incDec op e => do pure (.incDec op (\u2190 bytesPure \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1911,
+          "arm": "| .incDec op e => do pure (.incDec op (\u2190 narrowPure unc \u0393 e))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 307,
+          "arm": "| .incDec op e => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1238,
+          "arm": "| .incDec op e, .ok (.val _ (.simple (.local _))) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1279,
+          "arm": "| s@(.declPush ..) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1376,
+          "arm": "| .assign l _ | .opAssign _ l _ | .incDec _ l | .delete l =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1846,
+          "arm": "| .incDec op l => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1849,
+          "arm": "| true => pure (pre ++ [.of \u0393 (.incDec op hp t)] ++ (\u2190 narrowCheck C p (widthIn C (\u2190 ctx) l) l))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 128,
+          "arm": "| .incDec _ l | .assign l _ | .opAssign _ l _ => inlineExprTy \u0393 l"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 714,
+          "arm": "| .incDec op l => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "pushOpAssign",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1214,
+          "arm": "| .pushOpAssign op b r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1484,
+          "arm": "| .pushOpAssign op b r => some (op, b, r)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1581,
+          "arm": "| .pushOpAssign _ b r => pure [(b, true), (r, whole)]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1656,
+          "arm": "| .pushOpAssign op b r => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1665,
+          "arm": "| true, true => pure (.of \u0393 (.pushOpAssign op hop hp path (\u2190 checkIn C \u0393 p r)) ::"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 718,
+          "arm": "| .pushOpAssign op b r => do pure (.pushOpAssign op (\u2190 b.uncheck) (\u2190 r.uncheck))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "pushIncDec",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1219,
+          "arm": "| .pushIncDec op b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1485,
+          "arm": "| .pushIncDec op b => some (if op.isIncrement then .add else .sub, b, .num 1)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1582,
+          "arm": "| .pushIncDec _ b => pure [(b, true)]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1669,
+          "arm": "| .pushIncDec op b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1675,
+          "arm": "| true => pure (.of \u0393 (.pushIncDec op hp path) :: (\u2190 narrowCheck C p n (pushedSlot b)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 719,
+          "arm": "| .pushIncDec op b => do pure (.pushIncDec op (\u2190 b.uncheck))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "call",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 277,
+          "arm": "| .call (.name _) _ => []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 278,
+          "arm": "| .call (.field _ m) _ => if [\"push\", \"pop\", \"transfer\"].contains m then [] else [()]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 279,
+          "arm": "| .call _ _ => [()]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 443,
+          "arm": "| .call \"address\" [a] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 453,
+          "arm": "| .call f _ => throw s!\"the call {f}(\u2026) under a short-circuit operator or in a conditional's branch\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 912,
+          "arm": "| .call g args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 942,
+          "arm": "| .call f (t :: rest) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 958,
+          "arm": "| .call \"#abiArrayType\" [t] => (abiTyExpr? t).map .array"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 959,
+          "arm": "| e@(.call ..) => (abiEnumBelow? e).bind fun (t, _) => abiTyExpr? t"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 968,
+          "arm": "| .call \"#sliceCopy\" [v] | .call \"#sliceRaw\" [v, _, _]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 969,
+          "arm": "| .call \"#sliceDesc\" [v, _, _] => exprShape \u0393 v"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 970,
+          "arm": "| .call f as =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1005,
+          "arm": "| .call \"string\" [a] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1009,
+          "arm": "| .call \"string.concat\" as => as.attach.all fun \u27e8a, _ha\u27e9 => stringReason? \u0393 a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1029,
+          "arm": "| .call \"#array\" _ => pure () -- checked on the inferred memory local after hoisting"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1139,
+          "arm": "| .call g _ => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1229,
+          "arm": "| .call \"#array\" as => as.findSome? (narrowWholeAt? \u0393)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1230,
+          "arm": "| .call f as =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1234,
+          "arm": "| .call \"bytes\" [v] => v"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1341,
+          "arm": "| .call f _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1390,
+          "arm": "| .call \"address\" [_] => if m == \"#address\" then some 20 else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1396,
+          "arm": "| .call f _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1436,
+          "arm": "| .call f _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1514,
+          "arm": "| .call f _ => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1532,
+          "arm": "| .call f (h :: as) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1590,
+          "arm": "| .call f as => do pure (.call f (\u2190 as.mapM (fnPure \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1648,
+          "arm": "| none => pure (.call \"uint8\" [.call bytesIndexName [b, i, .num n]])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1664,
+          "arm": "| .call \"#array\" as => pure (.call \"#array\" as)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1665,
+          "arm": "| .call f as => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1676,
+          "arm": "| .call \"bytes\" [value] => value"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1686,
+          "arm": "| .call \"bytes\" [_] => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1709,
+          "arm": "| none => .call (tyName .uint (8 * n)) [a]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1717,
+          "arm": "| some n => .call (abiBytesMark n) [a]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1729,
+          "arm": "| none => pure (.call f as')"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1791,
+          "arm": "| .call (.field b \"push\") [o], .call f [r] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1862,
+          "arm": "| none => .call \"uint\" [a]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1871,
+          "arm": "| none => .call \"uint\" [l]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1882,
+          "arm": "| none => .call \"uint\" [a]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1913,
+          "arm": "| .call f as => do pure (.call f (\u2190 as.mapM (narrowPure unc \u0393)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 355,
+          "arm": "| .call \"#bytesIndex\" [b, i, .num n] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 371,
+          "arm": "| .call \"#sliceIndex\" [off, len, k, _past] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 399,
+          "arm": "| .call \"#sliceAt\" [view, k] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 406,
+          "arm": "| .call \"#sliceLength\" [view] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 412,
+          "arm": "| .call \"#sliceDecode\" (view :: rest) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 418,
+          "arm": "| .call \"#sliceCopy\" [view] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 448,
+          "arm": "| .call \"#array\" args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 454,
+          "arm": "| .call f args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 505,
+          "arm": "| .call g [x] => if (abiBytesMark? g).isSome then x else sel"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 511,
+          "arm": "| .call g [x] => if (abiBytesMark? g).isSome then x else a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 523,
+          "arm": "| .call g [x] => if (abiBytesMark? g).isSome then x else a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1246,
+          "arm": "| .call f args, .ok (.val _ (.simple (.local _))) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1254,
+          "arm": "| .decl T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1303,
+          "arm": "| .call (.field e m) args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1313,
+          "arm": "| .call (.name f) args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1361,
+          "arm": "| .tupleAssign ts (.call \"#sliceDecode\" (view :: rest)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1363,
+          "arm": "| .tupleDecl ts (.call \"#sliceDecode\" (view :: rest)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1373,
+          "arm": "| .call \"#array\" _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1415,
+          "arm": "| .call \"string\" [_] | .call \"string.concat\" _ => !stringReason? C \u0393 e"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1422,
+          "arm": "| .call (.field (.name n) g) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1424,
+          "arm": "| .call (.name f) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1432,
+          "arm": "| .call (.name _) _ => s"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1433,
+          "arm": "| .call e@(.field _ m) args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1435,
+          "arm": "| .call e args => .call (.name callValueName) (e :: args)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1439,
+          "arm": "| .call (.name f) as =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1442,
+          "arm": "| .call _ as' => pure as'"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1450,
+          "arm": "| .tupleDecl _ (.call \"abi.decode\" [d, .tuple ts]) | .tupleAssign _ (.call \"abi.decode\" [d, .tuple ts]) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1568,
+          "arm": "| .call (.field b \"push\") [a] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1575,
+          "arm": "| .call f _ => ((lookupBy f funs).bind (\u00b7.ret)).any"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1580,
+          "arm": "| .call (.name f) as => pure [(RawExpr.call f as, whole)]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1692,
+          "arm": "| .assign l (.call f args) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1727,
+          "arm": "| .decl T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1744,
+          "arm": "| .declStorage T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1788,
+          "arm": "| .declMemory T x (some (.call f args)) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1863,
+          "arm": "| .call (.field (.call f args) \"push\") values => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1872,
+          "arm": "| .call (.field (.call f args) \"pop\") [] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1874,
+          "arm": "| .call (.field e \"push\") args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1892,
+          "arm": "| .call (.field e \"pop\") [] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1896,
+          "arm": "| .call (.field e \"transfer\") [a] => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1919,
+          "arm": "| .call (.name \"constructor\") args => elabCtor args"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1920,
+          "arm": "| .call (.name f) args => elabCall f args none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1921,
+          "arm": "| .call .. => throw \"only push, pop and transfer are calls on a receiver\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2052,
+          "arm": "| .call h [a] => if funs.any (\u00b7.1 == h) then e else a"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 379,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call g as)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 380,
+          "arm": "| none => .call (.name g) as"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 522,
+          "arm": "| some (x, _) => .assign (.name (toString x)) (.call y args)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 523,
+          "arm": "| none => .call (.name y) args"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 598,
+          "arm": "| .call f args (.storage (.array E) r) body =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 610,
+          "arm": "| .call f args (.storage (.array E) r) body =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 915,
+          "arm": "| .call f args =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 77,
+          "arm": "| .call \"#array\" _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 105,
+          "arm": "| .call \"#sliceCopy\" [view] => inlineExprTy \u0393 view"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 106,
+          "arm": "| .call \"#sliceRaw\" [base, _, _]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 107,
+          "arm": "| .call \"#sliceDesc\" [base, _, _] => inlineExprTy \u0393 base"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 108,
+          "arm": "| .call \"#array\" es => return .fixed (\u2190 inlineArrayTy \u0393 es) es.length"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 114,
+          "arm": "| .call f _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 260,
+          "arm": "| rs, e@(.call ..) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 262,
+          "arm": "| rs, e@(.ternary _ (.call ..) (.call ..)) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 779,
+          "arm": "| .call (rs := rs) _ as (.rets _) b => if h : rs = \u03c1 then some \u27e8_, _, as, h \u25b8 b\u27e9 else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 780,
+          "arm": "| .call _ as (.val p r _) b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 784,
+          "arm": "| .call _ as .none b => if h : ([] : Ctx) = \u03c1 then some \u27e8_, _, as, h \u25b8 b\u27e9 else none"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 980,
+          "arm": "| some (.uint, n), _ => some (unsigned (n / 8) (.call T [.name w]))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1490,
+          "arm": "| .call f _ => f == sliceViewName"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1516,
+          "arm": "| .call f [.name base, o, L] =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1618,
+          "arm": "| none => pure (some (.binop .shr (.call \"keccak256\" [s]) (.num 224), rest))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1721,
+          "arm": "| .call g [_] =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "assignIncDec",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1300,
+          "arm": "| .assignIncDec x op l => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1851,
+          "arm": "| .assignIncDec x op l => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 716,
+          "arm": "| .assignIncDec .. => throw \"`v = x++;` inside `unchecked`: write `v = x; x += 1;`\""
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "assignPush",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1326,
+          "arm": "| .assignPush l b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1538,
+          "arm": "| .assignPush l b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1770,
+          "arm": "| .assignPush l b => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "declStoragePush",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1278,
+          "arm": "| s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1536,
+          "arm": "| .declStoragePush T _ b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1623,
+          "arm": "| .declStorage T x _ | .declMemory T x _ | .declStoragePush T x _ =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1756,
+          "arm": "| .declStoragePush T x b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 188,
+          "arm": "| .declStoragePush T x b =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "declPush",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1279,
+          "arm": "| s@(.declPush ..) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1550,
+          "arm": "| .declPush .. => pure true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1762,
+          "arm": "| .declPush T x b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 191,
+          "arm": "| .declPush T x b =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "ite",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1279,
+          "arm": "| s@(.declPush ..) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1959,
+          "arm": "| .ite c thn els => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1990,
+          "arm": "| .requireReason c m => elabStmt1 (.ite c [] [.revertReason m])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 197,
+          "arm": "| .ite c t e =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 299,
+          "arm": "| .ite c t e :: ss => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 444,
+          "arm": "| .ite c t e => do pure (.ite c (\u2190 lowerB t) (\u2190 lowerB e), [])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 469,
+          "arm": "| .ite c t e => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 556,
+          "arm": "| .ite c t e => return .ite c (\u2190 go t) (\u2190 go e)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 720,
+          "arm": "| .ite c t e => do pure (.ite (\u2190 c.uncheck) (\u2190 uncheckStmts t) (\u2190 uncheckStmts e))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "require",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 1929,
+          "arm": "| none => if sf then panicStmt 0x11 c else .require c)]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1279,
+          "arm": "| s@(.declPush ..) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1965,
+          "arm": "| .require c => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1530,
+          "arm": "| .num l => if l < 32 * n then .revert else .require (.binop .ge len (.num (32 * n)))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1531,
+          "arm": "| _ => .require (.binop .ge len (.num (32 * n)))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "assert",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1086,
+          "arm": "| .error _ => .cons (.assert (.simple (.bool false))) .nil) recDepth)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1280,
+          "arm": "| s@(.requireMsg ..) | s@(.assert _) | s@(.tryCall ..) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1968,
+          "arm": "| .assert c => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "revert",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1975,
+          "arm": "| .revert => do pure [.of (\u2190 nctx) .revert]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 1530,
+          "arm": "| .num l => if l < 32 * n then .revert else .require (.binop .ge len (.num (32 * n)))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "revertMsg",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1977,
+          "arm": "| .revertMsg m => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "requireMsg",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1212,
+          "arm": "| some text => .requireMsg c text"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1280,
+          "arm": "| s@(.requireMsg ..) | s@(.assert _) | s@(.tryCall ..) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1991,
+          "arm": "| .requireMsg c m => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "revertReason",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1195,
+          "arm": "| .revertReason m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1411,
+          "arm": "| .revertReason m | .requireReason _ m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1592,
+          "arm": "| .revertReason m | .revertRaw m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1985,
+          "arm": "| .revertReason m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1990,
+          "arm": "| .requireReason c m => elabStmt1 (.ite c [] [.revertReason m])"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "requireReason",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1202,
+          "arm": "| .requireReason c m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1213,
+          "arm": "| none => .requireReason c (.name x))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1411,
+          "arm": "| .revertReason m | .requireReason _ m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1595,
+          "arm": "| .requireReason c m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1990,
+          "arm": "| .requireReason c m => elabStmt1 (.ite c [] [.revertReason m])"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "revertRaw",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1199,
+          "arm": "| .revertRaw m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1592,
+          "arm": "| .revertReason m | .revertRaw m => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1989,
+          "arm": "| .revertRaw d => memoryRevert .raw d"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "revertErr",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1397,
+          "arm": "| .revertErr e args => pure (.revertErr e (\u2190 errorArgs e args))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1583,
+          "arm": "| .revertErr e args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1996,
+          "arm": "| .revertErr e args => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "requireErr",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1398,
+          "arm": "| .requireErr c e args => pure (.requireErr c e (\u2190 errorArgs e args))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1401,
+          "arm": "| .requireErr c e args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2032,
+          "arm": "| .requireErr c _ args => elabStmt1 (RawStmt.requireWith c args)"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "assumeFalse",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2033,
+          "arm": "| .assumeFalse => do pure [.of (\u2190 nctx) .assumeFalse]"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "ret",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Values.lean",
+          "line": 985,
+          "arm": "| some d => match d.ret with"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1575,
+          "arm": "| .call f _ => ((lookupBy f funs).bind (\u00b7.ret)).any"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1922,
+          "arm": "| .ret _ => throw \"`return` outside a function's body\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 289,
+          "arm": "| .ret none :: _ => pure []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 290,
+          "arm": "| .ret (some e) :: _ => lowerReturn r e"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 367,
+          "arm": "| .ret => fl.ret"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 373,
+          "arm": "| .ret => set { fl with ret := some x }"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 397,
+          "arm": "| .brk | .cont | .ret _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 454,
+          "arm": "| .ret e =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "eval",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1336,
+          "arm": "| .eval args => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2034,
+          "arm": "| .eval _ => pure []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Stmt.lean",
+          "line": 969,
+          "arm": "| none => unless e.isPure do tmps := tmps ++ [.eval [e]]"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "unchecked",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2035,
+          "arm": "| .unchecked ss => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 199,
+          "arm": "| .unchecked b => pure (.unchecked (\u2190 renameStmts \u03c1 b) :: (\u2190 renameStmts \u03c1 ss))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 318,
+          "arm": "| .unchecked b :: ss => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 442,
+          "arm": "| .unchecked b => do pure (.unchecked (\u2190 lowerB b), [])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 463,
+          "arm": "| .unchecked b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 558,
+          "arm": "| .unchecked b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 721,
+          "arm": "| .unchecked b => do pure (.unchecked (\u2190 uncheckStmts b))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "checked",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2037,
+          "arm": "| .checked o ss => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 200,
+          "arm": "| .checked o b => pure (.checked o (\u2190 renameStmts \u03c1 b) :: (\u2190 renameStmts \u03c1 ss))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 323,
+          "arm": "| .checked o b :: ss => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 443,
+          "arm": "| .checked o b => do pure (.checked o (\u2190 lowerB b), [])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 466,
+          "arm": "| .checked o b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 560,
+          "arm": "| .checked o b => return .checked o (\u2190 go b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 722,
+          "arm": "| .checked .checking _ => throw \"`checked { \u2026 }` inside `unchecked { \u2026 }`: its operations wrap there\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 723,
+          "arm": "| .checked o b => do pure (.checked o (\u2190 uncheckStmts b))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "tryCall",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1280,
+          "arm": "| s@(.requireMsg ..) | s@(.assert _) | s@(.tryCall ..) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 2048,
+          "arm": "| .tryCall e g as rets ok err code pnc other => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 213,
+          "arm": "| .tryCall e g as rets ok err code pnc other =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 307,
+          "arm": "| .tryCall e g as rets ok err code pnc other :: ss => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 445,
+          "arm": "| .tryCall e g as rets ok err code pnc other => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 473,
+          "arm": "| .tryCall e g as rets ok err code pnc other => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 561,
+          "arm": "| .tryCall e g as rets ok err code pnc other =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 725,
+          "arm": "| .tryCall e g as rets ok err code pnc other => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "send",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1330,
+          "arm": "| .send T x r a g => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1899,
+          "arm": "| .send T x e a g => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1913,
+          "arm": "| some _, _ => throw \"`T x = r.send(a);` declares a name\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 194,
+          "arm": "| .send (some T) (.name x) e a g =>"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "tupleDecl",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1363,
+          "arm": "| .tupleDecl ts (.call \"#sliceDecode\" (view :: rest)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1450,
+          "arm": "| .tupleDecl _ (.call \"abi.decode\" [d, .tuple ts]) | .tupleAssign _ (.call \"abi.decode\" [d, .tuple ts]) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1458,
+          "arm": "| .tupleDecl vs _ => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1567,
+          "arm": "| .tupleAssign .. | .tupleDecl .. => pure []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1953,
+          "arm": "| .tupleDecl vs rhs => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 202,
+          "arm": "| .tupleDecl vs e =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 269,
+          "arm": "| .tupleDecl .. => s.binds"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "tupleAssign",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1361,
+          "arm": "| .tupleAssign ts (.call \"#sliceDecode\" (view :: rest)) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1450,
+          "arm": "| .tupleDecl _ (.call \"abi.decode\" [d, .tuple ts]) | .tupleAssign _ (.call \"abi.decode\" [d, .tuple ts]) =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1467,
+          "arm": "| .tupleAssign ls _ => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1555,
+          "arm": "| .tupleAssign ts (.tuple values) => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1567,
+          "arm": "| .tupleAssign .. | .tupleDecl .. => pure []"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1952,
+          "arm": "| .tupleAssign ts rhs => elabTuple ts rhs"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 260,
+          "arm": "| rs, e@(.call ..) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 262,
+          "arm": "| rs, e@(.ternary _ (.call ..) (.call ..)) => pure [.tupleAssign (rs.map fun n => some (.name n)) e]"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "block",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1951,
+          "arm": "| .block b => elabBranch b"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 201,
+          "arm": "| .block b => pure (.block (\u2190 renameStmts \u03c1 b) :: (\u2190 renameStmts \u03c1 ss))"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 291,
+          "arm": "| .block b :: ss => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 441,
+          "arm": "| .block b => do pure (.block (\u2190 lowerB b), [])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 460,
+          "arm": "| .block b => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 555,
+          "arm": "| .hole => pure (.block inner)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 557,
+          "arm": "| .block b => return .block (\u2190 go b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 724,
+          "arm": "| .block b => do pure (.block (\u2190 uncheckStmts b))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "whileLoop",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1926,
+          "arm": "| s@(.whileLoop ..) | s@(.forLoop ..) | s@(.doWhile ..) => do elabStmtsP (\u2190 lowerLoops none [s])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 225,
+          "arm": "| .whileLoop a c b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 488,
+          "arm": "| .whileLoop a c b | .loop a c b => (a, c, [], [], b, false)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 563,
+          "arm": "| .whileLoop a c b => return .whileLoop a c (\u2190 go b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 729,
+          "arm": "| .whileLoop a c b => do pure (.whileLoop a (\u2190 c.uncheck) (\u2190 uncheckStmts b))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "forLoop",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1926,
+          "arm": "| s@(.whileLoop ..) | s@(.forLoop ..) | s@(.doWhile ..) => do elabStmtsP (\u2190 lowerLoops none [s])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 231,
+          "arm": "| .forLoop a [] c u b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 234,
+          "arm": "| .forLoop a i c u b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 238,
+          "arm": "| some (.forLoop a' [] c' u' b') =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 486,
+          "arm": "| .forLoop a i c u b => (a, c.getD (.bool true), i, u, b, false)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 566,
+          "arm": "| .forLoop a i c u b => return .forLoop a i c u (\u2190 go b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 732,
+          "arm": "| .forLoop a i c u b => do"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "doWhile",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1926,
+          "arm": "| s@(.whileLoop ..) | s@(.forLoop ..) | s@(.doWhile ..) => do elabStmtsP (\u2190 lowerLoops none [s])"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 227,
+          "arm": "| .doWhile a b c =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 487,
+          "arm": "| .doWhile a b c => (a, c, [], [], b, true)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 564,
+          "arm": "| .doWhile a b c => return .doWhile a (\u2190 go b) c"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 730,
+          "arm": "| .doWhile a b c => do pure (.doWhile a (\u2190 uncheckStmts b) (\u2190 c.uncheck))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "brk",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1923,
+          "arm": "| .brk => throw \"`break` outside a loop\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1948,
+          "arm": "| dec => pure (.inv I (\u2190 dec.mapM fun d => loopExpr \u0393 .uint d \"variant\") a.brk qs)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 365,
+          "arm": "| .brk => fl.brk"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 371,
+          "arm": "| .brk => set { fl with brk := some x }"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 397,
+          "arm": "| .brk | .cont | .ret _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 448,
+          "arm": "| .brk => throw \"`break` outside a loop\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 452,
+          "arm": "| .brk => pure (.setBool (\u2190 LoopFlags.flag .brk) true, [.brk])"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "cont",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1924,
+          "arm": "| .cont => throw \"`continue` outside a loop\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 397,
+          "arm": "| .brk | .cont | .ret _ => true"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 449,
+          "arm": "| .cont => throw \"`continue` outside a loop\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 453,
+          "arm": "| .cont => pure (.setBool (\u2190 LoopFlags.flag .cnt) true, [.cnt])"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "loop",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1927,
+          "arm": "| .loop a c body => do"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 229,
+          "arm": "| .loop a c b =>"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 488,
+          "arm": "| .whileLoop a c b | .loop a c b => (a, c, [], [], b, false)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 565,
+          "arm": "| .loop a c b => return .loop a c (\u2190 go b)"
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 731,
+          "arm": "| .loop a c b => do pure (.loop a (\u2190 c.uncheck) (\u2190 uncheckStmts b))"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    },
+    {
+      "family": "RawStmt",
+      "constructor": "hole",
+      "syntacticArmReferences": [
+        {
+          "path": "Solidity/Syntax/Elab/Arms.lean",
+          "line": 1925,
+          "arm": "| .hole => throw \"`_;` outside a modifier's body\""
+        },
+        {
+          "path": "Solidity/Syntax/Elab/Lower.lean",
+          "line": 555,
+          "arm": "| .hole => pure (.block inner)"
+        }
+      ],
+      "proofClosure": "No AST/Raw lowering-preservation theorem established by this inventory; intrinsic target soundness is separate."
+    }
+  ],
+  "typedTargetTheorems": [
+    {
+      "path": "Solidity/Calculus/StmtSound.lean",
+      "line": 31,
+      "declarationStart": "theorem Stmt.stepSound (k : Nat) (m : Modality) {\u0393 \u0393' : Ctx} (s : Stmt C \u0393 \u0393') :"
+    },
+    {
+      "path": "Solidity/Calculus/StmtSound.lean",
+      "line": 48,
+      "declarationStart": "theorem Stmt.sound : Stmt.Sound C :="
+    },
+    {
+      "path": "Solidity/Calculus/StmtSound.lean",
+      "line": 54,
+      "declarationStart": "theorem Stmt.runs (k : Nat) (m : Modality) {\u0393 \u0393' : Ctx} (s : Stmt C \u0393 \u0393') (p : Premise C \u0393 \u0393')"
+    },
+    {
+      "path": "Solidity/Calculus/SoundStep.lean",
+      "line": 39,
+      "declarationStart": "theorem Stmt.stepSound_arms (k : Nat) (m : Modality) {\u0393 \u0393' : Ctx} (s : Stmt C \u0393 \u0393')"
+    },
+    {
+      "path": "Solidity/Theory/Bridge/Denote.lean",
+      "line": 210,
+      "declarationStart": "theorem Op0.denote_eval {s : Srt} (o : Op0 C s) : Srt.BridgeO C g.H s (o.denote g) (o.eval g) := by"
+    },
+    {
+      "path": "Solidity/Theory/Bridge/Denote.lean",
+      "line": 216,
+      "declarationStart": "theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {d : a.TDen C}"
+    },
+    {
+      "path": "Solidity/Theory/Bridge/Denote.lean",
+      "line": 285,
+      "declarationStart": "theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H)}"
+    },
+    {
+      "path": "Solidity/Theory/Bridge/Denote.lean",
+      "line": 356,
+      "declarationStart": "theorem Op3.denote_eval {a b c s : Srt} (o : Op3 C a b c s) {x : Option (a.Den C g.H)}"
+    }
+  ]
+}

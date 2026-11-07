@@ -1,0 +1,56 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.budget_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.budget_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.continuation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.copy_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.load_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.reserve": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.size_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.size_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.store_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.store8_charged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

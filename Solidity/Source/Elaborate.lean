@@ -34,7 +34,7 @@ def elabArgs (C : Ctx) (es : Syn (.list .expr)) (ps : List STy) :
     Option {a : RConvArgs C.env C.tys ps // RConvArgs.DerivedIn C es ps a} :=
   match TypedArgs.infer C es with
   | Option.some ⟨σs, D⟩ =>
-    if h : argsFit C.env.isBase σs ps = true then
+    if h : argsFit C.env.isBase C.env.mapFree σs ps = true then
       Option.some ⟨RArgs.convert ps D.toR h, σs, D, h, HEq.rfl⟩
     else Option.none
   | Option.none => Option.none
@@ -94,7 +94,7 @@ def elabInit (E : Env) (d : Decl) : Option {i : RInit E // i.var = d ∧ RInit.D
   | Option.some e, Option.some τ =>
     match Typed.infer (Ctx.forInit E d.scope) e with
     | Option.some ⟨σ, D⟩ =>
-      if h : σ.implicit E.isBase τ = true then
+      if h : σ.implicit E.isBase E.mapFree τ = true then
         Option.some ⟨⟨d, τ, hτ, .conv D.toR (.inl h)⟩, rfl, e, σ, D, h, he, rfl⟩
       else Option.none
     | Option.none => Option.none

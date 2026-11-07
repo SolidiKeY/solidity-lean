@@ -52,6 +52,12 @@ theorem Prepared.complete {outside body} (p : Prepared outside body) :
           cases bad
       · rfl
 
+/-- Fixed original syntax and supplied outside names determine the entire
+certificate. Outside-name provenance remains a separate obligation. -/
+theorem Prepared.unique {outside body} (first second : Prepared outside body) :
+    first = second := by
+  exact Except.ok.inj (first.complete.symm.trans second.complete)
+
 theorem prepare_iff (outside : List String) (body : Syn (.list .yulStmt)) :
     (prepare outside body).toOption.isSome = true ↔ Nonempty (Prepared outside body) := by
   constructor
@@ -70,11 +76,23 @@ def Prepared.program {outside body} (p : Prepared outside body) :
   ⟨p.checkedSyntax.typing.code,
     stmt_policy_words _ (fun _ index => by cases index) p.policy⟩
 
+/-- The same preparation inputs determine both code and its derived profile. -/
+theorem Prepared.program_unique {outside body} (first second : Prepared outside body) :
+    first.program = second.program := by
+  exact congrArg Prepared.program (Except.ok.inj (first.complete.symm.trans second.complete))
+
 def emptyModel : Logic.Model [] := ⟨.nil, True.intro⟩
 
 def Prepared.run {outside body} (p : Prepared outside body) (fuel : Nat) :
     Option (Outcome ClosedSyntax.rootControl 0) :=
   evalStmt fuel emptyModel.environment emptyModel.words p.program.code p.program.words Fin.elim0
+
+/-- At fixed fuel, preparation inputs determine the full actual interpreter
+result, including noncompletion. This does not assert termination. -/
+theorem Prepared.run_unique {outside body} (first second : Prepared outside body)
+    (fuel : Nat) : first.run fuel = second.run fuel := by
+  exact congrArg (fun p => Prepared.run p fuel)
+    (Except.ok.inj (first.complete.symm.trans second.complete))
 
 /-- Concrete ONE-STEP calculus composition for this ACTUAL emitted program.
 No RuleExists hypothesis, dispatcher/normalizer, logical completeness or

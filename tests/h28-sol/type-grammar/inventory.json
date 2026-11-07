@@ -1,0 +1,88 @@
+{
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "upstream_commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "inputs": {
+    "Solidity/Source/Syntax.lean": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+    "Solidity/Frontend/Checked/Print.lean": "df481269236679b9934ee1cb60e00a980ff5a1f13bbb2407c1e9859af7b5b660",
+    "Solidity/Frontend/Checked/Parser.lean": "e7f3df06490946870a43712ecbd93f6f0a6140bbdb561665e665935158c745c3",
+    "Solidity/Frontend/Checked/Check.lean": "080f2cf13448d87033e9454f460663a155975ea412050077f629819dae7f19cf",
+    "Solidity/Frontend/Checked/Prec.lean": "1ba7dd728814ee45008755c139701560565f0fbb6557b8e68930f373e45f5bdf",
+    "Solidity/Frontend/Checked/Token.lean": "6eee8ccd98f4e70a4ff9d8632d81b594bff98e0732254ad88039f4a66de3787a",
+    "tests/upstream/grammar-0.8.38/SolidityParser.g4": "663afb0d91d482a886a6879c801ba6b6f83f34e250d3e8d9406b1ab198272b6a",
+    "tests/upstream/grammar-0.8.38/SolidityLexer.g4": "b6eb8ffcb358b8a854b22ed0e3df6ced8c42760a3da4f77899ba9c65a6dd7132"
+  },
+  "type_constructors": [
+    "elem",
+    "fnType",
+    "mapping",
+    "userType",
+    "array"
+  ],
+  "elementary": [
+    "address",
+    "addressPayable",
+    "bool",
+    "string",
+    "bytes",
+    "int",
+    "fixedBytes",
+    "fixed"
+  ],
+  "mapping_keys": [
+    "elem (not addressPayable)",
+    "path"
+  ],
+  "function_fields": [
+    "params",
+    "visibility",
+    "mutability",
+    "returns"
+  ],
+  "visibility": [
+    "internal",
+    "external",
+    "priv",
+    "pub"
+  ],
+  "mutability": [
+    "pure",
+    "view",
+    "payable"
+  ],
+  "data_locations": [
+    "memory",
+    "storage",
+    "calldata"
+  ],
+  "names": [
+    "parameter optional",
+    "mapping key optional",
+    "mapping value optional"
+  ],
+  "function_layouts": [
+    "attrs []",
+    "attrs [vis]",
+    "attrs [mutab]",
+    "attrs [vis, mutab]",
+    "attrs [mutab, vis]"
+  ],
+  "array_lengths": [
+    "none",
+    "some expr (read-only syntactic atom)"
+  ],
+  "parser_fuel_edges": {
+    "typeName": "1 + maximum(base child cost, suffix cost)",
+    "typeSuffix": "one per suffix plus terminal check; static length calls expr",
+    "fnType": "one + paramsParen / returnsOpt",
+    "mappingType": "one + value typeName",
+    "paramsParen": "one + param, each element",
+    "param": "one + typeName",
+    "returnsOpt": "one + paramsParen; explicit returns must be nonempty"
+  },
+  "exclusions": [
+    "SOL-QN name resolution",
+    "SOL-CB constant evaluation",
+    "operational type admission/lowering",
+    "whole-unit or expression uniqueness"
+  ]
+}

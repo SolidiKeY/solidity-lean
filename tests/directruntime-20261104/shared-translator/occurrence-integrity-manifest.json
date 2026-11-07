@@ -1,0 +1,53 @@
+{
+  "checkpoint": "External all-occurrence witness integrity; reader execution remains pending",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python3 tests/directruntime-20261104/shared-translator/occurrence-integrity-controls.py",
+  "exit": 0,
+  "wallSeconds": 15.277062906000538,
+  "results": {
+    "controls": [
+      {
+        "case": "healthy",
+        "result": "accepted"
+      },
+      {
+        "case": "missing-occurrence",
+        "result": "rejected",
+        "line": 14
+      },
+      {
+        "case": "case-identity",
+        "result": "rejected",
+        "line": 21
+      },
+      {
+        "case": "pointer",
+        "result": "rejected",
+        "line": 19
+      },
+      {
+        "case": "node-hash",
+        "result": "rejected",
+        "line": 19
+      },
+      {
+        "case": "route",
+        "result": "rejected",
+        "line": 22
+      }
+    ],
+    "boundary": "External integrity controls only; no Lean or semantic proof."
+  },
+  "boundary": "Python controls only; no Lean proof, reader matrix, semantic adequacy or runtime gate claim.",
+  "bulk": [
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-integrity/controls.json",
+      "bytes": 426,
+      "sha256": "6133ae494b331cbff35933453f2b55877935e5b3f7ebc0b9324f908981abe116"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/cases.json",
+      "bytes": 31209422,
+      "sha256": "9404d8aaf991a9e5615778d15559a43f6f8cdbb3b084ea0acde29d8d14ed6659"
+    }
+  ]
+}

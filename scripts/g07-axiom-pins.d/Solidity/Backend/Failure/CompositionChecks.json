@@ -1,0 +1,24 @@
+{
+ "Solidity/Backend/Failure/CompositionChecks.lean:Solidity.Backend.Failure.concatenated_emitters": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/CompositionChecks.lean:Solidity.Backend.Failure.disjoint_payloads": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/CompositionChecks.lean:Solidity.Backend.Failure.return_revert_execution_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/CompositionChecks.lean:Solidity.Backend.Failure.run_two_writes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/CompositionChecks.lean:Solidity.Backend.Failure.two_executed_writes_control": [
+  "Quot.sound",
+  "propext"
+ ]
+}

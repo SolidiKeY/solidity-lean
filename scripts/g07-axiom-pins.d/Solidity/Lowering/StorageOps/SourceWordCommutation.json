@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.journal_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.storage_commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.world_commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

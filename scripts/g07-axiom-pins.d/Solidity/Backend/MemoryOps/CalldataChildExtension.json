@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataChildExtension.lean:Solidity.Backend.MemoryOps.BoolChildRepr.grow": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildExtension.lean:Solidity.Backend.MemoryOps.decodedChildRefs_wk": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildExtension.lean:Solidity.Backend.MemoryOps.RefChildRepr.grow": [
+  "Quot.sound",
+  "propext"
+ ]
+}

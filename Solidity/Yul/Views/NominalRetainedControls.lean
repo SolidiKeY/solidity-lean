@@ -44,7 +44,7 @@ def placement : Placement heap where
 
 def state : Source.EMState env [arrayTy,arrayTy] :=
   ⟨.cons (.memRef rfl 0) (.cons (.memRef rfl 0) .nil),
-    ⟨⟨⟨fun _ => Source.Account.empty _⟩,.empty,[]⟩,heap,[],[],⟨[],.nil⟩⟩⟩
+    ⟨⟨⟨fun _ => Source.Account.empty _⟩,.empty,[]⟩,heap,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def raw : ByteView := mstore (mstore (mstore (mstore (mstore (fun _=>165) 64 256) 96 0) 128 2) 160 ⟨2^256-1,by decide⟩) 192 32767
 def shrunkRaw : ByteView := mstore raw 128 0
 def regrownRaw : ByteView := mstore shrunkRaw 128 2

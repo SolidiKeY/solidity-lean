@@ -1,0 +1,113 @@
+{
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.fresh_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.full_owner_fixture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.generated_nested_machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.generated_nested_writes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.nested_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.Node": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.oldNode": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.outside_owner_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlap_capture_and_addresses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlap_graph_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlap_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlap_source_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlapHash": [],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlapLocations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlapMachine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlapResult": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlapSource": [],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlapSourceQueries": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlapStore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.overlapView": [],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.recursiveGraph": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.source_representation_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.sourceNode": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.wrong_incremental_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.wrong_initialization_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWriteControls.lean:Solidity.Backend.StorageOps.CopyWriteControls.wrongIncremental": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

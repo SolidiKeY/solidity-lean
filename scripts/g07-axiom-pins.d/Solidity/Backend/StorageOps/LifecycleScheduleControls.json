@@ -1,0 +1,75 @@
+{
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.accesses_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.actual_failed_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.capacity_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.changed_pop_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.graph_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.late_failure_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.other_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.other_graph_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.prefix_restart": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.repeated_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.repeated_pop_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.schedule_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.wrong_different": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean:Solidity.Backend.StorageOps.LifecycleScheduleControls.wrong_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

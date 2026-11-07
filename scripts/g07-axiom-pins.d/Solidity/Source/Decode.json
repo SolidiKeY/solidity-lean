@@ -1,0 +1,32 @@
+{
+ "Solidity/Source/Decode.lean:Solidity.Source.abiDecodeData_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Decode.lean:Solidity.Source.decodeArg_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Decode.lean:Solidity.Source.decodeArgs_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Decode.lean:Solidity.Source.evalE_abiDecode_lit_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Decode.lean:Solidity.Source.evalE_abiDecode_local_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Decode.lean:Solidity.Source.evalE_abiDecode_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

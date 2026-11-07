@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayIndex.lean:Solidity.Lowering.StorageOps.SourceArrayIndex.bounds_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndex.lean:Solidity.Lowering.StorageOps.SourceArrayIndex.locate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayIndex.lean:Solidity.Lowering.StorageOps.SourceArrayIndex.represented_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

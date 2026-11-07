@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/ValueReflection.lean:Solidity.Backend.Passes.ValueReflection.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

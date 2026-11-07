@@ -1,0 +1,32 @@
+{
+  "sources": {
+    "Solidity/Frontend/LiteralGrammarH28/Body.lean": "10808ef4e7792ddadac9e70df74a4d831ced59d152791ee6b80201dfb842ae3d",
+    "Solidity/Frontend/LiteralGrammarH28/BodyControls.lean": "1a2316de575ba3deed5dc6ea62f14f6dc984f70bf16b040e133ede3cd81c1ed9",
+    "Solidity/Frontend/LiteralGrammarH28/BodyPins.lean": "6482b8593ce379b9ced91c04aec99cfb778d62087099655a8be8c80c753d0746",
+    "Solidity/Frontend/LiteralGrammarH28/BoundaryControls.lean": "eac11db37729062594e3c352b19446bc43e4a1ed5714266370836a9128f60c5b",
+    "Solidity/Frontend/LiteralGrammarH28/BoundaryPins.lean": "b235f72463edc358e6a4fe6da8b10b68b3363bd98a55dab92fb317f42c5ff53d",
+    "Solidity/Frontend/LiteralGrammarH28/Classification.lean": "dfdabe8c2ee69658de02444a5c82e1c7c0a53fe9ca42b1c5c1067c5ecea7e728",
+    "Solidity/Frontend/LiteralGrammarH28/EncodingValue.lean": "ef689cc251b445bedb3c3383564d46851a7a258491c8ff7323d0864d9435c192",
+    "Solidity/Frontend/LiteralGrammarH28/FragmentCompleteness.lean": "302efc979565443a8b9f55144dbe34780db2bbcedce49769df60379518f12d1a",
+    "Solidity/Frontend/LiteralGrammarH28/Fragments.lean": "9c5671f1bc2f4cf7cfed3b9331a1536be371b5e0646e7beab5ffa4c6f6d6716e",
+    "Solidity/Frontend/LiteralGrammarH28/FullControls.lean": "8f31fa9a673e1f1e49f2a472b0f446f80345f784a1bd7c2eefec882cc8049aee",
+    "Solidity/Frontend/LiteralGrammarH28/FullPins.lean": "f89071181d6c189f96e16dc13ed22db4281ece07f97b0221664966bf0cb556a1",
+    "Solidity/Frontend/LiteralGrammarH28/Global.lean": "4930c27456cbf46f88343ca5f4eaa29ae8cc463a5c60cfc5ddb7e6835a750058",
+    "Solidity/Frontend/LiteralGrammarH28/Hex.lean": "1314c89e3b60b3d50ac2043bb03cf201d976b63f7510d7f6e2b3809b1332444a",
+    "Solidity/Frontend/LiteralGrammarH28/HexControls.lean": "75f3fcd359319fb069b091e1d28006cdc1d6fd0cfe1b15f703d5fd28cd275af8",
+    "Solidity/Frontend/LiteralGrammarH28/HexEncoding.lean": "50652c1912dba21cd27df4738b23e0a64aee43304c9243dabf8a5e7b94b499b5",
+    "Solidity/Frontend/LiteralGrammarH28/HexPins.lean": "5c90c70fb8ac8d5a123b51d02c7f7d069e4970dc971b8de2218654a45385218d",
+    "Solidity/Frontend/LiteralGrammarH28/Lengths.lean": "2bd6721c9bfa592bf36a054370c9cb7179f58dd8fade28cca7d01cfbcbb3359b",
+    "Solidity/Frontend/LiteralGrammarH28/ModeGrammar.lean": "b1a7348bd85329f660ef422944778af2129e8d9fdb3acec4a955af5880d2feb4",
+    "Solidity/Frontend/LiteralGrammarH28/ProofSafety.lean": "cfc8d62806da3717205b0c5b3e50a27f4e712d5d69ab02ec9e1dca99f40c27c5",
+    "Solidity/Frontend/LiteralGrammarH28/Quoted.lean": "cd22a6943a773ef5068644bdc37978367da188baeba0929eec1a25be6431e32b",
+    "Solidity/Frontend/LiteralGrammarH28/Roundtrips.lean": "aaf443974cd55ce627f0ab8c1820c687f040b5970cb08979c8cd026e91c18928",
+    "Solidity/Frontend/LiteralGrammarH28/Scanner.lean": "dc1844dca32d30ee87cbc8a5b307b8bed1e525e8d7136ed0713ee75fc60bffa0",
+    "Solidity/Frontend/LiteralGrammarH28/Split.lean": "8e3b8c1974c7ced4f55bd7a1388ec86e2269d40be33c82bbdf3e64e9c37445c0",
+    "Solidity/Frontend/LiteralGrammarH28/TaggedEncoding.lean": "6be9ed110a1672751e4a03a868667f58fcde24497a2d0aca6ee1f306c3ef3a51",
+    "Solidity/Frontend/LiteralGrammarH28/Utf8Shape.lean": "16065450ba7ca5cd3826fafc09780c2634e005d7bfa64b7cd9dfbca18f6f80ae",
+    "Solidity/Frontend/LiteralGrammarH28/WordTable.lean": "a4fd8c2ed095d567fa50f6e927a1f6ce5c607cdc993889d4b2ecebbe00584d83"
+  },
+  "axiom_log": "tests/h28-sol/literal-grammar/evidence/axioms.log",
+  "axiom_log_sha256": "d420f046c747b0b3d14c531a1f72ef7729e8d7671262c91fa547ae779f5d9ba9"
+}

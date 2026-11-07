@@ -1,0 +1,11 @@
+PASS	build-touched	260	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/1.log	build_touched 
+FAIL	run-lean	1	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/2.log	bash run-lean.sh 
+PASS	trust	13	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/3.log	bash scripts/check-trust.sh 
+FAIL	orphans	0	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/4.log	node scripts/check-orphans.mjs 
+PASS	layers	1	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/5.log	node scripts/check-layers.mjs 
+FAIL	roots	0	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/6.log	bash scripts/coord-tools/register.sh --check 
+PASS	doc-paths	12	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/7.log	bash scripts/check-doc-paths.sh 
+PASS	axiom-pins	13	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/8.log	node scripts/check-axiom-pins.mjs 
+PASS	testsuite	1	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/9.log	bash scripts/check-testsuite.sh 
+PASS	corpus	34	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/10.log	bash scripts/check-corpus.sh 
+PASS	automatic-strict	0	/workspace/solidity-lean/tests/h28-sol/type-grammar/evidence/h28-full-3a32d40620f6/11.log	node scripts/check-automatic.mjs --strict 

@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/LetBranchCompilation.lean:Solidity.Yul.Compilation.LetBranchCompilation.Artifact.normal_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompilation.lean:Solidity.Yul.Compilation.LetBranchCompilation.Artifact.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompilation.lean:Solidity.Yul.Compilation.LetBranchCompilation.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompilation.lean:Solidity.Yul.Compilation.LetBranchCompilation.lower": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,158 @@
+[
+  {
+    "source": "Solidity/Evm/Sim.lean",
+    "start_line": 200,
+    "text": "structure SimL (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State C []) (ρ : Look C Γ)\n    (m : Machine) : Prop where\n  store : ReprStore C L m.store σ.storage\n  vals : ∀ {p : PrimTy} (i : Idx Γ (.val p)), ReprV p (ρ i) (m.memAt (lvl b i))\n  aliases : ∀ {R : RefTy} (i : Idx Γ (.alias R)), F.get i = .ok →\n    ∃ r s, ρ i = some r ∧ m.memAt (lvl b i) = .slot s ∧\n      PathSlot C true r s\n  /-- `net(a)` is what `a`'s account lost, at every address but the\n  contract's own. -/\n  net : ∀ a : Fin W, a ≠ m.self → netAt σ.net a.1 = (m.bal₀ a : Int) - m.bal a\n  /-- The contract's own entry is never moved. -/\n  netSelf : netAt σ.net m.self = 0\n  /-- The bound on the arrays is at most solc's. -/\n  bound : L ≤ Lmax\n  /-- A fragile alias: its cell holds the slot of a path that indexes an\n  array, and that path is in bounds. -/\n  fragile : ∀ {R : RefTy} (i : Idx Γ (.alias R)), F.get i = .fragile →\n    ∃ r s, ρ i = some r ∧ m.memAt (lvl b i) = .slot s ∧\n      PathSlot C false r s ∧\n      ∃ sv, σ.storage.findLive r = some sv\n  /-- `msg.sender`, `msg.value`, `block.timestamp`, `address(this)`. -/\n  env : EnvSim σ.tx m\n  /-- The contract's spendable balance agrees with the machine. -/\n  funds : σ.selfBalance.1 = m.bal m.self\n  /-- Both readings accept the same external payment. -/\n  oracle : ∀ (addr amt : PrimTy.uint.Denote) (x y : Fin W),\n    addr.1 = x.1 → amt.1 = y.1 →\n    (match Semantics.lookupBy (sendKey addr amt) σ.tx.ext with\n      | none | some (.ok _) => true | some _ => false) = m.accepts x y",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/JointWorld.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.joint_payment_world"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Evm/Sim.lean",
+    "start_line": 574,
+    "text": "abbrev Sim (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State C Γ) (m : Machine) :\n    Prop :=\n  SimL C L b F σ.glob (Look.ofTEnv σ.env) m",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/JointWorld.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.joint_payment_world"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Evm/Compiler.lean",
+    "start_line": 187,
+    "text": "def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}\n    (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)\n    (σ : State C Γ) (m : Machine) : Prop :=\n  match result with\n  | .core _ _ => Sim C L b F σ m ∧ L + Evm.Prog.pushes P ≤ Lmax\n  | .memory out => Memory.StateRepr L b frame F σ base m ∧ b + Memory.frameNeedProg P ≤ frame ∧\n      Memory.AllocationInput b frame (out.cert.cost σ) σ base m\n  | .referenceArrays _ => Memory.RefArrayStateRepr L b frame F σ base m\n  | .objects _ => Memory.Objects.StateRepr L b frame F σ base m ∧\n      b + Memory.frameNeedProg P ≤ frame\n  | .construction _ => Memory.Objects.StateRepr L b frame F σ base m ∧\n      b + Memory.frameNeedProg P ≤ frame ∧\n      Memory.Objects.AllocationInput b frame (Memory.Construction.allocationCostProg P σ) σ base m\n  | .memoryLoops out => Memory.StateRepr L b frame F σ base m ∧\n      b + out.cert.need ≤ frame ∧ Memory.Loops.Room out.cert frame σ base m\n  | .memoryLoopScopes out => Memory.StateRepr L b frame F σ base m ∧\n      b + out.cert.need ≤ frame ∧ Memory.LoopScopes.Room out.cert frame σ base m\n  | .memoryCalls out _ => Memory.StateRepr L b frame F σ base m ∧ b + out.need ≤ frame ∧\n      Memory.AllocationInput b frame (out.cost σ) σ base m\n  | .memoryCopy out => Memory.StateRepr L b frame F σ base m ∧\n      b + Memory.frameNeedProg P ≤ frame ∧\n      Memory.AllocationInput b frame (out.cert.cost σ) σ base m ∧\n      Memory.copyBoundProg P σ ≤ L\n  | .fixedMemory _ => Memory.FixedStateRepr L b frame F σ base m ∧ Memory.copyBoundProg P σ ≤ L\n  | .copyConstruction _ => Memory.Objects.StateRepr L b frame F σ base m ∧\n      b + Memory.frameNeedProg P ≤ frame ∧\n      Memory.Objects.AllocationInput b frame (Memory.Construction.allocationCostProg P σ) σ base m ∧\n      Memory.copyBoundProg P σ ≤ L",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CheckedFamilies.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.checked_families_joint"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Evm/Compiler.lean",
+    "start_line": 313,
+    "text": "def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}\n    (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)\n    (entry : State C Γ) (initial : Machine) (σ : State C Δ) (m : Machine) : Prop :=\n  match result with\n  | .core out _ => Sim C L b out σ m\n  | .memory out => ∃ base', Memory.StateRepr L b frame out.frag σ base' m ∧\n      Memory.BaseExtends entry.H base base' ∧\n      Memory.GrowsAllocator b frame (out.cert.cost entry) entry base initial σ base' m\n  | .referenceArrays out => Memory.RefArrayStateRepr L b frame out.frag σ base m\n  | .objects out => Memory.Objects.StateRepr L b frame out.frag σ base m ∧\n      Memory.Objects.KeepsAllocator b frame entry base initial σ m\n  | .construction out => ∃ base', Memory.Objects.StateRepr L b frame out.frag σ base' m ∧\n      Memory.BaseExtends entry.H base base' ∧\n      Memory.Objects.GrowsAllocator b frame (Memory.Construction.allocationCostProg P entry)\n        entry base initial σ base' m\n  | .memoryLoops out => ∃ base' cost, ∃ e : entry.H <+: σ.H,\n      Memory.Loops.Cost out.cert entry ⟨σ, e⟩ cost ∧\n      Memory.StateRepr L b frame out.frag σ base' m ∧ Memory.BaseExtends entry.H base base' ∧\n      Memory.GrowsAllocator b frame cost entry base initial σ base' m\n  | .memoryLoopScopes out => ∃ base' cost, ∃ e : entry.H <+: σ.H,\n      Memory.LoopScopes.Cost out.cert entry ⟨σ, e⟩ cost ∧\n      Memory.StateRepr L b frame out.frag σ base' m ∧ Memory.BaseExtends entry.H base base' ∧\n      Memory.GrowsAllocator b frame cost entry base initial σ base' m\n  | .memoryCalls out _ => ∃ base', Memory.StateRepr L b frame out.frag σ base' m ∧\n      Memory.BaseExtends entry.H base base' ∧\n      Memory.GrowsAllocator b frame (out.cost entry) entry base initial σ base' m\n  | .memoryCopy out => ∃ base', Memory.StateRepr L b frame out.frag σ base' m ∧\n      Memory.BaseExtends entry.H base base' ∧\n      Memory.GrowsAllocator b frame (out.cert.cost entry) entry base initial σ base' m\n  | .fixedMemory out => Memory.FixedStateRepr L b frame out.frag σ base m ∧\n      m.mem = initial.mem ∧ σ.H = entry.H ∧ HEq σ.heap entry.heap\n\n  | .copyConstruction _ => ∃ base', Memory.Objects.StateRepr L b frame result.frag σ base' m ∧\n      Memory.BaseExtends entry.H base base' ∧\n      Memory.Objects.GrowsAllocator b frame (Memory.Construction.allocationCostProg P entry)\n        entry base initial σ base' m\n\n/-- Expose the full output relation without reducing a certified compiler value. -/",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CheckedFamilies.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.checked_families_joint"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Evm/Compiler.lean",
+    "start_line": 550,
+    "text": "def Agrees {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}\n    (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)\n    (σ : State C Γ) (m : Machine) : Prop :=\n  (∃ o m', P.run σ = .ok o ∧ run result.code m = .ok m' 0 ∧ m'.stack = m.stack ∧\n    result.Rep (L + Evm.Prog.pushes P) frame base σ m o.st m') ∨\n  ((P.run σ = .error .revert ∨ (P.asserts = true ∧ P.run σ = .error .panic)) ∧\n    run result.code m = .revert) ∨\n  (Evm.Prog.pays P = true ∧ run result.code m = .revert ∧ ∃ o m',\n    P.run σ = .ok o ∧ result.Rep (L + Evm.Prog.pushes P) frame base σ m o.st m') ∨\n  (P.run σ = .error .diverge ∧ (run result.code m = .fault ∨\n    (Evm.Prog.pays P = true ∧ run result.code m = .revert)))",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CheckedFamilies.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.checked_families_joint"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Calculus/CallbackHolds.lean",
+    "start_line": 129,
+    "text": "structure Invariant (C : Contract) where\n  fml : Fml C []\n  fo : fml.FO = true := by rfl",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Originals.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.original_invariant_inputs"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Calculus/ProvesSound.lean",
+    "start_line": 191,
+    "text": "theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}\n    {φ : Fml C Γ} (d : Proves C R Γ₀ H φ) : ∀ σ, holds σ (H.wrap φ) := by",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Originals.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.original_calculus_induction"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Evm/Compile.lean",
+    "start_line": 70,
+    "text": "structure Frag (Γ : Ctx) where\n  fl : List Fl\n  deriving DecidableEq, Repr",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.inhabited_fragment"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Evm/Compile.lean",
+    "start_line": 274,
+    "text": "def inFrag {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Stmt C Γ Γ' → Option (Frag Γ')\n  | .assign l r => F.guard (assignIn F r l)\n  | .rebind i r => match r with\n    | .path q => (bindFl F q).map (F.set i)\n    | .push .. => none\n  | .assignLocal _ r => F.guard (valIn F r)\n  | .declLocal p _ init => (F.push (.val p) .ok).guard (init.all (valIn F))\n  | .declStorage R _ init => declStorageIn F R init\n  | .opAssign _ _ _ l r => F.guard (opLocIn F l && valIn F r)\n  | .incDec _ _ l => F.guard (opLocIn F l)\n  | .assignIncDec _ _ _ l _ => F.guard (opLocIn F l)\n  | .push b v _ => F.guard (pushIn F v b)\n  | .pop b => F.dropFragile.guard (spathIn F false b)\n  | .transfer r a => F.guard (valIn F r && valIn F a)\n  | @Solidity.Stmt.delete _ _ T l => F.dropFragile.guard (leavesFit T && locIn F false l)\n  | .ite c t e =>\n    if valIn F c then\n      match inFragP F t, inFragP F e with\n      | some F₁, some F₂ => some ((F₁.restrict Γ).meet (F₂.restrict Γ))\n      | _, _ => none\n    else none\n  | .block body => (inFragP F body).map (Frag.restrict Γ)\n  | .require c | .assert c => F.guard (valIn F c)\n  | .revert => some F\n  | .assumeFalse => none\n  | @Solidity.Stmt.call _ _ _ ps rs _ _ args ret body =>\n    if argsIn F args then\n      match inFragP (Frag.init (rs ++ ps)) body with\n      | some _ => CallRetIn (F.after (Prog.shrinks body)) ret\n      | none => none\n    else none\n  -- a loop whose body pushes, pays, shrinks nothing and leaves what is known\n  -- of the locals as it found it: every turn starts from the same fragment\n  | .loop _ c body =>\n    if valIn F c && Prog.pushes body == 0 && !Prog.pays body && !Prog.shrinks body then\n      match inFragP F body with\n      | some G => if (G.restrict Γ).fl = F.fl then some F else none\n      | none => none\n    else none\n  | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..\n  | .assignMem .. | .deleteMem ..\n  | .assignNew .. | .tryCall .. | .revertData _ | .catchData .. | .pushOpAssign .. | .pushIncDec ..\n  | .callReceiver .. => none\n  | .callReceiverPush .. => none\n  -- recursion is outside the compiled fragment\n  | .callRec .. => none\n/-- A block of the fragment. -/\ndef inFragP {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Prog C Γ Γ' → Option (Frag Γ')\n  | .nil => some F\n  | .cons s P => match inFrag F s with\n    | some F' => inFragP F' P\n    | none => none\nend\n\n/-! ## The compiler -/",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.fragment_family"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Calculus/PremiseSound.lean",
+    "start_line": 25,
+    "text": "def Premise.Sound (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ')\n    (σ : State C Γ) : Prop :=\n  ∀ {Γ₁ Γ₀ : Ctx} (ω : Prog C Γ' Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀),\n    holds σ (p.fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ)\n\n/-- **Every rule the strategy fires is sound** over the typed state, in\nevery typed state, at any fresh index (`Stmt.Sound`, over `State`). -/\ndef Stmt.Sound (C : Contract) : Prop :=\n  ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ'),\n    s.step k m = p → ∀ σ : State C Γ, Premise.Sound m s p σ",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/ScalarPremises.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.flag_rule_application"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Calculus/CallbackHolds.lean",
+    "start_line": 51,
+    "text": "def holdsC (I : Fml C []) (pay : Bool) : {Γ : Ctx} → State C Γ → Fml C Γ → Prop\n  | _, _, .tt => True\n  | _, σ, .eq a b => holds σ (.eq a b)\n  | _, σ, .wellFormed t => holds σ (.wellFormed t)\n  | _, σ, .not φ => ¬ holdsC I pay σ φ\n  | _, σ, .and φ ψ => holdsC I pay σ φ ∧ holdsC I pay σ ψ\n  | _, σ, .imp φ ψ => holdsC I pay σ φ → holdsC I pay σ ψ\n  | _, σ, .upd m U φ => U.afterT m σ (holdsC I pay · φ)\n  | _, σ, .modal m P κ φ =>\n    ∀ o, ExecP (I.stateInv pay) σ P o → o.thenF (I.stateInv pay) κ m (holdsC I pay · φ)\n  | _, σ, .havoc φ => ∀ st nt sb, holdsC I pay (σ.havoc st nt sb) φ\n  | _, σ, .all _ p φ => ∀ v : p.Denote, holdsC I pay (σ.push (t := .val p) v) φ\n  | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => holdsC I pay (σ.push v) φ\n  | _, σ, .anon xs φ => ∀ b, holdsC I pay (σ.anon xs b) φ\n  | _, σ, .allocAll _ A φ => ∀ o : MObj σ.H A,\n      holdsC I pay ((σ.alloc o).1.push (t := .mem A) (some (σ.alloc o).2)) φ\n  | _, σ, .grow φ => ∀ g : Grown σ.H (fun _ => Unit), Heap.Keeps g.ext σ.heap g.heap →\n      holdsC I pay (σ.adopt g).1 φ\n\n/-- A first-order formula has no program, so no payment. -/",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Originals.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.original_callback_formula"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  },
+  {
+    "source": "Solidity/Calculus/CorrectCallback.lean",
+    "start_line": 37,
+    "text": "def ValidC (I : Invariant C) (φ : Spec C []) (pay : Bool := true) : Prop :=\n  ∀ σ : State C [], satC I pay σ φ",
+    "status": "witnessed",
+    "witnesses": [
+      {
+        "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Callbacks.lean",
+        "name": "Solidity.Assurance.NonVacuityH28.payment_headline"
+      }
+    ],
+    "boundary": "Whole contract inhabitation; exact delegated definitions and durable unexercised fields in public-contracts.json."
+  }
+]

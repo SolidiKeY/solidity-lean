@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+actual=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+root=/workspace/solidity-lean
+config="$root/tests/h62/item2/audit-abi-world/resume-serial.lakefile.toml"
+if [[ "${1:-}" == serve ]]; then
+  shift
+  [[ "${1:-}" != -- ]] || shift
+  # Lake serve resets LAKE to the real binary; that loses this alternate
+  # configuration in setup-file. Reproduce its environment and preserve LAKE.
+  exec "$actual" -f "$config" env env LAKE="$root/scripts/h62/item2/audit-abi-world/resume-bin/lake" \
+    /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --server --tstack=131072 -j1 "$@"
+fi
+exec "$actual" -f "$config" "$@"

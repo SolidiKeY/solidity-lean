@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Compilation/FramedControl.lean:Solidity.Yul.Compilation.FramedControl.seq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedControl.lean:Solidity.Yul.Compilation.FramedControl.seq_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

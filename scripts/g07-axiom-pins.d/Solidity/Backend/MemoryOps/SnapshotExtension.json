@@ -1,0 +1,9 @@
+{
+ "Solidity/Backend/MemoryOps/SnapshotExtension.lean:Solidity.Backend.MemoryOps.overwriteSlice_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotExtension.lean:Solidity.Backend.MemoryOps.withElems_wk": [
+  "propext"
+ ]
+}

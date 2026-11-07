@@ -1,0 +1,78 @@
+{
+  "modules": [
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.Layouts",
+      "purpose": "Successful layout equivalence and exact elementary/qualified layout consumption"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.Counterexamples",
+      "purpose": "Preserved false raw type-name yield uniqueness claim with actual trees and precedence control"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.Composition",
+      "purpose": "All type-constructor layout composition, list yield converse, explicit length-atom contracts and arbitrary-depth layout controls"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.Boundaries",
+      "purpose": "Arbitrary-depth balanced token regions, exact boundary uniqueness, universal scanner suffix consumption and positive/negative controls"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.TypeRegions",
+      "purpose": "Actual type/parameter/list yield region membership under local length-atom balance; all constructor/layout clauses and exact token boundaries"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserBasics",
+      "purpose": "Constructive elementary completeness; exact dynamic suffix consumption and fuel; arbitrary token locations; preserved raw-parser counterexample"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserChecks",
+      "purpose": "Checked guard soundness/converse, elementary parseType completeness/characterization and yield identity/layout uniqueness"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserPaths",
+      "purpose": "Independent arbitrary-depth qualified-path completeness, constructive loop fuel, checked source corollaries and exact yield identity; malformed boundary controls"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserArrays",
+      "purpose": "Rooted dynamic-array completeness for elementary/qualified bases, constructive sharp fuel, source corollaries, actual syntax/layout identity and universal negative controls; remaining bases/static lengths open"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserContexts",
+      "purpose": "Independent sufficient continuation certificates; arbitrary real located prefixes for elementary/qualified/dynamic arrays; inhabited CompleteAt contracts; all visibility/mutability continuation controls"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserMapping",
+      "purpose": "All mapping key/name constructor composition from independent strict-child support; constructive/frozen fuel, actual yield/prec converse, source corollaries, certificate preservation and inhabited arbitrary-depth mapping identity controls"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure",
+      "purpose": "Actual dynamic-array yield/prec converse and mapping-plus-suffix constructive closure; arbitrary mapping/array interleavings with inhabited exactness controls, no replacement of full type language"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserReady",
+      "purpose": "Suffix-readiness equations and stronger yield-prefix certificates with explicit canonical layout stability; leaf/mapping/dynamic-array preservation and substantive zero-residual guard controls"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserParams",
+      "purpose": "Actual parameter trailers and arbitrary-length list/parenthesis parsing from strict child support; canonical layouts, explicit common/separator fuel, inhabited elementary/location/name controls and refusals"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs",
+      "purpose": "Exact classification of all successful function visibility/mutability arrangements, actual parser completeness/field-order uniqueness, inhabited all-profile controls and repeated-attribute behavior"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserFunctions",
+      "purpose": "Actual function parameter/attribute/return composition and capture layout order; constructive frozen fuel, all-layout prefix certification/source iff and inhabited arbitrary-depth function/array controls"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.ParserLengths",
+      "purpose": "Explicit independent read-only length atom contract with real expr parser instances; static array suffix/prefix closure, frozen fuel/source iff and inhabited arbitrary-depth static controls"
+    },
+    {
+      "module": "Solidity.Frontend.TypeGrammarH28.Exactness",
+      "purpose": "All original constructors with finite local read-only length dependencies; actual frozen parser/source completeness, arbitrary-depth boundary/AST/layout exactness and genuine mixed all-constructor controls"
+    }
+  ],
+  "central_roots": "integration owner only",
+  "scope": "G09 type-name grammar; no lowering or admission"
+}

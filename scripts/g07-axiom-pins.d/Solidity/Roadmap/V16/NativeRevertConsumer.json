@@ -1,0 +1,57 @@
+{
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.data_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.empty_revert_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.exhaustion_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.frames_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.ordinary_diamond_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.target_positive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.target_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.wrong_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.wrong_panic_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeRevertConsumer.lean:Solidity.Roadmap.V16.NativeRevertConsumer.zero_bound_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

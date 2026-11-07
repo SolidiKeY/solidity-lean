@@ -1,0 +1,9 @@
+{
+  "command": [
+    "bash",
+    "scripts/check-doc-paths.sh"
+  ],
+  "exit": 0,
+  "seconds": 8.304302884993376,
+  "log_sha256": "94b04a6b1d2d985e15c9cf2257e0eeb47ec68f2e30eafb93d06d1d5f7ab2a582"
+}

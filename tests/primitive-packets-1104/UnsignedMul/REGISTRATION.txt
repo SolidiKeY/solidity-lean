@@ -1,0 +1,10 @@
+Publication record: origin/master 89373e34cdfd6bb5db7054b1c204d01edffc5fa7.
+All five packet modules are now published and registered:
+Solidity.Backend.PrimitivePackets.UnsignedMul.Selection
+Solidity.Backend.PrimitivePackets.UnsignedMul.Execution
+Solidity.Backend.PrimitivePackets.UnsignedMul.Controls
+Solidity.Backend.PrimitivePackets.UnsignedMul.WideControls
+Solidity.Backend.PrimitivePackets.UnsignedMul.WidthControls
+
+No remaining module registration or shared map edit is proposed.
+Remaining worker files: owning feature documentation and evaluator/audit fixtures.

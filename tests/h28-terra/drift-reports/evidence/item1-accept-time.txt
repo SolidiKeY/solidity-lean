@@ -1,0 +1,7 @@
+{
+  "elapsedSeconds": 90.62310789100002,
+  "childrenMaxRssKiB": 605984,
+  "exit": 0,
+  "stderr": "",
+  "note": "/usr/bin/time unavailable; Python rusage reports maximum child RSS"
+}

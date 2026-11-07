@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/AbiEntry/TailGuard.lean:Solidity.Backend.AbiEntry.TailGuard.capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuard.lean:Solidity.Backend.AbiEntry.TailGuard.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuard.lean:Solidity.Backend.AbiEntry.TailGuard.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuard.lean:Solidity.Backend.AbiEntry.TailGuard.frameCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/TailGuard.lean:Solidity.Backend.AbiEntry.TailGuard.reference": [
+  "propext"
+ ]
+}

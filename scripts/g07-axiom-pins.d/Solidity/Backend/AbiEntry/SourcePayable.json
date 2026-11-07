@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/AbiEntry/SourcePayable.lean:Solidity.Backend.AbiEntry.SourcePayable.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayable.lean:Solidity.Backend.AbiEntry.SourcePayable.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayable.lean:Solidity.Backend.AbiEntry.SourcePayable.lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayable.lean:Solidity.Backend.AbiEntry.SourcePayable.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SourcePayable.lean:Solidity.Backend.AbiEntry.SourcePayable.source_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

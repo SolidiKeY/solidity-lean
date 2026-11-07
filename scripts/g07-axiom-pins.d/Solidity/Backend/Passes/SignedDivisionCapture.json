@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.ordinary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.ordinary_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.selectable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCapture.lean:Solidity.Backend.Passes.SignedDivisionCapture.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

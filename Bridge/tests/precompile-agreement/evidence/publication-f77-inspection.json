@@ -1,0 +1,10 @@
+{
+  "payload": "b25eb32497033bac6c4085872df21e8de9c4baa1",
+  "publication": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "origin_master": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "base": "b6ba0696102a7a038afe2ed333c09dff397cc5b2",
+  "pinned_inputs_changed": [],
+  "instruction_changes": [],
+  "remote_competing_modules": [],
+  "ancestry": "all pass"
+}

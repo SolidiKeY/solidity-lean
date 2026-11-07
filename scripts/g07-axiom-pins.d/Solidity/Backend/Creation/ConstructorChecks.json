@@ -1,0 +1,21 @@
+{
+ "Solidity/Backend/Creation/ConstructorChecks.lean:Solidity.Backend.Creation.constructor_compose": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ConstructorChecks.lean:Solidity.Backend.Creation.copyConstructor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ConstructorChecks.lean:Solidity.Backend.Creation.exit_exec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ConstructorChecks.lean:Solidity.Backend.Creation.Prefix.exec": [
+  "Quot.sound",
+  "propext"
+ ]
+}

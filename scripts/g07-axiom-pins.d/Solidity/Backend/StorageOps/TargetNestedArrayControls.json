@@ -1,0 +1,38 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayControls.empty_source_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayControls.growing_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayControls.retained_reuse_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayControls.runtime_header_family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayControls.self_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayControls.shrinking_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayControls.wrong_older_shadow_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayControls.wrong_outer_start": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

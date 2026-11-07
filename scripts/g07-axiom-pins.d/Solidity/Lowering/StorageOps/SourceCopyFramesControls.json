@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCopyFramesControls.lean:Solidity.Backend.StorageOps.SourceCopyFrames.Controls.actual_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFramesControls.lean:Solidity.Backend.StorageOps.SourceCopyFrames.Controls.explicit_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFramesControls.lean:Solidity.Backend.StorageOps.SourceCopyFrames.Controls.older_same_root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFramesControls.lean:Solidity.Backend.StorageOps.SourceCopyFrames.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFramesControls.lean:Solidity.Backend.StorageOps.SourceCopyFrames.Controls.subsequent_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCopyFramesControls.lean:Solidity.Backend.StorageOps.SourceCopyFrames.Controls.wrong_frame_live_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "output": "\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n⚠ [77/114] Replayed Solidity.Syntax.Quote\nwarning: Solidity/Syntax/Quote.lean:433:39: unused variable `ps`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n⚠ [87/114] Replayed Solidity.Calculus.CloseLemmas\nwarning: Solidity/Calculus/CloseLemmas.lean:137:28: This simp argument is unused:\n  h1\n\nHint: Omit it from the simp argument list.\n  simp only [uintBitwise, h1,̵ ̵h̵1̵', Nat.one_and_eq_mod_two, signedOf]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n⚠ [103/114] Replayed Solidity.Syntax.Elab.Arms\nwarning: Solidity/Syntax/Elab/Arms.lean:1456:11: unused variable `n`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n✔ [114/114] Built Solidity.Frontend.ExecutableAst.Shared.Intrinsic (12s)\nBuild completed successfully (114 jobs).",
+  "errors": []
+}
+diag: 0 errors
+{"childMaxRssKiB": 12672, "command": ["bash", "-c", "set -e; trap \"python3 scripts/coord-tools/lean-mcp stop\" EXIT; python3 scripts/coord-tools/lean-mcp call lean_build \"{\\\"output_lines\\\":20}\"; python3 scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean"], "exit": 0, "scopeMemoryPeakBytes": "475013120", "wallSeconds": 80.83944815700033}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 14839795712, "outerWallSeconds": 86.75353452000036}

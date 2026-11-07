@@ -1,0 +1,28 @@
+{
+ "Solidity/Backend/Scalar/Slice.lean:Solidity.Backend.Scalar.binary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Slice.lean:Solidity.Backend.Scalar.run_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Slice.lean:Solidity.Backend.Scalar.run_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Slice.lean:Solidity.Backend.Scalar.step": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Slice.lean:Solidity.Backend.Scalar.step_pushWord": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Slice.lean:Solidity.Backend.Scalar.ternary": [],
+ "Solidity/Backend/Scalar/Slice.lean:Solidity.Backend.Scalar.unary": [
+  "Quot.sound",
+  "propext"
+ ]
+}

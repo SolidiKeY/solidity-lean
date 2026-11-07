@@ -20,7 +20,8 @@ A dependency-free Lean 4 model of [SolKey](https://github.com/SolidiKeY/solkey).
   printers or tactic front ends. The library roots (`Solidity.lean`,
   `SolidityExamples.lean`, `Bridge/SolidityBridge.lean`) are generated: register
   new modules with `scripts/coord-tools/register.sh`, give each a row in its
-  area's `docs/module-map/` file, and follow
+  area's fragment `docs/module-map/<area>.d/<lane>.md` (then run
+  `scripts/coord-tools/fragments.sh`), and follow
   [parallelism.md](docs/parallelism.md).
 - Do not raise `maxHeartbeats` to rescue a proof. Use `simp only [...]` in
   finished proofs and write explicit signature and `have` types.
@@ -69,6 +70,7 @@ milestone's documentation.
 | SolKey sort checks, pins and re-pinning | [solkey-migration.md](docs/solkey-migration.md) |
 | Paper derivations and definition links | [latex.md](docs/latex.md); use `Solidity.Tools.ProgramTrace` for separate captures |
 | Examples site | [site.md](docs/site.md); register examples in `site/examples.json` |
+| Audits and prior-art studies (read before freezing an interface) | [docs/audits/](docs/audits/): 2026-11-06 proof-coverage, architecture, build-speed, coordination audits; `prior-art-*.md` |
 
 Keep detailed guidance in `docs/` and link it here. Module docstrings explain
 conventions and rationale; avoid duplicating declarations or the rule map.

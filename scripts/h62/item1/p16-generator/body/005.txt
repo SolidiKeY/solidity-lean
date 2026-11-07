@@ -1,0 +1,7 @@
+/-! RawPreparedDeclaration supplies a concrete literal declaration runner using
+existing exact-word preparation. input_words preserves all represented bits;
+coherent_result retains the genuine input-coherence premise. dirty_agrees is
+full result/frame equality with the existing materialized runner on incoherent
+inputs. Source projection is concrete, not a premise. The extended-context
+checked-consumer witness is in Solidity.Yul.Checks.RawPreparedDeclaration;
+the enclosing growing block/loop composition remains a separate obligation. -/

@@ -1,0 +1,48 @@
+{
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.Controls.corrupted_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.Controls.different_pipelines": [],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.Controls.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.Controls.short_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.Controls.source_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.Controls.stale_rhs_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentAdditionPins.lean:Solidity.Backend.Passes.AssignmentAdditionPass.reached_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,83 @@
+{
+  "built_at_head": "a4696f619f48e69f7fac8fdd4a8c0e0a09ace6f5",
+  "dependency_commit": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "interface_commit": "b92fc3a1d170be29180f521c0fb9c959d5aa74cc",
+  "binary_path": "/workspace/solidity-lean/.lake/build/bin/control-tuples-probe",
+  "binary_sha256": "6e486ce1e4c5876741004d9b1e82caafe884ef5ad4cd15b62c67d4310d74c0b9",
+  "build_manifest": "tests/directruntime-20261104/control-tuples/evidence/native-build-reviewed.json",
+  "fixtures": {
+    "Controls": {
+      "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "sourceSha256": "11c44271ac2572801215483a7922e984e58b1cd554c289f0bd7bdc679a883ab7",
+      "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+      "source": "tests/directruntime-20261104/control-tuples/Controls.sol",
+      "provenanceVersion": 1,
+      "compilerFile": "soljson-v0.8.34+commit.80d5c536.js",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "validationStage": "analysis",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "": [
+              "ast"
+            ]
+          }
+        }
+      },
+      "acceptedPragmas": [
+        [
+          "solidity",
+          "^",
+          "0.8",
+          ".24"
+        ]
+      ]
+    },
+    "FailureAlias": {
+      "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "sourceSha256": "dc9df52c981c836125c7b6a418f020da41c54fa47ca65ea6bee9848fe98fcbc3",
+      "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+      "source": "tests/directruntime-20261104/control-tuples/FailureAlias.sol",
+      "provenanceVersion": 1,
+      "compilerFile": "soljson-v0.8.34+commit.80d5c536.js",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "validationStage": "analysis",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "": [
+              "ast"
+            ]
+          }
+        }
+      },
+      "acceptedPragmas": [
+        [
+          "solidity",
+          "^",
+          "0.8",
+          ".24"
+        ]
+      ]
+    }
+  },
+  "boundary": "native external AST-to-intrinsic-model execution only; not production verifier loading closure or source/EVM adequacy",
+  "ldd": "\tlinux-vdso.so.1 (0x00007ffa40d34000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ffa37cb7000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007ffa40d36000)\n\tlibpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007ffa37cb2000)\n\tlibdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007ffa37cad000)\n\tlibrt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007ffa37ca8000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ffa37bb6000)\n",
+  "serialized_environment_reads_in_trace": 0
+}

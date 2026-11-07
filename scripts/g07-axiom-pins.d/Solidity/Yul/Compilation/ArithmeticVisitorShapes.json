@@ -1,0 +1,7 @@
+{
+ "Solidity/Yul/Compilation/ArithmeticVisitorShapes.lean:Solidity.Yul.Compilation.ArithmeticVisitorShapes.visit_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

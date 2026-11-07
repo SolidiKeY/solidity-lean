@@ -1,0 +1,28 @@
+{
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.allocatedSourceAddress_old": [],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.alloc_bool": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.alloc_select_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.default_word_growth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructGrowth.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

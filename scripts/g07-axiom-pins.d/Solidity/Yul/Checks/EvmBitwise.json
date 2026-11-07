@@ -1,0 +1,34 @@
+{
+ "Solidity/Yul/Checks/EvmBitwise.lean:Solidity.Yul.Checks.EvmBitwise.sar_boundaries": [
+  "propext"
+ ],
+ "Solidity/Yul/Checks/EvmBitwise.lean:Solidity.Yul.Checks.EvmBitwise.sar_composition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/EvmBitwise.lean:Solidity.Yul.Checks.EvmBitwise.sar_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/EvmBitwise.lean:Solidity.Yul.Checks.EvmBitwise.sar_nested": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/EvmBitwise.lean:Solidity.Yul.EvmBitwise.eval_sar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/EvmBitwise.lean:Solidity.Yul.EvmBitwise.step_sar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/EvmBitwise.lean:Solidity.Yul.EvmBitwise.step_sar_fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/SourceDeclaration.lean:Solidity.Backend.MemoryOps.source_bool_declaration_timeouts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeclaration.lean:Solidity.Backend.MemoryOps.source_bool_declaration_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeclaration.lean:Solidity.Backend.MemoryOps.source_decl_statement_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeclaration.lean:Solidity.Backend.MemoryOps.source_decl_statement_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

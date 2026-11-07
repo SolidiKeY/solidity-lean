@@ -1,0 +1,30 @@
+{
+ "Solidity/Backend/StorageOps/NestedStaleComposition.lean:Solidity.Backend.StorageOps.NestedStaleComposition.find_older": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedStaleComposition.lean:Solidity.Backend.StorageOps.NestedStaleComposition.find_stale": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedStaleComposition.lean:Solidity.Backend.StorageOps.NestedStaleComposition.finish_cleared_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedStaleComposition.lean:Solidity.Backend.StorageOps.NestedStaleComposition.stale_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedStaleComposition.lean:Solidity.Backend.StorageOps.NestedStaleComposition.unvisited_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedStaleComposition.lean:Solidity.Backend.StorageOps.NestedStaleComposition.unvisited_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

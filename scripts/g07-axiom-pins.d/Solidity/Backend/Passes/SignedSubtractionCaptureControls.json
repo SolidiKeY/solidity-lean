@@ -1,0 +1,63 @@
+{
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.both_wrap_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.corrupt_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.no_horizon_promotion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.observations": [],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.origin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.recapture_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.source_checked_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCaptureControls.lean:Solidity.Backend.Passes.SignedSubtractionCaptureControls.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

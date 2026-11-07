@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/Loom.lean:Solidity.Bridge.Loom.loomWp_bind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Loom.lean:Solidity.Bridge.Loom.loomWp_iff_afterRunTR": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

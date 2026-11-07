@@ -1,0 +1,57 @@
+{
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.actual_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.actual_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.capacity_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.overflow_separate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.shifted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.shifted_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapesControls.lean:Solidity.Yul.Compilation.StatementVisitorShapes.Controls.updated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

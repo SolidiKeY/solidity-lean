@@ -1,0 +1,12 @@
+{
+ "Solidity/Frontend/Static/Certificates.lean:Solidity.Frontend.Static.inheritanceChecker_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Static/Certificates.lean:Solidity.Frontend.Static.metadataChecker_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

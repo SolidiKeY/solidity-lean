@@ -1,0 +1,57 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.afterStore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.clear_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.clear_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.clearNumerics": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.clearStore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.clearStores": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.copy_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.copyNumerics": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.copyStores": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransport.execute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalUintSequence.lean:Solidity.Backend.MemoryOps.Physical.resolved_uint_assign_delete_physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalUintSequence.lean:Solidity.Backend.MemoryOps.Physical.resolved_uint_assign_delete_physical_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalUintSequence.lean:Solidity.Backend.MemoryOps.Physical.resolved_uint_delete_assign_physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalUintSequence.lean:Solidity.Backend.MemoryOps.Physical.resolved_uint_disjoint_orders": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalUintSequence.lean:Solidity.Backend.MemoryOps.Physical.UintArrayAt.write_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalUintSequence.lean:Solidity.Backend.MemoryOps.Physical.word_stores_commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+  "source": "Complete initial task instruction and inherited goal copied from the original visible conversation, because no original assignment file/thread-export tool was available.",
+  "original_assignment_file": "original-assignment.txt",
+  "original_goal_file": "original-goal-objective.txt",
+  "reported_frozen_rendered_prompt_sha256": "7e38e2884b080562f651c0ed737abbb52012f8b5d4450b542dc6e1e637423ff3",
+  "rendered_prompt_hash_independently_verified": false,
+  "boundary": "The reported renderer hash is preserved as provenance, not asserted to equal a transcription hash. SHA256SUMS authenticates the exact preserved assignment bytes. All four original checkpoints, backfill text, scope and full owner map are included.",
+  "owner_keys_count": 123,
+  "H71_text_available": false,
+  "H81_full_policy_text_available": false,
+  "resource_handling": "Preserve known recorded limits; do not infer permission to relax them. Successor should consult current H81 authority before work."
+}

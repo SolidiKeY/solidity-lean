@@ -1,0 +1,48 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.body_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.condition_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.iterationMachine": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.iterations_finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.iterations_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.prefix_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.prefixMachine": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.run_loop_from": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.touched": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.turn_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.turn_more": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopyLoop.unvisited_child": [
+  "Quot.sound",
+  "propext"
+ ]
+}

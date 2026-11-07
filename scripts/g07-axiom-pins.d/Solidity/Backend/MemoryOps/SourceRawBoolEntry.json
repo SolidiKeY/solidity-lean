@@ -1,0 +1,21 @@
+{
+ "Solidity/Backend/MemoryOps/SourceRawBoolEntry.lean:Solidity.Backend.MemoryOps.raw_bool_frame_word": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolEntry.lean:Solidity.Backend.MemoryOps.source_raw_bool_entry_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolEntry.lean:Solidity.Backend.MemoryOps.source_raw_bool_entry_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolEntry.lean:Solidity.Backend.MemoryOps.source_raw_bool_guarded_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

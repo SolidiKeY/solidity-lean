@@ -1,0 +1,18 @@
+{
+  "id": "Q-H28-PINS",
+  "sources": [
+    "H28 exclusive writes; no H21 shared registries/trust inventories",
+    "queue4 required final gates",
+    "scripts/check-axiom-pins.mjs hardcoded INVENTORY"
+  ],
+  "question": "The unchanged full gate reports 0 axiom errors but 414 unrecorded H28 pins. H28 forbids shared-registry writes. Which disposition is authorized for the exact prepared registration delta?",
+  "options": [
+    "Keep the assigned write scope: deliver this blocked branch and its 414-entry delta for central integration; do not claim a passing full gate.",
+    "Authorize the prepared two-file exception: preserve7590 adopted records, add exactly414 pins, and allow only that registry path for the latest adopted-worker diff; review, commit and rerun unchanged full gates."
+  ],
+  "proposal_only": true,
+  "registration_patch_sha256": "a04e9807e135026011e5ce990cc2baba8f6e135cccdf5ac91a46d4b5c5ecf91e",
+  "scope_boundary": "UNAPPLIED. No shared file or checker allowance changed. Existing scope remains binding pending explicit authorization.",
+  "registry_base": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "exception_patch_sha256": "894a25c9b06cc67a5afdc0149e332a97b80722e75c9f65262e1aaaca90b5de15"
+}

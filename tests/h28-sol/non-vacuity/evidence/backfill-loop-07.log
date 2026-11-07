@@ -1,0 +1,56 @@
+H28_DEP_COMMAND ["lean", "-j1", "--tstack=131072", "--root=/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean", "--deps", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean"]
+H28_PRIVATE_IMPORTS {"module": "Solidity.Assurance.NonVacuityH28.LoopContracts", "imports": {"Solidity.Assurance.NonVacuityH28.CheckedFamilies": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/build/lib/Solidity/Assurance/NonVacuityH28/CheckedFamilies.olean"}}
+H28_KERNEL_COMMAND ["lean", "-j1", "--tstack=131072", "--root=/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean", "-o", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/build/lib/Solidity/Assurance/NonVacuityH28/LoopContracts.olean", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean"]
+/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean:145:62: error: Tactic `rfl` failed: The left-hand side
+  (primitiveOutcome C).st.heap.len r ArrTy.dyn
+is not definitionally equal to the right-hand side
+  1
+
+C : Contract
+a : LoopAnn C MemCtx
+flag : Bool
+mc : Evm.Machine
+base : Nat → Fin Evm.W
+ht : Evm.run (constructionCompiled C).code memoryMachine = Evm.Out.ok mc 0
+left✝ : mc.stack = memoryMachine.stack
+hstate : Evm.Memory.Objects.StateRepr 1 1 128 (constructionResult C).frag (primitiveOutcome C).st base mc
+r : HRef (primitiveOutcome C).st.H (RefTy.array (Ty.prim PrimTy.uint)) :=
+  Option.get (TEnv.get Idx.here (primitiveOutcome C).st.env) ⋯
+hr : TEnv.get Idx.here (primitiveOutcome C).st.env = some r
+q : HRef (primitiveOutcome C).st.H (RefTy.array (Ty.prim PrimTy.uint))
+hq : TEnv.get Idx.here (primitiveOutcome C).st.env = some q
+hp : mc.mem (Evm.cellOf 1 Idx.here) = Evm.Word.val (base r.id)
+hqr : q = r
+hl : mc.mem ↑(base r.id) = Evm.Word.val (Evm.wmod ((primitiveOutcome C).st.heap.len r ArrTy.dyn))
+⊢ (primitiveOutcome C).st.heap.len r ArrTy.dyn = 1
+/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean:148:49: error: Tactic `rfl` failed: The left-hand side
+  (MObj.elems ArrTy.dyn ((primitiveOutcome C).st.heap.get r))[0]?
+is not definitionally equal to the right-hand side
+  some ⟨0, ⋯⟩
+
+C : Contract
+a : LoopAnn C MemCtx
+flag : Bool
+mc : Evm.Machine
+base : Nat → Fin Evm.W
+ht : Evm.run (constructionCompiled C).code memoryMachine = Evm.Out.ok mc 0
+left✝ : mc.stack = memoryMachine.stack
+hstate : Evm.Memory.Objects.StateRepr 1 1 128 (constructionResult C).frag (primitiveOutcome C).st base mc
+r : HRef (primitiveOutcome C).st.H (RefTy.array (Ty.prim PrimTy.uint)) :=
+  Option.get (TEnv.get Idx.here (primitiveOutcome C).st.env) ⋯
+hr : TEnv.get Idx.here (primitiveOutcome C).st.env = some r
+q : HRef (primitiveOutcome C).st.H (RefTy.array (Ty.prim PrimTy.uint))
+hq : TEnv.get Idx.here (primitiveOutcome C).st.env = some q
+hp : mc.mem (Evm.cellOf 1 Idx.here) = Evm.Word.val (base r.id)
+hqr : q = r
+hl : mc.mem ↑(base r.id) = Evm.Word.val (Evm.wmod 1)
+hn : (primitiveOutcome C).st.heap.len r ArrTy.dyn = 1
+⊢ (MObj.elems ArrTy.dyn ((primitiveOutcome C).st.heap.get r))[0]? = some ⟨0, ⋯⟩
+/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean:157:26: error: Application type mismatch: The argument
+  rfl
+has type
+  ?m.390 = ?m.390
+but is expected to have type
+  List.length (primitiveOutcome C).st.H = 1
+in the application
+  And.intro rfl

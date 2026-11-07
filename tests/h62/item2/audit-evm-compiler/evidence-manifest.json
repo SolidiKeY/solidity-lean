@@ -1,0 +1,15 @@
+{
+  "schema_version": 2,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "full_manifest": {
+    "path": "/workspace/audit-evm-compiler-evidence/continuation-11-manifest.json",
+    "size_bytes": 160509,
+    "sha256": "8e540a55b95f84a3b6db461517ccea651c34b4a7a16bdab814a07a1474109b93",
+    "archive_member": "continuation-2/evidence-manifest.json"
+  },
+  "archive": {
+    "path": "/workspace/audit-evm-compiler-continuation-11-bulk.tar.gz",
+    "size_bytes": 12620552,
+    "sha256": "ef67e0ca6e0ea3f00a86286df404fbb0f4178c4e0ac033c42bc57c6ce0c32c62"
+  }
+}

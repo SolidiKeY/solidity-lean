@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/V07/IntegerConstantAssignment.lean:Solidity.Lowering.V07.IntegerConstantAssignment.code_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignment.lean:Solidity.Lowering.V07.IntegerConstantAssignment.family_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignment.lean:Solidity.Lowering.V07.IntegerConstantAssignment.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignment.lean:Solidity.Lowering.V07.IntegerConstantAssignment.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignment.lean:Solidity.Lowering.V07.IntegerConstantAssignment.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

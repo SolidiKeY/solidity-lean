@@ -1,0 +1,16 @@
+{
+ "Solidity/Yul/Compilation/ScopedLoopExecution.lean:Solidity.Yul.Compilation.ScopedLoopExecution.finite": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedLoopExecution.lean:Solidity.Yul.Compilation.ScopedLoopExecution.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedLoopExecution.lean:Solidity.Yul.Compilation.ScopedLoopExecution.selection": [
+  "Quot.sound",
+  "propext"
+ ]
+}

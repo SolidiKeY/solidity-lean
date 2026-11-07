@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.complete_vectors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.endpoint_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.headerless_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.resolved_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.resolved_refusals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.strong_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.whole_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.whole_word_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean:Solidity.Backend.MemoryOps.Physical.FixedChildControls.wrong_dynamic_offset": []
+}

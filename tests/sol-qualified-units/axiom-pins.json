@@ -1,0 +1,1299 @@
+{
+  "Solidity.Frontend.QualifiedUnits.mem_namespaceCandidates": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.inherited_empty_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_headCandidates": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.compatible_iff": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.noClash_iff": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.checkSuffix_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.resolve_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.resolve_noClash": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.InheritedFrom.decl_exists": [],
+  "Solidity.Frontend.QualifiedUnits.NamespaceStep.decl_exists": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Head.decl_exists": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Admits.decl_exists": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.resolve_identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.accepted_hops": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.refused_missing": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.local_shadow": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.cycle_accepted": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.diamond_accepted": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.inherited_type": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.private_base_global_fallback": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.own_private_shadows": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.visible_base_shadows": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.ambiguous_base_not_followed": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.ambiguous_base_member_refused": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.ambiguous_namespace_refused": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.left_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.right_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.foreign_scope_refused": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.missing_scope_refused": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.CheckedControls.noncontainer_scope_refused": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_nil": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_cons": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_none": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_some": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_unit": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_pragma": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_importPath": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_importSymbols": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_importStar": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_importAlias": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_contract": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_interface": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_library": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_topPart": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_inherit": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_constructor": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_function": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_modifier": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_fallback": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_fbNoParams": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_fbParams": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_receive": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_struct": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_structMember": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_enum": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_udvt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_stateVar": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_constant": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_event": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_eventParam": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_error": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_errorParam": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_usingPart": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_usingPath": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_usingAliases": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_usingAlias": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_positional": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_named": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_namedArg": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_modInv": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_param": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_elem": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_fnType": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_mapping": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_userType": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_array": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_varDecl": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_index": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_slice": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_member": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_callOptions": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_call": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_payableConv": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_metaType": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_unaryPrefix": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_unarySuffix": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_exp": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_mulDivMod": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_addSub": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_shift": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_bitAnd": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_bitXor": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_bitOr": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_order": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_equality": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_and": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_or": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_cond": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_assign": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_new": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_tuple": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_inlineArray": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_ident": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_lit": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_litUnit": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_elemType": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_declVar": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_declTuple": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_exprStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_blockStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_simpleStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_ifStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_forStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_whileStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_doWhile": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_continueStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_breakStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_tryStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_catchPlain": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_catchSig": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_returnStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_emit": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_revert": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_assembly": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_block": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_stmtItem": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_uncheckedItem": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulBlock": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulLet": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulAssign": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulExprStmt": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulIf": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulFor": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulSwitch": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulCase": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulLeave": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulBreak": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulContinue": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulFun": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulPath": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulCall": [],
+  "Solidity.Frontend.QualifiedUnits.ConstructorFixtures.fixture_yulLit": [],
+  "Solidity.Frontend.QualifiedUnits.Controls.multi_hop": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Controls.missing_symbol": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Controls.cycle_path": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Controls.diamond_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Controls.first_owner_left": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Controls.first_owner_not_right": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Controls.second_owner_right": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Controls.second_owner_not_left": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.multi_hop": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.missing_symbol": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.ambiguous_namespace": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.left_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.right_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.symbol_namespace_alias": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.transitive_all": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.diamond_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.cyclic_namespace": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.private_base_fallback": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.visible_base_shadow": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.local_shadow": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.qualified_base_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.inherited_struct_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.ambiguous_base": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.qualified_base_query": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.inherited_overload_query_gap": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.DifferentialControls.qualified_overload_query_gap": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.visible_iff": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_visibleMembers": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_declIds": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_baseTargets": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Through.decl_exists": [],
+  "Solidity.Frontend.QualifiedUnits.Qualified.decl_exists": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.decl_mem_universe": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_baseSucc": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.baseSucc_closed": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.InheritedFrom.reach": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.inherited_of_reach": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_inheritedMembers": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.bodyDecls_length": [],
+  "Solidity.Frontend.QualifiedUnits.no_container_layout": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.empty_layout": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.OwnerLayout.append": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.part_no_container": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.parts_no_container": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.container_layout": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.top_layout": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.tops_layout": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.source_layout": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Member.in_owner_body": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_members": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_step": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_through": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.mem_lookup": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.available_iff": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.first_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.first_nonempty": [],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_sound": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_complete": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.First.member": [],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.mem_remove": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.mem_nonempty": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.members": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.nodup": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_monotone": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.unique": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.diamond_result": [],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.diamond_judgment": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.duplicate_route_identity": [],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.blocked_first_head": [],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.inconsistent_order_refused": [],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.inconsistent_judgment_absent": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.exact_budget_refused": [],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.zero_fuel_refused": [],
+  "Solidity.Frontend.QualifiedUnits.MergeSpecification.empty_rows_accepted": [],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.base_identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.derived_identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.inherited_distinct_parameters": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.two_units_same_spelling": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.aliases_same_parameters": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.aliases_distinct_declarations": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.multihop_type_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.cyclic_alias_type_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.diamond_type_identity": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.missing_type_refused": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.ambiguous_type_refused": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.unresolved_is_not_distinct": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.missing_declaration_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.first_original_owner": [],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.second_original_owner": [],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.storage_memory_distinct": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.external_calldata_public_memory_hides": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.public_memory_calldata_distinct": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.internal_memory_calldata_distinct": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.internal_storage_memory_distinct": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationControls.hiding_unresolved_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.ReferenceControls.member_chain": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.ReferenceControls.member_chain_references": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.ReferenceControls.nonpath_receiver": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.ReferenceControls.mapping_key_path": [],
+  "Solidity.Frontend.QualifiedUnits.ReferenceControls.mapping_key_elementary": [],
+  "Solidity.Frontend.QualifiedUnits.ReferenceControls.symbol_namespace_alias": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.ReferenceControls.transitive_all": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.references_eq": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.references_sub": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.append_paths_subset": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.paths_sub_references": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.expressionPath_in_references": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.expressionPath_in_references_of_sub": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.expressionPathAny_eq_M": [],
+  "Solidity.Frontend.QualifiedUnits.references_eq_M": [],
+  "Solidity.Frontend.QualifiedUnits.Through.append": [],
+  "Solidity.Frontend.QualifiedUnits.Step.decl_exists": [],
+  "Solidity.Frontend.QualifiedUnits.SignatureGap.current_overload_gap": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureGap.base_overload_exists": [],
+  "Solidity.Frontend.QualifiedUnits.SignatureHiding.externalKey_nominal_identity": [],
+  "Solidity.Frontend.QualifiedUnits.SignatureHiding.externalKey_all_nominal_identity": [],
+  "Solidity.Frontend.QualifiedUnits.SignatureHiding.hides_none_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureHiding.hides_originals": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.inherited_overloads": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.cross_unit_nominal_overloads": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.same_owner_duplicates_preserved": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.external_location_override": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.storage_memory_overloads": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.unresolved_first_owner_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.missing_root_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.noncontainer_root_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.missing_base_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.inheritance_cycle_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.diamond_owner_order": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.diamond_original_override": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.ambiguous_written_base_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.empty_name_collection": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.unhidden_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.mem_select": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.mem_walk": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.WalkMember.owner": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.ready_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.unhidden_total": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.select_total": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.walk_total": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.collected_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_normalizes": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.eq_of_same": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.eq_of_sameList": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.same_refl": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.sameList_refl": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.nominal_origin": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.preserves_identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.normalize_injective": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.original_declaration": [],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.nominal_identity": [],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.enumeration_identity": [],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_true_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_false_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_none_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.eligible_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.safeOwners_iff": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_candidates": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.Member.nearest_exists": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.Member.decl_exists": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.prefix_unique": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.coherent": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.local_shadows": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_namespaceCandidates": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_headCandidates": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.checkSuffix_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_noClash": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.NamespaceStep.decl_exists": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.Head.decl_exists": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.decl_exists": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.multi_hop_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.missing_symbol_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.ambiguous_namespace_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.same_spelling_units_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.same_spelling_units_1": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.symbol_namespace_alias_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.transitive_all_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.diamond_identity_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.cyclic_namespace_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.private_base_fallback_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_base_shadow_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.local_shadow_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_type_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_type_1": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.ambiguous_base_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_overload_gap_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.qualified_parameter_overload_gap_0": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.failed_signature_no_global_fallback": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.own_private_still_shadows": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_nonoverload_still_shadows": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.private_base_global_fallback": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.diamond_override_identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.external_location_override": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.foreign_scope_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_intermediate_barrier_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.qualified_barrier_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.getter_override_identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Admits.prefix_unique": [],
+  "Solidity.Frontend.QualifiedUnits.Admits.coherent": [],
+  "Solidity.Frontend.QualifiedUnits.local_shadows": [],
+  "Solidity.Frontend.QualifiedUnits.TypePaths.tail_iff": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TypePaths.lookup_iff": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.uniqueSymbol_iff": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.unitTail_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.unitBase_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.UnitRoute.decl_exists": [],
+  "Solidity.Frontend.QualifiedUnits.Linearization.routes_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.bases_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.mapM_pairs": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.pairs_mapM": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.linearize_sound": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.Linear.head": [],
+  "Solidity.Frontend.QualifiedUnits.Linearization.routes_unique": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.bases_unique": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.pairs_snd_unique": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.Linear.unique": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.merged_in_base": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.base_in_merged": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.Linear.bounded": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.Linear.members": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.linearize_complete": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.order_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.First.available": [],
+  "Solidity.Frontend.QualifiedUnits.Linearization.Merge.sublist": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.Linear.precedence": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Linearization.Linear.acyclic": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.eraseList_eq": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.elementary_erase": [],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.root_refs": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.child_refs": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_sound": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.keyType_complete": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_sound": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_complete": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.types_adequate": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.NormalizationAdequacy.fields_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.collected_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.safeOwners_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.member_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.step_eq": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.head_eq": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.admits_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.resolved_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.target_iff": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.Target.noClash": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.Target.identity": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.Target.refused_no_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.diamond_linear": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.diamond_shared_base_once": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.diamond_local_precedence": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.cycle_no_linear": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.missing_base_no_linear": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.inherited_overload_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.qualified_parameter_overload_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.multi_hop_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.missing_symbol_no_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.ambiguous_no_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.local_shadow_no_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.failed_signature_no_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.visible_barrier_no_target": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.callable_erases": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.struct_member_refused": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_references": [],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_nominal": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_sound": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_leaf_complete": [
+    "propext"
+  ],
+  "Solidity.Frontend.QualifiedUnits.TargetControls.adequacy_instance": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

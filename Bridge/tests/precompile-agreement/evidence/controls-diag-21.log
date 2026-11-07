@@ -1,0 +1,54 @@
+ERROR 267:92 missing exponent digits in scientific literal
+ERROR 265:5 Tactic `decide` failed for proposition
+  (if (Nat.succ 0 % 2 == 1) = true then
+      expModAux 3 (1 * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3)
+        ((UInt256.ofNat (2 ^ 256 + 1)).toNat * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3) (Nat.succ 0 / 2)
+    else
+      expModAux 3 (1 % 3) ((UInt256.ofNat (2 ^ 256 + 1)).toNat * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3)
+        (Nat.succ 0 / 2)) =
+    1
+because its `Decidable` instance
+  instDecidableEqNat
+    (if (Nat.succ 0 % 2 == 1) = true then
+      expModAux 3 (1 * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3)
+        ((UInt256.ofNat (2 ^ 256 + 1)).toNat * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3) (Nat.succ 0 / 2)
+    else
+      expModAux 3 (1 % 3) ((UInt256.ofNat (2 ^ 256 + 1)).toNat * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3)
+        (Nat.succ 0 / 2))
+    1
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match h :
+    (if (Nat.succ 0 % 2 == 1) = true then
+          expModAux 3 (1 * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3)
+            ((UInt256.ofNat (2 ^ 256 + 1)).toNat * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3) (Nat.succ 0 / 2)
+        else
+          expModAux 3 (1 % 3) ((UInt256.ofNat (2 ^ 256 + 1)).toNat * (UInt256.ofNat (2 ^ 256 + 1)).toNat % 3)
+            (Nat.succ 0 / 2)).beq
+      1 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+ERROR 267:66 Unknown identifier `_private.EvmYul.UInt256`
+ERROR 267:89 Invalid field notation: Identifier or numeral expected
+ERROR 266:38 unsolved goals
+hb : nat_of_slice wide_base 0 32 = 33
+he : nat_of_slice wide_base 32 32 = 1
+hm : nat_of_slice wide_base 64 32 = 1
+base : nat_of_slice wide_base 96 33 = 2 ^ 256 + 1
+exponent : nat_of_slice wide_base 129 1 = 1
+modulus : nat_of_slice wide_base 130 1 = 3
+value : expMod 3 (UInt256.ofNat (2 ^ 256 + 1)) 1 = 1
+⊢ (EvmYul.toBytes'✝ 1).reverse.toByteArray = array [1]
+ERROR 250:94 unsolved goals
+hb : nat_of_slice wide_base 0 32 = 33
+he : nat_of_slice wide_base 32 32 = 1
+hm : nat_of_slice wide_base 64 32 = 1
+base : nat_of_slice wide_base 96 33 = 2 ^ 256 + 1
+exponent : nat_of_slice wide_base 129 1 = 1
+modulus : nat_of_slice wide_base 130 1 = 3
+value : expMod 3 (UInt256.ofNat (2 ^ 256 + 1)) 1 = 1
+encoded : BE 1 = array [1]
+⊢ Modexp.modexp wide_base.toList = some [2] ∧
+    (Ξ_EXPMOD default (UInt256.ofNat 1000) default (input wide_base)).2.2.2.2 = array [1]
+diag: 6 errors

@@ -1,0 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+lean --version
+lake --version
+lake env lean -j1 --tstack=131072 Solidity/KeySort.lean
+printf 'KEYSORT_PASS: Solidity/KeySort.lean checked from source\n'

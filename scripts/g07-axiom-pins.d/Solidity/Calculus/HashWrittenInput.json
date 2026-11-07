@@ -1,0 +1,25 @@
+{
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.AllocCounterexample.refutes_alloc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.hashEq_afterT_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.hashFree_update_of_landing": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.hashInput_write_index": [
+  "propext"
+ ],
+ "Solidity/Calculus/HashWrittenInput.lean:Solidity.Decide.WrittenMemory.refutes_update_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

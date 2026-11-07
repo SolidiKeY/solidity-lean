@@ -1,0 +1,3 @@
+Solidity.lean: missing import Solidity.Frontend.SolcJson.IrImport
+Solidity.lean: missing import Solidity.SolcValidation.Dialect
+register: stale roots; run scripts/coord-tools/register.sh

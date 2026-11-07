@@ -1,4 +1,4 @@
-import Solidity.Lowering.Readonly.SourceAllHistories
+import Solidity.Lowering.Readonly.SourceAllHistoriesV2
 import Solidity.Backend.WorldCalls.SourceBridge
 
 /-! Closed same-invocation SOURCE P2 facts for the actual pre-decoder run.
@@ -11,7 +11,7 @@ variable {E : Env} {Γ : RCtx} {dn : DeclName} {ps rs : List STy}
 theorem history_of_raw (i : InvocationFrame.Invocation E Γ dn ps rs)
     (raw : Except Halt Outcome) (final : St E) (actual : i.RawAt raw final) :
     StaticJournal.History i.after.2.ex i.mode final.ex := by
-  have history := (SourceHistory.all_at i.global i.horizon).callAddr i.frame
+  have history := (SourceDispatchV2.all_at i.global i.horizon).callAddr i.frame
     i.captured.receiver i.captured.value i.captured.input i.requested (L0 E) i.after.2
   change (callAddr i.global i.frame i.horizon i.captured.receiver i.captured.value
     i.captured.input i.requested).run (L0 E,i.after.2) = (raw,(L0 E,final)) at actual

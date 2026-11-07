@@ -1,3 +1,4 @@
+import Solidity.Source.Hoare
 import Solidity.Backend.Passes.SourceTypedCall
 
 /-! Source-order composition of actual external-call capture phase runs.
@@ -9,16 +10,6 @@ open Solidity.Roadmap (Address Bytes)
 open EM
 variable {E : Env} {Γ : RCtx} {dn : DeclName} {ps rs : List STy}
 
-private theorem run_bind {α β : Type} (m : EM E Γ α) (k : α → EM E Γ β)
-    (x : Locals E.layout Γ × St E) :
-    (m >>= k).run x = match m.run x with
-      | (.ok a, y) => (k a).run y
-      | (.error e, y) => (.error e, y) := by
-  rw [ExceptT.run_bind]
-  show StateT.bind (ExceptT.run m) _ x = _
-  simp only [StateT.bind]
-  rcases m.run x with ⟨r, y⟩
-  cases r <;> rfl
 
 private theorem get_plain {τ : STy} (v : Val E.layout τ) :
     (getV (.val v) : EM E Γ _) = pure v := rfl
@@ -47,7 +38,7 @@ theorem compose (global : Glob E) (frame : Fr) (n : Nat) (d : Decl)
         global.selector (sigOf E.layout d.name ps) ++ encoded⟩ := by
   unfold CapturedAt capture
   rw [signature]
-  simp only [run_bind, targetRun, get_plain, run_pure,
+  simp only [Solidity.Source.Hoare.run_bind, targetRun, get_plain, run_pure,
     valueRun, argsRun, encodingRun, instanceRun, run_st, admitted, Bool.false_eq_true,
     ↓reduceIte]
 

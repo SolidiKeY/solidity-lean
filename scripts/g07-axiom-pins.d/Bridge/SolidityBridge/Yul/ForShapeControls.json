@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.caller_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.condition_only_insufficient": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.last_caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.model_without_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForShapeControls.lean:SolidityBridge.Yul.ForShape.Controls.next_caller_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

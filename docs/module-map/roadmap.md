@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/roadmap.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Roadmap statements
 
 | Module | What it defines |
@@ -10,3 +11,26 @@
 | `Roadmap/V16/SSCP2/NewAllocation.lean` | Actual dynamic-new data validity and MemOK preservation, with a closed local-length consumer. |
 | `Roadmap/V16/SSCP2/NewAllocationControls.lean` | Live caller references, both pipelines, exact allocation-size/timeout/refusal phases and wrong-reference controls. |
 | `Roadmap/V16/SourceTransactionConsumer.lean` | Bounded actual Source transaction pairs, exact states, rollback and Hoare consumer; no compiler/session closure |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwise.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwiseControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Roadmap/V16/CreationReturnConsumer.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainder.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/P8/SourceSize.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Roadmap/V16/SourceSizeControls.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Roadmap/V16/NativeRevertConsumer.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean` | G46.01 fetched EQ consumer of actual Scalar and pinned native definitions. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean` | Populated exact native EQ states and typed equality clients. |
+| `Examples/Roadmap/V16/FramedReasonConsumer.lean` | Literal source Error(string) specification consumer. |
+| `Roadmap/V16/CreationLibrarySpec.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Roadmap/G49Final/PassCorrect.lean` | H64 pass template: one `Behaviour` type, one constructive refinement `PassCorrect` (explicit `need`, forward A/F/G and backward A/G transport, environment soundness/surjectivity), `PassCorrect.trans`, the intrinsic `PassList`, its `fold` and `public_end_to_end` ([h55-g49-final-theorem.md](../feature-work/h55-g49-final-theorem.md)). |
+| `Roadmap/G49Final/PassCorrectAdapters.lean` | `Behaviour.ofLang`; the one full-`Cert` adapter (`cert_adapter`) and its Lowering/Compilation/Execution/P8b carriers; the single source-end boundary (`source_from_admitted`, `source_ready`) and `PassCorrect.refines`. |
+| `Roadmap/G49Final/FoldedPublic.lean` | `g49_g50_of_fold`: the conditional G49/G50 statement as a fold over the three frozen G01 passes (`pipeline`, `FoldStatement`), with the frozen `PublicCorrectness`/`SpecTransfer`; fifteen residual obligations stay explicit `PublicObligations` fields. |
+| `Roadmap/G49Final/BridgeGoal.lean` | H68 owner-bridge target type `BridgeGoal` (the existing `PassCorrect` with prescribed map, bound and the entire original local conclusion), its projections and the full-`Cert` positive control `cert_bridge`; no bridge is assumed. |
+| `Roadmap/G49Final/PassChain.lean` | Frozen G01 certificate-chain backfill: composes the existing Lowering, Compilation and Execution certificates at the lowered world and assembled artifact; constructs no producer. |

@@ -1,0 +1,1953 @@
+{
+  "schema_version": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-2-20261106/audit-v10-storage",
+  "owner": "solidity-h62-2-20261106/audit-v10-storage",
+  "original_write_scope": [
+    "tests/h62/item2/audit-v10-storage/**",
+    "scripts/h62/item2/audit-v10-storage/**",
+    "docs/feature-work/h62-2-audit-v10-storage.md"
+  ],
+  "original_read_only_rule": "Existing owned originals outside sole write scope READ ONLY; no generated roots, central maps or axiom pin edits; additive Lean helpers may remain under tests pending registration.",
+  "module_map": "docs/module-map/v10-storage.md",
+  "module_map_sha256": "82e5b0c68d9c49f991c7925dce397a114f12762b82a54efa7af0564bb098a810",
+  "frozen_source_files": [
+    {
+      "path": "Solidity/Backend/StorageOps/AbsentRootQueries.lean",
+      "sha256": "b6d0f6b7d30528e3201068bc889ff6c7e3aa955f95e69da5cf6fd57bf682f09b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AggregatePop.lean",
+      "sha256": "c9891cd50c0cab24a5740b549fc93ec14d7f411a9c12d8862860a4409057fbe8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AggregatePopControls.lean",
+      "sha256": "2743accc23079b9c76997f3a54a8ece4fba8da9d8a6eef463e6371a60053b434",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean",
+      "sha256": "3e2bfee83558d37b4d3f0a5fecccb5e76f2115f576030eba7bcb41ce0e34481c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AggregatePopFrames.lean",
+      "sha256": "bbf32e7c42b73638dc8fc04817dd58ca2acffcf8d5c6e1f96bbb50a9cf6040cd",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AggregatePopPathControls.lean",
+      "sha256": "4583aa7a01ee00643b44bce2e1b97ccc0220e26e62409acbbb481e659ceefe91",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AggregatePopPaths.lean",
+      "sha256": "273cd65116110b6687ed49373bf4b920d5a0bca55bb9bbbc4ee2ac43596da056",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean",
+      "sha256": "0bd51f5c6a6b0016d701ed10410ed0b077ed9c147af8d3bc73091e48e178fac0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AggregatePopRootFrames.lean",
+      "sha256": "441e39e048a59cfd2ff57b97c733db78d2cdb3cea8bafe1dce9728bc525f24a2",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AlternatingLifecycle.lean",
+      "sha256": "a70e95119381605e943b782750e9cb5446f3549846a0a78e5019cadcdcaa06cb",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean",
+      "sha256": "fd5bf37ae1f8ac6fc4858c311fbfc248bf35095532ffbaf0780e750c193fc2b6",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/ClearDemandControls.lean",
+      "sha256": "fef19baa9ad3d8bb4b09e41d058d6f3a5463e98d3c7ca1513a9dc2f882c457a0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/ClearDemands.lean",
+      "sha256": "8b354e74ab19786df6b550ae138b305d3fa9c1d3797097fbb1a998a75b915ea0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CommonPrefix.lean",
+      "sha256": "2cccb685bf8cb91e1dbb765146d2bc50294b26e199939207e2534170e89e3dcf",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/Commutation.lean",
+      "sha256": "fa887d180387e82bee052d4aebb9642524130f1228cf564f9140e590b87c6a82",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/Controls.lean",
+      "sha256": "b40a8e9267bec0ab099d416c403fce26474f780bc627440ef764c1bc36c48afc",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyAccess.lean",
+      "sha256": "7989678fa18bd2bc0df3eeaa2ec1a1c0ec814409474eb01472e0a68b6a15a5dc",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyCompatibility.lean",
+      "sha256": "e3cd249402ba7235100d1bd01f5f4b592a8e8afe64c9475580384f8ae04c5742",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyCompatibilityControls.lean",
+      "sha256": "ae201e8b2748466628e6219a322fac31eda9341d2916b715162047d2a02962a9",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyDefaults.lean",
+      "sha256": "291b12e2f079a7ea60b49a35dcddca6e8eb48462b7fc32df3d7404deba52ef07",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyDefaultsControls.lean",
+      "sha256": "7658065743a4140a9d80b6a80312f6f2378fa37a30242b2fb0ffcf3bd11756e3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyDemandControls.lean",
+      "sha256": "eec55ceeac0a9238d05611bff3a308fddbe3932f449a6fb49b3f639efbfd18a3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyDemands.lean",
+      "sha256": "731dd0194ebf3bb8a95b8c859445efd4d0ce5701aab39d9f0f73bfc05b7fe21c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyHeaderControls.lean",
+      "sha256": "a6e7227e0bc4d2229994584bd0340618ff85f222c724a9d721ccc4b8c1a5385f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyHeaders.lean",
+      "sha256": "165ac2fe2e01b49d8707ec1d03d1bbe08c1be70548ace72c8c0f9d399268653b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyLifecycle.lean",
+      "sha256": "c8184de3625cba0a3f13f7b1be1eeb572faa91b1b017567dfbdb5e91270808aa",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyLifecycleControls.lean",
+      "sha256": "47313b95796408616d90a1a1081340d79a682466d97eea5bc6ab5988a5f03adf",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyOutput.lean",
+      "sha256": "af2217510eac0e4dcee2c20ae1414c83c6ba7c87a12667232ca083057c7b3b63",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyOutputControls.lean",
+      "sha256": "1a40fd914aeced64aecdae06b73621b991f05971ba69ba4ab14ed49c94580bf2",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyOutputInduction.lean",
+      "sha256": "9bf9fca8a7fb928bf19c1de9aaa88700dcd97cdaf5514e20e3c1271ee39618f8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyReadCapture.lean",
+      "sha256": "a31c30fdd9a5dda99accaa51771c869c8276c5a62fe61ebcb7b5a8568451b52e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyReadCaptureControls.lean",
+      "sha256": "70f8209a66e65a6bc249ad5de4cb081ddd1ed66ed0dfa1bb8c3c8ff58a6c53b2",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyReadback.lean",
+      "sha256": "eff7756da670d306d4d572d3dabd97d170ace83c773b61ced545e3310a4d61cd",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyReadbackControls.lean",
+      "sha256": "f636ba2e986b9b7133ed4599dbe5dc344818b7385c4b77728bde464c3c45ab4a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyTransport.lean",
+      "sha256": "2cd64477e5536485838871d8ff1a6e7f1f0a2e48b60232592b90260b7a1d876e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyWriteControls.lean",
+      "sha256": "b7ebb35667a82a12da726f03c79e9d444773074f631d63592a14738f416a2fe8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/CopyWrites.lean",
+      "sha256": "99dda73348cd07ec17d5bafc0f7d83b8953edb55f1dba5b833cc145fad25cbc3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FieldOperations.lean",
+      "sha256": "cf52454f30efd24f925dbe37a00f1676cdb0aeede7a8f95c4ef5564464adf71f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FiniteRootComposition.lean",
+      "sha256": "c5bc167fc98f7ffd5deb8a459fe3a133e78e16bca3419fb53e8f7a3b790380ab",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FixedRootPrimitive.lean",
+      "sha256": "0edcb82ca07522b4f512105919e36bf923ae93c8f44e87fbaa4ee8e37684d5c7",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FixedRootPrimitiveControls.lean",
+      "sha256": "9b712ca629747353695e63a3012bc10f20e57fabac94e573d2e638d09fa15bad",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean",
+      "sha256": "dc6bcaa306ecd1d86dae9aab435b0f2382a9a9f5f1e4e6be83a4da19718d2d05",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FixedSnapshotRoot.lean",
+      "sha256": "b5b5655e5bcff1a6313af5eef5582c1255f6286a46ee808a20219833a53876a5",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshArrayHistory.lean",
+      "sha256": "b026cfe0cfdf411b20838265744cdbfa02c627e0685f8fbd2c0c0b8677093796",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshArrayHistoryControls.lean",
+      "sha256": "5ff011545d9d14a95e67c175b1912898eee664fbc9e0b4ff70e04d370a2cde13",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshCopyAccess.lean",
+      "sha256": "7ccbe8bd095634f04a5b84cf6a541d5724a09ffe7546a37525e3d12a89d7b5f3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshDefaultPush.lean",
+      "sha256": "9e0196475563e4739cf546ac21c2fda163c7bf8c2efd7e4321f457f383a38f38",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshDefaultPushControls.lean",
+      "sha256": "2639af8f835d781bbf3cc5d61112d6bb1e0d5495eb1f7caeef540bba06314199",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshDefaultRoot.lean",
+      "sha256": "f271c2dc66acf16d21fc561ab77f6bcdc49ec2b811358b6a545d9fed4cda4df1",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean",
+      "sha256": "a5d13b95ace23d16d7d17d56f006911c8ef135c5c0b56defa25128c92000b860",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshMappingHistory.lean",
+      "sha256": "c31d93c00612078a3102d2fc90fce2839c1d0ea5e73bc90ad9ed328ffd564774",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean",
+      "sha256": "57322780a0094f779f8892356e4e7b8ab4148f4e29c2c4c1b4368fe7ee3bb316",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/GraphRetainedCycle.lean",
+      "sha256": "a9e56522c385e64510c82243e4c6bfe38071345ee3db1c44bc84c5d93d85791d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/GraphRetainedCycleControls.lean",
+      "sha256": "91ccab2bcb38a50944248fbc709d47567c5be309d258334f8af7c4960a069724",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/IndexedControls.lean",
+      "sha256": "bec946fa8c3e37ed61f26e9449b502c26b03d7954358fcb5c164a06b0cdf7871",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/IndexedOperations.lean",
+      "sha256": "8f892f1b5acda321156cb2ab00f40b5341170f642801fd1c7db3ceca32188d5f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LaterClearFrames.lean",
+      "sha256": "c82f67947b3bacbd30b6f23e6d8dc67b0c4590e56100131d009593b196fc0faa",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LayoutAccess.lean",
+      "sha256": "cc00792d64aa107509d39c6c3918cb7054eb407c602d88148ba37624946538f0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LayoutControls.lean",
+      "sha256": "035d6efd6cf5b380449a854f78aa956288e1b44cd0c8f2754346f40ebfd2d3b8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/Lifecycle.lean",
+      "sha256": "48adeb83c21c5dc16bf1e6191c1efa30e5362652e077e659d6c6a95c4b7668a4",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LifecycleNumeric.lean",
+      "sha256": "11523fa9cf3f74dd1a6979f5928de814590c1f48d5b2fe2b03bdedfc22594720",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LifecycleNumericControls.lean",
+      "sha256": "e8cfbd3b63569fca31baff0483ad17bd3106a66183ae315af2264dccdff2caae",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LifecyclePathControls.lean",
+      "sha256": "3c491af2d50cc4759fb1314feace789b08a607fa58dd6d4354d9ddff228f1f7c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LifecyclePaths.lean",
+      "sha256": "fc71ee918821f8c0e497b8ebb8322431f70d1c53e909e5abcfde14c20f78f755",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LifecycleScheduleControls.lean",
+      "sha256": "5ed50cc897e77d946386dd63eba04eaf6baed48df7edf2b537e88ea1a0561e0b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LifecycleSchedules.lean",
+      "sha256": "f6dfd1efc00dfc92be3f18fa896640407f2202f39652d4eeaffd0e23e3de9a26",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LivePrefix.lean",
+      "sha256": "6357a8a1f8e0c878c8b5f821277b4d5a69df3da820c2512f52b325ca7b5c0c9a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LoopLaws.lean",
+      "sha256": "7beea1b98f2f591fd768781f8f040eaa28a96b1642ba602f1e3d03a403cb8602",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/LoopLawsControls.lean",
+      "sha256": "256d43939fd25df0cb68b933f1e1c14702166adda5e058b883b70f12d032b1aa",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/MappingControls.lean",
+      "sha256": "63d297851f7ea3be72848aef16187154f10b63a59b72a960cecd06980f63ea2a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/MappingPaths.lean",
+      "sha256": "4b44f95e569f04a7f59ba4606e5aefeee35369e00d110dd5a34aba8b5c9ba4e7",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/MixedLifecycle.lean",
+      "sha256": "b0ce058bc2d0824d4934d8fb4919b6d3cfabc6e3beb6d98acb6780da4cef57d8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/MixedLifecycleControls.lean",
+      "sha256": "7a87cd05364a56a468b8ca38aa0f76a56bffcff65de255420151c406cc1f1c68",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/MixedLiveComposition.lean",
+      "sha256": "517856a2bb5a87d01d3dd1137a145419770dce182cb202fa082bd6ee3e86ad61",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedClearFrames.lean",
+      "sha256": "bd16e2104cf73011332fb2144eeda0441d362de72c7eb1fa392782a5550c0069",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedCopyObservations.lean",
+      "sha256": "705ee578e53c212c61d742c7f46c0b8117f776ab382152f4140b658f72b5d0e4",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedFreshComposition.lean",
+      "sha256": "ada71a3765de357ef713fbf489bc8b3711566213102a435c708e5ef12638a8cf",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedLaterFrames.lean",
+      "sha256": "4629c77e5e1e86495d3041f196521893c9713a16756f64cf5dcc922f13cf38ac",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedOlderComposition.lean",
+      "sha256": "fe123cf805528a64bc7cd76fce47e12d84905f44e003ccb6860bb53689ca29b4",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPhaseComposition.lean",
+      "sha256": "ce432b574e7a20ae554517fff15dd4100e5939c95c4cd753bb6c8a0cc1891918",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPopCommutation.lean",
+      "sha256": "a2e3f8b5688ad808209e7673b82992ec5a7115fac20224c5a7ee076ed1070119",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPopCommutationControls.lean",
+      "sha256": "d3e374a4c8f83e0b31c8fada18b2cc7b854ca9aab1e4f143358531a99e69c133",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPopFrames.lean",
+      "sha256": "5b43742858d5f74d3ed08801f5867c06b079ba0f71e7242f6e1963574715c18e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPopFramesControls.lean",
+      "sha256": "046acf77e45e6dc6357bae0527c6bad1ceb986c35a3c0ef0c43d638bff04115b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPopRegrow.lean",
+      "sha256": "227a7f2a534316b70d624176aeff933d8bbfb2c3e7e37df49392e8a9ea2dff85",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean",
+      "sha256": "2a17fbd52b2dab9a30832fe2cdbe0cb79f296db4f10e5f034e2d8bf49e3ecbb3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPopTransport.lean",
+      "sha256": "defb04d0bb0bb55cff1fa0abd0a8a589a9d98131c2a8b05a2ad54496fc312693",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedPopTransportControls.lean",
+      "sha256": "80c36b6b444be6a18db5d229d64b543e0ecc6fefdaa63a49e9d0def2e84bfcee",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedRetainedCopy.lean",
+      "sha256": "e3dba69bc3265f4122fccefbdd84ebddaccfbefeaa841ce1934c56d541252ecc",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedRootComposition.lean",
+      "sha256": "1283a658422df099e737c4f7aad565470148db48b645ef68cadc153099be23ed",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedSnapshotFrames.lean",
+      "sha256": "39627dd4ceb1f961f375e3463467ca5e7023934f3f3e5fb9b23257fa73eaafd3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NestedStaleComposition.lean",
+      "sha256": "09e8b06174dac71802156ebcb473f4f36a5e7e2e8c3b5d7be33484cbbb0c7339",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericClearCommutation.lean",
+      "sha256": "2ec26fae790303f1b832252e81d2ba9eec68771b5bd944725d2051283636817a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericClearCommutationControls.lean",
+      "sha256": "b87f92a8f98207a28b3ef8878e3abe25633df3fb6f07080ce4f2d825839c1726",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericCommutation.lean",
+      "sha256": "095cc5739ab836ca828e35ffa5b19cd52b32edd4b72ad7a3adbfc57299851a9f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericCopyCommutation.lean",
+      "sha256": "9f28748d781158eed4f448b54ee32f152b6859cbc1028ec461c1ca39b470b2b7",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean",
+      "sha256": "355e2e087cf929e2658d5d6304e833a887e99f791bf7632eef363b63efde70c9",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericRetainedCycle.lean",
+      "sha256": "3345d35f7a150d17c2ba73d293030fc9543d6df6cbc486217281417643eac53c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericRetainedCycleControls.lean",
+      "sha256": "3c9dd55f3508b87d7d3942d15f49348e9da29b1ea21ffdde6f2df4d193b4f025",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericTraversal.lean",
+      "sha256": "a5844fa6e01353b65d7d222fdc740b67921f5066a48a1bffb14e12f51792730a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/NumericTraversalControls.lean",
+      "sha256": "1bb1f66569262dd99ec1df07d6eb754704992133ef76a2ac22d56e608f6ef267",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/OperationControls.lean",
+      "sha256": "080b41e4e87a804f0d9c7c8115d7119a4620b4303917fdedcb70c0a9270f0ccc",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/OperationDepth.lean",
+      "sha256": "79f8e46512a2210b594d5fcc403c82d36455971753f6dcb9a426589ace3e1012",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/OperationFamilies.lean",
+      "sha256": "8e26c3f09ac40c47c58d6f6826dd74609cdb5c7e6312ba8f00b35b86e746c26b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/OperationPush.lean",
+      "sha256": "7d3a2ce62a4d21f659ab56eea72553a6420c5f746907e86d1a561bc8d6a62d90",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/OperationTransport.lean",
+      "sha256": "a8f2e556dae232f27b66c6d2d01057990cd5ebdd97725a8cf2d9493d93357080",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/OutputRootComplete.lean",
+      "sha256": "58c39b1d1ffe8716fc1166bfdf4c3bf09b0ba729a29e6fbf1e8b6f4c871e7f93",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/OutputRootComposition.lean",
+      "sha256": "2ead9eb3908636aaef4398f80b3f09e01259c949f1eac407f861ad0f9ed97310",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PathOperations.lean",
+      "sha256": "213d497ffb8066d5fd8f3e1bb5594fa2d3081343da0cb4250369280b78a5171f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PathRepresentation.lean",
+      "sha256": "aef7dea3362cb9ddb0691d15e4bcb4d77ada313b3d2a9ba6c599fcf0e0339523",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PathRepresentationControls.lean",
+      "sha256": "e47789e651501fbd740417a7e853d0fdbf7d5f9448bd1df99080538f071687a8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PopPush.lean",
+      "sha256": "269c69b813689530a225fd9fc771653895018622ccd644c04ca336bdc9a2d672",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrefixControls.lean",
+      "sha256": "c0a706ebda8ba0f883e4602a635e5d031524e4d443afe0feeb989425e15a924a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrefixLaws.lean",
+      "sha256": "286a2d3ecf3c0f3597a897d1b6646c49c22e087d4dabe5f9a650819c8891d304",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveCycleMachine.lean",
+      "sha256": "d9ad13ce13866a834f5cf46513dcb3385ce093ddc38fc08fe6ef4f500924445f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveCycleMachineControls.lean",
+      "sha256": "d57bdc2026218122aec9403cb9c3b09935b84540f41797b51057c44caad71a2b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveCycleNumeric.lean",
+      "sha256": "a7f9d14766318baa0f6bceb5112fe8dd2dc69d75c8b0face4053267448b1c3e4",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveCycleNumericControls.lean",
+      "sha256": "273d9bd08c39792c79965b61b7938fa75522856acb1aa73b7582285f7e44a02d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveCycleProgram.lean",
+      "sha256": "3a23943fa65598da3994d4c07f022cb6e806ece7762983e6a22161e629a4049d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveCycleProgramControls.lean",
+      "sha256": "19b973d1ebb51ba4b6aa8020f1f7bcfdd88935690798d023c9d5078e8bacc1d5",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveCycleTransport.lean",
+      "sha256": "1164cfcebf60b30926a6a1e8ac17f4b9b0c3966ef92c6892a78702fbd6294136",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveCycleTransportControls.lean",
+      "sha256": "9e0dc98938c4b7d603930bf1660154f24deb16b974a0d2c21fca3b6bbb5edfd1",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitivePop.lean",
+      "sha256": "baa159b67bb58bd83cf6c7265ab1960f3fc30517cd021e12466090281797d3a8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitivePopControls.lean",
+      "sha256": "fa49172d8f0e3f7c14d157b85bb05b395d065aa37e5cbd531bbe53e71b064b17",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutation.lean",
+      "sha256": "37faa7a0a18d2cd6a7cbf822984bb9e1a18bad69924e57ce89fa9a093ec0e968",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotCommutationControls.lean",
+      "sha256": "827d344489f00279dc2df54f9c5349d697ee6a0ddd521a226e95ad08f9119cbe",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotDependent.lean",
+      "sha256": "b0d77c41709c6ce3400e517a8b9a2f32d4a6f46e8d9b210ae4a5266f584f1637",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean",
+      "sha256": "be6eb1e516e98c6f5b1d8e000a3ad1bd3dee338bd3c671583777e2ff5ea84fb0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotFrames.lean",
+      "sha256": "90470874a58f1e3e114783001b4229e6525e8224aef5419264442e8d54b2f6ad",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean",
+      "sha256": "b519983d2fb35ac613567ed77453259473eaf0755bbdb3cb38a7aca3b77df31e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotNumeric.lean",
+      "sha256": "b2e04bc920fef6f917a31c78388fe418559ad2bf7be401317e4772fcc6ade4bb",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotNumericControls.lean",
+      "sha256": "830444a2a3af86c5b11bdd0d6b9c8c2840d067c0e8fbaa31c14b1197123b22c0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotOwner.lean",
+      "sha256": "334ec39a7d9e383ad0eeb1a15904f9cd954abf7af2b04e57a405dc71cb77c9d9",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotOwnerControls.lean",
+      "sha256": "0d545f26dd988f38d626ad11fd376b5cc363712eb9f840f71aa4bea9e4524b90",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeat.lean",
+      "sha256": "0ad396aa52d518c824bdb05e58a80e8ae64e775c33f60546b408376fb2b7723c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotRepeatControls.lean",
+      "sha256": "52fb15f03a7e1588f74d5ad9e7d0866be6bf77171b196c80ed097d7734fd7b0c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotRoot.lean",
+      "sha256": "b9b47d7d3d68026a0982926cfd7313f19440668f2a0c3de366f33c19bc924b2a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotRootControls.lean",
+      "sha256": "6b1f9eef47fba6c4c54acffbcfcaad99e956770d6883485ea6dedc1161e43f88",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotSelf.lean",
+      "sha256": "5b5241f7ead2345ac6a6e9c9dddd78a96eb7327e477e00da66ea8a411f6761e5",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean",
+      "sha256": "b0baf988e0101f7e9d429960d67adf6e1f379a54415a864ab699f6c0385d60df",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotSequence.lean",
+      "sha256": "48cb963f52ac912c9e19055da370cf2b9ff199b1a1088556024e7b9f0537c9b0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PrimitiveSnapshotSequenceControls.lean",
+      "sha256": "873895a025f987d67ba0fe7933282608381b0a53ce44d3352c3df3f5025ccddc",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/ProducerInterface.lean",
+      "sha256": "8f710ccef382d61f3eb13064973c81302a323e2558e35e0609c7253138b6fa48",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/ProducerInterfaceControls.lean",
+      "sha256": "ab5442388e2342c916925ddaad61abc95c7fd0eaf348d6d0b7b4689ceaebbeef",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PublishedControls.lean",
+      "sha256": "064eca2f69354c8ca9ba66215c45588388d8905ba3d87cb3a060ce60f40dc5a9",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PublishedOps.lean",
+      "sha256": "f5aeff957e14633c150bde29531c02f8a01c7bba9676ccb2f6ce8362f89dd70d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PushControls.lean",
+      "sha256": "7b5ce6dd9c2b768870307c540c21b54fac1db3afd017c58f90651e05d56af013",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PushFrameControls.lean",
+      "sha256": "e5d90ee55bca88a4bd7c582d4646565cf64dfba7628df9af90d12a09a565277f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PushFrames.lean",
+      "sha256": "a23e312e2f4248bdc702164a2641072a45e9d1115781ee097a4985083d25fe7e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PushPaths.lean",
+      "sha256": "c3ac3dcc4085c48df8aa79768a1bcbe320a39c6a45290b3aff8483bdde12adcf",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/PushTransport.lean",
+      "sha256": "a5f376420b756bb5b455b9133a518eca2ba1c8f73f47c777958558bbac4d9689",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveClear.lean",
+      "sha256": "63e7e8c918e6271b16ff4526e5b1ff0fceb5690af237f9aa0e00d7df7176db8b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveClearControls.lean",
+      "sha256": "59fd2a69428ae7d3325f56d591cffd10eac2a69289c1eb15b44dfe8ce97ac8aa",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveCopy.lean",
+      "sha256": "f9021ecb3c9f03d9c0ee994b1a5b090d1efec878a2ea8cc1e51ab743046e8b03",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveCopyControls.lean",
+      "sha256": "d497b9b45548bc8c07030a3400a8a3ca4bf491a843c547ecd18b08f0f4fcb729",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveLifecycleFacts.lean",
+      "sha256": "4fa211a5070e8fed6d41bc8233300ce9e2337cb869b405b04fb1badce24d308c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveNumericCommutation.lean",
+      "sha256": "9f448ae352ff5e5214af156916128b32344f67a827620bbf776b98947db2ca50",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveNumericCommutationControls.lean",
+      "sha256": "292bf8a25df143a26a06944d1904a7e30caa6541e739490fdbf8a31fa5703316",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursivePathRepresentation.lean",
+      "sha256": "72080c366ced0f7cfbd1e326c29c0a7104fdbb4f72153fd2f0bfb121c7e27d5f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursivePathRepresentationControls.lean",
+      "sha256": "031fd2eaf117608b88093aa05bce1f9acb560ac6189e59ad2fea3ed59461ae06",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursivePop.lean",
+      "sha256": "03e0ee71fb0673a916157b2131b27885b75f3106b9ecbbca9ae14b0599369e63",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveProgress.lean",
+      "sha256": "b77c06a8c15ba18f23c78c860858363748b06b97d6c4b1ca45430529a6b81964",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveRepeatCopy.lean",
+      "sha256": "0597141eca369c599d62d06368c2f623b34c7a641b29b8f0431de100fd401ed6",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean",
+      "sha256": "23db674cff52b616e84c0b1b9e69ad6df8895b9df22e83460ec87f0d615a29a7",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveSelfCopy.lean",
+      "sha256": "3f3d41db209d078859c11d65c1f06994e8b44c25b2bf2587811223ee79f4ac70",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RecursiveSelfCopyControls.lean",
+      "sha256": "8ff733b2cc19c00cefa4c5a71a6e4ebb8cec0ac44937f9b4e800b0d9c1ab265f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RepresentedControls.lean",
+      "sha256": "e5460010182c8c7f5d3bad09d014ae3975edb907910ea2a8647a03e922f0e1aa",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RepresentedOperations.lean",
+      "sha256": "7e4a636ff073c93eef8e2752e95d5ac67c59d280c024ef9587440d37999c8de3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RetainedPush.lean",
+      "sha256": "c5da9a125f85e3366286ae11e67ac071d74de111e7d42c3120e08b6fa080c92c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RetainedPushControls.lean",
+      "sha256": "00f0e6e81fffa8d7c67585b8993c664a445c91572e02a202d596ba2c66ce4df8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RootCopyAccess.lean",
+      "sha256": "1141f9b0f18ceeb1169cc8c5808c927482863dfa1ffd72c49b5e747c4fce7968",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RuntimeCopyComposition.lean",
+      "sha256": "dd0f5178d662cbbb9af7e27c6abd9a08cf66b6273f8b53eb815ec409f72af71c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean",
+      "sha256": "1d65a340d4a854b7d02f7e9ed9a35b0c209c308350929581134ce77030aad394",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RuntimeCopyRepeat.lean",
+      "sha256": "92ad635cd196cb8144bd5a4602af77bb0c22f76e349dfbd6f12d4583a86b352e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/RuntimeCopyRepeatControls.lean",
+      "sha256": "00eb4b4479dc48e4e917adca3cca7b1efcd2795ef3a1f5cd80077a4c2f9a31c3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/ShrinkRootComposition.lean",
+      "sha256": "88e26e6e7eef5a9fc84481e45e6db2463997174ccbbced30e249092b9fbd8520",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/SnapshotCommutation.lean",
+      "sha256": "b9eded705639b436338990e7d284e0134b7c883383376ca2e51530e4a8be6aa2",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/SnapshotControls.lean",
+      "sha256": "fd9fd47d83882db5b10dad0b58347d0f791b8e6d3a1250835f9c0d737cbe9d00",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/SourceSelfCopy.lean",
+      "sha256": "f7940d9d4060e6067624f376e9e3b700fa2dd37e6e7624cb5e4d769267b1f860",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/SourceSelfCopyControls.lean",
+      "sha256": "0256187b987a431d51f9d160d7d1c89df3d3446a28d39002c1fcac0b413cae03",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/StackWordWrite.lean",
+      "sha256": "0ee5892e84d633d76b6d059ed94461c50060932660714b2bb45ecf07b36da2a3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayClear.lean",
+      "sha256": "0fe4a0c39f40c4e2815f2ec152ea073af7b8a07ac03a516260e65bb490b18548",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayCopy.lean",
+      "sha256": "fe26b43e1dad9502738ebd918dfef7acbe441ce6736d20de90118a557312d9b3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayCopyControls.lean",
+      "sha256": "96e1ff9d71506b56c4c6e5f921ba8156e477de4f7af9d29b876f45b51527601b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayCopyTail.lean",
+      "sha256": "518db09752ec5ad381efc524dff43264316c68554c4355830a71ca68c86731a8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean",
+      "sha256": "4285b3e34fe1e6aafdea49aa8a821ef9892bd564316683f0c099094c9193681a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayRead.lean",
+      "sha256": "f0fbbff837bd5c0df583ec434ba11f1b14eceec3908ce30858ee7a66a1dfc23f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayRepeat.lean",
+      "sha256": "8047f086c62452ed8805ff8de0514783e57d7014a369affb89a9d8e162301d83",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean",
+      "sha256": "2dc2283442edb51a18b13aef3b554f241f3b2e176bd61dbf51d7439ba459878a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetArrayWrite.lean",
+      "sha256": "fa6a2e0e585bb7e8005bd68c87bbb45f4f6c10f5b08eb7b50a42e3dbeecf6408",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetClearRepresentation.lean",
+      "sha256": "eac3829ec7ea8bf4e8e4128607c37b92fa0df4fdd85410fd553bd253f9283117",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetCopyLifecycle.lean",
+      "sha256": "7d3d80c93b009407f8adf8f22f6d87b0a8ef69bd27530fe8c28a332520377678",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetCopyRead.lean",
+      "sha256": "bdcfd6de50dbde1df3aafe932c859ec19a3a8e6da2620034785b0eed13e53c46",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetCopyRepresentation.lean",
+      "sha256": "50ee0b6060fb9a46270179efa4b789af2792ed2de4594cd80425d5f37021288f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetCopyWrite.lean",
+      "sha256": "3408620567a44455e15b1091fc14e323d5bee678e102c2bf63bcc4667f315742",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetDefaultInit.lean",
+      "sha256": "023e90b50d57348c7985c992215bbb337d4b76bd48e3ba20a17877dde7dbe439",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetDefaultInitControls.lean",
+      "sha256": "a9ed0cbddb6067dd6a0c62d75ed69a2968c4bee565624ef37b8c8a87c358d18e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetFixedArrayCopy.lean",
+      "sha256": "abc8c3650597225a379f3f855135277b9f1023fb4f9635ee292b13b9cb5859de",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean",
+      "sha256": "a8510ed8277b6b94ae433e9dc39a0395e800457505a5bfafc74dcc86f2ab228d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetFixedArrayTransport.lean",
+      "sha256": "84475c4b5dcf45f365517b7e69f581c20e7d5a07fd6f4ab3a5599914d6852430",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean",
+      "sha256": "3c73a01aed96d2fa543403f8d229d847547454d4d6479e1894d8a3fd5f3bdd0c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean",
+      "sha256": "2a575dd951a93669d5dc2a1717718af3b4df4f90def63e13b0401a39ba09267d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetFixedSnapshot.lean",
+      "sha256": "159bb345b25f37e2651aa0a6059c04bea60e78fb0d59f616f4780d1c2dc224cc",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetFixedSnapshotControls.lean",
+      "sha256": "f07da320fb26998729f4bcd54d255c6d6c228befa35792097269be7ee91d1597",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetFreshMapping.lean",
+      "sha256": "032230adb9b1c174b73995f6613ebb248442e95a47c7599df5fb42311f98e406",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetHeaderPush.lean",
+      "sha256": "df6aa25dcdbe5ff95ca40d8d88f69f66aba67e830154ca51528e6ccc6cd18eda",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean",
+      "sha256": "36508a4718306ba1e57c72d5a98e004f779681f5ee481eb4848caf7544b03721",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedArrayControls.lean",
+      "sha256": "a0eceff220526480df3612c30adb8f00d53bcea45cdf6ed31f9be18fd957785b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean",
+      "sha256": "5ce276c0bbcbd30705f1b077f2af5bb620498ee7a437a13cd9fd0fd68251f48b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedArrayCopyLoop.lean",
+      "sha256": "628eb35b446c321bfc341acc4ac6b239b12493f31157e00d3983ac4f9d54fa9c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedArrayRuntime.lean",
+      "sha256": "e112c5bdd6fe01d9ee9995e45c354a98cd80174352d63ca5b53427c5a2ca9861",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedArrayTransport.lean",
+      "sha256": "20112166d90a9623ab51c2e22c9bde6f51b7b5df773c9c70596649a4c9cb46a5",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean",
+      "sha256": "d704de324e3d37c2a857c6da207272ad44fb06d6ba7bd58c185a9360330b923f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedPop.lean",
+      "sha256": "9d0b02e5d327946f1d4110b868063a925b7c33ec8485fc8421ef458c1f233786",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetNestedPopControls.lean",
+      "sha256": "aa26e1ece9188a3aac78b96203d5fd3cf00b1efb5a130eb6e9c846b9b65f62e6",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetOperationControls.lean",
+      "sha256": "3eb46d5c879b868edbeaf012a82878b6d91745fd44fc2a94eec8a5cb1aabe2c3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "sha256": "ff5594d1dc41a90777a5fbef081dd62be4ca07723848c68a1372102fdf59e2ce",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetPrimitivePop.lean",
+      "sha256": "d1273410046e9dc805bf8770c973d0797df0e5c0543728b2e640ee9f32cd5bd3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetPrimitivePopPush.lean",
+      "sha256": "b960b63d370d81912f2b7a2caa43b74981a05eb2000e27c09db4f1c9f4de6f7c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetPrimitivePush.lean",
+      "sha256": "2c12dee19e967d233564cb2a6d3c9b1a7fe44592d12ff54ab1b7691bd65b5baf",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetRetainedCycle.lean",
+      "sha256": "b1d5051e6082afe206ea370e11e5afc78903e988efa5160a9dee8bb3fca7f269",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetRetainedCycleControls.lean",
+      "sha256": "6d1d5f6ab145f43704a8ba19a1ddd2887b40c116a7de5b4333f8af6d109931ea",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetSelfCopy.lean",
+      "sha256": "0f9ffd22df52d58e8d7957223bab9c284fe61de1431182a73bb277516ac49868",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetSnapshotCommutation.lean",
+      "sha256": "fa734d457d18ea72ddba6adf6143ea6c92df0e5b46262c08fdd3d1f103f87613",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetSnapshotCommutationControls.lean",
+      "sha256": "d148c46f27b2c14235a998debd8cbc12ec0a2ebcff1abe4d7b1b35abe0b01a10",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetSnapshotRepeat.lean",
+      "sha256": "c10e996e81b3d5e452b4f96a2f4f99701eaa3a17b304ba98e2656028069da75b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean",
+      "sha256": "59eef2dfa624cc506eb3495e6469dd52c68e585d434738a60471f779ea089376",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/Touched.lean",
+      "sha256": "dbf61c06ab14df73509b243fd4e84887c6b51e36569e60158274e79ef49a1172",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/Traversal.lean",
+      "sha256": "2f3e060d0b8582a202fc2805c8bae638677fb1c80c05566744201f2ba47e1d98",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Backend/StorageOps/TwoClearRepresentation.lean",
+      "sha256": "67a209d655260b9c75c03fac241ebbe70c4ceedc454d96f4724e25511f08606c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "wildcard"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean",
+      "sha256": "4ec686c89ede4ee0bc05098f7e919ad241f9a6594ba352fae985a6cae3ea81f8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean",
+      "sha256": "d15a4ec76682d4a8b827d5b0104611407e00e02ac62be4e04e6a2178bcd940fb",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayIndex.lean",
+      "sha256": "5fb138cf6aa8750935c5f6831909186d962c4a670d8a49da317191ed99d0dcdb",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayIndexControls.lean",
+      "sha256": "1c1407657538c8961830b11982c831c54f458a11b35931bad92539e911094b7e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayReadback.lean",
+      "sha256": "2c0a3445fadc3903b70b68f3917b9199d39d99050dc095ca323fd369e2c35836",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayWrite.lean",
+      "sha256": "66fef4f00719ec0b40d692f9e73899b5e3b078b2c793c0e9d3af21f43b65ee07",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayWriteControls.lean",
+      "sha256": "406013d8d282a4c4dce275e584643bd59fc1f53b9e58b5d8228f10ab92992d19",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayWriteFailure.lean",
+      "sha256": "0a5591f147d063d71bdb8606a8204c29a2a5c0afece0032ba0f4c01d2aa40aaf",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean",
+      "sha256": "f6cfa924be1ae4ef5ce7cd465ed54a3d23df646a394737413297f817a220cbc3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean",
+      "sha256": "133f3c2d2769a4f37dbd388f0c4afaf348d7263036ad1f068b3ed9eae9610bd9",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean",
+      "sha256": "795b36acab87150412c3f97bf75b2c09f217f541c9a2e74bed650c250e81258c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean",
+      "sha256": "3ed9d152670ad8896047a155ecaf0996c1c1d14125fdf43ac0aab246facc1ce5",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumericControls.lean",
+      "sha256": "a32006fa5cf59801c3cc7ac1b69e5d3a858fa4e7fc2d5a2284b33aa6f71d62cd",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolCopyReadbacks.lean",
+      "sha256": "c967c96c21b7fba0a195cf2a5d98969353fe9c6f9817f3cf8fb371299c0f17ec",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopy.lean",
+      "sha256": "47a5af289211449b33b848b45569d52ccd4f95b43f612b213fb2fcafae0140db",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyControls.lean",
+      "sha256": "60ae47f3bd45c8fe72cc7b932db31b92d6c6fb49a77f40ce76c10c2bced76c58",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTarget.lean",
+      "sha256": "0a2122395e1c09343c93f940f100b2556d724bb2ee604e0246482def7e686862",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean",
+      "sha256": "a2766a1f18c2449d50617a8d84ef414b84b80cccf73629a4c7fff9359041c26f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean",
+      "sha256": "0a0f4266130db7a0a4103f29e6f1ef3c11914b2b010e72a7a535c25c187f0d4c",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolStorageCopyTarget.lean",
+      "sha256": "19f8f70e37d425cc7516beade3278fb83e7b3b789bebce003bfa01d4e8aa5abe",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceBoolStorageCopyTargetControls.lean",
+      "sha256": "06a811dce03acea6b36fc79a8c0a977764c136290657d52cbe6e0dc0cf3f1997",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteCaptureSuccess.lean",
+      "sha256": "c75900d57a6ed514fdd404121a9abc227a94415bca3df7868bdcb464e05bfabd",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteCaptureSuccessControls.lean",
+      "sha256": "25f5490680c35b01195d508714762d08466b788c581216972bdcb2c691dd3a3a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean",
+      "sha256": "151fa78db467091ded024239d9e164bceb9564375cb1de65563307eb4ebe8a5f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteCommitFramesControls.lean",
+      "sha256": "19e9a3eff5583a9caa8f441eb3c657334fc11daf3a7336f2ec3f53db92815913",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteStorageBarrier.lean",
+      "sha256": "784d4d48f3d9fd2a3a1a95ebed2614e51377ea6910161be194eadf48b1557a0d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean",
+      "sha256": "fbbfd1964888979d6d700422494286d5a547f8007849ccfd5666caea29873c2f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteStorageClear.lean",
+      "sha256": "025f70f2f18dacc61dd66461685b3b4ca8ad16e02fad29a053f606e41426b439",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteStorageCopy.lean",
+      "sha256": "db402a9572129d9d3a6c8d5f087f3925aebf6bb1ab249dc9d0071a8ffc87d95d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean",
+      "sha256": "1dc2d5ccf10c23ab153ef832eee80b02900b7df50b603d5bd918819404156185",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteStoragePrepared.lean",
+      "sha256": "54c6c678384767f2022227d53fd1dab96db08aa465bf55d6ad42d8a0d96f2a0e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean",
+      "sha256": "2dabb5298edb8027a42d83401c41c79b12a925425d646a217d033d7c67ad9e26",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCaptureReadback.lean",
+      "sha256": "74c434d0123873045bec81b6b60092b36721f753101d5dab4b84c9bb66016bfb",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCaptureReadbackControls.lean",
+      "sha256": "8430f952db7a49caf41d29c8b55dbbe567fc4b3a884182f076a02e0204ea73ef",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCapturedByteCommit.lean",
+      "sha256": "9cf23dbdd062fd9a44eacc0c12429206ee3f2ef6ae6fdf8d87533eae420aae4f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCapturedByteCommitControls.lean",
+      "sha256": "9493f512be9080f373ebc8b1201227ceea5e78a886dd4d4f8020c86984cc1317",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCapturedBytePhase.lean",
+      "sha256": "265ccae136dc23d431dbbbb08ba99d709a6c2270e2c130878d5fa36cae0e32ea",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCapturedByteTimeout.lean",
+      "sha256": "7e0e94c813853e40d99fefe1fc6ac5b36172b0393ccfb6ca031c571b191439b3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean",
+      "sha256": "6e22b21a52d161ae4f96c883737e33d2d033c50749140d7b3a91bc755928747d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeout.lean",
+      "sha256": "60bf4a69650d1a5bf447fdebde343bfc3f79ad069b5d7ddb1caecd2c278e4e4a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeoutControls.lean",
+      "sha256": "5f3eca36dbf17a35cad6862c4278df0b110a7f9d1768923a08ecdfa3c5fe4806",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCopyCommutation.lean",
+      "sha256": "e475ae4196b856e8817a96ed1d3f35bd659ba0b751d877f52f3f2ea282437c40",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCopyCommutationControls.lean",
+      "sha256": "b16c629a48ec452b18066afc7efa2182ff2fdfa2a37d264cf95237d34cf032f3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCopyFrames.lean",
+      "sha256": "de0b8de32f2ace80d080e91f28e63604eaec52dfc9d293b4ae8fca59df9b7b9d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCopyFramesControls.lean",
+      "sha256": "6dac8dbcda6699cb589cd3581aea4f374dd6aa3833da3224a016120d917e6b6a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCopyReadbacks.lean",
+      "sha256": "6d47f13a4769675673dcd4c89589d448f7a512be9d967cae5af5bded6521d30b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCopyRepeat.lean",
+      "sha256": "cb859a95079ad5def9dd116efbdf4eee5960ff0dff4ff240c29b6aa59fbafe34",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceCopyRepeatControls.lean",
+      "sha256": "31dbbd4ecf381a35feb91739061202347e123a94bf3bf10319c51df5b20f350d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean",
+      "sha256": "9486ed8b7ed5f31ec1bb82d287bc8caac385a87cd33d99c230a39e23bf13c361",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceFixedStorageCopyControls.lean",
+      "sha256": "fe9d4c97f538d9f858c8cafa8cb36d099fa936a583d9f6bc2e3b3db8dd514747",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTarget.lean",
+      "sha256": "51eaa95943164497e3a8597765c9fb46286008698ac8d855607009182d356153",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceFixedStorageCopyTargetControls.lean",
+      "sha256": "45b3150d6708588f8c3f438c6e9e3cadff6d3882ae80b9eb2e0c78a9f520b673",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumeric.lean",
+      "sha256": "abfb8bca5deeadb642ad1155a5ca1b60f1c3318ddd6a54826f8ea1792f5ed5c4",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumericControls.lean",
+      "sha256": "75999aed58fc1934e8b61f735282f41d1179e57c4ab099426375bc3d5ca18e5f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceIntCopyReadbacks.lean",
+      "sha256": "91d0f3ec79d52670a644f0d1b4c3f58031b0ce64238961f92a4661c70f877b7b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceMappingDelete.lean",
+      "sha256": "c46ad644218bc7d22284f03d9c57c0e94a0e2ebfe319f85ee7890c3bd6cd200e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceNestedByteCapture.lean",
+      "sha256": "b0c0bf3b878d0d3a3271a092926b1ce4ef8eaf1688f11fee92e04c4b38819096",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean",
+      "sha256": "ad4359ccb77f560608f2d64298ba61458f6b537b61de9dedb8a1636663b95007",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceNestedByteValues.lean",
+      "sha256": "53aae49d572f74ce3fd126db974050cecb191e2bae204f91cae3bb492ae6a920",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean",
+      "sha256": "b237eff4bb669d804977c797d5399817436711bc1c741d332d97859343fd0eff",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceReadFrames.lean",
+      "sha256": "e1be3c9deb4a764a172b6314a69b4d04e2cee102f6fb8d8a7405240478061c5e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean",
+      "sha256": "5ae8cc50c7433e1b73b1c6ffb7c083c13c0647213d295e64f664fceace11d62d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceSelfCopy.lean",
+      "sha256": "563c6d57c0bb2b94e7667be7d0140922e183b0e9bee12ee50e8d5b883bfde151",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTarget.lean",
+      "sha256": "a80f7d0fd511709205635df9ddc84c32cde078b378895144e9303e978313eb54",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean",
+      "sha256": "053f63073e9cab3a4228b43fa4d7de24dc365bed4ff5956307b42ad30a92f012",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopy.lean",
+      "sha256": "993047f10c0cc23777bc92a1fd64111cf620152f8668339fcbfc64092f37e3b2",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean",
+      "sha256": "9c706d6195b66201352017f256afeebe19d66d1b87f819ae5af862006f31fe60",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean",
+      "sha256": "54990cdb47100f3bfed34ab0e38177e9ac6382fb15f2eca8d01d0fd72b9431cd",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean",
+      "sha256": "602f82650d0ba9f2a73ffa5f8a413eee4024a93ceae51f5d9b1d2bb9f70b63e1",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyEmpty.lean",
+      "sha256": "e7e7e054fb2e65a7842eaceecdd074f8ddce0d02d77cfbe9e88fbdb07feb866f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean",
+      "sha256": "efa0385984ff855176cc95925e5e61a3a1833bf258363881b147b7f0f5946ab8",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyPayload.lean",
+      "sha256": "f96900f0465940ebc604d95e6fbf5c6e90e9e93c1e6d5bbbc5d32f86f9e94bf3",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean",
+      "sha256": "90d73ca35650d01fd439bfcd1b8c69186f4635e0a81d2e8ca1cb9264e5cd9b48",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyPrefix.lean",
+      "sha256": "cde5d0d1e426d279d10583057dc2394809f2e121874c431187af7fd3e414f30a",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean",
+      "sha256": "610cfc7540f44d534fdf54aff2ea15232f01fe45e6bd1fab24f3e89a5611c7d7",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyTarget.lean",
+      "sha256": "1c0c913ffacafa25e05ac1fd2bf919dc2ed0241574c917b64bb56f8c9d9b8dce",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceStorageCopyTargetControls.lean",
+      "sha256": "7cb4ece820d15d9355f305e6745d83ab06b4770044d27f5d1421979d197ace6f",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean",
+      "sha256": "824b988547157067a2fbac79d07c3f62c23fe8c6373ae5cd787a94f9eec639db",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteNumeric.lean",
+      "sha256": "4e3621ef119e9ed14211a66717c2b2c36db71b9772b15ddcf92fcb44c49c93cc",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteNumericControls.lean",
+      "sha256": "04bc4377757df3520e623abf4206c1a73356904f7638b5760f76f453bbe748f5",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean",
+      "sha256": "d50a0927c4fead7af4a8ab6034c7a025dbbd5ffb7dd1275588f7f1c599836f7e",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceVaryingByteCapture.lean",
+      "sha256": "ef4d7ea7586044299d0838fb5ef30bee7c3bc2cf8efd6bac559929cd3c86db7d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean",
+      "sha256": "43ce1d903100973a4207662665846f0d0077ece9f7cef7bec0db73d1691081f0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceWordCommutation.lean",
+      "sha256": "0f3deab795ce943636972472af69cbfa6fd00005f4c29dc2feb672718ba03867",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceWordCommutationControls.lean",
+      "sha256": "79310a15bb352cb86484bb72eb180d387e7783e5178fcd923361dc153044b237",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceWordRead.lean",
+      "sha256": "91bf81b95decfe8d728a24dd0feac8f76b57efedd9db4a2d7ab5783195adf6cb",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceWordReadControls.lean",
+      "sha256": "ab3ee07a60092634621ab4c51b2b7074194e291d28b99b726daa669588434cc0",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceWordWrite.lean",
+      "sha256": "3d34a78026ca6e9982fde85737a58f1e5c3ba2cf79f3772e5c79c1853d9d1eb6",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean",
+      "sha256": "91b3534bb187c447f52dde71d3f67e54c8f86e0ef45edda8d8cf471fd9a5e63b",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceWriteRollback.lean",
+      "sha256": "429abcfe5fbdc3eeca2693162955634a2dbe2fe969a9a15a30535ea87eb79408",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean",
+      "sha256": "2df034ebac141e8137a5bcdb198d8ad7c61986649832033c6fd1ad8835ff942d",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    },
+    {
+      "path": "Solidity/Lowering/StorageOps/TwoClearRepresentationControls.lean",
+      "sha256": "3f3abecc08528aa250059b71b1774665579e2057b5be7dc0e47359d234b16f33",
+      "owner": "V10 (v07-v11/v10-storage-operations)",
+      "scope": "explicit"
+    }
+  ],
+  "conservative_source_declarations": 3281,
+  "exclusions": [],
+  "successor": "solidity-v07-v11-20261030/v10-storage-operations",
+  "h82_amendment": "Standing statement-preserving edit authorization replaces exact-file agreement for most edits. Existing statement/dependent-definition/interface/budget/axiom/exclusion changes still need owner/frozen H57 pair. No such original edits were made.",
+  "retirement_override": "H82 stop-and-handoff takes precedence over H70 continue receipts; no further implementation or automatic continuation authorized."
+}

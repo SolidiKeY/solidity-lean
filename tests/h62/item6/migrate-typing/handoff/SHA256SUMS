@@ -1,0 +1,9 @@
+c7995daebdb82fa547f725790bac08074e3c1f8b3a22b796eacd1a16420941de  tests/h62/item6/migrate-typing/handoff/H82-retirement-instruction.txt
+fbc92fb2dfe38778f729fa49eec62c423e8f90c65b55e87fed33538d012884a3  tests/h62/item6/migrate-typing/handoff/exact-scope-manifest.json
+b2159a8c1f7fe611195fef99ae016a526607813e3a07a06b4e49de0b10fadb2a  tests/h62/item6/migrate-typing/handoff/input-provenance.json
+704921c6659544cb9eb968030f1d93b98cccff598ae41b5d34bf1a47196b31b9  tests/h62/item6/migrate-typing/handoff/official-toolchain-pin.json
+0d310f2face1b7bb53705a4e1a891b6c025ced6adbd67f7430d118bd27fb0f4c  tests/h62/item6/migrate-typing/handoff/original-assignment.txt
+23627ea9bffb0fa247304ee53f07bd566dd9bdba839976e6d005a5e19273ced4  tests/h62/item6/migrate-typing/handoff/original-goal-objective.txt
+0fc6b9bd3158bd2e8c4edb89ded89d2cdebc9d8065d8da5468ad22005ab2fba4  tests/h62/item6/migrate-typing/handoff/original-work-backfill-queue.md
+64d6f7dd298cd2293a850d017c1d33be6df237f03ca9ae501dec2fefad0325d4  tests/h62/item6/migrate-typing/handoff/routed-H78-owner-ticket.json
+bdefc371b45bf6f875510e889c0be28fa408c3ce5a146cad44edd53479d55f35  tests/h62/item6/migrate-typing/handoff/successor-queue-waits.json

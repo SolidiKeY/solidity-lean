@@ -1,0 +1,13 @@
+{
+  "ownedSourceAndTraceMappingsUnchanged": [
+    "Solidity.Frontend.ExecutableAst.Shared.Boundary",
+    "Solidity.Frontend.ExecutableAst.Shared.Translate",
+    "Solidity.Frontend.ExecutableAst.Shared.Intrinsic",
+    "Solidity.Tools.DirectRuntime"
+  ],
+  "cachePacket": "evidence/h35/cache-receipt.json",
+  "coordinatorCustodyReceipt": "evidence/h41/cache-custody.json",
+  "newOwnedModuleCacheOutputs": false,
+  "deliveryPolicy": "H41: coordinator-pending for future packs; never run ship-cache.sh on this VM",
+  "boundary": "Build gates establish freshness; source/trace matching is not native runtime closure or cache-installation evidence."
+}

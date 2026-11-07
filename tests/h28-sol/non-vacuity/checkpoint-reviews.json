@@ -1,0 +1,93 @@
+{
+  "reviews": [
+    {
+      "area": "rules-calculus",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/checkpoint-finder.md",
+      "sha256": "619a43b4f4a55234dccf387e3802c1055b2784c8dc789ea62d773b532e60f23e",
+      "scope": "core-controls checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "callbacks",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/checkpoint-finder.md",
+      "sha256": "619a43b4f4a55234dccf387e3802c1055b2784c8dc789ea62d773b532e60f23e",
+      "scope": "core-controls checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "compiler",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/checkpoint-finder.md",
+      "sha256": "619a43b4f4a55234dccf387e3802c1055b2784c8dc789ea62d773b532e60f23e",
+      "scope": "core-controls checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "checker-evidence",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/checkpoint-finder.md",
+      "sha256": "619a43b4f4a55234dccf387e3802c1055b2784c8dc789ea62d773b532e60f23e",
+      "scope": "core-controls checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "rules-calculus",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/checkpoint-skeptic.md",
+      "sha256": "cbe18178ad2b0721f9d2af9fb742f4d8fa5df6edf68dbed8899c8835daed0c48",
+      "scope": "core-controls checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "callbacks",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/checkpoint-skeptic.md",
+      "sha256": "cbe18178ad2b0721f9d2af9fb742f4d8fa5df6edf68dbed8899c8835daed0c48",
+      "scope": "core-controls checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "compiler",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/checkpoint-skeptic.md",
+      "sha256": "cbe18178ad2b0721f9d2af9fb742f4d8fa5df6edf68dbed8899c8835daed0c48",
+      "scope": "core-controls checkpoint only; not whole-assignment acceptance"
+    },
+    {
+      "area": "checker-evidence",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/checkpoint-skeptic.md",
+      "sha256": "cbe18178ad2b0721f9d2af9fb742f4d8fa5df6edf68dbed8899c8835daed0c48",
+      "scope": "core-controls checkpoint only; not whole-assignment acceptance"
+    }
+  ],
+  "final_assignment_acceptance": false
+}

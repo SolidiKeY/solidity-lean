@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/CopyTransport.lean:Solidity.Backend.StorageOps.CopyTransport.body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyTransport.lean:Solidity.Backend.StorageOps.CopyTransport.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyTransport.lean:Solidity.Backend.StorageOps.CopyTransport.numeric_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyTransport.lean:Solidity.Backend.StorageOps.CopyTransport.numeric_eq_fold": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyTransport.lean:Solidity.Backend.StorageOps.CopyTransport.symbolicCopy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyTransport.lean:Solidity.Backend.StorageOps.CopyTransport.transported": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyTransport.lean:Solidity.Backend.StorageOps.CopyTransport.updates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,51 @@
+{
+  "status": "conditional proof/fixture/tooling scope accepted; whole assignment BLOCKED",
+  "finder": {
+    "agent": "/root/inventory_finder",
+    "mode": "read-only; no Lean server",
+    "verdict": "accepted conditional scope; no remaining confirmed finding",
+    "verified": "18modules/444statement hashes,8sourcepins,29fixtures; actualgates; topdoccorrection; wrapperprovenance repair; truthful rawwhitespaceexception"
+  },
+  "skeptic": {
+    "agent": "/root/inventory_skeptic",
+    "mode": "read-only; no Lean server",
+    "verdict": "accepted conditional scope; no remaining confirmed finding",
+    "verified": "Finite local LengthAtom dependencies, no True-fallback bypass/circularity, genuineallconstructor controls, source-bound trust/fixtures, actual independentdefault/sort results, preservedresourcefailures; wrapper-source binding repair verified"
+  },
+  "source_hashes": {
+    "Solidity.Frontend.TypeGrammarH28.Layouts": "bbad6065ac81a1f2bda430776824e03adf352674eae6b3116d51a1019080c590",
+    "Solidity.Frontend.TypeGrammarH28.Counterexamples": "19f2e110beeeacf6a9d9896a0d313707120547b67e2b0de0cad56ca9bba19d9d",
+    "Solidity.Frontend.TypeGrammarH28.Composition": "a4221306ef32b0be942e508d52d962c0d5b1e8bbe02a71cb614dcf033650299a",
+    "Solidity.Frontend.TypeGrammarH28.Boundaries": "66724d8f22cb2bd3dade3c2bc6d8a3ae4209b30a48ef389e9c7cb26e8217d971",
+    "Solidity.Frontend.TypeGrammarH28.TypeRegions": "6af64706d53c975a897435f97beb21063cd029359ded26632720c0dd9669cea4",
+    "Solidity.Frontend.TypeGrammarH28.ParserBasics": "931f56f7bad2b381515116adf288dbfad826a718ba388dc5d7d808483b93508e",
+    "Solidity.Frontend.TypeGrammarH28.ParserChecks": "804b474d15c68525233b22c7898c0d75e908bfd06f975f29d052b7ccb4aeca52",
+    "Solidity.Frontend.TypeGrammarH28.ParserPaths": "dcd685799be0e7c3837fa9703394e528de1932e4c19f0095464b4eeeb7df8789",
+    "Solidity.Frontend.TypeGrammarH28.ParserArrays": "762b89814e72994c0b2b24a6a57755dc0884dec47e9eb1d2f38e64b11cdf832e",
+    "Solidity.Frontend.TypeGrammarH28.ParserContexts": "8ab669999ed030a7d2cef6e8586128ecc2d78057cae40441ce344e1d16b04371",
+    "Solidity.Frontend.TypeGrammarH28.ParserMapping": "f24ef81c6df5030eeb2a9525ad6fa9eaeffde396cfe9436881a487bddf7cea43",
+    "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure": "71b7f2f83fd530632426a76e875cee17a946981c42948cc463cfd5d3f127e3e2",
+    "Solidity.Frontend.TypeGrammarH28.ParserReady": "8fb3756765d5639f27750d7313e9045eed16112b9068a5026d5e89825224f02a",
+    "Solidity.Frontend.TypeGrammarH28.ParserParams": "d729236599a907ec89eac239f3d0e17c376dcc557d5694e60a9d963877f86d97",
+    "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs": "4171d25788dbcd017a21525ea8985b53fefbfd684765b38667cc0712f2d9bebc",
+    "Solidity.Frontend.TypeGrammarH28.ParserFunctions": "a9cf3f1d2cb40f0bc583166b933b5eeb84b2d01c675816af0aa014ff8a59a1c6",
+    "Solidity.Frontend.TypeGrammarH28.ParserLengths": "414106275e03eb2af39b7c9ef48cfb989491c5172087c1a52529b306744ad09b",
+    "Solidity.Frontend.TypeGrammarH28.Exactness": "58765322178ba2e8bd951d1460ee01cba3ee93e47c48123ff1e4b61ccd9d6562"
+  },
+  "proof_boundaries": "All-constructor finite local read-only atoms and frozen precedence; no universal expression/whole-unit/compiler correctness; source soundness has no atom premise",
+  "fixed_findings": [
+    "unconditional param_values_to_syn restored",
+    "disallowed simplifier/WF Quot.sound dependencies removed before acceptance",
+    "fixture preflight/provenance and negative-wrapper isolation corrected",
+    "stale top-level queue summary corrected",
+    "measured final_policy.py bytes restored and old measured version/hash/diff retained"
+  ],
+  "final_validations": "final-validation-summary.json; final-guard-controls.json; final-policy-wrapper-source-bindings.json",
+  "remaining": [
+    "reservedcentralrootintegration",
+    "passingrun-lean/roots/orphangatesatintegratedhead",
+    "finalcommit/exactheadfollowup/sealverification"
+  ],
+  "no_waiver": true,
+  "questions": []
+}

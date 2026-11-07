@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedSourceBools_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedSourceFreshBools_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedSourceFreshBools_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataTransfer.lean:Solidity.Backend.MemoryOps.overwrite_fresh_bools": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataTransfer.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.checked_cd_bool_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataTransfer.lean:Solidity.Backend.MemoryOps.sourceBoolTable_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataTransfer.lean:Solidity.Backend.MemoryOps.sourceBoolTable_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataTransfer.lean:Solidity.Backend.MemoryOps.sourceBoolTable_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

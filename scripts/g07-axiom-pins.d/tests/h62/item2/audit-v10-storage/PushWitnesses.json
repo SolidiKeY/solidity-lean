@@ -1,0 +1,84 @@
+{
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.aggregate_keeps_identity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.capacity_failure_and_success": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.capacity_input": [],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.data_input": [],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.fresh_apply": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.fresh_default": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.fresh_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.header_apply": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.header_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.kept_apply": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.kept_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.pop_apply": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.pop_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.pop_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.pop_twice_fails": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.reset_apply": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.reset_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.scalar_reset": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.semantic_fresh_apply": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.semantic_fresh_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.semantic_kept_apply": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/PushWitnesses.lean:H62.StorageAudit.PushWitnesses.semantic_kept_joint": [
+  "Quot.sound",
+  "propext"
+ ]
+}

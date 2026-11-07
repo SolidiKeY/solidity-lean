@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/V08/FixedBytesCallableArgument.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.argument_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgument.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.arguments": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/FixedBytesCallableArgument.lean:Solidity.Lowering.V08.FixedBytesCallableArgument.transport_argument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

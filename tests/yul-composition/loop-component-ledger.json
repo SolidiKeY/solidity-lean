@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "source": "Solidity/Yul/Composition/LoopPhysical.lean",
+  "sourceSha256": "e41c794b1d17b24d2b13df56669f0fb3dd8e810f0098f3b1cf2766d084f58aa0",
+  "base": "0b078cefaf7daad79007b87b72df64eb6936420f",
+  "localLedgerSha256": "8782e2a1e1b98d7c3e957989c7d8e8d4b21644e8385fdb0bb1ad1f25dd395b56",
+  "facts": [
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.loop_completes",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.three_iterations",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.loop_normal",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.loop_source",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.loop_nonword",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.loop_physical_word",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.loop_all_completed",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.transfer_runs_complete",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.continue_iterations",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.break_one_iteration",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.transfers_consumed",
+      "fullCoverage": false
+    },
+    {
+      "name": "Solidity.Yul.Composition.LoopPhysical.wrong_count_control",
+      "fullCoverage": false
+    }
+  ],
+  "fullProofGate": "pending",
+  "combination": "loops",
+  "fullCombinationStatus": "pending",
+  "fullCombinationProof": null,
+  "remaining": "Actual Source.RStmt loop/Yul dispatch, raw Source ordinary operators, compiler/world/V16 assembly certificates and full Y10/G48-G51 combination"
+}

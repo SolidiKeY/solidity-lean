@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalStructSequence.lean:Solidity.Backend.MemoryOps.Physical.assign_struct_reference_child_physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalStructSequence.lean:Solidity.Backend.MemoryOps.Physical.assign_struct_reference_child_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -36,12 +36,11 @@ queries inside child calls/native providers, and adversary/offline queries,
 are not automatically included. It cannot justify the full-run probability
 bound until that query-completeness obligation is supplied.
 
-Current master retains opaque padding/scanner definitions. No vendor, pin,
-extern or provider is changed here. The old H7-dependent `Controls` source is
-retained verbatim as evidence but is not imported under this master snapshot.
-No canonical memory/padding/native equality is assumed by the new controls.
-The human's prior H7 authorization is not represented as an unanswered question;
-this implementation does not duplicate or silently adopt another vendor patch.
+Master includes the approved H7 bounded scanner and logical zero-padding
+interfaces; see [their scope](h7-bounded-interfaces.md). The hash-query receipts
+keep their actual byte expressions symbolic. Native allocator/extern and hash
+compatibility, source input realization and whole-run query completeness remain
+separate obligations; the H7 kernel laws alone do not establish them.
 
 ## Fetched/charged first-edge consumer
 
@@ -160,7 +159,7 @@ classification retains its real checks-before-exhaustion alternatives.
 
 `XiQueries.lean` lifts direct-frame receipts through the pinned public `Ξ`
 constructor and result projection. Its Prop-only `XiQueryReceipt` retains the
-actual initialized state, original opaque destination scanner, smaller X fuel,
+actual initialized state, actual destination scanner, smaller X fuel,
 and real error/revert/success projection. All-fuel existence derives the X
 result internally; soundness and uniqueness preclude selecting a different
 public result or query list for the same invocation. No returned world is

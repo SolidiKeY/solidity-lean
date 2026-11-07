@@ -1,0 +1,7 @@
+/-! RawContinueLoop.all_fuel proves every horizon of the actual literal-true/
+continue runner times out, preserving raw word views and world. Concrete Source
+while and read-local uint8 initialized-for laws quantify every fuel under genuine
+checked/coherent premises. Initialized raw laws establish timeout/world; they do
+not claim raw-frame metadata identity or general initializer divergence.
+Checks include all-fuel dirty words and a terminating-break countercontrol.
+General program divergence, admission and compiler adequacy remain separate. -/

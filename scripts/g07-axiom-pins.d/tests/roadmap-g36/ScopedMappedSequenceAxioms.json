@@ -1,0 +1,98 @@
+{
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.admitted": [
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.code_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.badCore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.badEmitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.badTail": [
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.checked_bad": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.checked_good": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.loadedCanary": [],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.no_canary_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.observed_bad": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.observed_good": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.outState": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.tail": [
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.typed_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.Controls.wrong_index_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.program": [
+  "propext"
+ ],
+ "tests/roadmap-g36/ScopedMappedSequenceAxioms.lean:Solidity.Backend.StructuredFlow.ScopedMappedSequence.run_composed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

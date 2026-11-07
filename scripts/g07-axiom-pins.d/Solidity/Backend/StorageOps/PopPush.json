@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/StorageOps/PopPush.lean:Solidity.Backend.StorageOps.PopPush.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PopPush.lean:Solidity.Backend.StorageOps.PopPush.headers": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PopPush.lean:Solidity.Backend.StorageOps.PopPush.outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PopPush.lean:Solidity.Backend.StorageOps.PopPush.read_middle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PopPush.lean:Solidity.Backend.StorageOps.PopPush.retained": [
+  "Quot.sound",
+  "propext"
+ ]
+}

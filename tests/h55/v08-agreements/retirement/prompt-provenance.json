@@ -1,0 +1,25 @@
+{
+  "source": "Full original assignment user message transcribed from original thread, plus original supplied goal objective and environment context saved separately.",
+  "original_assignment_sha256": "15a770419c82a1e39dd9b25863f2eca0d876597a70aa82cd65abf74e7ed88a69",
+  "declared_frozen_rendered_prompt_sha256": "bb3c43849f89025ac9036941a45ffdf8eb0b1459b8bde54f7cc3bf0f058a05ae",
+  "matches_declared_renderer_hash": false,
+  "boundary": "The renderer-specific frozen prompt bytes are not exposed as a file/tool resource. The visible full original user assignment is saved with its own actual checksum; no equality with the declared rendered-prompt hash is claimed unless equal.",
+  "files": [
+    {
+      "path": "/workspace/solidity-lean/tests/h55/v08-agreements/retirement/original-assignment.txt",
+      "sha256": "15a770419c82a1e39dd9b25863f2eca0d876597a70aa82cd65abf74e7ed88a69"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h55/v08-agreements/retirement/original-environment-context.txt",
+      "sha256": "780cfaa9a34408f47ad319b9d9084695245ea0f0ad810f028b805396d69a578b"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h55/v08-agreements/retirement/original-goal-objective.txt",
+      "sha256": "7de87656819f5bb97835d4f6ffcc5e37e8da40792269d5b06c644c909822db3b"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h55/v08-agreements/retirement/retirement-notice.txt",
+      "sha256": "7f22a7aa2f5beace5980fff7448829e7bf176891fa46eca86b74f5c4b49963eb"
+    }
+  ]
+}

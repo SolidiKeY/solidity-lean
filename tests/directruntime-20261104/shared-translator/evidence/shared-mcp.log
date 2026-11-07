@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "output": "⚠ [2/9] Replayed Solidity.AST\nwarning: Solidity/AST.lean:355:4: unused variable `k`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n✔ [9/18] Built Solidity.Frontend.ExecutableAst.Shared.Boundary (1.9s)\n✔ [18/18] Built Solidity.Frontend.ExecutableAst.Shared.Translate (4.2s)\nBuild completed successfully (18 jobs).",
+  "errors": []
+}
+diag: 0 errors
+diag: 0 errors
+{"childMaxRssKiB": 12672, "command": ["bash", "-c", "set -e; trap \"python3 scripts/coord-tools/lean-mcp stop\" EXIT; python3 scripts/coord-tools/lean-mcp call lean_build \"{\\\"output_lines\\\":30}\"; python3 scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExecutableAst/Shared/Boundary.lean; python3 scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExecutableAst/Shared/Translate.lean"], "exit": 0, "scopeMemoryPeakBytes": "785121280", "wallSeconds": 28.12509912200005}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 15691853824, "outerWallSeconds": 31.549294307000082}

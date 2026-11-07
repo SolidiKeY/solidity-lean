@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/SourceSelfCopyControls.lean:Solidity.Backend.StorageOps.SourceSelfCopyTargetControls.different_target_ordered": [],
+ "Solidity/Backend/StorageOps/SourceSelfCopyControls.lean:Solidity.Backend.StorageOps.SourceSelfCopyTargetControls.target_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SourceSelfCopyControls.lean:Solidity.Backend.StorageOps.SourceSelfCopyTargetControls.target_self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

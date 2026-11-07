@@ -1,0 +1,94 @@
+{
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.absent_remains_absent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.absent_slot_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.all_depth_header_shadow_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.all_depth_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.alternating_depth_nontrivial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.bad_absent_representation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.bad_hash_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.complete_wrong_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.empty_retained_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.exact_demands": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.exact_locations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.fixed_combination_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.malformed_alias_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.no_global_hash_injectivity": [],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.represented_numeric_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.wrong_mapping_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.wrong_ordered_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.wrong_shadow_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemandControls.lean:Solidity.Backend.StorageOps.ClearDemandControls.wrong_true_mapping_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

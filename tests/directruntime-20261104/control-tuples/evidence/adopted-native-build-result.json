@@ -1,0 +1,5 @@
+{
+  "success": true,
+  "output": "\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n⚠ [61/156] Replayed Solidity.Calculus.Fml\nwarning: Solidity/Calculus/Fml.lean:264:21: unused variable `φ`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n✔ [65/156] Fetched Solidity.Calculus.JoinSequence\n✔ [68/156] Fetched Solidity.Calculus.LexVariant\n✔ [69/156] Fetched Solidity.Calculus.LexDiamond\n✔ [70/156] Fetched Solidity.Calculus.SyntaxSize\n✔ [71/156] Fetched Solidity.Calculus.CallSummary\nBuild completed successfully (156 jobs).",
+  "errors": []
+}

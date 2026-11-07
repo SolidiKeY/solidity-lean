@@ -1,0 +1,3 @@
+{"status": "native-functional-parity-pass; strict frontend-origin closure review pending", "binarySha256": "1d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d", "comparisons": 18, "failClosedRequests": 2, "frontendOriginSymbolCandidates": 14, "runtimeExit": 0, "runtimeWallSeconds": 0.253032651002286}
+{"childMaxRssKiB": 21492, "command": ["python3", "tests/directruntime-20261104/shared-translator/native-controls.py"], "exit": 0, "scopeMemoryPeakBytes": "25747456", "wallSeconds": 0.6448288430110551}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 6463107072, "outerWallSeconds": 3.0073552779940655}

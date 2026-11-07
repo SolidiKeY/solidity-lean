@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/AggregatePopRootFrames.lean:Solidity.Backend.StorageOps.AggregatePopRootFrames.complete_at_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrames.lean:Solidity.Backend.StorageOps.AggregatePopRootFrames.execution_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrames.lean:Solidity.Backend.StorageOps.AggregatePopRootFrames.frame_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrames.lean:Solidity.Backend.StorageOps.AggregatePopRootFrames.header_frame_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

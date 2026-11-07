@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/ParameterReduction.lean:Solidity.Decide.ParameterReduction.Countermodel.refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ParameterReduction.lean:Solidity.Decide.ParameterReduction.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

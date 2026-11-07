@@ -1,0 +1,42 @@
+{
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.actual_success": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.decoded_success": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.infinity_pairing": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.malformed_control": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.one_mul_one": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.pointEval_of_decode": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.pointEval_result_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.pow_go_one": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.pow_one": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.success_price": [],
+ "tests/h62/item2/audit-precompiles/PointEvalSuccess.lean:H62.AuditPrecompiles.Successor.PointEvalSuccess.verifies_infinity": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,149 @@
+{
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.absent_demands": [],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.coveredLocations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.default_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.delete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.delete_outside_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.demands": [],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.fin_mem": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.fold_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.fold_zero_member": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.listed_compatible": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.listed_slot_compatible": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.listed_slot_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.listed_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.mapping_barrier": [],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.mapping_compatible_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.mapping_numeric_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.mapping_query_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.mapping_represented_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.numeric_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.numeric_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.numericClear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.outside_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.outside_slot_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.positions": [],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.positions_mem": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.prefix_find_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.represented_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.represented_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.shadow_compatible_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.shadow_find_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.shadow_query_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.shadow_represented_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.slotDemands": [],
+ "Solidity/Backend/StorageOps/ClearDemands.lean:Solidity.Backend.StorageOps.ClearDemands.updates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

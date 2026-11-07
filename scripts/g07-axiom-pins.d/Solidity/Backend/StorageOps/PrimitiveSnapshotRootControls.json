@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRootControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRoot.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRootControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRoot.Controls.graph_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRootControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRoot.Controls.missing_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRootControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRoot.Controls.retained_not_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRootControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRoot.Controls.storage_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRootControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRoot.Controls.wrong_direction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRootControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRoot.Controls.wrong_target_direction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

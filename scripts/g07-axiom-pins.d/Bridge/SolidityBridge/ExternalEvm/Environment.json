@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Environment.lean:Solidity.Evm.External.referenceMachine_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Environment.lean:Solidity.Evm.External.selfbalance_upstream": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

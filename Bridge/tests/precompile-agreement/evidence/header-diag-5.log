@@ -1,0 +1,55 @@
+ERROR 119:5 Tactic `rfl` failed: The left-hand side
+  match
+    if I.calldata.size ≠ 213 then do
+      throw "error"
+      if I.calldata[212]! ∉ List.map Nat.toUInt8 [0, 1] then do
+          throw "error"
+          pure (ffi.BLAKE2Compress I.calldata)
+        else do
+          pure PUnit.unit
+          pure (ffi.BLAKE2Compress I.calldata)
+    else do
+      pure PUnit.unit
+      if I.calldata[212]! ∉ List.map Nat.toUInt8 [0, 1] then do
+          throw "error"
+          pure (ffi.BLAKE2Compress I.calldata)
+        else do
+          pure PUnit.unit
+          pure (ffi.BLAKE2Compress I.calldata) with
+  | Except.ok o => (true, σ, g - UInt256.ofNat (fromByteArrayBigEndian (I.calldata.extract 0 4)), A, o)
+  | Except.error e =>
+    dbgTrace (toString (toString "Ξ_BLAKE2_F failed: " ++ toString e)) fun x =>
+      (false, ∅, { val := 0 }, A, ByteArray.empty)
+is not definitionally equal to the right-hand side
+  (false, ∅, { val := 0 }, A, ByteArray.empty)
+
+case neg
+σ : AccountMap OperationType.EVM
+g : UInt256
+A : Substate
+I : ExecutionEnv OperationType.EVM
+size : I.calldata.size ≠ 213
+short : ¬g.toNat < fromByteArrayBigEndian (I.calldata.extract 0 4)
+⊢ (match
+      if I.calldata.size ≠ 213 then do
+        throw "error"
+        if I.calldata[212]! ∉ List.map Nat.toUInt8 [0, 1] then do
+            throw "error"
+            pure (ffi.BLAKE2Compress I.calldata)
+          else do
+            pure PUnit.unit
+            pure (ffi.BLAKE2Compress I.calldata)
+      else do
+        pure PUnit.unit
+        if I.calldata[212]! ∉ List.map Nat.toUInt8 [0, 1] then do
+            throw "error"
+            pure (ffi.BLAKE2Compress I.calldata)
+          else do
+            pure PUnit.unit
+            pure (ffi.BLAKE2Compress I.calldata) with
+    | Except.ok o => (true, σ, g - UInt256.ofNat (fromByteArrayBigEndian (I.calldata.extract 0 4)), A, o)
+    | Except.error e =>
+      dbgTrace (toString (toString "Ξ_BLAKE2_F failed: " ++ toString e)) fun x =>
+        (false, ∅, { val := 0 }, A, ByteArray.empty)) =
+    (false, ∅, { val := 0 }, A, ByteArray.empty)
+diag: 1 errors

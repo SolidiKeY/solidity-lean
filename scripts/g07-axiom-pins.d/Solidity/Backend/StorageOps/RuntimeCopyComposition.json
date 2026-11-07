@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/RuntimeCopyComposition.lean:Solidity.Backend.StorageOps.RuntimeCopyComposition.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

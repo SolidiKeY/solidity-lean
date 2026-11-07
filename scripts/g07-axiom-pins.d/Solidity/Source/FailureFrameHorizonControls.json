@@ -1,0 +1,37 @@
+{
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.attempt_not_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.caller_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.completed_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.emitSeven_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.outer_cut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.timeout_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizonControls.lean:Solidity.Source.FailureExecution.FrameHorizonControls.timeout_to_emit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

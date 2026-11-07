@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/StorageOps/NestedLaterFrames.lean:Solidity.Backend.StorageOps.NestedLaterFrames.owner_interval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedLaterFrames.lean:Solidity.Backend.StorageOps.NestedLaterFrames.target_interval": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedLaterFrames.lean:Solidity.Backend.StorageOps.NestedLaterFrames.word_interval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

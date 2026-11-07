@@ -1,0 +1,17 @@
+{
+ "Solidity/Examples/Tactics/CallSummary.lean:Solidity.Examples.Tactics.CallSummary.CheckedResult.signedTripling": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallSummary.lean:Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingFive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallSummary.lean:Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingThree": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

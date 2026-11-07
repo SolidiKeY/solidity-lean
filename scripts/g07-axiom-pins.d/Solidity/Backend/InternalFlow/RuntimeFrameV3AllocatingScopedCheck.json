@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScopedCheck.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScopedCheck.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

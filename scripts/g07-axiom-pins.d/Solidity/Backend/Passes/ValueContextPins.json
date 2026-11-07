@@ -1,0 +1,159 @@
+{
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.core_val_fresh_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.core_val_fresh_in": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.loc_fresh_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.loc_fresh_in": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.memory_extend_reference": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ptr_fresh_cert": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.simple_fresh_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.simple_fresh_in": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.spath_fresh_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.spath_fresh_in": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.val_fresh_cert": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.value_after_fresh_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.value_after_fresh_scalar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.value_fresh_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.value_fresh_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.value_fresh_reference_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.value_fresh_scalar_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextAllocation.allocated_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextAllocation.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextAllocation.recognizer_same_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.core_refusal_preserved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.declaration_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.ordered_reference_memory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.ordered_scalar_memory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.preserved_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.recognizers_same_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.reference_decl_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.reference_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.reference_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.scalar_decl_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.scalar_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.scalar_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.source_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.source_wrong_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.target_wrong_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

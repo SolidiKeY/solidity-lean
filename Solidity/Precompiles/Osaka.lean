@@ -183,7 +183,7 @@ theorem gas_mono {p : Precompile} (hp : LengthPriced p) {d e : Bytes}
 stipend payment to address 1 always fails on Osaka. -/
 theorem ecrecover_exceeds_stipend (d : Bytes) : pinned.stipend < gas .ecrecover d := by
   show pinned.stipend < 3000
-  decide
+  exact @of_decide_eq_true _ (Nat.decLt _ _) rfl
 
 /-- The precompiles a stipend payment with empty data reaches successfully:
 they accept the empty input and charge at most 2300. -/

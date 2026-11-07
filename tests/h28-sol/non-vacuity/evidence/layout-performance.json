@@ -1,0 +1,27 @@
+{
+  "purpose": "checking-layout refactor only, no speed claim",
+  "before": [
+    "lake",
+    "env",
+    "lean",
+    "-j1",
+    "--tstack=131072",
+    "Solidity/Assurance/NonVacuityH28/Pins.lean"
+  ],
+  "after": [
+    "lake",
+    "env",
+    "python3",
+    "tests/h28-sol/non-vacuity/runtime/check-layout.py",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean"
+  ],
+  "before_metadata": "layout-before-pins-01.json",
+  "after_metadata": "layout-after-pins-02.json",
+  "matched_conditions": "same217 guarded sets, byte-identical Pins/import sources, all imports precompiled, fresh source check without olean output, serial same bounded container/toolchain",
+  "before_seconds": 87.05914478200066,
+  "after_seconds": 84.04013952099922,
+  "ratio": 0.9653223648295519,
+  "change_percent": -3.4677635170448085,
+  "slowdown_threshold": 1.1,
+  "outcome": "pass"
+}

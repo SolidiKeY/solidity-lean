@@ -1,0 +1,5 @@
+# Captured command output remains byte-for-byte, including tool-emitted spaces.
+evidence/**/*.log -whitespace
+evidence/**/*.tsv -whitespace
+evidence/*.log -whitespace
+evidence/*.tsv -whitespace

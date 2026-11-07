@@ -1,0 +1,22 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Structured.lean:Solidity.Evm.External.Assembly.certified_run_simulation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Structured.lean:Solidity.Evm.External.Assembly.decoded_loop_divergence_prefixes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Structured.lean:Solidity.Evm.External.Assembly.decoded_loop_turn": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Structured.lean:Solidity.Evm.External.Assembly.DecodedCode.refinement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

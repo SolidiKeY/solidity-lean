@@ -1,0 +1,19 @@
+{
+  "policy": "H44; bulk outside git",
+  "path": "/workspace/raw-int-review-fix.tar.gz",
+  "bytes": 73567,
+  "sha256": "7e5e99fadcfed1c23a0f4e7ae66b33c90c4667a3f3659990e20f48bacd8d5275",
+  "directory": "/workspace/raw-int-review-fix",
+  "source_head": "1f506fa74f5fc2fd44ded10a439654850c0a4999",
+  "status": "review-note repair checked; whole assignment partial",
+  "passing_checks": [
+    "18exactguardpins",
+    "ownedmodulebuilds",
+    "touched",
+    "KeySort"
+  ],
+  "incomplete": [
+    "broadercheckpoint voluntarily stopped, exit137"
+  ],
+  "reviews": "Separate read-only finder/skeptic PASS; stale pins-open sentence fixed; no Lean/server by reviewers"
+}

@@ -1,0 +1,5 @@
+CWD: /workspace/solidity-lean
+COMMAND: sha256sum --check Bridge/tests/precompile-agreement/evidence/SHA256SUMS
+Initial verification: PASS all entries.
+Final manifest includes this stable outcome log and is verified again before commit.
+EXIT=0

@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeat.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeat.copy_repeat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeat.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeat.headers_and_footprint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3HeapDomain.lean:Solidity.Backend.InternalFlow.RuntimeFrame.HeapDomain.domain_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

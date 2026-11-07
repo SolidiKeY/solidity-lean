@@ -1,0 +1,47 @@
+{
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.bad_old_agreements": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.empty_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.full_target_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.grow_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.signed_words_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSignedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceSignedStorageCopyTarget.Controls.varied_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

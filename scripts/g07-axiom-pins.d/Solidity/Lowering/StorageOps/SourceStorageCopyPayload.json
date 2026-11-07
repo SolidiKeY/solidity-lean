@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayload.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayload.copy_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayload.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayload.store_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3DistinctScalarUnwind.lean:Solidity.Backend.InternalFlow.RuntimeFrame.DistinctScalarUnwind.step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

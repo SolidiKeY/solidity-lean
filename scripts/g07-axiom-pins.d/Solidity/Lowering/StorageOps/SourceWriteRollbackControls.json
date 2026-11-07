@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.prefix_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.refusal_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWriteRollbackControls.lean:Solidity.Lowering.StorageOps.SourceWriteRollbackControls.rollback_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

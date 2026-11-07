@@ -1,0 +1,10 @@
+import Solidity.Counterexamples.DeleteFamilyGenericOverlap
+set_option pp.universes true
+set_option pp.explicit true
+set_option pp.fullNames true
+set_option format.width 100000
+
+#check @Solidity.Counterexamples.DeleteFamilyGenericOverlap.delValue_overlap_inconsistent
+#print axioms Solidity.Counterexamples.DeleteFamilyGenericOverlap.delValue_overlap_inconsistent
+#check @Solidity.Counterexamples.DeleteFamilyGenericOverlap.selectStDelNode_overlap_inconsistent
+#print axioms Solidity.Counterexamples.DeleteFamilyGenericOverlap.selectStDelNode_overlap_inconsistent

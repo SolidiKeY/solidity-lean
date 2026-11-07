@@ -1,0 +1,262 @@
+{
+  "compiler": {
+    "version": "0.8.38+commit.1835d247.Emscripten.clang",
+    "file": "soljson-v0.8.38+commit.1835d247.js",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+  },
+  "fixtures": [
+    {
+      "name": "diamond",
+      "source": "tests/sol-c3-exactness/fixtures/diamond.sol",
+      "source_sha256": "ef3c59a0e7a7bb95f2a77474fe1357807bfc8b423cfd62b775fb9591a4e37208",
+      "linearizations": {
+        "A": [
+          "A"
+        ],
+        "B": [
+          "B",
+          "A"
+        ],
+        "C": [
+          "C",
+          "A"
+        ],
+        "D": [
+          "D",
+          "C",
+          "B",
+          "A"
+        ]
+      },
+      "expected_errors": [],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphDiamond_public",
+          "type": "graphDiamond.env.linearize \"D\" = some [\"D\", \"C\", \"B\", \"A\"]"
+        },
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphDiamond_constructors",
+          "type": "graphDiamond.env.ctorOrder \"D\" = [\"A\", \"B\", \"C\", \"D\"]"
+        }
+      ]
+    },
+    {
+      "name": "shared",
+      "source": "tests/sol-c3-exactness/fixtures/shared.sol",
+      "source_sha256": "d06bb070efe3f7d703b3f493feb8a066972003f21b9208acc2fe027b7760e29a",
+      "linearizations": {
+        "A": [
+          "A"
+        ],
+        "B": [
+          "B",
+          "A"
+        ],
+        "C": [
+          "C",
+          "A"
+        ],
+        "D": [
+          "D",
+          "C",
+          "B",
+          "A"
+        ],
+        "E": [
+          "E",
+          "C",
+          "B",
+          "A"
+        ],
+        "F": [
+          "F",
+          "E",
+          "D",
+          "C",
+          "B",
+          "A"
+        ]
+      },
+      "expected_errors": [],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphShared_public",
+          "type": "graphShared.env.linearize \"F\" = some [\"F\", \"E\", \"D\", \"C\", \"B\", \"A\"]"
+        },
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphShared_constructors",
+          "type": "graphShared.env.ctorOrder \"F\" = [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\"]"
+        }
+      ]
+    },
+    {
+      "name": "redundant",
+      "source": "tests/sol-c3-exactness/fixtures/redundant.sol",
+      "source_sha256": "61bff82b99fbd5185933f029fb60c74a58269457bf5cca1bc63225a197771db8",
+      "linearizations": {
+        "A": [
+          "A"
+        ],
+        "B": [
+          "B",
+          "A"
+        ],
+        "C": [
+          "C",
+          "B",
+          "A"
+        ]
+      },
+      "expected_errors": [],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphRedundant_public",
+          "type": "graphRedundant.env.linearize \"C\" = some [\"C\", \"B\", \"A\"]"
+        },
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphRedundant_constructors",
+          "type": "graphRedundant.env.ctorOrder \"C\" = [\"A\", \"B\", \"C\"]"
+        }
+      ]
+    },
+    {
+      "name": "interface",
+      "source": "tests/sol-c3-exactness/fixtures/interface.sol",
+      "source_sha256": "17c577da02c3c2e54889cca68eaa1d687c2bd2faff41208434923e285d42699d",
+      "linearizations": {
+        "IA": [
+          "IA"
+        ],
+        "IB": [
+          "IB",
+          "IA"
+        ],
+        "IC": [
+          "IC",
+          "IA"
+        ],
+        "ID": [
+          "ID",
+          "IC",
+          "IB",
+          "IA"
+        ]
+      },
+      "expected_errors": [],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphInterfaceDiamond_public",
+          "type": "graphInterfaceDiamond.env.linearize \"ID\" = some [\"ID\", \"IC\", \"IB\", \"IA\"]"
+        }
+      ]
+    },
+    {
+      "name": "mixed",
+      "source": "tests/sol-c3-exactness/fixtures/mixed.sol",
+      "source_sha256": "accf470dc24bee9eb6f7a28aa9e58e55eb485d91ff2d432a671b212480d609e0",
+      "linearizations": {
+        "IA": [
+          "IA"
+        ],
+        "IB": [
+          "IB",
+          "IA"
+        ],
+        "C": [
+          "C",
+          "IB",
+          "IA"
+        ]
+      },
+      "expected_errors": [],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphMixed_public",
+          "type": "graphMixed.env.linearize \"C\" = some [\"C\", \"IB\", \"IA\"]"
+        }
+      ]
+    },
+    {
+      "name": "obstruction",
+      "source": "tests/sol-c3-exactness/fixtures/obstruction.sol",
+      "source_sha256": "66c3bacc307d91a6d0eb8988f3aff8d8e2dce269bf9b237e5124c88306ef1f67",
+      "linearizations": null,
+      "expected_errors": [
+        {
+          "errorCode": "5005",
+          "type": "TypeError",
+          "message": "Linearization of inheritance graph impossible"
+        }
+      ],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphBad_public_refused",
+          "type": "graphBad.env.linearize \"Z\" = none"
+        },
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphBad_inherited_all_fuel",
+          "type": "\u2200 n : Nat, graphBad.env.linearizeF n \"W\" = none"
+        }
+      ],
+      "comparison_limit": "Compiler rejects the whole source at Z; W is present, but inherited refusal at W is established by the kernel witness, not a separate compiler observation."
+    },
+    {
+      "name": "self-cycle",
+      "source": "tests/sol-c3-exactness/fixtures/self-cycle.sol",
+      "source_sha256": "f434f086d8a767e77b87a8158f3486614547a6845cbbb82dbdeaeee8c3829822",
+      "linearizations": null,
+      "expected_errors": [
+        {
+          "errorCode": "2449",
+          "type": "TypeError",
+          "message": "Definition of base has to precede definition of derived contract"
+        }
+      ],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphSelfCycle_all_fuel",
+          "type": "\u2200 n : Nat, graphSelfCycle.env.linearizeF n \"S\" = none"
+        }
+      ]
+    },
+    {
+      "name": "mutual-cycle",
+      "source": "tests/sol-c3-exactness/fixtures/mutual-cycle.sol",
+      "source_sha256": "727ad5a7a26d9a3b9746f01f457aae54ccb1a8416a081b949109dc584e4bbea5",
+      "linearizations": null,
+      "expected_errors": [
+        {
+          "errorCode": "2449",
+          "type": "TypeError",
+          "message": "Definition of base has to precede definition of derived contract"
+        }
+      ],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphMutualCycle_all_fuel",
+          "type": "\u2200 n : Nat, graphMutualCycle.env.linearizeF n \"P\" = none"
+        }
+      ]
+    },
+    {
+      "name": "illegal-interface",
+      "source": "tests/sol-c3-exactness/fixtures/illegal-interface.sol",
+      "source_sha256": "e56a44671c2e1d2e1892cc64440dab5e14df4961863fe628fee9b7f97e455d9c",
+      "linearizations": null,
+      "expected_errors": [
+        {
+          "errorCode": "6536",
+          "type": "TypeError",
+          "message": "Interfaces can only inherit from other interfaces."
+        }
+      ],
+      "kernel_observations": [
+        {
+          "name": "Solidity.Frontend.C3Exactness.graphBadInterface_not_admitted",
+          "type": "graphBadInterface.env.basesOK = false"
+        }
+      ]
+    }
+  ],
+  "boundary": "External solc analysis of these explicit sources only. Compiler AST IDs are mapped to names, never equated with intrinsic declaration positions. Reverse name lists compare static constructor sequence, not execution. Cyclic sources may be rejected by declaration-order admission before C3. Intrinsic empty-body units are hand-constructed from the same pinned declarations; this is no proof that solc AST parsing produces them. W propagation is kernel-only after the compiler refuses Z."
+}

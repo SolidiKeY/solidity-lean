@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/StorageOps/TwoClearRepresentationControls.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.Controls.bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/TwoClearRepresentationControls.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.Controls.collision_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/TwoClearRepresentationControls.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.Controls.failed_query_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/TwoClearRepresentationControls.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/TwoClearRepresentationControls.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.Controls.physical_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/TwoClearRepresentationControls.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.Controls.wrong_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

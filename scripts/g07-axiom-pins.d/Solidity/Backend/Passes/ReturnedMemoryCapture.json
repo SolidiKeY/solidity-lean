@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/Passes/ReturnedMemoryCapture.lean:Solidity.Backend.Passes.ReturnedMemoryCapture.excludes_revert_with": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReturnedMemoryCapture.lean:Solidity.Backend.Passes.ReturnedMemoryCapture.readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Passes/MemoryJoinedOutputPins.lean:Solidity.Backend.Passes.MemoryJoinedOutput.compose": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinedOutputPins.lean:Solidity.Backend.Passes.MemoryJoinedOutput.Controls.public_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinedOutputPins.lean:Solidity.Backend.Passes.MemoryJoinedOutput.Controls.public_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinedOutputPins.lean:Solidity.Backend.Passes.MemoryJoinedOutput.public_compose": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

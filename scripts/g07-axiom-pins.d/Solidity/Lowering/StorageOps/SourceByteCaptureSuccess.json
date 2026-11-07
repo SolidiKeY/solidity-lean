@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteCaptureSuccess.lean:Solidity.Lowering.StorageOps.SourceByteCaptureSuccess.capture_all": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "Bridge/SolidityBridge/LoomRules.lean:Solidity.Bridge.Loom.generator_get": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomRules.lean:Solidity.Bridge.Loom.leads_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomRules.lean:Solidity.Bridge.Loom.symexGenerator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomRules.lean:Solidity.Premise.toLoom_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.actual_target_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.early_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.early_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.instantiated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.prefix_tail_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.source_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.stale_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnFailurePins.lean:Solidity.Backend.Passes.RuntimeReturnFailure.Controls.wrong_failure_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

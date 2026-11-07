@@ -1,0 +1,22 @@
+{
+ "Solidity/Storage/Representation/Controls.lean:Solidity.Storage.Representation.Controls.array_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/Controls.lean:Solidity.Storage.Representation.Controls.nested_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/Controls.lean:Solidity.Storage.Representation.Controls.wallet_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/Controls.lean:Solidity.Storage.Representation.Controls.wrong_scalar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

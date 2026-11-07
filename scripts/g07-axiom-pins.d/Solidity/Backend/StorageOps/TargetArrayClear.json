@@ -1,0 +1,94 @@
+{
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.after_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.after_header": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.after_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.body_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.condition_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.iterations_finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.iterations_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.prefix_header": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.prefix_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.prefix_unvisited": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.prefix_visited": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.run_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.run_condition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.run_finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.run_loop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.run_loop_from": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.run_setup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.turn_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayClear.lean:Solidity.Backend.StorageOps.TargetArrayClear.turn_more": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

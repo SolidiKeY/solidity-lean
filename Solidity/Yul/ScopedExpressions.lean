@@ -6,7 +6,7 @@ import Solidity.Yul.ScopedNames
 This reuses the existing arity/context-indexed ExprD/ArgsD. The property ONLY
 concerns external namespace resolution. Literal/local clauses contain no external
 reference; they do not assert lexical validity, Source provenance or coverage.
-Callee bodies, local/function-table validity, Source occurrence6578 and physical/
+Callee bodies, local/function-table validity, Source occurrence attachment and physical/
 dirty execution remain separate. The environment is the actual constructed readEnv.
 -/
 namespace Solidity.Yul.ScopedExpressions
@@ -206,5 +206,32 @@ theorem closed_erasure {root F n decls} (input : @ScopedNames.Checked root decls
   cases actual : inferExpr (input.readEnv scope locals functions) term with
   | none => rfl
   | some pair => cases pair; rfl
+
+/-- The fixed supplemental scope-check input determines the entire certificate.
+The property still concerns external namespace resolution only. -/
+theorem Checked.unique : ∀ (root X : List Solidity.Yul.ExternalType) (F : List Solidity.Yul.Sig) (n : Nat)
+ (decls : Solidity.Yul.ExternalNames root) (input : Solidity.Yul.ScopedNames.Checked decls)
+ (scope : Solidity.Yul.ExternalScope root X) (locals : List (String × Fin n))
+ (functions : Solidity.Yul.FunctionNames F) (tree : Solidity.Source.Syn .yulExpr)
+ (first second : Solidity.Yul.ScopedExpressions.Checked input scope locals functions tree),
+ first = second := by
+  intro root X F n decls input scope locals functions tree first second
+  exact Option.some.inj ((Checked.complete first).symm.trans (Checked.complete second))
+
+/-- Certificate uniqueness transports to the generated arity-indexed expression.
+This retains the supplemental property's existing scope. -/
+theorem Checked.term_result_unique : ∀ (root X : List Solidity.Yul.ExternalType) (F : List Solidity.Yul.Sig) (n : Nat)
+ (decls : Solidity.Yul.ExternalNames root) (input : Solidity.Yul.ScopedNames.Checked decls)
+ (scope : Solidity.Yul.ExternalScope root X) (locals : List (String × Fin n))
+ (functions : Solidity.Yul.FunctionNames F) (tree : Solidity.Source.Syn .yulExpr)
+ (first second : Solidity.Yul.ScopedExpressions.Checked input scope locals functions tree),
+ (⟨first.arity,Solidity.Yul.ScopedExpressions.Checked.term first⟩ :
+ (arity : Nat) × Solidity.Yul.Expr F X n arity) =
+ ⟨second.arity,Solidity.Yul.ScopedExpressions.Checked.term second⟩ := by
+  intro root X F n decls input scope locals functions tree first second
+  exact congrArg
+    (fun certificate : Checked input scope locals functions tree =>
+      (⟨certificate.arity,Checked.term certificate⟩ : (arity : Nat) × Expr F X n arity))
+    (Checked.unique root X F n decls input scope locals functions tree first second)
 
 end Solidity.Yul.ScopedExpressions

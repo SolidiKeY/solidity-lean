@@ -1,0 +1,443 @@
+"""Synthetic provenance controls; no kernel proof or actual clean build claimed."""
+import copy
+import importlib.util
+import json
+from pathlib import Path
+import tempfile
+import shlex
+import subprocess
+from types import SimpleNamespace
+from unittest.mock import patch, MagicMock
+import unittest
+
+ROOT = Path(__file__).resolve().parents[2]
+spec = importlib.util.spec_from_file_location('provenance', ROOT/'scripts/roadmap-v17-provenance.py')
+p = importlib.util.module_from_spec(spec); spec.loader.exec_module(p)
+e = p.e
+
+
+class ProvenanceTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        resource_patch=patch.object(p,'resource_snapshot',return_value={'hostMemAvailableBytes':20*1024**3,'enclosingCgroupLimitBytes':16*1024**3,'enclosingCgroupCurrentBytes':2*1024**3,'headroomBytes':14*1024**3})
+        resource_patch.start(); self.addCleanup(resource_patch.stop)
+        self.root = Path(self.tmp.name)
+        marker=patch.object(p,'UNRESOLVED',self.root/'unresolved.json'); marker.start(); self.addCleanup(marker.stop)
+        self.current = {'schema':1,'revision':'1'*40,'sourceTree':'2'*40,
+                        'sourceToolchainKey':'a'*64, 'serialConfigSha256':e.digest(b'config'),
+                        'repository':str(self.root),'inputs':{'lakefile.toml':'b'*64},
+                        'runtime':{name:{'path':'/usr/bin/'+name,'sha256':c*64,'version':name+' version'} for name,c in [('lean','c'),('lake','d')]}}
+        self.current['buildTools'] = {name: {'path':'/usr/bin/'+name,'sha256':'c'*64 if name=='lean' else 'e'*64} for name in e.BUILD_TOOL_NAMES}
+        self.build = self.root/'.lake/build'; self.build.mkdir(parents=True)
+        self.cache = self.root/'.lake/roadmap-v17-cache'/('a'*64); self.cache.mkdir(parents=True)
+        path=self.build/'lib/lean/Solidity/Evm/Compiler.olean'; path.parent.mkdir(parents=True); path.write_bytes(b'artifact')
+        (self.cache/'token').write_bytes(b'cached')
+        self.clean=self.record('clean'); self.warm=self.record('warm')
+
+    def attach(self, name, data):
+        (self.root/name).write_bytes(data); return e.digest(data)
+
+    def record(self, mode):
+        name=mode+'-compiler'
+        runtime={'entrypointHashes':{tool:e.digest(p.launcher_bytes(tool)) for tool in e.BUILD_TOOL_NAMES},'toolHashes':{k:v['sha256'] for k,v in self.current['buildTools'].items()},'memoryMax':p.CAP,'swapMax':0,'memoryPeak':1024,'image':p.IMAGE,
+                 'realLeanSha256':'c'*64,'lakeSha256':'d'*64,'leanVersion':'lean version','lakeVersion':'lake version','leanNumThreads':'1'}
+        r={'schema':3,'sampleFormat':p.SAMPLE_FORMAT,'buildTools':copy.deepcopy(self.current['buildTools']),'collectionDirectory':str(self.root),'gate':name,'mode':mode,'before':copy.deepcopy(self.current),'after':copy.deepcopy(self.current),
+           'budgets':copy.deepcopy(p.BUDGET),'configuration':mode+'.toml','configurationSha256':self.attach(mode+'.toml',b'config'),
+           'configurationAfterSha256':e.digest(b'config'),
+           'launcher':'lean-launcher','launcherSha256':self.attach('lean-launcher',p.launcher_bytes()),
+           'runtime':mode+'.runtime','runtimeSha256':self.attach(mode+'.runtime',json.dumps(runtime).encode()),
+           'samples':mode+'.samples','samplesSha256':self.attach(mode+'.samples',b'[{"rssBytes":10,"leanWorkers":1,"leanSupervisors":0,"leanZombies":0,"leanTransitions":0,"unclassifiedLeanWorkers":0,"unknownLeanProcesses":[]}]'),
+           'log':mode+'.log','logSha256':self.attach(mode+'.log',b'Build completed successfully\n'),
+           'exit':0,'commandExit':0,'attachExit':0,'executionExit':0,'cleanupExit':0,'validationExit':0,'phaseErrors':[],'errors':mode+'.errors','errorsSha256':self.attach(mode+'.errors',b'[]'),'hostMemAvailableBytes':20*1024**3,'enclosingCgroupLimitBytes':16*1024**3,'enclosingCgroupCurrentBytes':2*1024**3,'headroomBytes':14*1024**3,'diskFreeBytes':2*1024**3,'elapsedSeconds':1,
+           'command':['lake','-f','roadmap-v17-runtime.lakefile.toml','build','Solidity.Evm.Compiler'],
+           'buildStart':p.inventory(self.build),'cacheStart':p.inventory(self.cache),
+           'buildEnd':p.inventory(self.build),'cacheEnd':p.inventory(self.cache)}
+        r['serializers']={}
+        for tool in e.BUILD_TOOL_NAMES:
+            path=tool+'-launcher'
+            r['serializers'][tool]={'path':path,'sha256':self.attach(path,p.launcher_bytes(tool))}
+        r['containerName']='roadmap-v17-'+'a'*32
+        r['dockerArgv']=mode+'.docker.json'
+        r['dockerArgvSha256']=self.attach(r['dockerArgv'],json.dumps(p.docker_create_argv(self.root,self.current,r['containerName'],r['command'])).encode())
+        r['executionScript']=mode+'.sh'
+        r['executionScriptSha256']=self.attach(mode+'.sh',p.execution_script(self.root,r['command'],Path(self.current['runtime']['lake']['path'])).encode())
+        if mode=='clean':
+            r['buildStart']['files']={}; r['cacheStart']['files']={}
+        return r
+
+    def validate(self, record=None):
+        r=self.clean if record is None else record
+        return p.validate(r,self.root,self.current,r['gate'])
+
+    def pair(self):
+        runs={}
+        for mode,r in [('clean',self.clean),('warm',self.warm)]:
+            path=mode+'.json'; runs[mode]={'path':path,'sha256':self.attach(path,json.dumps(r).encode())}
+        return p.validate_pair({'runs':runs},self.root,self.current)
+
+    def test_resource_mutations_require_valid_baseline(self):
+        self.assertTrue(self.validate())
+        for key,value in [('hostMemAvailableBytes',True),('enclosingCgroupLimitBytes',True),('enclosingCgroupCurrentBytes',-1),('headroomBytes',True),('diskFreeBytes',True),('enclosingCgroupLimitBytes',8*1024**3),('enclosingCgroupCurrentBytes',3*1024**3),('headroomBytes',20*1024**3)]:
+            bad=copy.deepcopy(self.clean); bad[key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError): self.validate(bad)
+        for key in ('hostMemAvailableBytes','enclosingCgroupLimitBytes','enclosingCgroupCurrentBytes','headroomBytes','commandExit','attachExit','executionExit','cleanupExit','validationExit'):
+            bad=copy.deepcopy(self.clean); del bad[key]
+            with self.subTest(missing=key),self.assertRaises((ValueError,KeyError)): self.validate(bad)
+        old=copy.deepcopy(self.clean); old['schema']=2
+        with self.assertRaisesRegex(ValueError,'provenance schema'): self.validate(old)
+
+    def test_boolean_runtime_measurement_rejected(self):
+        runtime=e.loads((self.root/self.clean['runtime']).read_bytes()); runtime['swapMax']=False
+        self.clean['runtimeSha256']=self.attach(self.clean['runtime'],json.dumps(runtime).encode())
+        with self.assertRaisesRegex(ValueError,'runtime memory'): self.validate()
+
+    def test_raw_exit_and_phase_distinctions(self):
+        for raw,execution,cleanup,validation,total in [(0,0,125,0,125),(0,0,0,125,125),(1,1,125,0,1),(None,124,125,0,124),(0,0,0,0,0)]:
+            bad=copy.deepcopy(self.clean); bad.update(commandExit=raw,executionExit=execution,cleanupExit=cleanup,validationExit=validation,exit=total)
+            self.assertEqual(self.validate(bad),total==0)
+            bad['exit']=0 if total else 125
+            with self.subTest(raw=raw,total=total),self.assertRaisesRegex(ValueError,'phase exit'): self.validate(bad)
+        bad=copy.deepcopy(self.clean); bad['commandExit']=False
+        with self.assertRaisesRegex(ValueError,'raw command'): self.validate(bad)
+
+    def test_errors_cannot_claim_success_and_attach_transport_must_fail(self):
+        bad=copy.deepcopy(self.clean); bad['phaseErrors']=[{'phase':'container cleanup','error':'failed'}]
+        bad['errorsSha256']=self.attach(bad['errors'],json.dumps(bad['phaseErrors']).encode())
+        with self.assertRaisesRegex(ValueError,'contradict'): self.validate(bad)
+        bad=copy.deepcopy(self.clean); bad['attachExit']=125
+        with self.assertRaisesRegex(ValueError,'attach/execution'): self.validate(bad)
+
+    def test_collector_raw_completion_survives_cleanup_and_validation_errors(self):
+        for raw,cleanup in [(0,True),(7,True),(0,False)]:
+            with self.subTest(raw=raw,cleanup=cleanup),tempfile.TemporaryDirectory() as external:
+                out=Path(external)/'collection'; (self.root/'lakefile.toml').write_bytes(b'config')
+                p.UNRESOLVED.unlink(missing_ok=True)
+                proc=MagicMock(); proc.poll.return_value=raw; proc.wait.return_value=raw
+                def docker(*args,**kwargs):
+                    if args[0]=='create': return SimpleNamespace(stdout=b'id')
+                    if args[0]=='inspect': return SimpleNamespace(stdout=str(raw).encode() if args[2]=='{{.State.ExitCode}}' else b'exited')
+                    if args[0]=='rm' and cleanup: raise subprocess.TimeoutExpired('cleanup',5)
+                    return SimpleNamespace(stdout=b'')
+                with patch.object(p,'ROOT',self.root),patch.object(p.e,'snapshot',return_value=self.current),patch('shutil.which',return_value='/usr/bin/true'),patch.object(p,'docker',side_effect=docker),patch.object(p.subprocess,'Popen',return_value=proc),patch.object(p,'validate',side_effect=ValueError('intentional validation rejection')):
+                    code=p.collect(SimpleNamespace(out=out,gate='warm-compiler'))
+                record=e.load(out/'provenance.json')
+                self.assertEqual(record['commandExit'],raw); self.assertEqual(record['executionExit'],raw)
+                self.assertEqual(record['cleanupExit'],125 if cleanup else 0)
+                self.assertEqual(code,raw if raw else 125)
+                if not cleanup:
+                    self.assertEqual(record['validationExit'],125)
+                    self.assertIn('validation',[x['phase'] for x in record['phaseErrors']])
+                self.assertFalse((self.root/'roadmap-v17-runtime.lakefile.toml').exists())
+
+    def test_inhabited_clean_warm_pair(self):
+        self.assertTrue(self.pair()['accountingComplete'])
+        self.assertFalse(self.pair()['releaseClosed'])
+
+    def test_warm_labeled_clean(self):
+        self.clean['buildStart']=copy.deepcopy(self.clean['buildEnd'])
+        with self.assertRaisesRegex(ValueError,'clean starting'): self.validate()
+
+    def test_nonempty_clean_cache(self):
+        self.clean['cacheStart']=copy.deepcopy(self.clean['cacheEnd'])
+        with self.assertRaisesRegex(ValueError,'clean starting'): self.validate()
+
+    def test_missing_provenance_rejected_by_aggregate(self):
+        row={'id':'clean-compiler','revision':'1'*40,'command':['lake','build','Solidity.Evm.Compiler'],
+             'exit':0,'status':'pass','log':'clean.log','sha256':self.clean['logSha256']}
+        report={'schema':1,'revision':'1'*40,'gates':[row]}
+        with self.assertRaisesRegex(ValueError,'missing build provenance'):
+            e.aggregate(report,self.root,'1'*40,['clean-compiler'],self.current)
+
+    def test_aggregate_validates_provenance_bytes_and_log_binding(self):
+        raw=json.dumps(self.clean).encode(); sha=self.attach('proof.json',raw)
+        row={'id':'clean-compiler','revision':'1'*40,'command':self.clean['command'],
+             'exit':0,'status':'pass','log':'clean.log','sha256':self.clean['logSha256'],
+             'provenance':'proof.json','provenanceSha256':sha}
+        report={'schema':1,'revision':'1'*40,'gates':[row]}
+        self.assertTrue(e.aggregate(report,self.root,'1'*40,['clean-compiler'],self.current)['accountingComplete'])
+        self.attach('proof.json',raw+b'corruption')
+        with self.assertRaisesRegex(ValueError,'corrupt'): e.aggregate(report,self.root,'1'*40,['clean-compiler'],self.current)
+
+    def test_source_tree_toolchain_inputs_and_key_change(self):
+        for field in ['revision','sourceTree','sourceToolchainKey','runtime','inputs']:
+            bad=copy.deepcopy(self.clean); bad['after'][field]='changed'
+            with self.assertRaisesRegex(ValueError,'source/toolchain'): self.validate(bad)
+
+    def test_configuration_and_budget_change(self):
+        for field in ['configurationSha256','configurationAfterSha256','budgets']:
+            bad=copy.deepcopy(self.clean); bad[field]='changed'
+            with self.assertRaises(ValueError): self.validate(bad)
+
+    def test_cache_identity(self):
+        self.clean['cacheStart']['path']=str(self.root/'wrong-key')
+        with self.assertRaisesRegex(ValueError,'cache location'): self.validate()
+
+    def test_unrelated_build_or_cache_parent(self):
+        for field in ['buildStart','buildEnd','cacheStart','cacheEnd']:
+            bad=copy.deepcopy(self.clean)
+            bad[field]['path']=str(self.root/'unrelated'/('a'*64))
+            with self.assertRaisesRegex(ValueError,'location'): self.validate(bad)
+
+    def test_historical_consistency_does_not_weaken_live_default(self):
+        self.assertTrue(self.validate())
+        artifact=self.build/'lib/lean/Solidity/Evm/Compiler.olean';artifact.write_bytes(b'changed current artifact')
+        with self.assertRaisesRegex(ValueError,'live artifacts/cache differ'):self.validate()
+        self.assertTrue(p.validate(self.clean,self.root,self.current,self.clean['gate'],live_outputs=False))
+
+    def test_nonzero_mandatory_pair_gate(self):
+        self.warm.update(exit=1,commandExit=1,executionExit=1)
+        with self.assertRaisesRegex(ValueError,'nonzero mandatory'): self.pair()
+
+    def test_missing_mandatory_pair_gate(self):
+        with self.assertRaisesRegex(ValueError,'missing mandatory'): p.validate_pair({'runs':{}},self.root,self.current)
+
+    def test_cache_continuity(self):
+        self.warm['cacheStart']['files']={}
+        with self.assertRaisesRegex(ValueError,'continuity'): self.pair()
+
+    def test_unmatched_artifact(self):
+        self.clean['buildEnd']['files']={}
+        with self.assertRaisesRegex(ValueError,'mandatory artifact'): self.validate()
+
+    def test_corrupt_live_artifact(self):
+        (self.build/'lib/lean/Solidity/Evm/Compiler.olean').write_bytes(b'changed')
+        with self.assertRaisesRegex(ValueError,'live artifacts'): self.validate()
+
+    def test_corrupt_attachment(self):
+        (self.root/'clean.runtime').write_text('{}')
+        with self.assertRaisesRegex(ValueError,'corrupt'): self.validate()
+
+    def test_missing_cap_swap_peak_tool_and_threads(self):
+        for field,value in [('memoryMax',16*1024**3),('swapMax',1024),('memoryPeak',0),
+                            ('realLeanSha256','e'*64),('lakeVersion','wrong'),('leanNumThreads','4')]:
+            bad=copy.deepcopy(self.clean); data=json.loads((self.root/'clean.runtime').read_text()); data[field]=value
+            bad['runtime']='bad.runtime'; bad['runtimeSha256']=self.attach('bad.runtime',json.dumps(data).encode())
+            with self.assertRaises(ValueError,msg=field): self.validate(bad)
+
+    def test_parallel_or_missing_samples(self):
+        for data in [b'[]',b'[{"rssBytes":10,"leanWorkers":2}]']:
+            self.clean['samplesSha256']=self.attach('clean.samples',data)
+            with self.assertRaisesRegex(ValueError,'samples'): self.validate()
+
+    def test_fetch_in_clean_log(self):
+        self.clean['logSha256']=self.attach('clean.log',b'Fetched Solidity.Evm.Compiler')
+        with self.assertRaisesRegex(ValueError,'fetch labeled clean'): self.validate()
+
+    def test_unmatched_extra_live_artifact(self):
+        (self.build/'extra').write_bytes(b'not inventoried')
+        with self.assertRaisesRegex(ValueError,'live artifacts'): self.validate()
+
+    def test_duplicate_attached_json(self):
+        self.clean['runtimeSha256']=self.attach('clean.runtime',b'{"swapMax":1,"swapMax":0}')
+        with self.assertRaisesRegex(ValueError,'duplicate JSON'): self.validate()
+
+    def test_negative_and_noninteger_worker_counts(self):
+        for workers in [-1,0.5,True]:
+            data=json.dumps([{'rssBytes':10,'leanWorkers':workers}]).encode()
+            self.clean['samplesSha256']=self.attach('clean.samples',data)
+            with self.assertRaisesRegex(ValueError,'samples'): self.validate()
+
+    def test_scoped_pair_cannot_satisfy_final_gate(self):
+        row={'id':'cache-equivalence','revision':'1'*40,'command':['scoped-pair'],
+             'exit':0,'status':'pass','log':'clean.log','sha256':self.clean['logSha256']}
+        with self.assertRaisesRegex(ValueError,'scoped pair'):
+            e.aggregate({'schema':1,'revision':'1'*40,'gates':[row]},self.root,'1'*40,['cache-equivalence'],self.current)
+
+    def test_inventory_root_symlink(self):
+        link=self.root/'link'; link.symlink_to(self.build,target_is_directory=True)
+        with self.assertRaisesRegex(ValueError,'symlink'): p.inventory(link)
+
+    def test_missing_or_changed_execution_budget_script(self):
+        self.clean['executionScriptSha256']=self.attach('clean.sh',b'ordinary warm lake build')
+        with self.assertRaisesRegex(ValueError,'execution script'): self.validate()
+
+    def test_collect_create_timeout_retains_record_and_removes_config(self):
+        with tempfile.TemporaryDirectory() as external:
+            out=Path(external)/'collection'
+            (self.root/'lakefile.toml').write_bytes(b'config')
+            with patch.object(p,'ROOT',self.root), patch.object(p.e,'snapshot',return_value=self.current), \
+                 patch('shutil.which',return_value='/usr/bin/true'), \
+                 patch.object(p,'docker',side_effect=lambda *a,**kw: (_ for _ in ()).throw(subprocess.TimeoutExpired('docker create',5)) if a[0]=='create' else SimpleNamespace(stdout=b'')):
+                code=p.collect(SimpleNamespace(out=out,gate='warm-compiler'))
+            self.assertEqual(code,124)
+            self.assertTrue((out/'provenance.json').is_file())
+            self.assertFalse((self.root/'roadmap-v17-runtime.lakefile.toml').exists())
+
+    def test_cleanup_and_changed_snapshot_failures_are_retained(self):
+        with tempfile.TemporaryDirectory() as external:
+            out=Path(external)/'collection'
+            (self.root/'lakefile.toml').write_bytes(b'config')
+            proc=MagicMock(); proc.poll.return_value=None; proc.wait.return_value=0
+            def docker(*args,**kwargs):
+                if args[0]=='create': return SimpleNamespace(stdout=b'owned-container')
+                raise subprocess.TimeoutExpired('docker '+args[0],5)
+            with patch.object(p,'ROOT',self.root), \
+                 patch.object(p.e,'snapshot',side_effect=[self.current,ValueError('changed source')]), \
+                 patch('shutil.which',return_value='/usr/bin/true'), patch.object(p,'docker',side_effect=docker), \
+                 patch.object(p.subprocess,'Popen',return_value=proc):
+                code=p.collect(SimpleNamespace(out=out,gate='warm-compiler'))
+            self.assertEqual(code,124)
+            record=e.load(out/'provenance.json')
+            self.assertEqual(record['after'],{'error':'changed source'})
+            errors=e.load(out/'execution-errors.json')
+            self.assertIn('container cleanup',[x['phase'] for x in errors])
+            self.assertFalse((self.root/'roadmap-v17-runtime.lakefile.toml').exists())
+            proc.kill.assert_called_once()
+            self.assertTrue(p.UNRESOLVED.exists())
+
+    def test_collector_transport_config_and_numeric_failures_retain_raw_exit(self):
+        for failure in ('transport','config','numeric'):
+            with self.subTest(failure=failure),tempfile.TemporaryDirectory() as external:
+                out=Path(external)/'collection'; (self.root/'lakefile.toml').write_bytes(b'config'); p.UNRESOLVED.unlink(missing_ok=True)
+                proc=MagicMock(); proc.poll.return_value=125 if failure=='transport' else 0; proc.wait.return_value=proc.poll.return_value
+                def docker(*args,**kwargs):
+                    if args[0]=='create': return SimpleNamespace(stdout=b'id')
+                    if args[0]=='inspect':
+                        if failure=='numeric': (out/'memoryMax').write_text('malformed')
+                        return SimpleNamespace(stdout=b'0' if args[2]=='{{.State.ExitCode}}' else b'exited')
+                    return SimpleNamespace(stdout=b'')
+                original_unlink=Path.unlink
+                def unlink(path,*args,**kwargs):
+                    if failure=='config' and path.name=='roadmap-v17-runtime.lakefile.toml': raise OSError('config removal refused')
+                    return original_unlink(path,*args,**kwargs)
+                with patch.object(p,'ROOT',self.root),patch.object(p.e,'snapshot',return_value=self.current),patch('shutil.which',return_value='/usr/bin/true'),patch.object(p,'docker',side_effect=docker),patch.object(p.subprocess,'Popen',return_value=proc),patch.object(Path,'unlink',unlink):
+                    code=p.collect(SimpleNamespace(out=out,gate='warm-compiler'))
+                r=e.load(out/'provenance.json'); self.assertEqual(r['commandExit'],0); self.assertEqual(code,125)
+                self.assertEqual(r['attachExit'],125 if failure=='transport' else 0)
+                if failure=='config': self.assertEqual(r['cleanupExit'],125)
+                if failure=='numeric': self.assertIn('runtime observation',[x['phase'] for x in r['phaseErrors']])
+                (self.root/'roadmap-v17-runtime.lakefile.toml').unlink(missing_ok=True)
+
+    def test_created_running_exited_monitor_uses_required_pid_column(self):
+        with tempfile.TemporaryDirectory() as external:
+            out=Path(external)/'collection'
+            (self.root/'lakefile.toml').write_bytes(b'config')
+            proc=MagicMock(); proc.poll.return_value=0; proc.wait.return_value=0
+            states=iter([b'created',b'running',b'exited'])
+            def docker(*args,**kwargs):
+                self.assertGreater(kwargs.get('timeout',0),0)
+                if args[0]=='create': return SimpleNamespace(stdout=b'owned-container')
+                if args[0]=='inspect': return SimpleNamespace(stdout=b'0' if args[2]=='{{.State.ExitCode}}' else next(states))
+                if args[0]=='top':
+                    self.assertEqual(args[-1],'pid,stat,comm,rss,args')
+                    return SimpleNamespace(stdout=b'PID STAT COMMAND RSS COMMAND\n1 R lean 10 /opt/v17-toolchain/bin/lean -j1\n2 S lean 2 /bin/sh /usr/bin/true args\n')
+                return SimpleNamespace(stdout=b'')
+            with patch.object(p,'ROOT',self.root), patch.object(p.e,'snapshot',return_value=self.current), \
+                 patch('shutil.which',return_value='/usr/bin/true'), patch.object(p,'docker',side_effect=docker), \
+                 patch.object(p.subprocess,'Popen',return_value=proc), patch.object(p,'validate',return_value=True):
+                self.assertEqual(p.collect(SimpleNamespace(out=out,gate='warm-compiler')),0)
+            self.assertEqual(e.load(out/'samples.json'),[{'rssBytes':12288,'leanWorkers':1,'leanSupervisors':1,'leanZombies':0,'leanTransitions':0,'unclassifiedLeanWorkers':0,'unknownLeanProcesses':[]}])
+
+    def test_unresolved_container_refuses_another_collection(self):
+        p.UNRESOLVED.write_text(json.dumps({'container':'roadmap-v17-'+'a'*32}))
+        with patch.object(p,'docker',return_value=SimpleNamespace(stdout=b'running')):
+            with self.assertRaisesRegex(ValueError,'refusing overlap'): p.ensure_no_unresolved()
+        self.assertTrue(p.UNRESOLVED.exists())
+        with patch.object(p,'docker',return_value=SimpleNamespace(stdout=b'exited')): p.ensure_no_unresolved()
+        self.assertFalse(p.UNRESOLVED.exists())
+
+    def test_commented_timeout_or_appended_command_rejected(self):
+        original=(self.root/'clean.sh').read_bytes()
+        for data in [b'# '+original+b'\nlake build', original+b'\nlake build']:
+            self.clean['executionScriptSha256']=self.attach('clean.sh',data)
+            with self.assertRaisesRegex(ValueError,'execution script'): self.validate()
+
+    def test_boolean_exit_rejected(self):
+        self.clean['exit']=False
+        with self.assertRaisesRegex(ValueError,'invalid provenance exit'): self.validate()
+
+    def test_missing_c_or_changed_serializer_rejected(self):
+        bad=copy.deepcopy(self.clean); del bad['serializers']['clang']
+        with self.assertRaisesRegex(ValueError,'missing serialized'): self.validate(bad)
+        ref=self.clean['serializers']['clang']; ref['sha256']=self.attach(ref['path'],b'#!/bin/sh\nexec clang "$@"\n')
+        with self.assertRaisesRegex(ValueError,'changed tool serializer'): self.validate()
+
+    def test_changed_native_tool_hash_rejected(self):
+        self.clean['buildTools']['clang']['sha256']='f'*64
+        with self.assertRaisesRegex(ValueError,'tool binaries'): self.validate()
+
+    def test_unwrapped_or_changed_mount_cannot_validate(self):
+        argv=e.loads((self.root/self.clean['dockerArgv']).read_bytes())
+        index=next(i for i,arg in enumerate(argv) if 'clang-launcher' in arg)
+        argv[index]=argv[index].replace('clang-launcher','unwrapped-clang')
+        self.clean['dockerArgvSha256']=self.attach(self.clean['dockerArgv'],json.dumps(argv).encode())
+        with self.assertRaisesRegex(ValueError,'Docker spawn'): self.validate()
+
+    def test_observed_unwrapped_native_entrypoint_rejected(self):
+        runtime=e.loads((self.root/'clean.runtime').read_bytes())
+        runtime['entrypointHashes']['clang']=self.current['buildTools']['clang']['sha256']
+        self.clean['runtimeSha256']=self.attach('clean.runtime',json.dumps(runtime).encode())
+        with self.assertRaisesRegex(ValueError,'unwrapped runtime'): self.validate()
+
+    def test_correct_but_unused_serializer_attachment_rejected(self):
+        ref=self.clean['serializers']['clang']; data=(self.root/ref['path']).read_bytes()
+        ref['path']='unused-good-launcher'; ref['sha256']=self.attach(ref['path'],data)
+        with self.assertRaisesRegex(ValueError,'mounted source'): self.validate()
+
+    def test_native_sampler_retains_supervisor_and_unknown_counts(self):
+        text='PID STAT COMMAND RSS COMMAND\n1 R lean 10 /opt/v17-toolchain/bin/lean -j1\n2 S lean 2 /bin/sh /usr/bin/lean file\n3 S lean 3 /unknown/lean file\n'
+        sample=p.process_sample(text,Path('/usr/bin/lean'))
+        self.assertEqual(sample,{'rssBytes':15360,'leanWorkers':1,'leanSupervisors':1,'leanZombies':0,'leanTransitions':0,'unclassifiedLeanWorkers':1,'unknownLeanProcesses':[{'pid':3,'state':'S','rssBytes':3072,'arguments':'/unknown/lean file'}]})
+
+    def test_unknown_lean_process_cannot_validate(self):
+        data=[{'rssBytes':10,'leanWorkers':1,'leanSupervisors':0,'unclassifiedLeanWorkers':1}]
+        self.clean['samplesSha256']=self.attach('clean.samples',json.dumps(data).encode())
+        with self.assertRaisesRegex(ValueError,'samples'): self.validate()
+
+    def test_old_sample_semantics_cannot_be_reinterpreted(self):
+        self.clean['sampleFormat']='comm-only/v1'
+        with self.assertRaisesRegex(ValueError,'sample format'): self.validate()
+
+    def test_empty_or_headerless_telemetry_rejected(self):
+        for text in ['', '1 lean 10 /opt/v17-toolchain/bin/lean -j1']:
+            with self.assertRaisesRegex(ValueError,'telemetry header'): p.process_sample(text,Path('/usr/bin/lean'))
+
+    def test_header_only_sample_is_explicitly_empty(self):
+        self.assertEqual(p.process_sample('PID STAT COMMAND RSS COMMAND\n',Path('/usr/bin/lean')),
+                         {'rssBytes':0,'leanWorkers':0,'leanSupervisors':0,'leanZombies':0,'leanTransitions':0,'unclassifiedLeanWorkers':0,'unknownLeanProcesses':[]})
+
+    def test_explicit_zombie_and_lock_transition_are_retained_not_running(self):
+        text='PID STAT COMMAND RSS COMMAND\n1 Z lean 0 [lean] <defunct>\n2 S lean 2 /usr/bin/flock -x 9\n'
+        sample=p.process_sample(text,Path('/usr/bin/lean'))
+        self.assertEqual(sample['leanWorkers'],0)
+        self.assertEqual(sample['leanZombies'],1)
+        self.assertEqual(sample['leanTransitions'],1)
+        self.assertEqual(sample['unclassifiedLeanWorkers'],0)
+        self.assertEqual(sample['rssBytes'],2048)
+
+    def test_zombie_label_with_nonzero_rss_is_not_silently_ignored(self):
+        text='PID STAT COMMAND RSS COMMAND\n1 Z lean 10 [lean] <defunct>\n'
+        self.assertEqual(p.process_sample(text,Path('/usr/bin/lean'))['unclassifiedLeanWorkers'],1)
+
+    def test_gate_log_or_exit_disagreement(self):
+        row={'exit':1,'sha256':self.clean['logSha256'],'log':'clean.log','command':self.clean['command']}
+        with self.assertRaisesRegex(ValueError,'disagreement'): p.validate(self.clean,self.root,self.current,'clean-compiler',row)
+
+
+
+class SharedResourceControls(unittest.TestCase):
+    def test_measurement_parser_and_effective_reserve(self):
+        paths={'/proc/self/cgroup':'0::/\n','/proc/meminfo':'MemAvailable: 20971520 kB\n','/sys/fs/cgroup/memory.max':str(16*1024**3),'/sys/fs/cgroup/memory.current':str(2*1024**3)}
+        def snapshot(values):
+            with patch.object(Path,'read_text',lambda path: values[str(path)]): return p.resource_snapshot()
+        self.assertEqual(snapshot(paths)['headroomBytes'],p.CAP+2*1024**3)
+        for path,value in [('/proc/self/cgroup','0::/other'),('/sys/fs/cgroup/memory.max','max'),('/sys/fs/cgroup/memory.max','-1'),('/sys/fs/cgroup/memory.current','true'),('/sys/fs/cgroup/memory.current',str(13*1024**3)),('/proc/meminfo','MemAvailable: max kB')]:
+            bad=copy.deepcopy(paths); bad[path]=value
+            with self.subTest(path=path,value=value),self.assertRaises(ValueError): snapshot(bad)
+        boundary=p.resource_snapshot.__globals__['check_headroom']
+        r=dict(hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,enclosingCgroupCurrentBytes=12*1024**3,headroomBytes=4*1024**3)
+        boundary(r)
+        r['enclosingCgroupCurrentBytes']+=1; r['headroomBytes']-=1
+        with self.assertRaises(ValueError): boundary(r)
+
+class H1PolicyControls(unittest.TestCase):
+    def test_legacy_and_new_records_do_not_share_floors(self):
+        r=dict(hostMemAvailableBytes=20*1024**3,enclosingCgroupLimitBytes=16*1024**3,
+               enclosingCgroupCurrentBytes=12*1024**3,headroomBytes=4*1024**3,diskFreeBytes=256*1024**2)
+        with self.assertRaises(ValueError):p.resources.check_record_resources(r)
+        r['admissionPolicy']=copy.deepcopy(p.resources.ADMISSION_POLICY)
+        p.resources.check_record_resources(r)
+        r['headroomBytes']-=1;r['enclosingCgroupCurrentBytes']+=1
+        with self.assertRaises(ValueError):p.resources.check_record_resources(r)
+
+if __name__=='__main__': unittest.main()

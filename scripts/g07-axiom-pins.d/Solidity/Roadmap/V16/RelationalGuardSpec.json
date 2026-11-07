@@ -1,0 +1,37 @@
+{
+ "Solidity/Roadmap/V16/RelationalGuardSpec.lean:Solidity.Roadmap.V16.RelationalGuardSpec.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/RelationalGuardSpec.lean:Solidity.Roadmap.V16.RelationalGuardSpec.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/RelationalGuardSpec.lean:Solidity.Roadmap.V16.RelationalGuardSpec.timeout_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/RelationalGuardSpec.lean:Solidity.Roadmap.V16.RelationalGuardSpec.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/RelationalGuardSpec.lean:Solidity.Roadmap.V16.RelationalGuardSpec.wrong_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/RelationalGuardSpec.lean:Solidity.Roadmap.V16.RelationalGuardSpec.wrong_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/RelationalGuardSpec.lean:Solidity.Roadmap.V16.RelationalGuardSpec.wrong_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

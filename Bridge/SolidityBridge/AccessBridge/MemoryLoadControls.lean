@@ -1,4 +1,4 @@
-import SolidityBridge.AccessBridge.MemoryLoad
+import SolidityBridge.AccessBridge.MemoryLoadExecution
 
 /-! Actual existing P6/native images for full and physically clipped backing.
 The same ordered bytes cross a word boundary; both zero guards and large
@@ -109,4 +109,54 @@ theorem unchanged (pipeline : Pipeline) (offset : UInt256) :
 #guard_msgs (whitespace := lax) in #print axioms endian_refused
 /-- info: 'SolidityBridge.AccessBridge.MemoryLoadControls.unchanged' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms unchanged
+
+private def savedTail : List UInt256 := [u 258,u 513]
+private def chargedSite (pipeline : Pipeline) (gas : Nat) :
+    RoadmapV15.P10.Site .MLOAD where
+  seed := {(default : EVM.State) with
+    toMachineState := {(full pipeline) with gasAvailable := u gas}
+    stack := u 31::savedTail,execLength := 41}
+  before := []
+  after := []
+  pcFits := by decide
+private def chargedSpan (pipeline : Pipeline) : ByteSpan (frame pipeline).capacity where
+  offset := lenU 31 (by decide)
+  length := lenU 32 (by decide)
+  fits := Or.inr (by change 31+32≤96;decide)
+
+theorem charged_initial (pipeline : Pipeline) (gas : Nat) :
+    FrameImage (frame pipeline) (chargedSite pipeline gas).state.toMachineState :=
+  ⟨(full_image pipeline).bytes,(full_image pipeline).active,(full_image pipeline).wordFit⟩
+
+/-- An actual nonzero ordered load, with both saved tail words and the reached
+P6 image, at the exact gas boundary. No decoded value or run is a premise. -/
+theorem charged_nonzero (pipeline : Pipeline) (fuel : Nat) :
+    ∃ (reached : EVM.State) (value : UInt256),
+      Assembly.driverSteps 1 (fuel+2) #[] (chargedSite pipeline 3).state=.ok reached ∧
+      reached.stack=value::savedTail ∧ value.toNat=0x1234*256^30 ∧
+      FrameImage (Yul.Adapters.P6ByteMemory.touch (frame pipeline) (chargedSpan pipeline))
+        reached.toMachineState := by
+  obtain ⟨reached,value,run,stack,payload,memory,post⟩ :=
+    MemoryLoadExecution.success (frame pipeline) (chargedSite pipeline 3)
+      (chargedSpan pipeline) (u 31) savedTail rfl rfl (charged_initial pipeline 3) rfl
+      #[] fuel (chargedSite pipeline 3).state 3 (by cases pipeline <;> rfl)
+  have read : value.toNat=((full pipeline).mload (u 31)).1.toNat :=
+    payload.trans (MemoryLoad.payload _ _ _ (full_image pipeline)).symm
+  refine ⟨reached,value,run,stack,read.trans (full_values pipeline).1,post.mpr ?_⟩
+  change 32*max 2 ((31+32+31)/32)<UInt256.size
+  decide
+
+theorem charged_underfunded (pipeline : Pipeline) :
+    FrameImage (frame pipeline) (chargedSite pipeline 2).state.toMachineState ∧
+    Assembly.driverSteps 1 2 #[] (chargedSite pipeline 2).state=.error .OutOfGass := by
+  refine ⟨charged_initial pipeline 2,?_⟩
+  rw [MemoryCharged.load_charged]
+  cases pipeline <;> rfl
+
+/-- info: 'SolidityBridge.AccessBridge.MemoryLoadControls.charged_initial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms charged_initial
+/-- info: 'SolidityBridge.AccessBridge.MemoryLoadControls.charged_nonzero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms charged_nonzero
+/-- info: 'SolidityBridge.AccessBridge.MemoryLoadControls.charged_underfunded' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms charged_underfunded
 end SolidityBridge.AccessBridge.MemoryLoadControls

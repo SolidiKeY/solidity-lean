@@ -1,0 +1,44 @@
+{
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureOverwrite_source_apart": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_frozen": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_inside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.captureTwice_read_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_some_iff": [
+  "Quot.sound",
+  "propext"
+ ]
+}

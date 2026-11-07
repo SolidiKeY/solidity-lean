@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/PrimitivePackets/SignedSub/Execution.lean:Solidity.Backend.PrimitivePackets.SignedSub.emitted_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Execution.lean:Solidity.Backend.PrimitivePackets.SignedSub.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Execution.lean:Solidity.Backend.PrimitivePackets.SignedSub.selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Execution.lean:Solidity.Backend.PrimitivePackets.SignedSub.source_horizon_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

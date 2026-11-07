@@ -1,0 +1,44 @@
+{
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.decoded_and_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.entry_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.run_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedBinding.lean:Solidity.Backend.AbiEntry.SignedBinding.short_before_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

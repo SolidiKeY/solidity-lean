@@ -1,0 +1,24 @@
+{
+  "reviews": [
+    {
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/pin-registration/finder.md",
+      "sha256": "f2dc1e2104d1335b2350c916d536d5b9b2adbdbca9b930987a2b02ceb67c5425",
+      "scope": "Proposal preparation only; no authorization or final-gate completion"
+    },
+    {
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/pin-registration/skeptic.md",
+      "sha256": "8d04c4d47964b0b5184bc23067e8eadf65893eaa07b4798818751066a5c3a2fa",
+      "scope": "Proposal preparation only; no authorization or final-gate completion"
+    }
+  ]
+}

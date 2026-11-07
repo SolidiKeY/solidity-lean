@@ -1,0 +1,321 @@
+{
+  "assignment": "G25-CONST-1105",
+  "published_base": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "owned_start": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+  "modules": {
+    "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
+    "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "fd8800797115a46d975313f371b9c86d3e8882cc920c2ca0616879508272c397",
+    "Solidity/Backend/PrimitivePackets/Constants/Selected.lean": "12a0827282f64326126160ccec8944e90e7084af25c3c82bee3a942290a5ac19",
+    "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
+    "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
+  },
+  "inputs": {
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Selected.lean": "9bb0b89b0be284b84f2befd8dd40f97c764bc3f76ebebbe1244339c38646c4bd",
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Controls.lean": "ff70bbe874d62c9ef29ef8aafbaba13806024522feb9a2dcfe4f1843ff78aaad",
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Target.lean": "1104d2ed883b29ed8e51e73839abb4daa1b024e34f8de6805350dbf1e466b5fe",
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Source.lean": "656709e5ce94fd225acf9eb621bde44381aa1d63a6a60a41a53492d3b7b5a787",
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Agreement.lean": "d109dfdaee23c618764de2b15d96232d189dbc8db6801657fa91adeaaf252cc4",
+    "Solidity/Lowering/V07/IntegerConstants.lean": "8567f29bc8b6da1827005e536c0ebb06c326005754f01b27fe1211791f45e39f",
+    "Solidity/Lowering/V07/Scalar.lean": "2e0e760d63885f01e5c19c5a8dd8bb5903d78cf5ec96a052846003b8746e4b3d",
+    "Solidity/Evm/Compile.lean": "e452bff7f9c882940ccbabea2a51566e333c30d3617486b8338d04d32f99e4a9",
+    "Solidity/Evm/MemoryCompile.lean": "08f32f3755e4573f48408b48590adfaf0022e5e4d91c1c1913727311b87ba99b",
+    "Solidity/Evm/Machine.lean": "5b9ec1172302b00d76a01a8fa329615b63b6103bac9be6db45f7168ed4896686",
+    "Solidity/Evm/Repr.lean": "eac29c092292aca1f82d90409ab7d43a68450c2c44e8607b0fae06d18bafd240",
+    "Solidity/Evm/Signed.lean": "fcb02aa1a92478fa0208cb86045569309682107a0d65677f24767ad5de7c8563",
+    "Solidity/Source/Types.lean": "7bb6c26eaad2fbff46c11e54ead9451156d31b54cbd0400d17d76336021bd73e"
+  },
+  "declarations": [
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.success",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Agreement"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.i8",
+      "kind": "def",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.u16",
+      "kind": "def",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.endpoints",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.below_refused",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.above_refused",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.fractional_refused",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.lower",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.upper",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_word",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.zero_fits",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.zero",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_signed_result",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.signed_minus_one_word",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.signed_minus_one_read",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.unsigned_max_read",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_width_refused",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.wrong_sign_refused",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.low_fuel",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.signed_min",
+      "kind": "def",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.signed_max",
+      "kind": "def",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.unsigned_max",
+      "kind": "def",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.Controls.wider_positive",
+      "kind": "def",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Controls"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.value",
+      "kind": "abbrev",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Selected"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.selected",
+      "kind": "def",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Selected"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.public_selection",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Selected"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.selected_push",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Selected"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.source_success",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Source"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.source_refused",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Source"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.conversion_refused",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Source"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.target_success",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Target"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.word_agreement",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Target"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.unsigned_read",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Target"
+    },
+    {
+      "name": "Solidity.Backend.PrimitivePackets.Constants.signed_read",
+      "kind": "theorem",
+      "module": "Solidity.Backend.PrimitivePackets.Constants.Target"
+    }
+  ],
+  "kernel_inventory_sha256": "e8f8f339787dfcc0a18f9ab2785760b1c7d1beedfaf8edcdec95ab5ae55c907e",
+  "register": [
+    "Solidity.Backend.PrimitivePackets.Constants.Agreement",
+    "Solidity.Backend.PrimitivePackets.Constants.Controls",
+    "Solidity.Backend.PrimitivePackets.Constants.Selected",
+    "Solidity.Backend.PrimitivePackets.Constants.Source",
+    "Solidity.Backend.PrimitivePackets.Constants.Target"
+  ],
+  "coverage": {
+    "widths": "all32 legal byte-multiple widths8..256, both signs, arbitrary Source.IntTy",
+    "positive": [
+      "source_success",
+      "public_selection",
+      "selected_push",
+      "target_success",
+      "word_agreement",
+      "unsigned_read",
+      "signed_read",
+      "success",
+      "Controls.lower",
+      "Controls.upper",
+      "Controls.zero",
+      "Controls.signed_min",
+      "Controls.signed_max",
+      "Controls.signed_minus_one_read",
+      "Controls.unsigned_max",
+      "Controls.wider_positive"
+    ],
+    "negative": [
+      "source_refused",
+      "conversion_refused",
+      "Controls.below_refused",
+      "Controls.above_refused",
+      "Controls.fractional_refused",
+      "Controls.wrong_word",
+      "Controls.wrong_signed_result",
+      "Controls.wrong_width_refused",
+      "Controls.wrong_sign_refused",
+      "Controls.low_fuel"
+    ]
+  },
+  "boundary": "Existing structured Evm.Instr.push and Evm.run, not encoded PUSHn bytes, gas or deployed execution; intrinsic Source integer range admission unchanged.",
+  "preserved_untracked": {
+    "tests/sol-numeric-literals/evidence/integrationb86-committed.json": "fc7a7dc17b468efa9643c49ecb6812687d870d573370ac0608930db743f55702",
+    "tests/sol-numeric-literals/evidence/integrationb86-committed.log": "0960084d6ccaf13d0bc93d405e2aac2a81601d142758c4425457f7a46b499d5f"
+  },
+  "published_delivery": {
+    "master": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "receipt": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "receipt_source": "Coordinator-provided master; existing merge9442e5b6d preserved",
+    "integrated": {
+      "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
+      "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "fd8800797115a46d975313f371b9c86d3e8882cc920c2ca0616879508272c397",
+      "Solidity/Backend/PrimitivePackets/Constants/Selected.lean": "12a0827282f64326126160ccec8944e90e7084af25c3c82bee3a942290a5ac19",
+      "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
+      "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
+    },
+    "remaining": [],
+    "adoption": "Inherited merge preserved; fiveConstants sources and13API pins exact",
+    "receipt_master": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "merge_notice": "Coordinator master3883c64ef750dd49acdb7d83adcdf0f101d42c6c"
+  },
+  "rebase": {
+    "mode": "integrated_checkpoint",
+    "target": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "pre_rebase_head": "462422d4f32af164a4e511e9f186eae25cbfa140",
+    "post_rebase_head": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "rebased_owned_start": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "held_head_preserved": "8e5d497ebf4b24977976d66fd22b47be1f8c44f0"
+  },
+  "previous_rebase": {
+    "mode": "integrated_checkpoint",
+    "target": "e2c8268ec917f4080d438da52e1adad7bb085029",
+    "pre_rebase_head": "462422d4f32af164a4e511e9f186eae25cbfa140",
+    "post_rebase_head": "e2c8268ec917f4080d438da52e1adad7bb085029",
+    "rebased_owned_start": "e2c8268ec917f4080d438da52e1adad7bb085029",
+    "proof_files_unchanged": 47,
+    "backup_commit": "462422d4f32af164a4e511e9f186eae25cbfa140"
+  },
+  "previous_inputs": {
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Selected.lean": "9bb0b89b0be284b84f2befd8dd40f97c764bc3f76ebebbe1244339c38646c4bd",
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Controls.lean": "ff70bbe874d62c9ef29ef8aafbaba13806024522feb9a2dcfe4f1843ff78aaad",
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Target.lean": "1104d2ed883b29ed8e51e73839abb4daa1b024e34f8de6805350dbf1e466b5fe",
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Source.lean": "656709e5ce94fd225acf9eb621bde44381aa1d63a6a60a41a53492d3b7b5a787",
+    "Solidity/Backend/PrimitivePackets/CheckedAdd/Agreement.lean": "d109dfdaee23c618764de2b15d96232d189dbc8db6801657fa91adeaaf252cc4",
+    "Solidity/Lowering/V07/IntegerConstants.lean": "8567f29bc8b6da1827005e536c0ebb06c326005754f01b27fe1211791f45e39f",
+    "Solidity/Lowering/V07/Scalar.lean": "2e0e760d63885f01e5c19c5a8dd8bb5903d78cf5ec96a052846003b8746e4b3d",
+    "Solidity/Evm/Compile.lean": "e452bff7f9c882940ccbabea2a51566e333c30d3617486b8338d04d32f99e4a9",
+    "Solidity/Evm/MemoryCompile.lean": "08f32f3755e4573f48408b48590adfaf0022e5e4d91c1c1913727311b87ba99b",
+    "Solidity/Evm/Machine.lean": "a8a13b4c5b2c32bf5f83c9903ee5f7436e797fe4b70496aeb5fdf5aaa550ebd6",
+    "Solidity/Evm/Repr.lean": "eac29c092292aca1f82d90409ab7d43a68450c2c44e8607b0fae06d18bafd240",
+    "Solidity/Evm/Signed.lean": "5012a6c6b28affd7c417394e2f9562c2053b74e274b541e6be6cf68622441c7a",
+    "Solidity/Source/Types.lean": "7bb6c26eaad2fbff46c11e54ead9451156d31b54cbd0400d17d76336021bd73e"
+  },
+  "historical_inventory": {
+    "commit": "462422d4f32af164a4e511e9f186eae25cbfa140",
+    "path": "tests/primitive-packets-1105/Constants/kernel-inventory.json",
+    "sha256": "5dc8636ea6bea4e69540191bd3b05d785174cfaa8d6686c85837bc518b1ca011"
+  },
+  "continuity": {
+    "name": "Solidity.Evm.sword.eq_1",
+    "actual_module": "Solidity.Evm.Signed",
+    "owned": 45,
+    "imported": 1,
+    "renamed_helper": {
+      "before": "Solidity.Backend.PrimitivePackets.Constants.word_agreement._proof_1_3",
+      "after": "Solidity.Backend.PrimitivePackets.Constants.word_agreement._proof_1_2"
+    }
+  },
+  "current_audit": {
+    "log": "tests/primitive-packets-1105/Constants/adoption-e2c/audit.log",
+    "sha256": "eb45b37e2a369b27ec0ec4cefec7dba6497b489e920b001a1d2f5a96489d3bc9",
+    "script_sha256": "b728a880a0bf4036936c6848406edcf82c582df864e1bcc4306ea5575e8d2b41",
+    "gate": {
+      "path": "tests/primitive-packets-1105/Constants/adoption-e2c/gate.json",
+      "sha256": "78cd16a92135c269e849749359330ffb6af3b2b8a6c1bbe6db1b333b59227dea"
+    },
+    "build": {
+      "path": "tests/primitive-packets-1105/Constants/adoption-e2c/build.json",
+      "sha256": "11d26b45d3cc7ca9afb5f0f18d3b3b7b27a22bec270dfbd2ceb9c7a14a612f8c"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/SafeDivergence.lean:Solidity.Evm.External.Assembly.BlockDiverges.safe_compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "Solidity/Semantics/LexMetrics.lean:Solidity.LoopMetrics.Certificate.valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/LexMetrics.lean:Solidity.LoopMetrics.Certificate.validLex": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/LexMetrics.lean:Solidity.LoopMetrics.SourceCertificate.valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

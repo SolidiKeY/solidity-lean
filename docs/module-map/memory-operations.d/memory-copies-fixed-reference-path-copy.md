@@ -1,0 +1,3 @@
+| `Backend/MemoryCopies/FixedReferencePathCopyInterface.lean` | Contract only for checked compiled path plus fixed-parent copying of original arbitrary-shadow values, exact allocation and capacity refusal. |
+| `Backend/MemoryCopies/FixedReferencePathCopy.lean` | Proved actual compiled path plus checked parent copying for original arbitrary-shadow fixed reference values, full allocator/snapshot/growth and capacity refusal. |
+| `Backend/MemoryCopies/FixedReferencePathCopyControls.lean` | Inhabited retained-shadow path-copy execution40to44, empty/64-element child successes and real capacity refusal after path success. |

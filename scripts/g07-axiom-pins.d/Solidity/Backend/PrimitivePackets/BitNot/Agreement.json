@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/PrimitivePackets/BitNot/Agreement.lean:Solidity.Backend.PrimitivePackets.BitNot.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "nine static sequent/tree alias roles; zero fresh witnesses or runtime acceptance",
+  "counts": {
+    "role_reviewed": 277,
+    "role_pending": 5006,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-tree-classification-v23/evidence.tar.gz",
+      "bytes": 956094,
+      "sha256": "d472dacc3a219dd471644051f2cfefd49a45c73f03ee5637b8297056f912cc52"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-tree-classification-v23/inputs.json",
+      "bytes": 1164,
+      "sha256": "42fc0d67201a6d12d51c82f2d034927840d38193289cbebdf9fd691807eb61bf"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-tree-classification-v23/gates.json",
+      "bytes": 3074,
+      "sha256": "16573216662ef8804240d4db1bc45e8dfd33b4d489677e280f0c7d4ff5e104ea"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-tree-classification-v23/reviews.md",
+      "bytes": 601,
+      "sha256": "41faf548bcf1f29855ef4e37ab93b6205155df9a2468ff967e66d92b8d2e8fc5"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/sequent-tree-classification-v23/semantic-roles-reviewed.json",
+      "bytes": 763960,
+      "sha256": "2a44aa57f10aaba5b4c6611f21934eb5323bab390c26c8daa3a77b5c6876d0ee"
+    }
+  ]
+}

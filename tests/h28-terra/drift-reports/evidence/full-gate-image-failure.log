@@ -1,0 +1,11 @@
+memory.max=12884901888
+memory.swap.max=0
+Wed Nov  4 12:57:19 UTC 2026
+559 core modules, 0 reach the elaborator
+559 core modules, 0 reach the checked parser adapters
+scripts/coord-tools/register.sh: line 19: git: command not found
+scripts/coord-tools/register.sh: line 20: exec: python3: not found
+Wed Nov  4 12:57:19 UTC 2026
+memory.peak=172318720
+exit=127
+docker-exit=127

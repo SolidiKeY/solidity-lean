@@ -1,0 +1,52 @@
+{
+  "evidence": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107",
+  "baseline_head": "cfa14ed2706b21603ff938778f3f8b73a685ac36",
+  "status": "tooling regression only; unchanged saved-snapshot accounting",
+  "files": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/normal.json",
+      "bytes": 661806,
+      "sha256": "cf53f32033a51722ca78e27dcb1fa6a4902736705ade4ed7b7ccbe6b1c204927"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/normal.log",
+      "bytes": 147,
+      "sha256": "d40e896781bb13683a055483af9788861b2ad88c60e4c72b6cac85703a73d650"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/optimized.json",
+      "bytes": 661806,
+      "sha256": "cf53f32033a51722ca78e27dcb1fa6a4902736705ade4ed7b7ccbe6b1c204927"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/optimized.log",
+      "bytes": 147,
+      "sha256": "d40e896781bb13683a055483af9788861b2ad88c60e4c72b6cac85703a73d650"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/original.json",
+      "bytes": 661806,
+      "sha256": "cf53f32033a51722ca78e27dcb1fa6a4902736705ade4ed7b7ccbe6b1c204927"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/original.log",
+      "bytes": 147,
+      "sha256": "d40e896781bb13683a055483af9788861b2ad88c60e4c72b6cac85703a73d650"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/results.json",
+      "bytes": 2432,
+      "sha256": "b2f6cb936224ac3b04c8368a1d4ae9788c645441e744185368474f49d7586401"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/tests-optimized.log",
+      "bytes": 104,
+      "sha256": "fc9b30f65ecd411b6a93d55dc2059cec4d7079dd96ccde12391803456a5f4b05"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/reconcile-optimization-20261107/tests.log",
+      "bytes": 104,
+      "sha256": "c37791697afd00c62842f468fdd4c71d2d16b07cafb2c6a4dc3b42e96ae392a2"
+    }
+  ]
+}

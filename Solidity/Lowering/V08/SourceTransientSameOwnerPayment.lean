@@ -159,8 +159,8 @@ theorem all_memory_retained (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes
     ⟨rfl,rfl,rfl,rfl⟩,⟨rfl,rfl,rfl,rfl⟩⟩
 
 theorem complete_populated_vector (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
-    ((drained pipeline bytes).ex.world.accounts sender).balance.val = 0 ∧
-    ((drained pipeline bytes).ex.world.accounts self).balance.val = 100 ∧
+    ((drained pipeline bytes).ex.world.accounts sender).balance = 0 ∧
+    ((drained pipeline bytes).ex.world.accounts self).balance = 100 ∧
     ((drained pipeline bytes).ex.world.accounts self).code = some 0 ∧
     ((drained pipeline bytes).ex.world.accounts self).nonce = 1 ∧
     ((drained pipeline bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -201,7 +201,7 @@ theorem wrong_self_transfer (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes
   rw [same88_identity,distinct88_success]
   intro same
   have states := Option.some.inj same
-  have balances := congrArg (fun ex => (ex.world.accounts sender).balance.val) states
+  have balances := congrArg (fun ex => (ex.world.accounts sender).balance) states
   change 88 = 0 at balances
   cases balances
 

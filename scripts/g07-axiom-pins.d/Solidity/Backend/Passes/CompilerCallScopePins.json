@@ -1,0 +1,112 @@
+{
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.accepted_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.after_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.allocation_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.branch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.consumer_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.Controls.corrupted_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.Controls.final_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.Controls.prefix_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.Controls.skipped_consumer_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.fragment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.input_back": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.input_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.into_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.memory_calls_mapped_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.next_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.private_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.private_frame_strict": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CompilerCallScopePins.lean:Solidity.Backend.Passes.CompilerCallScopeRecognition.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

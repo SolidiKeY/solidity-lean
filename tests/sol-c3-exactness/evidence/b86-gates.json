@@ -1,0 +1,297 @@
+{
+  "checked_adoption_head": "0b561e0d3ae3116343dbbf40a20cbc163a6e42dc",
+  "adopted_upstream": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "gates": [
+    {
+      "name": "audit-confirmation",
+      "command": [
+        "lake",
+        "build",
+        "+Solidity.Frontend.C3Exactness.Audit"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.5936909480078612,
+      "minimum_parent_available_bytes": 12220309504,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/audit-confirmation.log",
+      "receipt": "tests/sol-c3-exactness/evidence/audit-confirmation.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "62848"
+    },
+    {
+      "name": "b86-axiom-mcp",
+      "command": [
+        ".venv/bin/python",
+        "scripts/coord-tools/lean-mcp",
+        "diag",
+        "Solidity/Frontend/C3Exactness/Audit.lean"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 18.63244532200042,
+      "minimum_parent_available_bytes": 11077824512,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/b86-axiom-mcp.log",
+      "receipt": "tests/sol-c3-exactness/evidence/b86-axiom-mcp.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "12772"
+    },
+    {
+      "name": "b86-controls-mcp",
+      "command": [
+        ".venv/bin/python",
+        "scripts/coord-tools/lean-mcp",
+        "diag",
+        "Solidity/Frontend/C3Exactness/Controls.lean"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 2.5954888819978805,
+      "minimum_parent_available_bytes": 10909679616,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/b86-controls-mcp.log",
+      "receipt": "tests/sol-c3-exactness/evidence/b86-controls-mcp.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "12752"
+    },
+    {
+      "name": "b86-graph-controls-mcp",
+      "command": [
+        ".venv/bin/python",
+        "scripts/coord-tools/lean-mcp",
+        "diag",
+        "Solidity/Frontend/C3Exactness/GraphControls.lean"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 13.094720515000517,
+      "minimum_parent_available_bytes": 10638028800,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/b86-graph-controls-mcp.log",
+      "receipt": "tests/sol-c3-exactness/evidence/b86-graph-controls-mcp.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "12780"
+    },
+    {
+      "name": "b86-mcp-stop",
+      "command": [
+        ".venv/bin/python",
+        "scripts/coord-tools/lean-mcp",
+        "stop"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.3172691060026409,
+      "minimum_parent_available_bytes": 10653982720,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/b86-mcp-stop.log",
+      "receipt": "tests/sol-c3-exactness/evidence/b86-mcp-stop.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "12728"
+    },
+    {
+      "name": "compiler-fixtures-final",
+      "command": [
+        "node",
+        "tests/sol-c3-exactness/check-fixtures.mjs",
+        "/workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/compiler/soljson-v0.8.38+commit.1835d247.js",
+        "tests/sol-c3-exactness/evidence/compiler-fixtures.json"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 3.3913663090061164,
+      "minimum_parent_available_bytes": 10616721408,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/compiler-fixtures-final.log",
+      "receipt": "tests/sol-c3-exactness/evidence/compiler-fixtures-final.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "315284"
+    },
+    {
+      "name": "b86-acceptance",
+      "command": [
+        ".venv/bin/python",
+        "scripts/check-sol-c3-exactness.py",
+        "--checkpoint",
+        "fixtures",
+        "--self-test"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 4.577839010002208,
+      "minimum_parent_available_bytes": 12236660736,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/b86-acceptance.log",
+      "receipt": "tests/sol-c3-exactness/evidence/b86-acceptance.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "19676"
+    },
+    {
+      "name": "keysort-final",
+      "command": [
+        "bash",
+        "scripts/check-solkey.sh",
+        "--key",
+        "/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.5646258080087136,
+      "minimum_parent_available_bytes": 12048449536,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/keysort-final.log",
+      "receipt": "tests/sol-c3-exactness/evidence/keysort-final.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "229192"
+    },
+    {
+      "name": "final-source-gates",
+      "command": [
+        ".venv/bin/python",
+        "tests/sol-c3-exactness/final-checks.py"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 42.401238175007165,
+      "minimum_parent_available_bytes": 11946373120,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/final-source-gates.log",
+      "receipt": "tests/sol-c3-exactness/evidence/final-source-gates.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "333728"
+    },
+    {
+      "name": "corpus-final",
+      "command": [
+        "bash",
+        "scripts/check-corpus.sh",
+        "--solkey",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 36.13620236898714,
+      "minimum_parent_available_bytes": 12041265152,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/corpus-final.log",
+      "receipt": "tests/sol-c3-exactness/evidence/corpus-final.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "682904"
+    },
+    {
+      "name": "b86-cache-identity",
+      "command": [
+        ".venv/bin/python",
+        "tests/sol-c3-exactness/evidence/adoption-cache-identity.py"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.566818578998209,
+      "minimum_parent_available_bytes": 12240027648,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/b86-cache-identity.log",
+      "receipt": "tests/sol-c3-exactness/evidence/b86-cache-identity.log.json",
+      "status": "pass",
+      "maximum_resident_kbytes": "17864"
+    },
+    {
+      "name": "b86-full-acceptance-pending",
+      "command": [
+        ".venv/bin/python",
+        "scripts/check-sol-c3-exactness.py",
+        "--checkpoint",
+        "full",
+        "--self-test"
+      ],
+      "exit": 1,
+      "elapsed_seconds": 4.446072165999794,
+      "minimum_parent_available_bytes": 12237328384,
+      "pressure_stop": false,
+      "evidence": "tests/sol-c3-exactness/evidence/b86-full-acceptance-pending.log",
+      "receipt": "tests/sol-c3-exactness/evidence/b86-full-acceptance-pending.log.json",
+      "status": "fail",
+      "maximum_resident_kbytes": "19768"
+    }
+  ],
+  "source_gates": [
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 14.959536966998712,
+      "log": "tests/sol-c3-exactness/evidence/final-source-1.log",
+      "log_sha256": "40958e55ae89ede34a8087a0c3c9266ffdc43db04479df2bcdbe3900f9a8eb2b"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.5141821639990667,
+      "log": "tests/sol-c3-exactness/evidence/final-source-2.log",
+      "log_sha256": "3520a48d0f493128fb29aacee7d1e42124c0637abafb3432bf048f39a73271f3"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.5885945330082905,
+      "log": "tests/sol-c3-exactness/evidence/final-source-3.log",
+      "log_sha256": "45b8497f1525055532b0ad03dd6aca190aae447e834670a1f0a133f94056e799"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/coord-tools/register.sh",
+        "--check"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.13513884000713006,
+      "log": "tests/sol-c3-exactness/evidence/final-source-4.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 8.845696385003976,
+      "log": "tests/sol-c3-exactness/evidence/final-source-5.log",
+      "log_sha256": "ed551fdab805b10d00731598031da69aad842f39f53cdb4a2d0638b4938e1c2d"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-axiom-pins.mjs"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 16.461614166997606,
+      "log": "tests/sol-c3-exactness/evidence/final-source-6.log",
+      "log_sha256": "6e25fef9f9366cbf5b0870f160c5a58e6b4fc742560124e3e1b27189ff39dcdc"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.4197818179964088,
+      "log": "tests/sol-c3-exactness/evidence/final-source-7.log",
+      "log_sha256": "32481e0de6928326e00e1c4595d5021d1e8b5cbd4e9dde6ca364eb195a0a8b95"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.13116591099242214,
+      "log": "tests/sol-c3-exactness/evidence/final-source-8.log",
+      "log_sha256": "b2b841479106ada50111d792351a6dde92b28c5529fbbde0ab768d3bbd67d83f"
+    }
+  ],
+  "historical_runtime_failures": [
+    "integrated-run-lean.log.json",
+    "integrated-openloops-isolated.log.json"
+  ],
+  "current_full_driver": "NOT RERUN:277 project source imports unchanged; no new verified cache/failure condition. Historical H1 blocker unwaived.",
+  "boundary": "Full acceptance correctly rejects unfinished runtime/readiness; no RUNTIME_GATE_PASS. Warm build plus fresh MCP. All current receipt input hashes/log digests checked. RSS max process/child; cgroup peaks cumulative. Retained owned-cache identity is not global freshness/import.",
+  "receipt_refresh_reason": "Skeptic pending-obligation wording fix applied; all twelve input-bound receipts refreshed against exact final manifest without proof/source changes."
+}

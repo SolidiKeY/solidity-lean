@@ -1,0 +1,4 @@
+import Solidity.Backend.CalldataPackets.RawBool.Execution
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.copy_run' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Backend.CalldataPackets.RawBool.copy_run

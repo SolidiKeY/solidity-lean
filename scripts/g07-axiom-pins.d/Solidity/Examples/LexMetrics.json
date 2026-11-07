@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/LexMetrics.lean:Solidity.Examples.LexMetrics.phase_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/LexMetrics.lean:Solidity.Examples.LexMetrics.sourceProgram_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

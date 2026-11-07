@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/Sound/ExternalTryWitness.lean:Solidity.catchData_normal_formula": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Sound/ExternalTryWitness.lean:Solidity.holds_diamond_of_normal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

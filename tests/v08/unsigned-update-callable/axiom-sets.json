@@ -1,0 +1,125 @@
+{
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.arguments": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.argument_actual": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.source_expression": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.transport_context": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.intSyntax": [],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.params": [],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.returns": [],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.fnSyntax": [],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.unit": [],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.E": [],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.declaration": [],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.program": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.global": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.populated": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.inputs": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.locals": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.expression": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.wrapped_call": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.postfix_max": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.prefix_max": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.decrement_zero": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.zero_timeout": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.argument_timeout": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.wrong_postfix_return": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.static_call": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.reached_read": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.wrong_caller_snapshot": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.pairLocals": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.pairSlot": [],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.initial": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Lowering.V08.UnsignedUpdateCallable.Controls.inhabited_transport": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

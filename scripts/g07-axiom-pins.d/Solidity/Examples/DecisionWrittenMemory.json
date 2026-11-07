@@ -1,0 +1,57 @@
+{
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Decide.decideGoal_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Decide.decideWrittenHash_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.actual_write_hash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.actual_write_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.alias_written_hashes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.distinct_written_hashes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.empty_diamond_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.original_kernel_verdict": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.original_realized_covered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.original_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionWrittenMemory.lean:Solidity.Examples.DecisionWrittenMemory.writtenSelf_certified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

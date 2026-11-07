@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/BitwiseValueContext.lean:Solidity.Backend.Passes.BitwiseValueContext.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveClearControls.lean:Solidity.Backend.StorageOps.RecursiveClearControls.mapping_all_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClearControls.lean:Solidity.Backend.StorageOps.RecursiveClearControls.ordered_cycle": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveClearControls.lean:Solidity.Backend.StorageOps.RecursiveClearControls.varying_clear_depth": [
+  "Quot.sound",
+  "propext"
+ ]
+}

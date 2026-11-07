@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/ArrayCut.lean:Solidity.Decide.LFml.aCut_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/ArrayCut.lean:Solidity.Decide.LFml.aCut_valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

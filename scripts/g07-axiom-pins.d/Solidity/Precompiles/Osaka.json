@@ -1,0 +1,11 @@
+{
+ "Solidity/Precompiles/Osaka.lean:Solidity.Precompiles.Osaka.ecrecover_exceeds_stipend": [],
+ "Solidity/Precompiles/Osaka.lean:Solidity.Precompiles.Osaka.gas_mono": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Precompiles/Osaka.lean:Solidity.Precompiles.Osaka.run_eq_none_iff": [
+  "Quot.sound",
+  "propext"
+ ]
+}

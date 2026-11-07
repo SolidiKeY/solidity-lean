@@ -26,20 +26,10 @@ def selected : Composition.Program 1 F (.cons call .nil) :=
   Composition.cons statement (Composition.nil 1 statement.checked.frag)
 
 theorem argument_revert : argumentRead.evalT caller = .error .revert := by
-  first
-  | (solve | simp only)
-  | (solve | decide)
-  | (solve | omega)
-  | (solve | rfl)
-  | with_unfolding_all rfl
+  with_unfolding_all rfl
 
 theorem source_revert : call.run caller = .error .revert := by
-  first
-  | (solve | simp only)
-  | (solve | decide)
-  | (solve | omega)
-  | (solve | rfl)
-  | with_unfolding_all rfl
+  with_unfolding_all rfl
 
 theorem capacity : AllocationInput 1 64 (selected.checked.cost caller) caller base machine :=
   .inr ⟨by decide,wmod 130,(V3CallProducerRef.ArrayControls.initial (wmod 2)).2,by decide +kernel⟩
@@ -65,12 +55,7 @@ theorem declaration_revert : (Stmt.declLocal .uint (.user "index") (some argumen
 def first : CompiledVal 1 F argumentRead := (compileVal 1 F argumentRead).get (by decide +kernel)
 theorem emitted_first : ∃ rest : List Instr,
     selected.checked.code = (first.code ++ [.mstore 3]) ++ rest := by
-  first
-  | (solve | simp only)
-  | (solve | decide)
-  | (solve | omega)
-  | (solve | rfl)
-  | with_unfolding_all exact ⟨_,rfl⟩
+  with_unfolding_all exact ⟨_,rfl⟩
 
 abbrev goodCaller := V3CallProducerRef.ArrayControls.caller (wmod 0)
 abbrev goodMachine := V3CallProducerRef.ArrayControls.machine (wmod 0)

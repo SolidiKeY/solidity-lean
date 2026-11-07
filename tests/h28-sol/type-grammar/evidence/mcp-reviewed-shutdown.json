@@ -1,0 +1,12 @@
+{
+  "command": [
+    "bash",
+    "tests/h28-sol/type-grammar/mcp.sh",
+    "diag",
+    "Solidity/Frontend/TypeGrammarH28/Layouts.lean"
+  ],
+  "exit": 0,
+  "elapsed_s": 3.8306678829999328,
+  "stdout": "diag: 0 errors\n",
+  "stderr": ""
+}

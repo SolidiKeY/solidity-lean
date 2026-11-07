@@ -1,0 +1,32 @@
+{
+ "Solidity/Yul/Compilation/WordExecution.lean:Solidity.Yul.Compilation.WordExecution.expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecution.lean:Solidity.Yul.Compilation.WordExecution.loweredExpr_machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecution.lean:Solidity.Yul.Compilation.WordExecution.loweredStmt_machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecution.lean:Solidity.Yul.Compilation.WordExecution.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecution.lean:Solidity.Yul.Compilation.WordExecution.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordExecution.lean:Solidity.Yul.Compilation.WordExecution.step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

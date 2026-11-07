@@ -1,0 +1,15 @@
+{
+  "command": [
+    "env",
+    "GATE_BASE=6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+    "GATE_LOGS=tests/sol-numeric-literals/evidence/h41-full-gates",
+    "bash",
+    "scripts/coord-tools/gate.sh",
+    "full"
+  ],
+  "exit": 1,
+  "seconds": 66.160141,
+  "peak_child_rss_kib": 689272,
+  "user_seconds": 58.789096,
+  "system_seconds": 6.581541
+}

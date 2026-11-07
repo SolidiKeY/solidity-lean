@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceWordReadControls.lean:Solidity.Lowering.StorageOps.SourceWordReadControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordReadControls.lean:Solidity.Lowering.StorageOps.SourceWordReadControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

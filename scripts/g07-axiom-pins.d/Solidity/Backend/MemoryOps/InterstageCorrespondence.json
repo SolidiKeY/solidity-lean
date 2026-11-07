@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.BoolChildRepr.captureAfterFirstAlloc": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.BoolChildRepr.checkedCapture": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.BoolChildRepr.interstage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.RefChildRepr.checkedCapture": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean:Solidity.Backend.MemoryOps.RefChildRepr.interstage": [
+  "Quot.sound",
+  "propext"
+ ]
+}

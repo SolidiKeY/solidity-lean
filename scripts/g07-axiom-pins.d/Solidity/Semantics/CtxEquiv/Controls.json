@@ -1,0 +1,87 @@
+{
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.artifactRefines_iff": [
+  "Quot.sound"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Behav.Below.seq": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.altered_not_ctxRefines_back": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.bool_not_ctxEquiv": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.ctxRefines_not_ctxEquiv": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.dropHash_preserves": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.erased_not_ctxRefines_forward": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.fail_not_ctxEquiv": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.failEmpty_ctxEquiv_loop": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.mapping_defaults_ctxEquiv": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.not_mangle_preserves": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.seq_continuation_observed": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.succeed_quiet_ctxEquiv": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.toy_ctxRefines_back": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.toyValidator_ctxRefines": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Controls.validator_rejects_altered": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.CtxEquiv.trans": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.ctxEquivOn_iff_refines": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.CtxEquivOn.done_iff": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.CtxRefines.noCallback": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.CtxRefinesOn.of_empty": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.CtxRefinesOn.safety": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.CtxRefinesOn.seq": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.obsEq_iff_ctxEquiv": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.preserves_iff": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Preserves.ctxEquiv": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.refines_iff": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.refinesUnder_iff": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.CtxEquiv.Validator.ctxRefines_back": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.Roadmap.Cert.ctxEquiv": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.Roadmap.Cert.preserves": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.Roadmap.PublicCorrectness.ctx_succeeds": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.Roadmap.PublicCorrectness.ctxRefines_back": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.Roadmap.PublicCorrectness.ctxRefines_forward": [],
+ "Solidity/Semantics/CtxEquiv/Controls.lean:Solidity.Roadmap.PublicCorrectness.transfer'": []
+}

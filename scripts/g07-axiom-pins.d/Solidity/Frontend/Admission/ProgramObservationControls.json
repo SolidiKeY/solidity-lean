@@ -1,0 +1,48 @@
+{
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.elaborated_constructor_in_declarations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.program_observation_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.ProgramControls.all_containers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.ProgramControls.all_containers_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.ProgramControls.body_only_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.ProgramControls.function_frame_parameters": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.ProgramControls.host_is_function": [],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.ProgramControls.invocation_parameter_types": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.ProgramControls.missing_contract_changes_scan": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramObservationControls.lean:Solidity.Frontend.Admission.ProgramControls.modifier_frame_parameters": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

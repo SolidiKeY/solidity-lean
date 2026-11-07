@@ -1,0 +1,17 @@
+{
+  "authority": "H44 user source-only split; H68 metadata option1 and fixed audit pin unchanged",
+  "heldHead": "a073878cf3dd1bd8fb82cfc067ca4cedcb711bb1",
+  "recoveryRef": "refs/codex-recovery/shared-translator/pre-h44-a073878c",
+  "sourceOnlyParent": "4095d848297d87e374b4f069692511cfe4a36cf7",
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h44/bulk-0de09096a654c43c.tar.zst",
+  "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h44/bulk-0de09096a654c43c.tar.zst",
+  "archiveBytes": 207427,
+  "archiveSha256": "0de09096a654c43ce6ecf6bf2ae958bffca8dbc2732273b4db881ffba28978a5",
+  "extractedRoot": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h68-bulk",
+  "dataFiles": 50,
+  "dataBytes": 3229786,
+  "filesManifest": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/files.json",
+  "filesManifestSha256": "07a2262eef21bb667b6b5ea86e4929c4c8c24fc1fd1d1b1442790e0c1ef7a47d",
+  "restore": "Copy archive to archiveRelative; mkdir extractedRoot equivalent under checkout; tar --zstd -xf ARCHIVE -C PACKET_ROOT; python3 tests/directruntime-20261104/shared-translator/verify-bulk.py",
+  "boundary": "External fixtures/corpus observations/evidence only; not new axioms,source preservation,exhaustive closure or whole-lane completion."
+}

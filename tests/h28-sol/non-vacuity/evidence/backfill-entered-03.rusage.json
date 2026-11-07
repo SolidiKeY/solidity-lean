@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "tests/h28-sol/non-vacuity/kernel.py",
+    "--module",
+    "Solidity.Assurance.NonVacuityH28.LoopContracts",
+    "--fresh"
+  ],
+  "exit": 1,
+  "elapsed_seconds": 0.04389044000708964,
+  "children_user_seconds": 0.027750999999999998,
+  "children_system_seconds": 0.015917,
+  "children_max_rss_kib": 13444,
+  "children_major_faults": 0,
+  "children_minor_faults": 3500
+}

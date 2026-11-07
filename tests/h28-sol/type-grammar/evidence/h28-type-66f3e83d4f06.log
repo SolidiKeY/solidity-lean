@@ -1,0 +1,17 @@
+["docker", "--host=unix:///var/run/docker.sock", "run", "--name", "h28-type-66f3e83d4f06", "--network", "none", "--memory", "12g", "--memory-swap", "12g", "--cpus", "1", "--user", "1000:1000", "--mount", "type=bind,src=/workspace/solidity-lean,dst=/workspace/solidity-lean", "--mount", "type=bind,src=/workspace/.setup/tools/lean-4.24.0-linux,dst=/opt/lean,readonly", "--mount", "type=bind,src=/workspace/.setup/cache/lake,dst=/workspace/.setup/cache/lake", "-w", "/workspace/solidity-lean", "-e", "LEAN_NUM_THREADS=1", "-e", "LAKE_CACHE_DIR=/workspace/.setup/cache/lake", "ubuntu@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852", "sh", "-c", "export PATH=/opt/lean/bin:$PATH; set -eu; test \"$(cat /sys/fs/cgroup/memory.max)\" = 12884901888; test \"$(cat /sys/fs/cgroup/memory.swap.max)\" = 0; lake -f tests/h28-sol/type-grammar/runtime.toml build Solidity.Frontend.TypeGrammarH28.Counterexamples"]
+✔ [3/7] Built Solidity.Frontend.Checked.Prec (3.5s)
+ℹ [6/7] Built Solidity.Frontend.TypeGrammarH28.Layouts (421ms)
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:54:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_symm' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:55:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_trans' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:56:0: 'Solidity.Frontend.TypeGrammarH28.elem_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:57:0: 'Solidity.Frontend.TypeGrammarH28.userType_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:58:0: 'Solidity.Frontend.TypeGrammarH28.elem_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:59:0: 'Solidity.Frontend.TypeGrammarH28.userType_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:60:0: 'Solidity.Frontend.TypeGrammarH28.elem_no_unused_layout' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:61:0: 'Solidity.Frontend.TypeGrammarH28.userType_no_unused_layout' does not depend on any axioms
+ℹ [7/7] Built Solidity.Frontend.TypeGrammarH28.Counterexamples (704ms)
+info: Solidity/Frontend/TypeGrammarH28/Counterexamples.lean:35:0: 'Solidity.Frontend.TypeGrammarH28.raw_yield_not_unique' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Counterexamples.lean:36:0: 'Solidity.Frontend.TypeGrammarH28.raw_counterexample_precedence' does not depend on any axioms
+Build completed successfully (7 jobs).
+
+CONTAINER 12884901888 12884901888 false 0

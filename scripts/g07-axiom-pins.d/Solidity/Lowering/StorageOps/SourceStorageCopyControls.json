@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.empty_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.exact_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.fuel_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.snapshot_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.wrong_tail_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

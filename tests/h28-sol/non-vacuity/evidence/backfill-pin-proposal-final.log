@@ -1,0 +1,8 @@
+file:///workspace/solidity-lean/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs:22
+ if(pin.file!==pinFile||!Object.hasOwn(local,pin.name))throw Error('unexpected unrecorded pin:'+key);
+                                                             ^
+
+Error: unexpected unrecorded pin:Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.account_balance
+    at file:///workspace/solidity-lean/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs:22:62
+
+Node.js v24.19.0

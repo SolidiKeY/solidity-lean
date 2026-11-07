@@ -1,0 +1,46 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.source_bool_value_array": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.source_cd_bool_empty_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.source_cd_bool_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.source_cd_bool_first_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.source_cd_bool_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.source_mapM_lift_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.cd_bool_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.sourceCalldataBoolValues_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.sourceCalldataBoolValues_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

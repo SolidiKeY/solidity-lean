@@ -1,0 +1,4 @@
+ORPHAN   Solidity.Frontend.SolcJson.IrImport
+ORPHAN   Solidity.SolcValidation.DataLayout
+ORPHAN   Solidity.SolcValidation.Dialect
+3907 reachable, 3 orphaned, 3 not allowed

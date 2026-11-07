@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.Controls.child_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.Controls.failed_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.Controls.graph_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.Controls.leaf_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.Controls.mapping_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.Controls.physical_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.Controls.raw_materialization": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotSelfControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotSelf.Controls.wrong_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

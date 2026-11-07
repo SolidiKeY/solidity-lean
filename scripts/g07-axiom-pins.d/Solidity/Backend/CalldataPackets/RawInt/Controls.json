@@ -1,0 +1,237 @@
+{
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.accepted_value": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_negative": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_positive": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.empty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_frame_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_large_length_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_short_head_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.entry_truncated_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.eof_padding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int16_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int16_near_width": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int248_near_width": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int256_all": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.int8_near_width": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.large_entry": [
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.late_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.misaligned_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.near_width_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_min": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_suffix_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.negative_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.one_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_int256_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.partial_zero_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.positive_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.positive_max": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.selector_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.sign_matters": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.uint256_all": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.uint8_near_width": [],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.unshifted_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.unsigned_rejects_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.copy_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.copy_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.decode_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.decode_dirty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.decode_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.decode_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.eval_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.guarded_frame_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.guarded_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.range_iff_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.signed_decode_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_dirty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_succ": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawInt/Controls.lean:Solidity.Backend.CalldataPackets.RawInt.values_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

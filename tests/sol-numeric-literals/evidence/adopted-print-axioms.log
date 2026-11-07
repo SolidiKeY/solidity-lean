@@ -1,0 +1,5665 @@
+{
+  "partial": false,
+  "still_elaborating_lines": null,
+  "success": true,
+  "timed_out": false,
+  "items": [
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.checksum_controls' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.checksum_length_controls' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.classify_numeric' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_decimal' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_digits' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_exponent_absent' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_exponent_negative' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_exponent_unsigned' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_fraction_absent' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_fraction_nil' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_fraction_present' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_hex_adjacent' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_hex_below_adjacent' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_hex_below_separated' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_hex_below_single' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_hex_separated' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_hex_single' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_hexadecimal' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_integer_absent' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_integer_present' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_nodigits_nil' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_nodigits_other' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_bad' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_below_bad' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_below_digit' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_below_final' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_below_nil' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_below_other' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_below_separated' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_digit' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_final' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_nil' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_other' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.control_tail_separated' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decNumber_erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decNumber_parts' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_bad_exponent' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_bad_suffix' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_bad_underscore_follower_refused' depends on axioms: [propext,\n Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_decode_mantissa' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_decode_value' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_doubled_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_exponent_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_fold' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_fraction_underscore_refused' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_iff' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_leading_underscore_refused' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_negative_exponent_underscore_refused' depends on axioms: [propext,\n Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_plus_exponent_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_trailing_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_value' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_separation' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digit_marker_false' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digit_not_underscore' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digits1_consumption_range' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digits1_exact_suffix' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digitsVal_append' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digits_iff' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.doubled_underscore_refused' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.doubled_underscore_tail' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.eip55_other_length' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.empty_hex_digits' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.empty_hex_number' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.exponent_marker' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.exponentialSpan_reprint' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixture_observations_pass' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fractionalSpan_reprint' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.glued_numeric_refused' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hexNumber_erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hexVal_lt16' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_digit_not_underscore' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_digits_iff' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_doubled_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_fold' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_invalid_byte_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_leading_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_number_doubled_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_number_leading_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_number_trailing_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hex_trailing_underscore_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hexadecimal_decode_value' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hexadecimal_iff' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hexadecimal_value' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.leading_underscore_digits' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.lex_glued_digit' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.lex_glued_dot' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.lex_numeric_range' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.locate_order' depends on axioms: [propext, Classical.choice, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.marker_keep' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.marker_stop' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.missing_exponent_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.missing_fraction_refused' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.missing_negative_exponent_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.noGlue_suffix' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.noGlue_tail' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.numberSpan_reprint' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.numeric_head_separation' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.octal_refused' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.scanner_controls_pass' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.solTok_numeric' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.solWordTable_no_num' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.solWord_no_num' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_48' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_49' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_50' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_51' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_52' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_53' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_54' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_55' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_56' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_57' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_digit' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_48' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_49' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_50' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_51' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_52' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_53' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_54' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_55' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_56' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot_57' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_102_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_102_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_102_105_110_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_102_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_102_97_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_102_97_117_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_102_97_117_108_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_108_101_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_101_108_101_116_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_97_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_100_97_121_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_108_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_108_115_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_109_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_109_105_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_110_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_110_117_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_116_104' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_116_104_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_116_104_101_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_118' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_118_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_118_101_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_118_101_110_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_120' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_120_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_120_116_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_120_116_101_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_120_116_101_114_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_120_116_101_114_110_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_101_120_116_101_114_110_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_105_110_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_105_110_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_111_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_117_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_117_110_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_117_110_99_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_117_110_99_116_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_117_110_99_116_105_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_117_110_99_116_105_111_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97_108_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97_108_108_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97_108_108_98_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97_108_108_98_97_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97_108_108_98_97_99_107' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97_108_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_102_97_108_115_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_103' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_103_119' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_103_119_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_103_119_101_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_104' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_104_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_104_101_120' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_104_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_104_111_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_104_111_117_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_104_111_117_114_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_109_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_109_117_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_109_117_116_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_109_117_116_97_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_109_117_116_97_98_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_109_117_116_97_98_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_108_101_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_108_101_109_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_108_101_109_101_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_108_101_109_101_110_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_108_101_109_101_110_116_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_111_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_109_112_111_114_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_100_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_100_101_120' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_100_101_120_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_100_101_120_101_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_108_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_108_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_108_105_110_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101_114_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101_114_102_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101_114_102_97_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101_114_102_97_99_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101_114_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101_114_110_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_110_116_101_114_110_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_105_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108_101_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108_105_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108_105_98_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108_105_98_114_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108_105_98_114_97_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_108_105_98_114_97_114_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_101_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_101_109_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_101_109_111_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_101_109_111_114_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_105_110_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_105_110_117_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_105_110_117_116_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_105_110_117_116_101_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_111_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_111_100_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_111_100_105_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_111_100_105_102_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_111_100_105_102_105_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_111_100_105_102_105_101_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_117_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_117_116_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_117_116_97_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_117_116_97_98_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_117_116_97_98_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_112_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_112_112_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_112_112_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_112_112_105_110_103' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_116_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_116_99_104' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_99_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_109_97_99_114_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_110_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_110_101_119' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_110_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_110_117_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_110_117_108_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111_118' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111_118_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111_118_101_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111_118_101_114_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111_118_101_114_114_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111_118_101_114_114_105_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_111_118_101_114_114_105_100_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_105_118' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_105_118_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_105_118_97_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_105_118_97_116_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_111_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_111_109_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_111_109_105_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_111_109_105_115_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_97_103' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_97_103_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_114_97_103_109_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_117_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_117_114_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_117_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_117_98_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_117_98_108_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_117_98_108_105_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_114_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_114_116_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_114_116_105_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_114_116_105_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_121_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_121_97_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_121_97_98_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_112_97_121_97_98_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_102_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_102_101_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_102_101_114_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_102_101_114_101_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_102_101_114_101_110_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_102_101_114_101_110_99_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108_111_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108_111_99_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108_111_99_97_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108_111_99_97_116_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108_111_99_97_116_97_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108_111_99_97_116_97_98_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_108_111_99_97_116_97_98_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_116_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_116_117_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_116_117_114_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_116_117_114_110_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_99_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_99_101_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_99_101_105_118' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_114_101_99_101_105_118_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_97_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_97_108_101_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_99_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_99_111_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_99_111_110_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_101_99_111_110_100_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_105_122' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_105_122_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_105_122_101_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_105_122_101_111_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_111_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_111_114_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_111_114_97_103' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_111_114_97_103_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_114_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_114_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_114_105_110_103' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_114_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_114_117_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_114_117_99_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_97_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_97_116_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_116_97_116_105_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_117_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_117_112_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_117_112_112_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_117_112_112_111_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_117_112_112_111_114_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_117_112_112_111_114_116_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_119' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_119_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_119_105_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_119_105_116_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_115_119_105_116_99_104' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_114_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_114_117_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_114_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_121_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_121_112_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_121_112_101_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_121_112_101_100_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_121_112_101_100_101_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_121_112_101_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_116_121_112_101_111_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_105_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_105_99_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_105_99_111_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_105_99_111_100_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_99_104' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_99_104_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_99_104_101_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_99_104_101_99_107' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_99_104_101_99_107_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_110_99_104_101_99_107_101_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_115_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_115_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_117_115_105_110_103' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_105_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_105_101_119' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_105_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_105_114_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_105_114_116_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_105_114_116_117_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_105_114_116_117_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_118_97_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_101_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_101_101_107' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_101_101_107_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_101_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_104' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_104_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_104_105_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_119_104_105_108_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_121_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_121_101_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_121_101_97_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_121_101_97_114_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_100_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_100_100_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_100_100_114_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_100_100_114_101_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_100_100_114_101_115_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_102_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_102_116_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_102_116_101_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_108_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_108_105_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_108_105_97_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_110_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_110_111_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_110_111_110_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_110_111_110_121_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_110_111_110_121_109_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_110_111_110_121_109_111_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_110_111_110_121_109_111_117_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_112_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_112_112_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_112_112_108_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_115_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_115_115_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_115_115_101_109' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_115_115_101_109_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_115_115_101_109_98_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_115_115_101_109_98_108_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_117_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_117_116_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_98_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_98_115_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_98_115_116_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_98_115_116_114_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_98_115_116_114_97_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_97_98_115_116_114_97_99_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_111_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_111_111_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_114_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_114_101_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_114_101_97_107' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_121_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_98_121_116_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_114_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_114_117_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_114_117_99_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_114_117_99_116_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_114_117_99_116_111_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_97_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_115_116_97_110_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116_105' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116_105_110' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116_105_110_117' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116_105_110_117_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116_114' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116_114_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116_114_97_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_110_116_114_97_99_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_112' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_112_121' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_112_121_111' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_111_112_121_111_102' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_108_108' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_108_108_100' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_108_108_100_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_108_108_100_97_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_108_108_100_97_116_97' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_115' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_115_101' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_116' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_116_99' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_99_97_116_99_104' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.table_prefix_root' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.tail_iff' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.takeWhile_reprint' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.toFin16_value' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.trailing_underscore_refused' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.trailing_underscore_tail' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.underscoreOk_bad_follower' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.underscoreOk_doubled' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.underscoreOk_trailing' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.uppercase_hex_prefix_refused' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.digits1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.digits1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.digitsTail.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.digitsTail.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.digitsTail.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.digitsTail.eq_def' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.eip55.eq_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.hexDigits.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.hexDigits.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.hexDigits.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.hexDigits.eq_4' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.hexDigits.eq_def' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.hexDigits.induct_unfolding' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.hexNumber.eq_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.hexNumber.eq_2' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.isDigit.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.isHexDigit.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.noGlue.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.Checked.noGlue.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Decimal.complete' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Decimal.erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Decimal.raw_nonempty' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Decimal.sound' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Decimal.underscore_ok' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.all_digits' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.append_stop' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.canonical' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.complete' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.consumed' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.nonempty' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.sound' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.underscore_ok' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Digits.value_erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Exponent.complete' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Exponent.erased_stop' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Exponent.erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Exponent.fraction_absent' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Exponent.sound' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Exponent.underscore_ok' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.FractionPart.complete' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.FractionPart.erased_stop' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.FractionPart.erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.FractionPart.sound' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.FractionPart.underscore_ok' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.all_digits' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.brecOn' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.canonical' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.complete' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.head' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.last_digit' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.no_doubled' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.nonempty' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.raw_classes' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.sound' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.value_erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Hexadecimal.complete' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Hexadecimal.erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Hexadecimal.raw_nonempty' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Hexadecimal.sound' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.IntegerPart.complete' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.IntegerPart.erasure' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.IntegerPart.sound' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.NoDigits.complete' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.NoDigits.of_stop' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.NoDigits.sound' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Tail.all_digits' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Tail.append_stop' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Tail.brecOn' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Tail.canonical' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Tail.complete' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Tail.consumed' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Tail.sound' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Tail.underscore_ok' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.checksum_controls._proof_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.checksum_length_controls._proof_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_exponent_underscore_refused._simp_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_negative_exponent_underscore_refused._simp_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.decimal_plus_exponent_refused._simp_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_4' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_5' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_6' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_7' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_8' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.denomination_head._proof_1_9' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digit_marker_false._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digit_not_underscore._proof_1_3' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digit_not_underscore._simp_1_2' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.digits1_consumption_range._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.eraseUnderscores.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.exponent_marker._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.exponent_marker._proof_1_2' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_10' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_11' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_12' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_13' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_14' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_15' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_4' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_5' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_6' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_7' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_8' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixtureExpected._proof_9' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.fixture_observations_pass._proof_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hexVal_lt16._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hexVal_lt16._proof_1_2' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.hexVal_lt16._proof_1_3' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.lex_numeric_range._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.lex_numeric_range._proof_1_2' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.locate_order._proof_1_3' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.locate_order._simp_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.missing_exponent_refused._simp_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.missing_negative_exponent_refused._simp_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.octal_refused._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.readExponent.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.readExponent.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.readExponent.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.readFraction.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.readFraction.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.scannerControls._proof_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.scannerControls._proof_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.scanner_controls_pass._proof_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_digit._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.split_glued_dot._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.underscoreOk.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.underscoreOk.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Source.NumLit.value.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Source.NumLit.value.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Decimal.sound._simp_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Exponent.complete._simp_1_2' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.Exponent.sound._simp_1_1' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.FixtureObservation.mk.inj' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.FixtureObservation.mk.injEq' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.FixtureObservation.mk.sizeOf_spec' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.complete._simp_1_2' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.erasure._proof_1_3' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.erasure._simp_1_2' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.no_doubled._proof_1_1' depends on axioms: [propext, Quot.sound]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.HexDigits.sound._simp_1_7' depends on axioms: [propext]",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.instDecidableEqFixtureObservation.decEq._proof_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.instDecidableEqFixtureObservation.decEq._proof_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.instDecidableEqFixtureObservation.decEq._proof_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.instDecidableEqFixtureObservation.decEq._proof_4' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.instDecidableEqFixtureObservation.decEq._proof_5' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.instDecidableEqFixtureObservation.decEq._proof_6' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.instDecidableEqFixtureObservation.decEq._proof_7' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'Solidity.Frontend.NumericLiteralProofs.instDecidableEqFixtureObservation.decEq._proof_8' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Backfill.0.Solidity.Frontend.Checked.locate.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Backfill.0.Solidity.Frontend.Checked.locate.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Backfill.0.Solidity.Frontend.Checked.noGlue.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Backfill.0.Solidity.Frontend.Checked.noGlue.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Backfill.0.Solidity.Frontend.Checked.noGlue.match_1.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Backfill.0.Solidity.Frontend.Checked.noGlue.match_1.eq_4' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Backfill.0.Solidity.Frontend.Checked.noGlue.match_3.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Backfill.0.Solidity.Frontend.Checked.noGlue.match_3.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.classify.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.classify.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.plainString.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.plainString.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solTok.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solTok.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solTok.match_3.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solTok.match_3.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solTok.match_3.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solTok.match_5.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solTok.match_5.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solWord.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solWord.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solWord.match_3.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solWord.match_3.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.solWord.match_3.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.strBody.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Classification.0.Solidity.Frontend.Checked.strBody.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Digits.0.Solidity.Frontend.Checked.digits1.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Digits.0.Solidity.Frontend.Checked.digits1.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Digits.0.Solidity.Frontend.Checked.digitsTail.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Digits.0.Solidity.Frontend.Checked.digitsTail.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Digits.0.Solidity.Frontend.Checked.digitsTail.match_3.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Digits.0.Solidity.Frontend.Checked.digitsTail.match_3.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Refusals.0.Solidity.Frontend.Checked.hexNumber.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Refusals.0.Solidity.Frontend.Checked.hexNumber.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Refusals.0.Solidity.Frontend.NumericLiteralProofs.decNumber_parts.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Refusals.0.Solidity.Frontend.NumericLiteralProofs.decNumber_parts.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Refusals.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_3.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Refusals.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_3.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Refusals.0.Solidity.Frontend.NumericLiteralProofs.readFraction.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Refusals.0.Solidity.Frontend.NumericLiteralProofs.readFraction.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.Checked.hexNumber.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.Checked.hexNumber.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.Checked.numberSpan.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.Checked.numberSpan.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.Checked.numberSpan.match_3.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.Checked.numberSpan.match_3.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.Checked.numberSpan.match_3.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.NumericLiteralProofs.exponentialSpan.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.NumericLiteralProofs.exponentialSpan.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.NumericLiteralProofs.exponentialSpan.match_1.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.NumericLiteralProofs.fractionalSpan.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Span.0.Solidity.Frontend.NumericLiteralProofs.fractionalSpan.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexDigits.match_1.congr_eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexDigits.match_1.congr_eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexDigits.match_1.congr_eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexDigits.match_1.congr_eq_4' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexDigits.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexDigits.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexDigits.match_1.eq_3' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexDigits.match_1.eq_4' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexNumber.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.Checked.hexNumber.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_3.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_3.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_5.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_5.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.NumericLiteralProofs.readFraction.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Spellings.0.Solidity.Frontend.NumericLiteralProofs.readFraction.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Underscores.0.Solidity.Frontend.Checked.digits1.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Underscores.0.Solidity.Frontend.Checked.digits1.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Underscores.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Underscores.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Underscores.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_3.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Underscores.0.Solidity.Frontend.NumericLiteralProofs.readExponent.match_3.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Underscores.0.Solidity.Frontend.NumericLiteralProofs.underscoreOk.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Underscores.0.Solidity.Frontend.NumericLiteralProofs.underscoreOk.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Values.0.Solidity.Source.NumLit.value.match_1.eq_1' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    },
+    {
+      "severity": "info",
+      "message": "'_private.Solidity.Frontend.NumericLiteralProofs.Values.0.Solidity.Source.NumLit.value.match_1.eq_2' does not depend on any axioms",
+      "line": 7,
+      "column": 1,
+      "lean_tags": null
+    }
+  ],
+  "failed_dependencies": []
+}

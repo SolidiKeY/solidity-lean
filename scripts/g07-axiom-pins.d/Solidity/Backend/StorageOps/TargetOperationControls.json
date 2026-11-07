@@ -1,0 +1,56 @@
+{
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.arbitrary_depth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.changed_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.changed_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.exact_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.malformed_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.raw_key_boundary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.read_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.wrong_constant_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetOperationControls.lean:Solidity.Backend.StorageOps.TargetOperationControls.wrong_tag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

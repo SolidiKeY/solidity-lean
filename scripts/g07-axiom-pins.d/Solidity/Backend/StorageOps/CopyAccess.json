@@ -1,0 +1,23 @@
+{
+ "Solidity/Backend/StorageOps/CopyAccess.lean:Solidity.Backend.StorageOps.CopyAccess.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyAccess.lean:Solidity.Backend.StorageOps.CopyAccess.observed_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyAccess.lean:Solidity.Backend.StorageOps.CopyAccess.read_queries_from_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyAccess.lean:Solidity.Backend.StorageOps.CopyAccess.readQueries": [],
+ "Solidity/Backend/StorageOps/CopyAccess.lean:Solidity.Backend.StorageOps.CopyAccess.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

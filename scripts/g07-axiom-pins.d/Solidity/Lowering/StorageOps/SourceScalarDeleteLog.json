@@ -1,0 +1,122 @@
+{
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.clear_log_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.clearOp_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.generated_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.generated_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.mapping_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.ordered_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.ordered_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.ordered_wrong_scope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.ordered_wrong_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.restore_inner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.static_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.transient_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.transient_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.typed_paths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.wrong_scope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.Controls.wrong_tail_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.scalar_range_explicit_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.scalar_range_journal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.scalar_range_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.scalar_range_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.scalar_range_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.scalar_range_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.scalar_range_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceScalarDeleteLog.lean:Solidity.Backend.StorageOps.SourceScalarDeleteLog.setCell_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

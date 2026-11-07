@@ -1,0 +1,463 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.both_phase_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.both_phase_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.cleared_child_actual_loop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.cleared_child_interval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.cleared_child_interval_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.cleared_child_old_owner_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.cleared_child_whole_extent_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.complete_growth_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.complete_growth_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.complete_not_raw_default": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.complete_wrong_source_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.failed_query_nonzero_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.finite_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.finite_root_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.finite_wrong_observer_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.forall_bounded_pair": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_case_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_child_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_live_retained_distinction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_none_does_not_pin_raw_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_not_old_default": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_primitive_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_root_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_root_postowner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_root_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_wrong_extra_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.fresh_wrong_skip_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.future_frame_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.growing_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.growing_self_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.ignored_retained_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.invalid_none_physical_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.later_alias_and_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.later_copied_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.later_finished_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.later_output_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.later_precise_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.later_precise_root_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.later_wrong_shadow_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.later_wrong_shadow_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.mixed_growth_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.mixed_growth_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.mixed_not_old_default": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.mixed_wrong_fresh": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.mixed_wrong_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.older_region_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.older_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.older_root_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.older_wrong_outer_clear_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.older_wrong_outer_clear_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.older_wrong_retained_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.older_wrong_source_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.older_wrong_source_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.output_growth_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.output_shrink_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.precise_access_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.precise_access_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.precise_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.precise_root_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.precise_root_target_wrong_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.precise_root_wrong_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.precise_snapshot_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.repeated_live_clear_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.retained_copied_root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.retained_copy_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.retained_prefix_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.retained_prefix_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.retained_strip_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.selected_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.selected_root_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.selected_root_wrong_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.self_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrink_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrink_root_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrink_wrong_classes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrink_wrong_skip_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrink_wrong_skip_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrinking_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrinking_clear_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrinking_copied_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.shrinking_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.stale_mapping_erasure_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.stale_mapping_options": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.stale_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.stale_root_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.stale_root_whole_extent_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.stale_root_wrong_source_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.stale_root_wrong_source_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.unread_source_copy_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.unread_source_target_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.visited_frame_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayTransportControls.lean:Solidity.Backend.StorageOps.TargetNestedArrayTransportControls.wrong_header_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

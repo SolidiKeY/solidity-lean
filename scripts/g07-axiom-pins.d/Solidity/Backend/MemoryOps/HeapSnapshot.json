@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.captureOverwrite_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.overwriteSlice_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.overwriteSlice_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.overwriteSlice_inside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/HeapSnapshot.lean:Solidity.Backend.MemoryOps.overwriteSlice_outside": [
+  "Quot.sound",
+  "propext"
+ ]
+}

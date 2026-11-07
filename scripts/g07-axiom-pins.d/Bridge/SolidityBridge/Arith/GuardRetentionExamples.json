@@ -1,0 +1,14 @@
+{
+ "Bridge/SolidityBridge/Arith/GuardRetentionExamples.lean:Solidity.Bridge.Arith.GuardRetentionExamples.guard_matrix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/GuardRetentionExamples.lean:Solidity.Bridge.Arith.GuardRetentionExamples.retained_panic": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/GuardRetentionExamples.lean:Solidity.Bridge.Arith.narrowCheck_guard": [
+  "Quot.sound",
+  "propext"
+ ]
+}

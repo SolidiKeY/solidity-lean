@@ -43,7 +43,7 @@ def storage (srcLength dstLength : Nat) : Source.Storage env.layout env.cellTy :
 def state (srcLength dstLength : Nat) : Source.St env :=
   { ex :=
       { world := ⟨fun a => if a=address then
-          {balance:=⟨19,by decide⟩,nonce:=3,code:=some 0,storage:=storage srcLength dstLength}
+          {balance := 19,nonce:=3,code:=some 0,storage:=storage srcLength dstLength}
           else Source.Account.empty _⟩
         transient := Source.Transient.empty.set address
           ((Source.Storage.empty : Source.Storage env.layout env.cellTy).write scratch (.int 41 (by decide)))
@@ -71,7 +71,7 @@ def rawView (s : Source.St env) := paths.map (rawWordAt s)
 def view (s : Source.St env) := paths.map (wordAt s)
 def context (s : Source.St env) :=
   ((((s.ex.transient.cells address).read scratch).bind Source.Val.word).map Fin.val,
-   s.ex.journal.length,(s.ex.world.accounts address).balance.val,(s.ex.world.accounts address).nonce,
+   s.ex.journal.length,(s.ex.world.accounts address).balance,(s.ex.world.accounts address).nonce,
    (s.ex.world.accounts address).code,s.heap.next,(s.heap.cells 0).isNone,s.events.length,
    s.logs.map (fun (a,b) => (a.val,b.map UInt8.toNat)),s.fnLocals.1)
 def short := run 2 7 6
@@ -143,13 +143,13 @@ def journalRows (s : Source.St env) := s.ex.journal.map fun e =>
   match e with
   | .account a old => (a.val,([right,elem right 0,elem right 1,elem right 2,elem right 3,
       elem right 4,elem right 5,elem right 6,elem right 8,sentinel].map fun p =>
-        ((old.storage.read p).bind Source.Val.word).map Fin.val),old.balance.val,old.nonce,old.code)
+        ((old.storage.read p).bind Source.Val.word).map Fin.val),old.balance,old.nonce,old.code)
   | .transient a _ => (a.val,[],0,0,none)
 def rawJournalRows (s : Source.St env) := s.ex.journal.map fun e =>
   match e with
   | .account a old => (a.val,([right,elem right 0,elem right 1,elem right 2,elem right 3,
       elem right 4,elem right 5,elem right 6,elem right 8,sentinel].map fun p =>
-        ((old.storage.cell p).bind Source.Val.word).map Fin.val),old.balance.val,old.nonce,old.code)
+        ((old.storage.cell p).bind Source.Val.word).map Fin.val),old.balance,old.nonce,old.code)
   | .transient a _ => (a.val,[],0,0,none)
 def journalOrder : Prop :=
   (journalRows short.2.2,journalRows complete.2.2) =

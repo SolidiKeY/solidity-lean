@@ -1,0 +1,22 @@
+{
+ "Bridge/SolidityBridge/Arith/WidthsSignedShift.lean:Solidity.Bridge.Arith.WidthsSignedShift.check_of_synth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsSignedShift.lean:Solidity.Bridge.Arith.WidthsSignedShift.inhabited_controls": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsSignedShift.lean:Solidity.Bridge.Arith.WidthsSignedShift.nonliteral_control": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsSignedShift.lean:Solidity.Bridge.Arith.WidthsSignedShift.synth_literal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsSignedShift.lean:Solidity.Bridge.Arith.WidthsSignedShift.synth_nonliteral": [
+  "Quot.sound",
+  "propext"
+ ]
+}

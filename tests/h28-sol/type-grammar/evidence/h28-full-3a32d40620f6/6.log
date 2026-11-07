@@ -1,0 +1,17 @@
+register: stale roots; run scripts/coord-tools/register.sh
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.Boundaries
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.Composition
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.Exactness
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserArrays
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserBasics
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserChecks
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserContexts
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserFnAttrs
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserFunctions
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserLengths
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserMapping
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserParams
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserPaths
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.ParserReady
+Solidity.lean: missing import Solidity.Frontend.TypeGrammarH28.TypeRegions

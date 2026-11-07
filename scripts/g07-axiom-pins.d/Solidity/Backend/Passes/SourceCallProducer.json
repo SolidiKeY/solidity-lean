@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.rawAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.history": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.call_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.step_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.step_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducer.lean:Solidity.Backend.Passes.SourceCallProducer.fetched_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

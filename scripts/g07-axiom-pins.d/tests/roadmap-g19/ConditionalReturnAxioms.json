@@ -1,0 +1,89 @@
+{
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.Controls.observe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.Controls.return_not_normal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.Controls.wrong_donor_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.Controls.wrong_flag_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.Controls.wrongFlag": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.reached": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalReturn.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalStatement.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalStatement.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalStatement.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalStatement.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnAxioms.lean:Solidity.Lowering.G19.ConditionalStatement.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

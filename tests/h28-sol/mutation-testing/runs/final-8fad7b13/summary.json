@@ -1,0 +1,2107 @@
+{
+ "controls": {
+  "pilot.control.guard-label-equivalent": {
+   "expect": "equivalent-certified",
+   "actual": "equivalent-certified"
+  },
+  "control.proof-invalid-syntax": {
+   "expect": "invalid-compilation",
+   "actual": "invalid-compilation"
+  },
+  "control.revert-diamond-true": {
+   "expect": "killed",
+   "actual": "killed"
+  },
+  "control.guard-label-equivalent": {
+   "expect": "equivalent",
+   "actual": "equivalent"
+  },
+  "control.cross-witness-survivor": {
+   "expect": "link-mismatch",
+   "actual": "link-mismatch"
+  },
+  "census.storageLengthRead_unfold_rightFst.receiver-reevaluated.1": {
+   "expect": "survivor-sound",
+   "actual": "survivor-sound"
+  },
+  "control.negative.pop-delete": {
+   "expect": "witness-failed",
+   "actual": "witness-failed"
+  },
+  "control.negative.index-bounds": {
+   "expect": "witness-failed",
+   "actual": "witness-failed"
+  },
+  "control.negative.push-tail-length": {
+   "expect": "witness-failed",
+   "actual": "witness-failed"
+  },
+  "control.negative.overflow": {
+   "expect": "witness-failed",
+   "actual": "witness-failed"
+  },
+  "control.negative.division-minimum": {
+   "expect": "witness-failed",
+   "actual": "witness-failed"
+  },
+  "control.negative.alias-capture-once": {
+   "expect": "link-mismatch",
+   "actual": "link-mismatch"
+  },
+  "control.negative.callback-frames": {
+   "expect": "witness-failed",
+   "actual": "witness-failed"
+  },
+  "control.negative.rollback-payment": {
+   "expect": "witness-failed",
+   "actual": "witness-failed"
+  },
+  "control.negative.guard-polarity": {
+   "expect": "witness-failed",
+   "actual": "witness-failed"
+  },
+  "control.semantic.index-bounds": {
+   "expect": "semantic-witness-failed",
+   "actual": "semantic-witness-failed"
+  },
+  "control.semantic.push-tail-length": {
+   "expect": "semantic-witness-failed",
+   "actual": "semantic-witness-failed"
+  },
+  "control.semantic.division-minimum": {
+   "expect": "semantic-witness-failed",
+   "actual": "semantic-witness-failed"
+  },
+  "control.semantic.pop-delete": {
+   "expect": "semantic-witness-failed",
+   "actual": "semantic-witness-failed"
+  }
+ },
+ "controls_pass": true,
+ "proof_baselines": {
+  "rules-taclet": "pass",
+  "rules-taclet-rows": "pass",
+  "callback-totaclet": "pass"
+ },
+ "proof_oracle": {
+  "census_counts": {
+   "detected": 267,
+   "invalid-compilation": 61,
+   "equivalent-certified": 6
+  },
+  "all_entry_counts": {
+   "detected": 273,
+   "invalid-compilation": 62,
+   "equivalent-certified": 7
+  },
+  "by_family": {
+   "alias-capture-once": {
+    "detected": 68,
+    "invalid-compilation": 5
+   },
+   "index-bounds": {
+    "detected": 33
+   },
+   "pop-delete": {
+    "detected": 12,
+    "equivalent-certified": 1,
+    "invalid-compilation": 2
+   },
+   "overflow": {
+    "detected": 15,
+    "invalid-compilation": 9
+   },
+   "push-tail-length": {
+    "detected": 22,
+    "invalid-compilation": 19,
+    "equivalent-certified": 4
+   },
+   "division-minimum": {
+    "invalid-compilation": 4,
+    "detected": 12
+   },
+   "rollback-payment": {
+    "detected": 20,
+    "invalid-compilation": 2
+   },
+   "guard-polarity": {
+    "detected": 19,
+    "invalid-compilation": 7,
+    "equivalent-certified": 1
+   },
+   "other:loop-invariant": {
+    "invalid-compilation": 9,
+    "detected": 3
+   },
+   "other:closing": {
+    "detected": 3
+   },
+   "callback-frames": {
+    "detected": 14,
+    "invalid-compilation": 2
+   },
+   "other:declaration": {
+    "detected": 3
+   },
+   "other:access": {
+    "invalid-compilation": 3,
+    "detected": 42
+   },
+   "side-condition": {
+    "detected": 5,
+    "equivalent-certified": 1
+   },
+   "other:block": {
+    "detected": 1
+   },
+   "other:loop": {
+    "detected": 1
+   }
+  },
+  "census_mutants": 334
+ },
+ "semantic": {
+  "alias.receiver-getter-twice": {
+   "family": "alias-capture-once",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "control.revert-diamond-true": {
+   "family": "rollback-payment",
+   "kind": "known-kill",
+   "outcome": "killed"
+  },
+  "bounds.array-read-skipped": {
+   "family": "index-bounds",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "callback.failed-send-flag-true": {
+   "family": "callback-frames",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "division.div-sub-helper-min-and-zero": {
+   "family": "division-minimum",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "overflow.compound-sub-helper-max": {
+   "family": "overflow",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "overflow.increment-erased-max": {
+   "family": "overflow",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "payment.success-flag-false": {
+   "family": "rollback-payment",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "pop.empty-skipped": {
+   "family": "pop-delete",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "delete.array-index-skipped": {
+   "family": "pop-delete",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "push.reference-tail-cleared": {
+   "family": "push-tail-length",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "push.compound-updates-swapped": {
+   "family": "push-tail-length",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "guard.require-success-false": {
+   "family": "guard-polarity",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "guard.require-revert-true": {
+   "family": "guard-polarity",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "control.guard-label-equivalent": {
+   "family": "guard-polarity",
+   "kind": "equivalent-control",
+   "outcome": "equivalent"
+  },
+  "callback-table.failed-send-flag-true": {
+   "family": "callback-frames",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.ifElseSplit.guard-true-to-false.1": {
+   "family": "guard-polarity",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.ifElseSplit.guard-false-to-true.1": {
+   "family": "guard-polarity",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.transferNoCallbackBox.payment-amount-zeroed.1": {
+   "family": "rollback-payment",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.transferDiamond.close-false-to-true.1": {
+   "family": "rollback-payment",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.storageRootDelete.delete-dropped.1": {
+   "family": "pop-delete",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.storageRootIncrement.increment-step-dropped.1": {
+   "family": "overflow",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "control.cross-witness-survivor": {
+   "family": "guard-polarity",
+   "kind": "runner-survivor-control",
+   "outcome": "link-mismatch"
+  },
+  "census.storageIndexReadArrayFind.index-constant-zero.1": {
+   "family": "index-bounds",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.clause.binopAssignment.operands-swapped.1": {
+   "family": "division-minimum",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.storagePushAddAssign.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "kind": "mutant",
+   "outcome": "killed"
+  },
+  "census.storageLengthRead_unfold_rightFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "kind": "sound-survivor",
+   "outcome": "survivor-sound"
+  },
+  "control.negative.pop-delete": {
+   "family": "pop-delete",
+   "kind": "negative-control",
+   "outcome": "witness-failed"
+  },
+  "control.negative.index-bounds": {
+   "family": "index-bounds",
+   "kind": "negative-control",
+   "outcome": "witness-failed"
+  },
+  "control.negative.push-tail-length": {
+   "family": "push-tail-length",
+   "kind": "negative-control",
+   "outcome": "witness-failed"
+  },
+  "control.negative.overflow": {
+   "family": "overflow",
+   "kind": "negative-control",
+   "outcome": "witness-failed"
+  },
+  "control.negative.division-minimum": {
+   "family": "division-minimum",
+   "kind": "negative-control",
+   "outcome": "witness-failed"
+  },
+  "control.negative.alias-capture-once": {
+   "family": "alias-capture-once",
+   "kind": "negative-control",
+   "outcome": "link-mismatch"
+  },
+  "control.negative.callback-frames": {
+   "family": "callback-frames",
+   "kind": "negative-control",
+   "outcome": "witness-failed"
+  },
+  "control.negative.rollback-payment": {
+   "family": "rollback-payment",
+   "kind": "negative-control",
+   "outcome": "witness-failed"
+  },
+  "control.negative.guard-polarity": {
+   "family": "guard-polarity",
+   "kind": "negative-control",
+   "outcome": "witness-failed"
+  },
+  "control.semantic.index-bounds": {
+   "family": "index-bounds",
+   "kind": "semantic-control",
+   "outcome": "semantic-witness-failed"
+  },
+  "control.semantic.push-tail-length": {
+   "family": "push-tail-length",
+   "kind": "semantic-control",
+   "outcome": "semantic-witness-failed"
+  },
+  "control.semantic.division-minimum": {
+   "family": "division-minimum",
+   "kind": "semantic-control",
+   "outcome": "semantic-witness-failed"
+  },
+  "control.semantic.pop-delete": {
+   "family": "pop-delete",
+   "kind": "semantic-control",
+   "outcome": "semantic-witness-failed"
+  }
+ },
+ "semantic_witness_validation": {
+  "killed": 23,
+  "denominator_killed_or_witness_failed": 23,
+  "counts": {
+   "killed": 24,
+   "equivalent": 1,
+   "link-mismatch": 2,
+   "survivor-sound": 1,
+   "witness-failed": 8,
+   "semantic-witness-failed": 4
+  }
+ },
+ "runner_cases_complete": true,
+ "mutants": {
+  "storageFieldRead_unfold_rightFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 44.571
+  },
+  "storageIndexRead_unfold_rightFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 41.311
+  },
+  "storageFieldWrite_unfold_leftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.08
+  },
+  "storageFieldWriteStorageRef_unfold_leftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.18
+  },
+  "storageIndexWriteCaptureAllComplexRecv.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.352
+  },
+  "storageIndexWriteStorageRefCaptureAllComplexRecv.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 37.107
+  },
+  "storageFieldDelete_unfold_leftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 40.256
+  },
+  "storageIndexDelete_unfold_leftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.66
+  },
+  "storageIndexReadArrayFind.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 36.247
+  },
+  "storageIndexReadArrayStoreRoot.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 41.136
+  },
+  "storageIndexWriteArraySave.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 39.74
+  },
+  "storageIndexWriteArrayCopySource.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 39.224
+  },
+  "storageIndexReadArrayBindLocalRoot.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 42.983
+  },
+  "storageIndexReadArrayBindLocalRootMappingElement.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 42.528
+  },
+  "storageRootDelete.delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 40.803
+  },
+  "storageFieldDelete.delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 40.818
+  },
+  "storageIndexDelete.delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 44.265
+  },
+  "storageIndexArrayDelete.delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 41.16
+  },
+  "storageIndexArrayDelete.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 37.864
+  },
+  "storageLengthRead_unfold_rightFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 40.196
+  },
+  "memoryLengthRead_unfold_rightFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 38.343
+  },
+  "storageIndexArrayOpAssign.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 36.597
+  },
+  "storageIndexArrayOpAssign.index-constant-zero.2": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 37.329
+  },
+  "memoryIndexArrayOpAssign.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 38.121
+  },
+  "memoryIndexArrayOpAssign.index-constant-zero.2": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 36.148
+  },
+  "storageFieldOpAssignUnfoldLeftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.502
+  },
+  "storageIndexOpAssignUnfoldLeftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.916
+  },
+  "memoryFieldOpAssignUnfoldLeftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 37.025
+  },
+  "memoryIndexOpAssignUnfoldLeftFst.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 40.873
+  },
+  "memoryIndexOpAssignUnfoldLeftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.958
+  },
+  "localIncrement.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 38.758
+  },
+  "storageRootIncrement.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 38.58
+  },
+  "storageFieldIncrement.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 40.8
+  },
+  "storageIndexIncrement.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 38.285
+  },
+  "memoryFieldIncrement.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 37.778
+  },
+  "memoryIndexArrayIncrement.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 39.94
+  },
+  "memoryIndexArrayIncrement.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 38.71
+  },
+  "memoryIndexArrayIncrement.index-constant-zero.2": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 37.611
+  },
+  "storageFieldIncrementUnfoldLeftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 40.583
+  },
+  "storageIndexIncrementUnfoldLeftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.987
+  },
+  "memoryFieldIncrementUnfoldLeftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 38.749
+  },
+  "memoryIndexIncrementUnfoldLeftFst.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 39.766
+  },
+  "memoryIndexIncrementUnfoldLeftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 41.962
+  },
+  "localAssignIncrement.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 38.879
+  },
+  "storageRootIncrementAssignment.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 39.533
+  },
+  "storageFieldIncrementAssignment.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 40.138
+  },
+  "storageIndexIncrementAssignment.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 35.813
+  },
+  "memoryFieldIncrementAssignment.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 35.688
+  },
+  "memoryIndexArrayIncrementAssignment.increment-step-dropped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 37.736
+  },
+  "memoryIndexArrayIncrementAssignment.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 36.566
+  },
+  "memoryIndexArrayIncrementAssignment.index-constant-zero.2": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 35.713
+  },
+  "memoryIndexArrayIncrementAssignment.index-constant-zero.3": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 36.216
+  },
+  "storagePushAddAssign.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 36.15
+  },
+  "storagePushAddAssign.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 37.365
+  },
+  "storagePushAddAssign.push-arith-add-to-sub.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 33.565
+  },
+  "storagePushAddAssign.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 31.034
+  },
+  "storagePushSubAssign.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 38.364
+  },
+  "storagePushSubAssign.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 40.342
+  },
+  "storagePushSubAssign.push-arith-sub-to-add.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 29.43
+  },
+  "storagePushSubAssign.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 32.556
+  },
+  "storagePushMulAssign.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 40.942
+  },
+  "storagePushMulAssign.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 39.894
+  },
+  "storagePushMulAssign.push-arith-mul-to-add.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 33.81
+  },
+  "storagePushMulAssign.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 31.871
+  },
+  "storagePushDivAssign.division-div-to-mul.1": {
+   "family": "division-minimum",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 32.427
+  },
+  "storagePushDivAssign.division-zero-guard-negated.1": {
+   "family": "division-minimum",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 31.75
+  },
+  "storagePushDivAssign.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 37.928
+  },
+  "storagePushDivAssign.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 39.43
+  },
+  "storagePushDivAssign.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 28.84
+  },
+  "storagePushModAssign.division-mod-to-div.1": {
+   "family": "division-minimum",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 32.739
+  },
+  "storagePushModAssign.division-zero-guard-negated.1": {
+   "family": "division-minimum",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 31.17
+  },
+  "storagePushModAssign.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 38.101
+  },
+  "storagePushModAssign.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 39.403
+  },
+  "storagePushModAssign.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 32.484
+  },
+  "storagePushPreincrement.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 41.613
+  },
+  "storagePushPreincrement.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 40.48
+  },
+  "storagePushPreincrement.push-arith-plus-one-to-minus.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 34.589
+  },
+  "storagePushPreincrement.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 31.514
+  },
+  "storagePushPostincrement.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 38.932
+  },
+  "storagePushPostincrement.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 38.717
+  },
+  "storagePushPostincrement.push-arith-plus-one-to-minus.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 30.491
+  },
+  "storagePushPostincrement.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 30.272
+  },
+  "storagePushPredecrement.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 37.971
+  },
+  "storagePushPredecrement.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 36.35
+  },
+  "storagePushPredecrement.push-arith-minus-one-to-plus.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 30.822
+  },
+  "storagePushPredecrement.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 29.069
+  },
+  "storagePushPostdecrement.last-slot-is-length.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 35.582
+  },
+  "storagePushPostdecrement.last-slot-is-length.2": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 37.805
+  },
+  "storagePushPostdecrement.push-arith-minus-one-to-plus.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 30.31
+  },
+  "storagePushPostdecrement.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 28.599
+  },
+  "storagePushValueSave.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 31.362
+  },
+  "storagePushValueSave.push-slot-is-last-old.1": {
+   "family": "push-tail-length",
+   "outcome": "equivalent-certified",
+   "elapsed_s": 38.627
+  },
+  "storagePushValueCopySource.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 33.137
+  },
+  "storagePushValueCopySource.push-slot-is-last-old.1": {
+   "family": "push-tail-length",
+   "outcome": "equivalent-certified",
+   "elapsed_s": 39.671
+  },
+  "storagePushMemoryCopySource.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 33.557
+  },
+  "storagePushMemoryCopySource.push-slot-is-last-old.1": {
+   "family": "push-tail-length",
+   "outcome": "equivalent-certified",
+   "elapsed_s": 38.45
+  },
+  "storagePushLengthSave.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 32.05
+  },
+  "storagePushLengthSaveReferenceElement.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 32.344
+  },
+  "storagePushLengthSaveMappingElement.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 29.946
+  },
+  "storagePushValue_unfold_leftFstReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 38.207
+  },
+  "storagePush_unfold_leftFstReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 39.749
+  },
+  "storagePop_unfold_leftFstReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 40.447
+  },
+  "storagePushValue_unfold_leftCallReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 33.278
+  },
+  "storagePush_unfold_leftCallReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 33.858
+  },
+  "storagePop_unfold_leftCallReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 33.332
+  },
+  "storagePopSave.delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 118.344
+  },
+  "storagePopSave.last-slot-is-length.1": {
+   "family": "pop-delete",
+   "outcome": "equivalent-certified",
+   "elapsed_s": 117.791
+  },
+  "storagePopSave.pop-length-reduced-twice.1": {
+   "family": "pop-delete",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 85.243
+  },
+  "storagePopSaveMappingElement.pop-length-reduced-twice.1": {
+   "family": "pop-delete",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 21.64
+  },
+  "storageLocalRootPush_unfold_leftFstReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 51.211
+  },
+  "storageLocalRootPushBind.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 45.032
+  },
+  "storageLocalRootPushBind.push-slot-is-last-old.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 53.272
+  },
+  "storageLocalPrimitivePushBind.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 43.793
+  },
+  "localValuePush_unfold_leftFstReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 53.38
+  },
+  "storageLocalRootPushBindMappingElement.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 46.546
+  },
+  "storageLocalRootPushBindMappingElement.push-slot-is-last-old.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 52.243
+  },
+  "transferNoCallbackBox.payment-amount-zeroed.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 55.033
+  },
+  "sendNoCallbackBox.payment-amount-zeroed.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 54.231
+  },
+  "sendNoCallbackBox.send-flag-false-to-true.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 52.783
+  },
+  "sendNoCallbackBox.send-flag-true-to-false.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 55.096
+  },
+  "sendNoCallbackDiamond.payment-amount-zeroed.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 55.448
+  },
+  "sendNoCallbackDiamond.send-amount-strict.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 53.408
+  },
+  "sendNoCallbackDiamond.send-flag-false-to-true.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 53.523
+  },
+  "sendNoCallbackDiamond.send-flag-true-to-false.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 55.175
+  },
+  "memoryFieldRead_unfold_rightFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 55.03
+  },
+  "memoryIndexRead_unfold_rightFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 53.362
+  },
+  "memoryIndexRead_unfold_rightSndIndex.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 79.121
+  },
+  "memoryIndexReadArrayValue.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 51.595
+  },
+  "memoryIndexReadArrayMemory.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 52.427
+  },
+  "memoryIndexWriteArray.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 56.414
+  },
+  "memoryIndexWriteCopy.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 54.603
+  },
+  "memoryFieldWrite_unfold_leftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 52.394
+  },
+  "memoryIndexWriteCaptureAllComplexRecv.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 55.437
+  },
+  "memoryIndexWriteCaptureAllComplexRecv.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 54.262
+  },
+  "memoryIndexWriteMemRefCaptureAllComplexRecv.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 50.596
+  },
+  "memoryIndexWriteMemRefCaptureAllComplexRecv.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 54.392
+  },
+  "memoryIndexWriteCaptureAllNonSimpleIndex.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 54.832
+  },
+  "memoryIndexWriteMemRefCaptureAllNonSimpleIndex.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 51.585
+  },
+  "memoryIndexWriteUnfoldSource.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 55.5
+  },
+  "memoryFieldDeletePrimitive.memory-delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 54.274
+  },
+  "memoryFieldDeleteReference.memory-delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 53.109
+  },
+  "memoryIndexDeletePrimitive.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 55.193
+  },
+  "memoryIndexDeletePrimitive.memory-delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 55.147
+  },
+  "memoryIndexDeleteReference.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 53.488
+  },
+  "memoryIndexDeleteReference.memory-delete-dropped.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 53.515
+  },
+  "memoryFieldDelete_unfold_leftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 56.709
+  },
+  "memoryIndexDelete_unfold_leftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 54.082
+  },
+  "memoryIndexDeleteNonSimpleIndexCapture.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 52.68
+  },
+  "memoryStorageCopyUnfold.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 55.492
+  },
+  "memoryToStorageIndexArrayCopyRoot.index-constant-zero.1": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 55.292
+  },
+  "memoryToStorageField_unfold_leftFst.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 51.806
+  },
+  "memoryToStorageIndexCaptureAllComplexRecv.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 54.709
+  },
+  "ifElseSplit.guard-false-to-true.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 54.42
+  },
+  "ifElseSplit.guard-true-to-false.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 51.229
+  },
+  "requireSimple.guard-false-to-true.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 53.439
+  },
+  "requireSimple.guard-true-to-false.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 54.599
+  },
+  "assertSimple.assert-check-true-to-false.1": {
+   "family": "guard-polarity",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 48.467
+  },
+  "assertSimple.guard-true-to-false.1": {
+   "family": "guard-polarity",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 47.082
+  },
+  "revertBox.close-true-to-false.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 54.011
+  },
+  "revertDiamond.close-false-to-true.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 54.572
+  },
+  "whileInvariantBox.break-negation-dropped.1": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 47.732
+  },
+  "whileInvariantBox.break-negation-dropped.2": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 47.028
+  },
+  "whileInvariantBox.break-negation-dropped.3": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 49.182
+  },
+  "whileInvariantBox.invariant-TRUE-to-FALSE.1": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 49.692
+  },
+  "whileInvariantBox.invariant-TRUE-to-FALSE.2": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 47.362
+  },
+  "whileInvariantBox.invariant-TRUE-to-FALSE.3": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 48.578
+  },
+  "whileInvariantBox.loop-guard-FALSE-to-TRUE.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 53.259
+  },
+  "whileInvariantBox.loop-guard-TRUE-to-FALSE.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 53.232
+  },
+  "whileInvariantDiamond.invariant-TRUE-to-FALSE.1": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 49.437
+  },
+  "whileInvariantDiamond.invariant-TRUE-to-FALSE.2": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 47.677
+  },
+  "whileInvariantDiamond.invariant-TRUE-to-FALSE.3": {
+   "family": "other:loop-invariant",
+   "outcome": "detected",
+   "elapsed_s": 53.613
+  },
+  "whileInvariantDiamond.loop-guard-FALSE-to-TRUE.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 55.156
+  },
+  "whileInvariantDiamond.loop-guard-TRUE-to-FALSE.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 52.235
+  },
+  "whileInvariantDiamond.loop-guard-TRUE-to-FALSE.2": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 53.174
+  },
+  "pushFixedCopySave.push-length-advanced-twice.1": {
+   "family": "push-tail-length",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 54.614
+  },
+  "pushFixedCopySave.push-slot-is-last-old.1": {
+   "family": "push-tail-length",
+   "outcome": "equivalent-certified",
+   "elapsed_s": 54.164
+  },
+  "pushMemorySourceCapture.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 50.491
+  },
+  "pushCompoundUnfoldReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 53.58
+  },
+  "pushIncrementUnfoldReceiver.receiver-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 54.468
+  },
+  "tryCallDiamond.close-false-to-true.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 25.707
+  },
+  "transferDiamond.close-false-to-true.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 52.16
+  },
+  "assumeFalse.close-true-to-false.1": {
+   "family": "other:closing",
+   "outcome": "detected",
+   "elapsed_s": 54.819
+  },
+  "loopExit.loop-guard-FALSE-to-TRUE.1": {
+   "family": "guard-polarity",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 27.155
+  },
+  "loopExit.loop-guard-FALSE-to-TRUE.2": {
+   "family": "guard-polarity",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 54.169
+  },
+  "whileClose.close-false-to-true.1": {
+   "family": "other:closing",
+   "outcome": "detected",
+   "elapsed_s": 52.273
+  },
+  "whileNoVariantDiamond.close-false-to-true.1": {
+   "family": "other:closing",
+   "outcome": "detected",
+   "elapsed_s": 27.511
+  },
+  "transferWithCallbackBox.payment-amount-zeroed.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 3.563
+  },
+  "sendWithCallbackBox.payment-amount-zeroed.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 2.225
+  },
+  "sendWithCallbackBox.send-flag-false-to-true.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 2.111
+  },
+  "sendWithCallbackBox.send-flag-true-to-false.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 2.195
+  },
+  "sendWithCallbackDiamond.payment-amount-zeroed.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 2.163
+  },
+  "sendWithCallbackDiamond.send-amount-strict.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 2.133
+  },
+  "sendWithCallbackDiamond.send-flag-false-to-true.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 2.041
+  },
+  "sendWithCallbackDiamond.send-flag-true-to-false.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 2.253
+  },
+  "binopC.helper-compound-operands-swapped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 227.456
+  },
+  "binopI.helper-incdec-swapped.1": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 229.069
+  },
+  "binop.helper-binop-args-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 227.421
+  },
+  "pushSlot.helper-push-slot-cleared.1": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 222.838
+  },
+  "pilot.alias.receiver-getter-twice": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 56.489
+  },
+  "pilot.bounds.array-read-skipped": {
+   "family": "index-bounds",
+   "outcome": "detected",
+   "elapsed_s": 56.182
+  },
+  "pilot.division.div-sub-helper-min-and-zero": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 222.811
+  },
+  "pilot.overflow.compound-sub-helper-max": {
+   "family": "overflow",
+   "outcome": "detected",
+   "elapsed_s": 221.234
+  },
+  "pilot.pop.empty-skipped": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 48.805
+  },
+  "pilot.push.compound-updates-swapped": {
+   "family": "push-tail-length",
+   "outcome": "detected",
+   "elapsed_s": 50.317
+  },
+  "pilot.control.guard-label-equivalent": {
+   "family": "guard-polarity",
+   "outcome": "equivalent-certified",
+   "elapsed_s": 53.886
+  },
+  "control.proof-invalid-syntax": {
+   "family": "guard-polarity",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 50.283
+  },
+  "clause.storageIndexRead_unfold_rightSndIndex.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 34.429
+  },
+  "clause.storageFieldRead_unfold_rightSndResult.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 65.901
+  },
+  "clause.storageIndexRead_unfold_rightSndResult.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 66.779
+  },
+  "clause.storageIndexWriteCaptureAllNonSimpleIndex.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 74.428
+  },
+  "clause.storageIndexWriteCaptureAllNonSimpleIndex.capture-use-reevaluated.2": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 108.962
+  },
+  "clause.storageIndexWriteCaptureAllNonSimpleIndex.capture-use-reevaluated.3": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 110.802
+  },
+  "clause.storageIndexWriteStorageRefCaptureAllNonSimpleIndex.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 57.604
+  },
+  "clause.storageIndexWriteStorageRefCaptureAllNonSimpleIndex.capture-use-reevaluated.2": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 53.318
+  },
+  "clause.storageRootWriteValueRhsCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 56.835
+  },
+  "clause.fieldWriteValueRhsCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 51.857
+  },
+  "clause.indexWriteValueRhsCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 57.12
+  },
+  "clause.storageIndexDeleteNonSimpleIndexCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 56.571
+  },
+  "clause.localValueDeclInitDrop.hand.1": {
+   "family": "other:declaration",
+   "outcome": "detected",
+   "elapsed_s": 53.044
+  },
+  "clause.valueDeclSkip.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 55.833
+  },
+  "clause.storageLocalDeclInitDrop.hand.1": {
+   "family": "other:declaration",
+   "outcome": "detected",
+   "elapsed_s": 55.698
+  },
+  "clause.storageLocalDeclSkip.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 54.479
+  },
+  "clause.memoryLocalDeclInitDrop.hand.1": {
+   "family": "other:declaration",
+   "outcome": "detected",
+   "elapsed_s": 57.083
+  },
+  "clause.memoryReferenceDeclFreshAlloc.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 55.94
+  },
+  "clause.memoryReferenceDeclFreshAlloc.binding-identity.2": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 56.811
+  },
+  "clause.localValueAssign.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.239
+  },
+  "clause.storageRootReadSelect.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.198
+  },
+  "clause.storageFieldReadFind.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.681
+  },
+  "clause.storageIndexReadMappingFind.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.572
+  },
+  "clause.storageRootWriteStore.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.949
+  },
+  "clause.storageRootWriteCopySource.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.557
+  },
+  "clause.storageFieldReadStoreRoot.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.046
+  },
+  "clause.storageIndexReadMappingStoreRoot.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 58.456
+  },
+  "clause.storageFieldWriteSave.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.536
+  },
+  "clause.storageFieldWriteCopySource.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 58.772
+  },
+  "clause.storageIndexWriteMappingSave.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 58.977
+  },
+  "clause.storageIndexWriteMappingCopySource.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.806
+  },
+  "clause.storageLocalRootRebind.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.821
+  },
+  "clause.storageFieldReadBindLocalRoot.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 58.475
+  },
+  "clause.storageIndexReadMappingBindLocalRoot.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.292
+  },
+  "clause.storageLengthRead.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 55.226
+  },
+  "clause.memoryLengthRead.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.368
+  },
+  "clause.binopAssignment.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 55.687
+  },
+  "clause.binopAssignment.operands-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 51.679
+  },
+  "clause.binopUnfoldLeft.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 56.468
+  },
+  "clause.binopUnfoldLeft.operands-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 56.702
+  },
+  "clause.binopUnfoldRight.side-condition-flipped.1": {
+   "family": "side-condition",
+   "outcome": "detected",
+   "elapsed_s": 35.693
+  },
+  "clause.binopUnfoldRight.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 51.605
+  },
+  "clause.binopUnfoldRight.operands-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 55.187
+  },
+  "clause.logicalAndShortCircuitRhs.branches-swapped.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 52.61
+  },
+  "clause.logicalAndShortCircuitRhs.short-circuit-flipped.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 48.466
+  },
+  "clause.logicalAndShortCircuitRhs.short-circuit-flipped.2": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 52.811
+  },
+  "clause.logicalOrShortCircuitRhs.branches-swapped.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 55.528
+  },
+  "clause.logicalOrShortCircuitRhs.short-circuit-flipped.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 53.256
+  },
+  "clause.logicalOrShortCircuitRhs.short-circuit-flipped.2": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 57.542
+  },
+  "clause.unopAssignment.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.533
+  },
+  "clause.unopAssignment.unop-dropped.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 45.145
+  },
+  "clause.unopCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 58.216
+  },
+  "clause.unopCapture.unop-dropped.1": {
+   "family": "overflow",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 41.574
+  },
+  "clause.ternaryToIf.branches-swapped.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 56.745
+  },
+  "clause.ternaryCaptureCond.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 57.308
+  },
+  "clause.localOpAssign.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 54.985
+  },
+  "clause.localOpAssign.operands-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 55.039
+  },
+  "clause.storageRootOpAssign.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 56.997
+  },
+  "clause.storageRootOpAssign.operands-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 54.81
+  },
+  "clause.storageFieldOpAssign.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 54.153
+  },
+  "clause.storageFieldOpAssign.operands-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 57.735
+  },
+  "clause.storageIndexMappingOpAssign.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.059
+  },
+  "clause.storageIndexMappingOpAssign.operands-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 54.211
+  },
+  "clause.memoryFieldOpAssign.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 58.612
+  },
+  "clause.memoryFieldOpAssign.operands-swapped.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 58.97
+  },
+  "clause.compoundAssignValueRhsCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 54.959
+  },
+  "clause.pushCompoundAssignValueRhsCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 62.038
+  },
+  "clause.storagePushValue_unfold_rightFstReferenceArgument.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 61.337
+  },
+  "clause.storagePushValue_unfold_rightFstPrimitiveArgument.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 56.695
+  },
+  "clause.storagePushValue_unfold_rightSndArgument.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 61.407
+  },
+  "clause.transfer_unfold_leftFstReceiver.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 60.375
+  },
+  "clause.transfer_unfold_rightSndArgument.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 57.941
+  },
+  "clause.send_unfold_leftFstReceiver.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 59.325
+  },
+  "clause.send_unfold_rightSndArgument.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 59.806
+  },
+  "clause.memoryFieldRead.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.811
+  },
+  "clause.memoryRootRebind.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 59.362
+  },
+  "clause.memoryFieldReadAliasRoot.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.717
+  },
+  "clause.memoryFieldWrite.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 57.653
+  },
+  "clause.memoryFieldWriteCopy.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 59.528
+  },
+  "clause.memoryFieldWriteUnfoldSource.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 58.301
+  },
+  "clause.memoryRootDeleteFreshRebind.binding-identity.1": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 57.9
+  },
+  "clause.memoryRootDeleteFreshRebind.binding-identity.2": {
+   "family": "pop-delete",
+   "outcome": "detected",
+   "elapsed_s": 57.821
+  },
+  "clause.memoryArrayFreshAlloc.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 58.182
+  },
+  "clause.memoryArrayFreshAlloc.binding-identity.2": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 56.348
+  },
+  "clause.newArrayCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 61.244
+  },
+  "clause.memoryStorageCopy.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 72.525
+  },
+  "clause.memoryStorageCopy.binding-identity.2": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 76.908
+  },
+  "clause.memoryToStorageStoreRoot.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 60.888
+  },
+  "clause.memoryToStorageFieldCopyRoot.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 61.201
+  },
+  "clause.memoryToStorageIndexMappingCopyRoot.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 59.723
+  },
+  "clause.memoryToStorageIndexCaptureAllNonSimpleIndex.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 60.478
+  },
+  "clause.memoryToStorageIndexCaptureAllNonSimpleIndex.capture-use-reevaluated.2": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 78.032
+  },
+  "clause.ifElseUnfold.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 57.943
+  },
+  "clause.ifElseUnfold.branches-swapped.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 59.269
+  },
+  "clause.requireConditionCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 58.403
+  },
+  "clause.assertConditionCapture.capture-use-reevaluated.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 57.391
+  },
+  "clause.functionBodyExpand.hand.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 59.856
+  },
+  "clause.internalCallExpand.hand.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 58.956
+  },
+  "clause.tryCallNoCallbackBox.hand.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 59.517
+  },
+  "clause.tryCallNoCallbackBox.hand.2": {
+   "family": "rollback-payment",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 54.229
+  },
+  "clause.tryCallNoCallbackBox.hand.3": {
+   "family": "rollback-payment",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 69.129
+  },
+  "clause.tryCallNoCallbackBox.hand.4": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 76.337
+  },
+  "clause.blockEmpty.hand.1": {
+   "family": "other:block",
+   "outcome": "detected",
+   "elapsed_s": 58.552
+  },
+  "clause.whileUnwind.hand.1": {
+   "family": "guard-polarity",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 50.18
+  },
+  "clause.whileUnwind.hand.2": {
+   "family": "other:loop",
+   "outcome": "detected",
+   "elapsed_s": 58.225
+  },
+  "clause.ifElseJoin.hand.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 57.351
+  },
+  "clause.ifElseJoinSequence.hand.1": {
+   "family": "guard-polarity",
+   "outcome": "detected",
+   "elapsed_s": 51.069
+  },
+  "clause.addmodAssignment.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 53.876
+  },
+  "clause.addmodAssignment.hand.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 53.967
+  },
+  "clause.mulmodAssignment.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 49.697
+  },
+  "clause.mulmodAssignment.hand.1": {
+   "family": "division-minimum",
+   "outcome": "detected",
+   "elapsed_s": 52.499
+  },
+  "clause.hashAssignment.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 54.181
+  },
+  "clause.storageMemorySourceSave.side-condition-flipped.1": {
+   "family": "side-condition",
+   "outcome": "detected",
+   "elapsed_s": 36.862
+  },
+  "clause.storageMemorySourceSave.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 51.224
+  },
+  "clause.storageFixedCopySave.side-condition-flipped.1": {
+   "family": "side-condition",
+   "outcome": "detected",
+   "elapsed_s": 78.26
+  },
+  "clause.storageFixedCopySave.binding-identity.1": {
+   "family": "other:access",
+   "outcome": "detected",
+   "elapsed_s": 51.845
+  },
+  "clause.tryCallSelfBox.hand.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 53.86
+  },
+  "clause.tryCallSelfDiamond.hand.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 52.443
+  },
+  "clause.revertDataBox.hand.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 51.388
+  },
+  "clause.revertDataDiamond.hand.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 54.559
+  },
+  "clause.catchDataBox.hand.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 52.999
+  },
+  "clause.catchDataDiamond.hand.1": {
+   "family": "rollback-payment",
+   "outcome": "detected",
+   "elapsed_s": 50.611
+  },
+  "clause.recursiveCallUnfold.hand.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 54.873
+  },
+  "clause.loopLexErase.side-condition-flipped.1": {
+   "family": "side-condition",
+   "outcome": "detected",
+   "elapsed_s": 78.774
+  },
+  "clause.loopLexErase.hand.1": {
+   "family": "other:loop-invariant",
+   "outcome": "detected",
+   "elapsed_s": 55.225
+  },
+  "clause.whileInvariantLexDiamond.side-condition-flipped.1": {
+   "family": "side-condition",
+   "outcome": "detected",
+   "elapsed_s": 38.663
+  },
+  "clause.whileInvariantLexDiamond.hand.1": {
+   "family": "other:loop-invariant",
+   "outcome": "detected",
+   "elapsed_s": 52.286
+  },
+  "clause.whileInvariantLexDiamond.hand.2": {
+   "family": "guard-polarity",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 75.102
+  },
+  "clause.whileInvariantLexDiamond.hand.3": {
+   "family": "other:loop-invariant",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 75.141
+  },
+  "clause.functionCallArgCapture.hand.1": {
+   "family": "alias-capture-once",
+   "outcome": "detected",
+   "elapsed_s": 56.843
+  },
+  "clause.internalCallSummary.side-condition-flipped.1": {
+   "family": "side-condition",
+   "outcome": "equivalent-certified",
+   "elapsed_s": 36.356
+  },
+  "clause.internalCallSummary.hand.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 52.505
+  },
+  "clause.tryCallWithCallbackBox.hand.1": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 2.355
+  },
+  "clause.tryCallWithCallbackBox.hand.2": {
+   "family": "callback-frames",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 2.137
+  },
+  "clause.tryCallWithCallbackBox.hand.3": {
+   "family": "callback-frames",
+   "outcome": "invalid-compilation",
+   "elapsed_s": 1.259
+  },
+  "clause.tryCallWithCallbackBox.hand.4": {
+   "family": "callback-frames",
+   "outcome": "detected",
+   "elapsed_s": 3.324
+  }
+ },
+ "reuse": [
+  "final-ae55acdb",
+  "final-aa39f4cd",
+  "full-91c9631d",
+  "full-20d7b77c"
+ ],
+ "reused_checks": 493,
+ "manifest": "tests/h28-sol/mutation-testing/manifests/h28-final.json",
+ "manifest_sha256": "fc4727c54b5e2536295f4088e1706c2b587c4ae6796ddd068e752a554a35daa7",
+ "head": "8fad7b132faa70ea02a92ca279a0b647ea0a6d95",
+ "dirty_development_run": false,
+ "full_records": {
+  "archive": "final-8fad7b13-checks-full.tar.gz",
+  "sha256": "2e83c46d142ef8d59690ae7bdb386fe6dbe1e1fb8e6ce291b4bf657cf8e762c1",
+  "files": 497,
+  "in_git": true
+ }
+}

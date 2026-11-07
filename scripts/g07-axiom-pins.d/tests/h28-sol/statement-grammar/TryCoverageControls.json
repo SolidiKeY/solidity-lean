@@ -1,0 +1,38 @@
+{
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_arbitrary_width_depth_parse": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_arbitrary_width_depth_yield": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_depth_relation": [],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_first_catch_relation": [
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_following_statement_preserved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_fragment_inhabited_derivation": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_greedy_catch_suffix_consumed": [],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_insufficient_fuel_rejected": [],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_missing_body_and_empty_parameters_rejected": [],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_missing_catch_rejected": [],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_plain_only_coverage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_recursive_fragment_relation": [
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_signature_first_coverage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/statement-grammar/TryCoverageControls.lean:Solidity.Frontend.StatementGrammarH28.try_tail_relation": []
+}

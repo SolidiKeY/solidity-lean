@@ -1,0 +1,14 @@
+import {retainCompilerMetadata} from './retained-metadata.mjs';
+import {compileFixture} from '../../../scripts/solc-ast.mjs';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+const owned='tests/directruntime-20261104/shared-translator';
+const bulk=owned+'/artifacts/h68-bulk';
+const sha=x=>createHash('sha256').update(x).digest('hex');
+const out=bulk+'/ModalityControls.ast.json';
+const result=compileFixture({args:['--solkey','/workspace/.setup/solkey','--soljson','/workspace/.setup/soljson','--source',owned+'/ModalityControls.sol','--out',out,'--no-wrapper'],quiet:true});
+writeFileSync(out,JSON.stringify(retainCompilerMetadata(result).fixture,null,2)+'\n');
+const rawOut=bulk+'/ModalityControls.raw.json';
+writeFileSync(rawOut,JSON.stringify(result.rawAst));
+writeFileSync(bulk+'/evidence/h68/modality-compilation.json',JSON.stringify({compiler:result.compiler,source:owned+'/ModalityControls.sol',sourceSha256:result.sourceHash,fixture:out,fixtureSha256:sha(readFileSync(out)),rawAst:rawOut,rawAstSha256:sha(readFileSync(rawOut)),boundary:'Existing compiler helper, normalization and H68 metadata retention; no new AST translation. Source explicitly annotates box functions; diamond functions have no box annotation. Not source-preservation evidence.'},null,2)+'\n');
+console.log('Pinned modality fixture generated through existing compiler normalization.');

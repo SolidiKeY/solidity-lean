@@ -1,0 +1,82 @@
+{
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.empty_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.impossible_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.lastReader": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.lastWriter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.read_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.reader": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.update_peak_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.updater": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.Controls.writer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.read?": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.readFrame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.updatePeak": [],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.updates?": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.updatesFrame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.write?": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/FrameCertificatesV2Controls.lean:SolidityBridge.Yul.FrameCertificatesV2.writeFrame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

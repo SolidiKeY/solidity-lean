@@ -1,0 +1,1778 @@
+--- a/scripts/g07-axiom-pins.json
++++ b/scripts/g07-axiom-pins.json
+@@ -37077,6 +37077,1775 @@
+   "Quot.sound",
+   "propext"
+  ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.alias_field": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.alias_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.alias_representation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.alias_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.alias_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.all_primitive_value_fields": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.all_primitive_values_represented": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.allocated_erasure_countercontrol": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.allocated_single_object": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.always_revert_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.assertion_derivation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.assertion_rule_semantics": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.assertion_runs": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.assumption_erased_code": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.assumption_exhausts": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.assumption_fragment_rejected": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.assumption_not_successful": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.calculus_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.calculus_context_gates": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_drop_frame": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_false_derivation_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_frame_observation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_halt_frame": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_nil_frame": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_observation_erasure_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_observations": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_pop_frame": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_program_noCallback": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_program_resume": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_program_revert": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_program_violation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_resume": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_revert": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_seq_frame": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_violated_frame": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.callback_violation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.calls_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.changed_observation": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.checked_families_joint": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.checked_family": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.checked_success_after_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.cleanTail_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.closed_joint_witness": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.closed_simulation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.competing_assertion_rule_rejected": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.compiler_divergence_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.compiler_panic_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.concrete_object_allocator_kept": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.concrete_object_cursor_kept": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.construction_allocator_growth": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.construction_cursor_erasure_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.construction_cursor_observation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.construction_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.construction_joint": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.construction_live_pointer": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.copy_construction_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.copy_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.correct_revert": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.correct_success": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.dead_alias_fragment_rejected": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.dead_alias_simulation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.dead_alias_source_reverts": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.dead_alias_target_faults": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.declare_memory_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.direct_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.dirty_tail_not_clean": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.dirty_tail_reachable": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.distinct_object_domain_empty": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.divergence_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.divergence_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.divergence_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.done_false_antecedent_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.empty_cases_guard_rejected": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.empty_fragment_acceptance_rejected": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.empty_goal_guard_rejected": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.empty_object_heap": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.environment_simulation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.every_rule_inhabited": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.expression_nonrevert_halt_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.false_annotation_entry": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.false_annotation_init_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.false_annotation_rule": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.false_annotation_run": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.false_invariant_entry_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.fixed_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_binding_antecedent": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_binding_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_binding_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_binding_step": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_changed": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_lands": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_require_source_false": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_require_source_true": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_rule_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_split_antecedent": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_split_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_step": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.flag_update_antecedent": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.fragile_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.fragile_joint": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.fragile_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.fragment_family": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.frame_callback_gates": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.fresh_free_memory": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.fresh_object_allocator": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.fresh_object_state": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.halt_gate_domains": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.identity_loop_diverges": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.impossible_resource": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.inhabited_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.joint_payment_compiler_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.joint_payment_world": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.live_array_layout_queried": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.live_base_extension_queried": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.loop_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.machine_loop_diverges": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.mismatched_external_ledger": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.mismatched_funds": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.mismatched_oracle": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.mismatched_self_ledger": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.mismatched_timestamp": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.near_end_allocation_rejected": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.near_end_allocator": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.near_end_state": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.negative_int_observation_not_erased": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.negative_int_word": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.net_success": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.noCallback_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.noCallback_equivalence": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.noCallback_excludes_resume": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.noCallback_payment_derivation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.noCallback_payment_headline": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.noCallback_transfer": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.noCallback_unique": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.nonempty_code": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.nonempty_program": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.object_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.objects_supply_fixed": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.original_arms_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.original_calculus_induction": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.original_callback_formula": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.original_clean_tail": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.original_invariant_inputs": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.original_noCallback_formula": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.panic_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.panic_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.panic_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_checked_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_derivation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_entry_identification": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_headline": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_net_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_observations": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_simulation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_syntax_gates": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.payment_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.pointer_erasure_rejected": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.poor_payment_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.poor_payment_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_allocator_growth": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_checked": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_joint": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_pointer": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_source_eq": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_source_observations": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_value_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_value_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.primitive_value_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.reference_array_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.refused_checked_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.refused_simulation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.refused_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.refused_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.represented_success": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.revert_done_true": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.revert_rule_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.rule_family": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.rule_from_step_family": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.rule_step_family": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.scalar_loop_cost": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.scalar_loop_demand": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.scalar_memory_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.scalar_scope_cost": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.scalar_scope_demand": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.scope_input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.self_rebind_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.sender_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.sender_representation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.sender_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.sender_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.simulation_family": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.solkey_admission_application": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.solkey_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.solkey_equivalence": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.solkey_rule_application": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.solkey_strict": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.source_false": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.source_true": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.storage_observation_erasure_rejected": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.symex_actual_progress": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.symex_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.tail_clean_main": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.tail_clean_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.tail_clean_status": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.tail_clean_valid": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.tail_dirty_frames_panic": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.tail_dirty_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.tail_dirty_status": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.tail_premise_cannot_be_erased": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.target_false": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.target_true": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.top_callback_policy": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.unique_family": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.universal_binder_control": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.unset_alias_not_ok": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.unset_memory_core_simulation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.unset_memory_pointer_rejected": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.value_field": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.value_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.value_representation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.value_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.value_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.violated_after_rejected": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.write_compiler_application": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.write_fragment": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.write_source": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.write_target": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Assurance.NonVacuityH28.zero_unwind_strict": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.cleanTailH": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.COut.after": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.COut.thenF": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.compile_correct": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.compile_net": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Compiler.Compilation": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Compiler.Compilation.Agrees": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Compiler.Compilation.correct": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Compiler.Compilation.Input": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Compiler.Compilation.Rep": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.EnvSim": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Frag": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.inFrag": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.inFragP": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.allocationCostProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.AllocationInput": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.AllocatorRepr": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.ArrayRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.BaseExtends": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Calls.Program": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.CompiledProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Construction.allocationCostProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Construction.CompiledProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.copyBoundProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.CopyConstruction.CompiledProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Fixed.CompiledProg": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.FixedArrayRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.FixedHeapRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.FixedStateRepr": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.frameNeedProg": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.FreeMemory": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.GrowsAllocator": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.HeapRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.LoopPrefix": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.LoopRoom": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Loops.CompiledProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Loops.Cost": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Loops.Demand": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Loops.Room": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Loops.StmtCert.Cost": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Loops.StmtCert.Demand": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.LoopScopes.CompiledProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.LoopScopes.Cost": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.LoopScopes.Demand": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.LoopScopes.Room": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.LoopScopes.StmtCost": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.LoopScopes.StmtDemand": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.AllocationInput": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.AllocatorRepr": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.ArrayRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.cells": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.CompiledProg": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.GrowsAllocator": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.header": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.HeapRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.KeepsAllocator": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.Ownership": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.StateRepr": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.Objects.ValueRepr": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.PointerRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.RefArrayHeapRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.RefArrayRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.RefArrayStateRepr": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.ReferenceArrays.CompiledProg": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.RefFieldsRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.StateRepr": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.StorageCopy.allocationCostProg": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.StorageCopy.CompiledProg": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.StructAllocatorRepr": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.StructArraySeparated": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.StructHeapRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Memory.StructRepr": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.PathAt": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.PathSlot": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.ReprAt": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.ReprStore": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.ReprV": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Sim": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.Sim.init": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Evm.SimL": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.ExecF": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Fml.callsBack": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Fml.FO": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Fml.hasTransfer": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Fml.inSolkey": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Fml.modalFree": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Fml.stateInv": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Fml.Valid": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Frames.callsBack": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Frames.hasTransfer": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Held.OK": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.holds": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.holdsC": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Hyps.boxOnly": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Hyps.wrap": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Invariant": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.callback_soundness": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.cleanTail_holds": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.compiler_checked": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.compiler_correct": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.compiler_net": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.Compiles": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.Derives": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.DerivesK": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.DoesAs": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.MReverts": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.MRuns": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.noCallback_iff": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.noCallback_soundness": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.Represents": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.Rewrites": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.RewritesK": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.rule_exists": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.rule_is_step": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.rule_of_step": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.rule_sound": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.rule_unique": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.Runs": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.solkey_eq_calculus": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.solkey_lt_calculus": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.solkey_rule_exists": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.solkey_rule_lt_calculus": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.solkey_soundness": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.solkey_step_taclet": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.soundness": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.soundness'": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.symex_sound": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Main.ValidUnder": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Modality.afterRunTR": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Modality.forallB": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Modality.onHalt": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Modality.onTHalt": [],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.ordinaryDefaultFold": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Premise.fml": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Premise.Sound": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Prog.callsBack": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Prog.hasTransfer": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Proves.solkey_iff": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Proves.solkey_lt_calculus": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Proves.sound": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Proves.sound_of": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Proves.valid": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.ProvesC.fmlValid": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.ProvesC.valid": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Rule.ofStep": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Rule.premise_unique": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Rule.toStep": [
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.RuleSet.admits": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.SFields.CleanTail": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.SFields.OrdinaryDefault": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.SList.OrdinaryDefault": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Spec.sat": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Spec.satC": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Spec.toFml": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Spec.Valid": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Spec.ValidC": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.StateInv": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.StateInv.at": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.callsBack": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.forksIn": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.hasTransfer": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.inSolkey": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.keyStep": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.rule_exists": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.solkey_lt_calculus": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.sound": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.Sound": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.step_taclet": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Stmt.taclet_of_admits": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Storage.CleanTail": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.SVal.CleanTail": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.SVal.OrdinaryDefault": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.SVec.OrdinaryDefault": [
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.symex_sound": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Upd.afterT": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.Upd.Lands": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.ValidC": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.validC_false_iff": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.ValidTail": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
++ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:Solidity.ValidTail.holds_of_clean": [
++  "Classical.choice",
++  "Quot.sound",
++  "propext"
++ ],
+  "tests/upstream/ByteLiterals.lean:literal_ignores_ambient_append": [],
+  "tests/upstream/ByteLiterals.lean:long_literal_exact": [],
+  "tests/upstream/ByteLiterals.lean:long_literal_not_truncated": [],

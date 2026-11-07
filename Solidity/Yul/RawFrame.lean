@@ -110,4 +110,116 @@ theorem preserves {ctx control} (code : Stmt [] (localExternalTypes ctx) control
     cases done
     exact ⟨rfl, rfl⟩
 
+
+/-- A completed admitted execution retains its exact raw frame and control at every larger horizon. -/
+theorem run_stable : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (state : Solidity.Yul.RawFrame.State ctx) (lo hi : Nat), lo ≤ hi →
+ ∀ (result : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy lo state = some result →
+ Solidity.Yul.RawFrame.run code policy hi state = some result := by
+  intro ctx control code policy state lo hi increasing result done
+  unfold run at done ⊢
+  cases actual : WordAdapter.run code policy lo ⟨Fin.elim0, view state⟩ with
+  | none => rw [actual] at done; cases done
+  | some raw =>
+    rw [WordAdapter.run_stable code policy _ increasing actual]
+    rw [actual] at done
+    exact done
+
+/-- Completed horizons determine the same whole outcome, without any coherence premise. -/
+theorem run_completed_unique : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (state : Solidity.Yul.RawFrame.State ctx) (lo hi : Nat),
+ ∀ (first second : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy lo state = some first →
+ Solidity.Yul.RawFrame.run code policy hi state = some second → first = second := by
+  intro ctx control code policy state lo hi first second one two
+  rcases Nat.le_total lo hi with lower | higher
+  · exact Option.some.inj ((run_stable ctx control code policy state lo hi lower first one).symm.trans two)
+  · exact Option.some.inj (one.symm.trans (run_stable ctx control code policy state hi lo higher second two))
+
+
+/-- Exact reflection of actual word-interpreter some results through raw-frame capture. -/
+theorem run_some_iff : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx), ∀ (result : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy fuel state = some result ↔
+ ∃ wordResult, Solidity.Yul.WordAdapter.run code policy fuel ⟨Fin.elim0, Solidity.Yul.RawFrame.view state⟩ = some wordResult ∧
+ Solidity.Yul.RawFrame.Outcome.ofWord state wordResult = result := by
+  intro ctx control code policy fuel state result
+  simp only [run, Option.map_eq_some_iff]
+
+/-- Exact reflection of actual word-interpreter none results through raw-frame capture. -/
+theorem run_none_iff : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.run code policy fuel state = none ↔
+ Solidity.Yul.WordAdapter.run code policy fuel ⟨Fin.elim0, Solidity.Yul.RawFrame.view state⟩ = none := by
+  intro ctx control code policy fuel state
+  simp only [run, Option.map_eq_none_iff]
+
+/-- Pre-capturing the current view preserves every exact later run, including
+timeouts and full captured outcomes. Sparse overlay metadata need not agree. -/
+theorem run_snapshot : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.run code policy fuel
+ (Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state)) =
+ Solidity.Yul.RawFrame.run code policy fuel state := by
+  intro ctx control code policy fuel state
+  rfl
+
+/-- Equal authoritative words, clean backups and worlds determine every exact raw run.
+Overlay metadata may differ. All three equalities are explicit. -/
+theorem run_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (first second : Solidity.Yul.RawFrame.State ctx),
+ first.clean = second.clean → first.world = second.world →
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ Solidity.Yul.RawFrame.run code policy fuel first = Solidity.Yul.RawFrame.run code policy fuel second := by
+  intro ctx control code policy fuel first second cleanEq worldEq viewEq
+  cases first
+  cases second
+  cases cleanEq
+  cases worldEq
+  unfold run
+  rw [viewEq]
+  rfl
+
+/-- Every actual completed raw outcome is fixed by full snapshot capture.
+The completion premise is retained; arbitrary input overlays need not be fixed. -/
+theorem run_captured : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx) (result : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy fuel state = some result →
+ Solidity.Yul.RawFrame.capture result.state (Solidity.Yul.RawFrame.view result.state) = result.state := by
+  intro ctx control code policy fuel state result done
+  obtain ⟨wordResult,_finished,captured⟩ :=
+    (run_some_iff ctx control code policy fuel state result).mp done
+  cases captured
+  rfl
+
+/-- An alleged result with an absent raw cell cannot be a completed outcome.
+This refuses that result, not execution or completion in general. -/
+theorem run_not_sparse : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx) (result : Solidity.Yul.RawFrame.Outcome ctx control)
+ (cell : Solidity.Yul.WordCell (Solidity.Yul.localExternalTypes ctx)),
+ result.state.raw cell = none →
+ Solidity.Yul.RawFrame.run code policy fuel state ≠ some result := by
+  intro ctx control code policy fuel state result cell missing done
+  have same : (capture result.state (view result.state)).raw cell = result.state.raw cell :=
+    congrArg (fun frame : State ctx => frame.raw cell)
+      (run_captured ctx control code policy fuel state result done)
+  change some (view result.state cell) = result.state.raw cell at same
+  rw [missing] at same
+  cases same
+
 end Solidity.Yul.RawFrame

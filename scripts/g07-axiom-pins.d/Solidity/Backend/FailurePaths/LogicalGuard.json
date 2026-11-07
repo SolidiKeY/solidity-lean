@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.exact_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.intrinsic_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.selected_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

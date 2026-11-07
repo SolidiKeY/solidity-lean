@@ -1,0 +1,8 @@
+## Work queue
+1. Inventory Env.merge/linearizeF/linearize, list filtering, deterministic first admissible-head selection and fuel formulas. State an independent inductive C3 merge trace over existing declaration identities: choose the first candidate head absent from every tail, remove that head globally, succeed only at empty residual lists; state inconsistent-residual stuckness without calling Env.merge in the relation.
+2. Prove soundness/completeness and trace uniqueness for Env.merge at a constructive fuel bound from the finite input lists, plus precise distinction between insufficient fuel and genuine C3 ordering obstruction. Derive no-duplicates, exact membership and local ordering from the relation; do not duplicate linearize_sound as the main deliverable.
+3. Lift exact merge/fuel correspondence to existing Env.linearize for acyclic, resolved inheritance graphs under their existing admission invariants, preserving reverse direct-base order and constructor order. Cover diamonds and repeated shared ancestors. Prove successful output uniqueness from deterministic C3, and refuse actual cyclic/ordering-inconsistent graphs with a checked witness. If existing public fuel is insufficient, preserve that obligation visibly with a kernel counterexample and prove an additive sufficient-fuel entrypoint without modifying the producer API.
+4. All-head-choice and obstruction controls, arbitrary-family kernel proofs, pinned solc multiple-inheritance fixtures and full acceptance/axiom checks, finder/skeptic and sealed handoff.
+
+## Backfill queue
+Additional constructive obstruction certificates and constructor-order consequences; no override-graph validation, modifier resolution or SOL-OV writes/dependencies.

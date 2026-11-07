@@ -1,0 +1,1722 @@
+{
+  "source_head": "b792dbe2692c0ba06aa1cdb9f5cd0473e4799e20",
+  "master": "3ad22f66d8fc6431378c22e71823436c79dede7f",
+  "mandatory_selection": [
+    "Solidity/Backend/MemoryOps/PhysicalReferenceChild.lean",
+    "Solidity/Backend/MemoryOps/PhysicalFixedChildWrite.lean",
+    "Solidity/Backend/MemoryOps/PhysicalFixedChildProgram.lean",
+    "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean"
+  ],
+  "closure_modules": 244,
+  "dependencies": [
+    {
+      "path": "Solidity/AST.lean",
+      "sha256": "d5463f24e3b12577a04099593cf2640b68a1ccb14cb3db513254d633c849c54b",
+      "git_blob": "2dbabba8a3de204acbf2e2f6e14e46febf922e03",
+      "bytes": 50085,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/Assembler.lean",
+      "sha256": "d0991b737f9a65416829c5850edca4bbb3f8fe7193ad104dd5aaeac92803f9d0",
+      "git_blob": "990ae3a90639260b93a2a5e5a64771c8b0e9e80b",
+      "bytes": 31104,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/Environment/ByteConstants.lean",
+      "sha256": "ee0326ebd501a92ec437ab52333fa577c38ef3ae78c10214c3f3d527586ab39b",
+      "git_blob": "c20c7c9dd6cbec0b5a8cab6a9a0cdd374510fc21",
+      "bytes": 5988,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/Environment/Crypto.lean",
+      "sha256": "6f7beb5112bfb1b7dccd5ed765a47924ad1536aff6ee9e337ef4c441fd06c038",
+      "git_blob": "e9a9c6ca01060bd13fa1b8c6a44552c10249738d",
+      "bytes": 11347,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/Environment/Metadata.lean",
+      "sha256": "620b91fcb867b42e19e80535cddd14fe087db98c0687754cb925f8902228ab6c",
+      "git_blob": "fd5ad14c6dfeaa205568f8fb544a6293a7e872a3",
+      "bytes": 8172,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/Environment/Namespace.lean",
+      "sha256": "dcd6fa8efdeb02ba9907b9200486feb56c88f244e412b190bf028c902599bff9",
+      "git_blob": "75957d00ae548694ffbd7889a3a7a249ea986910",
+      "bytes": 5845,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/Environment/Observations.lean",
+      "sha256": "c51d5a7ebb690cda0b05e58ac46f780e8193a942008a8c3962d29079a04ba3ed",
+      "git_blob": "8e62b0f70d8d778aae46c2b9780399af97462d64",
+      "bytes": 6737,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/Jumpdest.lean",
+      "sha256": "e5fc894e1b3470311a90887aa9f663c0536c3703f41195e7e04491a2b58dc3b2",
+      "git_blob": "c4e3cba782a737ec4931045220d6c0e758b8ad2c",
+      "bytes": 16361,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean",
+      "sha256": "cae30c1faadba9cbe75ff56bbca681f02202df5b1279cbc94b99dabe26af1c0b",
+      "git_blob": "a48fdfc930bac422b58862fa183ee39ba6a2c5cb",
+      "bytes": 7735,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataArrayRead.lean",
+      "sha256": "8b6adc80b3bb53fdc67e43bca3180d1656922cb55e97833b751022ae30d1d2cb",
+      "git_blob": "7d309d08389d7398c6ba4f531bdfbc960480f4ef",
+      "bytes": 5329,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataChildExtension.lean",
+      "sha256": "7c1e460d89421497d152284beddde861878e5ae06b1b02c8ae64a3e204ece331",
+      "git_blob": "7287010a1030aa90c91c79cd3390129a64268c7f",
+      "bytes": 3113,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataChildren.lean",
+      "sha256": "0d20529c9ce5e41e361e9b2421519070bada90fa3a4786ee87fac6e5f21338cb",
+      "git_blob": "ea4481a694c1d03f0958201de97c39b3856682cd",
+      "bytes": 7079,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataNestedChildren.lean",
+      "sha256": "c0476426f87f11386dee04f67cdbf518138defab40d7d9c2be886b68398545c6",
+      "git_blob": "d284a57d3c1cfff2cf384cdfb8bd39d3bd2da965",
+      "bytes": 8515,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataRead.lean",
+      "sha256": "e7ba2f7018b9a6f0c27365f41e27f43e64d2ae0d080e69c7e92d05fd75328d0f",
+      "git_blob": "ec8c93c3a374263c9f6c6a50bae12f455f297769",
+      "bytes": 7051,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataSequence.lean",
+      "sha256": "96d7d799f42666e51032e7297dfc181ca1ee891ca2de7a4d56a4704eee309577",
+      "git_blob": "044c4741de978ffcaf5c3875456bf16a29ad6bec",
+      "bytes": 17903,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean",
+      "sha256": "7f117f0905f883ab65a7f2fd733586b990da359bd9e52d0b391f2750024705dc",
+      "git_blob": "d0cfea66103ac44b389f074828541c3fdf3ac087",
+      "bytes": 6392,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataSequenceFixtures.lean",
+      "sha256": "418c7a247d2d76d44941057ff147eb1d24b518f4f0c01c3194da51636dced336",
+      "git_blob": "0067916dec4c98e3b09c47a6850abd67ab52178d",
+      "bytes": 2056,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean",
+      "sha256": "ba028abb19085757862e6ff9d3bde01872a99e16aeb2c23f32a2bac84193c01f",
+      "git_blob": "6d4b212783c61f1dcd18717543a622b4400486b0",
+      "bytes": 25061,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataTransfer.lean",
+      "sha256": "65147cb76c1e36c63364cd5667144f9aba9a9b0674ba23375d8411f66b170a56",
+      "git_blob": "4bfe007774ce570bf5412f89dda4928852a38577",
+      "bytes": 13539,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataTransport.lean",
+      "sha256": "f7e92b3debb555e968f03c88558db4bc461902ea34b9511240a05fb7247d7757",
+      "git_blob": "3514b5576234c05aa78023cdc2743e9d926eda50",
+      "bytes": 3732,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CalldataUintTransfer.lean",
+      "sha256": "297c3a88cefaa65644e02dcf167cebc19ffe425b3cb7c9b08157d95b2d0ca4c6",
+      "git_blob": "0de2fd0f7dba1c762ed5e390c00143d465275f89",
+      "bytes": 16684,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CheckedSnapshot.lean",
+      "sha256": "e5207a4a88f9f46c22a54d9211536941322d8f9681bb82de954bd347641f31dd",
+      "git_blob": "347df53a24b458f81f19fa5558358bc78deb0101",
+      "bytes": 9284,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/ContextTransport.lean",
+      "sha256": "a3954f9a17a94c948fbfc74409abc8e54f6408b0a1fb990bcd3fcdd1fc012290",
+      "git_blob": "365ed0c63c9ffd3734b0c522d0fc7e635e21e588",
+      "bytes": 5330,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean",
+      "sha256": "49a75920d6a85e455f7362493c9f5051f3815853d762d94748a958e75a101d82",
+      "git_blob": "d35534edc4db6647f5bb5aa8f564d76b39ffb58d",
+      "bytes": 4506,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean",
+      "sha256": "20f01f229351dcf72dec574189cfac6ae0248b289547fdf724b71dc06b6f65d0",
+      "git_blob": "4e14f037be8f665d369cd7cdf3d449cbdec26f39",
+      "bytes": 6593,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/DisjointOverwrite.lean",
+      "sha256": "d0e58ffdf3d47e8b966a4e28ca234fc8dd02dfe5d8e3daf4cdfd5ce39791e84b",
+      "git_blob": "d26221ebeb2ce22ae1c37c1913c665e6034c8d6b",
+      "bytes": 7383,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/HeapSnapshot.lean",
+      "sha256": "08573862ab9ec3719f49a39be82d3fcdb6db2e207fd85a6352fcdae8f7b6e6f7",
+      "git_blob": "15a53ad018d63b0de6d2212f69722d3f4d823666",
+      "bytes": 5564,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/InterstageBuilders.lean",
+      "sha256": "90648e4e7e8035ec9829b816e0dcd74ad6d4983337f5ce241de9d23923a10ef7",
+      "git_blob": "f967ae4aa97af6bfefc451d439ddb42e379d0fa7",
+      "bytes": 11698,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/InterstageCorrespondence.lean",
+      "sha256": "78d5b0a82091e442e4b15a095d0883c44eed1142358616e984064481c6de59ee",
+      "git_blob": "c9d1cdb12728935faf73c1823a823720deb0aaa7",
+      "bytes": 6678,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/InterstageGrowth.lean",
+      "sha256": "ee1a6a5b676a2b5d78ec681e72ec1ea6e7ac5b738071d656d097b9cbef4f6e88",
+      "git_blob": "43aec09845ac4513137fc1410f2531065ba1ea0b",
+      "bytes": 11552,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/IntervalOverwrite.lean",
+      "sha256": "ce9bfeadd1f2118f90b085e32383ef75693f2dccc9b30645af1dfd7be5353da1",
+      "git_blob": "2f599bb2a41aac7527d6ae43fd7447c397404246",
+      "bytes": 7461,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/MixedCalldataSequence.lean",
+      "sha256": "a8d428b6cdf633072fd3b2ae69ad7e879d904d8f8a7dc28314ab24277dd56efd",
+      "git_blob": "b55e1c12662e6aa70eb72db40d7ba833c3db6ab5",
+      "bytes": 21620,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/OverwriteAgreement.lean",
+      "sha256": "f0e05b420f19dabfb79ae6d50afee3af46744b18645f8d36a8406f4c1257cb2b",
+      "git_blob": "e82e8a2ee63cde592c463b42678470f6a4755422",
+      "bytes": 6266,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/OverwriteAgreementExact.lean",
+      "sha256": "15e09d2761645137fdda01346ed266c61ab06e3a17e020e6fd7a357885c6dfc9",
+      "git_blob": "ce4b6c9099eae1ff747cd6022385460c1ae53986",
+      "bytes": 13921,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/OverwriteRestoration.lean",
+      "sha256": "420fee343c5e4b07f94c134a0637a335d2a189b275f0c63c0ce57df078ec54ff",
+      "git_blob": "af169bed899075961311be82a5e0935112318108",
+      "bytes": 5448,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean",
+      "sha256": "582ee340153f5b347d4304988f7b91e524d6d24c6de574df74372d79a6ccc0dc",
+      "git_blob": "25e28546786c0b0410eb03ccbd2dcf157636da56",
+      "bytes": 24331,
+      "master_equal": false
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/PhysicalFixedChildProgram.lean",
+      "sha256": "c8f0cad840abd59d994c06aa699f29f12724a7cc630631f4a48ee07588c037c3",
+      "git_blob": "4ecf21335b20a6b3655a2ac4b36eccf0c3c656fc",
+      "bytes": 10328,
+      "master_equal": false
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/PhysicalFixedChildWrite.lean",
+      "sha256": "2750f79181c7d67e652719b2b94c65c631bec37dd96d9c6d0e52c116db01f24d",
+      "git_blob": "aa629555c31e88b3bf7bd8f16ad8a19c01a41af1",
+      "bytes": 8564,
+      "master_equal": false
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/PhysicalPointerFrame.lean",
+      "sha256": "b24bc3dc5f561af774a469c58ad10bfd90cb699d2985452046629d8c9b075243",
+      "git_blob": "8e91c35886640e8118f1f49824cc8eea8a4af601",
+      "bytes": 6284,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/PhysicalReferenceArray.lean",
+      "sha256": "f0dd59075a717f08b1d484ab1943499e39787f499ba3f648c8b810a954aba9ff",
+      "git_blob": "3d0ca7a6a3efb098e4b9bb5708020d4f6daef604",
+      "bytes": 6894,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/PhysicalReferenceChild.lean",
+      "sha256": "f8121b8ade8ae029cd439ce9c60cb98de9ccc2c839deb88beb745bb6aba6fcac",
+      "git_blob": "d2ca006b1c8564ec981314557b2108d804e6100e",
+      "bytes": 7155,
+      "master_equal": false
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/PhysicalReferenceStore.lean",
+      "sha256": "dd2a496ae48b45cb03f455e897f2952a1d3e6ee1c9f647a2f00da298f5fd518e",
+      "git_blob": "9e33cfbc4f1bb5cdfc6231992696cd58d7dd164a",
+      "bytes": 4310,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean",
+      "sha256": "17d254b6410a0a4313797176629cf787e336a74cc21e43cf823bb2a201ffddfb",
+      "git_blob": "e5b197b1ee697723c9ad0deefd1061ec4d9b286b",
+      "bytes": 7602,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/RecaptureRestoration.lean",
+      "sha256": "ef6cb9673d55a16b0c300dba79d3274b3b2a0af1e77079780eda05faac715cf2",
+      "git_blob": "d1860bc97b85a606f602aa261290eb65b0647788",
+      "bytes": 12046,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SequentialSnapshot.lean",
+      "sha256": "65cb40084a0d0762ce6c501c3053fb6a2ca2e7c694e7abd17a456ff87e714590",
+      "git_blob": "61ac1c44b50a1156f73d5b488c9dc06f29b20f7e",
+      "bytes": 13974,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SequentialTransport.lean",
+      "sha256": "7d6b46f3af123259cd3eaaec310dbb29ccd193080ee7554051ced8a057580bcf",
+      "git_blob": "c0f7d773535eb40a31cdbab97627d1b567f92b29",
+      "bytes": 7110,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SliceBounds.lean",
+      "sha256": "e563e5bb2623056a278833a4c89b74051258786203aeaacda7f8d24adfabf488",
+      "git_blob": "239145a4fe3152fd9560be25c69f3dfabfb1449f",
+      "bytes": 4589,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SliceExtension.lean",
+      "sha256": "ab71e0090ed9ff576a42d8551675a8e0391c2b0e3101e86d73d9f5ee6ffe7784",
+      "git_blob": "3e2f48eff2cb9841bb7bbebed689b8d51eb90b1f",
+      "bytes": 2931,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/Snapshot.lean",
+      "sha256": "2371f21cbb5d40da41f57e01fc8371bb4ee57cdf6fe029852bcd09e41bc02691",
+      "git_blob": "3b9c9ecd730889e760905ba06f25bc9b98c8f321",
+      "bytes": 7599,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SnapshotExtension.lean",
+      "sha256": "93a174c2e37c1d4f272f1054f0fb6b03cb2d12a437de00b0103cd95480a4e3b4",
+      "git_blob": "8b3ef14c8a17e6295a17c30441aa969a0435e1cf",
+      "bytes": 2681,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SnapshotProvenance.lean",
+      "sha256": "2ba4bf4b7a711c7db22b921fefd93f6455d6ba934d26c1d492177587b1eef412",
+      "git_blob": "434d110f48cfeb0612c9cde466a9edd7f87bd41f",
+      "bytes": 7110,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean",
+      "sha256": "29d6c77e6cc56e676a0e6b36c6d3c9d6fa8a3179801795bcda1848c0d51a2d79",
+      "git_blob": "d0d8dff2d183f93f97dcd4eb1667fe38b9996b21",
+      "bytes": 9703,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SnapshotSchedule.lean",
+      "sha256": "c202cb9ba7ee0b397f6c900980020ccc653baa8e373ffdc027bd944b619dbf81",
+      "git_blob": "5e504db91bb8dae311f3e91dd20f9ddd338d2ad6",
+      "bytes": 12279,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean",
+      "sha256": "cce3421a8670c41fb22b7ad1f8702c7f76ba241601423e68f1043e0ae769e8d9",
+      "git_blob": "51e215a58114c1c08d984170ade6e1d0df4e8d8f",
+      "bytes": 16087,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SnapshotScheduleGrowth.lean",
+      "sha256": "2ec0a951a7028d038f2c9944f292cd3d4dd8ac5c71772d9bb66a40a73790c3cc",
+      "git_blob": "4f64b818f1d4e95e2214cdd318fc8b5cc5411140",
+      "bytes": 14203,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceAssignment.lean",
+      "sha256": "41888d87c918b29ac3120ecda06be6da09647cdd4b769a14dac4a760fe89f9e1",
+      "git_blob": "1afbdf2c8d3b4056b560fe12c1730bfd58ed7906",
+      "bytes": 9938,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceDeclaration.lean",
+      "sha256": "fdb9c8fdf6e21fed140e7d01f4406c9e623b277e128bdfc018eb9755c9740cc8",
+      "git_blob": "9b93bce9bed9a99576dc7eddfa763cf5fe88f9bd",
+      "bytes": 6228,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceDefault.lean",
+      "sha256": "6a5e6888a0f6f6a566f7988f76b8d180cdcc5dfe9b9908bd624225f7879314b4",
+      "git_blob": "8e704016808944727f26fa825134c4b1dbbb36e8",
+      "bytes": 9983,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceDelete.lean",
+      "sha256": "68f17fc850c71136208961206b726aebe742a8940101e0e2fee362e0f774b349",
+      "git_blob": "a9054eb28f33cf5140edb7d9347693ceb7b90a2f",
+      "bytes": 6157,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceDeleteTarget.lean",
+      "sha256": "5c983c3f2294e342c7fdbbaec9de58e998e84e0a9cfa3733969cce69b8e8572c",
+      "git_blob": "ae645e86e45345b8f0bf871306ac61c8f6df96c7",
+      "bytes": 4400,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceIndexedDelete.lean",
+      "sha256": "0f64e8cce5fd5e62886ea2d0cdd2a1fcfc30015d2ff0f5731bc38244718b2c2f",
+      "git_blob": "812c5fd088a6eb94a2c623297bc438421b3d5a73",
+      "bytes": 16004,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceMemory.lean",
+      "sha256": "6bc72220ed04f6ad2f0369f2dd36324bcb5c8e7534254b7360cc7ca605397934",
+      "git_blob": "3a538a6a2f717b7b08cf8d06692774427664a21b",
+      "bytes": 9959,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceSequence.lean",
+      "sha256": "c28c5670efd483b1d49c6db82ad2b8d3bff048b328dc92c64af36ce79611ea63",
+      "git_blob": "2db20edffaad859a0dcd3cfb2d6347ca0965dcc6",
+      "bytes": 22483,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceUintAssignment.lean",
+      "sha256": "af9b056e8763523af5bee90e1d847189fd07b398df44636fcdcd8eee05d1304d",
+      "git_blob": "916e2b401d3af060f302fef8a94554a28bdb4a56",
+      "bytes": 13306,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceUintFixedAssignment.lean",
+      "sha256": "e31b6e2c7cc5ae9dc1c8e2381c4c12b9d0ef6f3dbd8b043030746064a340eddc",
+      "git_blob": "f793fe6dddd4529dcb9d8df5a75f7e470bee3237",
+      "bytes": 14520,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceUintFixedDeclaration.lean",
+      "sha256": "e44ad6752760ab73c7535cddc975b5131db6859866c5b8bea54eef41cf9c5345",
+      "git_blob": "b45b14465de74f22a43dfccc40c48434c6b84b28",
+      "bytes": 5327,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceUintFixedDefault.lean",
+      "sha256": "cab617822c73c49c357b826b85334b38d7d5f88cd8c90985e176c9b50f206537",
+      "git_blob": "a820fe9dbc84c1989914228d62818d6f7c19c192",
+      "bytes": 19811,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean",
+      "sha256": "2b8c087b3314319f8a7c012eebdb1ddfec7aa16d13a80c7f620b0db7e47de097",
+      "git_blob": "39b2209d5ab122b047e7f64082877dd4be67a09b",
+      "bytes": 6981,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceUintMemory.lean",
+      "sha256": "d8ca6c3af4520cbed4f5607282af85de97e3d319a7a415a92213d23f7cf95628",
+      "git_blob": "d1d37a473552975caf460b93d3b3fdc65b214bf1",
+      "bytes": 14409,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceUintWrite.lean",
+      "sha256": "b3ef464c6e2b7b3a8a9c9c4af5b17719b83c87cf1830485243f4b247c2f6aca9",
+      "git_blob": "7fae2ae188cf1ed22ea43e2b923a2f0047ffb771",
+      "bytes": 7620,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/MemoryOps/SourceWrite.lean",
+      "sha256": "7dcd4efcafbd0565f7e1d6e5a9c54e93073fe1497f1991d33831caac1e168160",
+      "git_blob": "17fd554b66744577366b0fb465709178282ef04a",
+      "bytes": 10381,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Backend/Opcode.lean",
+      "sha256": "70c1285ffee85bd60d8c01588978f0e07a4ab6c1eb7e353cb38fed071b615acc",
+      "git_blob": "f0dd45131dd8c1d4cd81887a06b63803958a0669",
+      "bytes": 16680,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/Arms.lean",
+      "sha256": "6a07403c61d7c44ede0da0fc3902f041023112a0287dba981b2edfc67d86f6ec",
+      "git_blob": "c3d552f46a4c8db92c88506f438c91bda2b7148c",
+      "bytes": 55594,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/Blocks.lean",
+      "sha256": "8d679c16c1f10cc04ddbdfe0c1f19ec46410c18a7cc8d6aaf9363f48582a6719",
+      "git_blob": "6f2d7347a2a694ca72fd9c362f19335d408c4d42",
+      "bytes": 46790,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/CallSummary.lean",
+      "sha256": "90d665e058d1a0679d87a6a462d786da588e27a7a94269a46926351eeb1f626b",
+      "git_blob": "a534abbbb1db9373cbcf865228b428be5bad7c08",
+      "bytes": 33694,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/Fml.lean",
+      "sha256": "1327bb1fe336e9eca4b761b1ebdf8c59c1b00dabbfc4cb5b9b0dfe78f94385f1",
+      "git_blob": "238181c06c1937597b3f975b3b0edcdc647402ab",
+      "bytes": 27037,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/JoinSequence.lean",
+      "sha256": "cc80898729c66130d66f79d85a83b2a0347eb751c13a42ec87ccdb504bcc66ac",
+      "git_blob": "97840d6780931b7eb16e70524de49aeb89ebef26",
+      "bytes": 8299,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/LexDiamond.lean",
+      "sha256": "b43e502c0feda4c79a70b847ad6d366547be2614947797bfb88e528ce36b79bc",
+      "git_blob": "8629f2e6c8073454ca07d6265c3a28b15ce09aa6",
+      "bytes": 2264,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/LexVariant.lean",
+      "sha256": "f853ebeba1f5e360812e86e9cc607d1a22c4f74c25afd236d152fe1f1d2cb40e",
+      "git_blob": "6e138413c495bc835da1fb3b9554adc847af551e",
+      "bytes": 2408,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/Lower.lean",
+      "sha256": "7984f90e4d065aa67a3150390bc2dd22301e1c2cedda89f7bf69f2c1d75ed3ef",
+      "git_blob": "afa9a658ba564069194e48b99152bb576617f44d",
+      "bytes": 13572,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/ReadWrite.lean",
+      "sha256": "fadc45d5d8799f08018f77541390df7350c1e870569b5bad254e7bbb060d2969",
+      "git_blob": "e677441823809f3a739ebcd0c0d12cfbea2c3b31",
+      "bytes": 1871,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/Shift.lean",
+      "sha256": "907888bf49ae2347938ae251b0a3ba38dfe12d0502e54159cf9f52d26ee1991f",
+      "git_blob": "dfe50c5166fc5d838cff0be0eb19afaf7793ae99",
+      "bytes": 9466,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/StateFacts.lean",
+      "sha256": "538a2f047312bf0e52d95a1f7ff8528a0a4ee0df3b3594af22f97a375de5828a",
+      "git_blob": "cbf71396adfffd671a62e77b91adb0d36c3927da",
+      "bytes": 9728,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/SyntaxSize.lean",
+      "sha256": "012ca70547d657dce56baaa86599c032f7f888d4c86336cbcb62bf760b8d999a",
+      "git_blob": "648ac8e0eceac3dc4e352d914264f553da5be9a7",
+      "bytes": 6219,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/TermEval.lean",
+      "sha256": "c254b7420b1157544fbc8d1581673887b90cde8206ee2ea9035f3c6f6e2ea201",
+      "git_blob": "3d86aaf040e44fe5308cdb791c672a960497579b",
+      "bytes": 7885,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Calculus/WkOver.lean",
+      "sha256": "b17b1d294b95ad1a058ef61c76e6d96789eeb3099ae4012046dd165323d7f408",
+      "git_blob": "5218f516d31b48c7fb33e96a03e0f4d07e51e4b8",
+      "bytes": 4457,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/ERC7201.lean",
+      "sha256": "5600d38de5f2e8cc3277d3b8a3186d82ecb42631b52f2da5699017a6202d6dff",
+      "git_blob": "e3856c2788a3b75146b49af9e4f324c87490ef6c",
+      "bytes": 1452,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Eqns.lean",
+      "sha256": "d54a2319480cd95cc158517c938b654eadd3ed9065d99e47eb2c3f2cdf39d096",
+      "git_blob": "7c97fe442e54b6b99e76630d493143d2c83b7b31",
+      "bytes": 1838,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Compile.lean",
+      "sha256": "e452bff7f9c882940ccbabea2a51566e333c30d3617486b8338d04d32f99e4a9",
+      "git_blob": "5c3942ffc9d615a55b34858c935908a2dbd3373e",
+      "bytes": 23035,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Correct.lean",
+      "sha256": "21f6b4b402515040d9adea80d61e0acf042aaf1fa93344e081f42cfc95ff4be1",
+      "git_blob": "877388f9d077387602dc20036eaf4b5440741e7c",
+      "bytes": 65566,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Exp.lean",
+      "sha256": "c0b3da3a583c13563162fd5cbd74a496caca559a5a9f1c8289ed31490df8ce35",
+      "git_blob": "6dd64ccddc5828997ba976b6486606690fa7d2d2",
+      "bytes": 10297,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Expr.lean",
+      "sha256": "6365964236a8720e4d773704ad336fba9f204ace8506b03f73d6374af766e591",
+      "git_blob": "53acbfd6e23e24fd98c1737d90ebb83127d86986",
+      "bytes": 24481,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Layout.lean",
+      "sha256": "6ed08f9d1321a00e51d5cd0d419f7f264cfacab4b0b5172cbb7638d6d7e68c4f",
+      "git_blob": "42a5068e8e55bca316f5e6cdf73e60179e177b98",
+      "bytes": 27906,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Machine.lean",
+      "sha256": "a8a13b4c5b2c32bf5f83c9903ee5f7436e797fe4b70496aeb5fdf5aaa550ebd6",
+      "git_blob": "b116e3cb2cb989530d7e8a253bddfeb1141cd815",
+      "bytes": 28819,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Memory.lean",
+      "sha256": "1b40c67f29168850d969f8c37f0aad3e89e15e44c20c0078020e4588f34b5b34",
+      "git_blob": "db9812b4d430be037c77e8b584e7a654fb1f04e9",
+      "bytes": 9613,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryAlloc.lean",
+      "sha256": "cfc0280445cf5aea444b4196be2b28ab767946dae7d4ded9d3e7626f4f3f634e",
+      "git_blob": "1a7708d1111d45c7e39902ffec83ad24f600fe4c",
+      "bytes": 16059,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryAllocSource.lean",
+      "sha256": "37cbda823ff7333f5050f3c673ef6905d6a6bf7168589a10b826ffed1371e531",
+      "git_blob": "a75bcd73e1e0f26a197289ab4be71dc29aea5a76",
+      "bytes": 10015,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryCapture.lean",
+      "sha256": "d455818799b70c0b0f41dc30f4ce12dec1e20f319d8610d5e7b143e896937002",
+      "git_blob": "304aaa468cf4ccefec8088a8f42897d86f057d66",
+      "bytes": 6702,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryCompile.lean",
+      "sha256": "08f32f3755e4573f48408b48590adfaf0022e5e4d91c1c1913727311b87ba99b",
+      "git_blob": "a65234724539f4ffad1737bd17ebd87e6f14baf6",
+      "bytes": 68073,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryCompound.lean",
+      "sha256": "bcef05fe00a1cee5888b04631c981686d7bd6160f4797da3dab9d6010366b79a",
+      "git_blob": "55cb4944c2511dcb43f3783c51b0d2b5d8c0bef2",
+      "bytes": 8276,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultArraySource.lean",
+      "sha256": "9d341c289aec49adf63ceebb3703ba61f618d1a1efe78266d8ecd921b47cae55",
+      "git_blob": "a6e44388945ee5aa5e6aa50eeeb022de88261238",
+      "bytes": 3784,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultBuilder.lean",
+      "sha256": "bfe6bc89a3f44f4b27623440528a2cbcc821ed59db17a66beda1bc64bb7212a7",
+      "git_blob": "541ba170d93aece2ddcb5e81770f323534fc48ca",
+      "bytes": 4230,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultChildren.lean",
+      "sha256": "9e2bbc0479999f13f50b6b21ba78b9d3355ba0ff6f54c567bdcfc0a77857eb53",
+      "git_blob": "dd52c646fc857dec5441d207c8fdb1c5fed00824",
+      "bytes": 4147,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultChildrenSim.lean",
+      "sha256": "c7a0e8e68748492885ce5cbd01b8f2ea9d5f138753f202b725866f10f90eecf0",
+      "git_blob": "e4a6421d64277c57e51f1df3b12e021d3cd6e09b",
+      "bytes": 6564,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultCompile.lean",
+      "sha256": "eda905610a56f7f9f1e2c8f464de556d334e9f8b2794dfba57f6ec0a80e47d4c",
+      "git_blob": "9f104daee24a23a644cfcaa31077b682d3038038",
+      "bytes": 1877,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultDynamic.lean",
+      "sha256": "9b5e31ba18df94007197a4710a001f419d6f532a359e23540c6b96024ee965a4",
+      "git_blob": "dd1b2d32f12aeab5bb178b94f7f8367fed20ffd0",
+      "bytes": 4157,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultFixedBuilder.lean",
+      "sha256": "e9a97b84e54b4272e1a3f996f1b80d57ac7b3c8b274202012fc10dc43fcf7fb2",
+      "git_blob": "128a0a73787a9119d91d6ad5283df960e8064fe2",
+      "bytes": 4155,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDefaultParent.lean",
+      "sha256": "f0f5a4e378d722f6fdf013e59cbfd2bbfda36e071c5284523c844391de23edda",
+      "git_blob": "8be59d31271ff9290634a1abdb40d40daa790527",
+      "bytes": 3340,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryDelete.lean",
+      "sha256": "42e874337c932317c07a5deed307bb93e2226ca66359f064d8df9b10fc96fee8",
+      "git_blob": "fd7b2403a98abda96999b42eb2165061e0742431",
+      "bytes": 2761,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryExpr.lean",
+      "sha256": "84aa0c393f39081c6cbab5952b87ccbd208e6e0fe2b22b5e453346af418fd7ab",
+      "git_blob": "e4b5c3888cde74560b78286ac2e4023a213825cf",
+      "bytes": 9695,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryGrowResult.lean",
+      "sha256": "05c861e391eadc867117ec21881012d933b35e04d567df288025d9fd9ee56da0",
+      "git_blob": "8fbe65f44980ebb5d112e07e7b2b9626ce1db754",
+      "bytes": 4387,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryHeap.lean",
+      "sha256": "3a84a3a517c15e37f74d693602d93e26aa4833eb5a26c29187a77b29122c8835",
+      "git_blob": "22cc4bbee29c41b788fec6b5685564f5b4362c82",
+      "bytes": 4274,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryLocals.lean",
+      "sha256": "d034059608ab265031dc91254116673b458f27946021a43986cf00af4cebc821",
+      "git_blob": "4fddfec990e62cb9b4b3da2ecaf1de819be30285",
+      "bytes": 11498,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectAccess.lean",
+      "sha256": "4ccf493593a0995498d480d520d0daf4afdc868b7e9657af6133f8a37f5f60bd",
+      "git_blob": "d49c851aaa35c93d13188437059153d341970843",
+      "bytes": 8200,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectAllocator.lean",
+      "sha256": "0f71968ed6a657c72a7efa05d33262d2f0f3afd34c9ea9ff445ba8b567fe970a",
+      "git_blob": "f11ee34a733f1f1a2f075f78150d9624c4f54479",
+      "bytes": 7414,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectChildLoop.lean",
+      "sha256": "a41758bb77418b8f5301f484896685beaaa617e385511c10ba6123abc5efd67e",
+      "git_blob": "c34caec0d0d5dfa7ffc090eb86910cdc7ea63f3d",
+      "bytes": 2489,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectChildrenCopy.lean",
+      "sha256": "d8321b1e94c9d3ac960151d2519f0652d23f6b90135fe7bde2b0fc085f2bc331",
+      "git_blob": "b265e83c31b3a67ce6a806787a967e557463bb96",
+      "bytes": 3729,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectChildrenSim.lean",
+      "sha256": "392f04f83b44dd498bd3083ac5eca45e2f2b2c59063ab33afc167b71e962c6d9",
+      "git_blob": "e630a0c549dd828797a0c92f19058cb79c6c8a1e",
+      "bytes": 5852,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectCompile.lean",
+      "sha256": "93f684686866f348178f2b008f807b9c0caae97841591b6bfc418f0abf40d81c",
+      "git_blob": "87ce5feecd22cd979c9ab3b6f2fb1ba8f688b246",
+      "bytes": 7114,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectConstructionSource.lean",
+      "sha256": "cbfbef6b7898ac5cdc365aed840bfff2a5db6744953f1e01741c5f7fab30f1f9",
+      "git_blob": "837e160c8d2ffaf04f20570a3ae6288a2487c7bd",
+      "bytes": 7783,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectEmpty.lean",
+      "sha256": "819fec8e7e32d65fbbbb646941d6a531f448d3da7ef8d807914d73b4c0bf5c89",
+      "git_blob": "4ac7040734fd99b28e8703b925f3f9f30cbd22c7",
+      "bytes": 10710,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectExpr.lean",
+      "sha256": "aa7b4d3282ae51d367feed471a52a6848632f7f7507948ca7cb4c5d982f30473",
+      "git_blob": "c4acdf6d5c5f5378ccbb59137382264c43ff4649",
+      "bytes": 9010,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectFieldFrame.lean",
+      "sha256": "bd6d179f081aacd35f083e166ca391720e7c6ed4794a9439e6296d0e488dab9d",
+      "git_blob": "03ba51bdaeda8c6a89ffc0d4b6e8714fe9588828",
+      "bytes": 3757,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectFlatFixed.lean",
+      "sha256": "2ca635a280012fb4992ece61cfc320b1c215fb97bafcbb71518acdf4714f3460",
+      "git_blob": "16c5ebb6fb2c155e5b74c23ed84736f021224abd",
+      "bytes": 3753,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectFlatStruct.lean",
+      "sha256": "8889f884a2958c99b9b909c27a4ccad6605fdcaa683412d23cf6f680bc425f6a",
+      "git_blob": "a664dbfb76dfe0e6fc77c28498614b58f67bdb75",
+      "bytes": 7677,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectFrame.lean",
+      "sha256": "e9850071f310de971d35c247d3569d57a00adb3b69b0e7ac0f3d9d00767a0ba7",
+      "git_blob": "1d9fdf5a757e621f52a650a68db4fdccf8f530a7",
+      "bytes": 9628,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectGrow.lean",
+      "sha256": "7b7d434fa353e5846bd900fbc9a61ae19d487c024733ecf3441337e00adfa085",
+      "git_blob": "c1c295a96563529a34774cfff8c0fc5c076a7ad0",
+      "bytes": 5251,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectNested.lean",
+      "sha256": "ba5615103b956227dcfd277e5bda1dd272543e304a180c32149eb8d722721c92",
+      "git_blob": "eecf0f001cd44f79e18e4df6b0cc519995884bd2",
+      "bytes": 6908,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectPaths.lean",
+      "sha256": "e122dec204e5ef940ff8cc5cccdc17020a6b85bc5b9d0cd5d4fd0ba77f6465ea",
+      "git_blob": "4227816543733e4353de2be6c8713b27224290a7",
+      "bytes": 7391,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectReserve.lean",
+      "sha256": "5d9a285950d9eebd014bc843a8eedf148be0249dac8bcddf6736c8a5e8c8b5ea",
+      "git_blob": "30141784b05dacdf05c1cf1587721b34ba34ad01",
+      "bytes": 4046,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectStatements.lean",
+      "sha256": "bf1874908097ab4f469bd807958ab6dd890eff70c0a55e36d23420a7c656aca7",
+      "git_blob": "4a1c03ff9d6ca00227836b2ce0ad93cb243cd858",
+      "bytes": 9908,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectValues.lean",
+      "sha256": "a8862a44981c798b3f47a268445bdaac73b0f026e9f37eda8dcac71a0ef89180",
+      "git_blob": "477289263bef011b5dc1d81eeb3cb67aa8bc43a9",
+      "bytes": 4469,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjects.lean",
+      "sha256": "31fb3cda3b69ad128a90d4dd783519e66573a4e391dd95a5aaeb206244e02269",
+      "git_blob": "6c8bcfc56aead8c117aafb9e0ab2bbd4c60dedc1",
+      "bytes": 8952,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryPaths.lean",
+      "sha256": "95ec734b0817e9b0d3b48ac2df2b477c598443de22bd2df2d7387b6027b9d1ac",
+      "git_blob": "97267babf31a0167131a0514cbfe39d88be2adea",
+      "bytes": 11968,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArray.lean",
+      "sha256": "9a4c60a90d13ca9f7ba6b1b054698e37d5eacac1aa945a12fcb6626dd6e1f877",
+      "git_blob": "8fe83e00cabd8ffee3ef338cba7451e7017a549e",
+      "bytes": 10647,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArrayState.lean",
+      "sha256": "a9af24f242d988570263634d4e6915a27b732feb66f19d7dc74ac39c604ad39a",
+      "git_blob": "64f139cb6b87012b8229f4f8c55ffbdb0ae55bdb",
+      "bytes": 6612,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefDelete.lean",
+      "sha256": "44c175e3eb79bb1bfe31b03a6a6876aa8380ccde940dca58063a8cde69102027",
+      "git_blob": "300440bbd0ec7ad3b5a2ba133db1a65c436af8b0",
+      "bytes": 8944,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefWrite.lean",
+      "sha256": "5f2e741096ea555764c253ccc96368792c4ee8e158046c3f65fbffb68d04c188",
+      "git_blob": "3995b34973b9687c5795ed987e830fa75704bcd9",
+      "bytes": 10188,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryReferenceDefaultSource.lean",
+      "sha256": "c5ecc2dbc40011ed9e93066af5c20e6dc6455b6171c7662daf32efd3fe21a4d0",
+      "git_blob": "a67460f27892d64d72d6bb45988eaa637ccdb777",
+      "bytes": 8930,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefs.lean",
+      "sha256": "da3283bf96f2d1c3bfe498934a71443666986717ce1264bcd771021e75eba5b5",
+      "git_blob": "54b2512068f3717476a4ce923f012f94db6a7e21",
+      "bytes": 8519,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryScope.lean",
+      "sha256": "7f34df6f3e0da6e89e6c5f59b42410f7953552ee69427900bff035b6fbf42529",
+      "git_blob": "a367d4b3455e1f950b3abc7f3a63a1c48df9a40f",
+      "bytes": 2041,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemorySource.lean",
+      "sha256": "0c843eaf5933df26cfc09d9d969c8975936b2e0ae51a37659874a5fc70a5dcfd",
+      "git_blob": "31247e4429b52060ef2194d23fa1ae13df400051",
+      "bytes": 13561,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStatements.lean",
+      "sha256": "a32528b73a25f251dc8d1d09bb9bb7a9a9fc93c18ac62776ba9ff5e304c288ab",
+      "git_blob": "8ef1830491b2dd1f3fcbcfa38852866633789f6e",
+      "bytes": 4104,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStruct.lean",
+      "sha256": "9e759f5656be7937e20bb0cc8799ec4b1652615ce5be45f8055aef6fa41fb08e",
+      "git_blob": "86e9a451081b068a0b9f0272121d8b2b5fe10d3c",
+      "bytes": 6346,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructAlloc.lean",
+      "sha256": "3d04b062ffa05ab66098c27b7356e4e5dd585bf82c4e6cc9be214707bbc5960f",
+      "git_blob": "5f0c24671c2ea2cce72f4b8ca43d365b397ee60d",
+      "bytes": 5107,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructArrayChild.lean",
+      "sha256": "fa7228deeb5905662e70022278030f3f5d509e12019812c53ff88fe25d934235",
+      "git_blob": "e3237b2ec80dd2e51b680fd7a281bb7e6fdfc663",
+      "bytes": 5793,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopy.lean",
+      "sha256": "4ee69b32cc29e65b4740a1be0d7012934a44076d0f7a8d3743365b7d3bf474e4",
+      "git_blob": "e5852474f58528f4a04885998dc7afc106f87ebb",
+      "bytes": 6279,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopyAlloc.lean",
+      "sha256": "b0bf383c67f583e32571731d14cae0bedd87f1fe4e650dd049562bf3482edf0c",
+      "git_blob": "371902d64473dd92cc7d0fc124f32c9e251d6cea",
+      "bytes": 8256,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopyCode.lean",
+      "sha256": "46464cdd2bb1d8c52fb81611911c5aea4f20dee082d7e55f392de6f99ed8ad52",
+      "git_blob": "80fec3d8f415574af0004be8b79665cf017318f6",
+      "bytes": 11374,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructCopySource.lean",
+      "sha256": "b1a8535a539cdc283c853c6a16e847b63c8cd182747cf91349807a753582be3a",
+      "git_blob": "a2f1f6243465f811347bffd24e3e8631460e44e1",
+      "bytes": 9084,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefault.lean",
+      "sha256": "08b905c22ee805ec68cd16957fd73b80c08cb8ad085e1722dee48cbe5c4807df",
+      "git_blob": "ba6026558427556f9ee85e298f81665bc4d7ffe4",
+      "bytes": 11496,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultCode.lean",
+      "sha256": "7b0c05ce1cf200d39b83c8568977b25dd46de0feacfccb66513f32b7894f2fdf",
+      "git_blob": "4532029ecab13660ce67017e539441ab5c902c57",
+      "bytes": 6186,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultLayout.lean",
+      "sha256": "6b6aadf9dfb5d1d0caac2e18bb55dfa093f493aeb3b6aecd709dfa78867f3638",
+      "git_blob": "e76b22c75fb625e7380063b5b9618e462cc614ff",
+      "bytes": 6271,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultPlan.lean",
+      "sha256": "98abc761d60de911b1bfefd496a102acfd46b42f38e0caec6855f0cf1b3dd002",
+      "git_blob": "d98d144cc5f75521e81a45350eeb77289b9e318f",
+      "bytes": 15320,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructDefaultSource.lean",
+      "sha256": "30fd021cc1304c8a76b3704c233b1b749b3448c861dda135c9f5fb9fa86b5d43",
+      "git_blob": "3926b2b3ee460fa8c09d5dae54ab5244a48d0179",
+      "bytes": 6295,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructGrow.lean",
+      "sha256": "df64c124bfab79d22acb3e7741f004ac82ab6142e6bfb2106c6318da30ae90ba",
+      "git_blob": "7d934a2b761144c942861f8aa7faf05f3101d382",
+      "bytes": 17274,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructHeap.lean",
+      "sha256": "b200cbd15d504dab96b3e0bb2c80f75f3dcb626e19c1f039e6fbfcd136872802",
+      "git_blob": "a8ad08556ed572e1681e002285190427d0031039",
+      "bytes": 8610,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructReferenceAlloc.lean",
+      "sha256": "340d1567877623d410ae06adf4ce7f118d73f633bcd9ecdd5349989469bc1042",
+      "git_blob": "2e84c85742bd5677675893a0b0206e12a7f70d60",
+      "bytes": 10453,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructReferenceCode.lean",
+      "sha256": "ee4334db47d63a0e6f3d910d8bf1686d940d80aa3288756d29872241417910ef",
+      "git_blob": "c0a04b2baafd41793c880ef930904e8bda223071",
+      "bytes": 12453,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructSource.lean",
+      "sha256": "a1471b84851209bb39bbf1d234fca8f9266849bd86978fbd55b333115f8f1350",
+      "git_blob": "2caec0d5235bb752830dffab6abef4c6365f27bc",
+      "bytes": 4188,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Repr.lean",
+      "sha256": "eac29c092292aca1f82d90409ab7d43a68450c2c44e8607b0fae06d18bafd240",
+      "git_blob": "93c20da8c5847cc1f27e293d3b6274e32909903f",
+      "bytes": 47898,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Signed.lean",
+      "sha256": "5012a6c6b28affd7c417394e2f9562c2053b74e274b541e6be6cf68622441c7a",
+      "git_blob": "f377c88900943e0d1a8b852d2ee6326fe2753e52",
+      "bytes": 16401,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Sim.lean",
+      "sha256": "e72117d9247ae80ade30c089378a56a51d3fd76ac3d36dd845a563db02bb2821",
+      "git_blob": "a4314dd7dd52738e4a7f2f420e59b86834c240b3",
+      "bytes": 53363,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/SimLemmas.lean",
+      "sha256": "7118ac974e84b3e7ea092eb84d7bff723ffaa662af927e3356414bdf4bfd07a7",
+      "git_blob": "64d91bdf2d8b8b58d97d0d8616406e97b3b486f5",
+      "bytes": 44536,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/Stmt.lean",
+      "sha256": "2e1929f2066ff110c62829520dd38f1a8f3fafddcda4b532d86780ed72e3b2f6",
+      "git_blob": "2c088ea4961a82812d1a04d7ee5ea020cf66e3a2",
+      "bytes": 57276,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Evm/StorageLemmas.lean",
+      "sha256": "bb5c05a7f5a51d15b951235bfd45957c83a9788a4fef93e7b0021c54cecc21ea",
+      "git_blob": "d1c5212195e9e3b6d680a78246e64e290f5eae06",
+      "bytes": 8924,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Hash/CollisionBound.lean",
+      "sha256": "49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce",
+      "git_blob": "b54c93a5b24340a19160c1fb378d057ccee60f84",
+      "bytes": 45567,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Hashes.lean",
+      "sha256": "1c2c71f30137bb0c0f5767b6f6596e6f54f14ef65f1921c5e7b2cff930bc0919",
+      "git_blob": "3db4c174e01afc901881bdee3175a906b0eb6ba8",
+      "bytes": 8846,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Keccak.lean",
+      "sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b",
+      "git_blob": "84d203a6c3d48298a2fe1af62089179603a1bc0e",
+      "bytes": 5240,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/KeySort.lean",
+      "sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0",
+      "git_blob": "7f078df3ec82900d61824ebed042f726de588f91",
+      "bytes": 10666,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Precompiles/Basic.lean",
+      "sha256": "ad735d22f74786399c0bc6ce2813fc782e4eeaf1bf80577382633111cfcb4b30",
+      "git_blob": "cc326cc10c03994614d8673c19dbcfe5ea440e64",
+      "bytes": 7423,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Precompiles/Field.lean",
+      "sha256": "350c0828fc5f639a3c0124664e1b22e0eba5eb933ff32ddb29ca4599b4fe85fd",
+      "git_blob": "f0d5d286ed8d5051707c2b77544486ad83fa0910",
+      "bytes": 8479,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/RevertBytes.lean",
+      "sha256": "724b287bc4c3f3e159f06ac2a5cd38100ccff9691b5331c17ef2edeab44d76ee",
+      "git_blob": "2474a1f05a619b8cb4a0a051e0f87e83be1e627b",
+      "bytes": 2879,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Roadmap/Contracts.lean",
+      "sha256": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79",
+      "git_blob": "b7cbc5cc7531bdaa8d4e061587c02d29608cc183",
+      "bytes": 57571,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Roadmap/Evm.lean",
+      "sha256": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50",
+      "git_blob": "b0e946aef1d5157c30b11acc15ff385ceedb09a1",
+      "bytes": 20283,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Scope.lean",
+      "sha256": "d37a9e4393e9b9da12bcd85beb428965becc2d3947838b1d11f510b07170c4ff",
+      "git_blob": "6bd9f972434e611ec51c3ff0c8692ab07b5c8ee3",
+      "bytes": 10230,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Secp256k1.lean",
+      "sha256": "44a750d75d6a27fbec52095f26e228b6d31927508854671d71119e78f76433e5",
+      "git_blob": "118a17b06d87d7c66f143ffca3b761b33ef0b0cc",
+      "bytes": 5075,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics.lean",
+      "sha256": "588c96429a3d91ef043d5ae731a1f98f3a12a8a394a601e287550828db32497d",
+      "git_blob": "a5d8e8ebecb5c9461fa97e53efa5c4e8255b3e87",
+      "bytes": 4157,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/AllocBytes.lean",
+      "sha256": "29033ca8c2fbb8449ee616ae36fc719fa77c606438b8340f3abe40a25b240257",
+      "git_blob": "66ea08593722ceed120d420967e7a997da5f9338",
+      "bytes": 13225,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/ContractWorld.lean",
+      "sha256": "4735cb8abc936b6cf3744756aed749ea8dacaec261368989752b9b5ded6d0554",
+      "git_blob": "9f22396da6266fa083413689a5c2e4141e545a95",
+      "bytes": 23144,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Deploy.lean",
+      "sha256": "31c6a5b2c0cfd15399294df77365ff615b1a7d8e29ea9ee41f0bab9d616ebb88",
+      "git_blob": "76de5fe670e79d027f5faa52292c286b10b166ea",
+      "bytes": 1314,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Ends.lean",
+      "sha256": "5e820367d4ae198af9df2ccd0054dec6c57f9c4a2f3415541c2cbf23c513b840",
+      "git_blob": "aabab691dc4c517043dd556447ffb44ca8f38755",
+      "bytes": 13079,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Heap.lean",
+      "sha256": "82bbdc0c5bb712e3cbfaedb258d0fb3cb439d784fb4d79c23c7f9ec1399be24a",
+      "git_blob": "817d5e5b641471d60df538817c2d494d1d74af25",
+      "bytes": 25553,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/NoPanic.lean",
+      "sha256": "a08845384cb4ee03338d7cee214bc2514acec30e16d08bb9225bcaa8e670e5cf",
+      "git_blob": "4941aa95ead479594185fb5dc1a4ffba3b78e5a6",
+      "bytes": 25483,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Ops.lean",
+      "sha256": "cc7e9107b49cbcea700791a265588c5655c4de095ae0d83ebd6e815cbd10ca5a",
+      "git_blob": "d2019420be166dc73bed5e8f7c72276b03c04764",
+      "bytes": 6895,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/RevertData.lean",
+      "sha256": "73f37ee7b44cb603d6768e652965fb7066275c8b078d3fa8519fee135e0a00f7",
+      "git_blob": "3d90672c073175b1c34a91536e1171e99605e62e",
+      "bytes": 820,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Run.lean",
+      "sha256": "5211d56062874939f6a059abdb604e8b0c0fec6b7fdf1fc80036d39d474837d5",
+      "git_blob": "18e1eb18c3ebe35420c11b75464fcb746bca8925",
+      "bytes": 60830,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/RunFrame.lean",
+      "sha256": "cd150706360346b72eb985ebaa6170532bfcea378d0630a68d35412b103c51bd",
+      "git_blob": "0fe793081ecc99abc54f13072469aa8f96374744",
+      "bytes": 54955,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/RunWk.lean",
+      "sha256": "598f5ac1081015beaa20e1805fd59bd27eb362a9e4330462a7bee014af8a0ebb",
+      "git_blob": "9e2bdbb0eb0079a2e3f902895fdc6450c37494fe",
+      "bytes": 75532,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/State.lean",
+      "sha256": "9023e4196a09e4430a7db8141ab664c746ab812252d35c438d34dac0dd3bb4d4",
+      "git_blob": "e77fedb3e8f3eb996b9130d863a2b844ef4e0030",
+      "bytes": 7939,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Storage.lean",
+      "sha256": "31e4b8f86b806252e7440a12ddc6e06c1cf1cac21942df248e875b25079d0bc1",
+      "git_blob": "a4fbe8c6e76891b1e9dec11c817bee90447a96f2",
+      "bytes": 2265,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Storage/Anon.lean",
+      "sha256": "43d65f0f8f1c00f8802252ed6e031c121e6255f64e0c73bfd748008f74f45e92",
+      "git_blob": "8dfde67fb87ba4753d81d5f04fdfba0e0cbbd9f3",
+      "bytes": 17371,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Storage/Ops.lean",
+      "sha256": "85009df8f6d04dc43ca6ee088416e6f557e33a8c0b6a8b7306edc86321d53706",
+      "git_blob": "b78dc8e277fe9d55b9761d79d788043629b54115",
+      "bytes": 61402,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Storage/Values.lean",
+      "sha256": "df568d043be5c7ffbe97ca6d790c7a7118efbe9039513c8379978fd764495259",
+      "git_blob": "32ab0f7a23e18868d8a71fc88a7c62cf770925b4",
+      "bytes": 37078,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/StorageWt.lean",
+      "sha256": "d045184c6c27687ae0feff9590128fb644ae0cf319fa48f9fef26c0a211a1093",
+      "git_blob": "91c0bf76a8ddff9100687de911a01cfa1bd2547e",
+      "bytes": 6197,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Semantics/Value.lean",
+      "sha256": "afa9b289f7720b04ce4db7d28b12c52649d2f12569d9f4d67bc703c1a9a7166e",
+      "git_blob": "0dc1c201e71e044f3ce1237ddf5e71fc0b60916f",
+      "bytes": 5627,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Signature.lean",
+      "sha256": "f87769d741153c151bd2d27aa43be9ba0a380f846f614ee5b00ef0e2581b5d1d",
+      "git_blob": "00821fe112ff718757eef1a06b59789467976a37",
+      "bytes": 27384,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Const.lean",
+      "sha256": "46ea4e0b34c80b91ccf30dec162398c290a5ad3a8403e58317a1d67d46888fa3",
+      "git_blob": "c762b7537eee1afc476a616abfcd780ace7c3d64",
+      "bytes": 14347,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Ctor.lean",
+      "sha256": "2ccaac06787dc1aeab8fe923f6a38bb4a9657b868becafb12732358ca07cfe13",
+      "git_blob": "69a9f3c470e5ebd1b9cf57d3f28f046d7da0ce4e",
+      "bytes": 32580,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Decls.lean",
+      "sha256": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9",
+      "git_blob": "8c4725d02ee3310ad36ae09ba7fc611e683d83d6",
+      "bytes": 11134,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Elaborated.lean",
+      "sha256": "b6f7a4fd560ef3d916ed54c171632e1e4e74d9c1623608697d1b8690507492a0",
+      "git_blob": "985a0226431a075d0cb457e0875eaa687acfa303",
+      "bytes": 12311,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Eval.lean",
+      "sha256": "0d88f15de02c4b6b2d18c8c517d24647f18366680a549b9ab2888ab9732e18d8",
+      "git_blob": "32d104566b86230295940fc6c7c623e092de2365",
+      "bytes": 71776,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Examples.lean",
+      "sha256": "6f3982f3494d5d46e87068692ebb984d346a1cc6809d00bd91118628ae00fa30",
+      "git_blob": "8f4c8f867a52ad1b85392187885e3407b24eb5a7",
+      "bytes": 8774,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/ExprProgress.lean",
+      "sha256": "1171e27dd50da1641cda45000c58be7752590382532c4015ddb2491983591fc5",
+      "git_blob": "609dd0df7c0bcbf1fd6e93f12b44903de09b9a94",
+      "bytes": 34667,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Hoare.lean",
+      "sha256": "18babea61c50d94235e25299fcccf02aa87eaac416be2d350bac1d4451b6ce96",
+      "git_blob": "3f628c6cf0b21402491b76a14d0c52dcf16ceb4b",
+      "bytes": 7678,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Ledger.lean",
+      "sha256": "655eaa15d6410e99acce4ae50d6110a2f7531227e2ff0a657e4c033d29a01faa",
+      "git_blob": "437a3bd8226f49eaf03a4114a4e82a7f452a9bf0",
+      "bytes": 4600,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Machine.lean",
+      "sha256": "dd4c286689e2678adc18d2b65621f585acc255dd1a974e80d2d34ccadc36ad67",
+      "git_blob": "7830bf103dab0d7c060849f5b36504c76956a880",
+      "bytes": 22478,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Observe.lean",
+      "sha256": "82db004513511e206ee57eb7437831d8908df9cab29b18271092406ccb166212",
+      "git_blob": "0df8291bdfd92ae59f8f10c7a078829d65bfd232",
+      "bytes": 8443,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Resolve.lean",
+      "sha256": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1",
+      "git_blob": "36121649b05fc4c6dfcaf72090afd4941eee77dc",
+      "bytes": 13507,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Resolved.lean",
+      "sha256": "52ed52251999d368302a343c912fe8446d976392d20765d21eaeac59d3f94084",
+      "git_blob": "afe1afe9821bee35943690c2189e5f34218759a6",
+      "bytes": 28255,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Semantics.lean",
+      "sha256": "b7a0d9056c3cc29fd461024260d4b89ef1177d80fde7670b79f2c7e0aac4c7a3",
+      "git_blob": "df04f0fdaf2a926a22a836d324f6b3bb179c48ba",
+      "bytes": 17790,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/SemanticsExamples.lean",
+      "sha256": "d0b39ebf0c0afa3777f3ab70798a26f3affb03b2f3f43e7e2329d17efc57e86f",
+      "git_blob": "b56db9066ec48f323efba9f3836b4010f3160f7e",
+      "bytes": 23642,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/State.lean",
+      "sha256": "0eabd32631a4032459114cca4fef000610997f4de8bf7af27506918bc76c0d1f",
+      "git_blob": "c337ef32c17aeeb16ae5c41da4051f2c520f0f47",
+      "bytes": 14151,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/StmtProgress.lean",
+      "sha256": "8e2963e05b89130150bbf1f89842f54f930660bf6f9dc73aeb42a9fd1c2b36b7",
+      "git_blob": "2be0eb390a84ba5d8e6cbeb38df3f238a1c08d05",
+      "bytes": 50887,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Syntax.lean",
+      "sha256": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+      "git_blob": "6e406b12c07db36ca9b66c3052a42a47c6a467a7",
+      "bytes": 18906,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Types.lean",
+      "sha256": "7bb6c26eaad2fbff46c11e54ead9451156d31b54cbd0400d17d76336021bd73e",
+      "git_blob": "2cc8d1dee17c6941fb4cf4b1c75c4431badfb2d6",
+      "bytes": 12006,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Typing.lean",
+      "sha256": "5a24a12af1f615864fea5e1397cef3944b4a6baffcee306a96ad2ab954175241",
+      "git_blob": "93a901fc8a7b635c01915f0130010f5486379366",
+      "bytes": 68040,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/TypingExamples.lean",
+      "sha256": "f9239b2eb16d2eb63636f57609ae0d9c98f8803d3c066fa6ed84bda38d05d3d1",
+      "git_blob": "66f702bddf884d95e5c79b18bc81f7f5c475dc4b",
+      "bytes": 30455,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Upstream.lean",
+      "sha256": "18fc0b1f2bf349b7b71e569e70e7ae6c7ec485a57915623e962c631186f32272",
+      "git_blob": "2023dafc0e7e0ef4438e70f4d9d3ebaeddb33a14",
+      "bytes": 13422,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/Value.lean",
+      "sha256": "6e1e9d0740f1c2b0783cd2ee56011e2174ba6333bb422d0fd12bb8dd1cb673f7",
+      "git_blob": "c3b7dbb1c0f7f8d6bab57d988659019631f4682b",
+      "bytes": 22373,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/ValueProgress.lean",
+      "sha256": "54e8c74af70bea8decb0d698789fecd122bdb765f6d56b8bc8fd2489c4a535ad",
+      "git_blob": "b491f0eb1cce47c5d444b28b395b9f820863a431",
+      "bytes": 38607,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/WellFormed.lean",
+      "sha256": "7b1ed96f14f9ff91c34bca8150cdd657e12eb520c05c7c2aa463bba86e69189a",
+      "git_blob": "c569040103bef240840449357cb9ea58e6fa15e2",
+      "bytes": 12771,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/WellTyped.lean",
+      "sha256": "cc07df3b81423390ba73af5a24cd9e70000a6ebb592e87964d5a3e5d884d0903",
+      "git_blob": "6c94f9babfcea69c4b32bd95aaa513810b638cff",
+      "bytes": 81883,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Source/World.lean",
+      "sha256": "61855329c308e42edb5bc0997be35dd80a63278bb6a818f885bba7666d62e64c",
+      "git_blob": "586a123130e5a3f3203b99c0c8a8cccff3ec2ffb",
+      "bytes": 13097,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/SpecSyntax.lean",
+      "sha256": "0d93503bea09cc6e1174fa5bcf6150705f5db360dfffa0fc33885bad23b3e236",
+      "git_blob": "db1a7b5d5f294c85bb147acd500d9d7548cd3520",
+      "bytes": 10144,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Storage/HashedKeccak.lean",
+      "sha256": "f5dab5ab0fe7b252d4c47bd617f026057de63133e0258a1b99dfca3cd8cf965d",
+      "git_blob": "44635a6942566b883a408379d8ff75a240d5742c",
+      "bytes": 13956,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Storage/HashedLayout.lean",
+      "sha256": "b3e0665011200d2ed78c94cc816591e8da5509fc73b17f13d809b8fe1306d4d3",
+      "git_blob": "63c31d69dd17b2d8477020caacfcdef11b61adb9",
+      "bytes": 19168,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Syntax.lean",
+      "sha256": "81e376192590dacc20ae1b3c1cb27e4cf144289d89be28beb40452d4fe7340e8",
+      "git_blob": "b5f746b441b3606a3fe990cc525c3d421f620041",
+      "bytes": 4152,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Syntax/Checked.lean",
+      "sha256": "27c2e199e4275370d18314eb80f610d4d97f95bf27df26aac042b8875f4ce964",
+      "git_blob": "89afe2ab399261e4aeaec56d52a5f07687e32b5b",
+      "bytes": 26318,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Syntax/Contract.lean",
+      "sha256": "25f04a46318dd766e6ac468972c2bf11bf75add95a069dde17a7171e85d5c70a",
+      "git_blob": "1e59eef8de4213112975531a61d604b2a51a492b",
+      "bytes": 31121,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Syntax/Grammar.lean",
+      "sha256": "996c2b232f6e73f5610f71eb0d7fcc726fa2200c163a8742f300632f7976e5d8",
+      "git_blob": "929727ea718566650da04d13bbdc1b2bb0cbaf25",
+      "bytes": 57813,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Syntax/Join.lean",
+      "sha256": "b0aa29059d179bc364e3bc87c7b0cb833c5dc76beda3585221dd8e54921899a8",
+      "git_blob": "55221d31bebca40432f144c275b7ac1aca0a2645",
+      "bytes": 503,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Syntax/PushSource.lean",
+      "sha256": "80e4c3b947bc6ab63eda96005f7f982971204423bf7c0f059e57b07f38f6bdcf",
+      "git_blob": "0c40db021ca2a41c4a4c793e5cc330b16a6be647",
+      "bytes": 2274,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Syntax/Raw.lean",
+      "sha256": "7c137f7e8e4c70f4868dc41a437687ab42e2d63e887cdde3ba3ccd1ea764b76f",
+      "git_blob": "32fa7d05e94169d500de4e081decea694e70fb7a",
+      "bytes": 35324,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Syntax/Scoped.lean",
+      "sha256": "85d626e454f350c6043046352101ce2bd53c7cebdebb93698f4a34e9deed7532",
+      "git_blob": "04ba84f9588aeb21c3ea05fc089a7bb62eb1c84c",
+      "bytes": 65335,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Theory/Segs.lean",
+      "sha256": "57e4a32ca89346c6e840f90866f0cdfd8fc2765cb268e09f693e267a5cb0b673",
+      "git_blob": "a38828849f02ffcc239b2053e41f36615ce18206",
+      "bytes": 917,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Theory/Typed/Mem.lean",
+      "sha256": "3791770611e07ce4cab587cf9f4e3138a9d49d931d37213904df8f341539808f",
+      "git_blob": "90aec343a312e09c270a714f083fe6d6901c67c4",
+      "bytes": 62088,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Theory/Typed/MemMirror.lean",
+      "sha256": "297bdf800b405d5b81cf655bb9755f96b799d45b2dcb25cd34b146a522f584b4",
+      "git_blob": "e26f53ac482a1608110f2bc050e981e4720390e3",
+      "bytes": 10592,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Theory/Typed/Obs.lean",
+      "sha256": "adf3215f70b63900d25c801084a2fbe6a74d5ce545e8791ae792c7eb05425a27",
+      "git_blob": "e5bdae5aff3d6e4b712015e5984bd51908e00d75",
+      "bytes": 2049,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Theory/Typed/Obs/Ops.lean",
+      "sha256": "73daf760a49da614a224a6e744dec38dd81060cbffbfd7e24f6418474424bdc9",
+      "git_blob": "f4048bc9a88d542ef9b7dc5216fac7dc04b9f2b9",
+      "bytes": 28737,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Theory/Typed/Obs/Paths.lean",
+      "sha256": "207bc401bf223ddcc90322522890f064c9aba2786204895e69da81898ac5c5cc",
+      "git_blob": "951da0ebfa166e8bd1bf44fb32eab465122159ee",
+      "bytes": 27055,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Theory/Typed/Obs/Values.lean",
+      "sha256": "47995dc3569459157761825dde462c102424cc44d779ac548d9e6cd4cef6c1c5",
+      "git_blob": "ccdcb16417a3c4c6f18d29e13f33df3fc190c614",
+      "bytes": 40161,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Typing/Values.lean",
+      "sha256": "8b6c32a3816e4613470608c860b727180d0dde2c0c22038b44b220bb0406099c",
+      "git_blob": "57c9ecb6069a65dc9400569e27f9b09cba9a5b5d",
+      "bytes": 62101,
+      "master_equal": true
+    },
+    {
+      "path": "Solidity/Update.lean",
+      "sha256": "b6770b0a55a024edbf17e0abe396984bac6ca3797e0a3d238a9b62af5adfb830",
+      "git_blob": "15702c6e1bdbb5f7c1665b7dcc38a91740b95a66",
+      "bytes": 2268,
+      "master_equal": true
+    }
+  ],
+  "previous_master": "8bf8321873befa3f35ca31e97e5339a1baee93e6"
+}

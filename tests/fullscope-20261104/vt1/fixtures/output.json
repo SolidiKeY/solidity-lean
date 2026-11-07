@@ -1,0 +1,1687 @@
+{
+  "contracts": {
+    "Census.sol": {
+      "Census": {
+        "evm": {
+          "bytecode": {
+            "object": "60a060405261001461000f6100e2565b6101f1565b61001c61003a565b610b3661020a82396080518181816103e801526105fd0152610b3690f35b60405190565b601f801991011690565b634e487b7160e01b5f52604160045260245ffd5b9061006890610040565b810190811060018060401b0382111761008057604052565b61004a565b9061009861009161003a565b928361005e565b565b5f80fd5b90565b6100aa8161009e565b036100b157565b5f80fd5b905051906100c2826100a1565b565b906020828203126100dd576100da915f016100b5565b90565b61009a565b610100610d40803803806100f581610085565b9283398101906100c4565b90565b90565b5f5260205f2090565b634e487b7160e01b5f52603260045260245ffd5b5490565b61013081610123565b82101561014a57610142600191610106565b910201905f90565b61010f565b1b90565b9190600861016e9102916101685f198461014f565b9261014f565b9181191691161790565b90565b61018f61018a6101949261009e565b610178565b61009e565b90565b90565b91906101b06101ab6101b89361017b565b610197565b908354610153565b9055565b90815491680100000000000000008310156101ec57826101e49160016101ea95018155610127565b9061019a565b565b61004a565b61020790806080526102025f610103565b6101bc565b56fe608060405260033611610012575b6104ac565b61001c5f3561009b565b8063444aa50e14610096578063624fbfdc146100915780636cbb5ae31461008c57806375059c59146100875780637af91e2e146100825780637d94792a1461007d578063959ac484146100785763a4ece52c0361000d57610479565b61043f565b61040a565b6103a1565b6102f7565b6102c0565b61023a565b610119565b60e01c90565b60405190565b5f80fd5b5f80fd5b5f80fd5b90565b6100bf816100b3565b036100c657565b5f80fd5b905035906100d7826100b6565b565b906020828203126100f2576100ef915f016100ca565b90565b6100ab565b610100906100b3565b9052565b9190610117905f602085019401906100f7565b565b346101495761014561013461012f3660046100d9565b610592565b61013c6100a1565b91829182610104565b0390f35b6100a7565b5f80fd5b5f80fd5b5f80fd5b909182601f830112156101945781359167ffffffffffffffff831161018f57602001926001830284011161018a57565b610156565b610152565b61014e565b906020828203126101ca575f82013567ffffffffffffffff81116101c5576101c1920161015a565b9091565b6100af565b6100ab565b5190565b60209181520190565b90825f9392825e0152565b601f801991011690565b61021061021960209361021e93610207816101cf565b938480936101d3565b958691016101dc565b6101e7565b0190565b6102379160208201915f8184039101526101f1565b90565b3461026b57610267610256610250366004610199565b906106e8565b61025e6100a1565b91829182610222565b0390f35b6100a7565b9190604083820312610298578061028c610295925f86016100ca565b936020016100ca565b90565b6100ab565b9160206102be9294936102b760408201965f8301906100f7565b01906100f7565b565b346102f2576102d96102d3366004610270565b90610815565b906102ee6102e56100a1565b9283928361029d565b0390f35b6100a7565b346103275761032361031261030d3660046100d9565b610841565b61031a6100a1565b91829182610104565b0390f35b6100a7565b90565b6103388161032c565b0361033f57565b5f80fd5b905035906103508261032f565b565b919060408382031261037a578061036e610377925f8601610343565b93602001610343565b90565b6100ab565b6103889061032c565b9052565b919061039f905f6020850194019061037f565b565b346103d2576103ce6103bd6103b7366004610352565b9061089f565b6103c56100a1565b9182918261038c565b0390f35b6100a7565b5f9103126103e157565b6100ab565b7f000000000000000000000000000000000000000000000000000000000000000090565b3461043a5761041a3660046103d7565b6104366104256103e6565b61042d6100a1565b91829182610104565b0390f35b6100a7565b3461046f5761046b61045a6104553660046100d9565b610a49565b6104626100a1565b91829182610104565b0390f35b6100a7565b5f0190565b346104a7576104893660046103d7565b610491610aed565b6104996100a1565b806104a381610474565b0390f35b6100a7565b5f80fd5b5f90565b90565b634e487b7160e01b5f52604160045260245ffd5b906104d5906101e7565b810190811067ffffffffffffffff8211176104ef57604052565b6104b7565b60e01b90565b90505190610507826100b6565b565b906020828203126105225761051f915f016104fa565b90565b6100ab565b610530906100b3565b9052565b9190610547905f60208501940190610527565b565b6105516100a1565b3d5f823e3d90fd5b634e487b7160e01b5f52601160045260245ffd5b61057c610582919392936100b3565b926100b3565b820180921161058d57565b610559565b60206105e5916105a06104b0565b506105be73__$08b3b530d727b4b2b521bbe2862c9154e0$__6104b4565b6105da633cf3bbf46105ce6100a1565b958694859384936104f4565b835260048301610534565b03915af4801561065357610622915f91610625575b507f00000000000000000000000000000000000000000000000000000000000000009061056d565b90565b610646915060203d811161064c575b61063e81836104cb565b810190610509565b5f6105fa565b503d610634565b610549565b606090565b5f80fd5b9061067461066d6100a1565b92836104cb565b565b67ffffffffffffffff8111610694576106906020916101e7565b0190565b6104b7565b90825f939282370152565b909291926106b96106b482610676565b610661565b938185526020850190828401116106d5576106d392610699565b565b61065d565b6106e59136916106a4565b90565b906106fb916106f5610658565b506106da565b90565b60011c90565b939190925b60018211610715575050565b909192808204811161074e576001831661073f575b806107369102926106fe565b90929192610709565b9384610736910294905061072a565b610559565b92919281156107eb5780156107e35780806001146107d9576002146107ba5760208210610133821016604e8310600b831016176107ab5792610799918193946001610704565b80920481116107a6570290565b610559565b0a9182116107b557565b610559565b5060ff81116107d45760020a9182116107cf57565b610559565b610559565b5050509050600190565b505090505f90565b50509050600190565b9061080a610804610812936100b3565b916100b3565b5f1991610753565b90565b919061083e906108236104b0565b5061082c6104b0565b5061083884829061056d565b936107f4565b90565b6108496104b0565b501e90565b5f90565b634e487b7160e01b5f52601260045260245ffd5b6108726108789161032c565b9161032c565b90811561089a5760015f038214600160ff1b821416610895570590565b610559565b610852565b906108b2916108ac61084e565b50610866565b90565b90565b5f5260205f2090565b634e487b7160e01b5f52603260045260245ffd5b5490565b6108e2816108d5565b8210156108fc576108f46001916108b8565b910201905f90565b6108c1565b1b90565b9190600861092091029161091a5f1984610901565b92610901565b9181191691161790565b90565b61094161093c610946926100b3565b61092a565b6100b3565b90565b90565b919061096261095d61096a9361092d565b610949565b908354610905565b9055565b908154916801000000000000000083101561099e578261099691600161099c950181556108d9565b9061094c565b565b6104b7565b5490565b90565b6109be6109b96109c3926109a7565b61092a565b6100b3565b90565b6109d56109db919392936100b3565b926100b3565b82039182116109e657565b610559565b5f5260205f2090565b6109fd816109a3565b821015610a1757610a0f6001916109eb565b910201905f90565b6108c1565b1c90565b90565b610a33906008610a389302610a1c565b610a20565b90565b90610a469154610a23565b90565b610a6490610a556104b0565b50610a5f5f6108b5565b61096e565b610a93610a8d5f610a87610a775f6109a3565b610a8160016109aa565b906109c6565b906109f4565b90610a3b565b90565b634e487b7160e01b5f52603160045260245ffd5b610abc91610ab66104b0565b9161094c565b565b610ac7816108d5565b8015610ae8576001900390610ae5610adf83836108d9565b90610aaa565b55565b610a96565b610afe610af95f6108b5565b610abe565b56fea264697066735822122084055a07268673dfd7decc59bd158075d11eae5632cded73e165bca61ed58e3f64736f6c63430008260033"
+          },
+          "deployedBytecode": {
+            "object": "608060405260033611610012575b6104ac565b61001c5f3561009b565b8063444aa50e14610096578063624fbfdc146100915780636cbb5ae31461008c57806375059c59146100875780637af91e2e146100825780637d94792a1461007d578063959ac484146100785763a4ece52c0361000d57610479565b61043f565b61040a565b6103a1565b6102f7565b6102c0565b61023a565b610119565b60e01c90565b60405190565b5f80fd5b5f80fd5b5f80fd5b90565b6100bf816100b3565b036100c657565b5f80fd5b905035906100d7826100b6565b565b906020828203126100f2576100ef915f016100ca565b90565b6100ab565b610100906100b3565b9052565b9190610117905f602085019401906100f7565b565b346101495761014561013461012f3660046100d9565b610592565b61013c6100a1565b91829182610104565b0390f35b6100a7565b5f80fd5b5f80fd5b5f80fd5b909182601f830112156101945781359167ffffffffffffffff831161018f57602001926001830284011161018a57565b610156565b610152565b61014e565b906020828203126101ca575f82013567ffffffffffffffff81116101c5576101c1920161015a565b9091565b6100af565b6100ab565b5190565b60209181520190565b90825f9392825e0152565b601f801991011690565b61021061021960209361021e93610207816101cf565b938480936101d3565b958691016101dc565b6101e7565b0190565b6102379160208201915f8184039101526101f1565b90565b3461026b57610267610256610250366004610199565b906106e8565b61025e6100a1565b91829182610222565b0390f35b6100a7565b9190604083820312610298578061028c610295925f86016100ca565b936020016100ca565b90565b6100ab565b9160206102be9294936102b760408201965f8301906100f7565b01906100f7565b565b346102f2576102d96102d3366004610270565b90610815565b906102ee6102e56100a1565b9283928361029d565b0390f35b6100a7565b346103275761032361031261030d3660046100d9565b610841565b61031a6100a1565b91829182610104565b0390f35b6100a7565b90565b6103388161032c565b0361033f57565b5f80fd5b905035906103508261032f565b565b919060408382031261037a578061036e610377925f8601610343565b93602001610343565b90565b6100ab565b6103889061032c565b9052565b919061039f905f6020850194019061037f565b565b346103d2576103ce6103bd6103b7366004610352565b9061089f565b6103c56100a1565b9182918261038c565b0390f35b6100a7565b5f9103126103e157565b6100ab565b7f000000000000000000000000000000000000000000000000000000000000000090565b3461043a5761041a3660046103d7565b6104366104256103e6565b61042d6100a1565b91829182610104565b0390f35b6100a7565b3461046f5761046b61045a6104553660046100d9565b610a49565b6104626100a1565b91829182610104565b0390f35b6100a7565b5f0190565b346104a7576104893660046103d7565b610491610aed565b6104996100a1565b806104a381610474565b0390f35b6100a7565b5f80fd5b5f90565b90565b634e487b7160e01b5f52604160045260245ffd5b906104d5906101e7565b810190811067ffffffffffffffff8211176104ef57604052565b6104b7565b60e01b90565b90505190610507826100b6565b565b906020828203126105225761051f915f016104fa565b90565b6100ab565b610530906100b3565b9052565b9190610547905f60208501940190610527565b565b6105516100a1565b3d5f823e3d90fd5b634e487b7160e01b5f52601160045260245ffd5b61057c610582919392936100b3565b926100b3565b820180921161058d57565b610559565b60206105e5916105a06104b0565b506105be73__$08b3b530d727b4b2b521bbe2862c9154e0$__6104b4565b6105da633cf3bbf46105ce6100a1565b958694859384936104f4565b835260048301610534565b03915af4801561065357610622915f91610625575b507f00000000000000000000000000000000000000000000000000000000000000009061056d565b90565b610646915060203d811161064c575b61063e81836104cb565b810190610509565b5f6105fa565b503d610634565b610549565b606090565b5f80fd5b9061067461066d6100a1565b92836104cb565b565b67ffffffffffffffff8111610694576106906020916101e7565b0190565b6104b7565b90825f939282370152565b909291926106b96106b482610676565b610661565b938185526020850190828401116106d5576106d392610699565b565b61065d565b6106e59136916106a4565b90565b906106fb916106f5610658565b506106da565b90565b60011c90565b939190925b60018211610715575050565b909192808204811161074e576001831661073f575b806107369102926106fe565b90929192610709565b9384610736910294905061072a565b610559565b92919281156107eb5780156107e35780806001146107d9576002146107ba5760208210610133821016604e8310600b831016176107ab5792610799918193946001610704565b80920481116107a6570290565b610559565b0a9182116107b557565b610559565b5060ff81116107d45760020a9182116107cf57565b610559565b610559565b5050509050600190565b505090505f90565b50509050600190565b9061080a610804610812936100b3565b916100b3565b5f1991610753565b90565b919061083e906108236104b0565b5061082c6104b0565b5061083884829061056d565b936107f4565b90565b6108496104b0565b501e90565b5f90565b634e487b7160e01b5f52601260045260245ffd5b6108726108789161032c565b9161032c565b90811561089a5760015f038214600160ff1b821416610895570590565b610559565b610852565b906108b2916108ac61084e565b50610866565b90565b90565b5f5260205f2090565b634e487b7160e01b5f52603260045260245ffd5b5490565b6108e2816108d5565b8210156108fc576108f46001916108b8565b910201905f90565b6108c1565b1b90565b9190600861092091029161091a5f1984610901565b92610901565b9181191691161790565b90565b61094161093c610946926100b3565b61092a565b6100b3565b90565b90565b919061096261095d61096a9361092d565b610949565b908354610905565b9055565b908154916801000000000000000083101561099e578261099691600161099c950181556108d9565b9061094c565b565b6104b7565b5490565b90565b6109be6109b96109c3926109a7565b61092a565b6100b3565b90565b6109d56109db919392936100b3565b926100b3565b82039182116109e657565b610559565b5f5260205f2090565b6109fd816109a3565b821015610a1757610a0f6001916109eb565b910201905f90565b6108c1565b1c90565b90565b610a33906008610a389302610a1c565b610a20565b90565b90610a469154610a23565b90565b610a6490610a556104b0565b50610a5f5f6108b5565b61096e565b610a93610a8d5f610a87610a775f6109a3565b610a8160016109aa565b906109c6565b906109f4565b90610a3b565b90565b634e487b7160e01b5f52603160045260245ffd5b610abc91610ab66104b0565b9161094c565b565b610ac7816108d5565b8015610ae8576001900390610ae5610adf83836108d9565b90610aaa565b55565b610a96565b610afe610af95f6108b5565b610abe565b56fea264697066735822122084055a07268673dfd7decc59bd158075d11eae5632cded73e165bca61ed58e3f64736f6c63430008260033"
+          }
+        },
+        "ir": "\n/// @use-src 0:\"Census.sol\"\nobject \"Census_134\" {\n    code {\n        /// @src 0:160:996  \"contract Census {...\"\n        mstore(64, memoryguard(160))\n\n        let _1 := copy_arguments_for_constructor_35_object_Census_134()\n        constructor_Census_134(_1)\n\n        let _2 := allocate_unbounded()\n        codecopy(_2, dataoffset(\"Census_134_deployed\"), datasize(\"Census_134_deployed\"))\n\n        setimmutable(_2, \"16\", mload(128))\n\n        return(_2, datasize(\"Census_134_deployed\"))\n\n        function allocate_unbounded() -> memPtr {\n            memPtr := mload(64)\n        }\n\n        function round_up_to_mul_of_32(value) -> result {\n            result := and(add(value, 31), not(31))\n        }\n\n        function panic_error_0x41() {\n            mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n            mstore(4, 0x41)\n            revert(0, 0x24)\n        }\n\n        function finalize_allocation(memPtr, size) {\n            let newFreePtr := add(memPtr, round_up_to_mul_of_32(size))\n            // protect against overflow\n            if or(gt(newFreePtr, 0xffffffffffffffff), lt(newFreePtr, memPtr)) { panic_error_0x41() }\n            mstore(64, newFreePtr)\n        }\n\n        function allocate_memory(size) -> memPtr {\n            memPtr := allocate_unbounded()\n            finalize_allocation(memPtr, size)\n        }\n\n        function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() {\n            revert(0, 0)\n        }\n\n        function revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() {\n            revert(0, 0)\n        }\n\n        function cleanup_t_uint256(value) -> cleaned {\n            cleaned := value\n        }\n\n        function validator_revert_t_uint256(value) {\n            if iszero(eq(value, cleanup_t_uint256(value))) { revert(0, 0) }\n        }\n\n        function abi_decode_t_uint256_fromMemory(offset, end) -> value {\n            value := mload(offset)\n            validator_revert_t_uint256(value)\n        }\n\n        function abi_decode_tuple_t_uint256_fromMemory(headStart, dataEnd) -> value0 {\n            if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n            {\n\n                let offset := 0\n\n                value0 := abi_decode_t_uint256_fromMemory(add(headStart, offset), dataEnd)\n            }\n\n        }\n\n        function copy_arguments_for_constructor_35_object_Census_134() -> ret_param_0 {\n            let programSize := datasize(\"Census_134\")\n            let argSize := sub(codesize(), programSize)\n\n            let memoryDataOffset := allocate_memory(argSize)\n            codecopy(memoryDataOffset, programSize, argSize)\n\n            ret_param_0 := abi_decode_tuple_t_uint256_fromMemory(memoryDataOffset, add(memoryDataOffset, argSize))\n        }\n\n        function convert_array_t_array$_t_uint256_$dyn_storage_to_t_array$_t_uint256_$dyn_storage_ptr(value) -> converted  {\n            converted := value\n\n        }\n\n        function array_dataslot_t_array$_t_uint256_$dyn_storage_ptr(ptr) -> data {\n            data := ptr\n\n            mstore(0, ptr)\n            data := keccak256(0, 0x20)\n\n        }\n\n        function panic_error_0x32() {\n            mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n            mstore(4, 0x32)\n            revert(0, 0x24)\n        }\n\n        function array_length_t_array$_t_uint256_$dyn_storage_ptr(value) -> length {\n\n            length := sload(value)\n\n        }\n\n        function array_dataslot_t_bytes_storage_ptr(ptr) -> data {\n            data := ptr\n\n            mstore(0, ptr)\n            data := keccak256(0, 0x20)\n\n        }\n\n        function long_byte_array_index_access_no_checks(array, index) -> slot, offset {\n\n            offset := sub(31, mod(index, 0x20))\n            let dataArea := array_dataslot_t_bytes_storage_ptr(array)\n            slot := add(dataArea, div(index, 0x20))\n\n        }\n\n        function storage_array_index_access_t_array$_t_uint256_$dyn_storage_ptr(array, index) -> slot, offset {\n            let arrayLength := array_length_t_array$_t_uint256_$dyn_storage_ptr(array)\n            if iszero(lt(index, arrayLength)) { panic_error_0x32() }\n\n            let dataArea := array_dataslot_t_array$_t_uint256_$dyn_storage_ptr(array)\n            slot := add(dataArea, mul(index, 1))\n            offset := 0\n\n        }\n\n        function shift_left_dynamic(bits, value) -> newValue {\n            newValue :=\n\n            shl(bits, value)\n\n        }\n\n        function update_byte_slice_dynamic32(value, shiftBytes, toInsert) -> result {\n            let shiftBits := mul(shiftBytes, 8)\n            let mask := shift_left_dynamic(shiftBits, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)\n            toInsert := shift_left_dynamic(shiftBits, toInsert)\n            value := and(value, not(mask))\n            result := or(value, and(toInsert, mask))\n        }\n\n        function identity(value) -> ret {\n            ret := value\n        }\n\n        function convert_t_uint256_to_t_uint256(value) -> converted {\n            converted := cleanup_t_uint256(identity(cleanup_t_uint256(value)))\n        }\n\n        function prepare_store_t_uint256(value) -> ret {\n            ret := value\n        }\n\n        function update_storage_value_t_uint256_to_t_uint256(slot, offset, value_0) {\n            let convertedValue_0 := convert_t_uint256_to_t_uint256(value_0)\n            sstore(slot, update_byte_slice_dynamic32(sload(slot), offset, prepare_store_t_uint256(convertedValue_0)))\n        }\n\n        function array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr(array , value0) {\n\n            let oldLen := sload(array)\n            if iszero(lt(oldLen, 18446744073709551616)) { panic_error_0x41() }\n            sstore(array, add(oldLen, 1))\n            let slot, offset := storage_array_index_access_t_array$_t_uint256_$dyn_storage_ptr(array, oldLen)\n            update_storage_value_t_uint256_to_t_uint256(slot, offset , value0)\n\n        }\n        /// @ast-id 35\n        /// @src 0:241:316  \"constructor(uint initial) payable { seed = initial; values.push(initial); }\"\n        function constructor_Census_134(var_initial_21) {\n\n            /// @src 0:241:316  \"constructor(uint initial) payable { seed = initial; values.push(initial); }\"\n\n            /// @src 0:284:291  \"initial\"\n            let _3 := var_initial_21\n            let expr_25 := _3\n            /// @src 0:277:291  \"seed = initial\"\n            let _4 := expr_25\n            mstore(128, _4)\n            let expr_26 := expr_25\n            /// @src 0:293:299  \"values\"\n            let _5_slot := 0x00\n            let expr_28_slot := _5_slot\n            /// @src 0:293:304  \"values.push\"\n            let expr_30_self_slot := convert_array_t_array$_t_uint256_$dyn_storage_to_t_array$_t_uint256_$dyn_storage_ptr(expr_28_slot)\n            /// @src 0:305:312  \"initial\"\n            let _6 := var_initial_21\n            let expr_31 := _6\n            /// @src 0:293:313  \"values.push(initial)\"\n            array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr(expr_30_self_slot, expr_31)\n\n        }\n        /// @src 0:160:996  \"contract Census {...\"\n\n    }\n    /// @use-src 0:\"Census.sol\"\n    object \"Census_134_deployed\" {\n        code {\n            /// @src 0:160:996  \"contract Census {...\"\n            mstore(64, memoryguard(128))\n\n            if gt(calldatasize(), 3)\n            {\n                let selector := shift_right_224_unsigned(calldataload(0))\n                switch selector\n\n                case 0x444aa50e\n                {\n                    // linked(uint256)\n\n                    external_fun_linked_124()\n                }\n\n                case 0x624fbfdc\n                {\n                    // echo(bytes)\n\n                    external_fun_echo_109()\n                }\n\n                case 0x6cbb5ae3\n                {\n                    // arithmetic(uint256,uint256)\n\n                    external_fun_arithmetic_55()\n                }\n\n                case 0x75059c59\n                {\n                    // assemblyWord(uint256)\n\n                    external_fun_assemblyWord_133()\n                }\n\n                case 0x7af91e2e\n                {\n                    // signed(int256,int256)\n\n                    external_fun_signed_69()\n                }\n\n                case 0x7d94792a\n                {\n                    // seed()\n\n                    external_fun_seed_16()\n                }\n\n                case 0x959ac484\n                {\n                    // push(uint256)\n\n                    external_fun_push_90()\n                }\n\n                case 0xa4ece52c\n                {\n                    // pop()\n\n                    external_fun_pop_99()\n                }\n\n                default {}\n            }\n\n            revert_error_42b3090547df1d2001c96683413b8cf91c1b902ef5e3cb8d9f6f304cf7446f74()\n\n            function shift_right_224_unsigned(value) -> newValue {\n                newValue :=\n\n                shr(224, value)\n\n            }\n\n            function allocate_unbounded() -> memPtr {\n                memPtr := mload(64)\n            }\n\n            function revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() {\n                revert(0, 0)\n            }\n\n            function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() {\n                revert(0, 0)\n            }\n\n            function revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() {\n                revert(0, 0)\n            }\n\n            function cleanup_t_uint256(value) -> cleaned {\n                cleaned := value\n            }\n\n            function validator_revert_t_uint256(value) {\n                if iszero(eq(value, cleanup_t_uint256(value))) { revert(0, 0) }\n            }\n\n            function abi_decode_t_uint256(offset, end) -> value {\n                value := calldataload(offset)\n                validator_revert_t_uint256(value)\n            }\n\n            function abi_decode_tuple_t_uint256(headStart, dataEnd) -> value0 {\n                if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n                {\n\n                    let offset := 0\n\n                    value0 := abi_decode_t_uint256(add(headStart, offset), dataEnd)\n                }\n\n            }\n\n            function abi_encode_t_uint256_to_t_uint256_fromStack(value, pos) {\n                mstore(pos, cleanup_t_uint256(value))\n            }\n\n            function abi_encode_tuple_t_uint256__to_t_uint256__fromStack(headStart , value0) -> tail {\n                tail := add(headStart, 32)\n\n                abi_encode_t_uint256_to_t_uint256_fromStack(value0,  add(headStart, 0))\n\n            }\n\n            function external_fun_linked_124() {\n\n                if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n                let param_0 :=  abi_decode_tuple_t_uint256(4, calldatasize())\n                let ret_0 :=  fun_linked_124(param_0)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_t_uint256__to_t_uint256__fromStack(memPos , ret_0)\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function revert_error_1b9f4a0a5773e33b91aa01db23bf8c55fce1411167c872835e7fa00a4f17d46d() {\n                revert(0, 0)\n            }\n\n            function revert_error_15abf5612cd996bc235ba1e55a4a30ac60e6bb601ff7ba4ad3f179b6be8d0490() {\n                revert(0, 0)\n            }\n\n            function revert_error_81385d8c0b31fffe14be1da910c8bd3a80be4cfa248e04f42ec0faea3132a8ef() {\n                revert(0, 0)\n            }\n\n            // bytes\n            function abi_decode_t_bytes_calldata_ptr(offset, end) -> arrayPos, length {\n                if iszero(slt(add(offset, 0x1f), end)) { revert_error_1b9f4a0a5773e33b91aa01db23bf8c55fce1411167c872835e7fa00a4f17d46d() }\n                length := calldataload(offset)\n                if gt(length, 0xffffffffffffffff) { revert_error_15abf5612cd996bc235ba1e55a4a30ac60e6bb601ff7ba4ad3f179b6be8d0490() }\n                arrayPos := add(offset, 0x20)\n                if gt(add(arrayPos, mul(length, 0x01)), end) { revert_error_81385d8c0b31fffe14be1da910c8bd3a80be4cfa248e04f42ec0faea3132a8ef() }\n            }\n\n            function abi_decode_tuple_t_bytes_calldata_ptr(headStart, dataEnd) -> value0, value1 {\n                if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n                {\n\n                    let offset := calldataload(add(headStart, 0))\n                    if gt(offset, 0xffffffffffffffff) { revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() }\n\n                    value0, value1 := abi_decode_t_bytes_calldata_ptr(add(headStart, offset), dataEnd)\n                }\n\n            }\n\n            function array_length_t_bytes_memory_ptr(value) -> length {\n\n                length := mload(value)\n\n            }\n\n            function array_storeLengthForEncoding_t_bytes_memory_ptr_fromStack(pos, length) -> updated_pos {\n                mstore(pos, length)\n                updated_pos := add(pos, 0x20)\n            }\n\n            function copy_memory_to_memory_with_cleanup(src, dst, length) {\n\n                mcopy(dst, src, length)\n                mstore(add(dst, length), 0)\n\n            }\n\n            function round_up_to_mul_of_32(value) -> result {\n                result := and(add(value, 31), not(31))\n            }\n\n            function abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr_fromStack(value, pos) -> end {\n                let length := array_length_t_bytes_memory_ptr(value)\n                pos := array_storeLengthForEncoding_t_bytes_memory_ptr_fromStack(pos, length)\n                copy_memory_to_memory_with_cleanup(add(value, 0x20), pos, length)\n                end := add(pos, round_up_to_mul_of_32(length))\n            }\n\n            function abi_encode_tuple_t_bytes_memory_ptr__to_t_bytes_memory_ptr__fromStack(headStart , value0) -> tail {\n                tail := add(headStart, 32)\n\n                mstore(add(headStart, 0), sub(tail, headStart))\n                tail := abi_encode_t_bytes_memory_ptr_to_t_bytes_memory_ptr_fromStack(value0,  tail)\n\n            }\n\n            function external_fun_echo_109() {\n\n                if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n                let param_0, param_1 :=  abi_decode_tuple_t_bytes_calldata_ptr(4, calldatasize())\n                let ret_0 :=  fun_echo_109(param_0, param_1)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_t_bytes_memory_ptr__to_t_bytes_memory_ptr__fromStack(memPos , ret_0)\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function abi_decode_tuple_t_uint256t_uint256(headStart, dataEnd) -> value0, value1 {\n                if slt(sub(dataEnd, headStart), 64) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n                {\n\n                    let offset := 0\n\n                    value0 := abi_decode_t_uint256(add(headStart, offset), dataEnd)\n                }\n\n                {\n\n                    let offset := 32\n\n                    value1 := abi_decode_t_uint256(add(headStart, offset), dataEnd)\n                }\n\n            }\n\n            function abi_encode_tuple_t_uint256_t_uint256__to_t_uint256_t_uint256__fromStack(headStart , value0, value1) -> tail {\n                tail := add(headStart, 64)\n\n                abi_encode_t_uint256_to_t_uint256_fromStack(value0,  add(headStart, 0))\n\n                abi_encode_t_uint256_to_t_uint256_fromStack(value1,  add(headStart, 32))\n\n            }\n\n            function external_fun_arithmetic_55() {\n\n                if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n                let param_0, param_1 :=  abi_decode_tuple_t_uint256t_uint256(4, calldatasize())\n                let ret_0, ret_1 :=  fun_arithmetic_55(param_0, param_1)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_t_uint256_t_uint256__to_t_uint256_t_uint256__fromStack(memPos , ret_0, ret_1)\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function external_fun_assemblyWord_133() {\n\n                if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n                let param_0 :=  abi_decode_tuple_t_uint256(4, calldatasize())\n                let ret_0 :=  fun_assemblyWord_133(param_0)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_t_uint256__to_t_uint256__fromStack(memPos , ret_0)\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function cleanup_t_int256(value) -> cleaned {\n                cleaned := value\n            }\n\n            function validator_revert_t_int256(value) {\n                if iszero(eq(value, cleanup_t_int256(value))) { revert(0, 0) }\n            }\n\n            function abi_decode_t_int256(offset, end) -> value {\n                value := calldataload(offset)\n                validator_revert_t_int256(value)\n            }\n\n            function abi_decode_tuple_t_int256t_int256(headStart, dataEnd) -> value0, value1 {\n                if slt(sub(dataEnd, headStart), 64) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n                {\n\n                    let offset := 0\n\n                    value0 := abi_decode_t_int256(add(headStart, offset), dataEnd)\n                }\n\n                {\n\n                    let offset := 32\n\n                    value1 := abi_decode_t_int256(add(headStart, offset), dataEnd)\n                }\n\n            }\n\n            function abi_encode_t_int256_to_t_int256_fromStack(value, pos) {\n                mstore(pos, cleanup_t_int256(value))\n            }\n\n            function abi_encode_tuple_t_int256__to_t_int256__fromStack(headStart , value0) -> tail {\n                tail := add(headStart, 32)\n\n                abi_encode_t_int256_to_t_int256_fromStack(value0,  add(headStart, 0))\n\n            }\n\n            function external_fun_signed_69() {\n\n                if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n                let param_0, param_1 :=  abi_decode_tuple_t_int256t_int256(4, calldatasize())\n                let ret_0 :=  fun_signed_69(param_0, param_1)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_t_int256__to_t_int256__fromStack(memPos , ret_0)\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function abi_decode_tuple_(headStart, dataEnd)   {\n                if slt(sub(dataEnd, headStart), 0) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n            }\n\n            /// @ast-id 16\n            /// @src 0:182:208  \"uint public immutable seed\"\n            function getter_fun_seed_16() -> rval {\n                rval := loadimmutable(\"16\")\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n\n            function external_fun_seed_16() {\n\n                if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n                abi_decode_tuple_(4, calldatasize())\n                let ret_0 :=  getter_fun_seed_16()\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_t_uint256__to_t_uint256__fromStack(memPos , ret_0)\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function external_fun_push_90() {\n\n                if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n                let param_0 :=  abi_decode_tuple_t_uint256(4, calldatasize())\n                let ret_0 :=  fun_push_90(param_0)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_t_uint256__to_t_uint256__fromStack(memPos , ret_0)\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function abi_encode_tuple__to__fromStack(headStart ) -> tail {\n                tail := add(headStart, 0)\n\n            }\n\n            function external_fun_pop_99() {\n\n                if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n                abi_decode_tuple_(4, calldatasize())\n                fun_pop_99()\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple__to__fromStack(memPos  )\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function revert_error_42b3090547df1d2001c96683413b8cf91c1b902ef5e3cb8d9f6f304cf7446f74() {\n                revert(0, 0)\n            }\n\n            function zero_value_for_split_t_uint256() -> ret {\n                ret := 0\n            }\n\n            function convert_t_type$_t_contract$_LinkedMath_$14_$_to_t_address(value) -> converted {\n                converted := value\n            }\n\n            function revert_error_0cc013b6b3b6beabea4e3a74a6d380f0df81852ca99887912475e1f66b2a2c20() {\n                revert(0, 0)\n            }\n\n            function panic_error_0x41() {\n                mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n                mstore(4, 0x41)\n                revert(0, 0x24)\n            }\n\n            function finalize_allocation(memPtr, size) {\n                let newFreePtr := add(memPtr, round_up_to_mul_of_32(size))\n                // protect against overflow\n                if or(gt(newFreePtr, 0xffffffffffffffff), lt(newFreePtr, memPtr)) { panic_error_0x41() }\n                mstore(64, newFreePtr)\n            }\n\n            function shift_left_224(value) -> newValue {\n                newValue :=\n\n                shl(224, value)\n\n            }\n\n            function abi_decode_t_uint256_fromMemory(offset, end) -> value {\n                value := mload(offset)\n                validator_revert_t_uint256(value)\n            }\n\n            function abi_decode_tuple_t_uint256_fromMemory(headStart, dataEnd) -> value0 {\n                if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n                {\n\n                    let offset := 0\n\n                    value0 := abi_decode_t_uint256_fromMemory(add(headStart, offset), dataEnd)\n                }\n\n            }\n\n            function abi_encode_t_uint256_to_t_uint256_fromStack_library(value, pos) {\n                mstore(pos, cleanup_t_uint256(value))\n            }\n\n            function abi_encode_tuple_t_uint256__to_t_uint256__fromStack_library(headStart , value0) -> tail {\n                tail := add(headStart, 32)\n\n                abi_encode_t_uint256_to_t_uint256_fromStack_library(value0,  add(headStart, 0))\n\n            }\n\n            function revert_forward_1() {\n                let pos := allocate_unbounded()\n                returndatacopy(pos, 0, returndatasize())\n                revert(pos, returndatasize())\n            }\n\n            function panic_error_0x11() {\n                mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n                mstore(4, 0x11)\n                revert(0, 0x24)\n            }\n\n            function checked_add_t_uint256(x, y) -> sum {\n                x := cleanup_t_uint256(x)\n                y := cleanup_t_uint256(y)\n                sum := add(x, y)\n\n                if gt(x, sum) { panic_error_0x11() }\n\n            }\n\n            /// @ast-id 124\n            /// @src 0:781:872  \"function linked(uint x) external view returns (uint) { return LinkedMath.twice(x) + seed; }\"\n            function fun_linked_124(var_x_111) -> var__114 {\n                /// @src 0:828:832  \"uint\"\n                let zero_t_uint256_1 := zero_value_for_split_t_uint256()\n                var__114 := zero_t_uint256_1\n\n                /// @src 0:843:853  \"LinkedMath\"\n                let expr_116_address := linkersymbol(\"Census.sol:LinkedMath\")\n                /// @src 0:843:859  \"LinkedMath.twice\"\n                let expr_117_address := convert_t_type$_t_contract$_LinkedMath_$14_$_to_t_address(expr_116_address)\n                let expr_117_functionSelector := 0x3cf3bbf4\n                /// @src 0:860:861  \"x\"\n                let _2 := var_x_111\n                let expr_118 := _2\n                /// @src 0:843:862  \"LinkedMath.twice(x)\"\n\n                // storage for arguments and returned data\n                let _3 := allocate_unbounded()\n                mstore(_3, shift_left_224(expr_117_functionSelector))\n                let _4 := abi_encode_tuple_t_uint256__to_t_uint256__fromStack_library(add(_3, 4) , expr_118)\n\n                let _5 := delegatecall(gas(), expr_117_address,  _3, sub(_4, _3), _3, 32)\n\n                if iszero(_5) { revert_forward_1() }\n\n                let expr_119\n                if _5 {\n\n                    let _6 := 32\n\n                    if gt(_6, returndatasize()) {\n                        _6 := returndatasize()\n                    }\n\n                    // update freeMemoryPointer according to dynamic return size\n                    finalize_allocation(_3, _6)\n\n                    // decode return parameters from external try-call into retVars\n                    expr_119 :=  abi_decode_tuple_t_uint256_fromMemory(_3, add(_3, _6))\n                }\n                /// @src 0:865:869  \"seed\"\n                let _7 := loadimmutable(\"16\")\n                let expr_120 := _7\n                /// @src 0:843:869  \"LinkedMath.twice(x) + seed\"\n                let expr_121 := checked_add_t_uint256(expr_119, expr_120)\n\n                /// @src 0:836:869  \"return LinkedMath.twice(x) + seed\"\n                var__114 := expr_121\n                leave\n\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n\n            function zero_value_for_split_t_bytes_memory_ptr() -> ret {\n                ret := 96\n            }\n\n            function revert_error_987264b3b1d58a9c7f8255e93e81c77d86d6299019c33110a076957a3e06e2ae() {\n                revert(0, 0)\n            }\n\n            function allocate_memory(size) -> memPtr {\n                memPtr := allocate_unbounded()\n                finalize_allocation(memPtr, size)\n            }\n\n            function array_allocation_size_t_bytes_memory_ptr(length) -> size {\n                // Make sure we can allocate memory without overflow\n                if gt(length, 0xffffffffffffffff) { panic_error_0x41() }\n\n                size := round_up_to_mul_of_32(length)\n\n                // add length slot\n                size := add(size, 0x20)\n\n            }\n\n            function copy_calldata_to_memory_with_cleanup(src, dst, length) {\n\n                calldatacopy(dst, src, length)\n                mstore(add(dst, length), 0)\n\n            }\n\n            function abi_decode_available_length_t_bytes_memory_ptr(src, length, end) -> array {\n                array := allocate_memory(array_allocation_size_t_bytes_memory_ptr(length))\n                mstore(array, length)\n                let dst := add(array, 0x20)\n                if gt(add(src, length), end) { revert_error_987264b3b1d58a9c7f8255e93e81c77d86d6299019c33110a076957a3e06e2ae() }\n                copy_calldata_to_memory_with_cleanup(src, dst, length)\n            }\n\n            function convert_array_t_bytes_calldata_ptr_to_t_bytes_memory_ptr(value, length) -> converted  {\n\n                // Copy the array to a free position in memory\n                converted :=\n\n                abi_decode_available_length_t_bytes_memory_ptr(value, length, calldatasize())\n\n            }\n\n            /// @ast-id 109\n            /// @src 0:686:776  \"function echo(bytes calldata input) external pure returns (bytes memory) { return input; }\"\n            function fun_echo_109(var_input_101_offset, var_input_101_length) -> var__104_mpos {\n                /// @src 0:745:757  \"bytes memory\"\n                let zero_t_bytes_memory_ptr_8_mpos := zero_value_for_split_t_bytes_memory_ptr()\n                var__104_mpos := zero_t_bytes_memory_ptr_8_mpos\n\n                /// @src 0:768:773  \"input\"\n                let _9_offset := var_input_101_offset\n                let _9_length := var_input_101_length\n                let expr_106_offset := _9_offset\n                let expr_106_length := _9_length\n                /// @src 0:761:773  \"return input\"\n                var__104_mpos := convert_array_t_bytes_calldata_ptr_to_t_bytes_memory_ptr(expr_106_offset, expr_106_length)\n                leave\n\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n\n            function shift_right_1_unsigned(value) -> newValue {\n                newValue :=\n\n                shr(1, value)\n\n            }\n\n            function checked_exp_helper(_power, _base, exponent, max) -> power, base {\n                power := _power\n                base  := _base\n                for { } gt(exponent, 1) {}\n                {\n                    // overflow check for base * base\n                    if gt(base, div(max, base)) { panic_error_0x11() }\n                    if and(exponent, 1)\n                    {\n                        // No checks for power := mul(power, base) needed, because the check\n                        // for base * base above is sufficient, since:\n                        // |power| <= base (proof by induction) and thus:\n                        // |power * base| <= base * base <= max <= |min| (for signed)\n                        // (this is equally true for signed and unsigned exp)\n                        power := mul(power, base)\n                    }\n                    base := mul(base, base)\n                    exponent := shift_right_1_unsigned(exponent)\n                }\n            }\n\n            function checked_exp_unsigned(base, exponent, max) -> power {\n                // This function currently cannot be inlined because of the\n                // \"leave\" statements. We have to improve the optimizer.\n\n                // Note that 0**0 == 1\n                if iszero(exponent) { power := 1 leave }\n                if iszero(base) { power := 0 leave }\n\n                // Specializations for small bases\n                switch base\n                // 0 is handled above\n                case 1 { power := 1 leave }\n                case 2\n                {\n                    if gt(exponent, 255) { panic_error_0x11() }\n                    power := exp(2, exponent)\n                    if gt(power, max) { panic_error_0x11() }\n                    leave\n                }\n                if or(\n                    and(lt(base, 11), lt(exponent, 78)),\n                    and(lt(base, 307), lt(exponent, 32))\n                )\n                {\n                    power := exp(base, exponent)\n                    if gt(power, max) { panic_error_0x11() }\n                    leave\n                }\n\n                power, base := checked_exp_helper(1, base, exponent, max)\n\n                if gt(power, div(max, base)) { panic_error_0x11() }\n                power := mul(power, base)\n            }\n\n            function checked_exp_t_uint256_t_uint256(base, exponent) -> power {\n                base := cleanup_t_uint256(base)\n                exponent := cleanup_t_uint256(exponent)\n\n                power := checked_exp_unsigned(base, exponent, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)\n\n            }\n\n            /// @ast-id 55\n            /// @src 0:321:431  \"function arithmetic(uint a, uint b) external pure returns (uint, uint) {...\"\n            function fun_arithmetic_55(var_a_37, var_b_39) -> var__42, var__44 {\n                /// @src 0:380:384  \"uint\"\n                let zero_t_uint256_10 := zero_value_for_split_t_uint256()\n                var__42 := zero_t_uint256_10\n                /// @src 0:386:390  \"uint\"\n                let zero_t_uint256_11 := zero_value_for_split_t_uint256()\n                var__44 := zero_t_uint256_11\n\n                /// @src 0:410:411  \"a\"\n                let _12 := var_a_37\n                let expr_46 := _12\n                /// @src 0:414:415  \"b\"\n                let _13 := var_b_39\n                let expr_47 := _13\n                /// @src 0:410:415  \"a + b\"\n                let expr_48 := checked_add_t_uint256(expr_46, expr_47)\n\n                /// @src 0:409:424  \"(a + b, a ** b)\"\n                let expr_52_component_1 := expr_48\n                /// @src 0:417:418  \"a\"\n                let _14 := var_a_37\n                let expr_49 := _14\n                /// @src 0:422:423  \"b\"\n                let _15 := var_b_39\n                let expr_50 := _15\n                /// @src 0:417:423  \"a ** b\"\n                let expr_51 := checked_exp_t_uint256_t_uint256(expr_49, expr_50)\n                /// @src 0:409:424  \"(a + b, a ** b)\"\n                let expr_52_component_2 := expr_51\n                /// @src 0:402:424  \"return (a + b, a ** b)\"\n                var__42 := expr_52_component_1\n                var__44 := expr_52_component_2\n                leave\n\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n\n            /// @ast-id 133\n            /// @src 0:877:994  \"function assemblyWord(uint x) external pure returns (uint r) {...\"\n            function fun_assemblyWord_133(var_x_126) -> var_r_129 {\n                /// @src 0:930:936  \"uint r\"\n                let zero_t_uint256_16 := zero_value_for_split_t_uint256()\n                var_r_129 := zero_t_uint256_16\n\n                /// @src 0:948:988  \"assembly (\\\"memory-safe\\\") { r := clz(x) }\"\n                { var_r_129 := clz(var_x_126) }\n\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n\n            function zero_value_for_split_t_int256() -> ret {\n                ret := 0\n            }\n\n            function panic_error_0x12() {\n                mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n                mstore(4, 0x12)\n                revert(0, 0x24)\n            }\n\n            function checked_div_t_int256(x, y) -> r {\n                x := cleanup_t_int256(x)\n                y := cleanup_t_int256(y)\n                if iszero(y) { panic_error_0x12() }\n\n                // overflow for minVal / -1\n                if and(\n                    eq(x, 0x8000000000000000000000000000000000000000000000000000000000000000),\n                    eq(y, sub(0, 1))\n                ) { panic_error_0x11() }\n\n                r := sdiv(x, y)\n            }\n\n            /// @ast-id 69\n            /// @src 0:436:511  \"function signed(int a, int b) external pure returns (int) { return a / b; }\"\n            function fun_signed_69(var_a_57, var_b_59) -> var__62 {\n                /// @src 0:489:492  \"int\"\n                let zero_t_int256_17 := zero_value_for_split_t_int256()\n                var__62 := zero_t_int256_17\n\n                /// @src 0:503:504  \"a\"\n                let _18 := var_a_57\n                let expr_64 := _18\n                /// @src 0:507:508  \"b\"\n                let _19 := var_b_59\n                let expr_65 := _19\n                /// @src 0:503:508  \"a / b\"\n                let expr_66 := checked_div_t_int256(expr_64, expr_65)\n\n                /// @src 0:496:508  \"return a / b\"\n                var__62 := expr_66\n                leave\n\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n\n            function convert_array_t_array$_t_uint256_$dyn_storage_to_t_array$_t_uint256_$dyn_storage_ptr(value) -> converted  {\n                converted := value\n\n            }\n\n            function array_dataslot_t_array$_t_uint256_$dyn_storage_ptr(ptr) -> data {\n                data := ptr\n\n                mstore(0, ptr)\n                data := keccak256(0, 0x20)\n\n            }\n\n            function panic_error_0x32() {\n                mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n                mstore(4, 0x32)\n                revert(0, 0x24)\n            }\n\n            function array_length_t_array$_t_uint256_$dyn_storage_ptr(value) -> length {\n\n                length := sload(value)\n\n            }\n\n            function array_dataslot_t_bytes_storage_ptr(ptr) -> data {\n                data := ptr\n\n                mstore(0, ptr)\n                data := keccak256(0, 0x20)\n\n            }\n\n            function long_byte_array_index_access_no_checks(array, index) -> slot, offset {\n\n                offset := sub(31, mod(index, 0x20))\n                let dataArea := array_dataslot_t_bytes_storage_ptr(array)\n                slot := add(dataArea, div(index, 0x20))\n\n            }\n\n            function storage_array_index_access_t_array$_t_uint256_$dyn_storage_ptr(array, index) -> slot, offset {\n                let arrayLength := array_length_t_array$_t_uint256_$dyn_storage_ptr(array)\n                if iszero(lt(index, arrayLength)) { panic_error_0x32() }\n\n                let dataArea := array_dataslot_t_array$_t_uint256_$dyn_storage_ptr(array)\n                slot := add(dataArea, mul(index, 1))\n                offset := 0\n\n            }\n\n            function shift_left_dynamic(bits, value) -> newValue {\n                newValue :=\n\n                shl(bits, value)\n\n            }\n\n            function update_byte_slice_dynamic32(value, shiftBytes, toInsert) -> result {\n                let shiftBits := mul(shiftBytes, 8)\n                let mask := shift_left_dynamic(shiftBits, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)\n                toInsert := shift_left_dynamic(shiftBits, toInsert)\n                value := and(value, not(mask))\n                result := or(value, and(toInsert, mask))\n            }\n\n            function identity(value) -> ret {\n                ret := value\n            }\n\n            function convert_t_uint256_to_t_uint256(value) -> converted {\n                converted := cleanup_t_uint256(identity(cleanup_t_uint256(value)))\n            }\n\n            function prepare_store_t_uint256(value) -> ret {\n                ret := value\n            }\n\n            function update_storage_value_t_uint256_to_t_uint256(slot, offset, value_0) {\n                let convertedValue_0 := convert_t_uint256_to_t_uint256(value_0)\n                sstore(slot, update_byte_slice_dynamic32(sload(slot), offset, prepare_store_t_uint256(convertedValue_0)))\n            }\n\n            function array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr(array , value0) {\n\n                let oldLen := sload(array)\n                if iszero(lt(oldLen, 18446744073709551616)) { panic_error_0x41() }\n                sstore(array, add(oldLen, 1))\n                let slot, offset := storage_array_index_access_t_array$_t_uint256_$dyn_storage_ptr(array, oldLen)\n                update_storage_value_t_uint256_to_t_uint256(slot, offset , value0)\n\n            }\n            function array_length_t_array$_t_uint256_$dyn_storage(value) -> length {\n\n                length := sload(value)\n\n            }\n\n            function cleanup_t_rational_1_by_1(value) -> cleaned {\n                cleaned := value\n            }\n\n            function convert_t_rational_1_by_1_to_t_uint256(value) -> converted {\n                converted := cleanup_t_uint256(identity(cleanup_t_rational_1_by_1(value)))\n            }\n\n            function checked_sub_t_uint256(x, y) -> diff {\n                x := cleanup_t_uint256(x)\n                y := cleanup_t_uint256(y)\n                diff := sub(x, y)\n\n                if gt(diff, x) { panic_error_0x11() }\n\n            }\n\n            function array_dataslot_t_array$_t_uint256_$dyn_storage(ptr) -> data {\n                data := ptr\n\n                mstore(0, ptr)\n                data := keccak256(0, 0x20)\n\n            }\n\n            function storage_array_index_access_t_array$_t_uint256_$dyn_storage(array, index) -> slot, offset {\n                let arrayLength := array_length_t_array$_t_uint256_$dyn_storage(array)\n                if iszero(lt(index, arrayLength)) { panic_error_0x32() }\n\n                let dataArea := array_dataslot_t_array$_t_uint256_$dyn_storage(array)\n                slot := add(dataArea, mul(index, 1))\n                offset := 0\n\n            }\n\n            function shift_right_unsigned_dynamic(bits, value) -> newValue {\n                newValue :=\n\n                shr(bits, value)\n\n            }\n\n            function cleanup_from_storage_t_uint256(value) -> cleaned {\n                cleaned := value\n            }\n\n            function extract_from_storage_value_dynamict_uint256(slot_value, offset) -> value {\n                value := cleanup_from_storage_t_uint256(shift_right_unsigned_dynamic(mul(offset, 8), slot_value))\n            }\n\n            function read_from_storage_split_dynamic_t_uint256(slot, offset) -> value {\n                value := extract_from_storage_value_dynamict_uint256(sload(slot), offset)\n\n            }\n\n            /// @ast-id 90\n            /// @src 0:516:635  \"function push(uint value) external returns (uint) {...\"\n            function fun_push_90(var_value_71) -> var__74 {\n                /// @src 0:560:564  \"uint\"\n                let zero_t_uint256_20 := zero_value_for_split_t_uint256()\n                var__74 := zero_t_uint256_20\n\n                /// @src 0:576:582  \"values\"\n                let _21_slot := 0x00\n                let expr_76_slot := _21_slot\n                /// @src 0:576:587  \"values.push\"\n                let expr_78_self_slot := convert_array_t_array$_t_uint256_$dyn_storage_to_t_array$_t_uint256_$dyn_storage_ptr(expr_76_slot)\n                /// @src 0:588:593  \"value\"\n                let _22 := var_value_71\n                let expr_79 := _22\n                /// @src 0:576:594  \"values.push(value)\"\n                array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr(expr_78_self_slot, expr_79)\n                /// @src 0:603:609  \"values\"\n                let _23_slot := 0x00\n                let expr_82_slot := _23_slot\n                /// @src 0:610:616  \"values\"\n                let _24_slot := 0x00\n                let expr_83_slot := _24_slot\n                /// @src 0:610:623  \"values.length\"\n                let expr_84 := array_length_t_array$_t_uint256_$dyn_storage(expr_83_slot)\n                /// @src 0:626:627  \"1\"\n                let expr_85 := 0x01\n                /// @src 0:610:627  \"values.length - 1\"\n                let expr_86 := checked_sub_t_uint256(expr_84, convert_t_rational_1_by_1_to_t_uint256(expr_85))\n\n                /// @src 0:603:628  \"values[values.length - 1]\"\n\n                let _25, _26 := storage_array_index_access_t_array$_t_uint256_$dyn_storage(expr_82_slot, expr_86)\n                let _27 := read_from_storage_split_dynamic_t_uint256(_25, _26)\n                let expr_87 := _27\n                /// @src 0:596:628  \"return values[values.length - 1]\"\n                var__74 := expr_87\n                leave\n\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n\n            function panic_error_0x31() {\n                mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n                mstore(4, 0x31)\n                revert(0, 0x24)\n            }\n\n            function storage_set_to_zero_t_uint256(slot, offset) {\n                let zero_0 := zero_value_for_split_t_uint256()\n                update_storage_value_t_uint256_to_t_uint256(slot, offset, zero_0)\n            }\n\n            function array_pop_t_array$_t_uint256_$dyn_storage_ptr(array) {\n                let oldLen := array_length_t_array$_t_uint256_$dyn_storage_ptr(array)\n                if iszero(oldLen) { panic_error_0x31() }\n                let newLen := sub(oldLen, 1)\n                let slot, offset := storage_array_index_access_t_array$_t_uint256_$dyn_storage_ptr(array, newLen)\n                storage_set_to_zero_t_uint256(slot, offset)\n                sstore(array, newLen)\n            }\n            /// @ast-id 99\n            /// @src 0:640:681  \"function pop() external { values.pop(); }\"\n            function fun_pop_99() {\n\n                /// @src 0:666:672  \"values\"\n                let _28_slot := 0x00\n                let expr_93_slot := _28_slot\n                /// @src 0:666:676  \"values.pop\"\n                let expr_95_self_slot := convert_array_t_array$_t_uint256_$dyn_storage_to_t_array$_t_uint256_$dyn_storage_ptr(expr_93_slot)\n                array_pop_t_array$_t_uint256_$dyn_storage_ptr(expr_95_self_slot)\n\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n\n        }\n\n        data \".metadata\" hex\"a264697066735822122084055a07268673dfd7decc59bd158075d11eae5632cded73e165bca61ed58e3f64736f6c63430008260033\"\n    }\n\n}\n\n",
+        "irOptimized": "/// @use-src 0:\"Census.sol\"\nobject \"Census_134\" {\n    code {\n        {\n            /// @src 0:160:996  \"contract Census {...\"\n            mstore(64, memoryguard(160))\n            let _1 := copy_arguments_for_constructor_object_Census()\n            constructor_Census(_1)\n            let _2 := allocate_unbounded()\n            codecopy(_2, dataoffset(\"Census_134_deployed\"), datasize(\"Census_134_deployed\"))\n            setimmutable(_2, \"16\", mload(128))\n            return(_2, datasize(\"Census_134_deployed\"))\n        }\n        function allocate_unbounded() -> memPtr\n        { memPtr := mload(64) }\n        function round_up_to_mul_of(value) -> result\n        {\n            result := and(add(value, 31), not(31))\n        }\n        function panic_error_0x41()\n        {\n            mstore(0, shl(224, 0x4e487b71))\n            mstore(4, 0x41)\n            revert(0, 0x24)\n        }\n        function finalize_allocation(memPtr, size)\n        {\n            let newFreePtr := add(memPtr, round_up_to_mul_of(size))\n            if or(gt(newFreePtr, sub(shl(64, 1), 1)), lt(newFreePtr, memPtr)) { panic_error_0x41() }\n            mstore(64, newFreePtr)\n        }\n        function allocate_memory(size) -> memPtr\n        {\n            memPtr := allocate_unbounded()\n            finalize_allocation(memPtr, size)\n        }\n        function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n        { revert(0, 0) }\n        function cleanup_uint256(value) -> cleaned\n        { cleaned := value }\n        function validator_revert_uint256(value)\n        {\n            if iszero(eq(value, cleanup_uint256(value))) { revert(0, 0) }\n        }\n        function abi_decode_t_uint256_fromMemory(offset, end) -> value\n        {\n            value := mload(offset)\n            validator_revert_uint256(value)\n        }\n        function abi_decode_uint256_fromMemory(headStart, dataEnd) -> value0\n        {\n            if slt(sub(dataEnd, headStart), 32)\n            {\n                revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n            }\n            let offset := 0\n            value0 := abi_decode_t_uint256_fromMemory(add(headStart, offset), dataEnd)\n        }\n        function copy_arguments_for_constructor_object_Census() -> ret_param\n        {\n            let programSize := datasize(\"Census_134\")\n            let argSize := sub(codesize(), programSize)\n            let memoryDataOffset := allocate_memory(argSize)\n            codecopy(memoryDataOffset, programSize, argSize)\n            ret_param := abi_decode_uint256_fromMemory(memoryDataOffset, add(memoryDataOffset, argSize))\n        }\n        function convert_array_array_uint256_dyn_storage_to_array_uint256_dyn__ptr(value) -> converted\n        { converted := value }\n        function array_dataslot_array_uint256_dyn_storage_ptr(ptr) -> data\n        {\n            data := ptr\n            mstore(0, ptr)\n            data := keccak256(0, 0x20)\n        }\n        function panic_error_0x32()\n        {\n            mstore(0, shl(224, 0x4e487b71))\n            mstore(4, 0x32)\n            revert(0, 0x24)\n        }\n        function array_length_array_uint256_dyn_storage_ptr(value) -> length\n        { length := sload(value) }\n        function storage_array_index_access_uint256_dyn__ptr(array, index) -> slot, offset\n        {\n            let arrayLength := array_length_array_uint256_dyn_storage_ptr(array)\n            if iszero(lt(index, arrayLength)) { panic_error_0x32() }\n            let dataArea := array_dataslot_array_uint256_dyn_storage_ptr(array)\n            slot := add(dataArea, mul(index, 1))\n            offset := 0\n        }\n        function shift_left_dynamic(bits, value) -> newValue\n        { newValue := shl(bits, value) }\n        function update_byte_slice_dynamic32(value, shiftBytes, toInsert) -> result\n        {\n            let shiftBits := mul(shiftBytes, 8)\n            let mask := shift_left_dynamic(shiftBits, not(0))\n            toInsert := shift_left_dynamic(shiftBits, toInsert)\n            value := and(value, not(mask))\n            result := or(value, and(toInsert, mask))\n        }\n        function identity(value) -> ret\n        { ret := value }\n        function convert_uint256_to_uint256(value) -> converted\n        {\n            converted := cleanup_uint256(identity(cleanup_uint256(value)))\n        }\n        function prepare_store_uint256(value) -> ret\n        { ret := value }\n        function update_storage_value_uint256_to_uint256(slot, offset, value)\n        {\n            let convertedValue := convert_uint256_to_uint256(value)\n            sstore(slot, update_byte_slice_dynamic32(sload(slot), offset, prepare_store_uint256(convertedValue)))\n        }\n        function array_push_from_uint256_to_array_uint256_dyn_storage_ptr(array, value0)\n        {\n            let oldLen := sload(array)\n            if iszero(lt(oldLen, 18446744073709551616)) { panic_error_0x41() }\n            sstore(array, add(oldLen, 1))\n            let slot, offset := storage_array_index_access_uint256_dyn__ptr(array, oldLen)\n            update_storage_value_uint256_to_uint256(slot, offset, value0)\n        }\n        /// @ast-id 35 @src 0:241:316  \"constructor(uint initial) payable { seed = initial; values.push(initial); }\"\n        function constructor_Census(var_initial)\n        {\n            /// @src 0:284:291  \"initial\"\n            let _1 := var_initial\n            let expr := _1\n            /// @src 0:277:291  \"seed = initial\"\n            let _2 := expr\n            mstore(128, _2)\n            /// @src 0:293:299  \"values\"\n            let _slot := 0x00\n            let expr_slot := _slot\n            /// @src 0:293:304  \"values.push\"\n            let expr_self_slot := convert_array_array_uint256_dyn_storage_to_array_uint256_dyn__ptr(expr_slot)\n            /// @src 0:305:312  \"initial\"\n            let _3 := var_initial\n            let expr_1 := _3\n            /// @src 0:293:313  \"values.push(initial)\"\n            array_push_from_uint256_to_array_uint256_dyn_storage_ptr(expr_self_slot, expr_1)\n        }\n    }\n    /// @use-src 0:\"Census.sol\"\n    object \"Census_134_deployed\" {\n        code {\n            {\n                /// @src 0:160:996  \"contract Census {...\"\n                mstore(64, memoryguard(128))\n                if gt(calldatasize(), 3)\n                {\n                    let selector := shift_right_unsigned(calldataload(0))\n                    switch selector\n                    case 0x444aa50e { external_fun_linked() }\n                    case 0x624fbfdc { external_fun_echo() }\n                    case 0x6cbb5ae3 { external_fun_arithmetic() }\n                    case 0x75059c59 { external_fun_assemblyWord() }\n                    case 0x7af91e2e { external_fun_signed() }\n                    case 0x7d94792a { external_fun_seed() }\n                    case 0x959ac484 { external_fun_push() }\n                    case 0xa4ece52c { external_fun_pop() }\n                    default { }\n                }\n                revert_error_42b3090547df1d2001c96683413b8cf91c1b902ef5e3cb8d9f6f304cf7446f74()\n            }\n            function shift_right_unsigned(value) -> newValue\n            { newValue := shr(224, value) }\n            function allocate_unbounded() -> memPtr\n            { memPtr := mload(64) }\n            function revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n            { revert(0, 0) }\n            function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n            { revert(0, 0) }\n            function revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db()\n            { revert(0, 0) }\n            function cleanup_uint256(value) -> cleaned\n            { cleaned := value }\n            function validator_revert_uint256(value)\n            {\n                if iszero(eq(value, cleanup_uint256(value))) { revert(0, 0) }\n            }\n            function abi_decode_uint256(offset, end) -> value\n            {\n                value := calldataload(offset)\n                validator_revert_uint256(value)\n            }\n            function abi_decode_tuple_uint256(headStart, dataEnd) -> value0\n            {\n                if slt(sub(dataEnd, headStart), 32)\n                {\n                    revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n                }\n                let offset := 0\n                value0 := abi_decode_uint256(add(headStart, offset), dataEnd)\n            }\n            function abi_encode_uint256_to_uint256(value, pos)\n            {\n                mstore(pos, cleanup_uint256(value))\n            }\n            function abi_encode_uint256(headStart, value0) -> tail\n            {\n                tail := add(headStart, 32)\n                abi_encode_uint256_to_uint256(value0, add(headStart, 0))\n            }\n            function external_fun_linked()\n            {\n                if callvalue()\n                {\n                    revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n                }\n                let param := abi_decode_tuple_uint256(4, calldatasize())\n                let ret := fun_linked(param)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_uint256(memPos, ret)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function revert_error_1b9f4a0a5773e33b91aa01db23bf8c55fce1411167c872835e7fa00a4f17d46d()\n            { revert(0, 0) }\n            function revert_error_15abf5612cd996bc235ba1e55a4a30ac60e6bb601ff7ba4ad3f179b6be8d0490()\n            { revert(0, 0) }\n            function revert_error_81385d8c0b31fffe14be1da910c8bd3a80be4cfa248e04f42ec0faea3132a8ef()\n            { revert(0, 0) }\n            function abi_decode_bytes_calldata_ptr(offset, end) -> arrayPos, length\n            {\n                if iszero(slt(add(offset, 0x1f), end))\n                {\n                    revert_error_1b9f4a0a5773e33b91aa01db23bf8c55fce1411167c872835e7fa00a4f17d46d()\n                }\n                length := calldataload(offset)\n                if gt(length, 0xffffffffffffffff)\n                {\n                    revert_error_15abf5612cd996bc235ba1e55a4a30ac60e6bb601ff7ba4ad3f179b6be8d0490()\n                }\n                arrayPos := add(offset, 0x20)\n                if gt(add(arrayPos, mul(length, 0x01)), end)\n                {\n                    revert_error_81385d8c0b31fffe14be1da910c8bd3a80be4cfa248e04f42ec0faea3132a8ef()\n                }\n            }\n            function abi_decode_bytes_calldata(headStart, dataEnd) -> value0, value1\n            {\n                if slt(sub(dataEnd, headStart), 32)\n                {\n                    revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n                }\n                let offset := calldataload(add(headStart, 0))\n                if gt(offset, 0xffffffffffffffff)\n                {\n                    revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db()\n                }\n                value0, value1 := abi_decode_bytes_calldata_ptr(add(headStart, offset), dataEnd)\n            }\n            function array_length_bytes(value) -> length\n            { length := mload(value) }\n            function array_storeLengthForEncoding_bytes(pos, length) -> updated_pos\n            {\n                mstore(pos, length)\n                updated_pos := add(pos, 0x20)\n            }\n            function copy_memory_to_memory_with_cleanup(src, dst, length)\n            {\n                mcopy(dst, src, length)\n                mstore(add(dst, length), 0)\n            }\n            function round_up_to_mul_of(value) -> result\n            {\n                result := and(add(value, 31), not(31))\n            }\n            function abi_encode_bytes_memory_ptr(value, pos) -> end\n            {\n                let length := array_length_bytes(value)\n                pos := array_storeLengthForEncoding_bytes(pos, length)\n                copy_memory_to_memory_with_cleanup(add(value, 0x20), pos, length)\n                end := add(pos, round_up_to_mul_of(length))\n            }\n            function abi_encode_bytes(headStart, value0) -> tail\n            {\n                tail := add(headStart, 32)\n                mstore(add(headStart, 0), sub(tail, headStart))\n                tail := abi_encode_bytes_memory_ptr(value0, tail)\n            }\n            function external_fun_echo()\n            {\n                if callvalue()\n                {\n                    revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n                }\n                let param, param_1 := abi_decode_bytes_calldata(4, calldatasize())\n                let ret := fun_echo(param, param_1)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_bytes(memPos, ret)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function abi_decode_uint256t_uint256(headStart, dataEnd) -> value0, value1\n            {\n                if slt(sub(dataEnd, headStart), 64)\n                {\n                    revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n                }\n                let offset := 0\n                value0 := abi_decode_uint256(add(headStart, offset), dataEnd)\n                let offset_1 := 32\n                value1 := abi_decode_uint256(add(headStart, offset_1), dataEnd)\n            }\n            function abi_encode_uint256_uint256(headStart, value0, value1) -> tail\n            {\n                tail := add(headStart, 64)\n                abi_encode_uint256_to_uint256(value0, add(headStart, 0))\n                abi_encode_uint256_to_uint256(value1, add(headStart, 32))\n            }\n            function external_fun_arithmetic()\n            {\n                if callvalue()\n                {\n                    revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n                }\n                let param, param_1 := abi_decode_uint256t_uint256(4, calldatasize())\n                let ret, ret_1 := fun_arithmetic(param, param_1)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_uint256_uint256(memPos, ret, ret_1)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function external_fun_assemblyWord()\n            {\n                if callvalue()\n                {\n                    revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n                }\n                let param := abi_decode_tuple_uint256(4, calldatasize())\n                let ret := fun_assemblyWord(param)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_uint256(memPos, ret)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function cleanup_int256(value) -> cleaned\n            { cleaned := value }\n            function validator_revert_int256(value)\n            {\n                if iszero(eq(value, cleanup_int256(value))) { revert(0, 0) }\n            }\n            function abi_decode_int256(offset, end) -> value\n            {\n                value := calldataload(offset)\n                validator_revert_int256(value)\n            }\n            function abi_decode_int256t_int256(headStart, dataEnd) -> value0, value1\n            {\n                if slt(sub(dataEnd, headStart), 64)\n                {\n                    revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n                }\n                let offset := 0\n                value0 := abi_decode_int256(add(headStart, offset), dataEnd)\n                let offset_1 := 32\n                value1 := abi_decode_int256(add(headStart, offset_1), dataEnd)\n            }\n            function abi_encode_int256(value, pos)\n            {\n                mstore(pos, cleanup_int256(value))\n            }\n            function abi_encode_tuple_int256(headStart, value0) -> tail\n            {\n                tail := add(headStart, 32)\n                abi_encode_int256(value0, add(headStart, 0))\n            }\n            function external_fun_signed()\n            {\n                if callvalue()\n                {\n                    revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n                }\n                let param, param_1 := abi_decode_int256t_int256(4, calldatasize())\n                let ret := fun_signed(param, param_1)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_int256(memPos, ret)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function abi_decode(headStart, dataEnd)\n            {\n                if slt(sub(dataEnd, headStart), 0)\n                {\n                    revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n                }\n            }\n            /// @ast-id 16 @src 0:182:208  \"uint public immutable seed\"\n            function getter_fun_seed() -> rval\n            { rval := loadimmutable(\"16\") }\n            /// @src 0:160:996  \"contract Census {...\"\n            function external_fun_seed()\n            {\n                if callvalue()\n                {\n                    revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n                }\n                abi_decode(4, calldatasize())\n                let ret := getter_fun_seed()\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_uint256(memPos, ret)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function external_fun_push()\n            {\n                if callvalue()\n                {\n                    revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n                }\n                let param := abi_decode_tuple_uint256(4, calldatasize())\n                let ret := fun_push(param)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_uint256(memPos, ret)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function abi_encode_tuple(headStart) -> tail\n            { tail := add(headStart, 0) }\n            function external_fun_pop()\n            {\n                if callvalue()\n                {\n                    revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n                }\n                abi_decode(4, calldatasize())\n                fun_pop()\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple(memPos)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function revert_error_42b3090547df1d2001c96683413b8cf91c1b902ef5e3cb8d9f6f304cf7446f74()\n            { revert(0, 0) }\n            function zero_value_for_split_uint256() -> ret\n            { ret := 0 }\n            function convert_type_contract_LinkedMath_to_address(value) -> converted\n            { converted := value }\n            function panic_error_0x41()\n            {\n                mstore(0, shl(224, 0x4e487b71))\n                mstore(4, 0x41)\n                revert(0, 0x24)\n            }\n            function finalize_allocation(memPtr, size)\n            {\n                let newFreePtr := add(memPtr, round_up_to_mul_of(size))\n                if or(gt(newFreePtr, 0xffffffffffffffff), lt(newFreePtr, memPtr)) { panic_error_0x41() }\n                mstore(64, newFreePtr)\n            }\n            function shift_left(value) -> newValue\n            { newValue := shl(224, value) }\n            function abi_decode_t_uint256_fromMemory(offset, end) -> value\n            {\n                value := mload(offset)\n                validator_revert_uint256(value)\n            }\n            function abi_decode_uint256_fromMemory(headStart, dataEnd) -> value0\n            {\n                if slt(sub(dataEnd, headStart), 32)\n                {\n                    revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n                }\n                let offset := 0\n                value0 := abi_decode_t_uint256_fromMemory(add(headStart, offset), dataEnd)\n            }\n            function abi_encode_uint256_to_uint256_library(value, pos)\n            {\n                mstore(pos, cleanup_uint256(value))\n            }\n            function abi_encode_tuple_uint256(headStart, value0) -> tail\n            {\n                tail := add(headStart, 32)\n                abi_encode_uint256_to_uint256_library(value0, add(headStart, 0))\n            }\n            function revert_forward()\n            {\n                let pos := allocate_unbounded()\n                returndatacopy(pos, 0, returndatasize())\n                revert(pos, returndatasize())\n            }\n            function panic_error_0x11()\n            {\n                mstore(0, shl(224, 0x4e487b71))\n                mstore(4, 0x11)\n                revert(0, 0x24)\n            }\n            function checked_add_uint256(x, y) -> sum\n            {\n                x := cleanup_uint256(x)\n                y := cleanup_uint256(y)\n                sum := add(x, y)\n                if gt(x, sum) { panic_error_0x11() }\n            }\n            /// @ast-id 124 @src 0:781:872  \"function linked(uint x) external view returns (uint) { return LinkedMath.twice(x) + seed; }\"\n            function fun_linked(var_x) -> var\n            {\n                /// @src 0:828:832  \"uint\"\n                let zero_uint256 := zero_value_for_split_uint256()\n                var := zero_uint256\n                /// @src 0:843:853  \"LinkedMath\"\n                let expr_116_address := linkersymbol(\"Census.sol:LinkedMath\")\n                /// @src 0:843:859  \"LinkedMath.twice\"\n                let expr_address := convert_type_contract_LinkedMath_to_address(expr_116_address)\n                let expr_functionSelector := 0x3cf3bbf4\n                /// @src 0:860:861  \"x\"\n                let _1 := var_x\n                let expr := _1\n                /// @src 0:843:862  \"LinkedMath.twice(x)\"\n                let _2 := allocate_unbounded()\n                mstore(_2, shift_left(expr_functionSelector))\n                let _3 := abi_encode_tuple_uint256(add(_2, 4), expr)\n                let _4 := delegatecall(gas(), expr_address, _2, sub(_3, _2), _2, 32)\n                if iszero(_4) { revert_forward() }\n                let expr_1\n                if _4\n                {\n                    let _5 := 32\n                    if gt(_5, returndatasize()) { _5 := returndatasize() }\n                    finalize_allocation(_2, _5)\n                    expr_1 := abi_decode_uint256_fromMemory(_2, add(_2, _5))\n                }\n                /// @src 0:865:869  \"seed\"\n                let _6 := loadimmutable(\"16\")\n                let expr_2 := _6\n                /// @src 0:843:869  \"LinkedMath.twice(x) + seed\"\n                let expr_3 := checked_add_uint256(expr_1, expr_2)\n                /// @src 0:836:869  \"return LinkedMath.twice(x) + seed\"\n                var := expr_3\n                leave\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n            function zero_value_for_split_bytes() -> ret\n            { ret := 96 }\n            function revert_error_987264b3b1d58a9c7f8255e93e81c77d86d6299019c33110a076957a3e06e2ae()\n            { revert(0, 0) }\n            function allocate_memory(size) -> memPtr\n            {\n                memPtr := allocate_unbounded()\n                finalize_allocation(memPtr, size)\n            }\n            function array_allocation_size_bytes(length) -> size\n            {\n                if gt(length, 0xffffffffffffffff) { panic_error_0x41() }\n                size := round_up_to_mul_of(length)\n                size := add(size, 0x20)\n            }\n            function copy_calldata_to_memory_with_cleanup(src, dst, length)\n            {\n                calldatacopy(dst, src, length)\n                mstore(add(dst, length), 0)\n            }\n            function abi_decode_available_length_bytes(src, length, end) -> array\n            {\n                array := allocate_memory(array_allocation_size_bytes(length))\n                mstore(array, length)\n                let dst := add(array, 0x20)\n                if gt(add(src, length), end)\n                {\n                    revert_error_987264b3b1d58a9c7f8255e93e81c77d86d6299019c33110a076957a3e06e2ae()\n                }\n                copy_calldata_to_memory_with_cleanup(src, dst, length)\n            }\n            function convert_array_bytes_calldata_to_bytes(value, length) -> converted\n            {\n                converted := abi_decode_available_length_bytes(value, length, calldatasize())\n            }\n            /// @ast-id 109 @src 0:686:776  \"function echo(bytes calldata input) external pure returns (bytes memory) { return input; }\"\n            function fun_echo(var_input_offset, var_input_length) -> var_mpos\n            {\n                /// @src 0:745:757  \"bytes memory\"\n                let zero_bytes_mpos := zero_value_for_split_bytes()\n                var_mpos := zero_bytes_mpos\n                /// @src 0:768:773  \"input\"\n                let _offset := var_input_offset\n                let _length := var_input_length\n                let expr_offset := _offset\n                let expr_length := _length\n                /// @src 0:761:773  \"return input\"\n                var_mpos := convert_array_bytes_calldata_to_bytes(expr_offset, expr_length)\n                leave\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n            function shift_right_1_unsigned(value) -> newValue\n            { newValue := shr(1, value) }\n            function checked_exp_helper(_power, _base, exponent, max) -> power, base\n            {\n                power := _power\n                base := _base\n                for { } gt(exponent, 1) { }\n                {\n                    if gt(base, div(max, base)) { panic_error_0x11() }\n                    if and(exponent, 1) { power := mul(power, base) }\n                    base := mul(base, base)\n                    exponent := shift_right_1_unsigned(exponent)\n                }\n            }\n            function checked_exp_unsigned(base, exponent, max) -> power\n            {\n                if iszero(exponent)\n                {\n                    power := 1\n                    leave\n                }\n                if iszero(base)\n                {\n                    power := 0\n                    leave\n                }\n                switch base\n                case 1 {\n                    power := 1\n                    leave\n                }\n                case 2 {\n                    if gt(exponent, 255) { panic_error_0x11() }\n                    power := exp(2, exponent)\n                    if gt(power, max) { panic_error_0x11() }\n                    leave\n                }\n                if or(and(lt(base, 11), lt(exponent, 78)), and(lt(base, 307), lt(exponent, 32)))\n                {\n                    power := exp(base, exponent)\n                    if gt(power, max) { panic_error_0x11() }\n                    leave\n                }\n                power, base := checked_exp_helper(1, base, exponent, max)\n                if gt(power, div(max, base)) { panic_error_0x11() }\n                power := mul(power, base)\n            }\n            function checked_exp_uint256_uint256(base, exponent) -> power\n            {\n                base := cleanup_uint256(base)\n                exponent := cleanup_uint256(exponent)\n                power := checked_exp_unsigned(base, exponent, not(0))\n            }\n            /// @ast-id 55 @src 0:321:431  \"function arithmetic(uint a, uint b) external pure returns (uint, uint) {...\"\n            function fun_arithmetic(var_a, var_b) -> var, var_1\n            {\n                /// @src 0:380:384  \"uint\"\n                let zero_t_uint256 := zero_value_for_split_uint256()\n                var := zero_t_uint256\n                /// @src 0:386:390  \"uint\"\n                let zero_uint256 := zero_value_for_split_uint256()\n                var_1 := zero_uint256\n                /// @src 0:410:411  \"a\"\n                let _1 := var_a\n                let expr := _1\n                /// @src 0:414:415  \"b\"\n                let _2 := var_b\n                let expr_1 := _2\n                /// @src 0:410:415  \"a + b\"\n                let expr_2 := checked_add_uint256(expr, expr_1)\n                /// @src 0:409:424  \"(a + b, a ** b)\"\n                let expr_component := expr_2\n                /// @src 0:417:418  \"a\"\n                let _3 := var_a\n                let expr_3 := _3\n                /// @src 0:422:423  \"b\"\n                let _4 := var_b\n                let expr_4 := _4\n                /// @src 0:417:423  \"a ** b\"\n                let expr_5 := checked_exp_uint256_uint256(expr_3, expr_4)\n                /// @src 0:409:424  \"(a + b, a ** b)\"\n                let expr_component_1 := expr_5\n                /// @src 0:402:424  \"return (a + b, a ** b)\"\n                var := expr_component\n                var_1 := expr_component_1\n                leave\n            }\n            /// @ast-id 133 @src 0:877:994  \"function assemblyWord(uint x) external pure returns (uint r) {...\"\n            function fun_assemblyWord(var_x) -> var_r\n            {\n                /// @src 0:930:936  \"uint r\"\n                let zero_uint256 := zero_value_for_split_uint256()\n                var_r := zero_uint256\n                /// @src 0:948:988  \"assembly (\\\"memory-safe\\\") { r := clz(x) }\"\n                var_r := clz(var_x)\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n            function zero_value_for_split_int256() -> ret\n            { ret := 0 }\n            function panic_error_0x12()\n            {\n                mstore(0, shl(224, 0x4e487b71))\n                mstore(4, 0x12)\n                revert(0, 0x24)\n            }\n            function checked_div_int256(x, y) -> r\n            {\n                x := cleanup_int256(x)\n                y := cleanup_int256(y)\n                if iszero(y) { panic_error_0x12() }\n                if and(eq(x, shl(255, 1)), eq(y, sub(0, 1))) { panic_error_0x11() }\n                r := sdiv(x, y)\n            }\n            /// @ast-id 69 @src 0:436:511  \"function signed(int a, int b) external pure returns (int) { return a / b; }\"\n            function fun_signed(var_a, var_b) -> var\n            {\n                /// @src 0:489:492  \"int\"\n                let zero_int256 := zero_value_for_split_int256()\n                var := zero_int256\n                /// @src 0:503:504  \"a\"\n                let _1 := var_a\n                let expr := _1\n                /// @src 0:507:508  \"b\"\n                let _2 := var_b\n                let expr_1 := _2\n                /// @src 0:503:508  \"a / b\"\n                let expr_2 := checked_div_int256(expr, expr_1)\n                /// @src 0:496:508  \"return a / b\"\n                var := expr_2\n                leave\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n            function convert_array_array_uint256_dyn_storage_to_array_uint256_dyn__ptr(value) -> converted\n            { converted := value }\n            function array_dataslot_array_uint256_dyn_storage_ptr(ptr) -> data\n            {\n                data := ptr\n                mstore(0, ptr)\n                data := keccak256(0, 0x20)\n            }\n            function panic_error_0x32()\n            {\n                mstore(0, shl(224, 0x4e487b71))\n                mstore(4, 0x32)\n                revert(0, 0x24)\n            }\n            function array_length_array_uint256_dyn_storage_ptr(value) -> length\n            { length := sload(value) }\n            function storage_array_index_access_uint256_dyn__ptr(array, index) -> slot, offset\n            {\n                let arrayLength := array_length_array_uint256_dyn_storage_ptr(array)\n                if iszero(lt(index, arrayLength)) { panic_error_0x32() }\n                let dataArea := array_dataslot_array_uint256_dyn_storage_ptr(array)\n                slot := add(dataArea, mul(index, 1))\n                offset := 0\n            }\n            function shift_left_dynamic(bits, value) -> newValue\n            { newValue := shl(bits, value) }\n            function update_byte_slice_dynamic32(value, shiftBytes, toInsert) -> result\n            {\n                let shiftBits := mul(shiftBytes, 8)\n                let mask := shift_left_dynamic(shiftBits, not(0))\n                toInsert := shift_left_dynamic(shiftBits, toInsert)\n                value := and(value, not(mask))\n                result := or(value, and(toInsert, mask))\n            }\n            function identity(value) -> ret\n            { ret := value }\n            function convert_uint256_to_uint256(value) -> converted\n            {\n                converted := cleanup_uint256(identity(cleanup_uint256(value)))\n            }\n            function prepare_store_uint256(value) -> ret\n            { ret := value }\n            function update_storage_value_uint256_to_uint256(slot, offset, value)\n            {\n                let convertedValue := convert_uint256_to_uint256(value)\n                sstore(slot, update_byte_slice_dynamic32(sload(slot), offset, prepare_store_uint256(convertedValue)))\n            }\n            function array_push_from_uint256_to_array_uint256_dyn_storage_ptr(array, value0)\n            {\n                let oldLen := sload(array)\n                if iszero(lt(oldLen, 18446744073709551616)) { panic_error_0x41() }\n                sstore(array, add(oldLen, 1))\n                let slot, offset := storage_array_index_access_uint256_dyn__ptr(array, oldLen)\n                update_storage_value_uint256_to_uint256(slot, offset, value0)\n            }\n            function array_length_array_uint256_dyn_storage(value) -> length\n            { length := sload(value) }\n            function cleanup_rational_by(value) -> cleaned\n            { cleaned := value }\n            function convert_rational_by_to_uint256(value) -> converted\n            {\n                converted := cleanup_uint256(identity(cleanup_rational_by(value)))\n            }\n            function checked_sub_uint256(x, y) -> diff\n            {\n                x := cleanup_uint256(x)\n                y := cleanup_uint256(y)\n                diff := sub(x, y)\n                if gt(diff, x) { panic_error_0x11() }\n            }\n            function array_dataslot_array_uint256_dyn_storage(ptr) -> data\n            {\n                data := ptr\n                mstore(0, ptr)\n                data := keccak256(0, 0x20)\n            }\n            function storage_array_index_access_uint256_dyn(array, index) -> slot, offset\n            {\n                let arrayLength := array_length_array_uint256_dyn_storage(array)\n                if iszero(lt(index, arrayLength)) { panic_error_0x32() }\n                let dataArea := array_dataslot_array_uint256_dyn_storage(array)\n                slot := add(dataArea, mul(index, 1))\n                offset := 0\n            }\n            function shift_right_unsigned_dynamic(bits, value) -> newValue\n            { newValue := shr(bits, value) }\n            function cleanup_from_storage_uint256(value) -> cleaned\n            { cleaned := value }\n            function extract_from_storage_value_dynamict_uint256(slot_value, offset) -> value\n            {\n                value := cleanup_from_storage_uint256(shift_right_unsigned_dynamic(mul(offset, 8), slot_value))\n            }\n            function read_from_storage_split_dynamic_uint256(slot, offset) -> value\n            {\n                value := extract_from_storage_value_dynamict_uint256(sload(slot), offset)\n            }\n            /// @ast-id 90 @src 0:516:635  \"function push(uint value) external returns (uint) {...\"\n            function fun_push(var_value) -> var_\n            {\n                /// @src 0:560:564  \"uint\"\n                let zero_uint256 := zero_value_for_split_uint256()\n                var_ := zero_uint256\n                /// @src 0:576:582  \"values\"\n                let _21_slot := 0x00\n                let expr_76_slot := _21_slot\n                /// @src 0:576:587  \"values.push\"\n                let expr_78_self_slot := convert_array_array_uint256_dyn_storage_to_array_uint256_dyn__ptr(expr_76_slot)\n                /// @src 0:588:593  \"value\"\n                let _1 := var_value\n                let expr := _1\n                /// @src 0:576:594  \"values.push(value)\"\n                array_push_from_uint256_to_array_uint256_dyn_storage_ptr(expr_78_self_slot, expr)\n                /// @src 0:603:609  \"values\"\n                let _23_slot := 0x00\n                let expr_slot := _23_slot\n                /// @src 0:610:616  \"values\"\n                let _slot := 0x00\n                let expr_83_slot := _slot\n                /// @src 0:610:623  \"values.length\"\n                let expr_1 := array_length_array_uint256_dyn_storage(expr_83_slot)\n                /// @src 0:626:627  \"1\"\n                let expr_2 := 0x01\n                /// @src 0:610:627  \"values.length - 1\"\n                let expr_3 := checked_sub_uint256(expr_1, convert_rational_by_to_uint256(expr_2))\n                /// @src 0:603:628  \"values[values.length - 1]\"\n                let _2, _3 := storage_array_index_access_uint256_dyn(expr_slot, expr_3)\n                let _4 := read_from_storage_split_dynamic_uint256(_2, _3)\n                let expr_4 := _4\n                /// @src 0:596:628  \"return values[values.length - 1]\"\n                var_ := expr_4\n                leave\n            }\n            /// @src 0:160:996  \"contract Census {...\"\n            function panic_error_0x31()\n            {\n                mstore(0, shl(224, 0x4e487b71))\n                mstore(4, 0x31)\n                revert(0, 0x24)\n            }\n            function storage_set_to_zero_uint256(slot, offset)\n            {\n                let zero := zero_value_for_split_uint256()\n                update_storage_value_uint256_to_uint256(slot, offset, zero)\n            }\n            function array_pop_array_uint256_dyn_storage_ptr(array)\n            {\n                let oldLen := array_length_array_uint256_dyn_storage_ptr(array)\n                if iszero(oldLen) { panic_error_0x31() }\n                let newLen := sub(oldLen, 1)\n                let slot, offset := storage_array_index_access_uint256_dyn__ptr(array, newLen)\n                storage_set_to_zero_uint256(slot, offset)\n                sstore(array, newLen)\n            }\n            /// @ast-id 99 @src 0:640:681  \"function pop() external { values.pop(); }\"\n            function fun_pop()\n            {\n                /// @src 0:666:672  \"values\"\n                let _28_slot := 0x00\n                let expr_93_slot := _28_slot\n                /// @src 0:666:676  \"values.pop\"\n                let expr_self_slot := convert_array_array_uint256_dyn_storage_to_array_uint256_dyn__ptr(expr_93_slot)\n                array_pop_array_uint256_dyn_storage_ptr(expr_self_slot)\n            }\n        }\n        data \".metadata\" hex\"a264697066735822122084055a07268673dfd7decc59bd158075d11eae5632cded73e165bca61ed58e3f64736f6c63430008260033\"\n    }\n}\n"
+      },
+      "LinkedMath": {
+        "evm": {
+          "bytecode": {
+            "object": "608060405234602057600e6024565b61019561002f82393081505061019590f35b602a565b60405190565b5f80fdfe608060405260033611610012575b6100cc565b61001c5f3561002b565b633cf3bbf40361000d576100a1565b60e01c90565b60405190565b5f80fd5b90565b6100478161003b565b0361004e57565b5f80fd5b9050359061005f8261003e565b565b9060208282031261007a57610077915f01610052565b90565b610037565b6100889061003b565b9052565b919061009f905f6020850194019061007f565b565b6100c86100b76100b2366004610061565b61013f565b6100bf610031565b9182918261008c565b0390f35b5f80fd5b5f90565b90565b90565b6100ee6100e96100f3926100d4565b6100d7565b61003b565b90565b634e487b7160e01b5f52601160045260245ffd5b61011961011f9193929361003b565b9261003b565b9161012b83820261003b565b92818404149015171561013a57565b6100f6565b61015c9061014b6100d0565b5061015660026100da565b9061010a565b9056fea2646970667358221220865b8b5fad68a92f4d65ddbaea0f41331d2f4dd89048d9ea5b7515ff8a58f4b964736f6c63430008260033"
+          },
+          "deployedBytecode": {
+            "object": "608060405260033611610012575b6100cc565b61001c5f3561002b565b633cf3bbf40361000d576100a1565b60e01c90565b60405190565b5f80fd5b90565b6100478161003b565b0361004e57565b5f80fd5b9050359061005f8261003e565b565b9060208282031261007a57610077915f01610052565b90565b610037565b6100889061003b565b9052565b919061009f905f6020850194019061007f565b565b6100c86100b76100b2366004610061565b61013f565b6100bf610031565b9182918261008c565b0390f35b5f80fd5b5f90565b90565b90565b6100ee6100e96100f3926100d4565b6100d7565b61003b565b90565b634e487b7160e01b5f52601160045260245ffd5b61011961011f9193929361003b565b9261003b565b9161012b83820261003b565b92818404149015171561013a57565b6100f6565b61015c9061014b6100d0565b5061015660026100da565b9061010a565b9056fea2646970667358221220865b8b5fad68a92f4d65ddbaea0f41331d2f4dd89048d9ea5b7515ff8a58f4b964736f6c63430008260033"
+          }
+        },
+        "ir": "\n/// @use-src 0:\"Census.sol\"\nobject \"LinkedMath_14\" {\n    code {\n        /// @src 0:63:159  \"library LinkedMath {...\"\n        mstore(64, memoryguard(128))\n        if callvalue() { revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() }\n\n        let _1 := allocate_unbounded()\n        codecopy(_1, dataoffset(\"LinkedMath_14_deployed\"), datasize(\"LinkedMath_14_deployed\"))\n\n        setimmutable(_1, \"library_deploy_address\", address())\n\n        return(_1, datasize(\"LinkedMath_14_deployed\"))\n\n        function allocate_unbounded() -> memPtr {\n            memPtr := mload(64)\n        }\n\n        function revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb() {\n            revert(0, 0)\n        }\n\n        /// @src 0:63:159  \"library LinkedMath {...\"\n        function constructor_LinkedMath_14() {\n\n            /// @src 0:63:159  \"library LinkedMath {...\"\n\n        }\n        /// @src 0:63:159  \"library LinkedMath {...\"\n\n    }\n    /// @use-src 0:\"Census.sol\"\n    object \"LinkedMath_14_deployed\" {\n        code {\n            /// @src 0:63:159  \"library LinkedMath {...\"\n            mstore(64, memoryguard(128))\n\n            let called_via_delegatecall := iszero(eq(loadimmutable(\"library_deploy_address\"), address()))\n\n            if gt(calldatasize(), 3)\n            {\n                let selector := shift_right_224_unsigned(calldataload(0))\n                switch selector\n\n                case 0x3cf3bbf4\n                {\n                    // twice(uint256)\n\n                    external_fun_twice_13()\n                }\n\n                default {}\n            }\n\n            revert_error_42b3090547df1d2001c96683413b8cf91c1b902ef5e3cb8d9f6f304cf7446f74()\n\n            function shift_right_224_unsigned(value) -> newValue {\n                newValue :=\n\n                shr(224, value)\n\n            }\n\n            function allocate_unbounded() -> memPtr {\n                memPtr := mload(64)\n            }\n\n            function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() {\n                revert(0, 0)\n            }\n\n            function revert_error_c1322bf8034eace5e0b5c7295db60986aa89aae5e0ea0873e4689e076861a5db() {\n                revert(0, 0)\n            }\n\n            function cleanup_t_uint256(value) -> cleaned {\n                cleaned := value\n            }\n\n            function validator_revert_t_uint256(value) {\n                if iszero(eq(value, cleanup_t_uint256(value))) { revert(0, 0) }\n            }\n\n            function abi_decode_t_uint256(offset, end) -> value {\n                value := calldataload(offset)\n                validator_revert_t_uint256(value)\n            }\n\n            function abi_decode_tuple_t_uint256(headStart, dataEnd) -> value0 {\n                if slt(sub(dataEnd, headStart), 32) { revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b() }\n\n                {\n\n                    let offset := 0\n\n                    value0 := abi_decode_t_uint256(add(headStart, offset), dataEnd)\n                }\n\n            }\n\n            function abi_encode_t_uint256_to_t_uint256_fromStack_library(value, pos) {\n                mstore(pos, cleanup_t_uint256(value))\n            }\n\n            function abi_encode_tuple_t_uint256__to_t_uint256__fromStack_library(headStart , value0) -> tail {\n                tail := add(headStart, 32)\n\n                abi_encode_t_uint256_to_t_uint256_fromStack_library(value0,  add(headStart, 0))\n\n            }\n\n            function external_fun_twice_13() {\n\n                let param_0 :=  abi_decode_tuple_t_uint256(4, calldatasize())\n                let ret_0 :=  fun_twice_13(param_0)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_tuple_t_uint256__to_t_uint256__fromStack_library(memPos , ret_0)\n                return(memPos, sub(memEnd, memPos))\n\n            }\n\n            function revert_error_42b3090547df1d2001c96683413b8cf91c1b902ef5e3cb8d9f6f304cf7446f74() {\n                revert(0, 0)\n            }\n\n            function zero_value_for_split_t_uint256() -> ret {\n                ret := 0\n            }\n\n            function cleanup_t_rational_2_by_1(value) -> cleaned {\n                cleaned := value\n            }\n\n            function identity(value) -> ret {\n                ret := value\n            }\n\n            function convert_t_rational_2_by_1_to_t_uint256(value) -> converted {\n                converted := cleanup_t_uint256(identity(cleanup_t_rational_2_by_1(value)))\n            }\n\n            function panic_error_0x11() {\n                mstore(0, 35408467139433450592217433187231851964531694900788300625387963629091585785856)\n                mstore(4, 0x11)\n                revert(0, 0x24)\n            }\n\n            function checked_mul_t_uint256(x, y) -> product {\n                x := cleanup_t_uint256(x)\n                y := cleanup_t_uint256(y)\n                let product_raw := mul(x, y)\n                product := cleanup_t_uint256(product_raw)\n\n                // overflow, if x != 0 and y != product/x\n                if iszero(\n                    or(\n                        iszero(x),\n                        eq(y, div(product, x))\n                    )\n                ) { panic_error_0x11() }\n\n            }\n\n            /// @ast-id 13\n            /// @src 0:88:157  \"function twice(uint x) external pure returns (uint) { return x * 2; }\"\n            function fun_twice_13(var_x_3) -> var__6 {\n                /// @src 0:134:138  \"uint\"\n                let zero_t_uint256_1 := zero_value_for_split_t_uint256()\n                var__6 := zero_t_uint256_1\n\n                /// @src 0:149:150  \"x\"\n                let _2 := var_x_3\n                let expr_8 := _2\n                /// @src 0:153:154  \"2\"\n                let expr_9 := 0x02\n                /// @src 0:149:154  \"x * 2\"\n                let expr_10 := checked_mul_t_uint256(expr_8, convert_t_rational_2_by_1_to_t_uint256(expr_9))\n\n                /// @src 0:142:154  \"return x * 2\"\n                var__6 := expr_10\n                leave\n\n            }\n            /// @src 0:63:159  \"library LinkedMath {...\"\n\n        }\n\n        data \".metadata\" hex\"a2646970667358221220865b8b5fad68a92f4d65ddbaea0f41331d2f4dd89048d9ea5b7515ff8a58f4b964736f6c63430008260033\"\n    }\n\n}\n\n",
+        "irOptimized": "/// @use-src 0:\"Census.sol\"\nobject \"LinkedMath_14\" {\n    code {\n        {\n            /// @src 0:63:159  \"library LinkedMath {...\"\n            mstore(64, memoryguard(128))\n            if callvalue()\n            {\n                revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n            }\n            let _1 := allocate_unbounded()\n            codecopy(_1, dataoffset(\"LinkedMath_14_deployed\"), datasize(\"LinkedMath_14_deployed\"))\n            setimmutable(_1, \"library_deploy_address\", address())\n            return(_1, datasize(\"LinkedMath_14_deployed\"))\n        }\n        function allocate_unbounded() -> memPtr\n        { memPtr := mload(64) }\n        function revert_error_ca66f745a3ce8ff40e2ccaf1ad45db7774001b90d25810abd9040049be7bf4bb()\n        { revert(0, 0) }\n    }\n    /// @use-src 0:\"Census.sol\"\n    object \"LinkedMath_14_deployed\" {\n        code {\n            {\n                /// @src 0:63:159  \"library LinkedMath {...\"\n                mstore(64, memoryguard(128))\n                if gt(calldatasize(), 3)\n                {\n                    let selector := shift_right_unsigned(calldataload(0))\n                    switch selector\n                    case 0x3cf3bbf4 { external_fun_twice() }\n                    default { }\n                }\n                revert_error_42b3090547df1d2001c96683413b8cf91c1b902ef5e3cb8d9f6f304cf7446f74()\n            }\n            function shift_right_unsigned(value) -> newValue\n            { newValue := shr(224, value) }\n            function allocate_unbounded() -> memPtr\n            { memPtr := mload(64) }\n            function revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n            { revert(0, 0) }\n            function cleanup_uint256(value) -> cleaned\n            { cleaned := value }\n            function validator_revert_uint256(value)\n            {\n                if iszero(eq(value, cleanup_uint256(value))) { revert(0, 0) }\n            }\n            function abi_decode_uint256(offset, end) -> value\n            {\n                value := calldataload(offset)\n                validator_revert_uint256(value)\n            }\n            function abi_decode_tuple_uint256(headStart, dataEnd) -> value0\n            {\n                if slt(sub(dataEnd, headStart), 32)\n                {\n                    revert_error_dbdddcbe895c83990c08b3492a0e83918d802a52331272ac6fdb6a7c4aea3b1b()\n                }\n                let offset := 0\n                value0 := abi_decode_uint256(add(headStart, offset), dataEnd)\n            }\n            function abi_encode_uint256_to_uint256_library(value, pos)\n            {\n                mstore(pos, cleanup_uint256(value))\n            }\n            function abi_encode_uint256(headStart, value0) -> tail\n            {\n                tail := add(headStart, 32)\n                abi_encode_uint256_to_uint256_library(value0, add(headStart, 0))\n            }\n            function external_fun_twice()\n            {\n                let param := abi_decode_tuple_uint256(4, calldatasize())\n                let ret := fun_twice(param)\n                let memPos := allocate_unbounded()\n                let memEnd := abi_encode_uint256(memPos, ret)\n                return(memPos, sub(memEnd, memPos))\n            }\n            function revert_error_42b3090547df1d2001c96683413b8cf91c1b902ef5e3cb8d9f6f304cf7446f74()\n            { revert(0, 0) }\n            function zero_value_for_split_uint256() -> ret\n            { ret := 0 }\n            function cleanup_rational_by(value) -> cleaned\n            { cleaned := value }\n            function identity(value) -> ret\n            { ret := value }\n            function convert_rational_by_to_uint256(value) -> converted\n            {\n                converted := cleanup_uint256(identity(cleanup_rational_by(value)))\n            }\n            function panic_error_0x11()\n            {\n                mstore(0, shl(224, 0x4e487b71))\n                mstore(4, 0x11)\n                revert(0, 0x24)\n            }\n            function checked_mul_uint256(x, y) -> product\n            {\n                x := cleanup_uint256(x)\n                y := cleanup_uint256(y)\n                let product_raw := mul(x, y)\n                product := cleanup_uint256(product_raw)\n                if iszero(or(iszero(x), eq(y, div(product, x)))) { panic_error_0x11() }\n            }\n            /// @ast-id 13 @src 0:88:157  \"function twice(uint x) external pure returns (uint) { return x * 2; }\"\n            function fun_twice(var_x) -> var\n            {\n                /// @src 0:134:138  \"uint\"\n                let zero_uint256 := zero_value_for_split_uint256()\n                var := zero_uint256\n                /// @src 0:149:150  \"x\"\n                let _1 := var_x\n                let expr := _1\n                /// @src 0:153:154  \"2\"\n                let expr_1 := 0x02\n                /// @src 0:149:154  \"x * 2\"\n                let expr_2 := checked_mul_uint256(expr, convert_rational_by_to_uint256(expr_1))\n                /// @src 0:142:154  \"return x * 2\"\n                var := expr_2\n                leave\n            }\n        }\n        data \".metadata\" hex\"a2646970667358221220865b8b5fad68a92f4d65ddbaea0f41331d2f4dd89048d9ea5b7515ff8a58f4b964736f6c63430008260033\"\n    }\n}\n"
+      }
+    }
+  },
+  "sources": {
+    "Census.sol": {
+      "ast": {
+        "absolutePath": "Census.sol",
+        "exportedSymbols": {
+          "Census": [
+            134
+          ],
+          "LinkedMath": [
+            14
+          ]
+        },
+        "id": 135,
+        "license": "UNLICENSED",
+        "nodeType": "SourceUnit",
+        "nodes": [
+          {
+            "id": 1,
+            "literals": [
+              "solidity",
+              "0.8",
+              ".38"
+            ],
+            "nodeType": "PragmaDirective",
+            "src": "39:23:0"
+          },
+          {
+            "abstract": false,
+            "baseContracts": [],
+            "canonicalName": "LinkedMath",
+            "contractDependencies": [],
+            "contractKind": "library",
+            "fullyImplemented": true,
+            "id": 14,
+            "linearizedBaseContracts": [
+              14
+            ],
+            "name": "LinkedMath",
+            "nameLocation": "71:10:0",
+            "nodeType": "ContractDefinition",
+            "nodes": [
+              {
+                "body": {
+                  "id": 12,
+                  "nodeType": "Block",
+                  "src": "140:17:0",
+                  "statements": [
+                    {
+                      "expression": {
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 10,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 8,
+                          "name": "x",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 3,
+                          "src": "149:1:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "*",
+                        "rightExpression": {
+                          "hexValue": "32",
+                          "id": 9,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "153:1:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_2_by_1",
+                            "typeString": "int_const 2"
+                          },
+                          "value": "2"
+                        },
+                        "src": "149:5:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "functionReturnParameters": 7,
+                      "id": 11,
+                      "nodeType": "Return",
+                      "src": "142:12:0"
+                    }
+                  ]
+                },
+                "functionSelector": "3cf3bbf4",
+                "id": 13,
+                "implemented": true,
+                "kind": "function",
+                "modifiers": [],
+                "name": "twice",
+                "nameLocation": "97:5:0",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 4,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 3,
+                      "mutability": "mutable",
+                      "name": "x",
+                      "nameLocation": "108:1:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 13,
+                      "src": "103:6:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 2,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "103:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "102:8:0"
+                },
+                "returnParameters": {
+                  "id": 7,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 6,
+                      "mutability": "mutable",
+                      "name": "",
+                      "nameLocation": "-1:-1:-1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 13,
+                      "src": "134:4:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 5,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "134:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "133:6:0"
+                },
+                "scope": 14,
+                "src": "88:69:0",
+                "stateMutability": "pure",
+                "virtual": false,
+                "visibility": "external"
+              }
+            ],
+            "scope": 135,
+            "src": "63:96:0",
+            "usedErrors": [],
+            "usedEvents": []
+          },
+          {
+            "abstract": false,
+            "baseContracts": [],
+            "canonicalName": "Census",
+            "contractDependencies": [],
+            "contractKind": "contract",
+            "fullyImplemented": true,
+            "id": 134,
+            "linearizedBaseContracts": [
+              134
+            ],
+            "name": "Census",
+            "nameLocation": "169:6:0",
+            "nodeType": "ContractDefinition",
+            "nodes": [
+              {
+                "constant": false,
+                "functionSelector": "7d94792a",
+                "id": 16,
+                "mutability": "immutable",
+                "name": "seed",
+                "nameLocation": "204:4:0",
+                "nodeType": "VariableDeclaration",
+                "scope": 134,
+                "src": "182:26:0",
+                "stateVariable": true,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 15,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "182:4:0",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "public"
+              },
+              {
+                "constant": false,
+                "id": 19,
+                "mutability": "mutable",
+                "name": "values",
+                "nameLocation": "229:6:0",
+                "nodeType": "VariableDeclaration",
+                "scope": 134,
+                "src": "214:21:0",
+                "stateVariable": true,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_array$_t_uint256_$dyn_storage",
+                  "typeString": "uint256[]"
+                },
+                "typeName": {
+                  "baseType": {
+                    "id": 17,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "214:4:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 18,
+                  "nodeType": "ArrayTypeName",
+                  "src": "214:6:0",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                    "typeString": "uint256[]"
+                  }
+                },
+                "visibility": "private"
+              },
+              {
+                "body": {
+                  "id": 34,
+                  "nodeType": "Block",
+                  "src": "275:41:0",
+                  "statements": [
+                    {
+                      "expression": {
+                        "id": 26,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftHandSide": {
+                          "id": 24,
+                          "name": "seed",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 16,
+                          "src": "277:4:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "Assignment",
+                        "operator": "=",
+                        "rightHandSide": {
+                          "id": 25,
+                          "name": "initial",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 21,
+                          "src": "284:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "src": "277:14:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "id": 27,
+                      "nodeType": "ExpressionStatement",
+                      "src": "277:14:0"
+                    },
+                    {
+                      "expression": {
+                        "arguments": [
+                          {
+                            "id": 31,
+                            "name": "initial",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 21,
+                            "src": "305:7:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "expression": {
+                            "id": 28,
+                            "name": "values",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 19,
+                            "src": "293:6:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_array$_t_uint256_$dyn_storage",
+                              "typeString": "uint256[] storage ref"
+                            }
+                          },
+                          "id": 30,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberLocation": "300:4:0",
+                          "memberName": "push",
+                          "nodeType": "MemberAccess",
+                          "src": "293:11:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_arraypush_nonpayable$_t_array$_t_uint256_$dyn_storage_ptr_$_t_uint256_$returns$__$attached_to$_t_array$_t_uint256_$dyn_storage_ptr_$",
+                            "typeString": "function (uint256[] storage pointer,uint256)"
+                          }
+                        },
+                        "id": 32,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "293:20:0",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_tuple$__$",
+                          "typeString": "tuple()"
+                        }
+                      },
+                      "id": 33,
+                      "nodeType": "ExpressionStatement",
+                      "src": "293:20:0"
+                    }
+                  ]
+                },
+                "id": 35,
+                "implemented": true,
+                "kind": "constructor",
+                "modifiers": [],
+                "name": "",
+                "nameLocation": "-1:-1:-1",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 22,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 21,
+                      "mutability": "mutable",
+                      "name": "initial",
+                      "nameLocation": "258:7:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 35,
+                      "src": "253:12:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 20,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "253:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "252:14:0"
+                },
+                "returnParameters": {
+                  "id": 23,
+                  "nodeType": "ParameterList",
+                  "parameters": [],
+                  "src": "275:0:0"
+                },
+                "scope": 134,
+                "src": "241:75:0",
+                "stateMutability": "payable",
+                "virtual": false,
+                "visibility": "public"
+              },
+              {
+                "body": {
+                  "id": 54,
+                  "nodeType": "Block",
+                  "src": "392:39:0",
+                  "statements": [
+                    {
+                      "expression": {
+                        "components": [
+                          {
+                            "commonType": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            "id": 48,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "leftExpression": {
+                              "id": 46,
+                              "name": "a",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 37,
+                              "src": "410:1:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "nodeType": "BinaryOperation",
+                            "operator": "+",
+                            "rightExpression": {
+                              "id": 47,
+                              "name": "b",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 39,
+                              "src": "414:1:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "src": "410:5:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          {
+                            "commonType": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            "id": 51,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "leftExpression": {
+                              "id": 49,
+                              "name": "a",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 37,
+                              "src": "417:1:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "nodeType": "BinaryOperation",
+                            "operator": "**",
+                            "rightExpression": {
+                              "id": 50,
+                              "name": "b",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 39,
+                              "src": "422:1:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "src": "417:6:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "id": 52,
+                        "isConstant": false,
+                        "isInlineArray": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "TupleExpression",
+                        "src": "409:15:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_tuple$_t_uint256_$_t_uint256_$",
+                          "typeString": "tuple(uint256,uint256)"
+                        }
+                      },
+                      "functionReturnParameters": 45,
+                      "id": 53,
+                      "nodeType": "Return",
+                      "src": "402:22:0"
+                    }
+                  ]
+                },
+                "functionSelector": "6cbb5ae3",
+                "id": 55,
+                "implemented": true,
+                "kind": "function",
+                "modifiers": [],
+                "name": "arithmetic",
+                "nameLocation": "330:10:0",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 40,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 37,
+                      "mutability": "mutable",
+                      "name": "a",
+                      "nameLocation": "346:1:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 55,
+                      "src": "341:6:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 36,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "341:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 39,
+                      "mutability": "mutable",
+                      "name": "b",
+                      "nameLocation": "354:1:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 55,
+                      "src": "349:6:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 38,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "349:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "340:16:0"
+                },
+                "returnParameters": {
+                  "id": 45,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 42,
+                      "mutability": "mutable",
+                      "name": "",
+                      "nameLocation": "-1:-1:-1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 55,
+                      "src": "380:4:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 41,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "380:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 44,
+                      "mutability": "mutable",
+                      "name": "",
+                      "nameLocation": "-1:-1:-1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 55,
+                      "src": "386:4:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 43,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "386:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "379:12:0"
+                },
+                "scope": 134,
+                "src": "321:110:0",
+                "stateMutability": "pure",
+                "virtual": false,
+                "visibility": "external"
+              },
+              {
+                "body": {
+                  "id": 68,
+                  "nodeType": "Block",
+                  "src": "494:17:0",
+                  "statements": [
+                    {
+                      "expression": {
+                        "commonType": {
+                          "typeIdentifier": "t_int256",
+                          "typeString": "int256"
+                        },
+                        "id": 66,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "id": 64,
+                          "name": "a",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 57,
+                          "src": "503:1:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_int256",
+                            "typeString": "int256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "/",
+                        "rightExpression": {
+                          "id": 65,
+                          "name": "b",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 59,
+                          "src": "507:1:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_int256",
+                            "typeString": "int256"
+                          }
+                        },
+                        "src": "503:5:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int256",
+                          "typeString": "int256"
+                        }
+                      },
+                      "functionReturnParameters": 63,
+                      "id": 67,
+                      "nodeType": "Return",
+                      "src": "496:12:0"
+                    }
+                  ]
+                },
+                "functionSelector": "7af91e2e",
+                "id": 69,
+                "implemented": true,
+                "kind": "function",
+                "modifiers": [],
+                "name": "signed",
+                "nameLocation": "445:6:0",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 60,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 57,
+                      "mutability": "mutable",
+                      "name": "a",
+                      "nameLocation": "456:1:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 69,
+                      "src": "452:5:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int256",
+                        "typeString": "int256"
+                      },
+                      "typeName": {
+                        "id": 56,
+                        "name": "int",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "452:3:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int256",
+                          "typeString": "int256"
+                        }
+                      },
+                      "visibility": "internal"
+                    },
+                    {
+                      "constant": false,
+                      "id": 59,
+                      "mutability": "mutable",
+                      "name": "b",
+                      "nameLocation": "463:1:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 69,
+                      "src": "459:5:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int256",
+                        "typeString": "int256"
+                      },
+                      "typeName": {
+                        "id": 58,
+                        "name": "int",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "459:3:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int256",
+                          "typeString": "int256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "451:14:0"
+                },
+                "returnParameters": {
+                  "id": 63,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 62,
+                      "mutability": "mutable",
+                      "name": "",
+                      "nameLocation": "-1:-1:-1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 69,
+                      "src": "489:3:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int256",
+                        "typeString": "int256"
+                      },
+                      "typeName": {
+                        "id": 61,
+                        "name": "int",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "489:3:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_int256",
+                          "typeString": "int256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "488:5:0"
+                },
+                "scope": 134,
+                "src": "436:75:0",
+                "stateMutability": "pure",
+                "virtual": false,
+                "visibility": "external"
+              },
+              {
+                "body": {
+                  "id": 89,
+                  "nodeType": "Block",
+                  "src": "566:69:0",
+                  "statements": [
+                    {
+                      "expression": {
+                        "arguments": [
+                          {
+                            "id": 79,
+                            "name": "value",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 71,
+                            "src": "588:5:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "expression": {
+                            "id": 76,
+                            "name": "values",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 19,
+                            "src": "576:6:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_array$_t_uint256_$dyn_storage",
+                              "typeString": "uint256[] storage ref"
+                            }
+                          },
+                          "id": 78,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberLocation": "583:4:0",
+                          "memberName": "push",
+                          "nodeType": "MemberAccess",
+                          "src": "576:11:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_arraypush_nonpayable$_t_array$_t_uint256_$dyn_storage_ptr_$_t_uint256_$returns$__$attached_to$_t_array$_t_uint256_$dyn_storage_ptr_$",
+                            "typeString": "function (uint256[] storage pointer,uint256)"
+                          }
+                        },
+                        "id": 80,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "576:18:0",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_tuple$__$",
+                          "typeString": "tuple()"
+                        }
+                      },
+                      "id": 81,
+                      "nodeType": "ExpressionStatement",
+                      "src": "576:18:0"
+                    },
+                    {
+                      "expression": {
+                        "baseExpression": {
+                          "id": 82,
+                          "name": "values",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 19,
+                          "src": "603:6:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$dyn_storage",
+                            "typeString": "uint256[] storage ref"
+                          }
+                        },
+                        "id": 87,
+                        "indexExpression": {
+                          "commonType": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "id": 86,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftExpression": {
+                            "expression": {
+                              "id": 83,
+                              "name": "values",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 19,
+                              "src": "610:6:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_array$_t_uint256_$dyn_storage",
+                                "typeString": "uint256[] storage ref"
+                              }
+                            },
+                            "id": 84,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberLocation": "617:6:0",
+                            "memberName": "length",
+                            "nodeType": "MemberAccess",
+                            "src": "610:13:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "nodeType": "BinaryOperation",
+                          "operator": "-",
+                          "rightExpression": {
+                            "hexValue": "31",
+                            "id": 85,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "number",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "626:1:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_rational_1_by_1",
+                              "typeString": "int_const 1"
+                            },
+                            "value": "1"
+                          },
+                          "src": "610:17:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "nodeType": "IndexAccess",
+                        "src": "603:25:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "functionReturnParameters": 75,
+                      "id": 88,
+                      "nodeType": "Return",
+                      "src": "596:32:0"
+                    }
+                  ]
+                },
+                "functionSelector": "959ac484",
+                "id": 90,
+                "implemented": true,
+                "kind": "function",
+                "modifiers": [],
+                "name": "push",
+                "nameLocation": "525:4:0",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 72,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 71,
+                      "mutability": "mutable",
+                      "name": "value",
+                      "nameLocation": "535:5:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 90,
+                      "src": "530:10:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 70,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "530:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "529:12:0"
+                },
+                "returnParameters": {
+                  "id": 75,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 74,
+                      "mutability": "mutable",
+                      "name": "",
+                      "nameLocation": "-1:-1:-1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 90,
+                      "src": "560:4:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 73,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "560:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "559:6:0"
+                },
+                "scope": 134,
+                "src": "516:119:0",
+                "stateMutability": "nonpayable",
+                "virtual": false,
+                "visibility": "external"
+              },
+              {
+                "body": {
+                  "id": 98,
+                  "nodeType": "Block",
+                  "src": "664:17:0",
+                  "statements": [
+                    {
+                      "expression": {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "expression": {
+                            "id": 93,
+                            "name": "values",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 19,
+                            "src": "666:6:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_array$_t_uint256_$dyn_storage",
+                              "typeString": "uint256[] storage ref"
+                            }
+                          },
+                          "id": 95,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberLocation": "673:3:0",
+                          "memberName": "pop",
+                          "nodeType": "MemberAccess",
+                          "src": "666:10:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_arraypop_nonpayable$_t_array$_t_uint256_$dyn_storage_ptr_$returns$__$attached_to$_t_array$_t_uint256_$dyn_storage_ptr_$",
+                            "typeString": "function (uint256[] storage pointer)"
+                          }
+                        },
+                        "id": 96,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "nameLocations": [],
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "666:12:0",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_tuple$__$",
+                          "typeString": "tuple()"
+                        }
+                      },
+                      "id": 97,
+                      "nodeType": "ExpressionStatement",
+                      "src": "666:12:0"
+                    }
+                  ]
+                },
+                "functionSelector": "a4ece52c",
+                "id": 99,
+                "implemented": true,
+                "kind": "function",
+                "modifiers": [],
+                "name": "pop",
+                "nameLocation": "649:3:0",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 91,
+                  "nodeType": "ParameterList",
+                  "parameters": [],
+                  "src": "652:2:0"
+                },
+                "returnParameters": {
+                  "id": 92,
+                  "nodeType": "ParameterList",
+                  "parameters": [],
+                  "src": "664:0:0"
+                },
+                "scope": 134,
+                "src": "640:41:0",
+                "stateMutability": "nonpayable",
+                "virtual": false,
+                "visibility": "external"
+              },
+              {
+                "body": {
+                  "id": 108,
+                  "nodeType": "Block",
+                  "src": "759:17:0",
+                  "statements": [
+                    {
+                      "expression": {
+                        "id": 106,
+                        "name": "input",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 101,
+                        "src": "768:5:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_calldata_ptr",
+                          "typeString": "bytes calldata"
+                        }
+                      },
+                      "functionReturnParameters": 105,
+                      "id": 107,
+                      "nodeType": "Return",
+                      "src": "761:12:0"
+                    }
+                  ]
+                },
+                "functionSelector": "624fbfdc",
+                "id": 109,
+                "implemented": true,
+                "kind": "function",
+                "modifiers": [],
+                "name": "echo",
+                "nameLocation": "695:4:0",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 102,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 101,
+                      "mutability": "mutable",
+                      "name": "input",
+                      "nameLocation": "715:5:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 109,
+                      "src": "700:20:0",
+                      "stateVariable": false,
+                      "storageLocation": "calldata",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes_calldata_ptr",
+                        "typeString": "bytes"
+                      },
+                      "typeName": {
+                        "id": 100,
+                        "name": "bytes",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "700:5:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_storage_ptr",
+                          "typeString": "bytes"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "699:22:0"
+                },
+                "returnParameters": {
+                  "id": 105,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 104,
+                      "mutability": "mutable",
+                      "name": "",
+                      "nameLocation": "-1:-1:-1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 109,
+                      "src": "745:12:0",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes_memory_ptr",
+                        "typeString": "bytes"
+                      },
+                      "typeName": {
+                        "id": 103,
+                        "name": "bytes",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "745:5:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_storage_ptr",
+                          "typeString": "bytes"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "744:14:0"
+                },
+                "scope": 134,
+                "src": "686:90:0",
+                "stateMutability": "pure",
+                "virtual": false,
+                "visibility": "external"
+              },
+              {
+                "body": {
+                  "id": 123,
+                  "nodeType": "Block",
+                  "src": "834:38:0",
+                  "statements": [
+                    {
+                      "expression": {
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 121,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "arguments": [
+                            {
+                              "id": 118,
+                              "name": "x",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 111,
+                              "src": "860:1:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            ],
+                            "expression": {
+                              "id": 116,
+                              "name": "LinkedMath",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 14,
+                              "src": "843:10:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_contract$_LinkedMath_$14_$",
+                                "typeString": "type(library LinkedMath)"
+                              }
+                            },
+                            "id": 117,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberLocation": "854:5:0",
+                            "memberName": "twice",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 13,
+                            "src": "843:16:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_delegatecall_pure$_t_uint256_$returns$_t_uint256_$",
+                              "typeString": "function (uint256) pure returns (uint256)"
+                            }
+                          },
+                          "id": 119,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "843:19:0",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "+",
+                        "rightExpression": {
+                          "id": 120,
+                          "name": "seed",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 16,
+                          "src": "865:4:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "src": "843:26:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "functionReturnParameters": 115,
+                      "id": 122,
+                      "nodeType": "Return",
+                      "src": "836:33:0"
+                    }
+                  ]
+                },
+                "functionSelector": "444aa50e",
+                "id": 124,
+                "implemented": true,
+                "kind": "function",
+                "modifiers": [],
+                "name": "linked",
+                "nameLocation": "790:6:0",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 112,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 111,
+                      "mutability": "mutable",
+                      "name": "x",
+                      "nameLocation": "802:1:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 124,
+                      "src": "797:6:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 110,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "797:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "796:8:0"
+                },
+                "returnParameters": {
+                  "id": 115,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 114,
+                      "mutability": "mutable",
+                      "name": "",
+                      "nameLocation": "-1:-1:-1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 124,
+                      "src": "828:4:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 113,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "828:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "827:6:0"
+                },
+                "scope": 134,
+                "src": "781:91:0",
+                "stateMutability": "view",
+                "virtual": false,
+                "visibility": "external"
+              },
+              {
+                "body": {
+                  "id": 132,
+                  "nodeType": "Block",
+                  "src": "938:56:0",
+                  "statements": [
+                    {
+                      "AST": {
+                        "nativeSrc": "973:15:0",
+                        "nodeType": "YulBlock",
+                        "src": "973:15:0",
+                        "statements": [
+                          {
+                            "nativeSrc": "975:11:0",
+                            "nodeType": "YulAssignment",
+                            "src": "975:11:0",
+                            "value": {
+                              "arguments": [
+                                {
+                                  "name": "x",
+                                  "nativeSrc": "984:1:0",
+                                  "nodeType": "YulIdentifier",
+                                  "src": "984:1:0"
+                                }
+                              ],
+                              "functionName": {
+                                "name": "clz",
+                                "nativeSrc": "980:3:0",
+                                "nodeType": "YulIdentifier",
+                                "src": "980:3:0"
+                              },
+                              "nativeSrc": "980:6:0",
+                              "nodeType": "YulFunctionCall",
+                              "src": "980:6:0"
+                            },
+                            "variableNames": [
+                              {
+                                "name": "r",
+                                "nativeSrc": "975:1:0",
+                                "nodeType": "YulIdentifier",
+                                "src": "975:1:0"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "evmVersion": "osaka",
+                      "externalReferences": [
+                        {
+                          "declaration": 129,
+                          "isOffset": false,
+                          "isSlot": false,
+                          "src": "975:1:0",
+                          "valueSize": 1
+                        },
+                        {
+                          "declaration": 126,
+                          "isOffset": false,
+                          "isSlot": false,
+                          "src": "984:1:0",
+                          "valueSize": 1
+                        }
+                      ],
+                      "flags": [
+                        "memory-safe"
+                      ],
+                      "id": 131,
+                      "nodeType": "InlineAssembly",
+                      "src": "948:40:0"
+                    }
+                  ]
+                },
+                "functionSelector": "75059c59",
+                "id": 133,
+                "implemented": true,
+                "kind": "function",
+                "modifiers": [],
+                "name": "assemblyWord",
+                "nameLocation": "886:12:0",
+                "nodeType": "FunctionDefinition",
+                "parameters": {
+                  "id": 127,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 126,
+                      "mutability": "mutable",
+                      "name": "x",
+                      "nameLocation": "904:1:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 133,
+                      "src": "899:6:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 125,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "899:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "898:8:0"
+                },
+                "returnParameters": {
+                  "id": 130,
+                  "nodeType": "ParameterList",
+                  "parameters": [
+                    {
+                      "constant": false,
+                      "id": 129,
+                      "mutability": "mutable",
+                      "name": "r",
+                      "nameLocation": "935:1:0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 133,
+                      "src": "930:6:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 128,
+                        "name": "uint",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "930:4:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "src": "929:8:0"
+                },
+                "scope": 134,
+                "src": "877:117:0",
+                "stateMutability": "pure",
+                "virtual": false,
+                "visibility": "external"
+              }
+            ],
+            "scope": 135,
+            "src": "160:836:0",
+            "usedErrors": [],
+            "usedEvents": []
+          }
+        ],
+        "src": "39:958:0"
+      },
+      "id": 0
+    }
+  }
+}

@@ -1,0 +1,1997 @@
+{
+  "version": 2,
+  "authority": "Coordinator acceptance reconciliation 2026-11-04 12:49; historical evidence immutable",
+  "historical_commit": "9cc85b14fa3f611e183379c257b10b19e1aa5325",
+  "historical_archive_sha256": "d3c047d0346652e4abc5ef3d7570091d707f1b6d7872e3b1fb60c30c67498aba",
+  "historical_members": {
+    "fixture/README.md": "273de9a4c40234950780e0c59e70cac7b5b1f9793bb9d56869ad1d235ef36317",
+    "fixture/accept.py": "ddc8936bd0dac39a6fcd02ed0685c5b2dac7ae5caa76a385f58fd7f7770019f5",
+    "fixture/test_cases.py": "61f132cccf7645131f3fa193cec8b0cc8304804d3829dac8ef3ab61900c9d412",
+    "original-red/stderr": "8a563ce18c9f6daa86869ae1538dbd0798c330fbf20d71c0d25fff2e8e2fd99c",
+    "original-red/stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "review/finder.txt": "a49aea1fa857d824c2211aeaed969aa383236985ba949df8669f7b295f4a97b5",
+    "review/result.json": "a05781b633229c65a5979c83a97db0eecca85c1388c6d51ce696269c5ee4fbbb",
+    "review/skeptic.txt": "2a32c98096db426d6794efdf72cbf03801d41b7c629a24c68167f362f2507c1f"
+  },
+  "historical_artifacts": {
+    "accept.py": {
+      "archive_member": "fixture/accept.py",
+      "sha256": "ddc8936bd0dac39a6fcd02ed0685c5b2dac7ae5caa76a385f58fd7f7770019f5",
+      "replacement": "unchanged historical accept.py plus new accept_repaired.py"
+    },
+    "test_cases.py": {
+      "archive_member": "fixture/test_cases.py",
+      "sha256": "61f132cccf7645131f3fa193cec8b0cc8304804d3829dac8ef3ab61900c9d412",
+      "replacement": "reviewed repaired test_cases.py"
+    },
+    "README.md": {
+      "archive_member": "fixture/README.md",
+      "sha256": "273de9a4c40234950780e0c59e70cac7b5b1f9793bb9d56869ad1d235ef36317",
+      "replacement": "reviewed repaired README.md"
+    }
+  },
+  "cases": [
+    {
+      "historical": "GateCases.test_changed_module",
+      "replacement": "GateCases.test_changed_module",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_checkpoint_all_gates",
+      "replacement": "GateCases.test_checkpoint_all_gates",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_deleted_module_importers",
+      "replacement": "GateCases.test_deleted_module_importers",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_diverged_base_merge_base",
+      "replacement": "GateCases.test_diverged_base_merge_base",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_failure_exit",
+      "replacement": "GateCases.test_failure_exit",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_full_extra_gates",
+      "replacement": "GateCases.test_full_extra_gates",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_head_stamp",
+      "replacement": "GateCases.test_head_stamp",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_per_file_relative_paths",
+      "replacement": "GateCases.test_per_file_relative_paths",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_relative_logs",
+      "replacement": "GateCases.test_relative_logs",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_renamed_module_importers",
+      "replacement": "GateCases.test_renamed_module_importers",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_reverse_import_closure",
+      "replacement": "GateCases.test_reverse_import_closure",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_root_module",
+      "replacement": "GateCases.test_root_module",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_scratch_excluded",
+      "replacement": "GateCases.test_scratch_excluded",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_untracked_module",
+      "replacement": "GateCases.test_untracked_module",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    },
+    {
+      "historical": "GateCases.test_usage",
+      "replacement": "GateCases.test_usage",
+      "positive_negative_oracle": "Original case and all helper assertions mapped below; no skip/xfail"
+    }
+  ],
+  "assertions": [
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 54,
+        "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 55,
+        "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 57,
+        "expression": "self.assertEqual(len(rows), len(names))"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 58,
+        "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        }
+      ],
+      "reason": "Exact file inventory retained; H21's named core flag is additionally required for build-touched, not a wildcard allowance."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 60,
+        "expression": "self.assertEqual(len(row), 5)"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 61,
+        "expression": "self.assertEqual(row[:2], [status, name])"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 62,
+        "expression": "self.assertTrue(row[2].isdigit())"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 63,
+        "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 64,
+        "expression": "self.assertTrue(row[4])"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 65,
+        "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "inspect",
+        "line": 66,
+        "expression": "self.assertEqual(len(result.stdout.splitlines()), len(names))"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        }
+      ],
+      "reason": "Exact stdout status/name/duration/path is compared to every TSV row, stronger than line count."
+    },
+    {
+      "historical": {
+        "method": "touched",
+        "line": 73,
+        "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: ' + (' '.join(expected) if expected else 'none') + '\\n')"
+      },
+      "replacement": [
+        {
+          "method": "touched",
+          "line": 109,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: ' + (' '.join(expected) if expected else 'none') + '\\n')"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "touched",
+        "line": 74,
+        "expression": "self.assertEqual(self.calls_read(), ['lake build ' + ' '.join(expected)] if expected else [])"
+      },
+      "replacement": [
+        {
+          "method": "touched",
+          "line": 110,
+          "expression": "self.assertEqual(self.calls_read(), ['lake build ' + ' '.join(expected)] if expected else [])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_usage",
+        "line": 79,
+        "expression": "self.assertEqual(r.returncode, 2)"
+      },
+      "replacement": [
+        {
+          "method": "test_usage",
+          "line": 115,
+          "expression": "self.assertEqual(r.returncode, 2)"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_usage",
+        "line": 80,
+        "expression": "self.assertIn('usage:', r.stderr)"
+      },
+      "replacement": [
+        {
+          "method": "test_usage",
+          "line": 116,
+          "expression": "self.assertIn('usage:', r.stderr)"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_usage",
+        "line": 81,
+        "expression": "self.assertFalse(self.logs.exists())"
+      },
+      "replacement": [
+        {
+          "method": "test_usage",
+          "line": 117,
+          "expression": "self.assertFalse(self.logs.exists())"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_usage",
+        "line": 82,
+        "expression": "self.assertEqual(self.calls_read(), [])"
+      },
+      "replacement": [
+        {
+          "method": "test_usage",
+          "line": 118,
+          "expression": "self.assertEqual(self.calls_read(), [])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_per_file_relative_paths",
+        "line": 87,
+        "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean', 'lake env lean --tstack=131072 Solidity/B.lean'])"
+      },
+      "replacement": [
+        {
+          "method": "test_per_file_relative_paths",
+          "line": 126,
+          "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean', 'lake env lean --tstack=131072 Solidity/B.lean'])"
+        },
+        {
+          "method": "test_failure_exit",
+          "line": 185,
+          "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean', 'lake env lean --tstack=131072 Solidity/B.lean'])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_per_file_relative_paths",
+        "line": 88,
+        "expression": "self.assertEqual([(self.logs / (str(i) + '.log')).read_text() for i in (1, 2)], ['', ''])"
+      },
+      "replacement": [
+        {
+          "method": "test_per_file_relative_paths",
+          "line": 127,
+          "expression": "self.assertEqual([(self.logs / (str(i) + '.log')).read_text() for i in (1, 2)], ['', ''])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_relative_logs",
+        "line": 94,
+        "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean'])"
+      },
+      "replacement": [
+        {
+          "method": "test_relative_logs",
+          "line": 133,
+          "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean'])"
+        },
+        {
+          "method": "test_head_stamp",
+          "line": 140,
+          "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean'])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_head_stamp",
+        "line": 100,
+        "expression": "self.assertNotEqual((self.logs / 'HEAD').read_text().strip(), self.base)"
+      },
+      "replacement": [
+        {
+          "method": "test_head_stamp",
+          "line": 139,
+          "expression": "self.assertNotEqual((self.logs / 'HEAD').read_text().strip(), self.base)"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_head_stamp",
+        "line": 101,
+        "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean'])"
+      },
+      "replacement": [
+        {
+          "method": "test_relative_logs",
+          "line": 133,
+          "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean'])"
+        },
+        {
+          "method": "test_head_stamp",
+          "line": 140,
+          "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean'])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_diverged_base_merge_base",
+        "line": 127,
+        "expression": "self.assertEqual(self.git('merge-base', other, 'HEAD'), self.base)"
+      },
+      "replacement": [
+        {
+          "method": "test_diverged_base_merge_base",
+          "line": 166,
+          "expression": "self.assertEqual(self.git('merge-base', other, 'HEAD'), self.base)"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "test_failure_exit",
+        "line": 146,
+        "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean', 'lake env lean --tstack=131072 Solidity/B.lean'])"
+      },
+      "replacement": [
+        {
+          "method": "test_per_file_relative_paths",
+          "line": 126,
+          "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean', 'lake env lean --tstack=131072 Solidity/B.lean'])"
+        },
+        {
+          "method": "test_failure_exit",
+          "line": 185,
+          "expression": "self.assertEqual(self.calls_read(), ['lake env lean --tstack=131072 Solidity/A.lean', 'lake env lean --tstack=131072 Solidity/B.lean'])"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 155,
+        "expression": "self.assertIsNotNone(real_node)"
+      },
+      "replacement": [
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Real Node remains mandatory, with an explicit prerequisite diagnostic."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 156,
+        "expression": "self.assertFalse((Path.home() / '.elan/bin/lake').exists(), 'unsafe lake override would bypass the fake backend')"
+      },
+      "replacement": [
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Reject backend escape by private HOME and exact private elan/lake path identity plus complete invocation vectors; host elan may safely exist."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 170,
+        "expression": "self.assertEqual([row[1] for row in rows], names)"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        },
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Exact row count and each row's status/name, plus exact command vector."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 171,
+        "expression": "self.assertEqual([row[4].strip() for row in rows], commands)"
+      },
+      "replacement": [
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Exact command vector retained; checkpoint uses published H21 library mode, while direct real run-lean refusal remains tested."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 172,
+        "expression": "self.assertEqual(r.returncode, 1)"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        }
+      ],
+      "reason": "Gate return code remains exactly 1 whenever a named negative gate fails."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 173,
+        "expression": "self.assertEqual((self.logs / 'HEAD').read_text().strip(), self.base)"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        }
+      ],
+      "reason": "HEAD is checked against current actual fixture commit, including the populated negative catalogue."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 174,
+        "expression": "self.assertEqual({p.name for p in self.logs.iterdir()}, {'HEAD', 'gates.tsv'} | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        }
+      ],
+      "reason": "Exact log file inventory retained plus the mandatory H21 core flag."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 178,
+        "expression": "self.assertEqual([row[0] for row in rows], statuses)"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        },
+        {
+          "method": "audit",
+          "line": 192,
+          "expression": "self.assertEqual(result.returncode, code, result.stdout + result.stderr)"
+        },
+        {
+          "method": "audit",
+          "line": 195,
+          "expression": "self.assertIn(fragment, text)"
+        },
+        {
+          "method": "audit",
+          "line": 197,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Every old audit has real positive and specific negative controls; old infrastructure FAILs and masked automatic PASS are strengthened, not blessed."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 179,
+        "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+      },
+      "replacement": [
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 182,
+        "expression": "self.assertIn(cmd, calls)"
+      },
+      "replacement": [
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Membership is strengthened to exact ordered wrapped/backend call vectors and counts, including inline Node."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 184,
+        "expression": "self.assertIn(row[0], ('PASS', 'FAIL'))"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        },
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Every status must equal its exact named expectation, stronger than membership in PASS/FAIL."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 185,
+        "expression": "self.assertTrue(row[2].isdigit())"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        }
+      ],
+      "reason": "Historical assertion retained verbatim (AST-normalized)."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 186,
+        "expression": "self.assertEqual(row[3], str(self.logs / (str(i) + '.log')))"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        }
+      ],
+      "reason": "Exact receipt path retained for every gate."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 188,
+        "expression": "self.assertTrue((self.logs / (str(i) + '.log')).read_text())"
+      },
+      "replacement": [
+        {
+          "method": "audit",
+          "line": 192,
+          "expression": "self.assertEqual(result.returncode, code, result.stdout + result.stderr)"
+        },
+        {
+          "method": "audit",
+          "line": 195,
+          "expression": "self.assertIn(fragment, text)"
+        },
+        {
+          "method": "audit",
+          "line": 197,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Every failure requires a specific substantive diagnostic and infrastructure errors are rejected; mock build failures have exact backend markers."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 190,
+        "expression": "self.assertIn('lake build Solidity.Corpus.Basic', calls)"
+      },
+      "replacement": [
+        {
+          "method": "all_gates",
+          "line": 223,
+          "expression": "self.assertIsNotNone(real_node, 'real Node is a fixture prerequisite')"
+        },
+        {
+          "method": "all_gates",
+          "line": 224,
+          "expression": "self.assertEqual(self.env['HOME'], str(self.home))"
+        },
+        {
+          "method": "all_gates",
+          "line": 225,
+          "expression": "self.assertEqual((self.home / '.elan/bin/lake').resolve(), (self.bin / 'lake').resolve())"
+        },
+        {
+          "method": "all_gates",
+          "line": 308,
+          "expression": "self.assertEqual((self.logs / '1.log').read_text(), 'targets: none\\n')"
+        },
+        {
+          "method": "all_gates",
+          "line": 312,
+          "expression": "self.assertEqual([r[4].strip() for r in rows], wanted)"
+        },
+        {
+          "method": "all_gates",
+          "line": 317,
+          "expression": "self.assertIn(diagnostics[name], text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 319,
+          "expression": "self.assertNotIn(infrastructure, text)"
+        },
+        {
+          "method": "all_gates",
+          "line": 324,
+          "expression": "self.assertEqual(len(calls), len(expected) + 6)"
+        },
+        {
+          "method": "all_gates",
+          "line": 325,
+          "expression": "self.assertEqual(calls[:len(expected)], expected)"
+        },
+        {
+          "method": "all_gates",
+          "line": 327,
+          "expression": "self.assertEqual(tail[0], 'bash scripts/check-testsuite.sh')"
+        },
+        {
+          "method": "all_gates",
+          "line": 329,
+          "expression": "self.assertIsNotNone(port_call)"
+        },
+        {
+          "method": "all_gates",
+          "line": 330,
+          "expression": "self.assertEqual(tail[2], 'node --input-type=module - ' + str(solkey) + ' ' + port_call.group(1) + ' 0')"
+        },
+        {
+          "method": "all_gates",
+          "line": 331,
+          "expression": "self.assertEqual(tail[3:], ['bash scripts/check-corpus.sh', 'lake build Solidity.Corpus.Basic', 'node scripts/check-automatic.mjs --strict'])"
+        },
+        {
+          "method": "all_gates",
+          "line": 333,
+          "expression": "self.assertEqual(calls, expected)"
+        }
+      ],
+      "reason": "Exact full tail includes exactly one lake build Solidity.Corpus.Basic; duplicates/extras rejected."
+    },
+    {
+      "historical": {
+        "method": "all_gates",
+        "line": 191,
+        "expression": "self.assertEqual(len(r.stdout.splitlines()), len(names))"
+      },
+      "replacement": [
+        {
+          "method": "inspect",
+          "line": 86,
+          "expression": "self.assertEqual(result.returncode, 0 if all((s == 'PASS' for s in statuses)) else 1, result.stderr)"
+        },
+        {
+          "method": "inspect",
+          "line": 87,
+          "expression": "self.assertEqual((logs / 'HEAD').read_text().strip(), self.git('rev-parse', 'HEAD'))"
+        },
+        {
+          "method": "inspect",
+          "line": 89,
+          "expression": "self.assertEqual(len(rows), len(names))"
+        },
+        {
+          "method": "inspect",
+          "line": 90,
+          "expression": "self.assertEqual({p.name for p in logs.iterdir()}, {'HEAD', 'gates.tsv'} | ({'core'} if 'build-touched' in names else set()) | {str(i) + '.log' for i in range(1, len(names) + 1)})"
+        },
+        {
+          "method": "inspect",
+          "line": 92,
+          "expression": "self.assertEqual(len(row), 5)"
+        },
+        {
+          "method": "inspect",
+          "line": 93,
+          "expression": "self.assertEqual(row[:2], [status, name])"
+        },
+        {
+          "method": "inspect",
+          "line": 94,
+          "expression": "self.assertTrue(row[2].isdigit())"
+        },
+        {
+          "method": "inspect",
+          "line": 95,
+          "expression": "self.assertEqual(row[3], str(logs / (str(i) + '.log')))"
+        },
+        {
+          "method": "inspect",
+          "line": 96,
+          "expression": "self.assertTrue(row[4])"
+        },
+        {
+          "method": "inspect",
+          "line": 97,
+          "expression": "self.assertTrue((logs / (str(i) + '.log')).is_file())"
+        },
+        {
+          "method": "inspect",
+          "line": 98,
+          "expression": "self.assertEqual(result.stdout.splitlines(), [f'{row[0]} {row[1]} {row[2]}s {row[3]}' for row in rows])"
+        },
+        {
+          "method": "inspect",
+          "line": 99,
+          "expression": "self.assertEqual(result.stderr, '')"
+        }
+      ],
+      "reason": "Exact stdout-to-TSV correspondence replaces line-count-only check."
+    }
+  ],
+  "rejection_conditions": [
+    {
+      "line": 9,
+      "expression": "hashlib.sha256(target.read_bytes()).hexdigest() == CONTRACT['sha256']",
+      "replacement": "source hash mismatch; all copied tool dependencies also pinned"
+    },
+    {
+      "line": 11,
+      "expression": "{str(p.relative_to(ROOT)) for p in HERE.rglob('*') if p.is_file() and '__pycache__' not in p.parts} == required",
+      "replacement": "artifact inventory mismatch; complete reviewed set, no ignored cache files"
+    },
+    {
+      "line": 12,
+      "expression": "(ROOT / p).stat().st_size > 40",
+      "replacement": "artifact size guard, every artifact remains larger than 40 bytes"
+    },
+    {
+      "line": 16,
+      "expression": "changed == required",
+      "replacement": "contract parent/change-set binding; exact repaired source commit/base scope and final two-file freeze commit"
+    },
+    {
+      "line": 17,
+      "expression": "subprocess.check_output(['git', 'show', commit + ':' + str(HERE.relative_to(ROOT) / 'accept.py')]) == pathlib.Path(__file__).read_bytes()",
+      "replacement": "committed contract bytes binding for both generated files at the exact supplied acceptance HEAD"
+    },
+    {
+      "line": 27,
+      "expression": "sorted(names) == sorted(expected)",
+      "replacement": "exact complete case inventory, including all 15 old names plus additions"
+    },
+    {
+      "line": 29,
+      "expression": "result.testsRun == len(expected) and (not result.skipped) and (not result.expectedFailures) and (not result.unexpectedSuccesses)",
+      "replacement": "exact testsRun and rejection of skips/expected failures/unexpected successes"
+    },
+    {
+      "line": 30,
+      "expression": "result.wasSuccessful()",
+      "replacement": "result.wasSuccessful required before PASS"
+    }
+  ],
+  "additional_cases": {
+    "test_targets.py": [
+      "Targets.test_backend_failure_is_not_hidden",
+      "Targets.test_core_change_retains_example_policy",
+      "Targets.test_deleted_production_keeps_importers",
+      "Targets.test_mixed_and_transitive_importers",
+      "Targets.test_tracked_ignored_production_is_not_ignored",
+      "Targets.test_tracked_scratch_only",
+      "Targets.test_untracked_production_is_not_ignored",
+      "Targets.test_untracked_scratch_only"
+    ],
+    "test_contract.py": [
+      "FrozenContract.test_changed_artifact",
+      "FrozenContract.test_changed_dependency",
+      "FrozenContract.test_changed_snapshot",
+      "FrozenContract.test_extra_artifact",
+      "FrozenContract.test_missing_artifact",
+      "FrozenContract.test_missing_head_argument",
+      "FrozenContract.test_source_drift",
+      "FrozenContract.test_tool_substitution",
+      "FrozenContract.test_unexpected_commit",
+      "FrozenContract.test_wrong_head"
+    ]
+  },
+  "audit_controls": {
+    "trust": "populated inventory positive; forbidden-token negative",
+    "orphans": "valid library roots/reachability positive; real Loose orphan negative",
+    "layers": "core-safe positive; concrete Semantics to Syntax.Elab negative",
+    "roots": "generated-root positive; exact missing Loose import negative",
+    "documentation": "tracked valid reference positive; missing named reference negative",
+    "axiom-pins": "one standard pin/inventory positive; shrinking-inventory negative",
+    "testsuite": "one-parameter source/hash/AST/catalogue/derived report/parity positive; unsound Report negative",
+    "corpus": "actual generator/parity/scoreboard positive with mock Lake; explicit backend failure negative",
+    "automatic": "non-vacuous one automatic positive; exactly one manual proof negative",
+    "backend": "repository-bound TOOL only; mismatching inherited GATE_TOOL rejected before module import; exact private Lake argv/counts and per-file failure propagation; no real Lean",
+    "receipt": "exact five-field TSV, stdout, HEAD and complete file/call inventory"
+  },
+  "policy_boundaries": {
+    "H21": "2c79634c checkpoint library mode and bounded non-root closure preserved; direct changed root restored",
+    "spaces": "dedicated per-file/log positives retained; real JS integration uses non-space paths, scoped-out production defect recorded",
+    "budgets": "No production proof/time/resource/skip policy changed",
+    "trust": "Mocks establish audit behavior, not Lean/kernel/corpus/EVM validity"
+  }
+}

@@ -1,0 +1,29 @@
+{
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.BoolChildRepr.self_agrees": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.boolTransfer_eq_self_of_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.BoolTransferAgrees.keeps_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.overwriteSlice_eq_self_of_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.overwriteSlice_ne_of_disagrees": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/OverwriteAgreement.lean:Solidity.Backend.MemoryOps.replaceSlice_eq_self_of_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,28 @@
+{
+ "Solidity/Backend/StorageOps/TargetSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.TargetSnapshotCommutation.Controls.actual_sequences": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.TargetSnapshotCommutation.Controls.captured_operands": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.TargetSnapshotCommutation.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.TargetSnapshotCommutation.Controls.ordered": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.TargetSnapshotCommutation.Controls.read_dependency_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotCommutationControls.lean:Solidity.Backend.StorageOps.TargetSnapshotCommutation.Controls.write_collision_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

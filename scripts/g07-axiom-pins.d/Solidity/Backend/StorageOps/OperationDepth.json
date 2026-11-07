@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/OperationDepth.lean:Solidity.Backend.StorageOps.OperationDepth.indexed_ne_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationDepth.lean:Solidity.Backend.StorageOps.OperationDepth.path_depth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationDepth.lean:Solidity.Backend.StorageOps.OperationDepth.query_depth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationDepth.lean:Solidity.Backend.StorageOps.OperationDepth.step_depth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

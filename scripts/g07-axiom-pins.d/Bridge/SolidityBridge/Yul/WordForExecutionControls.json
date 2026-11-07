@@ -1,0 +1,67 @@
+{
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.actual_emission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.actual_preparation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.actual_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.after_update": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.before_update": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.boundary_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.guards_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.inside_update": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.oversized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.repeat_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.source_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.stopped_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecutionControls.lean:SolidityBridge.Yul.WordForExecution.Controls.two_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

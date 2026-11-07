@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Composition.lean:Solidity.Evm.External.Assembly.decoded_run_simulation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Composition.lean:Solidity.Evm.External.Assembly.exec_simulation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Composition.lean:Solidity.Evm.External.Assembly.guard_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Composition.lean:Solidity.Evm.External.Assembly.loop_prefix_simulation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Composition.lean:Solidity.Evm.External.Assembly.loopIterN_simulation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

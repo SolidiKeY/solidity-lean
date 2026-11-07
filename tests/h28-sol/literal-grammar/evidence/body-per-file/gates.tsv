@@ -1,0 +1,3 @@
+PASS	lean:Solidity/Frontend/LiteralGrammarH28/Body.lean	2	/workspace/solidity-lean/tests/h28-sol/literal-grammar/evidence/body-per-file/1.log	lake env lean --tstack=131072 Solidity/Frontend/LiteralGrammarH28/Body.lean 
+PASS	lean:Solidity/Frontend/LiteralGrammarH28/BodyControls.lean	0	/workspace/solidity-lean/tests/h28-sol/literal-grammar/evidence/body-per-file/2.log	lake env lean --tstack=131072 Solidity/Frontend/LiteralGrammarH28/BodyControls.lean 
+PASS	lean:Solidity/Frontend/LiteralGrammarH28/BodyPins.lean	1	/workspace/solidity-lean/tests/h28-sol/literal-grammar/evidence/body-per-file/3.log	lake env lean --tstack=131072 Solidity/Frontend/LiteralGrammarH28/BodyPins.lean 

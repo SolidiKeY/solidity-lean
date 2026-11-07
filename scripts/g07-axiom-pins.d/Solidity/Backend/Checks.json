@@ -1,0 +1,107 @@
+{
+ "Solidity/Backend/Checks.lean:Solidity.Backend.assemble_isSome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.assemble_layout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.assemble_pushTag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.assemble_pushTagRel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.Block.expand_assemble_isSome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.Block.expand_loop_layout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.Block.ite_jumps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.Block.loop_jumps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.Block.tags_nodup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.decode_encode": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.encode_decode": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.encode_injective": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.fixWidths_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.link_patch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.mem_starts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.mem_starts_iff_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.starts_encode_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.tagIndex_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.validJumpdest_encode_append_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.validJumpdest_encode_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.validJumpdest_encode_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Checks.lean:Solidity.Backend.validJumpdest_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

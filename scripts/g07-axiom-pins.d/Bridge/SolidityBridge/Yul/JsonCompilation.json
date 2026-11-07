@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/Yul/JsonCompilation.lean:SolidityBridge.Yul.JsonCompilation.Compiled.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/JsonCompilation.lean:SolidityBridge.Yul.JsonCompilation.Compiled.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

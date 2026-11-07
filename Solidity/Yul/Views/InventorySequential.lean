@@ -1,4 +1,7 @@
-import Solidity.Yul.Views.InventorySnapshot
+import Solidity.Yul.Views.InventoryTraversal
+
+/-! Legacy canonical sequential preparation. Its recursor and equation API are
+preserved while its planning step is shared with additive decoder adapters. -/
 
 namespace Solidity.Yul.Views
 
@@ -10,18 +13,10 @@ def sequentialInventory {E : Source.Env} {origin h : Source.Heap E.layout} (allo
     List (MixedHeapEntry p) → (current : Source.Heap E.layout) → (q : Placement current) →
       RetainedAllocation allocated q → current.ty = h.ty → List (MixedHeapEntry q) → ByteView → Option (InventoryRealization allocated)
   | [], current, q, history, _, es, _ => some ⟨current,q,history,es⟩
-  | e::rest, current, q, history, types, es, m => do
-    let o ← decodeInventoryObject q es e.ty m (q.address e.id)
-    if fits : o.shape.size ≤ (allocated.shape e.id).size then
-      let ht : current.ty e.id = some e.ty := types ▸ heap_ty_of_get h e.id e.ty e.data e.found
-      let next := current.write e.id o.data ht
-      let nextTypes : next.ty = h.ty := (funext (fun a => Source.Heap.write_ty current e.id a o.data ht)).trans types
-      let nextPlacement := retainedWritePlacement allocated q history e.id o.data ht o.shape o.shaped fits
-      let nextHistory := retainWritten allocated q history e.id o.data ht o.shape o.shaped fits
-      let nextImage := o.image.transport nextPlacement (funext (fun a => Source.Heap.write_ty current e.id a o.data ht)) rfl
-      let nextEntries := refreshMixedEntries q e.id o.data ht nextPlacement rfl nextImage es
-      sequentialInventory allocated p snapshotHistory rest next nextPlacement nextHistory nextTypes nextEntries m
-    else none
+  | e::rest, current, q, history, types, es, m =>
+    inventoryStep (fun {_} q es τ m base => decodeInventoryObject (E:=E) q es τ m base)
+      allocated p e current q history types es m
+      (fun next nq nh nt nes => sequentialInventory allocated p snapshotHistory rest next nq nh nt nes m)
 
 /-- Internal induction generalization; member agreement is derived from the
 actual prior refresh and type/address transport at every recursive step. -/
@@ -39,7 +34,8 @@ theorem sequentialInventory_snapshot_aux {E : Source.Env} {origin h : Source.Hea
   induction entries generalizing current with
   | nil => rfl
   | cons e rest ih =>
-    unfold sequentialInventory decodeInventoryUpdates decodeInventoryUpdate
+    unfold sequentialInventory inventoryStep decodeInventoryUpdates decodeInventoryUpdate
+    dsimp only
     rw [addresses,decodeInventoryObject_transport p q types addresses original es members]
     cases dec : decodeInventoryObject p original e.ty m (p.address e.id) with
     | none => rfl

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "06301dea8ab7d5c0b52f66561f0be76cb1dd0548",
+  "status": "partial",
+  "fileCount": 20,
+  "uncompressedBytes": 312464,
+  "archive": {
+    "path": "/workspace/dafny-parity-hover-proof-20261106/evidence/bulk.tar.gz",
+    "bytes": 35034,
+    "sha256": "56b505837c63cec85b77767b2fb02c353ddf8b3adb9e68bfcce2347ea366829e"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-hover-proof-20261106/evidence/files.json",
+    "bytes": 3707,
+    "sha256": "95d9776963f14fa7c6b0beecc017d4a31e9d3a62ae10078395f01c778e7de189"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-hover-proof-evidence-manifest.json --restore",
+  "boundaries": [
+    "Actual native provider response during genuine bounded certifiedrequest, no verifierinjection/delay.",
+    "Not the full pinned NeverVerifies fixture,auto-on-open,renderedhover,pairedDafny/macOS or extendednative lifecycle.",
+    "Zero row completion/judgments; all489 IDs/expected observations retained."
+  ]
+}

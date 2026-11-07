@@ -1,0 +1,2 @@
+- [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
+- V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).

@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/SignedInstructionCertificates.lean:Solidity.Yul.Compilation.SignedInstructionCertificates.instruction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedInstructionCertificates.lean:Solidity.Yul.Compilation.SignedInstructionCertificates.instruction_origin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedInstructionCertificates.lean:Solidity.Yul.Compilation.SignedInstructionCertificates.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

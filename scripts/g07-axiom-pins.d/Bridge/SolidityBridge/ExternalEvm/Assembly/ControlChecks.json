@@ -1,0 +1,41 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean:Solidity.Evm.External.Assembly.fetched_jump_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean:Solidity.Evm.External.Assembly.jumpiMacro_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean:Solidity.Evm.External.Assembly.jumpMacro_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean:Solidity.Evm.External.Assembly.sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean:Solidity.Evm.External.Assembly.trueLoop_core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean:Solidity.Evm.External.Assembly.trueLoop_cycle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean:Solidity.Evm.External.Assembly.trueLoop_emitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ControlChecks.lean:Solidity.Evm.External.Assembly.trueLoop_prefixes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

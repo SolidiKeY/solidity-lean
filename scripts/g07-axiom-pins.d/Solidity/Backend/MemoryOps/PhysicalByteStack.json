@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalByteStack.lean:Solidity.Backend.MemoryOps.Physical.byteCode_stackSafe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStack.lean:Solidity.Backend.MemoryOps.Physical.materialize_checked_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStack.lean:Solidity.Backend.MemoryOps.Physical.materialize_stack_1023": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStack.lean:Solidity.Backend.MemoryOps.Physical.materialize_stackSafe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

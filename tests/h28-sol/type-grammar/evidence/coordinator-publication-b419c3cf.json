@@ -1,0 +1,35 @@
+{
+  "fetch_command": [
+    "git",
+    "fetch",
+    "origin",
+    "master"
+  ],
+  "fetch_exit": 0,
+  "origin_master": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "local_head_unchanged": "eb7d7c24b07f8929d1ce5e1763711040cdf141f7",
+  "published_commit": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "ancestry_command": [
+    "git",
+    "merge-base",
+    "--is-ancestor",
+    "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+    "origin/master"
+  ],
+  "ancestry_exit": 0,
+  "inputs_diff_command": [
+    "git",
+    "diff",
+    "--name-only",
+    "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+    "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+    "--",
+    "Solidity/Frontend/Checked/Print.lean",
+    "Solidity/Frontend/Checked/Parser.lean",
+    "Solidity/Frontend/Checked/Check.lean",
+    "Solidity/Source/Syntax.lean"
+  ],
+  "inputs_diff_exit": 0,
+  "inputs_diff_stdout": "",
+  "scope": "Published APIs inspected for relevance; no pinned inputs changed; no merge/reset/producer duplication/cache delta assumed."
+}

@@ -1,0 +1,11 @@
+{
+  "finding": "A documentation-only edit had changed current wrapper hash after measurement",
+  "repair": "Restored measured bytes; exact SHA matches asserted for build/sort/axiom/solc/Lean fixture receipts. Retained original full-policy measured version with exact receipt SHA and complete mode-extension diff.",
+  "current_sha256": "47df8c5bced344de8182a9d4f6ca7980b162075511df264ef53d4e923c6f7cdc",
+  "full_policy_sha256": "c9acc686c06428136c3028307c1afb1311f856a4f41dc28e0b13b7483b62dfb1",
+  "full_policy_source": "final-policy-measured-full-wrapper.py.txt",
+  "current_measured_source": "final-policy-measured-three-mode-wrapper.py.txt",
+  "diff": "final-policy-version-diff.patch.txt",
+  "behavior_boundary": "Only adding build/solkey modes/default-target assertion/reporting; original full command and resource/exit/source guards retained",
+  "future_exact_head_followup": "Current full mode will also be run after final metadata commit; receipt stored in sealed handoff"
+}

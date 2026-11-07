@@ -1,0 +1,18 @@
+{
+  "policy": "H41",
+  "status": "coordinator-pending",
+  "coordinator_pull_reported": false,
+  "delivery_complete": false,
+  "destination_receipt": null,
+  "source_head": "f5f5db3e778dcd3d53f957f27f0eeb8121e4feda",
+  "validation": "/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/sched9584-validation.json",
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/cache-9584f9e7-f5f5db3e.tar.zst",
+  "archive_sha256": "0bbf0314d84a814ba9a647530a352e63620f72acc90769311a05525b04034274",
+  "archive_bytes": 1694368,
+  "artifact_count": 9,
+  "mapping_count": 3,
+  "members_verified": 15,
+  "dependency_closure_included": false,
+  "worker_shipping_performed": false,
+  "worker_must_not_run_ship_cache": true
+}

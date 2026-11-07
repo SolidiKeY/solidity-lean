@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "RESOURCE-OLD-01: old clean Bridge build resource-stop at core PowerBounds; within-budget recovery and matched cache policy unresolved; no unchanged failed retry"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "COORD-BRIDGE-435/B07: common exact v4.35 dependencies and root/toolchain overlays not supplied; proposal unapplied/unelaborated; administrative exact-file agreement wait withdrawn for H82 statement-preserving edits"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78-COMPLETE-PUBLIC-INVENTORY: existing old/new elaborated public exports, including every generated declaration and exact shim signatures, not available; implemented_shims=[]; no new Lean run under retirement"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "B01/DEP-RAW-435: only partial receipt reported; no accepted overlay/trust/holds lifted"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "B02: partial raw-signature receipt reported; not applied or Lean-validated; complete generated API/trust gate pending"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-backend",
+      "item": "B03 Slice guard-message migration and PowerBounds resource reproduction pending owner/root; core source read-only here"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-source",
+      "item": "B04 Ctor and H78 generated public noConfusion compatibility pending"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-yul",
+      "item": "B05 ReservedNames recursion migration pending"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-frontend",
+      "item": "B06 Checked.Token String API migration pending"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-precompiles",
+      "item": "DEP-BLS-435 owner recursion repair pending"
+    },
+    {
+      "lane": "claudecloud/move5-20261106/v14-g43",
+      "item": "OBL-SUCCESS actual compiler-success theorem not supplied; frozen Solidity.Stipend.Obligation unchanged; no Claude-owned source edits/messages"
+    },
+    {
+      "lane": "coordinator",
+      "item": "Set existing goal PAUSED after final head report and idle; no pause action exposed here; blocked stop fallback is not completion"
+    }
+  ]
+}

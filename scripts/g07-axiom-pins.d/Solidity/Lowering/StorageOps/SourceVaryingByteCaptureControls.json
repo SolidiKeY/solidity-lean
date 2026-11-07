@@ -1,0 +1,37 @@
+{
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.capture_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.execution_unchanged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.fuel_guard_needed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls.prefix_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

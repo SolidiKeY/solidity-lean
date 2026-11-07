@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean:Solidity.Backend.StorageOps.TargetArrayDeleteSequence.first_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean:Solidity.Backend.StorageOps.TargetArrayDeleteSequence.fresh_read_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean:Solidity.Backend.StorageOps.TargetArrayDeleteSequence.headers_zero": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean:Solidity.Backend.StorageOps.TargetArrayDeleteSequence.outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean:Solidity.Backend.StorageOps.TargetArrayDeleteSequence.prefix_zero": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean:Solidity.Backend.StorageOps.TargetArrayDeleteSequence.preserves_zero": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean:Solidity.Backend.StorageOps.TargetArrayDeleteSequence.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayDeleteSequence.lean:Solidity.Backend.StorageOps.TargetArrayDeleteSequence.second_data": [
+  "Quot.sound",
+  "propext"
+ ]
+}

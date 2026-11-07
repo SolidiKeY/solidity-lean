@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Environment/CryptoChecks.lean:Solidity.Backend.Environment.intrinsic_keccak": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/CryptoChecks.lean:Solidity.Backend.Environment.lowerHash_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/CryptoChecks.lean:Solidity.Backend.Environment.namespace_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/CryptoChecks.lean:Solidity.Backend.Environment.source_digest": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

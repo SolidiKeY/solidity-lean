@@ -1,0 +1,20 @@
+{
+  "command": [
+    "scripts/coord-tools/lean-mcp",
+    "call",
+    "lean_multi_attempt",
+    "{\"file_path\":\"/workspace/solidity-lean/Solidity/Frontend/NumericLiteralProofs/Digits.lean\",\"line\":39,\"column\":22,\"snippets\":[\"unfold digitsTail; simp only [hd, Bool.true_eq, \u2193reduceIte, ih]\",\"rename_i b r ds rest h; cases r <;> simp only [digitsTail, hd, Bool.true_eq, \u2193reduceIte, ih]\",\"rw [digitsTail.eq_def]; simp only [hd, Bool.true_eq, \u2193reduceIte, ih]\"]}"
+  ],
+  "exit": 0,
+  "seconds": 0.557,
+  "container_memory_peak_bytes": 1071771648,
+  "minimum_parent_headroom_bytes": 15734243328,
+  "resource_stop": false,
+  "log": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/digits-tactic.log",
+  "container": "sol-nl-proof-worker",
+  "limits": {
+    "memory_max": 12884901888,
+    "memory_swap_max": 0,
+    "lean_num_threads": 1
+  }
+}

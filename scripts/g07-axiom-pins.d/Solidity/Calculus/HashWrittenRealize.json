@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/HashWrittenRealize.lean:Solidity.Decide.WrittenMemory.Realize.refutation?": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/HashWrittenRealize.lean:Solidity.Decide.WrittenMemory.Realize.schema_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

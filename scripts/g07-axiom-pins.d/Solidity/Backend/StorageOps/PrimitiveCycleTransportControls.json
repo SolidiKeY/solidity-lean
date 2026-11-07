@@ -1,0 +1,31 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransportControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransportControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.Controls.empty_and_fullword": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransportControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.Controls.numeric_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransportControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.Controls.old_owner_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransportControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleTransportControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleTransport.Controls.raw_identity_negative": [
+  "Quot.sound",
+  "propext"
+ ]
+}

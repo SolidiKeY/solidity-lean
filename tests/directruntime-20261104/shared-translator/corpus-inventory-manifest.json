@@ -1,0 +1,25 @@
+{
+  "basis": "bc997cd8379d8f3b8af6787f6095f2414adea378",
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/corpus-5528aeccfdfe4ba5.tar.zst",
+  "archiveBytes": 2749030,
+  "archiveSha256": "5528aeccfdfe4ba5703a6e16b39b79dee1e690613bd41d2f40a071cadfee1645",
+  "extractedRoot": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/corpus-inventory",
+  "filesManifestSha256": "9ee34517162404d240d9ac2540feff9d2da423f55e6f160aeea9aab406ffa00d",
+  "dataFiles": 16,
+  "dataBytes": 41577022,
+  "counts": {
+    "documents": 95,
+    "nodes": 55218,
+    "forms": 1926,
+    "kinds": 73,
+    "edges": 12899,
+    "formsWithSelectedObservations": 330
+  },
+  "sourceBindingCounts": {
+    "all-hashes-match": 88,
+    "unavailable-or-mismatch": 7
+  },
+  "restore": "Extract archive at extractedRoot equivalent under checkout;requires unchanged source inputs at basis and H44 data packet. Run verify-corpus-inventory.py.",
+  "boundary": "Exhaustive occurrence accounting for the enumerated finite corpus only. Forms are immediate field schemas,ordered child slots and selected scalar discriminants,not exhaustive semantic forms. Identity edges use explicit listed fields;candidate keys remain inventoried. Reference resolution is structural,not lexical/type/overload adequacy. Retained compiler output/header/source hashes do not prove source preservation. Unobserved or untested forms remain unknown.",
+  "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/corpus-5528aeccfdfe4ba5.tar.zst"
+}

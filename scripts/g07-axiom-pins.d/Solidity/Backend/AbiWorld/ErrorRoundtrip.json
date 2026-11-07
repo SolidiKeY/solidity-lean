@@ -1,0 +1,10 @@
+{
+ "Solidity/Backend/AbiWorld/ErrorRoundtrip.lean:Solidity.Backend.AbiWorld.error_roundtrip": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/ErrorRoundtrip.lean:Solidity.Backend.AbiWorld.read_word": [
+  "Quot.sound",
+  "propext"
+ ]
+}

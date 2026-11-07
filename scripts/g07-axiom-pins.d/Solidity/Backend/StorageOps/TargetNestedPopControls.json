@@ -1,0 +1,38 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedPopControls.lean:Solidity.Backend.StorageOps.TargetNestedPop.Controls.absence_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPopControls.lean:Solidity.Backend.StorageOps.TargetNestedPop.Controls.all_other_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPopControls.lean:Solidity.Backend.StorageOps.TargetNestedPop.Controls.executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPopControls.lean:Solidity.Backend.StorageOps.TargetNestedPop.Controls.graph_connection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPopControls.lean:Solidity.Backend.StorageOps.TargetNestedPop.Controls.graph_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPopControls.lean:Solidity.Backend.StorageOps.TargetNestedPop.Controls.opaque_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPopControls.lean:Solidity.Backend.StorageOps.TargetNestedPop.Controls.ordered": [],
+ "Solidity/Backend/StorageOps/TargetNestedPopControls.lean:Solidity.Backend.StorageOps.TargetNestedPop.Controls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

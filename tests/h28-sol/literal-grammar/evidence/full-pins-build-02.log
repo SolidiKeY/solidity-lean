@@ -1,0 +1,746 @@
+✔ [25/26] Built Solidity.Frontend.LiteralGrammarH28.FullControls (3.4s)
+ℹ [26/26] Built Solidity.Frontend.LiteralGrammarH28.FullPins (3.0s)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:22:0: @escape_complete : ∀ {c : UInt8} {out : Checked.Bytes}, Escape c out → Checked.escapeChar c = some out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:23:0: 'Solidity.Frontend.LiteralGrammarH28.escape_complete' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:24:0: escape_sound : ∀ (c : UInt8) (out : Checked.Bytes), Checked.escapeChar c = some out → Escape c out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:25:0: 'Solidity.Frontend.LiteralGrammarH28.escape_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:26:0: @body_complete : ∀ {allowed : UInt8 → Bool} {raw out : Checked.Bytes},
+  Body allowed raw out → Checked.strBody allowed raw = some out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:27:0: 'Solidity.Frontend.LiteralGrammarH28.body_complete' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:28:0: @Body.toStrBody : ∀ {allowed : UInt8 → Bool} {raw out : Checked.Bytes},
+  Body allowed raw out → Checked.StrBody allowed raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:29:0: 'Solidity.Frontend.LiteralGrammarH28.Body.toStrBody' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:30:0: body_sound : ∀ (allowed : UInt8 → Bool) (raw out : Checked.Bytes),
+  Checked.strBody allowed raw = some out → Body allowed raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:31:0: 'Solidity.Frontend.LiteralGrammarH28.body_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:32:0: body_iff : ∀ (allowed : UInt8 → Bool) (raw out : Checked.Bytes),
+  Checked.strBody allowed raw = some out ↔ Body allowed raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:33:0: 'Solidity.Frontend.LiteralGrammarH28.body_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:34:0: @Body.deterministic : ∀ {allowed : UInt8 → Bool} {raw x y : Checked.Bytes},
+  Body allowed raw x → Body allowed raw y → x = y
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:35:0: 'Solidity.Frontend.LiteralGrammarH28.Body.deterministic' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:36:0: body_none_iff : ∀ (allowed : UInt8 → Bool) (raw : Checked.Bytes),
+  Checked.strBody allowed raw = none ↔ ∀ (out : Checked.Bytes), ¬Body allowed raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:37:0: 'Solidity.Frontend.LiteralGrammarH28.body_none_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:38:0: utf8_length : ∀ (cp : Nat), List.length (Checked.utf8 cp) = if cp < 128 then 1 else if cp < 2048 then 2 else 3
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:39:0: 'Solidity.Frontend.LiteralGrammarH28.utf8_length' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:40:0: utf8_length_le : ∀ (cp : Nat), List.length (Checked.utf8 cp) ≤ 3
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:41:0: 'Solidity.Frontend.LiteralGrammarH28.utf8_length_le' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:42:0: @Escape.length_le : ∀ {c : UInt8} {out : Checked.Bytes}, Escape c out → List.length out ≤ 1
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:43:0: 'Solidity.Frontend.LiteralGrammarH28.Escape.length_le' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:44:0: @Body.length_le : ∀ {allowed : UInt8 → Bool} {raw out : Checked.Bytes},
+  Body allowed raw out → List.length out ≤ List.length raw
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:45:0: 'Solidity.Frontend.LiteralGrammarH28.Body.length_le' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:46:0: encodeBody_grammar : ∀ (allowed : UInt8 → Bool) (bytes : Checked.Bytes), Body allowed (encodeBody bytes) bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:47:0: 'Solidity.Frontend.LiteralGrammarH28.encodeBody_grammar' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:48:0: encodeBody_roundtrip : ∀ (allowed : UInt8 → Bool) (bytes : Checked.Bytes),
+  Checked.strBody allowed (encodeBody bytes) = some bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:49:0: 'Solidity.Frontend.LiteralGrammarH28.encodeBody_roundtrip' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:50:0: encodeBody_length : ∀ (bytes : Checked.Bytes), List.length (encodeBody bytes) = 4 * List.length bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:51:0: 'Solidity.Frontend.LiteralGrammarH28.encodeBody_length' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:52:0: bodyControls_pass : (bodyControls.all fun x =>
+    match x with
+    | (fst, m, raw, out) => Checked.strBody m.allowed raw == out) =
+  true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:53:0: 'Solidity.Frontend.LiteralGrammarH28.bodyControls_pass' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:54:0: bodyGrammar_inhabited : Body (fun x => true) [65, 92, 110, 92, 120, 52, 49] [65, 10, 65]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:55:0: 'Solidity.Frontend.LiteralGrammarH28.bodyGrammar_inhabited' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:56:0: oldStrBody_overlap : Checked.StrBody (fun x => true) [92, 13, 10] [10]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:57:0: 'Solidity.Frontend.LiteralGrammarH28.oldStrBody_overlap' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:58:0: bodyCRLF_empty : Body (fun x => true) [92, 13, 10] []
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:59:0: 'Solidity.Frontend.LiteralGrammarH28.bodyCRLF_empty' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:60:0: bodyCRLF_no_alternate : ¬Body (fun x => true) [92, 13, 10] [10]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:61:0: 'Solidity.Frontend.LiteralGrammarH28.bodyCRLF_no_alternate' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:62:0: bodyEncoding_control : Checked.strBody (fun x => false) (encodeBody [0, 127, 128, 255]) = some [0, 127, 128, 255]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:63:0: 'Solidity.Frontend.LiteralGrammarH28.bodyEncoding_control' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:64:0: quoteControls_pass : (quoteControls.all fun x =>
+    match x with
+    | (fst, raw, expected) => Checked.quotedBody raw == expected) =
+  true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:65:0: 'Solidity.Frontend.LiteralGrammarH28.quoteControls_pass' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:66:0: scanControls_pass : (scanControls.all fun x =>
+    match x with
+    | (fst, q, raw, expected) => Checked.untilQuote q raw == expected) =
+  true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:67:0: 'Solidity.Frontend.LiteralGrammarH28.scanControls_pass' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:68:0: plainControls_pass : (plainControls.all fun x =>
+    match x with
+    | (fst, raw, expected) => Checked.plainString raw == expected) =
+  true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:69:0: 'Solidity.Frontend.LiteralGrammarH28.plainControls_pass' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:70:0: quotedGrammar_inhabited : Quoted [34, 0, 255, 34] 34 [0, 255]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:71:0: 'Solidity.Frontend.LiteralGrammarH28.quotedGrammar_inhabited' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:72:0: plainGrammar_inhabited : Plain [34, 92, 120, 102, 70, 34] [255]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:73:0: 'Solidity.Frontend.LiteralGrammarH28.plainGrammar_inhabited' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:74:0: scannerGrammar_inhabited : Scan 39 [92, 122, 39, 255] [92, 122, 39] [255]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:75:0: 'Solidity.Frontend.LiteralGrammarH28.scannerGrammar_inhabited' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:76:0: scannerGrammar_empty_refused : ∀ (q : UInt8) (pre suffix : Checked.Bytes), ¬Scan q [] pre suffix
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:77:0: 'Solidity.Frontend.LiteralGrammarH28.scannerGrammar_empty_refused' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:78:0: scanner_nonliteral_boundary : Scan 92 [92, 0] [92] [0] ∧ Checked.untilQuote 92 [92, 0] = none
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:79:0: 'Solidity.Frontend.LiteralGrammarH28.scanner_nonliteral_boundary' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:80:0: quoted_plain_eq : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes), Checked.plainString (quoteBytes q body) = Checked.strBody (Checked.printable q) body
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:81:0: 'Solidity.Frontend.LiteralGrammarH28.quoted_plain_eq' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:82:0: quote_punct_none : ∀ (q : UInt8), IsQuote q → ∀ (tail : Checked.Bytes), Checked.punctExact (q :: tail) = none
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:83:0: 'Solidity.Frontend.LiteralGrammarH28.quote_punct_none' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:84:0: solTok_plain_eq : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.solTok (quoteBytes q body) = Option.map Checked.Tok.str (Checked.strBody (Checked.printable q) body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:85:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_plain_eq' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:86:0: yulTok_plain_eq : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.yulTok (quoteBytes q body) = Option.map Checked.Tok.str (Checked.strBody (Checked.printable q) body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:87:0: 'Solidity.Frontend.LiteralGrammarH28.yulTok_plain_eq' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:88:0: solTok_hex_eq : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.solTok (hexPrefix ++ quoteBytes q body) = Option.map Checked.Tok.hexStr (Checked.hexBody body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:89:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_hex_eq' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:90:0: yulTok_hex_eq : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.yulTok (hexPrefix ++ quoteBytes q body) = Option.map Checked.Tok.hexStr (Checked.hexBody body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:91:0: 'Solidity.Frontend.LiteralGrammarH28.yulTok_hex_eq' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:92:0: solTok_unicode_eq : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.solTok (unicodePrefix ++ quoteBytes q body) =
+        if (Checked.irregularBreak body || !Checked.bidiBalanced body) = true then none
+        else Option.map Checked.Tok.unicodeStr (Checked.strBody (Checked.unicodeChar q) body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:93:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_unicode_eq' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:94:0: @option_map_same_iff : ∀ {α β : Type} (f : α → β),
+  (∀ (a b : α), f a = f b → a = b) → ∀ (value : Option α) (a : α), Option.map f value = some (f a) ↔ value = some a
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:95:0: 'Solidity.Frontend.LiteralGrammarH28.option_map_same_iff' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:96:0: solTok_plain_iff : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body out : Checked.Bytes),
+      Checked.solTok (quoteBytes q body) = some (Checked.Tok.str out) ↔ Body (Checked.printable q) body out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:97:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_plain_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:98:0: solTok_hex_iff : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body out : Checked.Bytes),
+      Checked.solTok (hexPrefix ++ quoteBytes q body) = some (Checked.Tok.hexStr out) ↔ HexBody body out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:99:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_hex_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:100:0: solTok_unicode_iff : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body out : Checked.Bytes),
+      Checked.solTok (unicodePrefix ++ quoteBytes q body) = some (Checked.Tok.unicodeStr out) ↔
+        Checked.irregularBreak body = false ∧ Checked.bidiBalanced body = true ∧ Body (Checked.unicodeChar q) body out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:101:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_unicode_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:102:0: @Plain.solTok : ∀ {raw out : Checked.Bytes}, Plain raw out → Checked.solTok raw = some (Checked.Tok.str out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:103:0: 'Solidity.Frontend.LiteralGrammarH28.Plain.solTok' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:104:0: @HexLiteral.solTok : ∀ {raw out : Checked.Bytes},
+  HexLiteral raw out → Checked.solTok raw = some (Checked.Tok.hexStr out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:105:0: 'Solidity.Frontend.LiteralGrammarH28.HexLiteral.solTok' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:106:0: @UnicodeLiteral.solTok : ∀ {raw out : Checked.Bytes},
+  UnicodeLiteral raw out → Checked.solTok raw = some (Checked.Tok.unicodeStr out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:107:0: 'Solidity.Frontend.LiteralGrammarH28.UnicodeLiteral.solTok' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:108:0: quote_trivia_none : ∀ (q : UInt8), IsQuote q → ∀ (tail : Checked.Bytes), Checked.trivia (q :: tail) = none
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:109:0: 'Solidity.Frontend.LiteralGrammarH28.quote_trivia_none' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:110:0: classify_sol_plain : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.classify Checked.Mode.sol (quoteBytes q body) =
+        Option.map (fun b => Checked.Kind.tok (Checked.Tok.str b)) (Checked.strBody (Checked.printable q) body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:111:0: 'Solidity.Frontend.LiteralGrammarH28.classify_sol_plain' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:112:0: classify_yul_plain : ∀ (depth : Nat) (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.classify (Checked.Mode.yul depth) (quoteBytes q body) =
+        Option.map (fun b => Checked.Kind.tok (Checked.Tok.str b)) (Checked.strBody (Checked.printable q) body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:113:0: 'Solidity.Frontend.LiteralGrammarH28.classify_yul_plain' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:114:0: classify_sol_hex : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.classify Checked.Mode.sol (hexPrefix ++ quoteBytes q body) =
+        Option.map (fun b => Checked.Kind.tok (Checked.Tok.hexStr b)) (Checked.hexBody body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:115:0: 'Solidity.Frontend.LiteralGrammarH28.classify_sol_hex' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:116:0: classify_yul_hex : ∀ (depth : Nat) (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.classify (Checked.Mode.yul depth) (hexPrefix ++ quoteBytes q body) =
+        Option.map (fun b => Checked.Kind.tok (Checked.Tok.hexStr b)) (Checked.hexBody body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:117:0: 'Solidity.Frontend.LiteralGrammarH28.classify_yul_hex' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:118:0: classify_sol_unicode : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes),
+      Checked.classify Checked.Mode.sol (unicodePrefix ++ quoteBytes q body) =
+        if (Checked.irregularBreak body || !Checked.bidiBalanced body) = true then none
+        else
+          Option.map (fun b => Checked.Kind.tok (Checked.Tok.unicodeStr b))
+            (Checked.strBody (Checked.unicodeChar q) body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:119:0: 'Solidity.Frontend.LiteralGrammarH28.classify_sol_unicode' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:120:0: classify_yul_unicode_refused : ∀ (depth : Nat) (q : UInt8),
+  IsQuote q →
+    ∀ (body : Checked.Bytes), Checked.classify (Checked.Mode.yul depth) (unicodePrefix ++ quoteBytes q body) = none
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:121:0: 'Solidity.Frontend.LiteralGrammarH28.classify_yul_unicode_refused' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:122:0: classify_asm_double : ∀ (body : Checked.Bytes),
+  Checked.classify Checked.Mode.asm (quoteBytes 34 body) =
+    if List.length (quoteBytes 34 body) > 2 then
+      Option.map (fun b => Checked.Kind.tok (Checked.Tok.str b)) (Checked.strBody (Checked.printable 34) body)
+    else none
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:123:0: 'Solidity.Frontend.LiteralGrammarH28.classify_asm_double' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:124:0: classify_asm_single_refused : ∀ (body : Checked.Bytes), Checked.classify Checked.Mode.asm (quoteBytes 39 body) = none
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:125:0: 'Solidity.Frontend.LiteralGrammarH28.classify_asm_single_refused' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:126:0: @codepoint_complete : ∀ {cp : Nat} {out : Checked.Bytes}, CodepointBytes cp out → Checked.utf8 cp = out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:127:0: 'Solidity.Frontend.LiteralGrammarH28.codepoint_complete' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:128:0: codepoint_sound : ∀ (cp : Nat), CodepointBytes cp (Checked.utf8 cp)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:129:0: 'Solidity.Frontend.LiteralGrammarH28.codepoint_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:130:0: codepoint_iff : ∀ (cp : Nat) (out : Checked.Bytes), Checked.utf8 cp = out ↔ CodepointBytes cp out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:131:0: 'Solidity.Frontend.LiteralGrammarH28.codepoint_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:132:0: @codepoint_nonempty : ∀ {cp : Nat} {out : Checked.Bytes}, CodepointBytes cp out → out ≠ []
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:133:0: 'Solidity.Frontend.LiteralGrammarH28.codepoint_nonempty' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:134:0: @hexVal_lt16 : ∀ {b : UInt8}, Checked.isHexDigit b = true → Checked.hexVal b < 16
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:135:0: 'Solidity.Frontend.LiteralGrammarH28.hexVal_lt16' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:136:0: @hexPair_lt256 : ∀ {a b : UInt8},
+  Checked.isHexDigit a = true → Checked.isHexDigit b = true → Checked.hexVal a * 16 + Checked.hexVal b < 256
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:137:0: 'Solidity.Frontend.LiteralGrammarH28.hexPair_lt256' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:138:0: @hexPair_exactNat : ∀ {a b : UInt8},
+  Checked.isHexDigit a = true →
+    Checked.isHexDigit b = true → (pairValue a b).toNat = Checked.hexVal a * 16 + Checked.hexVal b
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:139:0: 'Solidity.Frontend.LiteralGrammarH28.hexPair_exactNat' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:140:0: @hexQuad_lt65536 : ∀ {a b c d : UInt8},
+  Checked.isHexDigit a = true →
+    Checked.isHexDigit b = true →
+      Checked.isHexDigit c = true →
+        Checked.isHexDigit d = true →
+          ((Checked.hexVal a * 16 + Checked.hexVal b) * 16 + Checked.hexVal c) * 16 + Checked.hexVal d < 65536
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:141:0: 'Solidity.Frontend.LiteralGrammarH28.hexQuad_lt65536' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:142:0: @Body.uni_value : ∀ {allowed : UInt8 → Bool} {a b c d : UInt8} {raw out bytes : Checked.Bytes},
+  Checked.isHexDigit a = true →
+    Checked.isHexDigit b = true →
+      Checked.isHexDigit c = true →
+        Checked.isHexDigit d = true →
+          CodepointBytes (((Checked.hexVal a * 16 + Checked.hexVal b) * 16 + Checked.hexVal c) * 16 + Checked.hexVal d)
+              bytes →
+            Body allowed raw out → Body allowed (92 :: 117 :: a :: b :: c :: d :: raw) (bytes ++ out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:143:0: 'Solidity.Frontend.LiteralGrammarH28.Body.uni_value' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:144:0: @fragments_tagged_iff : ∀ {α : Type} (literal : Checked.Bytes → Checked.Bytes → Prop)
+  (classifier : Checked.Bytes → Option α) (tag : Checked.Bytes → α),
+  (∀ (raw out : Checked.Bytes), classifier raw = some (tag out) ↔ literal raw out) →
+    ∀ (raws values : List Checked.Bytes),
+      List.mapM classifier raws = some (List.map tag values) ↔ Fragments literal raws values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:145:0: 'Solidity.Frontend.LiteralGrammarH28.fragments_tagged_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:146:0: fragments_solTok_iff : ∀ (flavor : Flavor) (raws values : List Checked.Bytes),
+  List.mapM Checked.solTok raws = some (List.map flavor.tag values) ↔ Fragments flavor.Rel raws values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:147:0: 'Solidity.Frontend.LiteralGrammarH28.fragments_solTok_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:148:0: fragments_classify_sol_iff : ∀ (flavor : Flavor) (raws values : List Checked.Bytes),
+  List.mapM (Checked.classify Checked.Mode.sol) raws =
+      some (List.map (fun b => Checked.Kind.tok (flavor.tag b)) values) ↔
+    Fragments flavor.Rel raws values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:149:0: 'Solidity.Frontend.LiteralGrammarH28.fragments_classify_sol_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:150:0: fragments_yul_plain_iff : ∀ (depth : Nat) (raws values : List Checked.Bytes),
+  List.mapM (Checked.classify (Checked.Mode.yul depth)) raws =
+      some (List.map (fun b => Checked.Kind.tok (Checked.Tok.str b)) values) ↔
+    Fragments Plain raws values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:151:0: 'Solidity.Frontend.LiteralGrammarH28.fragments_yul_plain_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:152:0: fragments_yul_hex_iff : ∀ (depth : Nat) (raws values : List Checked.Bytes),
+  List.mapM (Checked.classify (Checked.Mode.yul depth)) raws =
+      some (List.map (fun b => Checked.Kind.tok (Checked.Tok.hexStr b)) values) ↔
+    Fragments HexLiteral raws values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:153:0: 'Solidity.Frontend.LiteralGrammarH28.fragments_yul_hex_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:154:0: encoded_hex_fragments : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes),
+      Fragments HexLiteral (List.map (fun b => hexPrefix ++ quoteBytes q (encodeHex b)) values) values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:155:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_hex_fragments' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:156:0: encoded_unicode_fragments : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes),
+      Fragments UnicodeLiteral (List.map (fun b => unicodePrefix ++ quoteBytes q (encodeBody b)) values) values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:157:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_unicode_fragments' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:158:0: encoded_hex_fragments_roundtrip : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes),
+      List.mapM Checked.solTok (List.map (fun b => hexPrefix ++ quoteBytes q (encodeHex b)) values) =
+        some (List.map Checked.Tok.hexStr values)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:159:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_hex_fragments_roundtrip' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:160:0: encoded_unicode_fragments_roundtrip : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes),
+      List.mapM Checked.solTok (List.map (fun b => unicodePrefix ++ quoteBytes q (encodeBody b)) values) =
+        some (List.map Checked.Tok.unicodeStr values)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:161:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_unicode_fragments_roundtrip' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:162:0: @Fragments.plain_split_head : ∀ {raw out : Checked.Bytes} {raws values : List Checked.Bytes},
+  Fragments Plain (raw :: raws) (out :: values) →
+    ∀ (mode : Checked.Mode),
+      mode ≠ Checked.Mode.pragma →
+        ∀ (suffix : Checked.Bytes),
+          Checked.split mode (raw ++ (raws.flatten ++ suffix)) = Except.ok (raw, raws.flatten ++ suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:163:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.plain_split_head' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:164:0: @Fragments.hex_split_head : ∀ {raw out : Checked.Bytes} {raws values : List Checked.Bytes},
+  Fragments HexLiteral (raw :: raws) (out :: values) →
+    ∀ (mode : Checked.Mode),
+      HexMode mode →
+        ∀ (suffix : Checked.Bytes),
+          Checked.split mode (raw ++ (raws.flatten ++ suffix)) = Except.ok (raw, raws.flatten ++ suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:165:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.hex_split_head' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:166:0: @Fragments.unicode_split_head : ∀ {raw out : Checked.Bytes} {raws values : List Checked.Bytes},
+  Fragments UnicodeLiteral (raw :: raws) (out :: values) →
+    ∀ (suffix : Checked.Bytes),
+      Checked.split Checked.Mode.sol (raw ++ (raws.flatten ++ suffix)) = Except.ok (raw, raws.flatten ++ suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:167:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.unicode_split_head' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:168:0: encoded_hex_fragments_value : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes),
+      FragmentValue HexLiteral (List.map (fun b => hexPrefix ++ quoteBytes q (encodeHex b)) values) values.flatten
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:169:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_hex_fragments_value' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:170:0: encoded_unicode_fragments_value : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes),
+      FragmentValue UnicodeLiteral (List.map (fun b => unicodePrefix ++ quoteBytes q (encodeBody b)) values)
+        values.flatten
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:171:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_unicode_fragments_value' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:172:0: @FragmentValue.byteLength : ∀ {literal : Checked.Bytes → Checked.Bytes → Prop} {raws : List Checked.Bytes}
+  {out : Checked.Bytes},
+  FragmentValue literal raws out →
+    ∃ values, Fragments literal raws values ∧ List.length out = (List.map List.length values).sum
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:173:0: 'Solidity.Frontend.LiteralGrammarH28.FragmentValue.byteLength' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:174:0: fragments_mapM_iff : ∀ (literal : Checked.Bytes → Checked.Bytes → Prop)
+  (decoder : Checked.Bytes → Option Checked.Bytes),
+  (∀ (raw out : Checked.Bytes), decoder raw = some out ↔ literal raw out) →
+    ∀ (raws values : List Checked.Bytes), List.mapM decoder raws = some values ↔ Fragments literal raws values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:175:0: 'Solidity.Frontend.LiteralGrammarH28.fragments_mapM_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:176:0: @Fragments.append : ∀ {literal : Checked.Bytes → Checked.Bytes → Prop}
+  {left right lvalues rvalues : List Checked.Bytes},
+  Fragments literal left lvalues →
+    Fragments literal right rvalues → Fragments literal (left ++ right) (lvalues ++ rvalues)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:177:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.append' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:178:0: @FragmentValue.append : ∀ {literal : Checked.Bytes → Checked.Bytes → Prop} {left right : List Checked.Bytes}
+  {a b : Checked.Bytes},
+  FragmentValue literal left a → FragmentValue literal right b → FragmentValue literal (left ++ right) (a ++ b)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:179:0: 'Solidity.Frontend.LiteralGrammarH28.FragmentValue.append' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:180:0: fragments_none_iff : ∀ (literal : Checked.Bytes → Checked.Bytes → Prop)
+  (decoder : Checked.Bytes → Option Checked.Bytes),
+  (∀ (raw out : Checked.Bytes), decoder raw = some out ↔ literal raw out) →
+    ∀ (raws : List Checked.Bytes),
+      List.mapM decoder raws = none ↔ ∀ (values : List Checked.Bytes), ¬Fragments literal raws values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:181:0: 'Solidity.Frontend.LiteralGrammarH28.fragments_none_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:182:0: @Fragments.classified : ∀ {literal : Checked.Bytes → Checked.Bytes → Prop}
+  (classifier : Checked.Bytes → Option Checked.Tok) (tag : Checked.Bytes → Checked.Tok),
+  (∀ (raw out : Checked.Bytes), literal raw out → classifier raw = some (tag out)) →
+    ∀ {raws values : List Checked.Bytes},
+      Fragments literal raws values → List.mapM classifier raws = some (List.map tag values)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:183:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.classified' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:184:0: @Fragments.plain_classified : ∀ {raws values : List Checked.Bytes},
+  Fragments Plain raws values → List.mapM Checked.solTok raws = some (List.map Checked.Tok.str values)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:185:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.plain_classified' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:186:0: @Fragments.hex_classified : ∀ {raws values : List Checked.Bytes},
+  Fragments HexLiteral raws values → List.mapM Checked.solTok raws = some (List.map Checked.Tok.hexStr values)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:187:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.hex_classified' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:188:0: @Fragments.unicode_classified : ∀ {raws values : List Checked.Bytes},
+  Fragments UnicodeLiteral raws values → List.mapM Checked.solTok raws = some (List.map Checked.Tok.unicodeStr values)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:189:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.unicode_classified' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:190:0: encoded_fragments_grammar : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes), Fragments Plain (List.map (fun b => quoteBytes q (encodeBody b)) values) values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:191:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_fragments_grammar' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:192:0: encoded_fragments_roundtrip : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes),
+      List.mapM Checked.plainString (List.map (fun b => quoteBytes q (encodeBody b)) values) = some values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:193:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_fragments_roundtrip' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:194:0: encoded_fragments_value : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (values : List Checked.Bytes),
+      FragmentValue Plain (List.map (fun b => quoteBytes q (encodeBody b)) values) values.flatten
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:195:0: 'Solidity.Frontend.LiteralGrammarH28.encoded_fragments_value' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:196:0: @Plain.split : ∀ {raw out : Checked.Bytes},
+  Plain raw out → ∀ (suffix : Checked.Bytes), Checked.split Checked.Mode.sol (raw ++ suffix) = Except.ok (raw, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:197:0: 'Solidity.Frontend.LiteralGrammarH28.Plain.split' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:198:0: @Fragments.split_head : ∀ {raw out : Checked.Bytes} {raws values : List Checked.Bytes},
+  Fragments Plain (raw :: raws) (out :: values) →
+    Checked.split Checked.Mode.sol (raw ++ raws.flatten) = Except.ok (raw, raws.flatten)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:199:0: 'Solidity.Frontend.LiteralGrammarH28.Fragments.split_head' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:200:0: fullControls_pass : (fullControls.all fun x =>
+    match x with
+    | (fst, mode, raw, expected) => decide (Checked.classify mode raw = expected)) =
+  true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:201:0: 'Solidity.Frontend.LiteralGrammarH28.fullControls_pass' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:202:0: assemblyGrammar_inhabited_empty_value : AssemblyLiteral [34, 92, 10, 34] []
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:203:0: 'Solidity.Frontend.LiteralGrammarH28.assemblyGrammar_inhabited_empty_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:204:0: unicodeGrammar_inhabited_invalid_bytes : UnicodeLiteral [117, 110, 105, 99, 111, 100, 101, 34, 255, 34] [255]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:205:0: 'Solidity.Frontend.LiteralGrammarH28.unicodeGrammar_inhabited_invalid_bytes' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:206:0: codepoint_surrogate_control : CodepointBytes 55296 [237, 160, 128]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:207:0: 'Solidity.Frontend.LiteralGrammarH28.codepoint_surrogate_control' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:208:0: plainFragments_inhabited : Fragments Plain [[34, 65, 34], [39, 92, 120, 48, 48, 39], [34, 92, 117, 48, 48, 69, 57, 34]]
+  [[65], [0], [195, 169]]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:209:0: 'Solidity.Frontend.LiteralGrammarH28.plainFragments_inhabited' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:210:0: hexFragments_inhabited : Fragments HexLiteral
+  [[104, 101, 120, 34, 48, 48, 34], [104, 101, 120, 39, 70, 70, 95, 48, 49, 39]] [[0], [255, 1]]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:211:0: 'Solidity.Frontend.LiteralGrammarH28.hexFragments_inhabited' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:212:0: unicodeFragments_inhabited : Fragments UnicodeLiteral
+  [[117, 110, 105, 99, 111, 100, 101, 34, 65, 34], [117, 110, 105, 99, 111, 100, 101, 39, 195, 169, 39]]
+  [[65], [195, 169]]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:213:0: 'Solidity.Frontend.LiteralGrammarH28.unicodeFragments_inhabited' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:214:0: fragments_bad_second_refused : ∀ (values : List Checked.Bytes),
+  ¬Fragments Plain [[34, 65, 34], [34, 92, 122, 34]] values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:215:0: 'Solidity.Frontend.LiteralGrammarH28.fragments_bad_second_refused' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:216:0: cross_fragment_CR_LF_control : List.mapM Checked.plainString [[34, 92, 13, 34], [39, 92, 10, 39]] = some [[], []]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:217:0: 'Solidity.Frontend.LiteralGrammarH28.cross_fragment_CR_LF_control' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:218:0: mixedModeSequence_inhabited : ModeSequence Checked.Mode.sol
+  [[34, 65, 34], [104, 101, 120, 34, 70, 70, 34], [117, 110, 105, 99, 111, 100, 101, 34, 66, 34]]
+  [(Flavor.plain, [65]), (Flavor.hex, [255]), (Flavor.unicode, [66])]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:219:0: 'Solidity.Frontend.LiteralGrammarH28.mixedModeSequence_inhabited' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:220:0: yulUnicodeMode_refused : ∀ (raw out : Checked.Bytes), ¬ModeLiteral (Checked.Mode.yul 0) Flavor.unicode raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:221:0: 'Solidity.Frontend.LiteralGrammarH28.yulUnicodeMode_refused' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:222:0: solWordTable_no_literal : ∀ (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.solWordTable raw ≠ Checked.WordClass.tok (flavor.tag out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:223:0: 'Solidity.Frontend.LiteralGrammarH28.solWordTable_no_literal' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:224:0: solWord_no_literal : ∀ (flavor : Flavor) (raw out : Checked.Bytes), Checked.solWord raw ≠ some (flavor.tag out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:225:0: 'Solidity.Frontend.LiteralGrammarH28.solWord_no_literal' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:226:0: solTok_literal_sound : ∀ (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.solTok raw = some (flavor.tag out) → flavor.Rel raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:227:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_literal_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:228:0: solTok_literal_iff : ∀ (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.solTok raw = some (flavor.tag out) ↔ flavor.Rel raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:229:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_literal_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:230:0: yulWordTable_no_literal : ∀ (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.yulWordTable raw ≠ some (flavor.tag out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:231:0: 'Solidity.Frontend.LiteralGrammarH28.yulWordTable_no_literal' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:232:0: yulWord_no_literal : ∀ (flavor : Flavor) (raw out : Checked.Bytes), Checked.yulWord raw ≠ flavor.tag out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:233:0: 'Solidity.Frontend.LiteralGrammarH28.yulWord_no_literal' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:234:0: yulNumber_no_literal : ∀ (flavor : Flavor) (raw out : Checked.Bytes), Checked.yulNumber raw ≠ some (flavor.tag out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:235:0: 'Solidity.Frontend.LiteralGrammarH28.yulNumber_no_literal' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:236:0: yulTok_literal_sound : ∀ (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.yulTok raw = some (flavor.tag out) → flavor.Rel raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:237:0: 'Solidity.Frontend.LiteralGrammarH28.yulTok_literal_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:238:0: @Plain.yulTok : ∀ {raw out : Checked.Bytes}, Plain raw out → Checked.yulTok raw = some (Checked.Tok.str out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:239:0: 'Solidity.Frontend.LiteralGrammarH28.Plain.yulTok' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:240:0: @HexLiteral.yulTok : ∀ {raw out : Checked.Bytes},
+  HexLiteral raw out → Checked.yulTok raw = some (Checked.Tok.hexStr out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:241:0: 'Solidity.Frontend.LiteralGrammarH28.HexLiteral.yulTok' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:242:0: yulTok_plain_iff : ∀ (raw out : Checked.Bytes), Checked.yulTok raw = some (Checked.Tok.str out) ↔ Plain raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:243:0: 'Solidity.Frontend.LiteralGrammarH28.yulTok_plain_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:244:0: yulTok_hex_iff : ∀ (raw out : Checked.Bytes), Checked.yulTok raw = some (Checked.Tok.hexStr out) ↔ HexLiteral raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:245:0: 'Solidity.Frontend.LiteralGrammarH28.yulTok_hex_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:246:0: yulTok_unicode_impossible : ∀ (raw out : Checked.Bytes), Checked.yulTok raw ≠ some (Checked.Tok.unicodeStr out)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:247:0: 'Solidity.Frontend.LiteralGrammarH28.yulTok_unicode_impossible' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:248:0: @Flavor.Rel.noTrivia : ∀ {flavor : Flavor} {raw out : Checked.Bytes}, flavor.Rel raw out → Checked.trivia raw = none
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:249:0: 'Solidity.Frontend.LiteralGrammarH28.Flavor.Rel.noTrivia' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:250:0: classify_sol_literal_iff : ∀ (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.classify Checked.Mode.sol raw = some (Checked.Kind.tok (flavor.tag out)) ↔ flavor.Rel raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:251:0: 'Solidity.Frontend.LiteralGrammarH28.classify_sol_literal_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:252:0: classify_yul_literal_sound : ∀ (depth : Nat) (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.classify (Checked.Mode.yul depth) raw = some (Checked.Kind.tok (flavor.tag out)) → flavor.Rel raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:253:0: 'Solidity.Frontend.LiteralGrammarH28.classify_yul_literal_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:254:0: classify_yul_plain_iff : ∀ (depth : Nat) (raw out : Checked.Bytes),
+  Checked.classify (Checked.Mode.yul depth) raw = some (Checked.Kind.tok (Checked.Tok.str out)) ↔ Plain raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:255:0: 'Solidity.Frontend.LiteralGrammarH28.classify_yul_plain_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:256:0: classify_yul_hex_iff : ∀ (depth : Nat) (raw out : Checked.Bytes),
+  Checked.classify (Checked.Mode.yul depth) raw = some (Checked.Kind.tok (Checked.Tok.hexStr out)) ↔ HexLiteral raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:257:0: 'Solidity.Frontend.LiteralGrammarH28.classify_yul_hex_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:258:0: classify_yul_unicode_impossible : ∀ (depth : Nat) (raw out : Checked.Bytes),
+  Checked.classify (Checked.Mode.yul depth) raw ≠ some (Checked.Kind.tok (Checked.Tok.unicodeStr out))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:259:0: 'Solidity.Frontend.LiteralGrammarH28.classify_yul_unicode_impossible' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:260:0: solTok_no_flavor_iff : ∀ (flavor : Flavor) (raw : Checked.Bytes),
+  (∀ (out : Checked.Bytes), Checked.solTok raw ≠ some (flavor.tag out)) ↔ ∀ (out : Checked.Bytes), ¬flavor.Rel raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:261:0: 'Solidity.Frontend.LiteralGrammarH28.solTok_no_flavor_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:262:0: classify_asm_plain_iff : ∀ (raw out : Checked.Bytes),
+  Checked.classify Checked.Mode.asm raw = some (Checked.Kind.tok (Checked.Tok.str out)) ↔ AssemblyLiteral raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:263:0: 'Solidity.Frontend.LiteralGrammarH28.classify_asm_plain_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:264:0: classify_asm_nonplain_impossible : ∀ (flavor : Flavor),
+  flavor ≠ Flavor.plain →
+    ∀ (raw out : Checked.Bytes), Checked.classify Checked.Mode.asm raw ≠ some (Checked.Kind.tok (flavor.tag out))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:265:0: 'Solidity.Frontend.LiteralGrammarH28.classify_asm_nonplain_impossible' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:266:0: classify_pragma_literal_impossible : ∀ (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.classify Checked.Mode.pragma raw ≠ some (Checked.Kind.tok (flavor.tag out))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:267:0: 'Solidity.Frontend.LiteralGrammarH28.classify_pragma_literal_impossible' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:268:0: @hexBody_complete : ∀ {raw out : Checked.Bytes}, HexBody raw out → Checked.hexBody raw = some out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:269:0: 'Solidity.Frontend.LiteralGrammarH28.hexBody_complete' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:270:0: hexBody_sound : ∀ (raw out : Checked.Bytes), Checked.hexBody raw = some out → HexBody raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:271:0: 'Solidity.Frontend.LiteralGrammarH28.hexBody_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:272:0: hexBody_iff : ∀ (raw out : Checked.Bytes), Checked.hexBody raw = some out ↔ HexBody raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:273:0: 'Solidity.Frontend.LiteralGrammarH28.hexBody_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:274:0: @HexBody.deterministic : ∀ {raw x y : Checked.Bytes}, HexBody raw x → HexBody raw y → x = y
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:275:0: 'Solidity.Frontend.LiteralGrammarH28.HexBody.deterministic' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:276:0: hexBody_none_iff : ∀ (raw : Checked.Bytes), Checked.hexBody raw = none ↔ ∀ (out : Checked.Bytes), ¬HexBody raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:277:0: 'Solidity.Frontend.LiteralGrammarH28.hexBody_none_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:278:0: @HexBody.length_bounds : ∀ {raw out : Checked.Bytes},
+  HexBody raw out → 2 * List.length out ≤ List.length raw ∧ List.length raw ≤ 3 * List.length out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:279:0: 'Solidity.Frontend.LiteralGrammarH28.HexBody.length_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:280:0: hexControls_pass : (hexControls.all fun row => Checked.hexBody (Checked.ascii row.fst) == row.snd) = true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:281:0: 'Solidity.Frontend.LiteralGrammarH28.hexControls_pass' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:282:0: hexGrammar_inhabited : HexBody (Checked.ascii "00_01FF_ee") [0, 1, 255, 238]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:283:0: 'Solidity.Frontend.LiteralGrammarH28.hexGrammar_inhabited' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:284:0: hexGrammar_no_trailing : ∀ (out : Checked.Bytes), ¬HexBody (Checked.ascii "00_") out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:285:0: 'Solidity.Frontend.LiteralGrammarH28.hexGrammar_no_trailing' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:286:0: hexEncoding_control : encodeHex [0, 1, 127, 128, 254, 255] = Checked.ascii "00017f80feff"
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:287:0: 'Solidity.Frontend.LiteralGrammarH28.hexEncoding_control' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:288:0: byteEncoding_table : ((List.range 256).all fun n => decide (ByteEncodingFacts n.toUInt8)) = true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:289:0: 'Solidity.Frontend.LiteralGrammarH28.byteEncoding_table' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:290:0: byteEncoding_facts : ∀ (b : UInt8), ByteEncodingFacts b
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:291:0: 'Solidity.Frontend.LiteralGrammarH28.byteEncoding_facts' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:292:0: encodeHex_grammar : ∀ (bytes : Checked.Bytes), HexBody (encodeHex bytes) bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:293:0: 'Solidity.Frontend.LiteralGrammarH28.encodeHex_grammar' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:294:0: encodeHex_roundtrip : ∀ (bytes : Checked.Bytes), Checked.hexBody (encodeHex bytes) = some bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:295:0: 'Solidity.Frontend.LiteralGrammarH28.encodeHex_roundtrip' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:296:0: encodeHex_length : ∀ (bytes : Checked.Bytes), List.length (encodeHex bytes) = 2 * List.length bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:297:0: 'Solidity.Frontend.LiteralGrammarH28.encodeHex_length' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:298:0: modeLiteral_iff : ∀ (mode : Checked.Mode) (flavor : Flavor) (raw out : Checked.Bytes),
+  Checked.classify mode raw = some (Checked.Kind.tok (flavor.tag out)) ↔ ModeLiteral mode flavor raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:299:0: 'Solidity.Frontend.LiteralGrammarH28.modeLiteral_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:300:0: @ModeLiteral.split : ∀ {mode : Checked.Mode} {flavor : Flavor} {raw out : Checked.Bytes},
+  ModeLiteral mode flavor raw out →
+    ∀ (suffix : Checked.Bytes), Checked.split mode (raw ++ suffix) = Except.ok (raw, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:301:0: 'Solidity.Frontend.LiteralGrammarH28.ModeLiteral.split' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:302:0: modeSequence_iff : ∀ (mode : Checked.Mode) (raws : List Checked.Bytes) (values : List (Flavor × Checked.Bytes)),
+  List.mapM (Checked.classify mode) raws = some (sequenceTags values) ↔ ModeSequence mode raws values
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:303:0: 'Solidity.Frontend.LiteralGrammarH28.modeSequence_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:304:0: @ModeSequence.append : ∀ {mode : Checked.Mode} {left right : List Checked.Bytes} {a b : List (Flavor × Checked.Bytes)},
+  ModeSequence mode left a → ModeSequence mode right b → ModeSequence mode (left ++ right) (a ++ b)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:305:0: 'Solidity.Frontend.LiteralGrammarH28.ModeSequence.append' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:306:0: sequenceBytes_append : ∀ (a b : List (Flavor × Checked.Bytes)),
+  sequenceBytes (a ++ b) = sequenceBytes a ++ sequenceBytes b
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:307:0: 'Solidity.Frontend.LiteralGrammarH28.sequenceBytes_append' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:308:0: @ModeSequence.split_head : ∀ {mode : Checked.Mode} {flavor : Flavor} {raw out : Checked.Bytes}
+  {raws : List Checked.Bytes} {values : List (Flavor × Checked.Bytes)},
+  ModeSequence mode (raw :: raws) ((flavor, out) :: values) →
+    ∀ (suffix : Checked.Bytes),
+      Checked.split mode (raw ++ (raws.flatten ++ suffix)) = Except.ok (raw, raws.flatten ++ suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:309:0: 'Solidity.Frontend.LiteralGrammarH28.ModeSequence.split_head' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:310:0: @quotedBody_complete : ∀ {raw : Checked.Bytes} {q : UInt8} {body : Checked.Bytes},
+  Quoted raw q body → Checked.quotedBody raw = some (q, body)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:311:0: 'Solidity.Frontend.LiteralGrammarH28.quotedBody_complete' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:312:0: quotedBody_sound : ∀ (raw : Checked.Bytes) (q : UInt8) (body : Checked.Bytes),
+  Checked.quotedBody raw = some (q, body) → Quoted raw q body
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:313:0: 'Solidity.Frontend.LiteralGrammarH28.quotedBody_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:314:0: quotedBody_iff : ∀ (raw : Checked.Bytes) (q : UInt8) (body : Checked.Bytes),
+  Checked.quotedBody raw = some (q, body) ↔ Quoted raw q body
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:315:0: 'Solidity.Frontend.LiteralGrammarH28.quotedBody_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:316:0: @plainString_complete : ∀ {raw out : Checked.Bytes}, Plain raw out → Checked.plainString raw = some out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:317:0: 'Solidity.Frontend.LiteralGrammarH28.plainString_complete' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:318:0: plainString_sound : ∀ (raw out : Checked.Bytes), Checked.plainString raw = some out → Plain raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:319:0: 'Solidity.Frontend.LiteralGrammarH28.plainString_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:320:0: plainString_iff : ∀ (raw out : Checked.Bytes), Checked.plainString raw = some out ↔ Plain raw out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:321:0: 'Solidity.Frontend.LiteralGrammarH28.plainString_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:322:0: quoteBytes_quoted : ∀ (q : UInt8), IsQuote q → ∀ (body : Checked.Bytes), Quoted (quoteBytes q body) q body
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:323:0: 'Solidity.Frontend.LiteralGrammarH28.quoteBytes_quoted' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:324:0: encodePlain_roundtrip : ∀ (q : UInt8),
+  IsQuote q → ∀ (bytes : Checked.Bytes), Checked.plainString (quoteBytes q (encodeBody bytes)) = some bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:325:0: 'Solidity.Frontend.LiteralGrammarH28.encodePlain_roundtrip' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:326:0: quoteBytes_length : ∀ (q : UInt8) (body : Checked.Bytes), List.length (quoteBytes q body) = List.length body + 2
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:327:0: 'Solidity.Frontend.LiteralGrammarH28.quoteBytes_length' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:328:0: encodePlain_length : ∀ (q : UInt8) (bytes : Checked.Bytes),
+  List.length (quoteBytes q (encodeBody bytes)) = 4 * List.length bytes + 2
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:329:0: 'Solidity.Frontend.LiteralGrammarH28.encodePlain_length' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:330:0: encodePlain_sol_classify : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (bytes : Checked.Bytes),
+      Checked.classify Checked.Mode.sol (quoteBytes q (encodeBody bytes)) =
+        some (Checked.Kind.tok (Checked.Tok.str bytes))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:331:0: 'Solidity.Frontend.LiteralGrammarH28.encodePlain_sol_classify' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:332:0: encodePlain_yul_classify : ∀ (depth : Nat) (q : UInt8),
+  IsQuote q →
+    ∀ (bytes : Checked.Bytes),
+      Checked.classify (Checked.Mode.yul depth) (quoteBytes q (encodeBody bytes)) =
+        some (Checked.Kind.tok (Checked.Tok.str bytes))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:333:0: 'Solidity.Frontend.LiteralGrammarH28.encodePlain_yul_classify' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:334:0: encodeHex_sol_classify : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (bytes : Checked.Bytes),
+      Checked.classify Checked.Mode.sol (hexPrefix ++ quoteBytes q (encodeHex bytes)) =
+        some (Checked.Kind.tok (Checked.Tok.hexStr bytes))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:335:0: 'Solidity.Frontend.LiteralGrammarH28.encodeHex_sol_classify' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:336:0: encodeHex_yul_classify : ∀ (depth : Nat) (q : UInt8),
+  IsQuote q →
+    ∀ (bytes : Checked.Bytes),
+      Checked.classify (Checked.Mode.yul depth) (hexPrefix ++ quoteBytes q (encodeHex bytes)) =
+        some (Checked.Kind.tok (Checked.Tok.hexStr bytes))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:337:0: 'Solidity.Frontend.LiteralGrammarH28.encodeHex_yul_classify' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:338:0: encodeUnicode_sol_classify : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (bytes : Checked.Bytes),
+      Checked.classify Checked.Mode.sol (unicodePrefix ++ quoteBytes q (encodeBody bytes)) =
+        some (Checked.Kind.tok (Checked.Tok.unicodeStr bytes))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:339:0: 'Solidity.Frontend.LiteralGrammarH28.encodeUnicode_sol_classify' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:340:0: encodeAssembly_grammar : ∀ (bytes : Checked.Bytes), AssemblyLiteral (encodeAssembly bytes) bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:341:0: 'Solidity.Frontend.LiteralGrammarH28.encodeAssembly_grammar' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:342:0: encodeAssembly_classify : ∀ (bytes : Checked.Bytes),
+  Checked.classify Checked.Mode.asm (encodeAssembly bytes) = some (Checked.Kind.tok (Checked.Tok.str bytes))
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:343:0: 'Solidity.Frontend.LiteralGrammarH28.encodeAssembly_classify' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:344:0: encodeAssembly_length : ∀ (bytes : Checked.Bytes), List.length (encodeAssembly bytes) = 4 * List.length bytes + 4
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:345:0: 'Solidity.Frontend.LiteralGrammarH28.encodeAssembly_length' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:346:0: @Scan.input_nonempty : ∀ {q : UInt8} {raw pre suffix : Checked.Bytes}, Scan q raw pre suffix → raw ≠ []
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:347:0: 'Solidity.Frontend.LiteralGrammarH28.Scan.input_nonempty' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:348:0: @Scan.partition : ∀ {q : UInt8} {raw pre suffix : Checked.Bytes}, Scan q raw pre suffix → raw = pre ++ suffix
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:349:0: 'Solidity.Frontend.LiteralGrammarH28.Scan.partition' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:350:0: @untilQuote_complete : ∀ {q : UInt8},
+  IsQuote q → ∀ {raw pre suffix : Checked.Bytes}, Scan q raw pre suffix → Checked.untilQuote q raw = some (pre, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:351:0: 'Solidity.Frontend.LiteralGrammarH28.untilQuote_complete' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:352:0: untilQuote_sound : ∀ (q : UInt8) (raw pre suffix : Checked.Bytes),
+  Checked.untilQuote q raw = some (pre, suffix) → Scan q raw pre suffix
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:353:0: 'Solidity.Frontend.LiteralGrammarH28.untilQuote_sound' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:354:0: untilQuote_iff : ∀ (q : UInt8),
+  IsQuote q → ∀ (raw pre suffix : Checked.Bytes), Checked.untilQuote q raw = some (pre, suffix) ↔ Scan q raw pre suffix
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:355:0: 'Solidity.Frontend.LiteralGrammarH28.untilQuote_iff' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:356:0: @Scan.closer : ∀ {q : UInt8} {raw pre suffix : Checked.Bytes}, Scan q raw pre suffix → ∃ body, pre = body ++ [q]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:357:0: 'Solidity.Frontend.LiteralGrammarH28.Scan.closer' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:358:0: @Scan.append_suffix : ∀ {q : UInt8} {raw pre suffix : Checked.Bytes},
+  Scan q raw pre suffix → ∀ (extra : Checked.Bytes), Scan q (raw ++ extra) pre (suffix ++ extra)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:359:0: 'Solidity.Frontend.LiteralGrammarH28.Scan.append_suffix' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:360:0: @untilQuote_append_suffix : ∀ {q : UInt8},
+  IsQuote q →
+    ∀ {raw pre suffix : Checked.Bytes},
+      Checked.untilQuote q raw = some (pre, suffix) →
+        ∀ (extra : Checked.Bytes), Checked.untilQuote q (raw ++ extra) = some (pre, suffix ++ extra)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:361:0: 'Solidity.Frontend.LiteralGrammarH28.untilQuote_append_suffix' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:362:0: printable_safe : ∀ (q : UInt8), SafeFor (Checked.printable q) q
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:363:0: 'Solidity.Frontend.LiteralGrammarH28.printable_safe' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:364:0: unicode_safe : ∀ (q : UInt8), SafeFor (Checked.unicodeChar q) q
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:365:0: 'Solidity.Frontend.LiteralGrammarH28.unicode_safe' depends on axioms: [propext]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:366:0: @hexDigit_safe : ∀ {q b : UInt8}, IsQuote q → Checked.isHexDigit b = true → b ≠ q ∧ b ≠ 92 ∧ Checked.isNewline b = false
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:367:0: 'Solidity.Frontend.LiteralGrammarH28.hexDigit_safe' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:368:0: @Body.scan : ∀ {allowed : UInt8 → Bool} {q : UInt8},
+  IsQuote q →
+    SafeFor allowed q →
+      ∀ {raw out : Checked.Bytes},
+        Body allowed raw out → ∀ (suffix : Checked.Bytes), Scan q (raw ++ q :: suffix) (raw ++ [q]) suffix
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:369:0: 'Solidity.Frontend.LiteralGrammarH28.Body.scan' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:370:0: @body_scan_value : ∀ {allowed : UInt8 → Bool} {q : UInt8},
+  IsQuote q →
+    SafeFor allowed q →
+      ∀ {raw out : Checked.Bytes},
+        Body allowed raw out →
+          ∀ (suffix : Checked.Bytes),
+            Checked.untilQuote q (raw ++ q :: suffix) = some (raw ++ [q], suffix) ∧
+              Checked.strBody allowed raw = some out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:371:0: 'Solidity.Frontend.LiteralGrammarH28.body_scan_value' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:372:0: @HexBody.scan : ∀ {q : UInt8},
+  IsQuote q →
+    ∀ {raw out : Checked.Bytes},
+      HexBody raw out → ∀ (suffix : Checked.Bytes), Scan q (raw ++ q :: suffix) (raw ++ [q]) suffix
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:373:0: 'Solidity.Frontend.LiteralGrammarH28.HexBody.scan' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:374:0: @hex_scan_value : ∀ {q : UInt8},
+  IsQuote q →
+    ∀ {raw out : Checked.Bytes},
+      HexBody raw out →
+        ∀ (suffix : Checked.Bytes),
+          Checked.untilQuote q (raw ++ q :: suffix) = some (raw ++ [q], suffix) ∧ Checked.hexBody raw = some out
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:375:0: 'Solidity.Frontend.LiteralGrammarH28.hex_scan_value' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:376:0: encodePlain_scan : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (bytes suffix : Checked.Bytes),
+      Checked.untilQuote q (encodeBody bytes ++ q :: suffix) = some (encodeBody bytes ++ [q], suffix) ∧
+        Checked.plainString (quoteBytes q (encodeBody bytes)) = some bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:377:0: 'Solidity.Frontend.LiteralGrammarH28.encodePlain_scan' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:378:0: @Scan.split_quoted : ∀ {q : UInt8},
+  IsQuote q →
+    ∀ {raw pre suffix : Checked.Bytes},
+      Scan q raw pre suffix →
+        ∀ (mode : Checked.Mode),
+          mode ≠ Checked.Mode.pragma → Checked.split mode (q :: raw) = Except.ok (q :: pre, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:379:0: 'Solidity.Frontend.LiteralGrammarH28.Scan.split_quoted' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:380:0: @Scan.split_hex : ∀ {q : UInt8},
+  IsQuote q →
+    ∀ {raw pre suffix : Checked.Bytes},
+      Scan q raw pre suffix →
+        ∀ (mode : Checked.Mode),
+          HexMode mode → Checked.split mode (hexPrefix ++ q :: raw) = Except.ok (hexPrefix ++ q :: pre, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:381:0: 'Solidity.Frontend.LiteralGrammarH28.Scan.split_hex' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:382:0: @Scan.split_unicode : ∀ {q : UInt8},
+  IsQuote q →
+    ∀ {raw pre suffix : Checked.Bytes},
+      Scan q raw pre suffix →
+        Checked.split Checked.Mode.sol (unicodePrefix ++ q :: raw) = Except.ok (unicodePrefix ++ q :: pre, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:383:0: 'Solidity.Frontend.LiteralGrammarH28.Scan.split_unicode' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:384:0: split_yul_unicode_word : ∀ (depth : Nat) (q : UInt8),
+  IsQuote q →
+    ∀ (raw : Checked.Bytes),
+      Checked.split (Checked.Mode.yul depth) (unicodePrefix ++ q :: raw) = Except.ok (unicodePrefix, q :: raw)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:385:0: 'Solidity.Frontend.LiteralGrammarH28.split_yul_unicode_word' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:386:0: @Plain.split_mode : ∀ {raw out : Checked.Bytes},
+  Plain raw out →
+    ∀ (mode : Checked.Mode),
+      mode ≠ Checked.Mode.pragma →
+        ∀ (suffix : Checked.Bytes), Checked.split mode (raw ++ suffix) = Except.ok (raw, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:387:0: 'Solidity.Frontend.LiteralGrammarH28.Plain.split_mode' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:388:0: @HexLiteral.split : ∀ {raw out : Checked.Bytes},
+  HexLiteral raw out →
+    ∀ (mode : Checked.Mode),
+      HexMode mode → ∀ (suffix : Checked.Bytes), Checked.split mode (raw ++ suffix) = Except.ok (raw, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:389:0: 'Solidity.Frontend.LiteralGrammarH28.HexLiteral.split' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:390:0: @UnicodeLiteral.split : ∀ {raw out : Checked.Bytes},
+  UnicodeLiteral raw out →
+    ∀ (suffix : Checked.Bytes), Checked.split Checked.Mode.sol (raw ++ suffix) = Except.ok (raw, suffix)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:391:0: 'Solidity.Frontend.LiteralGrammarH28.UnicodeLiteral.split' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:392:0: @hex_regular : ∀ {b : UInt8}, Checked.isHexDigit b = true → RegularByte b
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:393:0: 'Solidity.Frontend.LiteralGrammarH28.hex_regular' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:394:0: encodeBody_regular : ∀ (bytes : Checked.Bytes) (b : UInt8), b ∈ encodeBody bytes → RegularByte b
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:395:0: 'Solidity.Frontend.LiteralGrammarH28.encodeBody_regular' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:396:0: regular_irregularBreak : ∀ (raw : Checked.Bytes),
+  (∀ (b : UInt8), b ∈ raw → RegularByte b) → Checked.irregularBreak raw = false
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:397:0: 'Solidity.Frontend.LiteralGrammarH28.regular_irregularBreak' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:398:0: bidi_walk_noE2 : ∀ (raw : Checked.Bytes) (depth : Nat),
+  (∀ (b : UInt8), b ∈ raw → b ≠ 226) → Checked.bidiBalanced.walk raw depth = (depth == 0)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:399:0: 'Solidity.Frontend.LiteralGrammarH28.bidi_walk_noE2' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:400:0: regular_bidiBalanced : ∀ (raw : Checked.Bytes),
+  (∀ (b : UInt8), b ∈ raw → RegularByte b) → Checked.bidiBalanced raw = true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:401:0: 'Solidity.Frontend.LiteralGrammarH28.regular_bidiBalanced' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:402:0: encodeHexLiteral_grammar : ∀ (q : UInt8),
+  IsQuote q → ∀ (bytes : Checked.Bytes), HexLiteral (hexPrefix ++ quoteBytes q (encodeHex bytes)) bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:403:0: 'Solidity.Frontend.LiteralGrammarH28.encodeHexLiteral_grammar' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:404:0: encodeUnicodeLiteral_grammar : ∀ (q : UInt8),
+  IsQuote q → ∀ (bytes : Checked.Bytes), UnicodeLiteral (unicodePrefix ++ quoteBytes q (encodeBody bytes)) bytes
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:405:0: 'Solidity.Frontend.LiteralGrammarH28.encodeUnicodeLiteral_grammar' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:406:0: encodeHexLiteral_roundtrip : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (bytes : Checked.Bytes),
+      Checked.solTok (hexPrefix ++ quoteBytes q (encodeHex bytes)) = some (Checked.Tok.hexStr bytes)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:407:0: 'Solidity.Frontend.LiteralGrammarH28.encodeHexLiteral_roundtrip' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:408:0: encodeUnicodeLiteral_roundtrip : ∀ (q : UInt8),
+  IsQuote q →
+    ∀ (bytes : Checked.Bytes),
+      Checked.solTok (unicodePrefix ++ quoteBytes q (encodeBody bytes)) = some (Checked.Tok.unicodeStr bytes)
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:409:0: 'Solidity.Frontend.LiteralGrammarH28.encodeUnicodeLiteral_roundtrip' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:410:0: encodeHexLiteral_length : ∀ (q : UInt8) (bytes : Checked.Bytes),
+  List.length (hexPrefix ++ quoteBytes q (encodeHex bytes)) = 2 * List.length bytes + 5
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:411:0: 'Solidity.Frontend.LiteralGrammarH28.encodeHexLiteral_length' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:412:0: encodeUnicodeLiteral_length : ∀ (q : UInt8) (bytes : Checked.Bytes),
+  List.length (unicodePrefix ++ quoteBytes q (encodeBody bytes)) = 4 * List.length bytes + 9
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:413:0: 'Solidity.Frontend.LiteralGrammarH28.encodeUnicodeLiteral_length' depends on axioms: [propext, Quot.sound]
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:414:0: word_cases : ∀ (raw : Checked.Bytes) (empty : Checked.WordClass) (cons : UInt8 → Checked.Bytes → Checked.WordClass),
+  wordNonliteral empty = true →
+    (∀ (b : UInt8) (tail : Checked.Bytes), wordNonliteral (cons b tail) = true) →
+      wordNonliteral (List.casesOn raw empty cons) = true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:415:0: 'Solidity.Frontend.LiteralGrammarH28.word_cases' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:416:0: word_dite : ∀ (p : Prop) [inst : Decidable p] (yes : p → Checked.WordClass) (no : ¬p → Checked.WordClass),
+  (∀ (h : p), wordNonliteral (yes h) = true) →
+    (∀ (h : ¬p), wordNonliteral (no h) = true) → wordNonliteral (dite p yes no) = true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:417:0: 'Solidity.Frontend.LiteralGrammarH28.word_dite' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:418:0: @word_transport : ∀ {α : Sort u_1} {a b : α} (h : a = b) (value : Checked.WordClass),
+  wordNonliteral value = true → wordNonliteral (h ▸ value) = true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:419:0: 'Solidity.Frontend.LiteralGrammarH28.word_transport' does not depend on any axioms
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:420:0: solWordTable_nonliteral : ∀ (raw : Checked.Bytes), wordNonliteral (Checked.solWordTable raw) = true
+info: Solidity/Frontend/LiteralGrammarH28/FullPins.lean:421:0: 'Solidity.Frontend.LiteralGrammarH28.solWordTable_nonliteral' does not depend on any axioms
+Build completed successfully (26 jobs).
+	Command being timed: "lake -f tests/h28-sol/literal-grammar/runtime.toml build Solidity.Frontend.LiteralGrammarH28.FullPins"
+	User time (seconds): 6.93
+	System time (seconds): 0.46
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.46
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1392568
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 59562
+	Voluntary context switches: 3771
+	Involuntary context switches: 341
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 12224
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

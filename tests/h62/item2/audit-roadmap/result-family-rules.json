@@ -1,0 +1,659 @@
+{
+  "boundary": "Source-directed family classification, not elaborated type equality or proof exclusion.",
+  "families": [
+    {
+      "id": "effect-result-carrier",
+      "heads": [
+        "Except",
+        "TRes"
+      ],
+      "description": "Success/failure carrier with a dependent payload. Returning a value/status is not a theorem about that value.",
+      "evidence": [
+        {
+          "path": "Solidity/Tools/Run.lean",
+          "line": 149
+        },
+        {
+          "path": "Solidity/Tools/Upstream.lean",
+          "line": 40
+        },
+        {
+          "path": "Solidity/Semantics/Run.lean",
+          "line": 79
+        }
+      ],
+      "remaining": "Payload types, actual success and semantic correctness remain separate; generic payload may itself carry proofs.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "random-generator",
+      "heads": [
+        "Gen",
+        "TGen"
+      ],
+      "description": "StateM StdGen generator or generator dictionary. Numeric values retain their denotation range constraints.",
+      "evidence": [
+        {
+          "path": "Solidity/Tools/Common.lean",
+          "line": 28
+        },
+        {
+          "path": "Solidity/Tools/Common.lean",
+          "line": 50
+        }
+      ],
+      "remaining": "Gen alpha retains arbitrary alpha; no inference that generated values satisfy a semantic law.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "renderer-metaprogram",
+      "heads": [
+        "RM",
+        "CommandElabM",
+        "Lean.Elab.Command.CommandElab",
+        "LatexPrinter"
+      ],
+      "description": "Renderer/elaborator monad or callback. Expr and textual output require separate checking.",
+      "evidence": [
+        {
+          "path": "Solidity/Tools/LatexTerm.lean",
+          "line": 385
+        },
+        {
+          "path": "Solidity/Tools/LatexSolkey.lean",
+          "line": 47
+        },
+        {
+          "path": "vendor/LeanTeX/LeanTeX/Basic.lean",
+          "line": 53
+        }
+      ],
+      "remaining": "RM alpha and callback outputs remain dependent on alpha and external checker acceptance; this is not a proof acceptance rule.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "fold-algebra",
+      "heads": [
+        "Fold"
+      ],
+      "description": "Recursor algebra with Type-valued V/F/L/W/M codomains. Concrete family assignments are recorded per fold.",
+      "evidence": [
+        {
+          "path": "Solidity/Semantics/Storage/Values.lean",
+          "line": 70
+        },
+        {
+          "path": "Solidity/Tools/Show.lean",
+          "line": 37
+        },
+        {
+          "path": "Solidity/Tools/Show.lean",
+          "line": 60
+        },
+        {
+          "path": "Solidity/Tools/DiffTest.lean",
+          "line": 72
+        },
+        {
+          "path": "Solidity/Tools/DiffTest.lean",
+          "line": 107
+        },
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 576
+        },
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 598
+        },
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 1087
+        }
+      ],
+      "remaining": "A generic Fold is not proof-free; renameFold returns indexed storage data and quoteFold only Expr syntax.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "primitive-or-word-carrier",
+      "heads": [
+        "Word",
+        "Address",
+        "Fin",
+        "Scalar.Word",
+        "PrimTy.int.Denote",
+        "p.Denote"
+      ],
+      "description": "Distinct primitive/numeric/word carriers. Roadmap Fin bounds, Scalar BitVec256 and PrimTy range subtypes differ; Evm.Word also has a symbolic Slot constructor.",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 55
+        },
+        {
+          "path": "Solidity/Semantics.lean",
+          "line": 23
+        },
+        {
+          "path": "Solidity/Evm/Machine.lean",
+          "line": 165
+        },
+        {
+          "path": "Solidity/Backend/Scalar/Slice.lean",
+          "line": 14
+        }
+      ],
+      "remaining": "Preserve exact namespace and PrimTy case. In particular Evm.Word.slot is not a Fin numeral; no word unification or semantic correctness follows.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "intrinsic-indexed-data",
+      "heads": [
+        "State",
+        "Solidity.State",
+        "SVal",
+        "SMap",
+        "SVec",
+        "Prog"
+      ],
+      "description": "Typed intrinsic state/storage/program data. Array constructors and primitive denotations may carry bound proofs.",
+      "evidence": [
+        {
+          "path": "Solidity/Semantics/Storage/Values.lean",
+          "line": 19
+        },
+        {
+          "path": "Solidity/Semantics/Heap.lean",
+          "line": 67
+        },
+        {
+          "path": "Solidity/Semantics/State.lean",
+          "line": 115
+        }
+      ],
+      "remaining": "Representation, evaluation, storage well-formedness and runtime success are not supplied by the data type.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "source-indexed-data",
+      "heads": [
+        "Env",
+        "RCtx",
+        "Heap",
+        "St",
+        "Source.St",
+        "Locals",
+        "Fr",
+        "Program",
+        "Glob",
+        "RExpr",
+        "Data",
+        "RStmt",
+        "Source.EM",
+        "Source.EMState",
+        "Source.Val"
+      ],
+      "description": "Indexed Source environment/state/syntax/computation family. Source.Glob contains Fixed transitively and is not proof-free.",
+      "evidence": [
+        {
+          "path": "Solidity/Source/Resolved.lean",
+          "line": 34
+        },
+        {
+          "path": "Solidity/Source/State.lean",
+          "line": 112
+        },
+        {
+          "path": "Solidity/Source/Machine.lean",
+          "line": 181
+        },
+        {
+          "path": "Solidity/Source/Hoare.lean",
+          "line": 25
+        }
+      ],
+      "remaining": "Namespace, context/layout and nested Fixed constraints remain explicit; no typing, Hoare, MemOK or whole-program law is inferred.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "external-reference-state",
+      "heads": [
+        "EVM.State"
+      ],
+      "description": "Declared external reference-EVM state carrier, used by P10 site fixtures.",
+      "evidence": [
+        {
+          "path": "Bridge/SolidityBridge/RoadmapV15/P10/Interface.lean",
+          "line": 1
+        }
+      ],
+      "remaining": "Imported external type definition/field expansion is not supplied by this local source review; trust and runtime gates remain pending.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "instruction-site-with-bound-proof",
+      "heads": [
+        "Site"
+      ],
+      "description": "P10 site includes pcFits : encoded-prefix length < UInt256.size in addition to seed and code.",
+      "evidence": [
+        {
+          "path": "Bridge/SolidityBridge/RoadmapV15/P10/Interface.lean",
+          "line": 10
+        }
+      ],
+      "remaining": "Constructing pcFits does not prove source lowering, frame origin or instruction agreement; those statements remain separate.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "machine-and-bytecode-data",
+      "heads": [
+        "Solidity.Evm.Machine",
+        "Failure.Slice.Machine",
+        "WordStore",
+        "Backend.Op",
+        "Backend.Program"
+      ],
+      "description": "Executable machine/bytecode/store data; exact native/intrinsic machine identities remain distinct.",
+      "evidence": [
+        {
+          "path": "Solidity/Evm/Machine.lean",
+          "line": 266
+        },
+        {
+          "path": "Solidity/Evm/Machine.lean",
+          "line": 326
+        },
+        {
+          "path": "Solidity/Backend/Failure/Slice.lean",
+          "line": 17
+        },
+        {
+          "path": "Solidity/Backend/Opcode.lean",
+          "line": 467
+        }
+      ],
+      "remaining": "Stores and addresses have intrinsic bounds; no execution, representation or gas-adequacy claim is implied.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "predicate-indexed-pass-data",
+      "heads": [
+        "Pass"
+      ],
+      "description": "Pass has Dom predicate and a proof-indexed run, but no refinement certificate. Pass.comp still requires its closed-domain premise.",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 290
+        },
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 330
+        }
+      ],
+      "remaining": "Distinguish this data constructor from Cert.comp, whose result carries actual semantic laws.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "roadmap-observation-and-settings",
+      "heads": [
+        "AbiCoder",
+        "CoderMode",
+        "EvalOrder",
+        "Settings",
+        "Pin",
+        "Prefix",
+        "Prefixes",
+        "Bytes",
+        "Artifact",
+        "SessionEnv",
+        "Toy"
+      ],
+      "description": "Declared roadmap settings, observations, source program tags or session/artifact carriers.",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 97
+        },
+        {
+          "path": "Solidity/Roadmap/Frontend.lean",
+          "line": 164
+        },
+        {
+          "path": "Solidity/Roadmap/Evm.lean",
+          "line": 59
+        },
+        {
+          "path": "Solidity/Roadmap/Controls.lean",
+          "line": 126
+        }
+      ],
+      "remaining": "No blanket proof-free claim: embedded address bounds, session callbacks and per-input validity remain separate from data construction.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "syntax-and-frontend-plans",
+      "heads": [
+        "RawExpr",
+        "RawTy",
+        "FunDecl",
+        "V1Plan",
+        "Plan"
+      ],
+      "description": "Raw syntax/declaration and replay-plan data; rejection/blocked cases are data constructors, not semantic theorems.",
+      "evidence": [
+        {
+          "path": "Solidity/Syntax/Raw.lean",
+          "line": 1
+        },
+        {
+          "path": "Solidity/Tools/UpstreamEntry.lean",
+          "line": 329
+        }
+      ],
+      "remaining": "Actual parser/admission/acceptance and replay success need independent evidence.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "counterexample-data",
+      "heads": [
+        "Tri",
+        "Cand",
+        "Search",
+        "Peeled",
+        "TDom",
+        "Semantics.CallValue"
+      ],
+      "description": "Three-valued evaluation, candidate/search/peeling or finite-domain data. Typed numeric components retain range evidence.",
+      "evidence": [
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 73
+        },
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 193
+        },
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 523
+        },
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 709
+        },
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 899
+        }
+      ],
+      "remaining": "ff/status and candidate values are not themselves refutation proofs; named soundness/certification theorems remain required.",
+      "does_not_discharge_witness_obligations": true
+    },
+    {
+      "id": "report-and-formatting-data",
+      "heads": [
+        "Json",
+        "MessageData",
+        "FreshNames",
+        "Labels",
+        "Options"
+      ],
+      "description": "Reporting, naming and formatting configuration data in their recorded lexical scopes.",
+      "evidence": [
+        {
+          "path": "Solidity/Tools/Upstream.lean",
+          "line": 24
+        },
+        {
+          "path": "Solidity/AST.lean",
+          "line": 1190
+        },
+        {
+          "path": "Solidity/Tools/LatexTerm.lean",
+          "line": 42
+        },
+        {
+          "path": "Solidity/Tools/LatexTerm.lean",
+          "line": 54
+        }
+      ],
+      "remaining": "Short Options/FreshNames names retain lexical scope; strings/diagnostics and generated names do not certify a theorem.",
+      "does_not_discharge_witness_obligations": true
+    }
+  ],
+  "concrete_folds": {
+    "Solidity.Tools.fmtFold": {
+      "V": "String",
+      "F": "List (Name \u00d7 String)",
+      "L": "Unit",
+      "W": "List String",
+      "M": "List String"
+    },
+    "Solidity.Tools.fmtFoldShadow": {
+      "V": "String (inherited fmtFold)",
+      "F": "List (Name \u00d7 String) (inherited)",
+      "L": "List String",
+      "W": "List String (inherited)",
+      "M": "List String (inherited)"
+    },
+    "Solidity.Tools.mapKeysFold": {
+      "V": "List Nat",
+      "F": "List Nat",
+      "L": "List Nat",
+      "W": "List Nat",
+      "M": "List Nat \u00d7 List Nat"
+    },
+    "Solidity.Tools.encodeFold": {
+      "V": "Slot \u2192 List (Slot \u00d7 Nat)",
+      "F": "(Name \u2192 Slot) \u2192 List (Slot \u00d7 Nat)",
+      "L": "Unit",
+      "W": "(Nat \u2192 Slot) \u2192 Nat \u2192 List (Slot \u00d7 Nat)",
+      "M": "List (Int \u00d7 (Slot \u2192 List (Slot \u00d7 Nat)))"
+    },
+    "Solidity.Tools.intsFold": {
+      "V": "List Int",
+      "F": "List Int",
+      "L": "List Int",
+      "W": "List Int",
+      "M": "List Int"
+    },
+    "Solidity.Tools.renameFold": {
+      "V": "Solidity.SVal",
+      "F": "SFields",
+      "L": "SList",
+      "W": "SVec",
+      "M": "SMap"
+    },
+    "Solidity.Tools.quoteFold": {
+      "V": "Expr",
+      "F": "Expr",
+      "L": "Expr",
+      "W": "Expr",
+      "M": "Expr"
+    }
+  },
+  "reviewed_source_identities": {
+    "Solidity.Roadmap.Address.zero": {
+      "expected_head": "Address",
+      "source_target": "Solidity.Roadmap.Address",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 58
+        }
+      ],
+      "scope_reason": "Roadmap lexical namespace; source alias is Fin(2^160).",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Roadmap.Fixed.createAddress": {
+      "expected_head": "Address",
+      "source_target": "Solidity.Roadmap.Address",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 58
+        }
+      ],
+      "scope_reason": "Roadmap lexical namespace; source alias is Fin(2^160).",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Roadmap.Fixed.hash": {
+      "expected_head": "Word",
+      "source_target": "Solidity.Roadmap.Word",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 55
+        }
+      ],
+      "scope_reason": "Roadmap lexical namespace; do not substitute Evm.Word or Scalar.Word.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Roadmap.Pass.comp": {
+      "expected_head": "Pass",
+      "source_target": "Solidity.Roadmap.Pass",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 290
+        }
+      ],
+      "scope_reason": "Roadmap pass declaration; predicate-indexed data, not Cert.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Roadmap.Controls.idPass": {
+      "expected_head": "Pass",
+      "source_target": "Solidity.Roadmap.Pass",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 290
+        }
+      ],
+      "scope_reason": "Roadmap pass declaration; predicate-indexed data, not Cert.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Roadmap.Controls.artOf": {
+      "expected_head": "Artifact",
+      "source_target": "Solidity.Roadmap.Artifact",
+      "evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 621
+        }
+      ],
+      "scope_reason": "Roadmap controls open their parent Roadmap namespace.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.E": {
+      "expected_head": "Env",
+      "source_target": "Solidity.Source.Env",
+      "evidence": [
+        {
+          "path": "Solidity/Source/Resolve.lean",
+          "line": 36
+        }
+      ],
+      "scope_reason": "Published Source fixture and Source-open context; no intrinsic/source type unification.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.seed": {
+      "expected_head": "Heap",
+      "source_target": "Solidity.Source.Heap",
+      "evidence": [
+        {
+          "path": "Solidity/Source/State.lean",
+          "line": 183
+        }
+      ],
+      "scope_reason": "Published Source fixture and Source-open context; no intrinsic/source type unification.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.program": {
+      "expected_head": "Program",
+      "source_target": "Solidity.Source.Program",
+      "evidence": [
+        {
+          "path": "Solidity/Source/Elaborated.lean",
+          "line": 71
+        }
+      ],
+      "scope_reason": "Published Source fixture and Source-open context; no intrinsic/source type unification.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Tools.freshState": {
+      "expected_head": "State",
+      "source_target": "Solidity.State",
+      "evidence": [
+        {
+          "path": "Solidity/Semantics/State.lean",
+          "line": 115
+        }
+      ],
+      "scope_reason": "Intrinsic typed State lookup in parent Solidity namespace; not external EVM.State.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.State.exampleStore": {
+      "expected_head": "State",
+      "source_target": "Solidity.State",
+      "evidence": [
+        {
+          "path": "Solidity/Semantics/State.lean",
+          "line": 115
+        }
+      ],
+      "scope_reason": "Intrinsic typed State lookup in parent Solidity namespace; not external EVM.State.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.State.testSuiteStore": {
+      "expected_head": "State",
+      "source_target": "Solidity.State",
+      "evidence": [
+        {
+          "path": "Solidity/Semantics/State.lean",
+          "line": 115
+        }
+      ],
+      "scope_reason": "Intrinsic typed State lookup in parent Solidity namespace; not external EVM.State.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Tools.Start.state": {
+      "expected_head": "State",
+      "source_target": "Solidity.State",
+      "evidence": [
+        {
+          "path": "Solidity/Semantics/State.lean",
+          "line": 115
+        }
+      ],
+      "scope_reason": "Intrinsic typed State lookup in parent Solidity namespace; not external EVM.State.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Tools.wordOf": {
+      "expected_head": "Word",
+      "source_target": "Solidity.Evm.Word",
+      "evidence": [
+        {
+          "path": "Solidity/Evm/Machine.lean",
+          "line": 165
+        }
+      ],
+      "scope_reason": "Tools/DiffTest opens Evm at line64; preserve distinction from Roadmap.Word.",
+      "elaborated_identity_claim": false
+    },
+    "Solidity.Latex.Options.ofCore": {
+      "expected_head": "Options",
+      "source_target": "Solidity.Latex.Options",
+      "evidence": [
+        {
+          "path": "Solidity/Tools/LatexTerm.lean",
+          "line": 54
+        }
+      ],
+      "scope_reason": "Local Latex Options declaration takes lexical precedence over opened Lean names.",
+      "elaborated_identity_claim": false
+    }
+  }
+}

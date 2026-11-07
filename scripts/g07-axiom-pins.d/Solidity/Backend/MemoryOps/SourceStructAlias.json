@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/SourceStructAlias.lean:Solidity.Backend.MemoryOps.source_struct_select_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAlias.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_selected_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAlias.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.same_heaps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructAlias.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.selected_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

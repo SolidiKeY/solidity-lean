@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceWordRead.lean:Solidity.Lowering.StorageOps.SourceWordRead.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordRead.lean:Solidity.Lowering.StorageOps.SourceWordRead.read_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

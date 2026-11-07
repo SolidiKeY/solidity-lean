@@ -1,0 +1,31 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.mixedSequence_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.boolTransfer_frame_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.checkedReverse_as_forward": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.mixedTransfer_frame_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.mixedSequence_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.reverseMixedSequence_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

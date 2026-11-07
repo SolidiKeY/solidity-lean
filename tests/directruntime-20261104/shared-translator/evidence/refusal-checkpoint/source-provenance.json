@@ -1,0 +1,54 @@
+{
+  "basisBeforeCommit": "dc2718096308da55e57e713a4d3b37aec4d47606",
+  "boundary": "Development Lean objects/generated C only. No native/WASM artifact or runtime trusted-closure claim.",
+  "files": [
+    {
+      "source": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
+      "sourceSha256": "a8bc38ff1cffea32a6af360812335aa7f6d9262875cfd19daca8c9ecbd53cf64",
+      "olean": {
+        "path": ".lake/build/lib/lean/Solidity/Frontend/ExecutableAst/Shared/Boundary.olean",
+        "sha256": "a5e46a1b002c22c87de45de78d8dfe336c3451bb8c2ea74cdda1eec8e3805185"
+      },
+      "c": {
+        "path": ".lake/build/ir/Solidity/Frontend/ExecutableAst/Shared/Boundary.c",
+        "sha256": "0293a922f4eecfe9319d87cf30fba6bdff8dc99f27d576e189e2203f208fec21"
+      }
+    },
+    {
+      "source": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sourceSha256": "f915d2fdc5a7fd1cf36284df63f4952b99f6f8d8dc913432dde6627f583b4594",
+      "olean": {
+        "path": ".lake/build/lib/lean/Solidity/Frontend/ExecutableAst/Shared/Translate.olean",
+        "sha256": "360c42ad6e0d4da10b672877c131bb99c742b22fd244d9b240b39b26ce82127c"
+      },
+      "c": {
+        "path": ".lake/build/ir/Solidity/Frontend/ExecutableAst/Shared/Translate.c",
+        "sha256": "1a8c6c36f63bf1d45dca1a62203ba9b424c824d645a410c93ac1b3af40ab8594"
+      }
+    },
+    {
+      "source": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+      "sourceSha256": "fbe70d07e9c4a8a12f8ef331108e4b2792c67938eeafac5f39ed5c4239ec4c35",
+      "olean": {
+        "path": ".lake/build/lib/lean/Solidity/Frontend/ExecutableAst/Shared/Intrinsic.olean",
+        "sha256": "5447c04d296cd9a5945ed5db0708fb71f98c44fa163f92177cb7b0e57ce1b298"
+      },
+      "c": {
+        "path": ".lake/build/ir/Solidity/Frontend/ExecutableAst/Shared/Intrinsic.c",
+        "sha256": "22de5d6d3878099d2876c695df4e7d84ab6b2a7d209a7db0cfc015beeb83dc0c"
+      }
+    },
+    {
+      "source": "Solidity/Tools/DirectRuntime.lean",
+      "sourceSha256": "a39fa99e19ef30235eacd6c38eb4c24ec01149b749cc173be426bf7843c91e8d",
+      "olean": {
+        "path": ".lake/build/lib/lean/Solidity/Tools/DirectRuntime.olean",
+        "sha256": "d7c4eb5118138ccfa1a9fae84a07f9fcc9c8590ae9c9a62d58d46c69ddcab244"
+      },
+      "c": {
+        "path": ".lake/build/ir/Solidity/Tools/DirectRuntime.c",
+        "sha256": "9bd812dfc3223164498f8bbf9c575dc244f7f70201a312c10330ee7bd3008efd"
+      }
+    }
+  ]
+}

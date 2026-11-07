@@ -1,0 +1,195 @@
+{
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.expressionFaultWorldAll": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.expressionSourceErrorAll": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.expressionWorldAll": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.functionInputIncoherent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedBooleanNotClean": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedExpressionLegacy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedExpressionRaw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedExpressionSource": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedExpressionViaIR": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedFunctionFields": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedFunctionView": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedScalarAll": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.initializedSelectorNotClean": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.Checks.RawContinueLoop.scalarDropMutation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.initialized_function_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.initialized_scalar_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.initialized_view": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.source_uint8_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.source_uint8_for_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.uint8_body_world": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.uint8_declaration_world": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.uint8_for_no_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.uint8_for_world": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.uint8_statement_world": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawContinueLoop.uint8_world": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.drop_function_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.drop_function_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.drop_scalar_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.drop_scalar_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.drop_view_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.functionRead_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.functionRead_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.functionRead_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.lift_function_fields": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.lift_scalar_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.scalarRead_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.RawTypedScope.scalarRead_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.sourceFunctionAt_surjective": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/RawContinueLoop.lean:Solidity.Yul.SourceFunctionCell.ref_injective": [
+  "Quot.sound",
+  "propext"
+ ]
+}

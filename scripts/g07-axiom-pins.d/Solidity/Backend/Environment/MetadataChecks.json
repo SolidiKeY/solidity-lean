@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/Environment/MetadataChecks.lean:Solidity.Backend.Environment.constant_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/MetadataChecks.lean:Solidity.Backend.Environment.function_projections": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/MetadataChecks.lean:Solidity.Backend.Environment.materialize_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/MetadataChecks.lean:Solidity.Backend.Environment.read_written": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/MetadataChecks.lean:Solidity.Backend.Environment.selector_alignment": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/MetadataChecks.lean:Solidity.Backend.Environment.selector_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Environment/MetadataChecks.lean:Solidity.Backend.Environment.typed_literal_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

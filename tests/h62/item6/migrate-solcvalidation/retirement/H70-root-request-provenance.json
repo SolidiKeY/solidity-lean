@@ -1,0 +1,8 @@
+{
+  "ticket_head": "16d7e371a1e013f492784b596397cf500dbd7543",
+  "reported_file_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+  "preserved_json_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+  "reported_bytes_match": true,
+  "source": "Complete JSON content supplied in the concurrent user relay; serialized here. Coordinator/other-VM paths are provenance only and not assumed locally accessible.",
+  "effect": "Preserve for successor; does not revoke H82 retirement or grant new Lean/source work."
+}

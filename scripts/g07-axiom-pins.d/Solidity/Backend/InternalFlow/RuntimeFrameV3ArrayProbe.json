@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ArrayProbe.failure_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

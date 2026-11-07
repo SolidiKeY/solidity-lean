@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean:Solidity.Backend.StorageOps.NestedPopRegrow.Controls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean:Solidity.Backend.StorageOps.NestedPopRegrow.Controls.bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean:Solidity.Backend.StorageOps.NestedPopRegrow.Controls.capacity_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean:Solidity.Backend.StorageOps.NestedPopRegrow.Controls.concrete_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean:Solidity.Backend.StorageOps.NestedPopRegrow.Controls.empty_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean:Solidity.Backend.StorageOps.NestedPopRegrow.Controls.false_restoration": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean:Solidity.Backend.StorageOps.NestedPopRegrow.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopRegrowControls.lean:Solidity.Backend.StorageOps.NestedPopRegrow.Controls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

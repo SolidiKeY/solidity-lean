@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/TypedLinear.lean:Solidity.Linear.TypedFormula.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/TypedLinear.lean:Solidity.Linear.TypedFormula.verify": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

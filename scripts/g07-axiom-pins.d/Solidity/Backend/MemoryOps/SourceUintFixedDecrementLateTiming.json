@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementLateTiming.lean:Solidity.Backend.MemoryOps.source_uint_fixed_decrement_prefix_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

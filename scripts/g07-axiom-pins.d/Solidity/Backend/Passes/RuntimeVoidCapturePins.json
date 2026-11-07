@@ -1,0 +1,63 @@
+{
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.corrupt_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.evaluated_before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.failure_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.failure_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.fragment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.instantiated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.insufficient_private_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.premature_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidCapturePins.lean:Solidity.Backend.Passes.RuntimeVoidCapture.Controls.stale_capture_refused": []
+}

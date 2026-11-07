@@ -1,0 +1,10 @@
+{
+  "id": "H62-1-INFER-HELPERS",
+  "owner": "solidity-h62-1-20261106/infer-helpers",
+  "status": "reserved",
+  "writeScope": "tests/h62/item1/infer-helpers/**; scripts/h62/item1/infer-helpers/**; docs/feature-work/h62-1-infer-helpers.md",
+  "model": "gpt-6.1-terra",
+  "baseRevision": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "evidence": "receipts/h62-20261106/scopes/1-infer-helpers.json",
+  "writeMode": "exclusive-additive-with-free-exact-files"
+}

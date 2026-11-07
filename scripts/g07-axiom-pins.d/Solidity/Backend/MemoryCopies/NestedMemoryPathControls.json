@@ -1,0 +1,46 @@
+{
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.actual_deep_bind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.alias_keeps_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.capacity_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.copied_children_are_distinct": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.deep_bind_preserves_inhabited_gap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.deep_changes_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.gap_overlapping_old_child_refuted": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.old_child_is_shared": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.populated_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathControls.lean:Solidity.Backend.MemoryCopies.NestedMemoryPathControls.wrong_alias_for_deep_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

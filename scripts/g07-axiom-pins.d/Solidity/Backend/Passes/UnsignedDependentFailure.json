@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Passes/UnsignedDependentFailure.lean:Solidity.Backend.Passes.UnsignedDependentFailure.immediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentFailure.lean:Solidity.Backend.Passes.UnsignedDependentFailure.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentFailure.lean:Solidity.Backend.Passes.UnsignedDependentFailure.reached_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentFailure.lean:Solidity.Backend.Passes.UnsignedDependentFailure.revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

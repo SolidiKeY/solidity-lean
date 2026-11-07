@@ -1,0 +1,63 @@
+{
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.complete_target_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.copied": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.key_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.negative_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.path_injective": [],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.source_cells": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.target_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.wrong_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMappingControls.lean:Solidity.Backend.Aggregates.ScalarMapping.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

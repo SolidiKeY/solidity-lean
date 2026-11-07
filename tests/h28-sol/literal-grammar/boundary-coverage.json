@@ -1,0 +1,708 @@
+{
+  "quote": [
+    {
+      "id": "empty",
+      "raw": [],
+      "expected": null
+    },
+    {
+      "id": "opener-double",
+      "raw": [
+        34
+      ],
+      "expected": null
+    },
+    {
+      "id": "opener-single",
+      "raw": [
+        39
+      ],
+      "expected": null
+    },
+    {
+      "id": "empty-double",
+      "raw": [
+        34,
+        34
+      ],
+      "expected": [
+        34,
+        []
+      ]
+    },
+    {
+      "id": "empty-single",
+      "raw": [
+        39,
+        39
+      ],
+      "expected": [
+        39,
+        []
+      ]
+    },
+    {
+      "id": "double-body",
+      "raw": [
+        34,
+        65,
+        34
+      ],
+      "expected": [
+        34,
+        [
+          65
+        ]
+      ]
+    },
+    {
+      "id": "single-body",
+      "raw": [
+        39,
+        65,
+        39
+      ],
+      "expected": [
+        39,
+        [
+          65
+        ]
+      ]
+    },
+    {
+      "id": "wrong-close-double",
+      "raw": [
+        34,
+        65,
+        39
+      ],
+      "expected": null
+    },
+    {
+      "id": "wrong-close-single",
+      "raw": [
+        39,
+        65,
+        34
+      ],
+      "expected": null
+    },
+    {
+      "id": "invalid-opener",
+      "raw": [
+        33,
+        65,
+        33
+      ],
+      "expected": null
+    },
+    {
+      "id": "internal-quote-helper",
+      "raw": [
+        34,
+        34,
+        34
+      ],
+      "expected": [
+        34,
+        [
+          34
+        ]
+      ]
+    },
+    {
+      "id": "binary-body-helper",
+      "raw": [
+        39,
+        0,
+        255,
+        39
+      ],
+      "expected": [
+        39,
+        [
+          0,
+          255
+        ]
+      ]
+    }
+  ],
+  "scan": [
+    {
+      "id": "double-CRLF-at-EOF",
+      "q": 34,
+      "raw": [
+        92,
+        13,
+        10
+      ],
+      "expected": null
+    },
+    {
+      "id": "single-CRLF-at-EOF",
+      "q": 39,
+      "raw": [
+        92,
+        13,
+        10
+      ],
+      "expected": null
+    },
+    {
+      "id": "double-empty",
+      "q": 34,
+      "raw": [],
+      "expected": null
+    },
+    {
+      "id": "double-close",
+      "q": 34,
+      "raw": [
+        34,
+        65
+      ],
+      "expected": [
+        [
+          34
+        ],
+        [
+          65
+        ]
+      ]
+    },
+    {
+      "id": "double-raw",
+      "q": 34,
+      "raw": [
+        65,
+        34,
+        66
+      ],
+      "expected": [
+        [
+          65,
+          34
+        ],
+        [
+          66
+        ]
+      ]
+    },
+    {
+      "id": "double-raw-LF",
+      "q": 34,
+      "raw": [
+        10,
+        34
+      ],
+      "expected": null
+    },
+    {
+      "id": "double-raw-CR",
+      "q": 34,
+      "raw": [
+        13,
+        34
+      ],
+      "expected": null
+    },
+    {
+      "id": "double-unterminated",
+      "q": 34,
+      "raw": [
+        65
+      ],
+      "expected": null
+    },
+    {
+      "id": "double-lone-slash",
+      "q": 34,
+      "raw": [
+        92
+      ],
+      "expected": null
+    },
+    {
+      "id": "double-escaped-final-quote",
+      "q": 34,
+      "raw": [
+        92,
+        34
+      ],
+      "expected": null
+    },
+    {
+      "id": "double-escape-quote",
+      "q": 34,
+      "raw": [
+        92,
+        34,
+        34,
+        1
+      ],
+      "expected": [
+        [
+          92,
+          34,
+          34
+        ],
+        [
+          1
+        ]
+      ]
+    },
+    {
+      "id": "double-escape-slash",
+      "q": 34,
+      "raw": [
+        92,
+        92,
+        34
+      ],
+      "expected": [
+        [
+          92,
+          92,
+          34
+        ],
+        []
+      ]
+    },
+    {
+      "id": "double-escape-LF",
+      "q": 34,
+      "raw": [
+        92,
+        10,
+        34
+      ],
+      "expected": [
+        [
+          92,
+          10,
+          34
+        ],
+        []
+      ]
+    },
+    {
+      "id": "double-escape-CR",
+      "q": 34,
+      "raw": [
+        92,
+        13,
+        34
+      ],
+      "expected": [
+        [
+          92,
+          13,
+          34
+        ],
+        []
+      ]
+    },
+    {
+      "id": "double-escape-CRLF",
+      "q": 34,
+      "raw": [
+        92,
+        13,
+        10,
+        34
+      ],
+      "expected": [
+        [
+          92,
+          13,
+          10,
+          34
+        ],
+        []
+      ]
+    },
+    {
+      "id": "double-unknown-escape-scan",
+      "q": 34,
+      "raw": [
+        92,
+        122,
+        34
+      ],
+      "expected": [
+        [
+          92,
+          122,
+          34
+        ],
+        []
+      ]
+    },
+    {
+      "id": "double-binary-suffix",
+      "q": 34,
+      "raw": [
+        34,
+        0,
+        255,
+        92,
+        13,
+        10,
+        34
+      ],
+      "expected": [
+        [
+          34
+        ],
+        [
+          0,
+          255,
+          92,
+          13,
+          10,
+          34
+        ]
+      ]
+    },
+    {
+      "id": "double-binary-interior",
+      "q": 34,
+      "raw": [
+        255,
+        0,
+        34
+      ],
+      "expected": [
+        [
+          255,
+          0,
+          34
+        ],
+        []
+      ]
+    },
+    {
+      "id": "single-empty",
+      "q": 39,
+      "raw": [],
+      "expected": null
+    },
+    {
+      "id": "single-close",
+      "q": 39,
+      "raw": [
+        39,
+        65
+      ],
+      "expected": [
+        [
+          39
+        ],
+        [
+          65
+        ]
+      ]
+    },
+    {
+      "id": "single-raw",
+      "q": 39,
+      "raw": [
+        65,
+        39,
+        66
+      ],
+      "expected": [
+        [
+          65,
+          39
+        ],
+        [
+          66
+        ]
+      ]
+    },
+    {
+      "id": "single-raw-LF",
+      "q": 39,
+      "raw": [
+        10,
+        39
+      ],
+      "expected": null
+    },
+    {
+      "id": "single-raw-CR",
+      "q": 39,
+      "raw": [
+        13,
+        39
+      ],
+      "expected": null
+    },
+    {
+      "id": "single-unterminated",
+      "q": 39,
+      "raw": [
+        65
+      ],
+      "expected": null
+    },
+    {
+      "id": "single-lone-slash",
+      "q": 39,
+      "raw": [
+        92
+      ],
+      "expected": null
+    },
+    {
+      "id": "single-escaped-final-quote",
+      "q": 39,
+      "raw": [
+        92,
+        39
+      ],
+      "expected": null
+    },
+    {
+      "id": "single-escape-quote",
+      "q": 39,
+      "raw": [
+        92,
+        39,
+        39,
+        1
+      ],
+      "expected": [
+        [
+          92,
+          39,
+          39
+        ],
+        [
+          1
+        ]
+      ]
+    },
+    {
+      "id": "single-escape-slash",
+      "q": 39,
+      "raw": [
+        92,
+        92,
+        39
+      ],
+      "expected": [
+        [
+          92,
+          92,
+          39
+        ],
+        []
+      ]
+    },
+    {
+      "id": "single-escape-LF",
+      "q": 39,
+      "raw": [
+        92,
+        10,
+        39
+      ],
+      "expected": [
+        [
+          92,
+          10,
+          39
+        ],
+        []
+      ]
+    },
+    {
+      "id": "single-escape-CR",
+      "q": 39,
+      "raw": [
+        92,
+        13,
+        39
+      ],
+      "expected": [
+        [
+          92,
+          13,
+          39
+        ],
+        []
+      ]
+    },
+    {
+      "id": "single-escape-CRLF",
+      "q": 39,
+      "raw": [
+        92,
+        13,
+        10,
+        39
+      ],
+      "expected": [
+        [
+          92,
+          13,
+          10,
+          39
+        ],
+        []
+      ]
+    },
+    {
+      "id": "single-unknown-escape-scan",
+      "q": 39,
+      "raw": [
+        92,
+        122,
+        39
+      ],
+      "expected": [
+        [
+          92,
+          122,
+          39
+        ],
+        []
+      ]
+    },
+    {
+      "id": "single-binary-suffix",
+      "q": 39,
+      "raw": [
+        39,
+        0,
+        255,
+        92,
+        13,
+        10,
+        39
+      ],
+      "expected": [
+        [
+          39
+        ],
+        [
+          0,
+          255,
+          92,
+          13,
+          10,
+          39
+        ]
+      ]
+    },
+    {
+      "id": "single-binary-interior",
+      "q": 39,
+      "raw": [
+        255,
+        0,
+        39
+      ],
+      "expected": [
+        [
+          255,
+          0,
+          39
+        ],
+        []
+      ]
+    }
+  ],
+  "plain": [
+    {
+      "id": "empty-input",
+      "raw": [],
+      "expected": null
+    },
+    {
+      "id": "missing-close-double",
+      "raw": [
+        34
+      ],
+      "expected": null
+    },
+    {
+      "id": "missing-close-single",
+      "raw": [
+        39
+      ],
+      "expected": null
+    },
+    {
+      "id": "empty-double",
+      "raw": [
+        34,
+        34
+      ],
+      "expected": []
+    },
+    {
+      "id": "empty-single",
+      "raw": [
+        39,
+        39
+      ],
+      "expected": []
+    },
+    {
+      "id": "escaped-value",
+      "raw": [
+        34,
+        92,
+        120,
+        102,
+        70,
+        34
+      ],
+      "expected": [
+        255
+      ]
+    },
+    {
+      "id": "unknown-escape",
+      "raw": [
+        34,
+        92,
+        122,
+        34
+      ],
+      "expected": null
+    },
+    {
+      "id": "internal-quote",
+      "raw": [
+        34,
+        34,
+        34
+      ],
+      "expected": null
+    },
+    {
+      "id": "raw-high",
+      "raw": [
+        39,
+        255,
+        39
+      ],
+      "expected": null
+    },
+    {
+      "id": "CRLF-empty",
+      "raw": [
+        34,
+        92,
+        13,
+        10,
+        34
+      ],
+      "expected": []
+    }
+  ]
+}

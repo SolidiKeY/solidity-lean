@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/evm-compiler.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The EVM compiler
 
 `docs/compiler-verification.md` has the theorem, the fragment and what is out.
@@ -134,3 +135,57 @@
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicRelative.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicSourcePadding.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Bitwise/Selected.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Bitwise/Source.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/TryPanicCallMetadata.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Payments/EntrySuccess.lean` | Actual checked-entry acceptance and successful execution on every supported core input; reuses payment-exact success, with pinned standard axioms. |
+| `Evm/MachineV2.lean` | Versioned pair (H57) of the frozen machine: `OutV2` with `revert data`/`ret m data`, `MachineV2` with return buffer, callee reply oracle and call journal, `InstrV2` (`REVERT`/`RETURN` with data, `RETURNDATASIZE`, `RETURNDATACOPY`, `CALLIN` with input bytes); migration to the frozen run (`forget_run_lift`, `callIn_forget`, `callIn_step`) and the return-buffer law `callIn_returndata`. |
+| `Evm/MachineV2Controls.lean` | Kernel-checked joint witness (call, buffer, copy, revert with data), `RETURN` with data, and negative controls (reply-dependent revert data, blind frozen projection, input window read, slot window, copy past buffer, unentered, refused and self calls, partial cell write). |
+| `Backend/InternalFlow/RuntimeFrameP1V2Lift.lean` | Exact canonical V2 observation of actual lifted frozen execution, including arbitrary existing call journals and every frozen outcome; no frame, admission, payload-producing or full P1 adequacy claim. |
+| `Backend/InternalFlow/RuntimeFrameP1V2FramedRevert.lean` | Actual V2 bare-revert execution and exact canonical prefix agreement for certified save/body/restore code under unchanged physical Entry. |
+| `Backend/InternalFlow/RuntimeFrameP1V2FramedRevertControls.lean` | Selected callee-OOB importing consumer with arbitrary journal/buffer, physical Entry, nonempty input stack, wrong-cursor and payload-misclassification refusals. |
+| `Backend/InternalFlow/RuntimeFrameP1V2CallAgreement.lean` | Source outcome classification from actual checked compiler soundness and exact canonical V2 agreement for both outcomes of entered void calls, retaining physical Entry and alias compatibility. |
+| `Backend/InternalFlow/RuntimeFrameP1V2CallAgreementControls.lean` | Actual Mutation.compileCall empty-call success on the populated caller and refusal of an always-revert replacement; complements the reached callee-OOB branch. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ValueAgreement.lean` | Actual V2 private-result save/restore/export execution with the full physical return tuple and both-outcome canonical agreement under the unchanged Entry/alias premises. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ValueAgreementControls.lean` | Public Composition.compileCall readAt family returns seven or reaches OOB failure on populated physical callers; checks export, saved stack, cursor, arbitrary V2 metadata and capture-arena capacity refusal. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReadAtBridge.lean` | Full conditional PassCorrect/BridgeGoal for the actual selected readAt family over canonical P1LangV2; original approved/physical domain agreement, all six V3 Local duties and exact producer-image binding retained. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReadAtBridgeControls.lean` | Actual positive/reverting approved inputs and nonempty-domain controls, both observed outcomes and retention of the full Local/reverting-entry duties. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceAgreement.lean` | Generic actual reference-plan V2 execution with unchanged physical success fields and bare-revert classification; not full session adequacy. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceControls.lean` | Selected finite nested-default reference call, all legal indices, exact graph snapshot and export/capacity refusals. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceRebindAgreement.lean` | Selected whole-struct rebinding agrees for all indices and arbitrary V2 metadata; typed aliases bound conversion; operational missing-export refusal, with original source observations retained in their defining controls and separate execution controls. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceRebindExecutionControls.lean` | Actual lifted bare failure and positive old-graph snapshot for selected rebinding with arbitrary prior metadata; staged conversions under restricted transparency, no source/session adequacy claim. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceBridge.lean` | Generic native reference/tuple full PassCorrect and all six original V3 Local duties over the exact selected plan; unchanged profile/physical/entry premises, actual producer-image binding and rejecting-substitute refutation; not full Source/session provenance. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceBridgeControls.lean` | Actual rebinding/mixed-tuple compiler and dual-entry witnesses, reflexive native test profiles, nonempty native certificates and all-index metadata coverage; no joint external Approved/Source evidence. |
+| `Backend/PrimitivePackets/PanicBytes.lean` | Exact arithmetic Source panic bytes and nontruncation/nonemptiness observations; no selected-target payload claim. |
+| `Backend/Payments/CoreExact.lean` | G43: the core compiler with no refused-payment outcome (`compile_paid`, `compile_success`, `compile_revert`, `compile_storage_paid`); `Sim` carries the joint world/payment relation. |
+| `Backend/Payments/CompilerExact.lean` | G43: `AgreesExact`, `correct_exact` and the compiler-success theorem `compile_success` over every `Compilation` result. |
+| `Backend/Payments/Versioned.lean` | G43 V2 (H57/H98): `Compilation.AgreesV2`/`correct_v2`, `compile_correct_v2`, `_of_v2` migration lemmas to the frozen statements, empty payment branches. |
+| `Backend/Payments/VersionedControls.lean` | G43 V2 witnesses and controls on `payOwner`: joint satisfiability, success and refusal on both sides, the oracle premise carrying the weight. |
+| `Backend/Payments/Headlines.lean` | G43 V2 of `Theorems.compiler_correct`/`compiler_checked` in their notation, with migration lemmas and pinned axioms. |
+| `Evm/MemoryLoopHorizonObjectHeapGrowth.lean` | Actual allocating-body heap extension and exact initial-length-plus-count growth through scope exit. |
+| `Evm/MemoryLoopHorizonObjectHeapControls.lean` | Existentially witnessed selected-loop execution with matched object count and cursor observations. |
+| `Evm/MemoryLoopHorizonObjectHeapKeeps.lean` | Original typed objects survive actual empty-array allocation prefixes. |
+| `Evm/MemoryLoopHorizonObjectHeapTypes.lean` | Exact typed source heap history for the empty-array allocating body. |
+| `Evm/MemoryLoopHorizonObjectLiveCells.lean` | One actual reached machine preserves the explicit original typed live-cell footprint of the allocating loop. |
+| `Evm/MemoryLoopHorizonObjectNewArrays.lean` | Initialization of newly appended uint arrays in the actual allocating loop. |
+| `Evm/MemoryLoopHorizonObjectNewInventory.lean` | Inhabited inventory of the actual allocating loop's new uint arrays. |
+| `Evm/MemoryLoopHorizonObjectNewSeparation.lean` | Pointer separation for actual finite allocating loop executions. |
+| `Evm/MemoryLoopHorizonObjectNewSeparationControls.lean` | An inhabited two-turn control for distinct freshly allocated arrays. |
+| `Evm/MemoryLoopHorizonObjectOldElements.lean` | Physical preservation of live payload cells in original dynamic or fixed arrays across the actual empty-array allocating loop. |
+| `Evm/MemoryLoopHorizonObjectOldHeaders.lean` | Physical preservation of every original dynamic-array header by the actual allocating loop target. |
+| `Evm/MemoryLoopHorizonObjectOldStructs.lean` | Actual allocating target execution preserves encoded primitive and reference fields in original typed struct objects. |
+| `Evm/MemoryLoopHorizonObjectRetainedNew.lean` | Retention of arrays created before a finite allocating-loop pause. |
+| `Evm/MemoryLoopHorizonObjectCheckedNested.lean` | Checked typed nested read selection after allocating-loop execution. |
+| `Evm/MemoryLoopHorizonObjectCheckedReads.lean` | Checked typed read selection after actual allocating-loop execution. |
+| `Evm/MemoryLoopHorizonObjectLocalAlias.lean` | Actual initialized memory locals survive the allocating loop. |
+| `Evm/MemoryLoopHorizonObjectLocalAliasControls.lean` | Inhabited stored-local aliases across genuine allocating-loop execution. |
+| `Evm/MemoryLoopHorizonObjectLocalBounds.lean` | Exact bounds reverts for loads through retained initialized array locals. |
+| `Evm/MemoryLoopHorizonObjectLocalLoadControls.lean` | Inhabited success and bounds-revert observations after allocating loops. |
+| `Evm/MemoryLoopHorizonObjectLocalLoads.lean` | Actual target loads through retained initialized array locals. |
+| `Evm/MemoryLoopHorizonObjectLocalReads.lean` | Reads through actual initialized array locals after allocating loops. |
+| `Evm/MemoryLoopHorizonObjectLocalRefLoads.lean` | Actual reference-valued loads through retained array locals. |
+| `Evm/MemoryLoopHorizonObjectNestedBounds.lean` | Exact parent- or child-stage bounds reverts after allocating loops. |
+| `Evm/MemoryLoopHorizonObjectNestedControls.lean` | Inhabited nested read success and two bounds-failure stages. |
+| `Evm/MemoryLoopHorizonObjectNestedLoads.lean` | Actual nested loads through a retained parent local after loop allocation. |
+| `Evm/MemoryLoopHorizonObjectRetainedRefs.lean` | Typed identities and pointer values retained across actual allocating loop resumption. |

@@ -1,0 +1,4 @@
+Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)
+error: unknown long option '--version'
+{"childMaxRssKiB": 39280, "command": ["bash", "-c", "set -e; lean --version; lake --version; lake build Solidity.Frontend.ExecutableAst.Shared.Boundary Solidity.Frontend.ExecutableAst.Shared.Translate Solidity.Frontend.ExecutableAst.Shared.Intrinsic Solidity.Tools.DirectRuntime; trap \"python3 scripts/coord-tools/lean-mcp stop\" EXIT; python3 scripts/coord-tools/lean-mcp diag tests/directruntime-20261104/shared-translator/AxiomInventory.lean"], "exit": 1, "scopeMemoryPeakBytes": "24018944", "wallSeconds": 0.5410407670024142}
+{"outerExit": 1, "resourceStop": false, "minimumOuterAvailableBytes": 8757927936, "outerWallSeconds": 3.0117125529977784}

@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/V08/SignedCallableControls.lean:Solidity.Lowering.V08.SignedCallableControls.inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SignedCallableControls.lean:Solidity.Lowering.V08.SignedCallableControls.minimum_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SignedCallableControls.lean:Solidity.Lowering.V08.SignedCallableControls.minimum_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SignedCallableControls.lean:Solidity.Lowering.V08.SignedCallableControls.wrong_signed_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

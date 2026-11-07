@@ -23,7 +23,7 @@ def transient : Source.Storage env.layout env.cellTy :=
 def state : Source.St env :=
   { ex :=
       { world := ⟨fun a => if a = address then
-          { balance := ⟨19,by decide⟩, nonce := 3, code := some 0, storage := storage }
+          { balance := 19, nonce := 3, code := some 0, storage := storage }
           else Source.Account.empty _⟩
         transient := Source.Transient.empty.set address transient
         journal := [] }
@@ -45,7 +45,7 @@ def sourceView (s : Source.St env) :=
  ([SourceArrayDeleteTarget.wordAt frame s.ex left,SourceArrayDeleteTarget.wordAt frame s.ex right,
    (((s.ex.transient.cells frame.this).read scratch).bind Source.Val.word).map Fin.val,
    SourceArrayDeleteTarget.wordAt frame s.ex missing],
- s.ex.journal.length,(s.ex.world.accounts address).balance.val,
+ s.ex.journal.length,(s.ex.world.accounts address).balance,
  (s.ex.world.accounts address).nonce,(s.ex.world.accounts address).code,s.events.length,s.logs.length)
 def machine : Evm.Machine :=
  { Evm.Machine.init (fun _=>37) (Evm.wmod 43) with

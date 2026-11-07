@@ -1,0 +1,413 @@
+{
+  "base": "4d3790eadb8a5212233bc7d5e345817476b2f590",
+  "files": {
+    "RawAdapterLoopHorizon.lean": {
+      "count": 25,
+      "sha256": "7495ad9d64b3558c859cd3fa4ffe4188ac7b246468065a1fbd8336a1db325609"
+    },
+    "RawAdapterSequenceLoopHorizon.lean": {
+      "count": 26,
+      "sha256": "387c2d92d2207e46ee44f211005330564d297e85fbd223eafac510520a2c18f5"
+    },
+    "RawBoolFailure.lean": {
+      "count": 55,
+      "sha256": "37a46669a2d0236eb1fec73254762f402350b3be22b3b2e036942e867f5185b4"
+    },
+    "RawBoundary.lean": {
+      "count": 60,
+      "sha256": "3750c8ab1987d1fea90b603eea1674ee1ce483382ce87b3b5ebcdc03e15c390f"
+    },
+    "RawCheckedAdapter.lean": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "RawCheckedAdapterAbsent.lean": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "RawCheckedAdapterDoWhile.lean": {
+      "count": 19,
+      "sha256": "ae853e5853b4413810d6da43a6cacf631b8d70ef4e27511af0676a93b2124036"
+    },
+    "RawCheckedAdapterFor.lean": {
+      "count": 18,
+      "sha256": "542dd60e69f3c0a8436eb9ef34e7236e8611b28a92c4e465d26e822204f09481"
+    },
+    "RawCheckedAdapterIfElse.lean": {
+      "count": 21,
+      "sha256": "7e2214ae1d473be13ab3d6a520b59bb24e81317f55f10e6b73c59169f3bd8d19"
+    },
+    "RawCheckedAdapterLoop.lean": {
+      "count": 35,
+      "sha256": "140e8bbaaa87a8e1f973d47b05392e56bd7c66aad63156307f56a26b9fe9e31a"
+    },
+    "RawCheckedAdapterSequence.lean": {
+      "count": 27,
+      "sha256": "45d7b055b2f78b58122878b9d1cf2298850c3ffb7c15b6e8e0261fbafa010109"
+    },
+    "RawCheckedControlDoWhile.lean": {
+      "count": 19,
+      "sha256": "8f281b81f2ea39888012a92c4a91278cd8c2c5adc3fde28d86c0b1e6465342e7"
+    },
+    "RawCheckedControlDoWhileHorizon.lean": {
+      "count": 25,
+      "sha256": "de737a215b98501ddaac81563fe8d3ef09f7c259977e80e7f6a1f3c923a89365"
+    },
+    "RawCheckedControlIfElse.lean": {
+      "count": 21,
+      "sha256": "4606b5e83234f40b019bd0883c3713706f5b1cfb306b59f2909b3c961ce3df0f"
+    },
+    "RawCheckedControlSequence.lean": {
+      "count": 57,
+      "sha256": "0a48e4cf13bf34d18794f34d08040ec8dc16e71bfb72ab856b3351b37423df2d"
+    },
+    "RawCheckedControlSequenceHorizon.lean": {
+      "count": 38,
+      "sha256": "2b60701410a80f3aaec1902e26f2fd49420aa95e12deb1fc2c6d2df7b954e739"
+    },
+    "RawCheckedControlWhile.lean": {
+      "count": 35,
+      "sha256": "97067adf5bc388bbe59b2215eaf1f5d33a46af0276cbd2d790998fc35fbfcb2b"
+    },
+    "RawCheckedControlWhileHorizon.lean": {
+      "count": 25,
+      "sha256": "b02a1d99bf9cd61b93c3a28cf43064ce5ce49eb24ad8b27e97082d42615f4fa3"
+    },
+    "RawCheckedDoWhile.lean": {
+      "count": 11,
+      "sha256": "c986d34fa239b99fa7f0843a33dc31255576aaf832a222008d0b642f765143ec"
+    },
+    "RawCheckedDoWhileHorizon.lean": {
+      "count": 20,
+      "sha256": "e77b1a5b749da74ad3531f000cc73465046905a7fbb99e59d05f3f629f159ba3"
+    },
+    "RawCheckedForPost.lean": {
+      "count": 35,
+      "sha256": "c3745c3ea9496cdfb1b7132fe3445e14c2d3414f8af624eec7b8661ee1ff6103"
+    },
+    "RawCheckedGrowingAbsent.lean": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "RawCheckedIf.lean": {
+      "count": 21,
+      "sha256": "7a14c67220a66c9efb8ded13f32e83ceca84715e9e8b94ab6824257de6fdaea7"
+    },
+    "RawCheckedIfElse.lean": {
+      "count": 21,
+      "sha256": "92c92500218ac66eb961ebdfe11a423a4a19918d5f515267cb97fb3a4a593fa5"
+    },
+    "RawCheckedIfElseHorizon.lean": {
+      "count": 15,
+      "sha256": "d8f1ccbd63f5892030dc78db8f257a787d598fc09045a9371b43d42136854029"
+    },
+    "RawCheckedIfHorizon.lean": {
+      "count": 15,
+      "sha256": "555fa655703a0216ffb43d39d59569c7912251f279c7cd91a767770ffb979e25"
+    },
+    "RawCheckedInitializedForPost.lean": {
+      "count": 18,
+      "sha256": "156f7c1c8905cb6206e25db4fe9e8dc84811334fd506b132a09250e260934e48"
+    },
+    "RawCheckedSequence.lean": {
+      "count": 45,
+      "sha256": "c9906d19357bef2be1c757ec21bb34e41c6e72cbe40ca90b00828dcc5b404e1f"
+    },
+    "RawCheckedSequenceHorizon.lean": {
+      "count": 31,
+      "sha256": "7551f8a994fb8a51e5ddc76e884cc083677f9c980b68ed449dd1aa97294404f3"
+    },
+    "RawCheckedWhile.lean": {
+      "count": 27,
+      "sha256": "6e41d5a7de7a9ac7b209b252d946c5766e322987f16bcbe2a0ce56c5213306d0"
+    },
+    "RawCheckedWhileHorizon.lean": {
+      "count": 20,
+      "sha256": "11cddaf98fbcf5364b537af28f9ee168d847dd822cbc849047c04fec0b91d5c2"
+    },
+    "RawCoherent.lean": {
+      "count": 9,
+      "sha256": "502be64822bf5f8336887723c37f50eee30c9444dae6fcbd6baf7aae8b219f77"
+    },
+    "RawCondition.lean": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "RawContinueLoop.lean": {
+      "count": 150,
+      "sha256": "82b5e636558bf9fe3424b9bcd460ffbab176754eb035e84ec7d36b6a0675947e"
+    },
+    "RawControlDeclaration.lean": {
+      "count": 24,
+      "sha256": "7318e785c5b58e136f896f3019f3ee23133fda0ea8152b1c1bbfab75dc57372a"
+    },
+    "RawControlForPost.lean": {
+      "count": 13,
+      "sha256": "a5a19a122171b8a045c6283b1b5eac16ff2e098fdaa84ecd3982f78c7ceafa22"
+    },
+    "RawControlGrowingBlock.lean": {
+      "count": 10,
+      "sha256": "8cb738e2d6e9f07311c2e8633e5d023dbd5f02e0a5393d8be5659c2e36fb109f"
+    },
+    "RawControlGrowingSequence.lean": {
+      "count": 19,
+      "sha256": "42da1026f022a94af1b5a265776159970b3d4d268a4ad0257571bb081ef04b33"
+    },
+    "RawControlSequence.lean": {
+      "count": 61,
+      "sha256": "e15cc176f34e28eb3c7a29408cead6c17a0f9ceb0d1de74644f5b5db695128a6"
+    },
+    "RawControlSequenceHorizon.lean": {
+      "count": 29,
+      "sha256": "029c52ee81aa9fab9f363e5f08c5de9c234aaedc08f8c68246fa3da18b496dd5"
+    },
+    "RawControlledWhile.lean": {
+      "count": 49,
+      "sha256": "d4c0465dc5daae020cae249a7a476321989928ba31b24a633bbe30f959f50619"
+    },
+    "RawControlledWhileHorizon.lean": {
+      "count": 25,
+      "sha256": "c39e8d0ce236ac032f53512fceb083aca15ff0460bd20d5e51c32e3a0a514865"
+    },
+    "RawDeclarationFrame.lean": {
+      "count": 6,
+      "sha256": "7a09f73d747995bfac2085ff39decb150f0aa2bcb08b898370fdc9038fc942fb"
+    },
+    "RawDefaultDeclaration.lean": {
+      "count": 14,
+      "sha256": "dec34416fe853eb0ed9ac920f9a16a60c47cfa869df73c1ec84b84f8bfb116d0"
+    },
+    "RawDefaultScope.lean": {
+      "count": 26,
+      "sha256": "e3c8d6bda3589886a1192ce40beda39767f9a8430db8ba0ccef98dd7dd33c82e"
+    },
+    "RawDoWhileHorizon.lean": {
+      "count": 27,
+      "sha256": "283c79737d966a4034db7c8c9341f5453038e526abd4ad6f70eb6ba995f4be99"
+    },
+    "RawForPostHorizon.lean": {
+      "count": 29,
+      "sha256": "00b3695d6e0a1638f5bfc8ca97e314d2b328b52272f1ac2a08d472a2f8b2cc3c"
+    },
+    "RawFrame.lean": {
+      "count": 17,
+      "sha256": "91744945ea4279277339993cc3b7ce4987a607481d3ba319390e883c43b2abce"
+    },
+    "RawGrowingBlock.lean": {
+      "count": 24,
+      "sha256": "48d6094191eb655812e9d9eca0e29840f7e5c6a7700f5cf0535516baf9f493c6"
+    },
+    "RawGrowingForPost.lean": {
+      "count": 13,
+      "sha256": "388f8302311f964962dbe2932dd9629b1a4f2fd74d760a2f1f6ab189cd384f95"
+    },
+    "RawGrowingSequence.lean": {
+      "count": 24,
+      "sha256": "d135681785f60ffb253baa71b5ba1a3d3de98137ea5009a514bfdf73981aacdf"
+    },
+    "RawHorizon.lean": {
+      "count": 24,
+      "sha256": "5383380fe88424a1cd80ac20c55bb989f810e4e461e0c9df34c3b6bc3d5bba47"
+    },
+    "RawIfElse.lean": {
+      "count": 30,
+      "sha256": "a786a3f09fb8f5079e0ae5e31ce7b5506e11b00f7c0317b0a2b2eee36c7095c6"
+    },
+    "RawIfThen.lean": {
+      "count": 24,
+      "sha256": "cf7c40af70bb35dd3a724374588143dddc76a7b7021b082fc62d54db528ba066"
+    },
+    "RawInitializedForHorizon.lean": {
+      "count": 19,
+      "sha256": "278648196c36d6d17cda403c6919d45bb9abc5e41cf51250d1ae42e7f93990b4"
+    },
+    "RawInitializedForPostHorizon.lean": {
+      "count": 19,
+      "sha256": "8aee0b0d1407919b44ce8b3f8ee4192da22fe3298eaedef4e655e4402b8af79c"
+    },
+    "RawIntegerBlock.lean": {
+      "count": 15,
+      "sha256": "3491b5f0c465e45220ed52090b48d70cfaa757baef958b3eb6cd37ed03cae469"
+    },
+    "RawIntegerInitialization.lean": {
+      "count": 10,
+      "sha256": "da006f0ea47c44f5db6ca65f660e89fe78a98327564ad1ce3c409a174d82ac09"
+    },
+    "RawIntegerScope.lean": {
+      "count": 26,
+      "sha256": "b52d4f20d2f5e785af1ffa32ba982aa9de5440839a4d83b4063c743cb74001aa"
+    },
+    "RawIntegerSequence.lean": {
+      "count": 23,
+      "sha256": "c430bb42134d01ffbeda83b372aad9d68bdabed0d9b3d54e94a04c8840d957a3"
+    },
+    "RawLiteralInitialization.lean": {
+      "count": 10,
+      "sha256": "93acc63399547e06e76cdcdb7d517a53b2722999c6e6b9ccc3f61d577ced5f4f"
+    },
+    "RawLiteralScope.lean": {
+      "count": 26,
+      "sha256": "c871e113abbdec8e98624677622243b22dffeca2f8fea251eb40c79ff4c905e3"
+    },
+    "RawLocalDeclaration.lean": {
+      "count": 12,
+      "sha256": "fe576da9b230ee3396d4f47924fc84a71a7f6985725f8d437da4e82ea24ef20b"
+    },
+    "RawLocalScope.lean": {
+      "count": 26,
+      "sha256": "1625f21a29ff09383ed56f70d02538ec46793bdd778500a96b801b9b022b364e"
+    },
+    "RawLoopBody.lean": {
+      "count": 62,
+      "sha256": "fed7764c5a39222890a2dda46cdd6184b8cd88866fbf29693d14377c6af1336c"
+    },
+    "RawLoopBodyHorizon.lean": {
+      "count": 32,
+      "sha256": "1edd495e377453f39cdd11579b78f67f7569a169b7c4d8da3d7757c4d79c27e3"
+    },
+    "RawLoopFailure.lean": {
+      "count": 96,
+      "sha256": "166d8723b4b3cd93833640bcf5aaf05d1325c0aa47064953bf58197e02e92630"
+    },
+    "RawNoGuardFailure.lean": {
+      "count": 87,
+      "sha256": "47d25495083102fbdc7fd363c69e630126fff2b6dc308b395e1401d5e9045575"
+    },
+    "RawNoGuardSource.lean": {
+      "count": 14,
+      "sha256": "b2146441da5e6d6b4a54514124cb185213626cdd3668835685e842f19564ea27"
+    },
+    "RawNoPostFailure.lean": {
+      "count": 59,
+      "sha256": "678e88ebf7021dfee76d5b49be433eb647a6507fd30b6c9c462cd88f4ecfa90a"
+    },
+    "RawPreparedDeclaration.lean": {
+      "count": 18,
+      "sha256": "1ab337f5a42f0e1d2e63e3cde86a2369ede80678b77f00701d9591d28b374f61"
+    },
+    "RawPreparedInteger.lean": {
+      "count": 16,
+      "sha256": "0e263f4c345f18d108f0d9a56992c5ad316b0700573efeabb3a702f0b802dd60"
+    },
+    "RawPureInitTimeout.lean": {
+      "count": 20,
+      "sha256": "cbf2a2caf3eab2028166229b891a870c3d73609cbe0d85d6dc85622e3577b5ea"
+    },
+    "RawReadOnlyViews.lean": {
+      "count": 35,
+      "sha256": "d29c70948732c5b772c08ecc76e9e3f83065d6249c4e2794b5a9a70e84a79ace"
+    },
+    "RawSequence.lean": {
+      "count": 40,
+      "sha256": "15888a9b956b7f7140976df44f3817b4ce9c286e65ade57ce1e2ae1567eb3fdb"
+    },
+    "RawSequenceDoWhileHorizon.lean": {
+      "count": 27,
+      "sha256": "72a0c37be544fd4154957ff21f6ab56ac8cfeed4329ee9ee35e1abb63a66ef3c"
+    },
+    "RawSequenceHorizon.lean": {
+      "count": 23,
+      "sha256": "f2e2ec3b6bfa01bffc784b97d8764e0853d1ceedb61602ec5ca8b3a7eca2766a"
+    },
+    "RawSequenceWhile.lean": {
+      "count": 35,
+      "sha256": "7d94f1fff6d7634323748454bef5391e1b1e94ede4a2979854cabba1aa6b97e9"
+    },
+    "RawSequenceWhileHorizon.lean": {
+      "count": 25,
+      "sha256": "4f46227f7a4dbe0858b86f5d7a772c770d07cb00ac4a5b22d61d05f88ac99953"
+    },
+    "RawSource.lean": {
+      "count": 3,
+      "sha256": "94589eba915986513d940d8802b5d5ce20c611976bb3ba010fe4723fd9e9465a"
+    },
+    "RawSourceAdapter.lean": {
+      "count": 48,
+      "sha256": "76a6e480f83c32f6f42fc7f77c6223c55c0d927f79382cd92bce14b2c9a92b9c"
+    },
+    "RawSourceAdapterDoWhile.lean": {
+      "count": 60,
+      "sha256": "20ffb97d64c4158964359e4f63d28dcbdb337460a05d4b5e5aed7125da23efef"
+    },
+    "RawSourceAdapterFor.lean": {
+      "count": 34,
+      "sha256": "9cf58895215000894ff6a48232a3cf5e5e66367049f854b9ebf3233aca7e0acb"
+    },
+    "RawSourceAdapterIfElse.lean": {
+      "count": 26,
+      "sha256": "02b3130fce2f6b764eedda4ce9c3466dfff1d53e012a61865a77089e81cd28a6"
+    },
+    "RawSourceAdapterLoop.lean": {
+      "count": 35,
+      "sha256": "9798c28312684b6fc25ba7c31857741080a1c1336eba131ef37c9ba107446210"
+    },
+    "RawSourceAdapterUnchecked.lean": {
+      "count": 32,
+      "sha256": "d1ef80fbc3acc713acab90dc2da8d04272bf68f4aee39e361e6ade783dae6b26"
+    },
+    "RawSourceForIter.lean": {
+      "count": 8,
+      "sha256": "699f6b06b6c9f5f583cd537b3c3765daf15cc73bec723e61f2946f63055c0238"
+    },
+    "RawSourceForPost.lean": {
+      "count": 108,
+      "sha256": "bd345c1bff5fc56efbb3a7843b0bafe2c9268ab5e54cd8ba09142cb9cf778c72"
+    },
+    "RawSourceLoopTimeout.lean": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "RawSourceReturnControl.lean": {
+      "count": 24,
+      "sha256": "40e2f46796561958604c4cf22b2bce2334033615b47b006a531363d83c8542a3"
+    },
+    "RawSourceVoidReturn.lean": {
+      "count": 18,
+      "sha256": "7d077333e8a360e79d3005eb0ace15f9a2b44f4e0ae310c3bb08886ad50b302f"
+    },
+    "RawStatementHorizon.lean": {
+      "count": 13,
+      "sha256": "4adc84ee2f31a65b34710a9f9d4dfbcf085b70f97110b067c25abf95cef0d8aa"
+    },
+    "RawTypedScope.lean": {
+      "count": 13,
+      "sha256": "46548e4357b7c2cfcf5530731da3faa3db486d2c9d322bce9769aa79bfe1f63e"
+    },
+    "RawU8Declaration.lean": {
+      "count": 16,
+      "sha256": "b5e4d26dc84ae81271132aad7b36007caa714be8cbdc1c3410b160c5a4d44942"
+    },
+    "RawU8For.lean": {
+      "count": 13,
+      "sha256": "04e5fd20c15c54e626bcef7bd43ec964840991d815ee92137e340620226c1fe7"
+    },
+    "RawU8ForAbsent.lean": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "RawU8ForPost.lean": {
+      "count": 13,
+      "sha256": "d884a6931b2f2dd290517e22e9c437e9d3a2df6a7b99d1772d9600c16d2bd06d"
+    },
+    "RawU8GrowingBlock.lean": {
+      "count": 10,
+      "sha256": "a5ebee39f178b5728a4728aa096c98ccf3d4bb1979987ee4a148e4c7f13dbc0e"
+    },
+    "RawU8GrowingSequence.lean": {
+      "count": 19,
+      "sha256": "cf7615b97af9b2d029a35c2e3af3662bdf7c9e05cfac0d1bdd44122f6360a3e4"
+    },
+    "RawU8Horizon.lean": {
+      "count": 3,
+      "sha256": "9bfd427f9fde5ae401672b5a4b9175c97a2ce94e8ed9f2fb0d665e97368cea10"
+    },
+    "RawU8Statement.lean": {
+      "count": 3,
+      "sha256": "378ebcefa83c97b0121a94ba7e3598c8f6bc651a6a04081c37907ffce449931c"
+    },
+    "RawWhile.lean": {
+      "count": 33,
+      "sha256": "053a2308c25683cc4aa1dcd692373ff3433a0b5f7e51220a4b7b0eddb2e0a15c"
+    }
+  }
+}

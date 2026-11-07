@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/MappingControls.lean:Solidity.Backend.StorageOps.clear_mapping_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MappingControls.lean:Solidity.Backend.StorageOps.copyAt_mapping_below": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MappingControls.lean:Solidity.Backend.StorageOps.delete_mapping_below": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MappingControls.lean:Solidity.Backend.StorageOps.MappingControls.clear_recursive_mapping": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MappingControls.lean:Solidity.Backend.StorageOps.overlay_mapping_read": [
+  "Quot.sound",
+  "propext"
+ ]
+}

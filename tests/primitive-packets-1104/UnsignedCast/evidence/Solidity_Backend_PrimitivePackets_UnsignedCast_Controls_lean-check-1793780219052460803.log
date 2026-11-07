@@ -1,0 +1,4 @@
+COMMAND ["docker", "--host=unix:///var/run/docker.sock", "run", "--rm", "--name", "ucast-98788", "--memory=12g", "--memory-swap=12g", "--network=none", "--mount", "type=bind,src=/workspace/solidity-lean-ucast-1104,dst=/workspace/solidity-lean-ucast-1104", "--mount", "type=bind,src=/workspace/solidity-lean/.lake,dst=/workspace/solidity-lean/.lake", "--mount", "type=bind,src=/home/agent/sol-qn-tools,dst=/tools,readonly", "-w", "/workspace/solidity-lean-ucast-1104", "-e", "LEAN_NUM_THREADS=1", "-e", "LEAN_PATH=/workspace/solidity-lean/.lake/build/lib/lean", "debian:trixie-slim", "/tools/lean-4.24.0-linux/bin/lean", "-j1", "--tstack=131072", "Solidity/Backend/PrimitivePackets/UnsignedCast/Controls.lean"]
+EXIT 0
+SECONDS 2.001
+MINIMUM_AVAILABLE_BYTES 5382467584

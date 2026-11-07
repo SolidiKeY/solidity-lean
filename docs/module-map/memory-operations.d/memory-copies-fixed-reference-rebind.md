@@ -1,0 +1,3 @@
+| `Backend/MemoryCopies/FixedReferenceRebindInterface.lean` | Contract only for checked fixed-reference local rebinding with intrinsic TRun/post-StateRepr, old-object preservation and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceRebind.lean` | Proved checked intrinsic fixed-reference local rebinding, full post-state/allocator, old-heap and fresh-root preservation, and machine capacity refusal. |
+| `Backend/MemoryCopies/FixedReferenceRebindControls.lean` | Populated old-parent/child alias-separation controls, preserved live words, empty/64-element child successes and capacity refusal after path success. |

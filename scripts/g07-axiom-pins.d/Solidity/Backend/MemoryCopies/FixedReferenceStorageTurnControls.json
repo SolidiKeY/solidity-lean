@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.actual_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.actual_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.empty_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.empty_saturated_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.long_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.pair_last": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.pair_saturated_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.saturated_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurnControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls.wrong_headerless_pointer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,79 @@
+[
+  {
+    "command": [
+      "lean",
+      "--version"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.041039055002329405,
+    "aggregate_peak_rss_bytes": 33587200,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/data/measured-0.log"
+  },
+  {
+    "command": [
+      "lake",
+      "--version"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.04080033500213176,
+    "aggregate_peak_rss_bytes": 36192256,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/data/measured-1.log"
+  },
+  {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "tests/fullscope-20261104/vt1/generate-object-data.mjs",
+      "--check"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.3349731429989333,
+    "aggregate_peak_rss_bytes": 172232704,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/data/measured-2.log"
+  },
+  {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "--tstack=131072",
+      "-o",
+      "/workspace/solidity-lean/.lake/build/lib/lean/Solidity/SolcValidation/DataLayout.olean",
+      "Solidity/SolcValidation/DataLayout.lean"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.3903572670024005,
+    "aggregate_peak_rss_bytes": 294187008,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/data/measured-3.log"
+  },
+  {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "--tstack=131072",
+      "tests/fullscope-20261104/vt1/ObjectDataChecks.lean"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.3068343470004038,
+    "aggregate_peak_rss_bytes": 278237184,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/data/measured-4.log"
+  },
+  {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "tests/fullscope-20261104/vt1/object-data.test.mjs"
+    ],
+    "exit": 0,
+    "wall_seconds": 1.4017257269988477,
+    "aggregate_peak_rss_bytes": 214781952,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/data/measured-5.log"
+  }
+]

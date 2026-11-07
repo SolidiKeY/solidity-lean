@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalSourceUint.lean:Solidity.Backend.MemoryOps.Physical.UintArrayAt.read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

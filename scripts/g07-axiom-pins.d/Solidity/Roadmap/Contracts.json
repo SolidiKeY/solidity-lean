@@ -1,0 +1,6 @@
+{
+ "Solidity/Roadmap/Contracts.lean:Solidity.Roadmap.Cert.comp": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Contracts.lean:Solidity.Roadmap.PublicCorrectness.transfer": []
+}

@@ -1,0 +1,74 @@
+{
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.admitted_construct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.argument_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.body_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.constructor_value_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.creation_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.entry_actual": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.finish_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.frame_inputs": [],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.retained_machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.selected_construct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.settlement_actual": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.source_construct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.target_created": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorScalarTransport.lean:Solidity.Lowering.V08.ConstructorScalarTransport.wrong_argument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

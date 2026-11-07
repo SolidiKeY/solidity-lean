@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Serialize separate corpus probes and retain explicit single-thread Lean args.
+# Used only by the final gate, never by an LSP server.
+args=("$@")
+# The coordinator per-file gate uses this exact invocation. Lake's lean
+# subcommand supplies the current package setup/import-artifact map; bare
+# env lean can select stale on-disk oleans despite a correct cache build.
+if [[ $# == 4 && "$1" == env && "$2" == lean && "$3" == --tstack=131072 && "$4" == *.lean ]]; then
+  args=(--no-build lean "$4" -- --tstack=131072 -j1)
+else
+  for arg in "$@"; do
+    if [[ "$arg" == lean ]]; then args+=("-j1"); break; fi
+  done
+fi
+exec flock /tmp/control-tuples-lean-invocations.lock /workspace/.setup/tools/lean-4.24.0-linux/bin/lake "${args[@]}"

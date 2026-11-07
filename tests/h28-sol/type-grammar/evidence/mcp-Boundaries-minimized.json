@@ -1,0 +1,12 @@
+{
+  "command": [
+    "bash",
+    "tests/h28-sol/type-grammar/mcp.sh",
+    "diag",
+    "Solidity/Frontend/TypeGrammarH28/Boundaries.lean"
+  ],
+  "exit": 0,
+  "elapsed_s": 4.8701863060000505,
+  "stdout": "diag: 0 errors\n",
+  "stderr": ""
+}

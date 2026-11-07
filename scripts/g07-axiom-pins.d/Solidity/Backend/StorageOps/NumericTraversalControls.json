@@ -1,0 +1,241 @@
+{
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.absent_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_lifecycle_late_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_lifecycle_wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_pop_push_aliases": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_pop_push_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_pop_push_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_read_absent_default": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_read_changed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_read_failed_aliases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_read_omitted_copy_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_read_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_read_runtime_indices": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_read_runtime_indices_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_read_self_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_absent_default": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_failed_source_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_late_failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_prefix_operands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_runtime_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_self_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_uint_indices": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_uint_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_unchecked_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_copy_write_wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_target_copy_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_target_copy_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_target_failed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_target_input_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.actual_target_self_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.empty_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.full_alias_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.full_copy_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.grow_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.negatives": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.overlap_wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.progress_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.rejected_stores": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.restart": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.self_alias_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.self_alias_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.symbolic_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.with_failed_destination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.wrong_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversalControls.lean:Solidity.Backend.StorageOps.NumericTraversalControls.wrong_symbolic_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

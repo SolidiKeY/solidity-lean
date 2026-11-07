@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.Controls.changed_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.Controls.malformed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.Controls.read_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.Controls.readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.Controls.write_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.Controls.wrong_dynamic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitiveControls.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.Controls.wrong_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

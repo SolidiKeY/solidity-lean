@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.failure_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.index_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.length_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.read_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.related_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.typed_out_of_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.wrong_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ArrayAccessControls.lean:Solidity.Backend.Aggregates.SourceArray.Controls.wrong_location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

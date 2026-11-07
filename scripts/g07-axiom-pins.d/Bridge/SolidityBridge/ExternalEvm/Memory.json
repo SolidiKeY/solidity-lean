@@ -1,0 +1,57 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.active_extent_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.active_wrap_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.empty_load_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.empty_loadAt_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.load_core_macro": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.loadAt_core_macro": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.loadAt_macro": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.store_core_macro": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.storeAt_core_macro": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.storeAt_macro": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Memory.lean:Solidity.Evm.External.Memory.stored_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

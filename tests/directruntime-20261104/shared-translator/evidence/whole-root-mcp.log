@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "output": "warning: Solidity/Calculus/CloseLemmas.lean:137:28: This simp argument is unused:\n  h1\n\nHint: Omit it from the simp argument list.\n  simp only [uintBitwise, h1,̵ ̵h̵1̵', Nat.one_and_eq_mod_two, signedOf]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n⚠ [103/114] Replayed Solidity.Syntax.Elab.Arms\nwarning: Solidity/Syntax/Elab/Arms.lean:1456:11: unused variable `n`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nBuild completed successfully (114 jobs).",
+  "errors": []
+}
+diag: 0 errors
+diag: 0 errors
+PASS lean:tests/directruntime-20261104/shared-translator/ParityControls.lean 3s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/evidence/whole-root-controls/1.log
+PASS lean:tests/directruntime-20261104/shared-translator/ReaderControls.lean 2s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/evidence/whole-root-controls/2.log
+PASS lean:tests/directruntime-20261104/shared-translator/FixtureControls.lean 2s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/evidence/whole-root-controls/3.log
+{"childMaxRssKiB": 574872, "command": ["bash", "-c", "set -e; trap \"python3 scripts/coord-tools/lean-mcp stop\" EXIT; python3 scripts/coord-tools/lean-mcp call lean_build \"{\\\"output_lines\\\":12}\"; python3 scripts/coord-tools/lean-mcp diag Solidity/Frontend/ExecutableAst/Shared/Translate.lean; python3 scripts/coord-tools/lean-mcp diag tests/directruntime-20261104/shared-translator/ParityControls.lean; python3 scripts/coord-tools/lean-mcp stop; GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/evidence/whole-root-controls bash scripts/coord-tools/gate.sh per-file tests/directruntime-20261104/shared-translator/ParityControls.lean tests/directruntime-20261104/shared-translator/ReaderControls.lean tests/directruntime-20261104/shared-translator/FixtureControls.lean"], "exit": 0, "scopeMemoryPeakBytes": "954482688", "wallSeconds": 43.29428938599813}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 14356246528, "outerWallSeconds": 49.66305140300028}

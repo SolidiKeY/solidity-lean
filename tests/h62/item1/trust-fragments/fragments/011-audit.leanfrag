@@ -1,0 +1,20 @@
+-- G09 (`docs/feature-work/frontend-parse.md`): checked parsing of types and
+-- declarations.
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Checked.parse_sound,
+    ``Solidity.Frontend.Checked.parse_derives,
+    ``Solidity.Frontend.Checked.parseType_derives,
+    ``Solidity.Frontend.Checked.declCtors_covered,
+    ``Solidity.Frontend.Checked.recursive_struct,
+    ``Solidity.Frontend.Checked.print_roundtrip,
+    ``Solidity.Frontend.Checked.strBody_sound]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checked-parse (G09) theorems use only the standard axioms"
+

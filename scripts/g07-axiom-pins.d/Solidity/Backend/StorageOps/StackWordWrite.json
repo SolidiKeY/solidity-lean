@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/StackWordWrite.lean:Solidity.Backend.StorageOps.StackWordWrite.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/StorageOps/OperationPush.lean:Solidity.Backend.StorageOps.operationPush_eq_push": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationPush.lean:Solidity.Backend.StorageOps.operationPush_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationPush.lean:Solidity.Backend.StorageOps.operationPush_fresh": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationPush.lean:Solidity.Backend.StorageOps.operationPush_header": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationPush.lean:Solidity.Backend.StorageOps.operationPush_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationPush.lean:Solidity.Backend.StorageOps.operationPush_reset": [
+  "Quot.sound",
+  "propext"
+ ]
+}

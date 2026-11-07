@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.aggregate_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.aggregate_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.bool_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.static_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailureControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailureControls.wrong_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -129,7 +129,7 @@ theorem canon_coverage : CoversMixedHeap canonEntries := by
 def canonResidual : ByteView := mstore (mstore (fun _ => 0xa5) 64 1152) 96 0
 def canonPhysical := encodeMixedHeap canonPlacement canonEntries canonResidual
 def canonState : Source.EMState canonEnv [.array .memory (.int canonS8) (some 4), .array .memory (.int canonS8) (some 4)] :=
-  ⟨.cons (.memRef rfl 1) (.cons (.memRef rfl 1) .nil), ⟨⟨⟨fun _ => Source.Account.empty _⟩, .empty, []⟩, canonHeap, [], [], ⟨[], .nil⟩⟩⟩
+  ⟨.cons (.memRef rfl 1) (.cons (.memRef rfl 1) .nil), ⟨⟨⟨fun _ => Source.Account.empty _⟩, .empty, []⟩, canonHeap, [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem canon_actual_MemOK : Source.MemOK canonEnv canonHeap.ty canonState := by
   obtain ⟨heap, top, inner⟩ := mixedHeap_owner_invariants canonPlacement canonEntries canon_coverage

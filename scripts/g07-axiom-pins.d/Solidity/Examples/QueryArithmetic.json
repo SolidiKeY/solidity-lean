@@ -1,0 +1,17 @@
+{
+ "Solidity/Examples/QueryArithmetic.lean:Solidity.Examples.QueryArithmetic.invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/QueryArithmetic.lean:Solidity.Examples.QueryArithmetic.mixedCounterstore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/QueryArithmetic.lean:Solidity.ReadRealization.Query.Arithmetic.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

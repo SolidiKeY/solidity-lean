@@ -1,0 +1,55 @@
+{
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.double_negate_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.negate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.operand_code": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.operand_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.operand_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.source_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.source_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12NegatedCondition.lean:Solidity.Lowering.V07.P12NegatedCondition.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

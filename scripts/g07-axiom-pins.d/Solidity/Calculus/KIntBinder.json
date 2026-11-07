@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/KIntBinder.lean:Solidity.Fml.holds_zT": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/KIntBinder.lean:Solidity.Fml.zT_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

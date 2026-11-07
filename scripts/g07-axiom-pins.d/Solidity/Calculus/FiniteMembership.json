@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/FiniteMembership.lean:Solidity.holds_finiteMember": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

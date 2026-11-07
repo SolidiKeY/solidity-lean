@@ -1,0 +1,47 @@
+{
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.same_path_components": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.source_self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.source_self_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.source_zero_budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopyControls.different_path_budget_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopyControls.ordered_nontrivial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopyControls.source_target_self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopyControls.typed_roots": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopyControls.zero_budget_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

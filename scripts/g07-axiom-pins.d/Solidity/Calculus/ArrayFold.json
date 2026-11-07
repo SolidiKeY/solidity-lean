@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/ArrayFold.lean:Solidity.Decide.LFml.hasFold_holds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "V12-ABSENCE-INSTANCES",
+  "type": "exact_file_owner_agreement_pending",
+  "owner": "claudecloud/move5-20261106/v12-p1",
+  "sources": [
+    "H70 router",
+    "refactor-audit-20261106.md item11",
+    "semantic-inventory.json"
+  ],
+  "exact_files": [
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrameControls.lean",
+      "declaration": "no_ref",
+      "line": 26
+    },
+    {
+      "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3OrderedEffectfulStorageControls.lean",
+      "declaration": "no_struct",
+      "line": 28
+    }
+  ],
+  "request": "V12 to confirm exact-file owner agreement for possible owner-applied instance migrations after an additive intrinsic absence lemma is proved and validated. These are distinct candidate instances, not established identical helpers. No original edits or migration patch is currently authorized or supplied. Preserve exact statements, explicit live premises, observations and proof budgets.",
+  "status": "current-owner delivery pending; exact-file agreement pending",
+  "dependency": "DEP-435-RAW; require reviewed pinned-4.35 dependency overlay before validation",
+  "delivery": "Saved for host-only coordinator relay; no VM relay installation requested.",
+  "current_routing": "Latest H70: syntax ticket destination migrate-syntax; current V12 delivery pending to claudecloud/move5-20261106/v12-p1. Host journals govern acceptance; no owner agreement or validation inferred.",
+  "H82_disposition": "Exact-file agreement request withdrawn for statement-preserving proof-only edits. Owner still required for statement/semantic definition/interface/budget/axiom/exclusion changes. Retirement: no further implementation; successor owns integration. No Claude-owned source edited or messaged."
+}

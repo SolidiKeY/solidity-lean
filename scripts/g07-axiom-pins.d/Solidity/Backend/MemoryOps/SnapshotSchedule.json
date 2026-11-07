@@ -1,0 +1,55 @@
+{
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_all_len": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_associative": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_cons_some": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_none_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_none_first": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_none_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_reached": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_singleton": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_split_some": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_success_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_two": [
+  "Quot.sound",
+  "propext"
+ ]
+}

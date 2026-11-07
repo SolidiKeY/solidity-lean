@@ -1,0 +1,940 @@
+{
+  "schema": 1,
+  "sourceCommit": "7dbf2748b5b0a02e42cccd6cf25c91fa77c9aade",
+  "masterCommit": "8dbbb58e6eda3d7a8e7e55fbb31e24acf5eb5990",
+  "inventorySha256": "6695909a0a96494b60559f002419f1bcb51c4b8325d34a1634e839e22a2a7105",
+  "entries": [
+    {
+      "key": "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.DecisionTheorem'",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.decideGoal_proved_iff_off_residue",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.decisionTheorem_iff_residue_disjoint",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.residue_iff_unknown",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.arrayBlock_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.dependent_witnesses",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.exhausted_residue",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.fixedArray_witnesses",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.floorBad_residue",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.floorValid_residue",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.hashBudget_residue",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.hash_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.kenc_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.kint_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.ledgerBlock_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.ledger_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.mapping_residue",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.mapping_routeRefusals",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.memory_witnesses",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.quantLedger_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.quant_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.residue_not_claimed",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.sibling_residue_without_reason",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Examples/DecisionResidue.lean:Solidity.Examples.DecisionResidue.storageArray_witness",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Lowering/V08/CallableBodyPremises.lean:Solidity.Lowering.V08.CallableBodyPremises.Inputs",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Lowering/V08/CallableBodyPremises.lean:Solidity.Lowering.V08.CallableBodyPremises.complete",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/Occurrences.lean:Solidity.Yul.OccurrenceSyntax.Prepared.run_unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/Occurrences.lean:Solidity.Yul.OccurrenceSyntax.Prepared.unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/ScopedSyntax.lean:Solidity.Yul.ScopedSyntax.Prepared.code_unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/ScopedSyntax.lean:Solidity.Yul.ScopedSyntax.Prepared.unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/ScopedSyntax.lean:Solidity.Yul.ScopedSyntax.Prepared.wordRun_unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.ClosedSyntax.Checked.finalNames_unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.ClosedSyntax.Checked.unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.WordSyntax.Prepared.program_unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.WordSyntax.Prepared.run_unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.WordSyntax.Prepared.unique",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.First.sameSpelling",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.Second.sameSpelling",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.alphaA",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.alphaB",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.differentBinder",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.differentType",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.indexedOne",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.indexedTwo",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.universeA",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item1/duplication-scanner/SignatureAxioms.lean:H62Signature.Controls.universeB",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteCase",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.capacity_refusal",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.first_byte",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.fuel_precedes_gas",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.gas_precedes_stack",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.gas_refusal",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.image_index_requires_bound",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.last_byte",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.maximum_index",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.maximum_word",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.middle_zero",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.ordered_code",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.ordered_word_bytes",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.outside_word",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.penultimate_byte",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.scalar_refusal_control",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.second_byte",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.stack_boundary",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.stack_refusal",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.typed_image_client",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.wrong_endian",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteControls.zero_word",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.ByteFixture",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.capacity_refusal",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.first_byte",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.fuel_precedes_gas",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.gas_precedes_stack",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.gas_refusal",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.image_index_requires_bound",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.last_byte",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.maximum_index",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.maximum_word",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.middle_zero",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.ordered_code",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.ordered_word_bytes",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.outside_word",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.penultimate_byte",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.scalar_refusal_control",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.second_byte",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.stack_boundary",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.stack_refusal",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.typed_image_client",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.wrong_endian",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.Correspondence.zero_word",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.execute",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.fixture",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.fixtureValues",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/AxiomAudit.lean:GenericP10.fixture_word",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean:GenericP10.execute",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean:GenericP10.fixture",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item4/generic-p10/GenericP10/ByteFixture.lean:GenericP10.fixture_word",
+      "kind": "new",
+      "recorded": null,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ]
+    },
+    {
+      "key": "tests/h62/item6/migrate-backend/OpcodeTernaryDependency.lean:MigrateBackendOpcodeFixture.candidate",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    },
+    {
+      "key": "tests/h62/item6/migrate-backend/TernaryDependency.lean:MigrateBackendFixture.ternaryRec",
+      "kind": "new",
+      "recorded": null,
+      "axioms": []
+    }
+  ]
+}

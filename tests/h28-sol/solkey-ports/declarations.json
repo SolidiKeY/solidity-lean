@@ -1,0 +1,709 @@
+[
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Fresh",
+    "line": 10,
+    "source": "def Fresh (H : HTy) (id : Nat) : Prop := H.length \u2264 id\n\n/-- The threshold is exact: no intrinsically typed object has this identity. -/\n",
+    "sha256": "d85445dbf8b52a7f25483962a4d6823b790bb34340d371c060a818b0872e70c7"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "fresh_iff_absent",
+    "line": 13,
+    "source": "theorem fresh_iff_absent (H : HTy) (id : Nat) :\n    Fresh H id \u2194 \u2200 R (r : HRef H R), r.id \u2260 id := by\n  constructor\n  \u00b7 intro hf R r he\n    have hr := HRef.id_lt r\n    change H.length \u2264 id at hf\n    omega\n  \u00b7 intro ha\n    by_cases hi : H.length \u2264 id\n    \u00b7 exact hi\n    \u00b7 have hit : id < H.length := Nat.lt_of_not_ge hi\n      let r : HRef H H[id] := \u27e8id, List.getElem?_eq_getElem hit\u27e9\n      exact False.elim (ha H[id] r rfl)\n\n/-- Successful typed writes preserve the entire object typing. -/\n",
+    "sha256": "538700944f44112db4794f3c1b42b1319fca8a8b358720e918e528c24e3113ac"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "write_typing",
+    "line": 28,
+    "source": "theorem write_typing {H : HTy} {T : Ty} {m n : Grown H (fun _ => Unit)}\n    {a : MAddrT T} {v : MvT T} (h : m.writeT a v = some n) : n.H' = m.H' := by\n  unfold Grown.writeT at h\n  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h\n  obtain \u27e8ad, _, w, _, hp, _, rfl\u27e9 := h\n  rfl\n\n/-- `newFromWrite`: equality in both directions, for every identity. -/\n",
+    "sha256": "01a42cab7b4ce418d88aca00b6de1b8baa1c4733e41e9d49219d3a0781aa7b26"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "newFromWrite",
+    "line": 36,
+    "source": "theorem newFromWrite {H : HTy} {T : Ty} {m n : Grown H (fun _ => Unit)}\n    {a : MAddrT T} {v : MvT T} (h : m.writeT a v = some n) (id : Nat) :\n    Fresh n.H' id \u2194 Fresh m.H' id := by\n  rw [write_typing h]\n\n/-- A finite spine of successful actual writes, at arbitrary slot types. -/\n",
+    "sha256": "4562b28f074e3d71a99cbdaf549c1574d069c4f61c36786b7e73755a896cd25d"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Writes",
+    "line": 42,
+    "source": "inductive Writes {H : HTy} : Grown H (fun _ => Unit) \u2192 Grown H (fun _ => Unit) \u2192 Prop\n  | nil (m) : Writes m m\n  | snoc {m n p} {T : Ty} (prev : Writes m n) (a : MAddrT T) (v : MvT T)\n      (step : n.writeT a v = some p) : Writes m p\n\n/-- Composition closes over any finite spine, not just one selected update. -/\n",
+    "sha256": "2b3b5da572c91bafc87098f69c1dfd69da9e6c92870d4839cbe50344b8ddf77b"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Writes.typing",
+    "line": 48,
+    "source": "theorem Writes.typing {H : HTy} {m n : Grown H (fun _ => Unit)} (h : Writes m n) :\n    n.H' = m.H' := by\n  induction h with\n  | nil => rfl\n  | snoc prev a v step ih => exact (write_typing step).trans ih\n\n/-- Arbitrary write spines preserve precisely the same freshness threshold. -/\n",
+    "sha256": "d0dfb3ac87aded431d74c6be56a74a4947a08ad70ac62359e34c65d3eb73899b"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Writes.fresh_iff",
+    "line": 55,
+    "source": "theorem Writes.fresh_iff {H : HTy} {m n : Grown H (fun _ => Unit)} (h : Writes m n)\n    (id : Nat) : Fresh n.H' id \u2194 Fresh m.H' id := by\n  rw [h.typing]\n\n/-- Preexisting and fresh identities stay separate across every write spine. -/\n",
+    "sha256": "9a4c8155a3cc00ede3669c93e7ce5742e9e52b2765e42744b18153dccbf492d5"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Writes.separate",
+    "line": 60,
+    "source": "theorem Writes.separate {H : HTy} {m n : Grown H (fun _ => Unit)} (h : Writes m n)\n    {R : RefTy} (r : HRef m.H' R) (id : Nat) (hf : Fresh m.H' id) :\n    Fresh n.H' id \u2227 r.id \u2260 id := by\n  refine \u27e8(h.fresh_iff id).2 hf, ?_\u27e9\n  have hr : r.id < m.H'.length := HRef.id_lt r\n  change m.H'.length \u2264 id at hf\n  omega\n\n/-- Allocation transports freshness backwards, including nested storage copies. -/\n",
+    "sha256": "44cc0a5c58b557d09478656667e8219fbaf9465cf791c29f3d0f72c18c76190b"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "newFromCopySt",
+    "line": 69,
+    "source": "theorem newFromCopySt {H : HTy} (hp : Heap H) {T : Ty} (v : SVal T)\n    (hm : T.mapFree = true) (id : Nat) :\n    Fresh (v.copyStToM hp hm).H' id \u2192 Fresh H id := by\n  exact Nat.le_trans (v.copyStToM hp hm).ext.length_le\n\n/-- A reference copy supplies a new identity, apart from each original object. -/\n",
+    "sha256": "acc88023cab2e3ab507af1f521949908a47a327f8b97199ad1410162b2b8a1b2"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "copy_witness",
+    "line": 75,
+    "source": "theorem copy_witness {H : HTy} (hp : Heap H) {R S : RefTy} (v : SVal (.ref R))\n    (hm : (Ty.ref R).mapFree = true) (old : HRef H S) :\n    let g := v.copyStToM hp hm\n    Fresh H g.val.id \u2227 \u00ac Fresh g.H' g.val.id \u2227 (old.wk g.ext).id \u2260 g.val.id := by\n  have hf : H.length \u2264 (v.copyStToM hp hm).val.id := SVal.copyStToM_id_ge hp v hm\n  have hn := HRef.id_lt (v.copyStToM hp hm).val\n  have ho := HRef.id_lt old\n  refine \u27e8hf, ?_, ?_\u27e9\n  \u00b7 exact Nat.not_le_of_lt hn\n  \u00b7 change old.id \u2260 (v.copyStToM hp hm).val.id\n    omega\n\n/-- The tempting forward converse fails for every inhabited reference copy. -/\n",
+    "sha256": "5c6bb78c0bbfc962122b673f04e451fdaa1297c2b878d8b5aaae1b66cfd5441a"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "copy_not_converse",
+    "line": 88,
+    "source": "theorem copy_not_converse {H : HTy} (hp : Heap H) {R : RefTy} (v : SVal (.ref R))\n    (hm : (Ty.ref R).mapFree = true) :\n    \u00ac (\u2200 id, Fresh H id \u2192 Fresh (v.copyStToM hp hm).H' id) := by\n  intro h\n  have hf := h (v.copyStToM hp hm).val.id (SVal.copyStToM_id_ge hp v hm)\n  exact Nat.not_le_of_lt (HRef.id_lt (v.copyStToM hp hm).val) hf\n\n/-- Actual copies and writes may be arbitrarily interleaved; no separation premise. -/\n",
+    "sha256": "2ebff5654dc05481e2375bb2855a9309d3d92f7a838a1cd90e209d94c242be6a"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Operations",
+    "line": 96,
+    "source": "inductive Operations : {H K : HTy} \u2192 Heap H \u2192 Heap K \u2192 Prop\n  | nil {H} (hp : Heap H) : Operations hp hp\n  | write {H K} {hp : Heap H} {hq : Heap K} (prev : Operations hp hq)\n      {T : Ty} (a : MAddr K T) (v : MVal K T) (hr : Heap K)\n      (step : hq.writeAddr a v = some hr) : Operations hp hr\n  | copy {H K} {hp : Heap H} {hq : Heap K} (prev : Operations hp hq)\n      {T : Ty} (v : SVal T) (hm : T.mapFree = true) :\n      Operations hp (v.copyStToM hq hm).heap\n\n/-- Composition derives growth from actual constructors, for arbitrarily many copies. -/\n",
+    "sha256": "dfe79bd859780ea0d56dcfd60d0b5d61a4721b566be546ee05760a57500a813e"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Operations.prefix",
+    "line": 106,
+    "source": "theorem Operations.prefix {H K : HTy} {hp : Heap H} {hq : Heap K}\n    (h : Operations hp hq) : H <+: K := by\n  induction h with\n  | nil => exact List.prefix_refl _\n  | write prev a v hr step ih => exact ih\n  | copy prev v hm ih => exact ih.trans (v.copyStToM _ hm).ext\n\n/-- An arbitrary mixed sequence transports threshold certificates backwards. -/\n",
+    "sha256": "d898eee54f40814c5dee416fb578c64e880661b35e00777acf54f57adf7c3724"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Operations.fresh_back",
+    "line": 114,
+    "source": "theorem Operations.fresh_back {H K : HTy} {hp : Heap H} {hq : Heap K}\n    (h : Operations hp hq) (id : Nat) : Fresh K id \u2192 Fresh H id :=\n  Nat.le_trans h.prefix.length_le\n\n/-- Old references retain identity and remain apart from every finally fresh id. -/\n",
+    "sha256": "ec00cf5dc81d5aa77d02db9015d74e19ea788bca27e7e84917bb35ca0e31ccb8"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "Operations.separate",
+    "line": 119,
+    "source": "theorem Operations.separate {H K : HTy} {hp : Heap H} {hq : Heap K}\n    (h : Operations hp hq) {R : RefTy} (r : HRef H R) (id : Nat) (hf : Fresh K id) :\n    (r.wk h.prefix).id = r.id \u2227 (r.wk h.prefix).id \u2260 id := by\n  refine \u27e8rfl, ?_\u27e9\n  change r.id \u2260 id\n  have hb : Fresh H id := h.fresh_back id hf\n  have hr := HRef.id_lt r\n  change H.length \u2264 id at hb\n  omega\n\n/-- Copied roots retain separation through any later copy/write sequence.\nFor `b = copy(a); b[i] = x`, this talks about identities even after writes\nchange the copied contents; it does not assert that contents still mirror a. -/\n",
+    "sha256": "766bb0050fd4251afbb36e0ea481a4ab267a540e97cc88cf2dd2c9f1bc57d227"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "copy_then_witness",
+    "line": 132,
+    "source": "theorem copy_then_witness {H K : HTy} (hp : Heap H) {R S : RefTy}\n    (v : SVal (.ref R)) (hm : (Ty.ref R).mapFree = true) (old : HRef H S)\n    {hq : Heap K} (suffix : Operations (v.copyStToM hp hm).heap hq) :\n    let g := v.copyStToM hp hm\n    let root : HRef K R := HRef.wk suffix.prefix g.val\n    root.id = g.val.id \u2227 Fresh H root.id \u2227 \u00ac Fresh K root.id \u2227\n      (old.wk (g.ext.trans suffix.prefix)).id \u2260 root.id := by\n  have hf := SVal.copyStToM_id_ge hp v hm\n  have ho := HRef.id_lt old\n  have hr := HRef.id_lt (HRef.wk suffix.prefix (v.copyStToM hp hm).val)\n  refine \u27e8rfl, hf, Nat.not_le_of_lt hr, ?_\u27e9\n  change old.id \u2260 (v.copyStToM hp hm).val.id\n  omega\n\n/-- Copies separated by arbitrary actual operations have strictly ordered roots.\nNo injectivity or separation assumption is supplied by the caller. -/\n",
+    "sha256": "c17b06e01e4acbfeb385f5a20eb0c7b4d364b076c8c577bb89787906427d3505"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "copies_ordered",
+    "line": 148,
+    "source": "theorem copies_ordered {H K : HTy} (hp : Heap H) {R S : RefTy}\n    (v : SVal (.ref R)) (hv : (Ty.ref R).mapFree = true) {hq : Heap K}\n    (middle : Operations (v.copyStToM hp hv).heap hq)\n    (w : SVal (.ref S)) (hw : (Ty.ref S).mapFree = true) :\n    (HRef.wk middle.prefix (v.copyStToM hp hv).val).id < (w.copyStToM hq hw).val.id := by\n  have ha := HRef.id_lt (v.copyStToM hp hv).val\n  have hb := middle.prefix.length_le\n  have hc := SVal.copyStToM_id_ge hq w hw\n  change (v.copyStToM hp hv).val.id < (w.copyStToM hq hw).val.id\n  omega\n\n/-- The complete structural mirror certificate includes every nested allocation. -/\n",
+    "sha256": "baa30ba80d71894f14271eb2fea38de9365c61a1eaf8d6f5678bd850ceb6d505"
+  },
+  {
+    "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+    "name": "copy_mirror",
+    "line": 160,
+    "source": "theorem copy_mirror {H : HTy} (hp : Heap H) {T : Ty} (v : SVal T)\n    (hm : T.mapFree = true) :\n    v.Mirrors (v.copyStToM hp hm).heap H.length (v.copyStToM hp hm).val :=\n  SVal.mirrors_copyStToM hp v hm\n",
+    "sha256": "7e19f3452260e29d1b30a2986c73d159739a360653db1ce8b9744f115fdaae33"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "z",
+    "line": 7,
+    "source": "def z : PrimTy.uint.Denote := PrimTy.dflt .uint\n",
+    "sha256": "2c02206250e75bb068eae891fa5679001b657bd12cc0c9015a91c5cf3eb7b478"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "one",
+    "line": 8,
+    "source": "def one : PrimTy.uint.Denote := \u27e81, by decide\u27e9\n",
+    "sha256": "b87b4579438c32c537b8c25de804842ee47dd40478b13000499b31f7945df4be"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "hp",
+    "line": 9,
+    "source": "def hp : Heap [.array Ty.uint] := (\u27e8[z], by decide\u27e9, ())\n",
+    "sha256": "612918b2e21d0b33b8c70ae41a46c209000333604d6bb7473fac4ef7fa736c6a"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "hp1",
+    "line": 10,
+    "source": "def hp1 : Heap [.array Ty.uint] := (\u27e8[one], by decide\u27e9, ())\n",
+    "sha256": "6e22d7ad17808a1101f035c7d405ee2ff3221c96026b482bae09cdef3a7b7d28"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "m",
+    "line": 11,
+    "source": "def m : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, hp, ()\u27e9\n",
+    "sha256": "f21e36a0b07b1c0793a604eab643dca2c5950736d5620dae3f41085b0e1db531"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "m1",
+    "line": 12,
+    "source": "def m1 : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, hp1, ()\u27e9\n",
+    "sha256": "b80a69f347a042023df829826c9ba90c71d2bba580e6f50a1ebe2362689a7e1d"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "at0",
+    "line": 13,
+    "source": "def at0 : MAddrT Ty.uint := .index 0 .dyn z\n\n",
+    "sha256": "bffa42df67e62911deddb79266a4215c27010cd1033a65fda0f9e6366ef6e72a"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "index_primitive",
+    "line": 15,
+    "source": "theorem index_primitive : m.writeT at0 one = some m1 := by with_unfolding_all rfl\n",
+    "sha256": "2bd6a56a1a625e34406df5ed93f207cfeba2ef0036d7a1f8a13728621e1f6e88"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "index_read_changed",
+    "line": 16,
+    "source": "theorem index_read_changed : m1.readId at0 = some one \u2227 m.readId at0 = some z := by\n  exact \u27e8by with_unfolding_all rfl, by with_unfolding_all rfl\u27e9\n",
+    "sha256": "8c7884ff385a6787441ed7d613ae84cb557c209b581f345068dfdcdf6d5f40f9"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "write_reverse",
+    "line": 18,
+    "source": "theorem write_reverse : Fresh m.H' 1 \u2192 Fresh m1.H' 1 := (newFromWrite index_primitive 1).2\n",
+    "sha256": "04db008939cbd6eb4cd078e599681ce91bb48db293c53caa0b55c8ed542d1363"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "write_forward",
+    "line": 19,
+    "source": "theorem write_forward : Fresh m1.H' 1 \u2192 Fresh m.H' 1 := (newFromWrite index_primitive 1).1\n",
+    "sha256": "11007d6a9a2b22b09e32bc0bba085e292c5d56468218d0751fd6b1ce5addd4ad"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nil_writes",
+    "line": 20,
+    "source": "theorem nil_writes : Writes m m := .nil m\n",
+    "sha256": "52858491a2532e0ecb64e9f95ba7a59be294895a9c2f01d735c83fbc3dd29562"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nonempty_writes",
+    "line": 21,
+    "source": "theorem nonempty_writes : Writes m m1 := .snoc (.nil m) at0 one index_primitive\n",
+    "sha256": "9a14636b1008cb67e8a1bb13d4497b51c24fbd4644224591477725240bee4dcf"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "overwrite_back",
+    "line": 22,
+    "source": "theorem overwrite_back : m1.writeT at0 z = some m := by with_unfolding_all rfl\n",
+    "sha256": "8c552024a3d487abdc8ca6468b52bf05fb31e0341c1726ae5cf8d24858eb971e"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "multiple_writes",
+    "line": 23,
+    "source": "theorem multiple_writes : Writes m m := .snoc nonempty_writes at0 z overwrite_back\n\n",
+    "sha256": "b86c1f1a2d86ff85c7e61d922bf39d19b79a86314a3234a4d29bf4a4a51c6e12"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "old",
+    "line": 25,
+    "source": "def old : HRef [.array Ty.uint] (.array Ty.uint) := \u27e80, rfl\u27e9\n",
+    "sha256": "96b768fe7ba6e11067040809f21d107c93682eef7d92131724790a556ab028c1"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "sequence_separation",
+    "line": 26,
+    "source": "theorem sequence_separation : Fresh m.H' 1 \u2227 old.id \u2260 1 :=\n  multiple_writes.separate old 1 (Nat.le_refl 1)\n",
+    "sha256": "c1bc023635d65ea441a344fcd9f85a0a9b49c4ee61c6bf6afca050c4cc71f0ce"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "allocated_not_fresh",
+    "line": 28,
+    "source": "theorem allocated_not_fresh : \u00ac Fresh m.H' 0 := Nat.not_le_of_lt (by decide : 0 < 1)\n",
+    "sha256": "2c06a2573023e12f188958040446e57af95365a3b15c016cf8bfef073a45f47b"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "threshold_boundary",
+    "line": 29,
+    "source": "theorem threshold_boundary : Fresh m.H' 1 := Nat.le_refl 1\n",
+    "sha256": "267e6fa42acc05f5573c1c02e248a478df26875873c9d48bded66eba2a24ab1a"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "failed_identity",
+    "line": 30,
+    "source": "theorem failed_identity : m.writeT (.index 9 .dyn z : MAddrT Ty.uint) one = none := by with_unfolding_all rfl\n",
+    "sha256": "dd0edf752f6e97a9374c30eb871a17ab03000d372ed57671363c952f6ff1a17d"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "failed_index",
+    "line": 31,
+    "source": "theorem failed_index : m.writeT (.index 0 .dyn one : MAddrT Ty.uint) one = none := by with_unfolding_all rfl\n\n",
+    "sha256": "6f0ffa4fa7a38ca2bcd602d63e370d134df93727a7db96b481f2be8174eb8bef"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "tokenHeap",
+    "line": 33,
+    "source": "def tokenHeap : Heap [.struct \"Token\"] := ((z, ()), ())\n",
+    "sha256": "f7f9b82a1e219493e27002d28d1a4166b84884f0921fe5f2f091fc1e4affddd3"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "tokenMem",
+    "line": 34,
+    "source": "def tokenMem : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, tokenHeap, ()\u27e9\n",
+    "sha256": "155da4b2c0c1d65c6cb3acab3e364e5839b7e3dbda8cece7af42e8ca74900731"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "tokenOne",
+    "line": 35,
+    "source": "def tokenOne : Grown [] (fun _ => Unit) := { H' := [.struct \"Token\"], ext := List.nil_prefix, heap := ((one, ()), ()), val := () }\n",
+    "sha256": "73a6319c9c9ee777792bcaa64d851ef4675ff834319207a5deaec5d02f3ed464"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "field_primitive",
+    "line": 36,
+    "source": "theorem field_primitive : tokenMem.writeT (.field 0 (s := \"Token\") (f := \"value\") rfl) one =\n    some tokenOne := by with_unfolding_all rfl\n\n",
+    "sha256": "e84c6ff3b01af4fe6073d80c85c85e7ccb8ec993ca3b4d84f762d809b2b9ccea"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "refsHeap",
+    "line": 39,
+    "source": "def refsHeap : Heap [.struct \"Token\", .struct \"Account\"] :=\n  ((z, ()), ((z, (\u27e80, rfl\u27e9, ())), ()))\n",
+    "sha256": "5698ebfa5d1b621f7a362135c7a62df495bd33271774751df1f113475ef9192a"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "refs",
+    "line": 41,
+    "source": "def refs : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, refsHeap, ()\u27e9\n",
+    "sha256": "c6858faca76b31c0662128b06ec2bfc4a4210b3fcc9792123915f6a284fffe87"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "tokenField",
+    "line": 42,
+    "source": "def tokenField : MAddrT (.ref (.struct \"Token\")) :=\n  .field 1 (s := \"Account\") (f := \"token\") rfl\n",
+    "sha256": "b09859b88588ff9bddad0ec2bdeba9374bc1b698aa1cd650a6af01f2c1773191"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "field_reference",
+    "line": 44,
+    "source": "theorem field_reference : refs.writeT tokenField 0 = some refs := by with_unfolding_all rfl\n",
+    "sha256": "f8678ef81e5518fe6d71538b6b0a320937f553678ec77e13e50ecb670f1885a9"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "failed_reference",
+    "line": 45,
+    "source": "theorem failed_reference : refs.writeT tokenField 1 = none := by with_unfolding_all rfl\n\n",
+    "sha256": "a6fe468fe5c76299bc6a40587959013ef257d9aeb2352b67774dd102fb7ef4af"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "refArrHeap",
+    "line": 47,
+    "source": "def refArrHeap : Heap [.struct \"Token\", .array (.ref (.struct \"Token\"))] :=\n  ((z, ()), (\u27e8[\u27e80, rfl\u27e9], by decide\u27e9, ()))\n",
+    "sha256": "b88cc4bccd49559105c28a8a667980e743c03cd303109885c391bba36b0a05d2"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "refArr",
+    "line": 49,
+    "source": "def refArr : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, refArrHeap, ()\u27e9\n",
+    "sha256": "7d593334262e8cdaa3dabfb828d6151088923f6f3b4593a40aa33297ceb78737"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "index_reference",
+    "line": 50,
+    "source": "theorem index_reference : refArr.writeT (.index 1 .dyn z : MAddrT (.ref (.struct \"Token\"))) 0 = some refArr := by with_unfolding_all rfl\n\n",
+    "sha256": "0acae377be0327fc6ba5010637732dfbc3e8f3e714b57bc76b20f480b9791025"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "fixedHeap",
+    "line": 52,
+    "source": "def fixedHeap : Heap [.fixed Ty.uint 1] := (\u27e8[z], rfl\u27e9, ())\n",
+    "sha256": "100e429bdd42964eb96d83831f10658032c77eb4b6e51cd39a1a2063207beb2e"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "fixedMem",
+    "line": 53,
+    "source": "def fixedMem : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, fixedHeap, ()\u27e9\n",
+    "sha256": "e6153423540e33424642b9a4c4cf07ba948790a6e4afa5018b4cf897a28e81cc"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "fixed_index",
+    "line": 54,
+    "source": "theorem fixed_index : fixedMem.writeT (.index 0 (ArrTy.fixed (n := 1)) z : MAddrT Ty.uint) z = some fixedMem := by with_unfolding_all rfl\n\n",
+    "sha256": "fc7855873ccdb1b9583f5de84c73407717bf0f84c8d3c130988cff0bc41ec091"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "token",
+    "line": 56,
+    "source": "def token : SVal (.ref (.struct \"Token\")) := .struct (.cons (.prim z) .nil)\n",
+    "sha256": "080f2374eb54fd534a28e9fac9eafe3c528979d3a3f981e2ac1c930be9036fff"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "emptyArr",
+    "line": 57,
+    "source": "def emptyArr : SVal (.ref (.array Ty.uint)) := .array .nil .nil (by decide)\n",
+    "sha256": "f79fd2f628b3c6236f9e9e9c3b71369c731b91e31813108efd4425e7946c02fc"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "liveArr",
+    "line": 58,
+    "source": "def liveArr : SVal (.ref (.array Ty.uint)) := .array (.cons (.prim z) .nil) .nil (by decide)\n",
+    "sha256": "fc4b2dbc705b6126e54afaa7bb0e908db1782c948a2eb119fbeb770ca25717de"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "emptyFixed",
+    "line": 59,
+    "source": "def emptyFixed : SVal (.ref (.fixed Ty.uint 0)) := .fixed .nil\n",
+    "sha256": "27dfb446ac9570b70945145fbc8b04be0c8380b1fa490a63a35ecaa6301d3646"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "liveFixed",
+    "line": 60,
+    "source": "def liveFixed : SVal (.ref (.fixed Ty.uint 1)) := .fixed (.cons (.prim z) .nil)\n",
+    "sha256": "dd9b981d9902b08a3bfcc9382b1ccc1638ad0f0f3357930e8f4101c90bc51380"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nested",
+    "line": 61,
+    "source": "def nested : SVal (.ref (.struct \"TokenBucket\")) :=\n  .struct (.cons (.array (.cons token (.cons token .nil)) .nil (by decide)) .nil)\n",
+    "sha256": "d64761cbedc25275684141e50728df707437c75c6310f56497099474e707f0f8"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "person",
+    "line": 63,
+    "source": "def person : SVal (.ref (.struct \"Person\")) :=\n  .struct (.cons (.struct (.cons (.prim z) (.cons token .nil))) (.cons (.prim z) .nil))\n\nmacro \"copy_reduce\" : tactic => `(tactic|\n  simp only [SVal.copyStToM_struct, SFields.copyStToM_cons, SFields.copyStToM_nil,\n    SVal.copyStToM_array, SVal.copyStToM_fixed, SVec.copyStToM_cons,\n    SVec.copyStToM_nil, SVal.copyStToM_prim])\n\n",
+    "sha256": "8d4548784084648404184d7b76d495d3d119df0f84f7205877252d1f53f5ed38"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "primitive_no_alloc",
+    "line": 71,
+    "source": "theorem primitive_no_alloc : ((SVal.prim z).copyStToM hp rfl).H' = [.array Ty.uint] := by\n  rw [SVal.copyStToM_prim]\n",
+    "sha256": "0fa3edcfd45fd7e7b093d9e05e32642ad652c4f4850406a08d99a64f34912c12"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "primitive_threshold",
+    "line": 73,
+    "source": "theorem primitive_threshold : Fresh ((SVal.prim z).copyStToM hp rfl).H' 1 \u2194 Fresh [.array Ty.uint] 1 := by\n  rw [SVal.copyStToM_prim]\n",
+    "sha256": "27dde886974c06c8edb28f77eef0f0d81ad8d51ff861835c93e039a76cd0db09"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "empty_array_alloc",
+    "line": 75,
+    "source": "theorem empty_array_alloc : (emptyArr.copyStToM hp rfl).val.id = 1 := by\n  unfold emptyArr; copy_reduce; rfl\n",
+    "sha256": "b4d440dbffc93fcef0f9e253322b0a41413817d5c473a28fb96b637bc899991b"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "live_array_alloc",
+    "line": 77,
+    "source": "theorem live_array_alloc : (liveArr.copyStToM hp rfl).val.id = 1 := by\n  unfold liveArr; copy_reduce; rfl\n",
+    "sha256": "f5a58782f63a5dc729d22c8f9fd8435fa1afe45104415ad26438b4ddbbe06a6c"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "empty_fixed_alloc",
+    "line": 79,
+    "source": "theorem empty_fixed_alloc : (emptyFixed.copyStToM hp rfl).val.id = 1 := by\n  unfold emptyFixed; copy_reduce; rfl\n",
+    "sha256": "aff352c224c7066ae6c9e55e2415200744a2a626fa5c34fd41eec0903b4ba0c7"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "live_fixed_alloc",
+    "line": 81,
+    "source": "theorem live_fixed_alloc : (liveFixed.copyStToM hp rfl).val.id = 1 := by\n  unfold liveFixed; copy_reduce; rfl\n",
+    "sha256": "bfef3b29d864b8e9ce788c7d437b86b5fefb62392daab49a5f7d817cbd8154e9"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "token_alloc",
+    "line": 83,
+    "source": "theorem token_alloc : (token.copyStToM hp rfl).val.id = 1 := by\n  unfold token; copy_reduce; rfl\n",
+    "sha256": "90b0a06b9a714f3acd7d5d1cff3b248aa1d932c7cb697cca3441362db52e379b"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "person_alloc",
+    "line": 85,
+    "source": "theorem person_alloc : (person.copyStToM hp rfl).val.id = 3 := by\n  unfold person token; copy_reduce; rfl\n",
+    "sha256": "324cfeaedfde5a8b97ae9c1cc236a7e2774213f4f9b2dfc5531f59514203cfec"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nested_allocations",
+    "line": 87,
+    "source": "theorem nested_allocations : (nested.copyStToM hp rfl).H' =\n    [.array Ty.uint, .struct \"Token\", .struct \"Token\",\n     .array (.ref (.struct \"Token\")), .struct \"TokenBucket\"] := by\n  unfold nested token; copy_reduce; rfl\n",
+    "sha256": "5d6f8f4a468fc423d2eb05551844ded5a69e218f50214cf2125aa29ef9eb907c"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nested_root",
+    "line": 91,
+    "source": "theorem nested_root : (nested.copyStToM hp rfl).val.id = 4 := by\n  unfold nested token; copy_reduce; rfl\n",
+    "sha256": "2697c9d8cd4ae5da6af15d0bd5a7973baf79c640ce38a3b7d36dfa9031d5f512"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nested_mirror",
+    "line": 93,
+    "source": "theorem nested_mirror : nested.Mirrors (nested.copyStToM hp rfl).heap 1\n    (nested.copyStToM hp rfl).val := copy_mirror hp nested rfl\n",
+    "sha256": "e42ff7246716b9285b80bd48015e64e30a7cb8560ad7f6601d26052ca7b9329c"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "converse_rejected",
+    "line": 95,
+    "source": "theorem converse_rejected : \u00ac (\u2200 id, Fresh [.array Ty.uint] id \u2192\n    Fresh (nested.copyStToM hp rfl).H' id) := copy_not_converse hp nested rfl\n\n",
+    "sha256": "5dac198a17c9bc42be2f6614fd40a53bcce31554a36a18680795dc10fedabe36"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "copied",
+    "line": 98,
+    "source": "def copied := nested.copyStToM hp rfl\n/-- A real write on the old array, after four nested allocations. -/\n",
+    "sha256": "3647bcec2ff510f702214efe94e56de890875ec7097d82f155f35b7148267180"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "suffixHeap",
+    "line": 100,
+    "source": "def suffixHeap : Heap copied.H' := (copied.heap.writeAddr\n    (.index (old.wk copied.ext) .dyn z) one).getD copied.heap\n\n",
+    "sha256": "35f137e13217cc8caa3b949c70f813227e726f98f6ed872a9e35f1a39eb82184"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "suffix_write_success",
+    "line": 103,
+    "source": "theorem suffix_write_success : copied.heap.writeAddr (.index (old.wk copied.ext) .dyn z) one =\n    some suffixHeap := by\n  unfold suffixHeap copied nested token hp old\n  copy_reduce\n  with_unfolding_all rfl\n\n",
+    "sha256": "a32d86042f441fd989f35a7e895f2386f032fdfded845d5f2b0aec4b9fac2207"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "mixed_suffix",
+    "line": 109,
+    "source": "theorem mixed_suffix : Operations copied.heap (emptyArr.copyStToM suffixHeap rfl).heap :=\n  .copy (.write (.nil copied.heap) (.index (old.wk copied.ext) .dyn z) one suffixHeap\n    suffix_write_success) emptyArr rfl\n\n",
+    "sha256": "439739e9ea676470bfbe2c480b062d6b30c031dec4137428c8c9ba0d958242a2"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "copied_witness_survives",
+    "line": 113,
+    "source": "theorem copied_witness_survives :\n    let root : HRef (emptyArr.copyStToM suffixHeap rfl).H' (.struct \"TokenBucket\") :=\n      HRef.wk mixed_suffix.prefix copied.val\n    root.id = copied.val.id \u2227 Fresh [.array Ty.uint] root.id \u2227\n      \u00ac Fresh (emptyArr.copyStToM suffixHeap rfl).H' root.id \u2227\n      (old.wk (copied.ext.trans mixed_suffix.prefix)).id \u2260 root.id :=\n  copy_then_witness hp nested rfl old mixed_suffix\n\n",
+    "sha256": "15dee34757c8cb7d2f92c9ca5d156013316b5e503d0177eb31467fb2d37f95b0"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "copy_order",
+    "line": 121,
+    "source": "theorem copy_order : (HRef.wk mixed_suffix.prefix copied.val).id <\n    (token.copyStToM (emptyArr.copyStToM suffixHeap rfl).heap rfl).val.id :=\n  copies_ordered hp nested rfl mixed_suffix token rfl\n\n",
+    "sha256": "f4080386f4289b571d7f99dffb19973a1b028dced06bc2f84b5038d159670827"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "map_refusal",
+    "line": 125,
+    "source": "theorem map_refusal : (Ty.ref (.mapping .uint Ty.uint)).mapFree \u2260 true := by decide\n\n",
+    "sha256": "3135c7303b379a23f66aeecc4f2c3804d5da7a09c176eb6799e658011462a223"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "empty_fields_no_alloc",
+    "line": 127,
+    "source": "theorem empty_fields_no_alloc :\n    (SFields.copyStToM hp .nil (fun _ h => by cases h)).H' = [.array Ty.uint] := by\n  rw [SFields.copyStToM_nil]\n",
+    "sha256": "73a4368069d2ed2442d42a471f7087a5ef4a49f16571fd0d9f5c20a17bd7471e"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "unknown_struct_refusal",
+    "line": 130,
+    "source": "theorem unknown_struct_refusal : (Ty.ref (.struct \"UnknownH28\")).mapFree \u2260 true := by decide\n\n",
+    "sha256": "2d3bb9dfbea1dba489fbda1b64cbe0cd1a9116e6e9a589578667e5d0da3cc4a5"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "fixedRefsHeap",
+    "line": 132,
+    "source": "def fixedRefsHeap : Heap [.struct \"Token\", .fixed (.ref (.struct \"Token\")) 1] :=\n  ((z, ()), (\u27e8[\u27e80, rfl\u27e9], rfl\u27e9, ()))\n",
+    "sha256": "99ab401873a433f89008a72e92b058d3cc62d238539e5451ab1751a7dc61c701"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "fixedRefs",
+    "line": 134,
+    "source": "def fixedRefs : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, fixedRefsHeap, ()\u27e9\n",
+    "sha256": "7821ae4e6f064e5f2d382b03d783db3ba979d3a174bc9be8f72a3d788956cb90"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "fixed_reference",
+    "line": 135,
+    "source": "theorem fixed_reference : fixedRefs.writeT\n    (.index 1 (ArrTy.fixed (n := 1)) z : MAddrT (.ref (.struct \"Token\"))) 0 =\n    some fixedRefs := by with_unfolding_all rfl\n\n",
+    "sha256": "cfa57d082936b382956a28feb6bbb075ddee760b48a6fb83ce6fa258ef85fe2a"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "boolHeap",
+    "line": 139,
+    "source": "def boolHeap : Heap [.array (.prim .bool)] := (\u27e8[false], by decide\u27e9, ())\n",
+    "sha256": "4631773ec5c5d79ccc194ddec5b9be2217bd86ec7c520a2d22b64bedcd08e476"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "boolMem",
+    "line": 140,
+    "source": "def boolMem : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, boolHeap, ()\u27e9\n",
+    "sha256": "52f3780f496414baeab0217ea99c35550c2de5e4dba3e3e0cb550ffe61ef5399"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "bool_write",
+    "line": 141,
+    "source": "theorem bool_write : boolMem.writeT (.index 0 .dyn z : MAddrT (.prim .bool)) false =\n    some boolMem := by with_unfolding_all rfl\n\n",
+    "sha256": "c7c1d4d003df0c139c81e76131a88feaf8eef5282a1c34620dda3deda8e2ba49"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "intHeap",
+    "line": 144,
+    "source": "def intHeap : Heap [.array (.prim .int)] := (\u27e8[PrimTy.dflt .int], by decide\u27e9, ())\n",
+    "sha256": "c124476da3e257e0a6349cd4f3a0d3ba6fe79c2a2d2f17f3c2c5c962b07d0729"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "intMem",
+    "line": 145,
+    "source": "def intMem : Grown [] (fun _ => Unit) := \u27e8List.nil_prefix, intHeap, ()\u27e9\n",
+    "sha256": "5bd84322756fca3347b20235acf89400dc095c9142245baf2db82e169e77eccf"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "int_write",
+    "line": 146,
+    "source": "theorem int_write : intMem.writeT (.index 0 .dyn z : MAddrT (.prim .int)) (PrimTy.dflt .int) =\n    some intMem := by with_unfolding_all rfl\n\n",
+    "sha256": "61b654b026ae744e1b21898b4f068c79edf1b2493fcf515e319e4cd890f70cce"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nestedFixed",
+    "line": 149,
+    "source": "def nestedFixed : SVal (.ref (.fixed (.ref (.struct \"TokenBucket\")) 1)) :=\n  .fixed (.cons nested .nil)\n",
+    "sha256": "0aeca46ba402fb528b4e586e34463ed155a7bde70d03082f750203d05e8c9fd1"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nested_fixed_root",
+    "line": 151,
+    "source": "theorem nested_fixed_root : (nestedFixed.copyStToM hp rfl).val.id = 5 := by\n  unfold nestedFixed nested token; copy_reduce; rfl\n\n",
+    "sha256": "e9b6836d23a23e0cec6ea87aa7a9876dfea503fb3038e5accdfd9ac3eef1855b"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "child",
+    "line": 154,
+    "source": "def child : HRef copied.H' (.array (.ref (.struct \"Token\"))) :=\n  copied.heap.field copied.val (f := \"tokens\") rfl\n",
+    "sha256": "53b6b99121509284f4189f7d9a43cf98891b03ea21b3ab24e96f7285e1c92e02"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nested_child_id",
+    "line": 156,
+    "source": "theorem nested_child_id : child.id = 3 := by\n  unfold child copied nested token; copy_reduce; with_unfolding_all rfl\n\n",
+    "sha256": "68493ab5a98456d6ffb1dac26105c4870395860f1a38dbdc237d746475296d6a"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "nested_child_survives",
+    "line": 159,
+    "source": "theorem nested_child_survives :\n    (HRef.wk mixed_suffix.prefix child).id = 3 \u2227\n    (old.wk (copied.ext.trans mixed_suffix.prefix)).id \u2260\n      (HRef.wk mixed_suffix.prefix child).id := by\n  change child.id = 3 \u2227 0 \u2260 child.id\n  rw [nested_child_id]\n  exact \u27e8rfl, by decide\u27e9\n\n",
+    "sha256": "5a5d616edfd4a69e9c93b5ab33b4910e7ea322ae5599935ffec585117b694c34"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "expanded",
+    "line": 167,
+    "source": "def expanded : Grown [] (fun _ => Unit) :=\n  \u27e8List.nil_prefix, (emptyArr.copyStToM hp rfl).heap, ()\u27e9\n",
+    "sha256": "6c4babb53b3e646723d63b957c3bb48d3ba2751b1b5b24daafa7358f1a71e8e6"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "writes_cannot_allocate",
+    "line": 169,
+    "source": "theorem writes_cannot_allocate : \u00ac Writes m expanded := by\n  intro h\n  have he := congrArg List.length h.typing\n  unfold expanded emptyArr at he\n  simp only [SVal.copyStToM_array, SVec.copyStToM_nil] at he\n  change 2 = 1 at he\n  omega\n\n",
+    "sha256": "c6e1960ae444e02997a022704f829ec27764c74a2d02d8a79d31b6acd948ee6c"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "operations_cannot_shrink",
+    "line": 177,
+    "source": "theorem operations_cannot_shrink : \u00ac (@Operations [.array Ty.uint] [] hp ()) := by\n  intro h\n  have he : 1 \u2264 0 := h.prefix.length_le\n  omega\n\n",
+    "sha256": "e142d7488629c9293c0206a2dcd095aa18f73a6c423beb44df3a557e84f73659"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "shadowArray",
+    "line": 182,
+    "source": "def shadowArray : SVal (.ref (.array (.ref (.struct \"Token\")))) :=\n  .array .nil (.cons token .nil) (by decide)\n",
+    "sha256": "0909bdaff618e67400eea02e7c5dd3c131db08ed451392b776d17cf0f7c31927"
+  },
+  {
+    "file": "tests/h28-sol/solkey-ports/Controls.lean",
+    "name": "shadow_not_allocated",
+    "line": 184,
+    "source": "theorem shadow_not_allocated : (shadowArray.copyStToM hp rfl).H' =\n    [.array Ty.uint, .array (.ref (.struct \"Token\"))] := by\n  unfold shadowArray\n  copy_reduce\n  rfl\n",
+    "sha256": "c50747ec7a7329e333774cc0638f261ed8677028d4605ea1bf9e41e45bcaa22a"
+  }
+]

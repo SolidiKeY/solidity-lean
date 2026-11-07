@@ -120,4 +120,11 @@ example : (Solidity.Yul.ScopedAssignments.check Before.checked Before.root
     ([("forged.name", 0)] : List (String × Fin 2)) functions [["forged.name"]]
     (Before.lit 257)).isSome = true := by decide
 
+/-- info: 'Solidity.Yul.ScopedAssignments.Checked.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedAssignments.Checked.unique
+/-- info: 'Solidity.Yul.ScopedAssignments.Checked.statement_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedAssignments.Checked.statement_unique
+
 end Solidity.Yul.Checks.ScopedAssignments

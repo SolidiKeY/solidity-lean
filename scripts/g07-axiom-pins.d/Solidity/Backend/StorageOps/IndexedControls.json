@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/StorageOps/IndexedControls.lean:Solidity.Backend.StorageOps.array_suffixes_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/IndexedControls.lean:Solidity.Backend.StorageOps.common_prefix_array_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/IndexedControls.lean:Solidity.Backend.StorageOps.common_prefix_fixed_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/IndexedControls.lean:Solidity.Backend.StorageOps.fixed_suffixes_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/IndexedControls.lean:Solidity.Backend.StorageOps.modifyAt_array_suffix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/IndexedControls.lean:Solidity.Backend.StorageOps.modifyAt_fixed_suffix": [
+  "Quot.sound",
+  "propext"
+ ]
+}

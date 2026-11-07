@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/SourceLoopInitializerControls.lean:Solidity.Yul.Compilation.SourceLoopInitializer.Controls.initialized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopInitializerControls.lean:Solidity.Yul.Compilation.SourceLoopInitializer.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SourceLoopInitializerControls.lean:Solidity.Yul.Compilation.SourceLoopInitializer.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

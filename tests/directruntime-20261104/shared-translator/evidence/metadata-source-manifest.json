@@ -1,0 +1,19 @@
+{
+  "source": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+  "sourceSha256": "490eac4a26e63a3af878aa7052b1a23623756eddbbc988ec16d8eb0fd11035b4",
+  "generatedC": ".lake/build/ir/Solidity/Frontend/ExecutableAst/Shared/Translate.c",
+  "generatedCSha256": "f9a40b98cccbd0d35cb10d85cef26aa9672a3f21ed000e0afb9d06e69a93e837",
+  "olean": ".lake/build/lib/lean/Solidity/Frontend/ExecutableAst/Shared/Translate.olean",
+  "oleanSha256": "6629fe0ddf141bf51efedca829057f8bdf52e35f7fd38c1a1262c6cdecce6fee",
+  "controls": {
+    "parity": {
+      "source": "tests/directruntime-20261104/shared-translator/ParityControls.lean",
+      "sha256": "75d88ef68d6d9ac0b7f9f52c23f8d00ac14637a039a2f13c6ef1e0a6c09f4b62"
+    },
+    "benchmark": {
+      "source": "tests/directruntime-20261104/shared-translator/MetadataBench.lean",
+      "sha256": "51155490a763f92bbc74dd3d6743552edd8d04ae9f821fed35d2968a8c59b062"
+    }
+  },
+  "note": "Source/C/olean binding and external development controls only; not standalone runtime closure, source-equivalence or performance gate."
+}

@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalFrameImageControls.lean:Solidity.Backend.MemoryOps.Physical.FrameControls.empty_endpoint_growth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFrameImageControls.lean:Solidity.Backend.MemoryOps.Physical.FrameControls.insufficient_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFrameImageControls.lean:Solidity.Backend.MemoryOps.Physical.FrameControls.unaligned_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

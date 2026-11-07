@@ -62,7 +62,7 @@ def inferBin (Γ : Ctx) (e a b : Syn .expr) (k : BinKind) (hb : e.binOp? = Optio
     | Option.some ⟨τa, da⟩, Option.some ⟨τb, db⟩ =>
       match k, hb with
       | .arith, hb =>
-        match hc : STy.common? Γ.isBase τa τb with
+        match hc : STy.common? Γ.isBase Γ.mapFree τa τb with
         | Option.some τ =>
           if hn : τ.isNumeric = true then
             if hz : (e.isDivMod && τb.isZeroConst) = false then
@@ -71,7 +71,7 @@ def inferBin (Γ : Ctx) (e a b : Syn .expr) (k : BinKind) (hb : e.binOp? = Optio
           else Option.none
         | Option.none => Option.none
       | .bit, hb =>
-        match hc : STy.common? Γ.isBase τa τb with
+        match hc : STy.common? Γ.isBase Γ.mapFree τa τb with
         | Option.some τ =>
           if hn : τ.isBits = true then Option.some ⟨τ, .bit hb da db hc hn⟩ else Option.none
         | Option.none => Option.none
@@ -92,12 +92,12 @@ def inferBin (Γ : Ctx) (e a b : Syn .expr) (k : BinKind) (hb : e.binOp? = Optio
           else Option.none
         else Option.none
       | .order, hb =>
-        match hc : STy.common? Γ.isBase τa τb with
+        match hc : STy.common? Γ.isBase Γ.mapFree τa τb with
         | Option.some τ =>
           if hn : τ.isOrdered = true then Option.some ⟨.bool, .order hb da db hc hn⟩ else Option.none
         | Option.none => Option.none
       | .eq, hb =>
-        match hc : STy.common? Γ.isBase τa τb with
+        match hc : STy.common? Γ.isBase Γ.mapFree τa τb with
         | Option.some τ =>
           if hn : τ.hasEq = true then Option.some ⟨.bool, .eq hb da db hc hn⟩ else Option.none
         | Option.none => Option.none
@@ -123,7 +123,7 @@ def tryMagic (Γ : Ctx) (g m : String) : Option (Inferred Γ (.member (.ident g)
 def inferCall (Γ : Ctx) (f : String) (args : Syn (.list .expr)) (σs : List STy)
     (da : TypedArgs Γ args σs) : Option (Inferred Γ (.call (.ident f) (.positional args))) :=
   match hf : (Γ.functions f).filter (fun d' => match d'.fnSig Γ.env with
-      | Option.some (ps', _) => argsFit Γ.isBase σs ps'
+      | Option.some (ps', _) => argsFit Γ.isBase Γ.mapFree σs ps'
       | Option.none => false) with
   | [d] =>
     match hs : d.fnSig Γ.env with
@@ -237,14 +237,14 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     | ⟨.bool, dc⟩ =>
       let ⟨τa, da⟩ ← Typed.inferN n Γ a
       let ⟨τb, db⟩ ← Typed.inferN n Γ b
-      match hc : STy.common? Γ.isBase τa.mobile τb.mobile with
+      match hc : STy.common? Γ.isBase Γ.mapFree τa.mobile τb.mobile with
       | Option.some τ => pure ⟨τ, .cond dc da db hc⟩
       | Option.none => Option.none
     | _ => Option.none
   | .assign .assign a b => do
     let ⟨τ, l⟩ ← LVal.inferN n Γ a
     let ⟨σ, d⟩ ← Typed.inferN n Γ b
-    if h : σ.implicit Γ.isBase τ = true then
+    if h : σ.implicit Γ.isBase Γ.mapFree τ = true then
       if hm : Γ.assignRefused τ a = false then pure ⟨τ, .assign l d h hm⟩ else Option.none
     else if hc : σ.copiesTo τ = true then
       if hl : Γ.namesLocal a = false then pure ⟨τ, .assignCopy l d hc hl⟩ else Option.none
@@ -252,7 +252,7 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
   | .assign op a b => do
     let ⟨τ, l⟩ ← LVal.inferN n Γ a
     let ⟨σ, d⟩ ← Typed.inferN n Γ b
-    if h : op.fits Γ.isBase σ τ = true then pure ⟨τ, .compound l d h⟩ else Option.none
+    if h : op.fits Γ.isBase Γ.mapFree σ τ = true then pure ⟨τ, .compound l d h⟩ else Option.none
   | .index a (.some i) => do
     let ⟨τ, da⟩ ← Typed.inferN n Γ a
     let ⟨σ, di⟩ ← Typed.inferN n Γ i
@@ -262,7 +262,7 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
         if h2 : inBounds σ n = true then pure ⟨_, .indexArray da di h1 h2⟩ else Option.none
       else Option.none
     | .mapping τk _, da =>
-      if h : σ.implicit Γ.isBase τk = true then pure ⟨_, .indexMapping da di h⟩ else Option.none
+      if h : σ.implicit Γ.isBase Γ.mapFree τk = true then pure ⟨_, .indexMapping da di h⟩ else Option.none
     | .bytes l, da =>
       if h1 : σ.isIndex = true then
         if h2 : inBounds σ Option.none = true then
@@ -295,7 +295,7 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
       | _, _ => Option.none
   | .call (.elemType el h) (.positional (.cons x .nil)) => do
     let ⟨σ, d⟩ ← Typed.inferN n Γ x
-    if he : σ.explicit Γ.isBase (el.ty σ.convLoc) = true then pure ⟨_, .convElem d rfl he⟩
+    if he : σ.explicit Γ.isBase Γ.mapFree (el.ty σ.convLoc) = true then pure ⟨_, .convElem d rfl he⟩
     else Option.none
   | .slice a o o' => do
     let ⟨τ, da⟩ ← Typed.inferN n Γ a
@@ -331,10 +331,10 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
   | .inlineArray x xs => do
     let ⟨τ, d⟩ ← Typed.inferN n Γ x
     let ⟨τs, ds⟩ ← TypedArgs.inferN n Γ xs
-    match hc : STy.commonOf Γ.isBase τ τs with
+    match hc : STy.commonOf Γ.isBase Γ.mapFree τ τs with
     | Option.some σ =>
       if hσ : σ.oneWord = true then
-        if hf : argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true then
+        if hf : argsFit Γ.isBase Γ.mapFree (τ :: τs) (List.replicate (τs.length + 1) σ) = true then
           pure ⟨_, .inlineArray d ds hc hσ hf⟩
         else Option.none
       else Option.none
@@ -343,20 +343,20 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     let ⟨σs, da⟩ ← TypedArgs.inferN n Γ args
     match hct : Γ.convTarget f, args, σs, da with
     | Option.some τ, .cons _ .nil, [σ], .cons dx .nil =>
-      if he : σ.explicit Γ.isBase τ = true then pure ⟨τ, .convUser hct dx he⟩ else Option.none
+      if he : σ.explicit Γ.isBase Γ.mapFree τ = true then pure ⟨τ, .convUser hct dx he⟩ else Option.none
     | _, args, σs, da =>
       match hs : Γ.structOf f with
       | Option.some dn =>
         match hfs : Γ.env.structFields dn .memory with
         | Option.some fs =>
-          if hfit : argsFit Γ.isBase σs (fs.map Prod.snd) = true then
+          if hfit : argsFit Γ.isBase Γ.mapFree σs (fs.map Prod.snd) = true then
             pure ⟨_, .structNew hs hfs da hfit⟩
           else Option.none
         | Option.none => Option.none
       | Option.none =>
         match hr : Γ.resolve f with
         | Option.some (.builtin b) =>
-          match hst : b.status, hτ : b.callTy Γ.isBase σs with
+          match hst : b.status, hτ : b.callTy Γ.isBase Γ.mapFree σs with
           | .admitted _, Option.some τ => pure ⟨τ, .builtinCall hr hst da hτ⟩
           | _, _ => Option.none
         | _ => inferCall Γ f args σs da
@@ -372,7 +372,7 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
       | .ident g =>
         match hr : Γ.resolve g, hk : AbiKind.ofMember f with
         | Option.some (.builtin .abi), Option.some k =>
-          if hok : k.argsOK Γ.isBase σs = true then Option.some ⟨_, .abiEncode hr hk da hok⟩
+          if hok : k.argsOK Γ.isBase Γ.mapFree σs = true then Option.some ⟨_, .abiEncode hr hk da hok⟩
           else Option.none
         | _, _ => Option.none
       | _ => Option.none
@@ -380,13 +380,13 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     let ⟨τc, dc⟩ ← Typed.inferN n Γ c
     match τc, dc, args, σs, da with
     | .address true, dc, .cons _ .nil, [σ], .cons dv .nil =>
-      if hv : σ.implicit Γ.isBase (.int IntTy.u256) = true then
+      if hv : σ.implicit Γ.isBase Γ.mapFree (.int IntTy.u256) = true then
         if ht : f = "transfer" then pure ⟨_, by subst ht; exact .transfer dc dv hv⟩
         else if hs : f = "send" then pure ⟨_, by subst hs; exact .send dc dv hv⟩
         else Option.none
       else Option.none
     | .contract dn, dc, _, σs, da =>
-      match ho : extOverloads Γ.env Γ.isBase dn f σs with
+      match ho : extOverloads Γ.env Γ.isBase Γ.mapFree dn f σs with
       | [d] =>
         match hs : d.fnSig Γ.env with
         | Option.some (_, _) => pure ⟨_, .extCall dc da ho hs⟩
@@ -399,8 +399,8 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
     let ⟨σs, da⟩ ← TypedArgs.inferN n Γ args
     match τc, dc with
     | .contract dn, dc =>
-      if hv : σ.implicit Γ.isBase (.int IntTy.u256) = true then
-        match ho : extOverloads Γ.env Γ.isBase dn f σs with
+      if hv : σ.implicit Γ.isBase Γ.mapFree (.int IntTy.u256) = true then
+        match ho : extOverloads Γ.env Γ.isBase Γ.mapFree dn f σs with
         | [d] =>
           match hs : d.fnSig Γ.env, hm : d.fnMut with
           | Option.some (_, _), Option.some .payable => pure ⟨_, .extCallValue dc dv hv da ho hs hm⟩
@@ -441,7 +441,7 @@ def LVal.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option ((τ : STy) × LVa
         if h2 : inBounds σ n = true then pure ⟨_, .indexArray da hl di h1 h2⟩ else Option.none
       else Option.none
     | .mapping τk _, da =>
-      if h : σ.implicit Γ.isBase τk = true then pure ⟨_, .indexMapping da di h⟩ else Option.none
+      if h : σ.implicit Γ.isBase Γ.mapFree τk = true then pure ⟨_, .indexMapping da di h⟩ else Option.none
     | .bytes l, da =>
       if hl : l = .calldata then Option.none else
       if h1 : σ.isIndex = true then pure ⟨_, .indexBytes da hl di h1⟩ else Option.none
@@ -556,7 +556,7 @@ def StmtD.inferSimple (C : Ctx) {k : SCtx} (L : List (String × STy)) (i : Syn .
     | Option.some τ =>
       if hl : locOK τ l true = true then
         (Typed.infer (C.at L) e).bind fun ⟨σ, d⟩ =>
-          if h : σ.implicit C.isBase τ = true then Option.some ⟨_, .declInit ht hl d h⟩
+          if h : σ.implicit C.isBase C.mapFree τ = true then Option.some ⟨_, .declInit ht hl d h⟩
           else Option.none
       else Option.none
     | Option.none => Option.none
@@ -566,7 +566,7 @@ def StmtD.inferSimple (C : Ctx) {k : SCtx} (L : List (String × STy)) (i : Syn .
       (Typed.infer (C.at L) e).bind fun ⟨σ, de⟩ =>
         match σ, de with
         | .tuple σs, de =>
-          if hf : slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true then
+          if hf : slotsFit C.isBase C.mapFree (slots.map (Option.map Prod.snd)) σs = true then
             Option.some ⟨_, .declTuple hs de hf⟩
           else Option.none
         | _, _ => Option.none
@@ -577,7 +577,7 @@ def StmtD.inferSingle (C : Ctx) {k : SCtx} (L : List (String × STy)) (e : Syn .
     Option (StmtInferred C (k := k) L (.returnStmt (.some e))) :=
   match hR : C.rets with
   | [τ] => (Typed.infer (C.at L) e).bind fun ⟨σ, d⟩ =>
-    if h : σ.implicit C.isBase τ = true then Option.some ⟨L, .retVal hR d h⟩ else Option.none
+    if h : σ.implicit C.isBase C.mapFree τ = true then Option.some ⟨L, .retVal hR d h⟩ else Option.none
   | _ => Option.none
 
 /-- `return e;`: a tuple of two or more components against the returns,
@@ -588,7 +588,7 @@ def StmtD.inferReturn (C : Ctx) {k : SCtx} (L : List (String × STy)) (e : Syn .
   | .tuple (.some a) s =>
     ((match Typed.infer (C.at L) a, TypedSlots.infer (C.at L) s with
       | Option.some ⟨σ, d⟩, Option.some ⟨σ' :: σs, ds⟩ =>
-        if h : argsFit C.isBase (σ :: σ' :: σs) C.rets = true then
+        if h : argsFit C.isBase C.mapFree (σ :: σ' :: σs) C.rets = true then
           Option.some ⟨L, .retTuple d ds (List.cons_ne_nil σ' σs) h⟩
         else Option.none
       | _, _ => Option.none : Option (StmtInferred C (k := k) L (.returnStmt (.some (.tuple (.some a) s))))
@@ -661,22 +661,22 @@ def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : 
   | _, .returnStmt (.some e) => StmtD.inferReturn C L e
   | _, .emit (.ident ev) (.positional args) =>
     (TypedArgs.infer (C.at L) args).bind fun ⟨σs, da⟩ =>
-    match hf : ((C.at L).declsOf .event ev).filter (·.fitsParams C.env C.isBase σs) with
+    match hf : ((C.at L).declsOf .event ev).filter (·.fitsParams C.env C.isBase C.mapFree σs) with
     | [_] => Option.some ⟨L, .emit da hf⟩
     | _ => Option.none
   | _, .revert (.ident er) (.positional args) =>
     (TypedArgs.infer (C.at L) args).bind fun ⟨σs, da⟩ =>
-    match hf : ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) with
+    match hf : ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase C.mapFree σs) with
     | [_] => Option.some ⟨L, .revertError da hf⟩
     | _ => Option.none
   | _, .tryStmt (.call (.member c f) (.positional args)) rets (.block okb) (.catchPlain (.block cb)) .nil =>
     match Typed.infer (C.at L) c, TypedArgs.infer (C.at L) args with
     | Option.some ⟨.contract dn, dc⟩, Option.some ⟨σs, da⟩ =>
-      match ho : extOverloads C.env C.isBase dn f σs with
+      match ho : extOverloads C.env C.isBase C.mapFree dn f σs with
       | [d] =>
         match hs : d.fnSig C.env with
         | Option.some (ps, rs) =>
-          if hf : argsFit C.isBase σs ps = true then
+          if hf : argsFit C.isBase C.mapFree σs ps = true then
             match ht : rets.tys C.env C.scope .memory with
             | Option.some tys =>
               if hsame : (tys.isEmpty || STy.sameList tys rs) = true then
@@ -693,11 +693,11 @@ def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : 
       (.catchSig Option.none (.param (.elem .bytes) (Option.some .memory) y) .nil (.block cb)) .nil =>
     match Typed.infer (C.at L) c, TypedArgs.infer (C.at L) args with
     | Option.some ⟨.contract dn, dc⟩, Option.some ⟨σs, da⟩ =>
-      match ho : extOverloads C.env C.isBase dn f σs with
+      match ho : extOverloads C.env C.isBase C.mapFree dn f σs with
       | [d] =>
         match hs : d.fnSig C.env with
         | Option.some (ps, rs) =>
-          if hf : argsFit C.isBase σs ps = true then
+          if hf : argsFit C.isBase C.mapFree σs ps = true then
             match ht : rets.tys C.env C.scope .memory with
             | Option.some tys =>
               if hsame : (tys.isEmpty || STy.sameList tys rs) = true then

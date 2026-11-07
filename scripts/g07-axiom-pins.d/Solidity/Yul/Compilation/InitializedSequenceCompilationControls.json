@@ -1,0 +1,61 @@
+{
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.body_fuel_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.borrowed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.borrowed_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.copied_body_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.copied_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.copied_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.copy_source": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.empty_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.final_height": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.initializer_fuel_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.lowered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/InitializedSequenceCompilationControls.lean:Solidity.Yul.Compilation.InitializedSequenceCompilation.Controls.source_recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -89,3 +89,103 @@ SS-CP2 remains owned by MIC; its integrated allocation modules are unchanged.
 Final finder and skeptic review corrected the distinction between arbitrary
 payload bytes and fixed fixture locals/log/event shapes. No proof premise or
 observation was changed.
+
+
+## Native allocating-frame specification consumers
+
+[NativeParentConsumer](../../Solidity/Roadmap/V16/NativeParentConsumer.lean)
+consumes the published P1 native-unwind and mutating-activation certificates.
+Its source is intrinsic `Prog`/`State`, distinct from the independent
+`Solidity.Source` interpreter used above. `parent_specification` retains the
+producer's actual frame entry, read bound and parent-index premises, all source
+and target prefix/return facts, representation, stack, old addresses and allocator
+growth. It derives a successful program run and genuine box/diamond counter
+postconditions without a new success, non-exhaustion or simulation premise.
+
+The inhabited countdown client returns at both parent horizons. Its counter is
+n+1, not the child's n; `native_spec_iff` reduces either modality to its actual
+returned state's postcondition. `native_return_transport` carries this to the
+represented endpoint with the complete published ordered stack/16-word vector,
+old addresses and actual eight-cell allocator growth.
+
+The separate mutating-entry client writes an old array element before allocation
+and argument/frame entry. `mutating_entry_transport` retains the real write,
+argument evaluation, entry, target execution, representation, four-cell growth,
+protected words and complete published stack/21-word vector. Its child has
+counter1 and fixed element one equal to2. Counter2 and the old element value9
+are rejected there; the actual mutation does not satisfy `Heap.Keeps`.
+This entry is not the completed return of the readonly countdown family.
+
+The represented bad-index client retains intrinsic bare revert and target revert:
+a true diamond is false there even though its box is true. `recBase` still
+exhausts and satisfies the approved exhausted-diamond reading. These controls
+supply neither panic/revert-data transport nor divergence or physical gas facts.
+
+All target results concern existing structured IR instructions and running
+prefixes, not fetched bytes or the pinned EVM interpreter. No Source admission,
+full P1 recursive selection/V3 profile, complete mutating caller return,
+ABI/world/physical-store agreement, deployment or adversarial closure follows.
+The existing physical-writer mismatch and other owners' obligations are unchanged.
+Independent finder/skeptic review requested a direct returned-counter negative;
+`wrong_returned_counter` now exercises the new positive return specification.
+
+
+## Constructor-return byte postconditions
+
+[CreationReturnConsumer](../../Solidity/Roadmap/V16/CreationReturnConsumer.lean)
+consumes the published finite constructor-copy execution directly, without an
+instance of the pending creation-return producer. `outcome_exact` fixes its
+complete outcome; `returned_post` supplies an actual returned-output witness
+exactly when a predicate holds on the complete linked/immutable runtime image.
+`reject_post` and `not_reverted` retain the same artifact and execution.
+
+The inhabited published fixture has two library locations, two immutable words,
+nonempty arguments and a complete 105-byte returned image. Controls reject
+argument leakage, a shifted observation window and relabelled revert outcomes.
+Independent read-only finder and skeptic reviews found no semantic defect;
+the first-byte/window wording was clarified after review. Scoped axiom guards
+retain the standard axiom set.
+
+These are constructor-copy byte postconditions, not Source constructor
+specifications, account installation, physical EVM execution or gas adequacy.
+No pending producer field, source admission, G50 deployment or full G51
+specification obligation is discharged by this component.
+
+
+## H55 historical calculus/compiler consumer port
+
+The consumer, 24 semantic controls and strict interface audit are ported from
+the exact eight-file historical export of `e5934822410d79093183ee16cae566d9e5616048`.
+The archive and every file hash were verified before extraction outside Git.
+All newer sections above are retained. The H55 work record is
+[h55-g49-final-theorem.md](h55-g49-final-theorem.md).
+
+[CalculusConsumer](../../tests/h55/g49-final-theorem/staging/CalculusConsumer.lean)
+(staged outside the library until its absent `Solidity.Roadmap.V16.CompilerConsumer`
+prerequisite lands; see the H55 work record) keeps the original six theorem signatures. Its checked
+compiler Input rules out exhausted execution; the genuine calculus diamond
+then gives a successful source postcondition. General target alternatives retain
+payment refusal and candidate representation. The nonpaying theorem removes
+that alternative only with the original syntactic pays equation. Box consumers
+require an actual successful target; callback consumers retain the explicit
+callback-free postcondition condition and do not prove callback bytecode behavior.
+Residual frames remain empty. No formula, rule or approved exhaustion reading
+is changed. These are scoped intrinsic-body consumers, not source admission or
+G49/G50 public correctness.
+
+The controls retain populated core and allocating-memory fixtures, protected
+stack and representation, the complete named 11-element observation vector,
+wrong value/post/alias/frame/allocation/failure controls, payment alternatives,
+invalid input, callback guard, panic and exhausted false-diamond boundaries.
+Their original fixture imports are currently missing from published master.
+No historical pass is asserted as a current proof pass.
+
+The strict audit retains all six contracts, 24 closed controls, dependency/axiom
+pins, producer hashes, 19 corruptions and 2290 open inherited obligations. Its
+original heap-audit dependency is also missing. The bulk premise JSON is not
+tracked; the committed H55 staging manifest pins its exact bytes and provenance.
+The audit accepts its external payload path as the fourth positional argument,
+after metadata, accounting report and output path. Original producer-revision
+and body checks remain unchanged; newer master additions are not overwritten
+to satisfy historical hashes. Registration changes and the historical
+LoopControls import are reserved for central integration.

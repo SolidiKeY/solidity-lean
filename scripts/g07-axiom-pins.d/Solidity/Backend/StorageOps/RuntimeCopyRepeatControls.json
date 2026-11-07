@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeatControls.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeatControls.interference_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeatControls.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeatControls.interference_regions": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeatControls.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeatControls.interference_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeatControls.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeatControls.other_lengths_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeatControls.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeatControls.shrinking_accesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeatControls.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeatControls.shrinking_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyRepeatControls.lean:Solidity.Backend.StorageOps.RuntimeCopyRepeatControls.shrinking_repeat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

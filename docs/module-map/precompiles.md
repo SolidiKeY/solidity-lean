@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/precompiles.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Precompiles
 
 | Module | What it defines |
@@ -14,3 +15,8 @@
 | `Precompiles/PointEval.lean` | EIP-4844 point evaluation (0x0a): zcash `G1` decompression, the trusted setup's `[τ]G₂`, the KZG check. |
 | `Precompiles/Osaka.lean` | G06's `Fixed` instantiated (`Osaka.fixed`): dispatch `run`/`gas` over `Precompile`, failure exactly on `Malformed` input (`run_eq_none_iff`), length-monotonic gas (`gas_mono`), the stipend facts. |
 | `Stipend/Rule.lean` | The stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs (`Stipend.rule`, `progCost`, `fits_iff`), its examples and non-examples, and the compiler obligation `Obligation` (G43) ([stipend-cost-rule.md](../feature-work/stipend-cost-rule.md)). |
+| `Bridge/SolidityBridge/PrecompileAgreement/Bytes.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/PrecompileAgreement/Controls.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/PrecompileAgreement/Gas.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/PrecompileAgreement/Header.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/PrecompileAgreement/Identity.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |

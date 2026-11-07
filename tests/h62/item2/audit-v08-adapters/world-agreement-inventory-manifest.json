@@ -1,0 +1,180 @@
+{
+  "scope": "Five defining-module kernel inventories, all entries pending; no new witnesses or full audit acceptance.",
+  "command": "source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; H62_WORLD_CENSUS=1 bash scripts/coord-tools/gate.sh per-file tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean",
+  "evidence": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107",
+  "acceptance": {
+    "expanded_declarations": 369,
+    "p8_rows": 157,
+    "p8_rows_equal_to_original_same_import_environment": true,
+    "default_world_rows": 0,
+    "all_world_entries_pending": true,
+    "new_witnesses": 0,
+    "module_counts": {
+      "Solidity.Lowering.V08.CreationPremises": 71,
+      "Solidity.Lowering.V08.LibraryPremises": 84,
+      "Solidity.Lowering.V08.LibraryFrameTransport": 57,
+      "Solidity.Lowering.V08.ConstructorScalarTransport": 111,
+      "Solidity.Lowering.V08.EnvironmentProjection": 46
+    },
+    "role_counts": {
+      "theorem": 144,
+      "structure_carrier": 9,
+      "proof_field": 61,
+      "other_declaration": 107,
+      "proof_definition": 24,
+      "predicate_definition": 5,
+      "data_field": 19
+    }
+  },
+  "source_sha256": {
+    "Solidity/Lowering/P8/FrozenInterface.lean": "25d6c7e77168309e23710540cfd7d3ba5479d0a3b1727c1caa2b1aa4357ab662",
+    "Solidity/Lowering/V08/ConstructorScalarTransport.lean": "6df88166077a519214626d0f9be6de374a8a0121942cc5b87b75a99e5eb6a272",
+    "Solidity/Lowering/V08/CreationPremises.lean": "2b662f55d616ff54ea4fc740351bd1454acedcb23d8e31d72edacb8ec5ad6eab",
+    "Solidity/Lowering/V08/EnvironmentProjection.lean": "e9c16c4c78dbd21ddb5d3aba9214677861d6b872f43d1ced332180f1d91652db",
+    "Solidity/Lowering/V08/LibraryFrameTransport.lean": "76fc3e418bf12b203a8d542cb70fb2abd1ae8fba8810f85f1014affdcc5dc220",
+    "Solidity/Lowering/V08/LibraryPremises.lean": "86484a5c96218cf088cc97e5dd877a57ecf8ad3f7c8c410dae06101909c5a749",
+    "tests/h62/item2/audit-v08-adapters/P8StatementCensus.lean": "b39743e3a6d45fd7d62f27da7cccc27e14d5808cde339d4ac3aceafe1fd79b58"
+  },
+  "files": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/acceptance.json",
+      "bytes": 700,
+      "sha256": "15a3efc0fbaf356ad4ba8a206bff93be4d7bd7936d238d434525820d2a9583b4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/console.log",
+      "bytes": 154,
+      "sha256": "4cd72df2b7524f2aa0268f503beef252961bf8cc9ff9be761a469340502f03d0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/default/console.log",
+      "bytes": 163,
+      "sha256": "04856d6c21356026846e2fae3b856f8352a9267c58fbdfb3b2a4c55d4df65bd0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/default/gates/1.log",
+      "bytes": 1912628,
+      "sha256": "8d6b6033a949f9a74c1f5b18201a9572631d78c75a2111842d3411eac4958dce"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/default/gates/HEAD",
+      "bytes": 41,
+      "sha256": "058db7c9dba28cf48709666c5d96ddb9e1620b685d91f8b00cf33f578db13550"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/default/gates/gates.tsv",
+      "bytes": 250,
+      "sha256": "de84da03a49bb5ff50824e83880a4e1ae5d428c3fb0d5d2567da584903d42bc9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/default/results.json",
+      "bytes": 399,
+      "sha256": "7cc8bb72abeb07c41e1961ea0ef87632a81b898c4a6f3e9d56de7bc5cf7e4432"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/fixed/console.log",
+      "bytes": 161,
+      "sha256": "c361f3f82873a3e5b8284d3172bf4642cc6f7cc6a777c65faa98942a5fb01dc2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/fixed/gates/1.log",
+      "bytes": 29914169,
+      "sha256": "645ff633565dc86d32c59596bfa039420a4cb50ab349dbe5cabfed4e86d56173"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/fixed/gates/HEAD",
+      "bytes": 41,
+      "sha256": "058db7c9dba28cf48709666c5d96ddb9e1620b685d91f8b00cf33f578db13550"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/fixed/gates/gates.tsv",
+      "bytes": 248,
+      "sha256": "083401f1ddbdc5d56d4b0080b401ca6696cd733e1babf49e2c02425608b051b2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/fixed/results.json",
+      "bytes": 399,
+      "sha256": "e7038a87494fe312bfabda8a9b3cb3d61f440178cc19f661d687afb8ce513780"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/gates/1.log",
+      "bytes": 67019,
+      "sha256": "828438a66465027ca5fb6d5e5bd5738b63a40d563430944d12fa215a617ee7c0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/gates/HEAD",
+      "bytes": 41,
+      "sha256": "058db7c9dba28cf48709666c5d96ddb9e1620b685d91f8b00cf33f578db13550"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/gates/gates.tsv",
+      "bytes": 241,
+      "sha256": "3c6c1315b82048e773aa1f1e0863dd848729762ac5045b1618f46166e3cef9a8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/inventory.json",
+      "bytes": 28334180,
+      "sha256": "f30a69d463de25dfc14a49b3aa736da21f64d21ed2e93741750d558c2d35c430"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/opt-in/console.log",
+      "bytes": 162,
+      "sha256": "984c7452ab2cab50dc845453b37ba5483e05a568c3fa737347af050479a7afe5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/opt-in/gates/1.log",
+      "bytes": 29914169,
+      "sha256": "645ff633565dc86d32c59596bfa039420a4cb50ab349dbe5cabfed4e86d56173"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/opt-in/gates/HEAD",
+      "bytes": 41,
+      "sha256": "058db7c9dba28cf48709666c5d96ddb9e1620b685d91f8b00cf33f578db13550"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/opt-in/gates/gates.tsv",
+      "bytes": 249,
+      "sha256": "8331bb53a26039f43e9c9432522fa0f53d2fe6e6083d80b1c2c3ef1aab38f1e6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/opt-in/results.json",
+      "bytes": 399,
+      "sha256": "fe653d991852e434cf3195ea349a5e8504bd2fbb6f052795aa67245be33d2532"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/original-collector/console.log",
+      "bytes": 174,
+      "sha256": "8d9710a70918014d48dfcea36ce4eb02969ae1e4342a26559fb0b8486fb602fe"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/original-collector/gates/1.log",
+      "bytes": 1912628,
+      "sha256": "8d6b6033a949f9a74c1f5b18201a9572631d78c75a2111842d3411eac4958dce"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/original-collector/gates/HEAD",
+      "bytes": 41,
+      "sha256": "058db7c9dba28cf48709666c5d96ddb9e1620b685d91f8b00cf33f578db13550"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/original-collector/gates/gates.tsv",
+      "bytes": 261,
+      "sha256": "0e7ae2e95575d545584f1dfef9ef51c2465bef5c01837ebc1291db097c6d6ca6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/original-collector/results.json",
+      "bytes": 399,
+      "sha256": "9d03fe5bc57efad9dfcfa24e638b5b1b6b46697935fa4f37738066223059d05d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/p8-compatibility.json",
+      "bytes": 70,
+      "sha256": "0c818d9aaaa08b86f7632693ab1c3a9fba512cdd6f90d669d5edbb55eb10ecc3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/world-agreement-census-20261107/results.json",
+      "bytes": 397,
+      "sha256": "e20f012252edb1997e143609cf9097510dac9882c4dfec2b056b7e516811405e"
+    }
+  ]
+}

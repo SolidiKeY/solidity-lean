@@ -1,0 +1,58 @@
+{
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.caller_restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.conversion_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.implicit_identity": [],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.metadata_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.populated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.slot_read_same": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.slot_write_same": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.source_call": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.target_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.target_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/IntegerCallable.lean:Solidity.Lowering.V08.IntegerCallable.uint_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

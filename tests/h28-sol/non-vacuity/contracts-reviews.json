@@ -1,0 +1,100 @@
+{
+  "reviews": [
+    {
+      "area": "rules-calculus",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/contracts-finder.md",
+      "sha256": "c2f647d236905216ba6dcfb8c8a50050297521a90d2a2411b4aa1d2c0ee62e85",
+      "reviewed_inputs_sha256": "f129b123e6437a95b87fd48af3fa8634a5dce704bb1e09c0e68e09dd799861f2",
+      "scope": "Frozen proof/accounting candidate only; mandatory final exact-head gates remain pending."
+    },
+    {
+      "area": "callbacks",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/contracts-finder.md",
+      "sha256": "c2f647d236905216ba6dcfb8c8a50050297521a90d2a2411b4aa1d2c0ee62e85",
+      "reviewed_inputs_sha256": "f129b123e6437a95b87fd48af3fa8634a5dce704bb1e09c0e68e09dd799861f2",
+      "scope": "Frozen proof/accounting candidate only; mandatory final exact-head gates remain pending."
+    },
+    {
+      "area": "compiler",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/contracts-finder.md",
+      "sha256": "c2f647d236905216ba6dcfb8c8a50050297521a90d2a2411b4aa1d2c0ee62e85",
+      "reviewed_inputs_sha256": "f129b123e6437a95b87fd48af3fa8634a5dce704bb1e09c0e68e09dd799861f2",
+      "scope": "Frozen proof/accounting candidate only; mandatory final exact-head gates remain pending."
+    },
+    {
+      "area": "checker-evidence",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/contracts-finder.md",
+      "sha256": "c2f647d236905216ba6dcfb8c8a50050297521a90d2a2411b4aa1d2c0ee62e85",
+      "reviewed_inputs_sha256": "f129b123e6437a95b87fd48af3fa8634a5dce704bb1e09c0e68e09dd799861f2",
+      "scope": "Frozen proof/accounting candidate only; mandatory final exact-head gates remain pending."
+    },
+    {
+      "area": "rules-calculus",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/contracts-skeptic.md",
+      "sha256": "211db08e78926583de2cf2370da8c1b9e4716202a464951f207f68f866459ad4",
+      "reviewed_inputs_sha256": "f129b123e6437a95b87fd48af3fa8634a5dce704bb1e09c0e68e09dd799861f2",
+      "scope": "Frozen proof/accounting candidate only; mandatory final exact-head gates remain pending."
+    },
+    {
+      "area": "callbacks",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/contracts-skeptic.md",
+      "sha256": "211db08e78926583de2cf2370da8c1b9e4716202a464951f207f68f866459ad4",
+      "reviewed_inputs_sha256": "f129b123e6437a95b87fd48af3fa8634a5dce704bb1e09c0e68e09dd799861f2",
+      "scope": "Frozen proof/accounting candidate only; mandatory final exact-head gates remain pending."
+    },
+    {
+      "area": "compiler",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/contracts-skeptic.md",
+      "sha256": "211db08e78926583de2cf2370da8c1b9e4716202a464951f207f68f866459ad4",
+      "reviewed_inputs_sha256": "f129b123e6437a95b87fd48af3fa8634a5dce704bb1e09c0e68e09dd799861f2",
+      "scope": "Frozen proof/accounting candidate only; mandatory final exact-head gates remain pending."
+    },
+    {
+      "area": "checker-evidence",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/contracts-skeptic.md",
+      "sha256": "211db08e78926583de2cf2370da8c1b9e4716202a464951f207f68f866459ad4",
+      "reviewed_inputs_sha256": "f129b123e6437a95b87fd48af3fa8634a5dce704bb1e09c0e68e09dd799861f2",
+      "scope": "Frozen proof/accounting candidate only; mandatory final exact-head gates remain pending."
+    }
+  ]
+}

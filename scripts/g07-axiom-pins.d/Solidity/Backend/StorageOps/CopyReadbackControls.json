@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/StorageOps/CopyReadbackControls.lean:Solidity.Backend.StorageOps.CopyReadbackControls.actual_and_bad_region": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadbackControls.lean:Solidity.Backend.StorageOps.CopyReadbackControls.arbitrary_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadbackControls.lean:Solidity.Backend.StorageOps.CopyReadbackControls.fresh_initialization_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadbackControls.lean:Solidity.Backend.StorageOps.CopyReadbackControls.represented_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadbackControls.lean:Solidity.Backend.StorageOps.CopyReadbackControls.symbolic_alias_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

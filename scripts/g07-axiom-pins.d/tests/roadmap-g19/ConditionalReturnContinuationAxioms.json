@@ -1,0 +1,64 @@
+{
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.Controls.eager": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.Controls.eager_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.Controls.eager_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.Controls.sourceTail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.Controls.tail_writes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.Controls.targetTail": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.suffix": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnContinuationAxioms.lean:Solidity.Lowering.G19.ConditionalReturnContinuation.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

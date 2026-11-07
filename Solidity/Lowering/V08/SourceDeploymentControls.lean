@@ -74,8 +74,8 @@ theorem refused_restores_execution : refused.ex = populated.ex :=
   Source.ExecState.undo_apply populated.ex nonpayablePlacement
 
 theorem installed_vector (p : Roadmap.Pipeline) :
-    ((installed p).ex.world.accounts user).balance.val = 93 ∧
-    ((installed p).ex.world.accounts thisC).balance.val = 7 ∧
+    ((installed p).ex.world.accounts user).balance = 93 ∧
+    ((installed p).ex.world.accounts thisC).balance = 7 ∧
     ((installed p).ex.world.accounts thisC).nonce = 1 ∧
     ((installed p).ex.world.accounts thisC).code = some 1 ∧
     ((installed p).ex.world.accounts thisC).storage.read dA.path = some v2 ∧

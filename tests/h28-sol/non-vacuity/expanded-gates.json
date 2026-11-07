@@ -1,0 +1,151 @@
+{
+  "status": "checkpoint only; full repository gate failed, acceptance incomplete",
+  "gates": [
+    {
+      "tag": "keysort-04",
+      "command": [
+        "tests/h28-sol/non-vacuity/runtime/keysort"
+      ],
+      "exit": 0,
+      "stop": null,
+      "elapsed_seconds": 2.201839014000143,
+      "sampled_peak_aggregate_rss_bytes": 292397056,
+      "children_max_rss_kib": 251640,
+      "metadata": "evidence/keysort-04.json",
+      "metadata_sha256": "c1c68f8d320249123c03bd03935254d575adf960fcff8defe437111530b756c1",
+      "log": "evidence/keysort-04.log",
+      "log_sha256": "353c45e002a6108d5eeeeb65a53cac9d06c9e355e6ac75ef95ff806ff3e389ac"
+    },
+    {
+      "tag": "signatures-expanded-02",
+      "command": [
+        "lake",
+        "build",
+        "+Solidity.Assurance.NonVacuityH28.Signatures:olean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "elapsed_seconds": 89.04036699599965,
+      "sampled_peak_aggregate_rss_bytes": 1529028608,
+      "children_max_rss_kib": 1429008,
+      "metadata": "evidence/signatures-expanded-02.json",
+      "metadata_sha256": "e38e952a50883a4591504e5e12f2e6077de154b009306ebebdfc5e0f2d28698d",
+      "log": "evidence/signatures-expanded-02.log",
+      "log_sha256": "132ba2c232de089edb7a0ec784e64ae0f494ad3035cfcb2d90637101767ab56d"
+    },
+    {
+      "tag": "pins-expanded-01",
+      "command": [
+        "lake",
+        "build",
+        "+Solidity.Assurance.NonVacuityH28.Pins:olean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "elapsed_seconds": 90.06506999699923,
+      "sampled_peak_aggregate_rss_bytes": 1523789824,
+      "children_max_rss_kib": 1413740,
+      "metadata": "evidence/pins-expanded-01.json",
+      "metadata_sha256": "cc50f25a499d6b7a0c3f84df78c6a7da8d43019b66e4cfbecfa1ed63bd719a88",
+      "log": "evidence/pins-expanded-01.log",
+      "log_sha256": "0e7b671d26d2cd0921b1313a4e35ba70168f87b41a410f266ed0f3b36f5cf2c3"
+    },
+    {
+      "tag": "expanded-checkpoint-kernel-01",
+      "command": [
+        "lake",
+        "build",
+        "+Solidity.Assurance.NonVacuityH28.Calculus:olean",
+        "+Solidity.Assurance.NonVacuityH28.Callbacks:olean",
+        "+Solidity.Assurance.NonVacuityH28.CheckedFamilies:olean",
+        "+Solidity.Assurance.NonVacuityH28.CheckedObjects:olean",
+        "+Solidity.Assurance.NonVacuityH28.Environments:olean",
+        "+Solidity.Assurance.NonVacuityH28.Families:olean",
+        "+Solidity.Assurance.NonVacuityH28.Fragile:olean",
+        "+Solidity.Assurance.NonVacuityH28.Locals:olean",
+        "+Solidity.Assurance.NonVacuityH28.MemoryControls:olean",
+        "+Solidity.Assurance.NonVacuityH28.MemoryInputs:olean",
+        "+Solidity.Assurance.NonVacuityH28.Outcomes:olean",
+        "+Solidity.Assurance.NonVacuityH28.Pins:olean",
+        "+Solidity.Assurance.NonVacuityH28.Preconditions:olean",
+        "+Solidity.Assurance.NonVacuityH28.Signatures:olean",
+        "+Solidity.Assurance.NonVacuityH28.Storage:olean",
+        "+Solidity.Assurance.NonVacuityH28.TailSensitive:olean",
+        "+Solidity.Assurance.NonVacuityH28.VacuityControls:olean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "elapsed_seconds": 1.0803042759998789,
+      "sampled_peak_aggregate_rss_bytes": 5869568,
+      "children_max_rss_kib": 59804,
+      "metadata": "evidence/expanded-checkpoint-kernel-01.json",
+      "metadata_sha256": "295394009735b86c522aa67c152307c27f62f914c2549dc89c54c97884981213",
+      "log": "evidence/expanded-checkpoint-kernel-01.log",
+      "log_sha256": "7c852c86f48188e1c13aed04caabe5bff31b60823558a51822d4de05ae31c950"
+    },
+    {
+      "tag": "memory-controls-kernel-02",
+      "command": [
+        "lake",
+        "build",
+        "+Solidity.Assurance.NonVacuityH28.MemoryControls:olean"
+      ],
+      "exit": 0,
+      "stop": null,
+      "elapsed_seconds": 2.1365478400002758,
+      "sampled_peak_aggregate_rss_bytes": 936013824,
+      "children_max_rss_kib": 839768,
+      "metadata": "evidence/memory-controls-kernel-02.json",
+      "metadata_sha256": "cf1efad32c30b8f12f70ba4e947cfb3b22492cc84dff0864b313681f344fe87f",
+      "log": "evidence/memory-controls-kernel-02.log",
+      "log_sha256": "b0cfbc7f1537e04b6626f3f622afa96ec09a92ebfcf1388740f915bc60468abd"
+    },
+    {
+      "tag": "accounting-expanded-04",
+      "command": [
+        "tests/h28-sol/non-vacuity/runtime/accounting"
+      ],
+      "exit": 0,
+      "stop": null,
+      "elapsed_seconds": 3.225591845000963,
+      "sampled_peak_aggregate_rss_bytes": 35360768,
+      "children_max_rss_kib": 18664,
+      "metadata": "evidence/accounting-expanded-04.json",
+      "metadata_sha256": "5cc5c721a99af4837833f2002e24893ed63cf037089a5e6cd34be737c92cc447",
+      "log": "evidence/accounting-expanded-04.log",
+      "log_sha256": "6ec2c678ce3dd6e1cb40bce39752595d65806bac989ee221a2a6b621d9fff5be"
+    },
+    {
+      "tag": "full-repository-01",
+      "command": [
+        "bash",
+        "run-lean.sh"
+      ],
+      "exit": 127,
+      "stop": null,
+      "elapsed_seconds": 1.060305065000648,
+      "sampled_peak_aggregate_rss_bytes": 5795840,
+      "children_max_rss_kib": 8832,
+      "metadata": "evidence/full-repository-01.json",
+      "metadata_sha256": "f65bbdec477acac456146f6421ce1c15d9db2f6cad37d0160e7d4bc01c42c0d9",
+      "log": "evidence/full-repository-01.log",
+      "log_sha256": "9ec4d60f73f032ef53c2e37d725b777f485cb51905781346ea8acbcf73d41184"
+    },
+    {
+      "tag": "full-repository-02",
+      "command": [
+        "bash",
+        "run-lean.sh"
+      ],
+      "exit": 1,
+      "stop": null,
+      "elapsed_seconds": 1.0698809839996102,
+      "sampled_peak_aggregate_rss_bytes": 5722112,
+      "children_max_rss_kib": 201508,
+      "metadata": "evidence/full-repository-02.json",
+      "metadata_sha256": "f9d23756db3ad54e6b590614ef12b4927d327caa284f8b8d5484a2b6b21c38b6",
+      "log": "evidence/full-repository-02.log",
+      "log_sha256": "e2450e38c7f3b73b2f2df2cfb4dcfea4e77aa227c0209ed0d5e6cc5958ba9fa8"
+    }
+  ]
+}

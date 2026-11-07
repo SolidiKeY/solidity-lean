@@ -1,0 +1,60 @@
+{
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.allowed_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.code_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.fits_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.not_allowed_client": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.operand_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.pass_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.refused_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.source_value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

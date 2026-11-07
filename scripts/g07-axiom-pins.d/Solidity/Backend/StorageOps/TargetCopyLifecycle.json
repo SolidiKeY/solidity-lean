@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/TargetCopyLifecycle.lean:Solidity.Backend.StorageOps.TargetCopyLifecycle.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyLifecycle.lean:Solidity.Backend.StorageOps.TargetCopyLifecycle.run_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "Solidity/Semantics/Termination.lean:Solidity.Stmt.loop_terminates_of_wellFounded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Termination.lean:Solidity.TLoop.finite_of_wellFounded": [
+  "propext"
+ ],
+ "Solidity/Semantics/Termination.lean:Solidity.TLoop.run_wellFounded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

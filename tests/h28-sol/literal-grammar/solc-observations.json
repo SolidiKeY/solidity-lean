@@ -1,0 +1,2821 @@
+{
+  "compiler": {
+    "version": "0.8.38+commit.1835d247.Emscripten.clang",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+  },
+  "boundary": "Compiler pipeline fixtures and AST bytes/ranges; not a scanner equivalence theorem. Invalid raw UTF8 bytes cannot be represented by standard JSON source strings; kernel controls cover those bytes, external escapes cover arbitrary decoded bytes.",
+  "comparison": "exact observations; model/compiler conformance is not asserted",
+  "differences": [
+    {
+      "id": "unicode-escape-thresholds",
+      "checkedModelAccept": true,
+      "compilerAccept": false,
+      "explanation": "Pinned byte decoder accepts surrogate byte encodings; compiler pipeline rejects invalid decoded UTF8 with SyntaxError8452. No new UTF8 validation is imposed on the decoder."
+    },
+    {
+      "id": "assembly-empty-flag",
+      "checkedModelAccept": false,
+      "compilerAccept": true,
+      "explanation": "Compiler accepts empty assembly flag; pinned asm classification has an unchanged source-length>2 and refuses it. Base solc-alignment claim is disproved by this observation."
+    },
+    {
+      "id": "assembly-single-flag",
+      "checkedModelAccept": false,
+      "compilerAccept": true,
+      "explanation": "Compiler accepts single-quoted memory-safe flag; pinned asm classification has an unchanged double-quote-only and refuses it. Base solc-alignment claim is disproved by this observation."
+    }
+  ],
+  "observations": [
+    {
+      "id": "plain-double-empty",
+      "viaIR": false,
+      "sourceSha256": "cd90d9863337f77e8448a05bcbbcc4c2112d00bb21ef37c31a4d59d8b4c75dae",
+      "inputSha256": "7e242852faa5e0ea666b5c41d6f9402b5602c4dd757a24c649a45592811b8a4d",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "",
+          "src": "134:2:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "91d7e91504db02d3e38d520268350e31b489ae179b78d7837ff2e4c0c41130f5"
+    },
+    {
+      "id": "plain-double-empty",
+      "viaIR": true,
+      "sourceSha256": "cd90d9863337f77e8448a05bcbbcc4c2112d00bb21ef37c31a4d59d8b4c75dae",
+      "inputSha256": "3ceac3bd4352d80a0242065f5b9350b8da5c50ec851e1bfc372536be40155f70",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "",
+          "src": "134:2:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "4a9b1a3133dd7c1ea138a7978bf4aedb0bfff4fc8b5b394b799809461a281362"
+    },
+    {
+      "id": "plain-single-empty",
+      "viaIR": false,
+      "sourceSha256": "90b8669464de74de4b7829723315e80546edb723faa543446818e1c1ac26399a",
+      "inputSha256": "2092e55926f44eefa3ff01095ca0ebc6cf0f7a47c4c504f40cfc1bbec210fa05",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "",
+          "src": "134:2:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "5650cf3bedbb6c708d6d1f3ee2fc428d6c387393700406bcdb86494e277baa46"
+    },
+    {
+      "id": "plain-single-empty",
+      "viaIR": true,
+      "sourceSha256": "90b8669464de74de4b7829723315e80546edb723faa543446818e1c1ac26399a",
+      "inputSha256": "57657fc20b595ff81a75e89b82f7b039b831589461e716bd7ab368b65575c94e",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "",
+          "src": "134:2:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "4bce604447e4dc9de87d686044196f6b35159e9a2af499e3f693e4ade1776df4"
+    },
+    {
+      "id": "simple-escapes-double",
+      "viaIR": false,
+      "sourceSha256": "1697c528ca7b879f5ba011f8d72c137f0f570e9a8d0e59ee68a5de758d281bb9",
+      "inputSha256": "9acdaab7cd849503238a264acd0eef37c66215037baa674731c7eae0b4423e1d",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "27225c0a0d09",
+          "src": "134:14:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "6ee29a6a5227ccd1919c22eef244e4bb2fe4416471b124c4d81360ba05b32e10"
+    },
+    {
+      "id": "simple-escapes-double",
+      "viaIR": true,
+      "sourceSha256": "1697c528ca7b879f5ba011f8d72c137f0f570e9a8d0e59ee68a5de758d281bb9",
+      "inputSha256": "3618ae56e042c55bc957c392e6fdaaca8ef57e8875996a55c66a88b3eef8869d",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "27225c0a0d09",
+          "src": "134:14:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "0d4e0e6ce61b04948377fe20cf5f246c39dd0b6c51ee42ce6fc68375ee5a32f5"
+    },
+    {
+      "id": "line-continuations-double",
+      "viaIR": false,
+      "sourceSha256": "629af9c2a5933cbf2718267bdbaa63aab08508c8381f1bf04db9f22565ac1e93",
+      "inputSha256": "8c10a65a0da3dc4bbfa1fcc8dc24ce3d2713d6ab540762f27e9d7666bf743216",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "41424344",
+          "src": "134:13:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "0d400e24f7d408b8aaa26eb09411731dc4b8d67dede13a66a9457f958dcc8555"
+    },
+    {
+      "id": "line-continuations-double",
+      "viaIR": true,
+      "sourceSha256": "629af9c2a5933cbf2718267bdbaa63aab08508c8381f1bf04db9f22565ac1e93",
+      "inputSha256": "6dbf39dbb457654d60d75169041582c1456b007e46f6e4ccbed7078690bf4405",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "41424344",
+          "src": "134:13:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "5cc87135f1dd4887d952fd353b0932922e54c60f8f54a00c4a2fcbf64b7669fd"
+    },
+    {
+      "id": "simple-escapes-single",
+      "viaIR": false,
+      "sourceSha256": "5c4511571a9a291c7bed56d834eec0194bb5576cf6c7fb2f5989840e78da0f39",
+      "inputSha256": "e1bb1ba5e70fb1c8b3e3549d0d2f75bcc6b08f721c0e43338db11cc15dfdda2b",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "27225c0a0d09",
+          "src": "134:14:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "c28ccbfdb1b8c6a0df7dfcb7066c66d3af819632a2cfc1d06ac4a23325456839"
+    },
+    {
+      "id": "simple-escapes-single",
+      "viaIR": true,
+      "sourceSha256": "5c4511571a9a291c7bed56d834eec0194bb5576cf6c7fb2f5989840e78da0f39",
+      "inputSha256": "36dfec09e04b00159b254d5da037f2d974ff8e2dc81df7e9888b2bfe735229e8",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "27225c0a0d09",
+          "src": "134:14:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "279d7ae102d37bf9c1aa1c800125895437ff3308eb34626a149192ddc43b57d8"
+    },
+    {
+      "id": "line-continuations-single",
+      "viaIR": false,
+      "sourceSha256": "6bab7dbf577192bdd53686cec828ba4909bcf3849d7181e00116b78df2131ee1",
+      "inputSha256": "c332231dc8fb76fb6d81e3b449e1ab988b6a9ae247096e653e42330fda2411fb",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "41424344",
+          "src": "134:13:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "3c9e4d179f7f120b9f08cc7c7aefc8ca1ff9072be2fa34467fbde8aa0469ea11"
+    },
+    {
+      "id": "line-continuations-single",
+      "viaIR": true,
+      "sourceSha256": "6bab7dbf577192bdd53686cec828ba4909bcf3849d7181e00116b78df2131ee1",
+      "inputSha256": "615657469c65bfa0526086098f9046313b8832d715bbaf9ed6ff65575d88e002",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "41424344",
+          "src": "134:13:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "8098393207b993ea2a8ac615d591351c22866d434dcaf851567d37255d49cca2"
+    },
+    {
+      "id": "hex-byte-escapes",
+      "viaIR": false,
+      "sourceSha256": "52fa50a23ffd2908dc95712da13f1f5ed2d6f646bc75573e9801c07a7ab54010",
+      "inputSha256": "b2e593cdb1e9e301ea00d884cff38a7196f2aedfe4997fca1912cb784a4853a4",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "00ff",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "0c5faf669d81e2452450ea041e9c3d09ea8373999b84bfc3be0bcfbba20459ac"
+    },
+    {
+      "id": "hex-byte-escapes",
+      "viaIR": true,
+      "sourceSha256": "52fa50a23ffd2908dc95712da13f1f5ed2d6f646bc75573e9801c07a7ab54010",
+      "inputSha256": "172874b4d8b39e65383801e8d42d785aafa07741a0a2c85821c11b170aa28040",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "00ff",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "d9b1c5ec2e0a73c06e2ae9a75e369a16ae9ea512f36b871a911b07f90572bfa5"
+    },
+    {
+      "id": "plain-unicode-escape",
+      "viaIR": false,
+      "sourceSha256": "c7dfa4f4d265ad5a6f83175d7c3377cfdb4ebed4d2e12b070fa745b7ed4df0a8",
+      "inputSha256": "a91cec36ba5142e3bd0fa8c5829ace907b131418d3f9da7e6d827bc3a76ad22e",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "c3a9",
+          "src": "134:8:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "84e03db463b51d99b7aefba35ba07f741771e6a12ca43658e9ac4c639fa912f4"
+    },
+    {
+      "id": "plain-unicode-escape",
+      "viaIR": true,
+      "sourceSha256": "c7dfa4f4d265ad5a6f83175d7c3377cfdb4ebed4d2e12b070fa745b7ed4df0a8",
+      "inputSha256": "f121e0ebca9d4c9d4c44b82ddab159acc0e69fa412b2ad621eb5f8a3fa67881e",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "c3a9",
+          "src": "134:8:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "a06ade69ef42999293a0465eb264e283c995ea638e9234b163a9ce9ab55019f5"
+    },
+    {
+      "id": "unicode-escape-thresholds",
+      "viaIR": false,
+      "sourceSha256": "74a9d22401a3bf1c8e580dd0eff4cd008776c88aab358186ad56d096b556a3d1",
+      "inputSha256": "b31891d85fe20bdbea81170d284c93775c6ec71a736b46da0c9b3fefee6901de",
+      "accept": false,
+      "errors": [
+        {
+          "type": "SyntaxError",
+          "code": "8452",
+          "message": "Contains invalid UTF-8 sequence at position 10.",
+          "location": {
+            "end": 185,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-escape-thresholds",
+      "viaIR": true,
+      "sourceSha256": "74a9d22401a3bf1c8e580dd0eff4cd008776c88aab358186ad56d096b556a3d1",
+      "inputSha256": "f4ac359ff3ff9afe69d6c7f64d87a9df5b29f082287d9fe949f1e05815c54246",
+      "accept": false,
+      "errors": [
+        {
+          "type": "SyntaxError",
+          "code": "8452",
+          "message": "Contains invalid UTF-8 sequence at position 10.",
+          "location": {
+            "end": 185,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-raw",
+      "viaIR": false,
+      "sourceSha256": "3e7106ad9e2a97a7c33c78bda3165c3d1047cf9bbdc7180852ae5c645e70713f",
+      "inputSha256": "f3fd0a4fdbac04dae1f662969816838a8f974d9897c8e1b6168536068b7be280",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "c3a9f09f92a1",
+          "src": "134:15:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "479c80ff2b13c16f0e81b3f2c8028438ec5f5b017072179ae5aad2c39f11303e"
+    },
+    {
+      "id": "unicode-raw",
+      "viaIR": true,
+      "sourceSha256": "3e7106ad9e2a97a7c33c78bda3165c3d1047cf9bbdc7180852ae5c645e70713f",
+      "inputSha256": "d0e2d2d52f2522423511813f3206bfc4be2167348d429ed4de483f00b29bd77c",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "c3a9f09f92a1",
+          "src": "134:15:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "c183f8e2261671d7856ff3f071dada56e73e749066e1ad7b2d4464431fd87b30"
+    },
+    {
+      "id": "unicode-balanced-bidi",
+      "viaIR": false,
+      "sourceSha256": "49e086bc93050a64c0df805c75e292b6fae538dc3ccfe6201781fd9972c7f116",
+      "inputSha256": "40914e8385abda217aaa3cc61c0e9258f00dfd6fa2f141ea473ba33d4757cdd2",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "e280ae41e280ac",
+          "src": "134:16:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "17a949ab8be779b949f83f252f2bbb9ccd4c44e0a2d4ebe4f63c4981336e8df5"
+    },
+    {
+      "id": "unicode-balanced-bidi",
+      "viaIR": true,
+      "sourceSha256": "49e086bc93050a64c0df805c75e292b6fae538dc3ccfe6201781fd9972c7f116",
+      "inputSha256": "7d53c45af99167a0bdb19209415420ec239b56594afa997c2e3d7f1c681805f2",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "e280ae41e280ac",
+          "src": "134:16:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "9272e7a83c83c6ab43f92e4fbc715b3970289b78112a8e26031b3a5238175600"
+    },
+    {
+      "id": "hex-double-empty",
+      "viaIR": false,
+      "sourceSha256": "d127563c870072e24a606ebf6fe9080450350511d1562a05396a471c6d679fbd",
+      "inputSha256": "9054865d8ded7124d0388a00d1028ba77f35ecc227109f021a61df54c4c154c8",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "",
+          "src": "134:5:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "f35576741b52d40b809682117a5152147fcc41938abb337ad611a65b59278c27"
+    },
+    {
+      "id": "hex-double-empty",
+      "viaIR": true,
+      "sourceSha256": "d127563c870072e24a606ebf6fe9080450350511d1562a05396a471c6d679fbd",
+      "inputSha256": "c83ed46c154f46fe0a960a7d8ccfd627e2979c7dab7823faad18196633a4cde6",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "",
+          "src": "134:5:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "8c294f8c3311671a4d65c1403d060680b0371ee6f96762194220811cfae30c11"
+    },
+    {
+      "id": "hex-single-empty",
+      "viaIR": false,
+      "sourceSha256": "d0e8d544db7b73d08eccf58db739206e26facfb900e6eed12e96d59fc686d88f",
+      "inputSha256": "e8b4e0857968c595efc6151540ae16e85363d238669b8245b8fb0e8f88cc7c3c",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "",
+          "src": "134:5:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "aecd46180f12ed53c54884dbb20ec13409272eb49b07972d83ea612b86a4daa8"
+    },
+    {
+      "id": "hex-single-empty",
+      "viaIR": true,
+      "sourceSha256": "d0e8d544db7b73d08eccf58db739206e26facfb900e6eed12e96d59fc686d88f",
+      "inputSha256": "cb2f714142356bbf17af26787c71d611ad596892ae91f811b644ca5359168a4e",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "",
+          "src": "134:5:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "054060a118e2c485ccf991d25d7d1f2b408b36f9e587d3dc058f60ca6bc10bb1"
+    },
+    {
+      "id": "hex-adjacent",
+      "viaIR": false,
+      "sourceSha256": "8f9c89a7ecc30f7a73f6455f0c4fe74ec470384bca3f0af29a0fe41cf1c0082e",
+      "inputSha256": "1d6619dc20587b49a5ec716658836a5f69ead64ff48871912a88b0dbde145545",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "00ffaf",
+          "src": "134:11:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "2b42e76c54c4ff10fdea43326cf71abb594777a388f7d7b087f57b3ab8b6533c"
+    },
+    {
+      "id": "hex-adjacent",
+      "viaIR": true,
+      "sourceSha256": "8f9c89a7ecc30f7a73f6455f0c4fe74ec470384bca3f0af29a0fe41cf1c0082e",
+      "inputSha256": "501b7cce372693f042c1ef8126670340457d950de0cec80981c31b69daea51e5",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "00ffaf",
+          "src": "134:11:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "729a200f98cb7334d848c367d5a78e4e610d0e8b5fddf64653ebeb71fb6c200d"
+    },
+    {
+      "id": "hex-separated",
+      "viaIR": false,
+      "sourceSha256": "108d06268f0dd5f8e71f36b0c6e19919690321f002ba5d650fb665b1750ccfbb",
+      "inputSha256": "f0cfeab091aecac5510f8c2fe2842b2c42f76a2b9e3f9c80e2f8e02242200f55",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "00ff01",
+          "src": "134:13:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "0cd64c262ba0da7e118fbeee21a85ff08dee69a5c059a120c9a132593b0c5b7e"
+    },
+    {
+      "id": "hex-separated",
+      "viaIR": true,
+      "sourceSha256": "108d06268f0dd5f8e71f36b0c6e19919690321f002ba5d650fb665b1750ccfbb",
+      "inputSha256": "a231d8e5698498f7fc06bb55feee5abe8bc99188ce70768a6db848fcdfae5abf",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "00ff01",
+          "src": "134:13:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "e6da0c653ea69fb7b8fcc818a2e4b9dd47fbd038acd4dd0cd2b3602780f58f26"
+    },
+    {
+      "id": "plain-concat",
+      "viaIR": false,
+      "sourceSha256": "662490583926d6569199ccfa5c5f436ef29d1daa737425cd87c8cf26616b36df",
+      "inputSha256": "4d94d93f3c249d8304f7b168d36e857c9b0a7c17218fe53571d23d8df907e460",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "4100c3a9",
+          "src": "134:19:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "f99f9d221046ccab0629dc84e8b53273b992d10589fb1b3f54220444490587c6"
+    },
+    {
+      "id": "plain-concat",
+      "viaIR": true,
+      "sourceSha256": "662490583926d6569199ccfa5c5f436ef29d1daa737425cd87c8cf26616b36df",
+      "inputSha256": "69067ec872a46a26449f3b27de0bf491710486841e1f11726fdfc9413c8089a2",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "4100c3a9",
+          "src": "134:19:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "17fa4df7a9e067ddb9c39235499e2e1bb18a34891940724bcd318daa1d1ee0ab"
+    },
+    {
+      "id": "unicode-concat",
+      "viaIR": false,
+      "sourceSha256": "4b06b11bbb913f758d2fd94e5b73718178db884b3d880c5ad24c12dbfb009e11",
+      "inputSha256": "a3197c12133787971a41a28f6a6dec0762e1de3c490ca86d3a2fb8400ffee149",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "41c3a9",
+          "src": "134:22:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "a141d4c1846ed8d6643904bcf01e6da547a0ad55bff4bf32d1131f1fa33e5e44"
+    },
+    {
+      "id": "unicode-concat",
+      "viaIR": true,
+      "sourceSha256": "4b06b11bbb913f758d2fd94e5b73718178db884b3d880c5ad24c12dbfb009e11",
+      "inputSha256": "235bb867584976891888fea7242247e5e362b8d836921f01d335ac85ba823f70",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "41c3a9",
+          "src": "134:22:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "3517293d3d33052e85beefc7e84852af71c1215b662e75f65544b42fda415994"
+    },
+    {
+      "id": "hex-concat",
+      "viaIR": false,
+      "sourceSha256": "7aba89764afce838a39431700b2cda539e0c473abe2fd2b60c4389ec525a3e3d",
+      "inputSha256": "53ecf2c693a2a012f7b093daa98daf4ccf75cb67c0218bc494e26885ee984a23",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "00ff01",
+          "src": "134:18:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "5189f79d22c47694abf2a2c4b3d300459ef752bd46092ace9c06ab416e4e8d7c"
+    },
+    {
+      "id": "hex-concat",
+      "viaIR": true,
+      "sourceSha256": "7aba89764afce838a39431700b2cda539e0c473abe2fd2b60c4389ec525a3e3d",
+      "inputSha256": "2d70e8a98518edc47dfb77087673d8fa657229347f740dc08f06b0b34580a502",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "hexString",
+          "hex": "00ff01",
+          "src": "134:18:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "77c414dc4905f61fba2c82b211547dbf3c8644ec9c1dc47a2f7bd5c2abc83ff6"
+    },
+    {
+      "id": "yul-empty",
+      "viaIR": false,
+      "sourceSha256": "f4b25d90fffc0cf783283136e74f454b211808908e2db1717f97b03f0a7a54a7",
+      "inputSha256": "845144281ed27de62b3fdd7cebc0b488e2bfe5acad25f4b2fec2036d2c292b4e",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "",
+          "src": "141:2:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "24b603b37eee651818f113aede509354dcc08de12aa0becd44ae808c10e768bc"
+    },
+    {
+      "id": "yul-empty",
+      "viaIR": true,
+      "sourceSha256": "f4b25d90fffc0cf783283136e74f454b211808908e2db1717f97b03f0a7a54a7",
+      "inputSha256": "bd0dcaf340a55b77b26890dd8fe2fc415b4df01450010525a8748935166e1a7a",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "",
+          "src": "141:2:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "c65aafcd40576082bb48fc7e083017a780e34c57cc50d11e70db2be757c565bf"
+    },
+    {
+      "id": "yul-single",
+      "viaIR": false,
+      "sourceSha256": "4d644d558f0e66078e3f82536333600981ea96b5f78bf85504e36a4b55265a54",
+      "inputSha256": "a775c3408189332d00083fcfc72ab4a894128a5a81b661b1ed4ad527e809a0c1",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "41",
+          "src": "141:3:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "a43ccbe21df6ed9f52ceb42008c4132935da16077ce1ccc765428304c3ad92c8"
+    },
+    {
+      "id": "yul-single",
+      "viaIR": true,
+      "sourceSha256": "4d644d558f0e66078e3f82536333600981ea96b5f78bf85504e36a4b55265a54",
+      "inputSha256": "86fb6f6be91ca1d078389a15fe9aefe8403c96fb5d265051016952adeb2f6f19",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "41",
+          "src": "141:3:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "2035111b995b71acb6f71a5c0892c44387dd463bf0580ef775511c1966c644b6"
+    },
+    {
+      "id": "yul-escapes",
+      "viaIR": false,
+      "sourceSha256": "f458dafc3cdf341582cf0a463012715932d7e2c54dcf38a3f4c67efbf009e231",
+      "inputSha256": "600b377f5666fe987fbb82dd55d69c49ceb304719fc5091e7244c840bf1643d5",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "00ff",
+          "src": "141:10:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "bdf7d9790107bcf870d45e997142e8939dba65b2b7111f4fea349e39f33e7c2e"
+    },
+    {
+      "id": "yul-escapes",
+      "viaIR": true,
+      "sourceSha256": "f458dafc3cdf341582cf0a463012715932d7e2c54dcf38a3f4c67efbf009e231",
+      "inputSha256": "2600e5571fe29a4dce47f382f9fc13fff37f3aadcd4d04b4d039bb123588bfbc",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "00ff",
+          "src": "141:10:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "04e2593f6c48c0b8f693641e2da4deff3fa93bfbf66e2aae2520b415fa239ae0"
+    },
+    {
+      "id": "yul-hex",
+      "viaIR": false,
+      "sourceSha256": "20adbd364682c6af39004a7448f48f3be5dd426314eef0a94708429d5e3bac34",
+      "inputSha256": "d7d93753872630a6ea212da74ffd064182816c811390d6e2b197f6b1f815801e",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "00ff",
+          "src": "141:10:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "e54ba75471888fca88c139da9a1c75f7d7df6cfb99a88eedbdc1c4b7944d42b2"
+    },
+    {
+      "id": "yul-hex",
+      "viaIR": true,
+      "sourceSha256": "20adbd364682c6af39004a7448f48f3be5dd426314eef0a94708429d5e3bac34",
+      "inputSha256": "4bd5c8059338186aae54756d6fd7a2dcf18d16b0fe7e6fa1345d0e49836edbd8",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "00ff",
+          "src": "141:10:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "24c36e41f812a9b32ab59a61ecf8934b288c9419d4e186a5545cf543c8146dfc"
+    },
+    {
+      "id": "yul-CRLF",
+      "viaIR": false,
+      "sourceSha256": "ab861054d2604dd8e0a46418527a82e5155cce03a5f520a75b46af6952a41ba0",
+      "inputSha256": "990a4cc9c5e62295a1abc9baf09f40cf32846a5ce27e03f4f7f823d88d060be7",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "4142",
+          "src": "141:7:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "d41d3a0d0763b63aef4b9f3bbc47fc92a6841ebef7cc0cd20797cad054a32c13"
+    },
+    {
+      "id": "yul-CRLF",
+      "viaIR": true,
+      "sourceSha256": "ab861054d2604dd8e0a46418527a82e5155cce03a5f520a75b46af6952a41ba0",
+      "inputSha256": "70c688fe7a4e9931f5d8a3890e322be9ed6e69a3e20113e3f2dd54d85a8ead2d",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "4142",
+          "src": "141:7:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "e97ee55baa3c8e54b7ba59970a2d790a1fcfeccb0d49d6f098f6a0865c5399a0"
+    },
+    {
+      "id": "assembly-double-flag",
+      "viaIR": false,
+      "sourceSha256": "5376a472750ed5899df8844e23b35086a08e0a7c502200d2fa15a3df9174ee5e",
+      "inputSha256": "2ef4def22b4fb5327b849ea492512b9ab71def414fd115a5f465c8dd845cf82a",
+      "accept": true,
+      "errors": [],
+      "literals": [],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "f1797f2fadc65cd92a3480829924ef9de4054399465aa32380ccd4dbe8a050ce"
+    },
+    {
+      "id": "assembly-double-flag",
+      "viaIR": true,
+      "sourceSha256": "5376a472750ed5899df8844e23b35086a08e0a7c502200d2fa15a3df9174ee5e",
+      "inputSha256": "3d6f550449385e43f2c4cdea09fe8208a33763cffeea2f7345b552f57b5534bd",
+      "accept": true,
+      "errors": [],
+      "literals": [],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "3eb9084673e0a5b0d21f2099633644e2ed2e72f382d825acfe3ed6cf99a42109"
+    },
+    {
+      "id": "bad-simple",
+      "viaIR": false,
+      "sourceSha256": "dd2911a00392fce1b44948d4b9d15b2b1c9e306e95337d5d11e506c1f430ede4",
+      "inputSha256": "caa26c477e2a090b4ad8f6b0e3afacf0d85ca7ea719b6e3beb250992d62b1670",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "bad-simple",
+      "viaIR": true,
+      "sourceSha256": "dd2911a00392fce1b44948d4b9d15b2b1c9e306e95337d5d11e506c1f430ede4",
+      "inputSha256": "a98376136bb66932d86873848b7884246d345e579c4d89d6d36cd6559524f82d",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "short-x",
+      "viaIR": false,
+      "sourceSha256": "c19c2107c6e5606c7a213fb32fc9256bee400da886ac0846786eefcf13b706cd",
+      "inputSha256": "f05927ddf9165877244ac5f6e4eb9ad877b29ecf7871c60bb963ec2d89415513",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "short-x",
+      "viaIR": true,
+      "sourceSha256": "c19c2107c6e5606c7a213fb32fc9256bee400da886ac0846786eefcf13b706cd",
+      "inputSha256": "be154c4275d4fe9f8688752d076083f12ec3c32afe5c643a3d40580814f060c7",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "x-first",
+      "viaIR": false,
+      "sourceSha256": "a64604bf304d4a38a2b8f4718b79b62058183c2ac7da5811c435a4079d746c48",
+      "inputSha256": "df8c79e5e3f45f4132132ed13d4a16eea8db9b2cfe8f581438199981f4d30c42",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "x-first",
+      "viaIR": true,
+      "sourceSha256": "a64604bf304d4a38a2b8f4718b79b62058183c2ac7da5811c435a4079d746c48",
+      "inputSha256": "536fdd1cbb0a29d5ec8eba9ee4d83f40010b2131e331b86a6e554e464b6d06a9",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "x-second",
+      "viaIR": false,
+      "sourceSha256": "b9df0146cecf859a076208044377efb726e949838c3745c44380bf136c938f20",
+      "inputSha256": "e56ef147ba90c1ac95716b27214441dcdd455f7b3d8b54cb9cfba311f9de6ad4",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "x-second",
+      "viaIR": true,
+      "sourceSha256": "b9df0146cecf859a076208044377efb726e949838c3745c44380bf136c938f20",
+      "inputSha256": "1161ff92fb077616cfdd2d51b2a5b303be6e3d482e8aa5ba5503f2b01ec1283d",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "short-u",
+      "viaIR": false,
+      "sourceSha256": "42e0f66da3f791227bbebdf7f94ebe17b36289ce55bfbcd5184c200659757f2e",
+      "inputSha256": "61120de217f8cc22f68efd78c32ae4fc3c45619f5d13e0091ab3e8fa7152568a",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "short-u",
+      "viaIR": true,
+      "sourceSha256": "42e0f66da3f791227bbebdf7f94ebe17b36289ce55bfbcd5184c200659757f2e",
+      "inputSha256": "2805e8dfc6b8ca0aceaae542d25cb4ca7e6d3a707a85ea75d0f72f45f8455d0b",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "u-invalid-0",
+      "viaIR": false,
+      "sourceSha256": "b4df83c462d257878c891fb696717989f303cb83a398bdbd0f248a274d9c0258",
+      "inputSha256": "087f9a870ac792d594330100dca4f92bbfcfea864aadadc7221a69be03d51a7b",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "u-invalid-0",
+      "viaIR": true,
+      "sourceSha256": "b4df83c462d257878c891fb696717989f303cb83a398bdbd0f248a274d9c0258",
+      "inputSha256": "89901070a7caa52d726a29d8f6ff41aa75cb8a018ea8a90994e2404b77ba8bf9",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "u-invalid-1",
+      "viaIR": false,
+      "sourceSha256": "e80d5ac29c94539dc52d15cf7f98dafaf0d490ee8e048a3114f9296d046cba79",
+      "inputSha256": "a4b84056eda7f2b6f73e02765832d51b711752ba2d8b7a5802a4bed5302fe2b7",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "u-invalid-1",
+      "viaIR": true,
+      "sourceSha256": "e80d5ac29c94539dc52d15cf7f98dafaf0d490ee8e048a3114f9296d046cba79",
+      "inputSha256": "96f88a9140b6bf599268ccc713557073afc9ef53579564f501e1ca86be7f28b9",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "u-invalid-2",
+      "viaIR": false,
+      "sourceSha256": "b4d216e6e146bc16158198dd9e89e73c567284281fb95eacab3b82de04f23d78",
+      "inputSha256": "2648f839aa6f638a0875e25e9140068b9ac89c430b82e3b784638e4dbb6aa839",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "u-invalid-2",
+      "viaIR": true,
+      "sourceSha256": "b4d216e6e146bc16158198dd9e89e73c567284281fb95eacab3b82de04f23d78",
+      "inputSha256": "a38820ef1722f78bc97b154e625f4fcbd44c5809aca57f16a4d2f50e7d3f8204",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "u-invalid-3",
+      "viaIR": false,
+      "sourceSha256": "b4c460a7d21000d4feae9f0914269c081075b104bd4b549ce8fa710b76318688",
+      "inputSha256": "f75537c7709925868b6b297d92986df00d636a141d47a13ebcad35894f3ac531",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "u-invalid-3",
+      "viaIR": true,
+      "sourceSha256": "b4c460a7d21000d4feae9f0914269c081075b104bd4b549ce8fa710b76318688",
+      "inputSha256": "37b6e20f2f61707cdc1e59e3ef6f1e6ad97572fd76a2c48d08246172a7161bd7",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid escape sequence.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-high",
+      "viaIR": false,
+      "sourceSha256": "00ab12359edaed2f2418c95c54f0a5d3595c7efe48c91db2bb2b956695b01c3e",
+      "inputSha256": "f9872d651801333d16b20dbea515f04d81a8bc6d83a2b6cd27cd608c2332b9f2",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-high",
+      "viaIR": true,
+      "sourceSha256": "00ab12359edaed2f2418c95c54f0a5d3595c7efe48c91db2bb2b956695b01c3e",
+      "inputSha256": "e3c4c320916affde3e989361fe95371f81d1a91861ea06f27b0ee869b93003ed",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-LF",
+      "viaIR": false,
+      "sourceSha256": "3bed9cabf80566118ad96c67d891fba14a47e87a0751d47f548e5e193e87d5f2",
+      "inputSha256": "0259469c3a6289fdacff30aebb949c0d26685c25975ce7bcbbc05be7c372b8d4",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-LF",
+      "viaIR": true,
+      "sourceSha256": "3bed9cabf80566118ad96c67d891fba14a47e87a0751d47f548e5e193e87d5f2",
+      "inputSha256": "d2e6768bcb4d5b69ee98f93be4cd735e324c4e8ff1900c0408f48dfe2669fe5d",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-raw-LF",
+      "viaIR": false,
+      "sourceSha256": "f190a79811141554df865a80b35aac570548fefbda810b940bbe7fd273244e61",
+      "inputSha256": "5f19d7800c874da6ccfb75b0a383ed70b25696f4bc4aa5c8d0d88739b608f20a",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 143,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-raw-LF",
+      "viaIR": true,
+      "sourceSha256": "f190a79811141554df865a80b35aac570548fefbda810b940bbe7fd273244e61",
+      "inputSha256": "43cee0de47bb39c074c6f96e676f4eeb3964a2ced7161e881dc9b7588f60813c",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 143,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-FF",
+      "viaIR": false,
+      "sourceSha256": "7a46fe2a5ac8724cbe22eed7bb8b8cc2274202963a34dee3cac3de2f1fb05a1c",
+      "inputSha256": "c033f11bc84592c978b342e9409c2706265b7edea7b3a86a6b9a21853d86a325",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-FF",
+      "viaIR": true,
+      "sourceSha256": "7a46fe2a5ac8724cbe22eed7bb8b8cc2274202963a34dee3cac3de2f1fb05a1c",
+      "inputSha256": "7854916565a943344144da2b210fb8c170c648a7216e7f4b59fd817d487a412a",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-VT",
+      "viaIR": false,
+      "sourceSha256": "5c636c2b45e7e810148dd83b3509042f262fec708956f309d1613336a16dec76",
+      "inputSha256": "a5b167098cbfed05a375867ca8c7c26abb7e3cbc7e2c9f4d3f6a804d71f64af5",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-VT",
+      "viaIR": true,
+      "sourceSha256": "5c636c2b45e7e810148dd83b3509042f262fec708956f309d1613336a16dec76",
+      "inputSha256": "a489744cf75cda950e9553d743cc6d4198e1c126562fc683dbe7511b34ac9acf",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-U2028",
+      "viaIR": false,
+      "sourceSha256": "1a5b7db60b381020febc2c1c5ed0843994849919052b164e10d27ffa5c79d87b",
+      "inputSha256": "bab4e5930e0ce74603cea7ecb7fc414d74f6d15fa4f9917df9b1021d729eb943",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-U2028",
+      "viaIR": true,
+      "sourceSha256": "1a5b7db60b381020febc2c1c5ed0843994849919052b164e10d27ffa5c79d87b",
+      "inputSha256": "d81e237c07e9adb69c1eb3ab178df4da2930ec52b8186ed82e990ee3a94d2b0c",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-U2029",
+      "viaIR": false,
+      "sourceSha256": "ad98ca4865f4361ad4e95c808c3244ddf5872012a2f8c676f887ccbf45ab7e46",
+      "inputSha256": "330ce7a26e368e2c1bb156c7c118ecc83b3617a5075a5d4ec06dac3501390a39",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-U2029",
+      "viaIR": true,
+      "sourceSha256": "ad98ca4865f4361ad4e95c808c3244ddf5872012a2f8c676f887ccbf45ab7e46",
+      "inputSha256": "39256e229edc0c7ca15df3e526fc4830384e7535461010448f9d8c810d6d92cd",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-open-bidi",
+      "viaIR": false,
+      "sourceSha256": "bb8795ae9ad5d9feda9fd15bddc0075553c8df8b6341beb988c60a78a22d4405",
+      "inputSha256": "b09bd3be53591a1d905330e2fefb152b845fbc12bef34efa2b5c915ac73b9b97",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Mismatching directional override markers in comment or string literal.",
+          "location": {
+            "end": 145,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-open-bidi",
+      "viaIR": true,
+      "sourceSha256": "bb8795ae9ad5d9feda9fd15bddc0075553c8df8b6341beb988c60a78a22d4405",
+      "inputSha256": "fd597632c6671317ecfddb0e783f47b8d7aa46b33b82cf31e2887851244f3710",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Mismatching directional override markers in comment or string literal.",
+          "location": {
+            "end": 145,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-close-bidi",
+      "viaIR": false,
+      "sourceSha256": "8c46bac529ff832c6cd1f4cbcee8b34392bbcc328b1459db12dadad2ced56b54",
+      "inputSha256": "171e4f9fbaf051e8f8d8c683b78724b93dc55b5c074bc3c59bfcd191f4adfa2e",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Unicode direction override underflow in comment or string literal.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-close-bidi",
+      "viaIR": true,
+      "sourceSha256": "8c46bac529ff832c6cd1f4cbcee8b34392bbcc328b1459db12dadad2ced56b54",
+      "inputSha256": "9bba7655b846fea30c937b9c7996e4bae1c434ed6824f7ef5935f458715155fb",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Unicode direction override underflow in comment or string literal.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-odd",
+      "viaIR": false,
+      "sourceSha256": "858dcdf12ee70aca2bc2966230b51bc25eb2054b06fcb860c3b08c850eeab385",
+      "inputSha256": "debe967c2d000f05e32d42b9c5285d4d24140c8b50e17f574dae319889c8a07a",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 138,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-odd",
+      "viaIR": true,
+      "sourceSha256": "858dcdf12ee70aca2bc2966230b51bc25eb2054b06fcb860c3b08c850eeab385",
+      "inputSha256": "f725f0c44b98fec7defd063ad4d84494718c21becc921e6ac7667c4498337ccc",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 138,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-leading",
+      "viaIR": false,
+      "sourceSha256": "b602aadad4a66ec4a04472979cf3045e8c42b90cdcf98921fe042bd26998478e",
+      "inputSha256": "5569318ce5b05d183dd3805a0d940078fd6ac276b612c404ced6600ab5ab9749",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid use of number separator '_'.",
+          "location": {
+            "end": 139,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-leading",
+      "viaIR": true,
+      "sourceSha256": "b602aadad4a66ec4a04472979cf3045e8c42b90cdcf98921fe042bd26998478e",
+      "inputSha256": "53a619318e53eda68c7257dabdca1648edaa91f30cd0afc00041afa1654ed995",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid use of number separator '_'.",
+          "location": {
+            "end": 139,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-trailing",
+      "viaIR": false,
+      "sourceSha256": "5cf4950302bb82c3a74dcf6b89d1e665018e73e4bd49fbf9abf44444bf302e66",
+      "inputSha256": "769a46103375421130d91cf544aec2df007f4b79e0b3280eea09291678df04e3",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid use of number separator '_'.",
+          "location": {
+            "end": 141,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-trailing",
+      "viaIR": true,
+      "sourceSha256": "5cf4950302bb82c3a74dcf6b89d1e665018e73e4bd49fbf9abf44444bf302e66",
+      "inputSha256": "9ff6200272c7f2638264a057b685eaee2577d0256a8e58eff676695b5101ba70",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid use of number separator '_'.",
+          "location": {
+            "end": 141,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-doubled",
+      "viaIR": false,
+      "sourceSha256": "bb3bf118ec104642a4c3b5f8de1f67ef2883ae4ab23fa707a5e36172c7e66c9d",
+      "inputSha256": "caa0ff95c20e9643f08fc86a121092d31e7c512148eeb88f7924f55c3149319b",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid use of number separator '_'.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-doubled",
+      "viaIR": true,
+      "sourceSha256": "bb3bf118ec104642a4c3b5f8de1f67ef2883ae4ab23fa707a5e36172c7e66c9d",
+      "inputSha256": "d6fd7fc66b537d9ab8e1310381ae8a778a42a238cb34f96079e261e9f7017102",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid use of number separator '_'.",
+          "location": {
+            "end": 142,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-intrapair",
+      "viaIR": false,
+      "sourceSha256": "675c06d90fdf9a30bccd1465faddf2a384e53696892e39ed02cfe43475a6c3b3",
+      "inputSha256": "9cb22ba1033e0d70883319dd3e0b59b5956184ecf140ef67e93de15e1ae5031f",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 138,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-intrapair",
+      "viaIR": true,
+      "sourceSha256": "675c06d90fdf9a30bccd1465faddf2a384e53696892e39ed02cfe43475a6c3b3",
+      "inputSha256": "9b313a5bccc090754421b495be9a32a65e7a2994a4f3dad221c93a3cfc05a86f",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 138,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-invalid-first",
+      "viaIR": false,
+      "sourceSha256": "4dae0eab01bc44c9d714be571f65b19c7ffd1210978ef0ffdbc14aa0daaada69",
+      "inputSha256": "858db0dc37e9237898d4d42d3eeff85d52bd1593cec68175c0279aa32b3098bf",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 138,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-invalid-first",
+      "viaIR": true,
+      "sourceSha256": "4dae0eab01bc44c9d714be571f65b19c7ffd1210978ef0ffdbc14aa0daaada69",
+      "inputSha256": "247b37eb40735e1a5d2b8e8f04a4db2e04893c9b924a9136f7e2b60d0bd51d95",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 138,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-invalid-second",
+      "viaIR": false,
+      "sourceSha256": "d04a1dbed5f43145751ffcfecdff50e5ac1775abc5d414c3228ee4ff65830eac",
+      "inputSha256": "30b8dc13ba7bbcefbd6c2aa3c6488135ee226ace4336c7423a9da77ab3ceb2b5",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 138,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-invalid-second",
+      "viaIR": true,
+      "sourceSha256": "d04a1dbed5f43145751ffcfecdff50e5ac1775abc5d414c3228ee4ff65830eac",
+      "inputSha256": "ddc84b59cff2051a2ba6a3029228c1274239320904c9f49c76e791e22013c6af",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 138,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-space",
+      "viaIR": false,
+      "sourceSha256": "d65ae2a25c5c01043cbb433cd2f3a0dd2e0a10b69fe49b0fa1caa1e79d513749",
+      "inputSha256": "be69d6c7424a21d7039a2e2f93ce6c45e08d326278ee7739cc5ee0497d29c42a",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 140,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "hex-space",
+      "viaIR": true,
+      "sourceSha256": "d65ae2a25c5c01043cbb433cd2f3a0dd2e0a10b69fe49b0fa1caa1e79d513749",
+      "inputSha256": "dd888d12acbe60a3ad1c4020d9433f93fc8a32a4cad7dd5277602bf2555bb32f",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected even number of hex-nibbles.",
+          "location": {
+            "end": 140,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "yul-bare-hex",
+      "viaIR": false,
+      "sourceSha256": "7507cdde720c9702345dbfdf62c6c3d219cef90b54b513f4b56ad01671b88bb4",
+      "inputSha256": "3f7831b71e5e64af1df375b27903882e4ecb06b649242a4555e903bd6dbfea59",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Invalid token.",
+          "location": {
+            "end": 144,
+            "file": "Case.sol",
+            "start": 141
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "yul-bare-hex",
+      "viaIR": true,
+      "sourceSha256": "7507cdde720c9702345dbfdf62c6c3d219cef90b54b513f4b56ad01671b88bb4",
+      "inputSha256": "33b639c1eb4e8f14e20b08b46f195c608fa67f86b34f4a0b29e00d8cf5e4cccc",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Invalid token.",
+          "location": {
+            "end": 144,
+            "file": "Case.sol",
+            "start": 141
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "yul-unicode",
+      "viaIR": false,
+      "sourceSha256": "01e7cb7bcb33e040943c0314e4613320987b7ae71e475a7c235061ac10130fb8",
+      "inputSha256": "44de3580290b1f7af6d0f1979e590dd6855fe337ce4e1c2bee538e0f2a5907ed",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "6913",
+          "message": "Call or assignment expected.",
+          "location": {
+            "end": 153,
+            "file": "Case.sol",
+            "start": 152
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "yul-unicode",
+      "viaIR": true,
+      "sourceSha256": "01e7cb7bcb33e040943c0314e4613320987b7ae71e475a7c235061ac10130fb8",
+      "inputSha256": "9fad5a62a8161a27a7b0d1bda31af4ae5d15d8cc514d145c0f9d0e42f8f12ab1",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "6913",
+          "message": "Call or assignment expected.",
+          "location": {
+            "end": 153,
+            "file": "Case.sol",
+            "start": 152
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "assembly-empty-flag",
+      "viaIR": false,
+      "sourceSha256": "4a78a054209499e559a3b18c5a351bcb6de7716143f93d780e6df0cf96316dd2",
+      "inputSha256": "d6e3aebe322f903d54097a7b56d78569481a823336a14ba6ad38e3ac9066d3ee",
+      "accept": true,
+      "errors": [],
+      "literals": [],
+      "flags": [
+        [
+          ""
+        ]
+      ],
+      "bytecodeSha256": "18189ab690aa00bec05e7ed5bb6ea91767bbeed8ceab20ad56aaae3075ec7ddc"
+    },
+    {
+      "id": "assembly-empty-flag",
+      "viaIR": true,
+      "sourceSha256": "4a78a054209499e559a3b18c5a351bcb6de7716143f93d780e6df0cf96316dd2",
+      "inputSha256": "f4f4067c8eb4cd1136b6694440b86baa74507ef7bba830003333018e78f37988",
+      "accept": true,
+      "errors": [],
+      "literals": [],
+      "flags": [
+        [
+          ""
+        ]
+      ],
+      "bytecodeSha256": "3e4b181f4534d8276fd75c012ddbae38e6b4a8f2cf6e67386bf36c53b8a88585"
+    },
+    {
+      "id": "assembly-single-flag",
+      "viaIR": false,
+      "sourceSha256": "c27a83efdfe3bac00d2674054b720f5c4d0c005ad63618ee00f3ecad7c155518",
+      "inputSha256": "12c735576fedfaf42a9cd507ab2e8ad76f3d79b44f24ecdab4c2230654b03b4a",
+      "accept": true,
+      "errors": [],
+      "literals": [],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "a9ca70cbe1c84e0669d9d7a3b508d9ea2fee1d4b1fc15c813070f0f410e818d0"
+    },
+    {
+      "id": "assembly-single-flag",
+      "viaIR": true,
+      "sourceSha256": "c27a83efdfe3bac00d2674054b720f5c4d0c005ad63618ee00f3ecad7c155518",
+      "inputSha256": "c798b6639b1edb5e58095b7ba12f82284d1ab16fcf7f9ec0e05ac3e48373d020",
+      "accept": true,
+      "errors": [],
+      "literals": [],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "930fdbb6a671cf0402596d652f410e03be9e3626069a9a71de437ce6e7ab36c9"
+    },
+    {
+      "id": "unicode-valid-thresholds",
+      "viaIR": false,
+      "sourceSha256": "67712506b4e69d2899c8bfa838168134cfd584cb6f42e7838538187be71f2b8a",
+      "inputSha256": "0b208232c76d402c4b66ed844b469c415b48be7c51eb42d2d816cd6222057d9c",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "007fc280dfbfe0a080efbfbf",
+          "src": "134:45:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "c73f40972957767d28a0279b1a89a9f59871ce99269ba9dce849e48411543a5e"
+    },
+    {
+      "id": "unicode-valid-thresholds",
+      "viaIR": true,
+      "sourceSha256": "67712506b4e69d2899c8bfa838168134cfd584cb6f42e7838538187be71f2b8a",
+      "inputSha256": "3eab9cb64c17e8bd18b06bd69d83bd37556841bb7941778b829688fa4488b9c8",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "007fc280dfbfe0a080efbfbf",
+          "src": "134:45:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "b2c7c3f43b32657e575ccf1681c2bc60def58f6abd8b1a64163769d18448963b"
+    },
+    {
+      "id": "plain-surrogate-escape",
+      "viaIR": false,
+      "sourceSha256": "46b3fb3b5f357f6f8db403b1a0e3e603165ffeaf8b924c679f85d746f061c2d1",
+      "inputSha256": "989eace1ef7c42ec776555f123a7616b3b328e863091d7cab94d50ef0d0978d2",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "eda080",
+          "src": "134:8:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "b809d89f2fb52962bf3b88672b0289211c59ff8dbe52d5ec20fde9fc871accc4"
+    },
+    {
+      "id": "plain-surrogate-escape",
+      "viaIR": true,
+      "sourceSha256": "46b3fb3b5f357f6f8db403b1a0e3e603165ffeaf8b924c679f85d746f061c2d1",
+      "inputSha256": "ab096bef6bfdf73da125fa534b4c493ca59f79e84ba78040ae639da5e2af6ceb",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "eda080",
+          "src": "134:8:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "b3d0c7fd121c490b23add517d7bda87a6f0be4ece3ea22c22fd3bc9b7f4649a5"
+    },
+    {
+      "id": "unicode-escaped-irregular",
+      "viaIR": false,
+      "sourceSha256": "0f387ed3476109e299d6e4eae68f267aaffa7ad8ab094d7967e48b4451a1b6f5",
+      "inputSha256": "3d505b894b8c80d04548c37e91774ae75dd7afe2444cd5340d72c6bc407ac088",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "0ce280a8",
+          "src": "134:19:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "a8f44d174fb219ba304dcc9c04087c913a3b3529d54357617ebf5adbb730929c"
+    },
+    {
+      "id": "unicode-escaped-irregular",
+      "viaIR": true,
+      "sourceSha256": "0f387ed3476109e299d6e4eae68f267aaffa7ad8ab094d7967e48b4451a1b6f5",
+      "inputSha256": "91859028f28fee66735a6c24bc1389392966bcd0751798b51b22d9d98aceab79",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "0ce280a8",
+          "src": "134:19:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "6449af7ecdf9f2061ec043c0bd3a045c77286285066c8af1fff8e7af0e1c79ea"
+    },
+    {
+      "id": "unicode-escaped-bidi",
+      "viaIR": false,
+      "sourceSha256": "825d60ea8a2b44905b47d8d947f638e9b880b676ad5db709f8d5247aec96cbff",
+      "inputSha256": "3c374634ad9669e7fc1541f4cb5e6d49f0f1ec31431827f0c850aeb6c9ed954c",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "e280ae",
+          "src": "134:15:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "989c22db6e9f25df959f9f82b41880ebf2664e262df0f871c4bb37ca8373defb"
+    },
+    {
+      "id": "unicode-escaped-bidi",
+      "viaIR": true,
+      "sourceSha256": "825d60ea8a2b44905b47d8d947f638e9b880b676ad5db709f8d5247aec96cbff",
+      "inputSha256": "9fbc6ac0d92b56338fd004eef4134c43f6c3011e12725ee42f10e40ed7dd968e",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "e280ae",
+          "src": "134:15:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "3442df1d517411750afe5ba3e671da396cfe9a8841805ff665ae593750cf4604"
+    },
+    {
+      "id": "plain-raw-TAB",
+      "viaIR": false,
+      "sourceSha256": "d8b3b80add249ea0bae76824d34266d13e141537a02f866e8c3194805516ba32",
+      "inputSha256": "8cf95b424e52e96084ed1260abc625e09c59bb6da0ded180bb119153f6182b4c",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-TAB",
+      "viaIR": true,
+      "sourceSha256": "d8b3b80add249ea0bae76824d34266d13e141537a02f866e8c3194805516ba32",
+      "inputSha256": "ef6705eab0a528eef58a7e906abbca01aff6cdec433cd0831dec1bd9bcd5404f",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 137,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-NUL",
+      "viaIR": false,
+      "sourceSha256": "80a315603fe722629154edb9644b73d975082acdb0f70ee33605cd13374ec9cd",
+      "inputSha256": "12372a8fe6f0b73040dc4dfa35713626eca03ad1098ca6a3eaad3ee22e84300e",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-NUL",
+      "viaIR": true,
+      "sourceSha256": "80a315603fe722629154edb9644b73d975082acdb0f70ee33605cd13374ec9cd",
+      "inputSha256": "2371931ec1bd53dabd83838aba040037f5c924c4914f3dfab3f0154b174fbf5e",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-DEL",
+      "viaIR": false,
+      "sourceSha256": "55125b25045e73140e10b8157f152e039057545caca585eccba1a0a147eccf81",
+      "inputSha256": "29835329dbc4b1cd83d7991d92aa938ebc7fb3dafbaf0e65870e9473bc03f195",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-raw-DEL",
+      "viaIR": true,
+      "sourceSha256": "55125b25045e73140e10b8157f152e039057545caca585eccba1a0a147eccf81",
+      "inputSha256": "818260110642a9c63bf697a23a2c02f35ba6b4ccc08ee0630b7cce762e70755b",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid character in string. If you are trying to use Unicode characters, use a unicode\"...\" string literal.",
+          "location": {
+            "end": 136,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-raw-TAB",
+      "viaIR": false,
+      "sourceSha256": "f7a09165bbd62077289634a214972a9c76bd022123bfd8b537f6bf12f941d150",
+      "inputSha256": "ba3b69efd5f1ba32b30c7f7d3252e7dbc072a2e81c286ce80386472d0cddcdc8",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "410942",
+          "src": "134:12:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "0054b1827ac07cfa8ad1a5058cb24622be8760b6f051e5ea3c5a8cf8872fbb73"
+    },
+    {
+      "id": "unicode-raw-TAB",
+      "viaIR": true,
+      "sourceSha256": "f7a09165bbd62077289634a214972a9c76bd022123bfd8b537f6bf12f941d150",
+      "inputSha256": "0cf5304372cf7ce737afe81ee0f9c3d195fd83f3e0210b585c77f6e2904b10e4",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "410942",
+          "src": "134:12:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "bd4322acd7d63e9cbbb268371163a4fa6f99a9fd328b3da43bcedbb5ca98cf63"
+    },
+    {
+      "id": "unicode-raw-NUL",
+      "viaIR": false,
+      "sourceSha256": "dc5d295f66c483df2adaeecb5e66d6d2ce239ec69217eb536b6af5dd000cec62",
+      "inputSha256": "b6e5de8fe049532c76dfb00a3a3986fffd5fca449346b3287680ce611f1354a7",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "00",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "f2e3bfad8f195bd891346b0e6aec69b8f3f4033f0f8236ee3431277d196c337d"
+    },
+    {
+      "id": "unicode-raw-NUL",
+      "viaIR": true,
+      "sourceSha256": "dc5d295f66c483df2adaeecb5e66d6d2ce239ec69217eb536b6af5dd000cec62",
+      "inputSha256": "36c132e7bb8cc055b0a640e6a7268d750ece1e6b80ada6445e5770c9d3a0b17f",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "00",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "663876368aa15b7ed99834262a5612b0a447af2de50afe02337853c02c523281"
+    },
+    {
+      "id": "unicode-raw-DEL",
+      "viaIR": false,
+      "sourceSha256": "6163ac31eee982ac07b40532d65a0b4745d79d321277b70b8cd4ba4b11e2773d",
+      "inputSha256": "508a5d8f6676650bc54321f597e7fc488572bccc02f79d94bfb67e6751893618",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "7f",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "38eef58fc8c27a6bca93dd1d132ba07607af4f261039a21a4873aff8ac9a5bef"
+    },
+    {
+      "id": "unicode-raw-DEL",
+      "viaIR": true,
+      "sourceSha256": "6163ac31eee982ac07b40532d65a0b4745d79d321277b70b8cd4ba4b11e2773d",
+      "inputSha256": "277a4c3788403c7f84e8e11422b291558df69c212a5c195856cd6362b39ae689",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "7f",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "f5631b840556d4c9378e5b443bab4512cc6ed3473172ce63e0e04e154564d7c5"
+    },
+    {
+      "id": "unicode-raw-CR",
+      "viaIR": false,
+      "sourceSha256": "3e352ab55d2d0f7877140e2c7bfc0adbec6a0cb3b1dc137cf162ea483db84535",
+      "inputSha256": "fbb5bf9106ed42098f6595174c43885b04e61c6d9bc03a4064584594fe5fbad1",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 143,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "unicode-raw-CR",
+      "viaIR": true,
+      "sourceSha256": "3e352ab55d2d0f7877140e2c7bfc0adbec6a0cb3b1dc137cf162ea483db84535",
+      "inputSha256": "659dc7e402c149e445cffd149b88878529cf9d04ed4b59f94329634b4d00c87c",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Expected string end-quote.",
+          "location": {
+            "end": 143,
+            "file": "Case.sol",
+            "start": 134
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "yul-raw-TAB",
+      "viaIR": false,
+      "sourceSha256": "6fd6a9f7a9fa54de9cb1aa49b48900076d13166146618381560f940a3e4eedb4",
+      "inputSha256": "32eab130febc5951ebfb4ab6bd5a4737c1fa22d17f34e5fc5c31e35edafa2818",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Invalid character in string.",
+          "location": {
+            "end": 144,
+            "file": "Case.sol",
+            "start": 141
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "yul-raw-TAB",
+      "viaIR": true,
+      "sourceSha256": "6fd6a9f7a9fa54de9cb1aa49b48900076d13166146618381560f940a3e4eedb4",
+      "inputSha256": "573de9e90a955f6520ba414c7b2023a1e9a357bdeb788a5d5b55e2f919c935d1",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Invalid character in string.",
+          "location": {
+            "end": 144,
+            "file": "Case.sol",
+            "start": 141
+          }
+        }
+      ],
+      "literals": [],
+      "flags": [],
+      "bytecodeSha256": null
+    },
+    {
+      "id": "plain-double-other-quote",
+      "viaIR": false,
+      "sourceSha256": "560dc847bce8a2e097f9164ff32de0b06e4ed6d4ab464e2b5b1afe2623dfb20d",
+      "inputSha256": "e43880de692b01bd6f76ead4dc391d217db38e833938c0a53916ebb470a6b4a3",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "27",
+          "src": "134:3:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "960e2422d946185bd9b6ac3aba4bda1b00271dfa2911dd8df7337dcf47fe471c"
+    },
+    {
+      "id": "plain-double-other-quote",
+      "viaIR": true,
+      "sourceSha256": "560dc847bce8a2e097f9164ff32de0b06e4ed6d4ab464e2b5b1afe2623dfb20d",
+      "inputSha256": "db589c41fedf224cfa5208a2c6a3fadfefedcd5ec995774925737f11a442952f",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "27",
+          "src": "134:3:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "5b295d2d2cd0ab42abbadaed3bb750257bb77002c45914bea5849a47c9854bd0"
+    },
+    {
+      "id": "plain-single-other-quote",
+      "viaIR": false,
+      "sourceSha256": "9d745f07552adc225fa16170cd8d00e28a8d1b9c363e359c0a164669d8add5be",
+      "inputSha256": "d7745e725fbabaf692f2e04f9de7ed6dbd89f5d505914902356b1c0cfd4141fb",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "22",
+          "src": "134:3:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "4f1f8190bb73fec6a285f840d3dd0fc26be00632220eded0f8098df547e5b001"
+    },
+    {
+      "id": "plain-single-other-quote",
+      "viaIR": true,
+      "sourceSha256": "9d745f07552adc225fa16170cd8d00e28a8d1b9c363e359c0a164669d8add5be",
+      "inputSha256": "de4ea84d746abf32a38b84c8a8dd80a34633acb5584615c617374595d55826e9",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "22",
+          "src": "134:3:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "bf88713c2e253a18d4f53d7e1954120e22a019424d9c12217a978294eae39910"
+    },
+    {
+      "id": "unicode-double-other-quote",
+      "viaIR": false,
+      "sourceSha256": "9a0fdadfd323457f393e36f443eb12b7865fa886d7f15ae08546afd0e1f7b5d1",
+      "inputSha256": "bc1392b1747a0d5e308fc63dd54618d562efa89b29bc9f5b7b4e85f8ec4263de",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "27",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "63dc52d1835f5f746092912f3454d9923f1534c94a7388308b6acbf14d525474"
+    },
+    {
+      "id": "unicode-double-other-quote",
+      "viaIR": true,
+      "sourceSha256": "9a0fdadfd323457f393e36f443eb12b7865fa886d7f15ae08546afd0e1f7b5d1",
+      "inputSha256": "25f3bb7372b2f1b5f5ec5fd7fb6e9027f972e4beec3d5f1af3789a196a0c0b5a",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "27",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "4f85893f5f3fcc2c779cc5ee7174a23103406c409ba984efdbee8a83d43a6330"
+    },
+    {
+      "id": "unicode-single-other-quote",
+      "viaIR": false,
+      "sourceSha256": "a310cec00fd35d44021e922583392e1913797d4164fb9c389cc297efe8620d73",
+      "inputSha256": "c76f34a089618350d0686f50a4236f3d79c061d8762e7214ed6d6787a69640af",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "22",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "b823a0aa43da84bf93fb27aa40a1d4c4773cb9abc105953b63da5d10351833cb"
+    },
+    {
+      "id": "unicode-single-other-quote",
+      "viaIR": true,
+      "sourceSha256": "a310cec00fd35d44021e922583392e1913797d4164fb9c389cc297efe8620d73",
+      "inputSha256": "62aeab92e3d7e6f37b38e28616a1690350b88d1918aeee5946a9f6221482c391",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "unicodeString",
+          "hex": "22",
+          "src": "134:10:0"
+        }
+      ],
+      "flags": [],
+      "bytecodeSha256": "6d4f2333c677cbbf62a58b00397c8d63820e1db019e945bab475f1fe1b04eca0"
+    },
+    {
+      "id": "yul-single-other-quote",
+      "viaIR": false,
+      "sourceSha256": "b4fb2694c9710f847ec06f9dd7d36bd4d23a02411c4386298278744d7a50de8d",
+      "inputSha256": "717299ceaf206a9ecb4fce71ca9b83e4696088e5c1dfa2ee620570ada2e73249",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "22",
+          "src": "141:3:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "be703e20f76cea96796f781b51a9a3882ac24731e3780aad2389cb10414d7411"
+    },
+    {
+      "id": "yul-single-other-quote",
+      "viaIR": true,
+      "sourceSha256": "b4fb2694c9710f847ec06f9dd7d36bd4d23a02411c4386298278744d7a50de8d",
+      "inputSha256": "f3035530ba2397d80bb3ac1c05e65515b5569fbeaaa48758ebb76aa54fe30179",
+      "accept": true,
+      "errors": [],
+      "literals": [
+        {
+          "kind": "string",
+          "hex": "22",
+          "src": "141:3:0"
+        }
+      ],
+      "flags": [
+        [
+          "memory-safe"
+        ]
+      ],
+      "bytecodeSha256": "8a89022b39ae010a2cab8f562e5b559304602ea220bdee018aab9f1c54c7fb3a"
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,778 @@
+{
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "inputs": {
+    "Solidity/Frontend/Checked/Lexer.lean": "7c8545210edd7f6255a8e0990035dc506ae8345ce95af4a7f7345397ec3fdfca",
+    "Solidity/Frontend/Checked/Token.lean": "6eee8ccd98f4e70a4ff9d8632d81b594bff98e0732254ad88039f4a66de3787a",
+    "tests/upstream/grammar-0.8.38/SolidityLexer.g4": "b6eb8ffcb358b8a854b22ed0e3df6ced8c42760a3da4f77899ba9c65a6dd7132",
+    "Solidity/Frontend/Checked/Tables.lean": "4989b4811753c9515a07be8236f53a0fa537bf1f2ecf7cdd7c33978c65d5b2ff"
+  },
+  "axioms": {
+    "escape_complete": [],
+    "escape_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "body_complete": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Body.toStrBody": [
+      "propext",
+      "Quot.sound"
+    ],
+    "body_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "body_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Body.deterministic": [
+      "propext",
+      "Quot.sound"
+    ],
+    "body_none_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "utf8_length": [],
+    "utf8_length_le": [],
+    "Escape.length_le": [],
+    "Body.length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeBody_grammar": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeBody_roundtrip": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeBody_length": [
+      "propext",
+      "Quot.sound"
+    ],
+    "bodyControls_pass": [],
+    "bodyGrammar_inhabited": [
+      "propext",
+      "Quot.sound"
+    ],
+    "oldStrBody_overlap": [],
+    "bodyCRLF_empty": [],
+    "bodyCRLF_no_alternate": [
+      "propext",
+      "Quot.sound"
+    ],
+    "bodyEncoding_control": [
+      "propext",
+      "Quot.sound"
+    ],
+    "quoteControls_pass": [],
+    "scanControls_pass": [],
+    "plainControls_pass": [],
+    "quotedGrammar_inhabited": [],
+    "plainGrammar_inhabited": [
+      "propext",
+      "Quot.sound"
+    ],
+    "scannerGrammar_inhabited": [
+      "propext",
+      "Quot.sound"
+    ],
+    "scannerGrammar_empty_refused": [],
+    "scanner_nonliteral_boundary": [],
+    "quoted_plain_eq": [
+      "propext"
+    ],
+    "quote_punct_none": [],
+    "solTok_plain_eq": [
+      "propext"
+    ],
+    "yulTok_plain_eq": [
+      "propext"
+    ],
+    "solTok_hex_eq": [
+      "propext"
+    ],
+    "yulTok_hex_eq": [
+      "propext"
+    ],
+    "solTok_unicode_eq": [
+      "propext"
+    ],
+    "option_map_same_iff": [],
+    "solTok_plain_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "solTok_hex_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "solTok_unicode_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Plain.solTok": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexLiteral.solTok": [
+      "propext",
+      "Quot.sound"
+    ],
+    "UnicodeLiteral.solTok": [
+      "propext",
+      "Quot.sound"
+    ],
+    "quote_trivia_none": [],
+    "classify_sol_plain": [
+      "propext"
+    ],
+    "classify_yul_plain": [
+      "propext"
+    ],
+    "classify_sol_hex": [
+      "propext"
+    ],
+    "classify_yul_hex": [
+      "propext"
+    ],
+    "classify_sol_unicode": [
+      "propext"
+    ],
+    "classify_yul_unicode_refused": [
+      "propext"
+    ],
+    "classify_asm_double": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "classify_asm_single_refused": [
+      "propext"
+    ],
+    "codepoint_complete": [
+      "propext",
+      "Quot.sound"
+    ],
+    "codepoint_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "codepoint_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "codepoint_nonempty": [],
+    "hexVal_lt16": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexPair_lt256": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexPair_exactNat": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexQuad_lt65536": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Body.uni_value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "fragments_tagged_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "fragments_solTok_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "fragments_classify_sol_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "fragments_yul_plain_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "fragments_yul_hex_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_hex_fragments": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_unicode_fragments": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_hex_fragments_roundtrip": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_unicode_fragments_roundtrip": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.plain_split_head": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.hex_split_head": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.unicode_split_head": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_hex_fragments_value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_unicode_fragments_value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "FragmentValue.byteLength": [
+      "propext"
+    ],
+    "fragments_mapM_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.append": [],
+    "FragmentValue.append": [
+      "propext"
+    ],
+    "fragments_none_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.classified": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.plain_classified": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.hex_classified": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.unicode_classified": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_fragments_grammar": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_fragments_roundtrip": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encoded_fragments_value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Plain.split": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.split_head": [
+      "propext",
+      "Quot.sound"
+    ],
+    "fullControls_pass": [
+      "propext"
+    ],
+    "assemblyGrammar_inhabited_empty_value": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "unicodeGrammar_inhabited_invalid_bytes": [
+      "propext",
+      "Quot.sound"
+    ],
+    "codepoint_surrogate_control": [
+      "propext",
+      "Quot.sound"
+    ],
+    "plainFragments_inhabited": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexFragments_inhabited": [
+      "propext",
+      "Quot.sound"
+    ],
+    "unicodeFragments_inhabited": [
+      "propext",
+      "Quot.sound"
+    ],
+    "fragments_bad_second_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "cross_fragment_CR_LF_control": [],
+    "mixedModeSequence_inhabited": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "yulUnicodeMode_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "solWordTable_no_literal": [],
+    "solWord_no_literal": [],
+    "solTok_literal_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "solTok_literal_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "yulWordTable_no_literal": [],
+    "yulWord_no_literal": [],
+    "yulNumber_no_literal": [
+      "propext",
+      "Quot.sound"
+    ],
+    "yulTok_literal_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Plain.yulTok": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexLiteral.yulTok": [
+      "propext",
+      "Quot.sound"
+    ],
+    "yulTok_plain_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "yulTok_hex_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "yulTok_unicode_impossible": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Flavor.Rel.noTrivia": [],
+    "classify_sol_literal_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "classify_yul_literal_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "classify_yul_plain_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "classify_yul_hex_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "classify_yul_unicode_impossible": [
+      "propext",
+      "Quot.sound"
+    ],
+    "solTok_no_flavor_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "classify_asm_plain_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "classify_asm_nonplain_impossible": [
+      "propext",
+      "Quot.sound"
+    ],
+    "classify_pragma_literal_impossible": [
+      "propext"
+    ],
+    "hexBody_complete": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexBody_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexBody_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexBody.deterministic": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexBody_none_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexBody.length_bounds": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "hexControls_pass": [],
+    "hexGrammar_inhabited": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexGrammar_no_trailing": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hexEncoding_control": [],
+    "byteEncoding_table": [],
+    "byteEncoding_facts": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeHex_grammar": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeHex_roundtrip": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeHex_length": [
+      "propext",
+      "Quot.sound"
+    ],
+    "modeLiteral_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "ModeLiteral.split": [
+      "propext",
+      "Quot.sound"
+    ],
+    "modeSequence_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "ModeSequence.append": [],
+    "sequenceBytes_append": [
+      "propext"
+    ],
+    "ModeSequence.split_head": [
+      "propext",
+      "Quot.sound"
+    ],
+    "quotedBody_complete": [
+      "propext"
+    ],
+    "quotedBody_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "quotedBody_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "plainString_complete": [
+      "propext",
+      "Quot.sound"
+    ],
+    "plainString_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "plainString_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "quoteBytes_quoted": [],
+    "encodePlain_roundtrip": [
+      "propext",
+      "Quot.sound"
+    ],
+    "quoteBytes_length": [
+      "propext"
+    ],
+    "encodePlain_length": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodePlain_sol_classify": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodePlain_yul_classify": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeHex_sol_classify": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeHex_yul_classify": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeUnicode_sol_classify": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeAssembly_grammar": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeAssembly_classify": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "encodeAssembly_length": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Scan.input_nonempty": [],
+    "Scan.partition": [
+      "propext"
+    ],
+    "untilQuote_complete": [
+      "propext",
+      "Quot.sound"
+    ],
+    "untilQuote_sound": [
+      "propext",
+      "Quot.sound"
+    ],
+    "untilQuote_iff": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Scan.closer": [],
+    "Scan.append_suffix": [],
+    "untilQuote_append_suffix": [
+      "propext",
+      "Quot.sound"
+    ],
+    "printable_safe": [
+      "propext",
+      "Quot.sound"
+    ],
+    "unicode_safe": [
+      "propext"
+    ],
+    "hexDigit_safe": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Body.scan": [
+      "propext",
+      "Quot.sound"
+    ],
+    "body_scan_value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexBody.scan": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hex_scan_value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodePlain_scan": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Scan.split_quoted": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Scan.split_hex": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Scan.split_unicode": [
+      "propext",
+      "Quot.sound"
+    ],
+    "split_yul_unicode_word": [],
+    "Plain.split_mode": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexLiteral.split": [
+      "propext",
+      "Quot.sound"
+    ],
+    "UnicodeLiteral.split": [
+      "propext",
+      "Quot.sound"
+    ],
+    "hex_regular": [],
+    "encodeBody_regular": [
+      "propext",
+      "Quot.sound"
+    ],
+    "regular_irregularBreak": [
+      "propext",
+      "Quot.sound"
+    ],
+    "bidi_walk_noE2": [
+      "propext",
+      "Quot.sound"
+    ],
+    "regular_bidiBalanced": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeHexLiteral_grammar": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeUnicodeLiteral_grammar": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeHexLiteral_roundtrip": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeUnicodeLiteral_roundtrip": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeHexLiteral_length": [
+      "propext",
+      "Quot.sound"
+    ],
+    "encodeUnicodeLiteral_length": [
+      "propext",
+      "Quot.sound"
+    ],
+    "word_cases": [],
+    "word_dite": [],
+    "word_transport": [],
+    "solWordTable_nonliteral": [],
+    "Scan.deterministic": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Scan.isSuffix": [
+      "propext"
+    ],
+    "Scan.length_lt": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Scan.length_eq": [
+      "propext"
+    ],
+    "Plain.length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexLiteral.length_bounds": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "UnicodeLiteral.length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Fragments.length_eq": [
+      "propext"
+    ],
+    "Fragments.flatten_length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "FragmentValue.plain_length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "FragmentValue.hex_length_le": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "FragmentValue.unicode_length_le": [
+      "propext",
+      "Quot.sound"
+    ],
+    "CodepointBytes.shape": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CodepointBytes.value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "utf8_injective": [
+      "propext",
+      "Quot.sound"
+    ],
+    "uniEscape_shape": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "uniEscape_value": [
+      "propext",
+      "Quot.sound"
+    ],
+    "HexBody.length_tight": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "HexLiteral.length_le_tight": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "hex_control_count": 28,
+  "body_control_count": 53,
+  "full_control_count": 118,
+  "boundary_control_count": 56,
+  "safe_declarations": [
+    "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28._aux_Solidity_Frontend_LiteralGrammarH28_WordTable___elabRules_Solidity_Frontend_LiteralGrammarH28_tacticWord_range_all_1.match_1: Lean.DefinitionSafety.safe",
+    "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28._aux_Solidity_Frontend_LiteralGrammarH28_WordTable___elabRules_Solidity_Frontend_LiteralGrammarH28_tacticWord_range_all_1: Lean.DefinitionSafety.safe",
+    "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28._aux_Solidity_Frontend_LiteralGrammarH28_WordTable___elabRules_Solidity_Frontend_LiteralGrammarH28_tacticWord_range_step_1.match_1: Lean.DefinitionSafety.safe",
+    "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28._aux_Solidity_Frontend_LiteralGrammarH28_WordTable___elabRules_Solidity_Frontend_LiteralGrammarH28_tacticWord_range_step_1: Lean.DefinitionSafety.safe",
+    "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28.tacticWord_range_all: Lean.DefinitionSafety.safe",
+    "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28.tacticWord_range_step: Lean.DefinitionSafety.safe",
+    "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28.wordNonliteral.match_1: Lean.DefinitionSafety.safe",
+    "DECL_SAFETY Solidity.Frontend.LiteralGrammarH28.wordNonliteral: Lean.DefinitionSafety.safe"
+  ]
+}

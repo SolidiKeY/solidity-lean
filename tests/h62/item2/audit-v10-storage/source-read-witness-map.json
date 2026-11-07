@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "91bf81b95decfe8d728a24dd0feac8f76b57efedd9db4a2d7ab5783195adf6cb",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Lowering/StorageOps/SourceWordRead.lean:11:read_total",
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordRead.read_total",
+      "signature": "theorem read_total :\n \u2200 (E : Source.Env) (\u0393 : Source.RCtx) (frame : Source.Fr) (path : Source.SPath)\n (locals : Source.Locals E.layout \u0393) (state : Source.St E)\n (_ordinary : E.transientRoot path=false),\n (Source.readAt (E:=E) (\u0393:=\u0393) frame path (E.cellTy path)).run (locals,state) =\n match (state.ex.world.accounts frame.this).storage.read path with\n | some value => (.ok value,(locals,state))\n | none => (.error (.stuck \"storage cell without a value\"),(locals,state))",
+      "signature_sha256": "378d4e8b631b6b13cc6e1c5dc11cea452ac7568fdf4b1a2c342112eb26e3f26a",
+      "witness": "H62.StorageAudit.SourceReadWitnesses.total_joint",
+      "status": "kernel-checked raw premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Lowering/StorageOps/SourceWordRead.lean:29:complete",
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordRead.complete",
+      "signature": "theorem complete :\n \u2200 (E : Solidity.Source.Env) (\u0393 : Solidity.Source.RCtx)\n (frame : Solidity.Source.Fr) (path : Solidity.Source.SPath)\n (locals : Solidity.Source.Locals E.layout \u0393) (state : Solidity.Source.St E)\n (_ordinary : E.transientRoot path=false)\n (value : Solidity.Source.Val E.layout (E.cellTy path))\n (_present : (state.ex.world.accounts frame.this).storage.read path=some value)\n (machine : Solidity.Evm.Machine) (slot : Solidity.Evm.Slot)\n (_coherent : value.word=some (machine.store.cells slot)),\n (Solidity.Source.readAt (E:=E) (\u0393:=\u0393) frame path (E.cellTy path)).run (locals,state)=\n   (.ok value,(locals,state)) \u2227\n Solidity.Evm.run (Solidity.Backend.StorageOps.TargetOperations.readCode slot) machine=\n   .ok {machine with stack:=.val (machine.store.cells slot)::machine.stack} 0 \u2227\n value.word=some (machine.store.cells slot)",
+      "signature_sha256": "df5a0b2cf86694c70b91c3692fdbd4a4d6f8e373ca71fb4be4ddcac4fd04a0e5",
+      "witness": "H62.StorageAudit.SourceReadWitnesses.complete_joint",
+      "status": "kernel-checked raw premise bundle; independent fidelity reviews passed"
+    }
+  ],
+  "substitutions": "Existing SourceWordWriteControls env, [] locals context, frame, left path, .nil locals, state, machine and slot.root0; selected_value is the actual int11 input.",
+  "scope": "Raw ordinary/present/coherent premises only. Source path and target slot remain independently supplied; no address/world/compiler relation is inferred."
+}

@@ -47,7 +47,7 @@ theorem source_slice (off len start finish : Nat) (toEnd : Bool)
   change (if (if toEnd then len else finish)<start then _
     else if len<(if toEnd then len else finish) then _ else _)=_
   rw [if_neg (by omega),if_neg (by omega)]
-  simp only [Nat.one_mul]
+  simp only [Source.STy.cdStride, Nat.one_mul]
   rfl
 
 /-- Complete producer result and unchanged Source state. Size mismatch is

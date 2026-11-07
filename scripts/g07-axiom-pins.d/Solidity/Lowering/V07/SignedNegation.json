@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/V07/SignedNegation.lean:Solidity.Lowering.V07.SignedNegation.Controls.operand": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegation.lean:Solidity.Lowering.V07.SignedNegation.Controls.source_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegation.lean:Solidity.Lowering.V07.SignedNegation.Controls.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegation.lean:Solidity.Lowering.V07.SignedNegation.Controls.target_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegation.lean:Solidity.Lowering.V07.SignedNegation.source_local_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegation.lean:Solidity.Lowering.V07.SignedNegation.source_neg_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegation.lean:Solidity.Lowering.V07.SignedNegation.source_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedNegation.lean:Solidity.Lowering.V07.SignedNegation.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

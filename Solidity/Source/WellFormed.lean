@@ -280,7 +280,7 @@ structure WellFormed (r : Resolution) : Prop where
   /-- A constant has an initializer. -/
   constInit : ∀ d ∈ r.unit.decls, d.isConst = true → d.init?.isSome
   inits : ∀ d ∈ r.unit.decls, ∀ e, d.init? = Option.some e → ∃ τ σ, d.varTy r.env = Option.some τ ∧
-    HasType (Ctx.forInit r.env d.scope) e σ ∧ σ.implicit (Ctx.forInit r.env d.scope).isBase τ = true
+    HasType (Ctx.forInit r.env d.scope) e σ ∧ σ.implicit (Ctx.forInit r.env d.scope).isBase (Ctx.forInit r.env d.scope).mapFree τ = true
   /-- Every body's frame elaborates, its names are distinct, and its
   statements are well typed. -/
   bodies : ∀ d ∈ r.unit.decls, d.hasBody = true → ∃ f L', d.frame? r.env = Option.some f ∧

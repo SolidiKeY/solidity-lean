@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/Failure/UnwindChecks.lean:Solidity.Backend.Failure.Local.CheckpointRel.functional": [],
+ "Solidity/Backend/Failure/UnwindChecks.lean:Solidity.Backend.Failure.Local.execute_checkpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/UnwindChecks.lean:Solidity.Backend.Failure.Local.execute_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/UnwindChecks.lean:Solidity.Backend.Failure.Local.execute_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/UnwindChecks.lean:Solidity.Backend.Failure.Local.nested_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/UnwindChecks.lean:Solidity.Backend.Failure.Local.nested_failure_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/UnwindChecks.lean:Solidity.Backend.Failure.Local.outer_rollback": [],
+ "Solidity/Backend/Failure/UnwindChecks.lean:Solidity.Backend.Failure.Local.wrong_transient_rejected": [
+  "Quot.sound",
+  "propext"
+ ]
+}

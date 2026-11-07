@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryCopies/SnapshotRestore.lean:Solidity.Backend.MemoryCopies.snapshot_restore_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/SnapshotRestore.lean:Solidity.Backend.MemoryCopies.snapshotRestore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/AggregatePopPathControls.lean:Solidity.Backend.StorageOps.AggregatePopPathControls.captured_operation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopPathControls.lean:Solidity.Backend.StorageOps.AggregatePopPathControls.changed_header_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopPathControls.lean:Solidity.Backend.StorageOps.AggregatePopPathControls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopPathControls.lean:Solidity.Backend.StorageOps.AggregatePopPathControls.empty_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopPathControls.lean:Solidity.Backend.StorageOps.AggregatePopPathControls.empty_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopPathControls.lean:Solidity.Backend.StorageOps.AggregatePopPathControls.every_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopPathControls.lean:Solidity.Backend.StorageOps.AggregatePopPathControls.malformed_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

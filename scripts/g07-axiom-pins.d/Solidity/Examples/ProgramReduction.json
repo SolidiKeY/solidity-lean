@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/ProgramReduction.lean:Solidity.Examples.ProgramReduction.badWrite_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ProgramReduction.lean:Solidity.Upd.afterT_run_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

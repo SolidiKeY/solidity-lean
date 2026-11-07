@@ -1,0 +1,2 @@
+PASS source inventory: 18 unique addresses, actual vendor dispatch/definitions, exact input hashes
+Source inventory only; no kernel or cryptographic equality claim

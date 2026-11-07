@@ -16,7 +16,7 @@ def dynSnapshot : SlotView := fun q =>
   else if q = 46 then 55 else if q = 1000 then 12 else if q = 1001 then dynMax else if q = 2000 then 33 else 77
 
 def dynStorageState : Source.EMState dynEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := dynEnv.layout) (dynEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := dynEnv.layout) (dynEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem dyn_registry_separated : finiteSeparated (dynRegistry account) :=
   (packedSeparationCheck_iff _).mp (by decide)

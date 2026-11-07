@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/Passes/SignedWidthCapture.lean:Solidity.Backend.Passes.SignedWidthCapture.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthCapture.lean:Solidity.Backend.Passes.SignedWidthCapture.execution_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthCapture.lean:Solidity.Backend.Passes.SignedWidthCapture.failure_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthCapture.lean:Solidity.Backend.Passes.SignedWidthCapture.failure_iff_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthCapture.lean:Solidity.Backend.Passes.SignedWidthCapture.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthCapture.lean:Solidity.Backend.Passes.SignedWidthCapture.operand_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthCapture.lean:Solidity.Backend.Passes.SignedWidthCapture.short_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthCapture.lean:Solidity.Backend.Passes.SignedWidthCapture.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

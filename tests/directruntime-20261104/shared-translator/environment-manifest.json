@@ -1,0 +1,321 @@
+{
+  "guardedRegression": "Shared msg.value/block.timestamp must use existing intrinsic environment terms, not unresolved ordinary fields",
+  "base": "e408c996a6c2bbc3c08e3b944dad098c10911890",
+  "adoptedMaster": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+  "sourceFiles": [
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sha256": "90479bcc5c022c435be037ccb2bf16a95dd41b7c15d8cd79696502c3a3e508c5"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/EnvironmentMemberControls.lean",
+      "sha256": "ca049e01d55a2bfab4e01d47fd0db3d9e60d07405a180ef42bacdb0d46f509f5"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/EnvironmentMembers.sol",
+      "sha256": "c6b4f237531cd900bda25997e752f64efd1c7fb9004c60d33501b5bd2ab92b0b"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/environment-fixture.mjs",
+      "sha256": "5d502c35f23c9d50b4c62f83afad3a44b7fe8be7cd48b0195fb6e8e465ac88c9"
+    }
+  ],
+  "fixture": {
+    "regression": "H90 environment-member/builtin-identity",
+    "compiler": {
+      "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+    },
+    "sourceSha256": "c6b4f237531cd900bda25997e752f64efd1c7fb9004c60d33501b5bd2ab92b0b",
+    "fixture": "tests/directruntime-20261104/shared-translator/artifacts/environment/EnvironmentMembers.ast.json",
+    "fixtureSha256": "4b57bac4071f9d3962d9814e20d87faf1edb4a7c3c89669738ada399cd9e86a4",
+    "fieldsRetained": 0,
+    "boundary": "External compiler provenance; no Lean or semantic proof."
+  },
+  "validation": {
+    "ownedBuildTargets": 9,
+    "uniquePassingLeanFiles": 31,
+    "gates": [
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/EnvironmentMemberControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/1.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/AddressLocalControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 4,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/2.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/FixedByteLocalControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 4,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/3.log"
+      },
+      {
+        "command": "lake lean Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/4.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/PrimitiveReturnControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 6,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/5.log"
+      },
+      {
+        "command": "lake lean Solidity/KeySort.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/6.log"
+      },
+      {
+        "command": "lake lean Solidity/Frontend/ExecutableAst/Shared/Translate.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 4,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/7.log"
+      },
+      {
+        "command": "lake lean Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/8.log"
+      },
+      {
+        "command": "lake lean Solidity/Frontend/ExecutableAst/Shared/Compose.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 1,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/9.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/NarrowLocalControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/10.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/NarrowLocalRuntimeControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/11.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/AxiomInventory.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 5,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/12.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/ApiSignatures.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 1,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/13.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/ConstructReaderControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 23,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/14.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/IntrinsicControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/15.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/ReaderControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 1,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/16.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/ParityControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/17.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/AdmissionControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/18.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/FixtureControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 1,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/19.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/ComposedControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 4,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/20.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/SelectionControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/21.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/ModalityControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 4,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/22.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/DirectResultControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/23.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/YulJsonControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/24.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/RequestControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/25.log"
+      },
+      {
+        "command": "lake lean Solidity/Frontend/ExecutableAst/ControlTuple/AdmissionControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 2,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/26.log"
+      },
+      {
+        "command": "lake lean Solidity/Frontend/ExecutableAst/ControlTuple/IntrinsicControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 17,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/27.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/control-tuples/ObligationControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 4,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/28.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/control-tuples/ProofAudit.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 15,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/29.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/control-tuples/ProductionControls.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 3,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/30.log"
+      },
+      {
+        "command": "lake lean tests/directruntime-20261104/shared-translator/H90Census.lean -- --tstack=131072 ",
+        "status": "PASS",
+        "wallSeconds": 90,
+        "log": "tests/directruntime-20261104/shared-translator/artifacts/environment/gates/31.log"
+      }
+    ],
+    "identityFollowup": {
+      "command": "lake lean tests/directruntime-20261104/shared-translator/EnvironmentMemberControls.lean -- --tstack=131072 ",
+      "status": "PASS",
+      "wallSeconds": 7
+    },
+    "finalCommand": {
+      "exit": 0,
+      "wallSeconds": 261.5893559930046,
+      "scopeMemoryPeakBytes": 680673280,
+      "minimumOuterAvailableBytes": 11148558336
+    },
+    "resourcePolicy": {
+      "memoryMaxBytes": 12884901888,
+      "swapMaxBytes": 0,
+      "leanThreads": 1,
+      "jobs": 1
+    },
+    "toolchain": "Lean4.24.0 hash797c613; Lake5.0.0-src+797c613",
+    "axioms": "environmentMember? has no axioms; no new theorem/axiom/premise/budget change. Existing inventory passes.",
+    "keySort": "PASS lean:Solidity/KeySort.lean; exact command/output in gate6.log/gates.tsv",
+    "failedAttempts": [
+      "Initial external nonpayable msg.value fixture rejected bysolc; corrected to validpayable functions.",
+      "Initial combinedMCP incomplete afterdependency setup; exit2, resourceStopfalse; reader/compose passed. Retry and finalgates pass."
+    ],
+    "runtimeGatePass": false
+  },
+  "controls": {
+    "requests": 16,
+    "proved": 8,
+    "refuted": 4,
+    "unsupported": 4,
+    "sourceIdsChecked": true,
+    "metadataNegativeCases": 15,
+    "unsupportedSiblingKeys": [
+      "block.number",
+      "tx.origin"
+    ]
+  },
+  "transition": {
+    "regression": "H90 environment local observation transition",
+    "base": "e408c996a6c2bbc3c08e3b944dad098c10911890",
+    "profileChanges": 0,
+    "profileTransitions": {},
+    "censusBefore": {
+      "parsedUnits": 78,
+      "functions": 1655,
+      "existingPrinted": 1486,
+      "canonicalAdmitted": 245,
+      "candidateFiles": 78,
+      "both": 241
+    },
+    "censusAfter": {
+      "parsedUnits": 78,
+      "functions": 1655,
+      "existingPrinted": 1486,
+      "canonicalAdmitted": 245,
+      "candidateFiles": 78,
+      "both": 241
+    },
+    "censusChanges": [],
+    "occurrenceChanges": {
+      "default.json": 0,
+      "composed.json": 0
+    },
+    "priorDecodedOutcomesPreserved": true,
+    "unknownRootRefusalsPreserved": true,
+    "boundary": "environment source witness/finite outcome checks, not decoded term equivalence, causal semantic or source adequacy proof."
+  },
+  "reviews": {
+    "finder": "Read-only source, strict-transition and final evidence reviews: no confirmed blocker. 31PASS and identity follow-up exit0;16source-bound observations; zero legacy outcome changes. No Lean/server/build/writes.",
+    "skeptic": "Read-only final source/evidence review: no remaining checkpoint blocker. Metadata shapes are not authentication. Initial compiler rejection/incomplete MCP preserved separately; model checks are not source/world/native adequacy. No Lean/server/build/writes."
+  },
+  "archive": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/environment-evidence.tar.zst",
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/environment-evidence.tar.zst",
+    "sha256": "d8a141a7703e95cc81f7aa0741ed12a5073739b1cb7d4363354211ca3cb16060",
+    "bytes": 65713
+  },
+  "checkingTimings": {
+    "priorAddressTranslateSeconds": 6,
+    "currentTranslateSeconds": 4,
+    "boundary": "Separate warmed focused gates with different adopted-master/dependency states; not matched runtime or causal performance acceptance."
+  },
+  "delta": {
+    "productionLeanAdded": 19,
+    "productionLeanRemoved": 8,
+    "newProductionModules": 0,
+    "newTestModules": 1
+  },
+  "limits": [
+    "Metadata shapes do not authenticate compiler inputs.",
+    "Exact old/new observations do not establish decoded-term or source/world equivalence.",
+    "No whole-function census admission increase;245canonical/1486printed unchanged.",
+    "No latest-source native/WASM qualification or repair/performance acceptance. Full original queue remains open."
+  ]
+}

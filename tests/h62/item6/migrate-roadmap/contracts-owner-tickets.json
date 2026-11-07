@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "transport": "Normalized from coordinator user relay; original raw ticket files are on requester VMs and their byte hashes are not locally reverified.",
+  "tickets": [
+    {
+      "id": "B-MIGRATION-ROADMAP-CONTRACTS",
+      "requester": "solidity-h62-4-20261106/generic-primitive-packets",
+      "requester_head": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+      "original_filename": "e05f5bd5f0feb0dfd17800000f938d531876b08f918b6634e6581b1e9ea71b18-blockers.json",
+      "original_sha256_as_relayed": "e05f5bd5f0feb0dfd17800000f938d531876b08f918b6634e6581b1e9ea71b18",
+      "file": "Solidity/Roadmap/Contracts.lean",
+      "line": 1104,
+      "theorem": "Solidity.Roadmap.PublicCorrectness.transfer",
+      "expected_axioms": [],
+      "observed_axioms_as_reported": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "evidence_as_relayed": "/workspace/h62-generic-primitive-packets-evidence/hash-overlay/run/dependency-logs/Solidity.Roadmap.Contracts.log",
+      "required_resolution": "Owner-reviewed exact-base resolution preserving frozen statements and trust policy; no silent guard/pin change.",
+      "hash_dependency_status_as_relayed": "Both Hash modules checked under pinned4.35 in exact isolated owner overlay; full migration gates pending; checkout originals unchanged.",
+      "unrelated_owner_ticket": "B-OWNER-RELAY CheckedSub/Controls remains with its existing owner; no write authority inferred."
+    },
+    {
+      "id": "Q-H70-CONTRACTS",
+      "requester": "solidity-h62-5-20261106/statement-graph",
+      "requester_head": "372e46284787e57e294d7c549f325f82f24ccfb2",
+      "original_filename": "d0c6b2f3eca73e9c634c182aac50bbac83ed8d6b0279bbe6a403205097508cf5-h70-contracts-owner-ticket.json",
+      "original_sha256_as_relayed": "d0c6b2f3eca73e9c634c182aac50bbac83ed8d6b0279bbe6a403205097508cf5",
+      "file": "Solidity/Roadmap/Contracts.lean",
+      "line": 1104,
+      "theorem": "Solidity.Roadmap.PublicCorrectness.transfer",
+      "expected_axioms": [],
+      "observed_axioms_as_reported": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "evidence_as_relayed": "/workspace/h62-statement-graph-evidence/h70-roadmap-final/Contracts.log",
+      "toolchain_as_reported": "Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc Release",
+      "validation_input_sha256_as_relayed": "29e283dee59e2888f577b5b4aa54c46bacbf955b67d1b87a5e5051f7a3d06797",
+      "validation_input_hash_role": "Reported aggregate validation-input identifier, not asserted to be the Contracts file hash.",
+      "command_as_reported": [
+        "/workspace/.setup/tools/lean-4.35.0-linux/bin/lean",
+        "-j1",
+        "--tstack=131072",
+        "-o",
+        "/workspace/h62-statement-graph-evidence/h70-roadmap-final/build/Solidity/Roadmap/Contracts.olean",
+        "Solidity/Roadmap/Contracts.lean"
+      ],
+      "exit_as_reported": 1,
+      "required_resolution": "Owner-reviewed preserving resolution or remain pending fleet/G49 migration; routing authorizes no proof/guard/pin edits."
+    }
+  ]
+}

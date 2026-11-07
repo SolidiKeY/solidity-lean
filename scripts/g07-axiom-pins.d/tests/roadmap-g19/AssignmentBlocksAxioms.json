@@ -1,0 +1,124 @@
+{
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.index": [],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.mapping": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.maps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.observe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.Rel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.repeated_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.reverse_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.reversed_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.self_alias_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.steps": [],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.Controls.untouched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.related_fold": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.source_items_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.sourceAfter": [],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.sourceItems": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.targetAfter": [
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentBlocksAxioms.lean:Solidity.Lowering.G19.AssignmentBlocks.targetEnvAfter": [
+  "propext"
+ ]
+}

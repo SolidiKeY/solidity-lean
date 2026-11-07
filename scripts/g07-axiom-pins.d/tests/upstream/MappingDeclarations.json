@@ -1,0 +1,11 @@
+{
+ "tests/upstream/MappingDeclarations.lean:Solidity.mappingAssignmentShape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/MappingDeclarations.lean:Solidity.Upstream.MappingDeclarations.snapshot_rebind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "sourceHead": "d7f153f3e9c096f7deaf86b0240fcdf28838b0e0",
+  "status": "partial",
+  "fileCount": 30,
+  "uncompressedBytes": 3062406,
+  "archive": {
+    "path": "/workspace/dafny-parity-spec-origins-20261107/gate-evidence/bulk.tar.gz",
+    "bytes": 298120,
+    "sha256": "2e78722226d1aa36560177b4c28e968ce1e3f34d8e0fc4765fe7d94446077fad"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-spec-origins-20261107/gate-evidence/files.json",
+    "bytes": 6199,
+    "sha256": "74bbbf74752b1b3766337e96d7b710e5b98a8bca1b17d18ed421d6859628a690"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-spec-origin-gates-evidence-manifest.json --restore",
+  "boundaries": [
+    "Checkpoint including library/trust/registries/axiom pins passes at exact recorded head.",
+    "Unchanged run-lean.sh full build passes6611 targets from matching cache; no cold Derived20/21 rerun.",
+    "Lean4.24/Lake5 observed; actual KeySort377/131/131 MATCHED/OK and complete TestSuite audit pass.",
+    "Timed strict not rerun unchanged; original300s STOP retained. No overall RUNTIME_GATE_PASS or parity completion."
+  ]
+}

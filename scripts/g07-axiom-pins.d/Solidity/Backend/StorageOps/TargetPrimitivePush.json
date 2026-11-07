@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/StorageOps/TargetPrimitivePush.lean:Solidity.Backend.StorageOps.TargetPrimitivePush.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePush.lean:Solidity.Backend.StorageOps.TargetPrimitivePush.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePush.lean:Solidity.Backend.StorageOps.TargetPrimitivePush.represented_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePush.lean:Solidity.Backend.StorageOps.TargetPrimitivePush.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePush.lean:Solidity.Backend.StorageOps.TargetPrimitivePush.run_reset": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

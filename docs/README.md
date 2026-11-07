@@ -1,3 +1,4 @@
+<!-- Generated from docs/README.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The documents
 
 Open [module-map.md](module-map.md) first. Each fact lives in one document;
@@ -8,7 +9,13 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [feature-work/integration-20261105T1200Z.md](feature-work/integration-20261105T1200Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
+| [feature-work/integration-20261105T0840Z.md](feature-work/integration-20261105T0840Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
+| [feature-work/integration-20261105-deferred.md](feature-work/integration-20261105-deferred.md) | Deferred standalone parser, builder, target and derived-formula checkpoints, with retained producer obligations. |
+| [feature-work/integration-20261105-checkpoints.md](feature-work/integration-20261105-checkpoints.md) | Bounded scheduled lane increments, producer commits and retained integration boundaries. |
 | [feature-work/integration-20261103-checkpoints.md](feature-work/integration-20261103-checkpoints.md) | Reviewed scheduled lane increments, fixes, validation requirements and retained producer boundaries. |
+| [feature-work/hash-xi-context.md](feature-work/hash-xi-context.md) | Actual Xi/Theta hash-query transport for arbitrary world and context, with explicit fixed-code/gas and native/source limits. |
+| [feature-work/h7-bounded-interfaces.md](feature-work/h7-bounded-interfaces.md) | H7 logical padding/scanner APIs, bounds and native/source limits. |
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/compiler-project-services.md](feature-work/compiler-project-services.md) | Multi-file compiler/LSP support, scoped specifications, formatting, refactoring and concurrent function proofs. |
 | [feature-work/solidity-lsp.md](feature-work/solidity-lsp.md) | Persistent Solidity LSP, warm Lean workers, editor services, validation and remaining limits. |
@@ -22,11 +29,11 @@ history is in git.
 | [dafny-editor-parity.md](dafny-editor-parity.md) | Real Dafny/Solidity Lean editor and stdio comparison harnesses, independent feature/test discovery, measurements and completeness limits. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Typed loop measures, finite membership, entry audits, certified source witnesses and editor integration. |
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |
-| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 18 VM lanes of eight to ten hours covering 118 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
+| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: VM lanes of eight to ten hours, proof work packages, dependencies, the full-scope extension and source-to-bytecode completion gates. |
 | [feature-work/roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) | Roadmap G01: intrinsic layer interfaces, observations, the six final theorem contracts, pass certificates, reuse map and the decisions they implement. |
 | [feature-work/frontend-parse.md](feature-work/frontend-parse.md) | Lane V05 (G08–G11): the checked lexer and parser to S00's syntax: lexical certificate, token yield and layouts, precedence, whole-source parsing, coverage, corpus regression and G05 parse-stage instance. |
 | [feature-work/roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md) | Roadmap G05: audit of frontend, provenance and unsafe elaborator paths; checked certificate interfaces for raw input, parse, resolution and metadata; link settings and admitted settings. |
-| [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy (model, abstract, exclude) and the exclusions. |
+| [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy, the full-scope decision and the reopened former exclusions. |
 | [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md) | Roadmap G00: pins and their disagreements, evidence for each recorded exclusion, manifest/ledger reconciliation, owners and open scope questions. |
 | [feature-work/roadmap-g03-ledger.md](feature-work/roadmap-g03-ledger.md) | Roadmap G03: constructor/feature → admission → lowering → backend → EVM → theorem ledger with combinations and decision rows, and the module/lemma dependency ledger (`scripts/roadmap-g03-ledger.py`, generated JSON). |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated from `solidity-features.json`: each feature's requirement, scope, status and evidence. Do not edit. |
@@ -57,12 +64,22 @@ history is in git.
 | [feature-work/backend-assembler.md](feature-work/backend-assembler.md) | Roadmap G45.05/G45.04 lane: the Osaka instruction datatype, byte encoder/decoder and jump-destination analysis, then the assembler; a handoff per checkpoint. |
 | [feature-work/precompiles.md](feature-work/precompiles.md) | Osaka's 18 precompiles as computed core functions with gas and failure laws, G06's `Fixed` instance, the vector provenance and the Bridge agreement. |
 | [feature-work/stipend-cost-rule.md](feature-work/stipend-cost-rule.md) | The compiler-independent stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs, its examples and the compiler obligation (G43). |
+| [feature-work/full-scope.md](feature-work/full-scope.md) | Full scope (2026-11-04): every exclusion withdrawn, optimizing compiler and solc translation validation; groups X/O/T, decisions D1–D6, parallel lanes and waves. |
 | [feature-work/inline-assembly.md](feature-work/inline-assembly.md) | Authorized inline assembly extension: the exclusions it reopens, tiers, groups Y01–Y10, lanes VY1–VY5 and approved decisions YQ1–YQ7; implementation gates remain open. |
 | [feature-work/compiler-transport-proofs.md](feature-work/compiler-transport-proofs.md) | Compiler transport proofs, reached failure controls, full small-frame output and remaining Source/EVM obligations. |
 | [feature-work/memory-operation-proofs.md](feature-work/memory-operation-proofs.md) | Typed Source/heap/word memory-operation lemmas, reached decrement failures and the remaining physical/backend boundary. |
 | [feature-work/primitive-return-projection.md](feature-work/primitive-return-projection.md) | Primitive return-byte validation before binding/discard, checked controls and the remaining O1 operational boundary. |
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
+| [feature-work/abstraction-pilot.md](feature-work/abstraction-pilot.md) | Anti-unification deduplication pilot: helper lemmas, measured line/token/check-time savings vs au.py predictions, redesign proposals and rollout shape. |
+| [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
+| [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
+| [feature-work/h28-mutation-testing.md](feature-work/h28-mutation-testing.md) | H28 semantic rule mutation testing: whole-family census, toStep proof oracle, checked kill witnesses and score. |
+| [feature-work/p8-producer-merge.md](feature-work/p8-producer-merge.md) | H57/H60 P8/P8b Producer merge: inventory, merged interface, inhabited frozen P8a Producer, controls and migration notes. |
+| [feature-work/source-s04-funds.md](feature-work/source-s04-funds.md) | S04.04: actual request-boundary sender-funds validation, invalid-drop laws, measured current Source release and remaining H19 boundary. |
+| [feature-work/vy5-composition.md](feature-work/vy5-composition.md) | VY5: scoped composition proofs, actual Source catch binding and explicit remaining full-lane obligations. |
 
 **The calculus and its proofs**
 
@@ -77,6 +94,7 @@ history is in git.
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
 | [lifetime.md](lifetime.md) | Transaction traces from the constructor, whole-contract safety, invariant induction. |
 | [automation.md](automation.md) | The deciding closer: M0–M8, the decision theorem's features and gaps, M7-next. |
+| [feature-work/m7-next.md](feature-work/m7-next.md) | M7-next lane handoff: the route-refusal `Fml.Residue`, `DecisionTheorem'` (not a completeness result), fixtures, reviews and gates. |
 | [complete-verification.md](complete-verification.md) | The exact-reduction pipeline, its stages, tools and limits. |
 | [assurance.md](assurance.md) | Trust gates, the memory compiler's invariants, remaining assurance work. |
 | [rule-repair.md](rule-repair.md) | How to repair a broken rule: semantics first, rejection gates, soundness. |
@@ -155,6 +173,137 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - V10 Source operation clients and remaining integration: [storage operations](feature-work/roadmap-v10-storage-operations.md#source-operation-clients-c145).
 - Registered V10 Source operation clients: [storage operation views and Source clients](feature-work/roadmap-v10-storage-operations.md#operation-views-and-source-clients).
 - [V16 correctness consumers](feature-work/roadmap-v16-correctness.md): scoped actual allocation-memory preservation, bounded Source transaction pairs and exact rollback/specification observations; full composition remains open.
+- [V17 validation/evidence preparation](feature-work/roadmap-v17-validation.md).
 - [P7 transient target](feature-work/p7-transient-target.md): typed transient target, Source correspondence and remaining G39/G42 obligations.
 - [Executable bytecode selection](feature-work/executable-bytecode-selection.md) and [memory defaults and copies](feature-work/memory-copies.md): G45 and G33/G35 statement-only interfaces and premises.
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
+
+G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
+V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
+- [Proof-coverage audit](audits/proof-coverage.md) (2026-11-06): claims vs theorems, statement quality, residue, and the ten best-paying proof efforts.
+- [Architecture audit](audits/architecture.md) (2026-11-06): areas and layering, per-case copies, Controls cost, dead weight.
+- [Build-speed audit](audits/build-speed.md) (2026-11-06): measured per-module time and memory, axiom-pin and slow-example costs.
+- [Coordination audit](audits/coordination-process.md) (2026-11-06): where lane time goes, gate saturation, merge latency, question load.
+- [Core EVM revert/return data (machine V2)](feature-work/evm-machine-v2.md): versioned `OutV2`/`MachineV2` with revert/return data, return buffer and CALL input bytes; migration to the frozen machine.
+- [Canonical P1 languages V2](feature-work/p1-lang-v2.md): `P1LangV2` with revert data, call events and frame classes over the V2 machine; `p1_frame_bridge` for a guarded revert-with-data family.
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+- [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
+- V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+
+- [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical codecs, finite storage/selected byte-heap writeback and retained-allocation resizing/supported byte/mixed aggregate heap views and selected word/dynamic uint256 retained-capacity/simultaneous heterogeneous struct and canonical bool/reference array writeback with retained-capacity resizing and canonical scalar-memory extension with exact legacy compatibility, real alias controls and joint ordinary-memory source/placement composition and arbitrary finite canonical owned-inventory writeback, registered residual journals, actual selected-step MemOK and outstanding concrete integration.
+
+VY2 [heap enumeration preparation](feature-work/inline-assembly-vy2.md#computed-ordinary-heap-inventory-2026-11-01) derives canonical typed inventories from actual heap cells; full assembly closure remains open.
+
+VY2 [packed-slot complements](feature-work/inline-assembly-vy2.md#packed-slot-complement-journaling-2026-11-01) covers canonical finite field/residual composition and actual source frame controls; whole-store and assembly closure remain open.
+
+VY2 [computed word-layout registrations](feature-work/inline-assembly-vy2.md#computed-word-layout-registrations-2026-11-01)
+derive canonical path/slot/hash agreements under actual owner per-run conditions;
+packed/whole-store/source/compiler closure remains open.
+
+VY2 [declaration-derived packing](feature-work/inline-assembly-vy2.md#declaration-derived-packed-registrations-2026-11-01)
+computes canonical mixed-field registrations and source/journal controls;
+whole-store and assembly closure remain open.
+
+VY2 [nested source-registry preparation](feature-work/inline-assembly-vy2.md#nested-declared-source-registry-and-writeback-2026-11-01)
+connects computed nested paths to actual source writeback and residual journals;
+full-lane integration remains open.
+
+VY2 [recursive fixed paths](feature-work/inline-assembly-vy2.md#recursive-fixed-declaration-paths-2026-11-01)
+adds checked recursive metadata traversal and concrete canonical source/journal
+composition; full assembly closure remains open.
+
+VY2 [ordered ordinary roots](feature-work/inline-assembly-vy2.md#ordered-ordinary-root-declarations-2026-11-01)
+adds checked cross-root packing/source-bank/readback components; full lane remains partial.
+
+VY2 inherited-root canonical preparation: see [lane queue](feature-work/inline-assembly-vy2.md#inherited-active-contract-roots-2026-11-01).
+
+VY2 computed active literal origins: [lane evidence](feature-work/inline-assembly-vy2.md#computed-active-layout-origin-2026-11-01).
+
+VY2 [computed dynamic storage headers and live inventories](feature-work/inline-assembly-vy2.md#computed-dynamic-headers-and-live-element-inventories-2026-11-01)
+records the canonical preparation/source-frame checkpoint and remaining full-lane obligations.
+
+
+VY2 [ownership-changing complements](feature-work/inline-assembly-vy2.md#ownership-changing-dynamic-complements-2026-11-01)
+connect computed dynamic snapshots to actual source/residual execution; full lane remains open.
+
+
+VY2 [packed dynamic unsigned ownership](feature-work/inline-assembly-vy2.md#packed-dynamic-unsigned-ownership-2026-11-01)
+adds computed partial-slot source/residual preparation; full original lane remains open.
+
+
+VY2 [signed dynamic integer ownership](feature-work/inline-assembly-vy2.md#signed-dynamic-integer-ownership-2026-11-01)
+adds canonical signed source/residual preparation; full original lane stays open.
+
+VY2 scalar-family dynamic storage component: [lane record](feature-work/inline-assembly-vy2.md) (`ScalarDynamicHeader`, `ScalarOwnershipPlan`); canonical preparation only, original full lane unfinished.
+
+VY2 combined primitive storage inventory: [lane record](feature-work/inline-assembly-vy2.md) (`PrimitiveDynamicSnapshot`, `PrimitiveOwnershipPlan`); canonical persistent preparation, not full Yul support.
+
+VY2 nested primitive-member storage preparation and original unfinished queue:
+[inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-nested-primitive-members-2026-11-01).
+
+VY2 recursive dynamic struct preparation and unfinished original work:
+[inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-recursive-dynamic-structs-2026-11-01).
+
+
+VY2 aggregate dynamic-array preparation and retained-alias boundary:
+[original lane queue](feature-work/inline-assembly-vy2.md#vy2-aggregate-dynamic-array-preparation-2026-11-01).
+
+
+VY2 retained source-reference preparation and original unfinished queues:
+[inline-assembly-vy2](feature-work/inline-assembly-vy2.md#vy2-retained-source-references-2026-11-01).
+
+- [VY2 computed entry/return capture](feature-work/inline-assembly-vy2.md#vy2-computed-entry-and-return-capture-2026-11-01): typed entry/return observation and supported physical writeback.
+
+- [VY2 tuple capture and parallel physical consumers](feature-work/inline-assembly-vy2.md#vy2-runtime-tuple-and-argument-capture-parallel-physical-consumers-2026-11-01).
+
+- [VY2 owned bool physical representation](feature-work/inline-assembly-vy2.md#owned-bool-representation-and-source-journals-2026-11-01): actual typed-source/complement journals; full original lane remains partial.
+
+- [VY2 owned bool dynamic inventory](feature-work/inline-assembly-vy2.md#owned-bool-changing-dynamic-inventory-2026-11-01): same-map source/physical journals; full original assignment remains partial.
+
+- VY2 [actual location producer capture](feature-work/inline-assembly-vy2.md#actual-location-producer-capture-2026-11-01): typed source locations and exact owner producer adapters; partial lane.
+
+- VY2 [actual byte/string allocation placement](feature-work/inline-assembly-vy2.md#actual-bytestring-allocation-placement-2026-11-01): derived physical placement and actual source allocation; partial lane.
+
+- VY2 [retained allocation lineage extension](feature-work/inline-assembly-vy2.md#retained-allocation-lineage-extension-2026-11-01): whole typed history/source/raw allocation laws; partial lane.
+
+VY2 [computed inventory after allocation](feature-work/inline-assembly-vy2.md#computed-inventory-after-allocation-2026-11-01) connects actual supported heap enumeration and allocation history.
+
+VY2 [actual allocation physical-view bridge](feature-work/inline-assembly-vy2.md#actual-allocation-physical-view-bridge-2026-11-01) proves computed raw-map/source agreement for the supported ordinary heap.
+
+VY2 [generic ordinary object allocation](feature-work/inline-assembly-vy2.md#generic-ordinary-object-allocation-2026-11-01) adds checked struct/array allocation and exact source/physical composition.
+
+VY2 [actual struct constructor producer](feature-work/inline-assembly-vy2.md#actual-struct-constructor-producer-2026-11-01) connects checked actual owner operands to physical allocation; full lane remains partial.
+
+VY2 [actual calldata array allocation](feature-work/inline-assembly-vy2.md#actual-calldata-array-allocation-2026-11-01) derives source/physical calldata agreement and supported array allocation; full lane partial.
+
+VY2 [actual memory hash binding](feature-work/inline-assembly-vy2.md#actual-memory-hash-binding-2026-11-01) proves computed payload/source builtin/sharedFixed agreement; full lane partial.
+
+VY2 [actual source environment inputs](feature-work/inline-assembly-vy2.md#actual-source-environment-inputs-2026-11-01) binds transaction timestamp/origin and actual source frame reads; full lane partial.
+
+VY2 [concrete packed World adapter](feature-work/inline-assembly-vy2.md#concrete-packed-world-adapter-2026-11-01) binds validated source writes and residual rollback to actual peer frame completion; full lane partial.
+
+VY2 [actual target input frame](feature-work/inline-assembly-vy2.md#actual-target-input-frame-2026-11-01) maps actual source inputs to existing target frame observations; full lane partial.
+
+VY2 [actual source balance inputs](feature-work/inline-assembly-vy2.md#actual-source-balance-inputs-2026-11-01) derives code/history-sensitive source balance observations and constructed target funds; full lane partial.
+
+VY2 storage/balance input stability: [lane checkpoint](feature-work/inline-assembly-vy2.md).
+
+VY2 effectful balance input proofs: [lane checkpoint](feature-work/inline-assembly-vy2.md).
+
+VY2 scratch-copy physical frame laws: [lane checkpoint](feature-work/inline-assembly-vy2.md).
+
+VY2 residual memory-window preparation and retained-tail laws: [lane checkpoint](feature-work/inline-assembly-vy2.md).
+
+VY2 chronological physical `mcopy` preparation and source-state preservation: [lane record](feature-work/inline-assembly-vy2.md#chronological-residual-memory-copies).
+
+VY2 mapping roundtrips and transient slot/frame/reset laws: [lane record](feature-work/inline-assembly-vy2.md#mapping-slot-views-and-transient-slots).
+
+VY2 actual-frame calldata copy/hash binding: [lane record](feature-work/inline-assembly-vy2.md#actual-frame-calldata-copy-and-hash).
+| Assembly lane | Document |
+|---|---|
+| VY5 raw-local/physical, indexed-write/emit composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |
+- [P8a SourceSpec and failure resources](feature-work/p8-source-spec.md): actual Source execution anchor, unchanged failure-resource transfer, and the proved bare-horizon obstruction; full producer remains open.
+
+H16: [typed failure interface, current-master measurements and deferred runtime migration](feature-work/source-failure-execution.md).

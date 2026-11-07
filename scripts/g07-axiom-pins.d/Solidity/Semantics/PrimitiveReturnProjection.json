@@ -1,0 +1,21 @@
+{
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.declared_failure": [
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.declared_success": [
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.decode_names": [
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.success_complete_word": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.success_reads_actual_words": [
+  "propext"
+ ],
+ "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.success_validates_declaration": [
+  "propext"
+ ]
+}

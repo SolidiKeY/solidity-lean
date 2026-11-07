@@ -1,0 +1,78 @@
+{
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.body_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.callable_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.declaration_member": [],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.missing_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.nonpayable_metadata": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.paid_frame_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.selected_internal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.signature": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.source_internal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.target_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.target_drop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.target_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.wrong_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.wrong_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ScalarCallableTransport.lean:Solidity.Lowering.V08.ScalarCallableTransport.zero_internal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

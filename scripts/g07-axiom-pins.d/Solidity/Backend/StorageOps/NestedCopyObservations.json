@@ -1,0 +1,34 @@
+{
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.child": [],
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.child_overlay_live": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.childPath": [],
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.find_child": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.overlay_find_live": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.strip_child": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.strip_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.strip_element": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedCopyObservations.lean:Solidity.Backend.StorageOps.NestedCopyObservations.strip_postowner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

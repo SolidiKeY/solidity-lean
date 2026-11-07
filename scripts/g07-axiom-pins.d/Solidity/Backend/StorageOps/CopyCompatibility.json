@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/CopyCompatibility.lean:Solidity.Backend.StorageOps.CopyCompatibility.clear_compatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibility.lean:Solidity.Backend.StorageOps.CopyCompatibility.clear_slot_compatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibility.lean:Solidity.Backend.StorageOps.CopyCompatibility.copy_compatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibility.lean:Solidity.Backend.StorageOps.CopyCompatibility.default_compatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibility.lean:Solidity.Backend.StorageOps.CopyCompatibility.represented_metadata": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibility.lean:Solidity.Backend.StorageOps.CopyCompatibility.slot_compatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

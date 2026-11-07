@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/PureAssignmentShapes.lean:Solidity.Yul.Compilation.PureAssignmentShapes.assignment_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureAssignmentShapes.lean:Solidity.Yul.Compilation.PureAssignmentShapes.packet": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureAssignmentShapes.lean:Solidity.Yul.Compilation.PureAssignmentShapes.sequence_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureAssignmentShapes.lean:Solidity.Yul.Compilation.PureAssignmentShapes.source_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

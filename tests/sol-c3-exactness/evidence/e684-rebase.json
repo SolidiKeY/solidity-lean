@@ -1,0 +1,15 @@
+{
+  "target": "e6849d3bdf516099d20c33d3581d523449764018",
+  "previous_head": "a005a47075e23d123a7c5c71ed47d05bba2c885c",
+  "backup_ref": "codex/solidity-sol2-20261104/c3-exactness-pre-e684",
+  "preflight": "/workspace/c3-exactness-artifacts/rebase-e684-preflight-a005a47075e23d123a7c5c71ed47d05bba2c885c",
+  "pruned_file_count": 334,
+  "retained_packet": "/workspace/c3-exactness-artifacts/b86-a005a47075e23d123a7c5c71ed47d05bba2c885c",
+  "retained_packet_checksum_manifest_sha256": "a679297fab7ae924ebf45d413a5e72124c3b14bae90c405da3da991616c022bd",
+  "all_24_closure_sources_unchanged": true,
+  "openloops_project_imports_unchanged": 277,
+  "proof_delta": "none",
+  "rebase_method": "git rebase --onto target old_head assigned_branch: integrated completed suffix empty, no proof replay",
+  "new_changes": "Exact upstream guard literal and restored task-local .artifacts ignore; current metadata/gates only",
+  "boundary": "Historical334 file bytes not bulk-restored. Canonical names reused only for actual fresh checks. Old refs/bytes retained externally; no runtime/cache success inferred."
+}

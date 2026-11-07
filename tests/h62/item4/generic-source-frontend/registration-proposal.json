@@ -1,0 +1,17 @@
+{
+  "status": "unapplied_coordinator_approval_required",
+  "generated_roots_changed": false,
+  "module_map_rows": [
+    {
+      "proposed_module": "Frontend/GenericSourceControls/Core.lean",
+      "source": "tests/h62/item4/generic-source-frontend/Core.lean",
+      "purpose": "Intrinsic parser-control correspondence; no frontend parser dependency"
+    },
+    {
+      "proposed_module": "Frontend/GenericSourceControls/StatementTable.lean",
+      "source": "tests/h62/item4/generic-source-frontend/FixtureTable.lean",
+      "purpose": "45 original finite certificates and exact instances; blocked/unvalidated"
+    }
+  ],
+  "action": "Coordinator and area owners decide final module placement, rewrite imports, run registry tools and full gates. This is a fragment proposal, not registration."
+}

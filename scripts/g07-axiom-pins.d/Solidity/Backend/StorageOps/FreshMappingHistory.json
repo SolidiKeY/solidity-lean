@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/FreshMappingHistory.lean:Solidity.Backend.StorageOps.FreshMappingHistory.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistory.lean:Solidity.Backend.StorageOps.FreshMappingHistory.fresh_before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistory.lean:Solidity.Backend.StorageOps.FreshMappingHistory.fresh_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistory.lean:Solidity.Backend.StorageOps.FreshMappingHistory.history_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistory.lean:Solidity.Backend.StorageOps.FreshMappingHistory.represented_keys": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistory.lean:Solidity.Backend.StorageOps.FreshMappingHistory.untouched_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

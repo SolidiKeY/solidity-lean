@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/CalldataPackets/RawUintN/Execution.lean:Solidity.Backend.CalldataPackets.RawUintN.copy_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Execution.lean:Solidity.Backend.CalldataPackets.RawUintN.copy_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Execution.lean:Solidity.Backend.CalldataPackets.RawUintN.copy_success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Execution.lean:Solidity.Backend.CalldataPackets.RawUintN.decode_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Execution.lean:Solidity.Backend.CalldataPackets.RawUintN.dirty_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Execution.lean:Solidity.Backend.CalldataPackets.RawUintN.eval_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Execution.lean:Solidity.Backend.CalldataPackets.RawUintN.guarded_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

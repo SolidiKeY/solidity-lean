@@ -88,11 +88,15 @@ The language and calculus gaps, callbacks included, are listed in
   (`Contract.vars_ok`, `Syntax/Raw.lean`).
 - **The EVM fragment**: broader memory operations beyond the
   checked primitive-array/struct-field path (reads/writes, lengths, typed local alias/value
-  operations, primitive-array and primitive-member struct construction/rebinding with explicit capacity,
+  operations, primitive-array and primitive-member struct construction/rebinding,
+  and certified finite nonrecursive struct defaults/literals with supported
+  reference members in the first memory path, all with explicit capacity,
   checked expressions, guards and primitive storage writes are
   proved), copies of dynamic arrays, `push()` of a struct,
   fragile aliases after `pop`/`delete`, mappings keyed by `bool`/`int`
-  (`docs/compiler-verification.md`).
+  (`docs/compiler-verification.md`). The finite struct construction result
+  does not supply general Source struct admission or recursive graph copying,
+  and does not compose the separate memory representations automatically.
 
 ## Port later
 

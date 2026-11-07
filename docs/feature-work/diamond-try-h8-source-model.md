@@ -16,21 +16,21 @@ try/panic source and its finite-memory model, generic in the local length.
 - `Examples/Tactics/TryPanicSource{Plan,Determinism,Whole}.lean`: length
   controls, refusals and JSON-mutation refusals.
 
-Not on master yet: the Bridge relative closure (`ExternalEvm/TryPanicRelative`,
-`TryPanicSourcePadding`, `TryPanicSourceScanner`), which needs the H7 padding
-and scanner supplier and the vendor overlay. In that theorem the P1/P3
-conjuncts restate supplied premise fields; P1/P3 provenance stays open.
+Earlier core-only checkpoints omitted the Bridge relative closure while H7
+was unpublished. The published-H7 consumers below now close that dependency.
+Their P1/P3 conjuncts still consume supplied premise fields; original-site
+provenance stays open.
 
 Generic Panic body (sched 2026-11-03), core only:
 
 - `Evm/TryPanicSource{Control,Bytes,Body,BodyImage,Execution}.lean`: normalized
   bounded Panic caller/return control; the generic Panic bytes; a proof-only
   body (allocation, six guarded byte writes, raw-memory revert) over the
-  existing `Stmt`/`Prog`; its byte image and its execution. Two single-step
-  glue facts (`TryPanicSourceBody.PutThen`, `AllocateRun`) are parameters, not
-  proved. This is not an association with the compiled code.
-- Still not on master: the Bridge `TryPanicOperational` adapter, which imports
-  the relative closure above.
+  existing `Stmt`/`Prog`; its byte image and its execution. The execution
+  module parameterizes the two single-step glue facts
+  (`TryPanicSourceBody.PutThen`, `AllocateRun`); their owned proofs are in
+  `Backend/TryCall/PanicNormalization.lean` below. This is not an association
+  with the compiled code.
 
 ## Checked try-call producer checkpoint
 
@@ -68,3 +68,34 @@ running Lean and found no confirmed defect; kernel diagnostics separately
 check the statements. Failed drafts and resource measurements remain in the
 worker evidence, including the repaired missing-contract-index elaboration
 failure, with no changed proof limit.
+
+### Published H7 consumers
+
+The optional modules `ExternalEvm/TryPanicSourcePadding` and
+`ExternalEvm/TryPanicSourceScanner` consume the published H7 word padding and
+bounded scanner laws for the retained full runtimes. `TryPanicRelative`
+collects their conditional consequences; it does not establish an EvmYul run.
+`TryPanicOperational.operational_checked` discharges the independent core
+return claim for structurally normalized sites whose emission equals the
+checked known-self plan. Original-site `Normalized` and emission association
+remain separate unproved adapter inputs; installation and same-invocation
+frame provenance remain explicit P3 premises. No original-site
+instance, native provider correctness or complete compiled-EVM correspondence
+is asserted.
+
+### H22 call fields
+
+`Evm/TryPanicCallMetadata.lean` carries mode and invocation on the actual
+intrinsic call consumed by the caller. `Frontend/SolcJson/TryPanicCallMetadata.lean`
+derives the original call's static mode from f's pure callee metadata and
+its site79 tag from the resolved call node, rather than c's nonpayable metadata
+or argument78/function7. No generic lowering/default is changed.
+
+The Bridge `Site.call` is now consumed by `callerForm`; P3 names that same
+record with `call.mode = .static` and `call.invocation = .site 79` hypotheses.
+There is no call-kind type index or detached source-invocation relation.
+The dynamic frame invocation counter remains separate. Current source semantics
+and oracle keys ignore both fields, as the metadata transport/control lemmas
+show; static restrictions and original execution/frame association are not
+inferred from a tag. Original-site normalization, emitted-plan association and
+all other P3 frame/installation/input/resource premises remain open.

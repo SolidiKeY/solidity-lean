@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean:Solidity.Backend.MemoryOps.RawBoolCopyControls.entry_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean:Solidity.Backend.MemoryOps.RawBoolCopyControls.entry_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean:Solidity.Backend.MemoryOps.RawBoolCopyControls.entry_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean:Solidity.Backend.MemoryOps.RawBoolCopyControls.entry_truncated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean:Solidity.Backend.MemoryOps.RawBoolCopyControls.late_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean:Solidity.Backend.MemoryOps.RawBoolCopyControls.padding_and_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean:Solidity.Backend.MemoryOps.RawBoolCopyControls.populated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

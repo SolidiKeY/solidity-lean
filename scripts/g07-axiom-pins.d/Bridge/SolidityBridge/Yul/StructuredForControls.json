@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.model_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.source_eight": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.target_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.zero_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredForControls.lean:SolidityBridge.Yul.StructuredFor.Controls.zero_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

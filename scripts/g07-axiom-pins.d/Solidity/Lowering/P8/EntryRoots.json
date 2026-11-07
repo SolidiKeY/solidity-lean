@@ -1,0 +1,21 @@
+{
+ "Solidity/Lowering/P8/EntryRoots.lean:Solidity.Lowering.P8.EntryRoots.function_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/EntryRoots.lean:Solidity.Lowering.P8.EntryRoots.selected_entry_root_coverage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/EntryRoots.lean:Solidity.Lowering.P8.EntryRoots.special_entry": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/EntryRoots.lean:Solidity.Lowering.P8.EntryRoots.special_entry_body_coverage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

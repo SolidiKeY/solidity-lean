@@ -1,0 +1,89 @@
+[
+  {
+    "command": [
+      "lean",
+      "--version"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.04089736999958404,
+    "aggregate_peak_rss_bytes": 32612352,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/import-integrated-8495/measured-0.log"
+  },
+  {
+    "command": [
+      "lake",
+      "--version"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.04061984200234292,
+    "aggregate_peak_rss_bytes": 36753408,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/import-integrated-8495/measured-1.log"
+  },
+  {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "--tstack=131072",
+      "-o",
+      "/workspace/solidity-lean/.lake/build/lib/lean/Solidity/Frontend/SolcJson/IrImport.olean",
+      "Solidity/Frontend/SolcJson/IrImport.lean"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.32803386300292914,
+    "aggregate_peak_rss_bytes": 305623040,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/import-integrated-8495/measured-2.log"
+  },
+  {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "--tstack=131072",
+      "tests/fullscope-20261104/vt1/IrImportChecks.lean"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.32704577399999835,
+    "aggregate_peak_rss_bytes": 297373696,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/import-integrated-8495/measured-3.log"
+  },
+  {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "tests/fullscope-20261104/vt1/generate-fixtures.mjs"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.9401577169992379,
+    "aggregate_peak_rss_bytes": 213446656,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/import-integrated-8495/measured-4.log"
+  },
+  {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "tests/fullscope-20261104/vt1/verify-fixtures.mjs"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.04080658399834647,
+    "aggregate_peak_rss_bytes": 40878080,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/import-integrated-8495/measured-5.log"
+  },
+  {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "tests/fullscope-20261104/vt1/verify-fixtures.test.mjs"
+    ],
+    "exit": 0,
+    "wall_seconds": 0.061131866998039186,
+    "aggregate_peak_rss_bytes": 55492608,
+    "stop_reason": null,
+    "log": "/workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/import-integrated-8495/measured-6.log"
+  }
+]

@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailure.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailure.bounds_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFailure.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFailure.source_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

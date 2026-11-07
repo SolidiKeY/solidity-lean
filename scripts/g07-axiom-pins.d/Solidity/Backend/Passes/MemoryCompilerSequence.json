@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/MemoryCompilerSequence.lean:Solidity.Backend.Passes.memory_compile_single_block": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

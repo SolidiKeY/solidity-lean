@@ -1,0 +1,84 @@
+--- a/Solidity/Source/Ctor.lean
++++ b/Solidity/Source/Ctor.lean
+@@ -639,8 +639,8 @@
+ /-- The nodes of a tree are its root's and its children's. -/
+ theorem Syn.nodes_eq {c : Cat} (s : Syn c) :
+     s.nodes = s.node :: s.children.flatMap fun x => x.2.nodes := by
+-  cases s <;> simp only [Syn.nodes, Syn.children, List.flatMap_cons, List.flatMap_nil,
+-    List.append_nil, List.append_assoc]
++  cases s <;> apply congrArg (List.cons _) <;>
++    simp only [Syn.children, List.flatMap_cons, List.flatMap_nil, List.append_nil, List.append_assoc]
+ 
+ theorem Syn.node_mem {c : Cat} (s : Syn c) : s.node ∈ s.nodes := by
+   rw [Syn.nodes_eq]
+@@ -681,15 +681,21 @@
+     s.ctor ∈ f.ctors := by
+   cases s with
+   | assembly _ _ b =>
+-    simp only [Syn.excl] at h
+-    split at h <;> cases h
++    change (if isRethrow b then Option.none else Option.some Excl.inlineAssembly) = Option.some f at h
++    cases hb : (isRethrow b) <;>
++      simp only [hb, Bool.false_eq_true,
++        ite_false, ite_true, Option.some.injEq, reduceCtorEq] at h
++    subst h
+     simp only [Syn.ctor, Excl.ctors, List.mem_singleton]
+   | contract _ _ o _ _ =>
+     cases o with
+     | none => simp only [Syn.excl] at h; cases h
+     | some b =>
+-      simp only [Syn.excl] at h
+-      split at h <;> cases h
++      change (if isLiteralBase b then Option.none else Option.some Excl.storageLayout) = Option.some f at h
++      cases hb : (isLiteralBase b) <;>
++        simp only [hb, Bool.false_eq_true,
++          ite_false, ite_true, Option.some.injEq, reduceCtorEq] at h
++      subst h
+       simp only [Syn.ctor, Excl.ctors, List.mem_singleton]
+   | shift op _ _ =>
+     cases op <;> simp only [Syn.excl, Option.some.injEq, reduceCtorEq] at h
+@@ -698,26 +704,35 @@
+   | assign op _ _ =>
+     cases op <;> simp only [Syn.excl, Option.some.injEq, reduceCtorEq] at h
+     subst h
+-    simp only [Syn.ctor, Excl.ctors, List.mem_cons, List.mem_singleton, true_or, or_true]
++    simp only [Syn.ctor, Excl.ctors, List.mem_cons, true_or, or_true]
+   | litUnit _ u =>
+     cases u <;> simp only [Syn.excl, Option.some.injEq, reduceCtorEq] at h
+     subst h
+     simp only [Syn.ctor, Excl.ctors, List.mem_singleton]
+-  | pragma _ =>
+-    simp only [Syn.excl] at h
+-    split at h <;> cases h
++  | pragma words =>
++    change (if words == ["experimental", "solidity"] then Option.some Excl.removedGenericSolidity else Option.none) = Option.some f at h
++    cases hb : (words == ["experimental", "solidity"]) <;>
++      simp only [hb, Bool.false_eq_true,
++        ite_false, ite_true, Option.some.injEq, reduceCtorEq] at h
++    subst h
+     simp only [Syn.ctor, Excl.ctors, List.mem_singleton]
+   | modifier _ _ _ _ o =>
+     cases o with
+     | none => simp only [Syn.excl] at h; cases h
+     | some b =>
+-      simp only [Syn.excl] at h
+-      split at h <;> cases h
++      change (if b.placeholders == 0 then Option.some Excl.invalidModifierBody else Option.none) = Option.some f at h
++      cases hb : (b.placeholders == 0) <;>
++        simp only [hb, Bool.false_eq_true,
++          ite_false, ite_true, Option.some.injEq, reduceCtorEq] at h
++      subst h
+       simp only [Syn.ctor, Excl.ctors, List.mem_cons, true_or]
+   | uncheckedItem b =>
+-    simp only [Syn.excl] at h
+-    split at h <;> cases h
+-    simp only [Syn.ctor, Excl.ctors, List.mem_cons, List.mem_singleton, true_or, or_true]
++    change (if b.placeholders == 0 then Option.none else Option.some Excl.invalidModifierBody) = Option.some f at h
++    cases hb : (b.placeholders == 0) <;>
++      simp only [hb, Bool.false_eq_true,
++        ite_false, ite_true, Option.some.injEq, reduceCtorEq] at h
++    subst h
++    simp only [Syn.ctor, Excl.ctors, List.mem_cons, true_or, or_true]
+   | _ => simp only [Syn.excl, reduceCtorEq] at h
+ 
+ end Solidity.Source

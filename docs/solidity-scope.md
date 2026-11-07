@@ -11,15 +11,28 @@ assert that every target feature already imports, executes, or proves correctly.
 
 ## Compiler completion target
 
-The user-requested endpoint is a complete compiler with kernel-checked proofs
-for every feature except explicit user exclusions. The
+The user-requested endpoint is a complete, optimizing compiler with
+kernel-checked proofs for **every** feature: since the
+[full-scope decision](#full-scope-decision-2026-11-04) there are no language
+exclusions. The
 [full compiler roadmap](coverage-plan.md) owns implementation groups, source
 semantics, admission/lowering coverage, backend/EVM proofs and composition.
 Existing `partial`/`missing` statuses, shape refusals and proof limits are work
-to finish, not permission to narrow the target. Its initial scope audit must
-reconcile recorded exclusions with user authorization; no new exclusion or
-assumption is introduced by scheduling a group. The former environment/log
-extension proposals do not change the profile without explicit approval.
+to finish, not permission to narrow the target. No new exclusion or
+assumption is introduced by scheduling a group.
+
+## Full-scope decision (2026-11-04)
+
+The user asked to remove the limitations and cover everything, with an
+optimizer, and with proofs that solc's EVM output behaves like this
+semantics. This **withdraws all 30 exclusions** confirmed by G00 Q1 and the
+refusals of YQ2 and YQ7 below. The work, the proposed decisions D1–D6
+(compiler-dependent values read the compiled artifact, exact gas, solc's
+physical layout, non-memory-safe assembly, the premises that stay, the
+optimizer's correctness relation) and the parallel lanes are in
+[full-scope.md](feature-work/full-scope.md). The manifest and `Unmodelled`
+keep reporting actual admission until each group lands; a row still marked
+`exclude` is open work, not a boundary.
 
 ## Artifacts and separate lists
 
@@ -73,7 +86,7 @@ manifest and the G01 statements.
 
 | Question | Decision |
 |---|---|
-| G00 Q1 — the 30 recorded exclusions | All 30 confirmed as approved exclusions (for example assembly/Yul, gas, `delegatecall`, low-level calls, selfdestruct, salted creation, raw code, physical layout, logs, extra block/transaction fields). |
+| G00 Q1 — the 30 recorded exclusions | Superseded by the [full-scope decision](#full-scope-decision-2026-11-04). Originally: all 30 confirmed as approved exclusions (for example assembly/Yul, gas, `delegatecall`, low-level calls, selfdestruct, salted creation, raw code, physical layout, logs, extra block/transaction fields). |
 | G00 Q2 — premises of the 23 `abstract` rows | Approved: opaque hashes and `ecrecover`, and `msg`/`block`/`this`/balance values as universally quantified inputs. Not approved: `worldAssumptions` and the payment-acceptance boolean, which must be replaced or proposed again. The no-callback reading must become a proved special case (not yet proved; G01 Q4). The remaining abstract rows follow G01 Q4 and Q8. |
 | G00 Q3 — EVM fork | Osaka, for the pinned semantics and the compiled bytecode. |
 | G00 Q4 — settings | Revised in the second round below: solc's two pipelines only. The frozen profile is solc 0.8.38; 0.8.34 fixtures are SolKey compatibility checks only. |
@@ -192,7 +205,7 @@ remain necessary even without an EVM. In particular:
 **Transient values are an implementation task, not inherently an exclusion.**
 A separate logical store can reset at transaction end, persist across
 reentrant frames and roll back at failing calls. Physical transient slot
-access and gas remain excluded. The current importer/interpreter has no
+access and gas are X06 and X03 work. The current importer/interpreter has no
 complete transient-store implementation; accepting its AST as ordinary
 persistent state would be unsound.
 
@@ -209,7 +222,7 @@ The typed contract-world API and restricted factory/library source commands
 provide creation, creation catches and linked caller-storage execution
 ([supported fragments and limits](feature-work/contract-world.md)). General
 world-aware `solc_import` statements remain missing. Salt-based deployment
-remains excluded.
+is X05 work.
 
 ## What requires explicit abstraction
 
@@ -233,7 +246,12 @@ not an EVM theorem; [G00 Q2](#user-decisions-2026-10-29) requires it to become
 a proved special case. Resource fuel, bounded call expansion and mathematical
 divergence are distinct from real EVM gas and stack exhaustion.
 
-## What is deliberately outside this profile
+## Former exclusions, reopened (2026-11-04)
+
+These families were outside the profile until the
+[full-scope decision](#full-scope-decision-2026-11-04); each is now work owned
+by a group in [full-scope.md](feature-work/full-scope.md). Until it lands,
+admission still refuses it with the diagnostic below.
 
 `Unmodelled` has finite constructors, including a typed `blockField` payload.
 `BlockField` lists coinbase, difficulty, prevrandao, number, gaslimit, chainid,
@@ -243,30 +261,28 @@ accidentally be included in that constructor.
 - General inline assembly/Yul, including memory-safe flags and every listed
   Yul opcode. The separately recognized whole-buffer revert idiom is an
   explicit exception, validated by shape and declaration identity.
+  Reopened by VY1–VY5 and X07.
 - `gasleft`, gas options, exact gas forwarding/stipends/refunds and real
-  machine resource limits.
+  machine resource limits (X03).
 - Raw `msg.data`/`msg.sig`, byte-oriented fallback dispatch/output, arbitrary
   low-level call/return bytes, `delegatecall` and low-level `staticcall`.
-  Typed calldata slices and caught revert bytes are separate supported targets.
+  Typed calldata slices and caught revert bytes are separate supported
+  targets (X04).
 - `selfdestruct`, `create2` salt/address rules, address code/codehash,
   arbitrary creation/runtime bytecode execution, physical storage/transient
   slots and packing,
-  custom `layout at`, and raw memory addresses/layout.
-- Observable logs, topics, event ordering and log gas. Event arguments must
-  still execute, including their side effects and failures. Erasing the log
-  only supports properties that do not observe logs.
+  custom `layout at`, and raw memory addresses/layout (X05, X06).
+- Observable logs, topics, event ordering and log gas (X07).
 - The listed extra block fields, block/blob hashes, `tx.origin` and
-  `tx.gasprice`. Most extra fields are feasible environment extensions in a
-  different profile; their exclusion here is a deliberate boundary, not a
-  claim that modeling them is impossible. `block.slotnum` is Amsterdam-gated;
-  historical difficulty/prevrandao interpretation is fork-dependent.
+  `tx.gasprice` (X02). `block.slotnum` is Amsterdam-gated; historical
+  difficulty/prevrandao interpretation is fork-dependent.
 
 Diagnostics are stable structured names such as `solidity.inlineAssembly`,
 `solidity.rawCalldata`, and `solidity.blockField.number`, with the exact
 one-line reason stored in the manifest and returned by `Unmodelled.reason`.
 The Lean theorems `Unmodelled.excluded` and `Feature.exclusion_complete`
 (`Language/FeatureInfo.lean`) prove that every diagnostic denotes an excluded feature and every excluded
-feature has a diagnostic. `Feature.all_complete` proves the list enumerates
+feature has a diagnostic; X01 shrinks the type as the families land. `Feature.all_complete` proves the list enumerates
 the feature type.
 
 ## A subset of actual Solidity syntax
@@ -348,6 +364,28 @@ updates; the checker never assigns newly discovered syntax a default scope.
 The normal CI check verifies generated-file consistency without downloading
 upstream sources.
 
+
+## Inline assembly decisions (2026-10-31)
+
+The human answered “Approve these choices for all five lanes” to the
+coordinator's YQ1–YQ7 question. These decisions authorize implementation;
+they do not establish admission or discharge dependency gates.
+
+- YQ1: tiers A–C through lanes VY1–VY5 are authorized.
+- YQ2: refuse gas/msize/pc and own-code codesize/codecopy at admission.
+- YQ3: allow nondeterministic allocation addresses satisfying documented
+  layout; prove refinement and explicitly amend the G01 allocation contract.
+- YQ4: preserve dirty high bits as solc does in each pipeline; record differences.
+- YQ5: Yul calculus rules are Lean-only, marked in the rule map.
+- YQ6: expose both Yul logs and Solidity emit as observations; amend G01.
+- YQ7: refuse non-memory-safe blocks; preserve the pre-existing canonical
+  whole-buffer rethrow exception.
+
+VY2 preparation is recorded in
+[inline-assembly-vy2.md](feature-work/inline-assembly-vy2.md).
+The current manifest reports actual admission. Reopening a row requires
+reviewed implementation and evidence; compiler-dependent observations and
+fork exclusions remain in force.
 ## Inline assembly decisions (2026-10-31)
 
 The human requested one CloudVM per lane VY1–VY5 to solve the inline assembly
@@ -370,16 +408,49 @@ The human answered exactly:
 - YQ7: refuse non-memory-safe blocks. Preserve the existing canonical rethrow
   behavior as the documented pre-existing exception.
 
-These are implementation directions, not evidence of implemented support. The
+YQ2 and YQ7 are superseded by the
+[full-scope decision](#full-scope-decision-2026-11-04) (X07, decisions D1 and
+D4). These are implementation directions, not evidence of implemented support. The
 current manifest continues to report actual admission; affected exclusion rows
 are reopened only by reviewed implementation with its evidence and decision
-reference. Compiler-dependent observations remain excluded. Dependency gates,
+reference. Dependency gates,
 existing worker ownership and validation still apply. The original launch
 request did not authorize merging or pushing this new batch. On 2026-10-31,
 the human subsequently requested inspection and integration of completed work
 from Codex Cloud VMs, worktrees and branches, with delivery to `origin/master`.
 That authorizes serial integration after the existing reviews and validation;
 it does not establish that any assembly implementation is complete.
+
+VY5's [composition backfill](feature-work/inline-assembly-vy5.md)
+changes no admission, observations, feature status, proof budget or prerequisite.
+
+### VY5 human amendments relayed 2026-11-02
+
+H1, resources (verbatim): **“Free disk + 4 GiB reserve”**. The human permits
+removal of VY5-owned stopped containers/regenerable duplicate data; latest sealed
+handoff and all commits remain preserved. RAM reserve is4GiB; hard12GiB cap and
+no-swap remain. Disk headroom is assessed after cleanup, without single-MB holds.
+
+H3, optimized-rethrow-journal-contract (verbatim): **“Per-pipeline”**. Implement a
+reviewed pinned compiler-aware per-pipeline trace contract and validate fresh:
+optimized viaIR omits reverted persistent99/8 stores; record the difference,
+consistent with YQ4. This does not waive bytes/world/log/memory/rollback checks,
+approve compiler-dependent source observations or prove G01/compiler adequacy.
+Original strict report/validator and failed exits remain immutable. See
+`tests/yul-composition/rethrow-trace-contract.json` and the VY5 lane handoff.
+VY5-DISK1 is resolved by H1; no filesystem growth/migration requested.
+
+### H3 continuation: LIB1 and unchecked-add (2026-11-02)
+
+The coordinator relayed that human H3 **“Per-pipeline”** also answers
+LIB1/library-viaIR-error-1834 and unchecked-add. Approved unchecked-add
+expectations are legacy512 and viaIR0; LIB1 requires a reviewed per-pipeline
+library-codegen contract and fresh validation. VY1 owns both implementations.
+VY5 will consume their exact committed results; it does not duplicate the owner,
+re-ask the decisions, assume package availability or mark these gates passed.
+Their status is pending committed producer evidence, not pending human choice.
+Earlier unanswered wording remains historical. Other original decisions/gates
+remain unchanged.
 
 ## Automation lane decisions (2026-10-31)
 
@@ -396,3 +467,95 @@ loops and adds a warning naming the loop, with no new option. These answers
 close no proof obligation and grant no broader scope. Decisions c, c-prime,
 d, e3-prime and e3-double-prime remain in force: undecidable or unprovable
 classes remain unknown; exact validity and hash premises remain unchanged.
+
+## Automation lane approvals (2026-10-31)
+
+For batch `solidity-automation-20261031`, VA1 records the exact human
+answers supplied in the originating chat and repeated in the worker launch:
+
+- AQ1 (start M7-next and the M8 leftovers): "Yes, start both lanes".
+- AQ2 (keep literal-loop unrolling and warn): "Yes, keep unrolling and warn".
+
+This authorizes VA1 AU01/AU02 and VA2 AU03/AU04 in isolated checkouts.
+VA1 owns Decision theorem/coverage/residue, AU02 pipelines, Decision example
+splits and M7-next documentation. It does not authorize AU05/AU06, compiler
+work, publication, pushing or merging. Decisions c, c′, d, e3′ and e3″ and
+the existing validity/hash premises remain unchanged. This approval record
+is setup evidence, not an implementation or validation claim.
+
+
+## VA1-Q1: human-authorized boundary revision (2026-11-01)
+
+Original AU02 requirement, retained for provenance: unconditional
+`Fml.Covered ⊆ Fml.inTarget` on program-free leaves. The retained kernel
+counterexample is committed at `8bbd5606e55f6ceadcbe611c2475370466d88ae9`.
+
+Exact question asked in coordinator `01a19286`:
+
+> VA1 kernel-checked a counterexample to the requested unconditional Covered implies inTarget inclusion. May it replace that false requirement with a precise certified boundary and retained counterexample, leaving both predicates unchanged? Independent work is already progressing.
+
+Exact direct human answer:
+
+> Authorize the certified boundary revision
+
+QuestionItemId:
+`["request_user_input_async","call_4a12e56cd98f422e8a2aec9a4282ef73",0]`.
+Durable original-batch receipt on the coordinator host:
+`decisions/20261101-approved-va1-decision/human-decision.json`.
+This worker records the direct human receipt supplied in the original thread;
+it does not claim that coordinator-host path is a local VM artifact.
+
+This supersedes only the false unconditional inclusion obligation. The revised
+obligation is a precisely stated, kernel-proved supported boundary, with explicit
+quantifiers/signatures, inhabited positive and negative controls, public
+proof/axiom reports, the exact supported class and what remains outside it.
+Both `Covered` and `inTarget` definitions remain byte-for-byte unchanged.
+The old inclusion is not presented as proved under a vacuous/circular or
+stronger precondition. No semantic/default/test/refusal/profile/pin/observation
+or budget change, new axiom or unfinished proof is authorized. Every other
+AU01/AU02/backfill/full-validation obligation remains. Earlier decisions,
+checkpoints, failures and seals are preserved; publication is not authorized.
+
+
+### VA1-Q2 / H6 performance-only authorization
+
+Coordinator message received on 2026-11-02 reports the human decision verbatim:
+H6 (VA1-Q2): "VA1 splits it".
+
+This resolves only VA1-Q2's ownership hold for a narrow performance-only split
+of TypeExamples and necessary registrations. Statements, observations and all
+proof/resource/test budgets must be preserved. It does not authorize a semantic
+repair, changed expectations, new premise/exclusion, compiler-lane expansion,
+push/merge/publication, or changes to the original full-goal requirements.
+AQ1/AQ2 and the approved VA1-Q1 boundary revision remain as recorded above.
+The message identifies Claude Code as coordinator and retires the previous
+Codex listener/auditor; no VM/branch/goal identity is changed by this receipt.
+
+
+### VA1 registry scheduling update — 2026-11-02
+
+The coordinator's user message assigns VA1 sole writing of Calculus files for its
+current AU01 item, then AU02. AU05 is additionally assigned after AU02, conditional
+on verified integration of VA2 ae1a1d56 and rebasing onto master. The announced master
+is a3205e6a1a1be1471fa0dc91688eca032d8acd85; fetch/ancestry/code verification is required.
+AU05 must use actual master Hash code and copy-recovery's SS-CP5-HASHED typed premise.
+AU03/AU04, G46.05 and SS-CP5-HASHED production are not reassigned. Before each new item,
+fetch origin master and reuse actual ready deliveries. This records queue ownership,
+not an exclusion, premise, profile or semantic change. AQ1/AQ2, Q1's certified-boundary
+revision and H6's exact “VA1 splits it” authorization remain as recorded above.
+No AU05 work or further walk change has started; the announced987/1024 memory-loop
+visits and unchanged300s timing guard must be preserved and revalidated when relevant.
+
+### VA1 H1 resource recovery (relayed 2026-11-03)
+
+The coordinator relayed the human resource decision H1 verbatim:
+
+> Free disk + 4 GiB reserve
+
+This authorizes the task-owned host-available admission/monitor reserve of
+4 GiB and cleanup of owned regenerable data. The aggregate child cap remains
+12 GiB, swap remains zero, and Lean remains serial with explicit `-j1` and
+`LEAN_NUM_THREADS=1`. No semantic, premise, observation, proof, test or timeout
+budget changes follow from this resource authorization. Existing AQ1/AQ2, Q1
+and H6 records remain unchanged. Cache reclamation was attempted through both
+provided kernel interfaces and denied permission; the failures are retained.

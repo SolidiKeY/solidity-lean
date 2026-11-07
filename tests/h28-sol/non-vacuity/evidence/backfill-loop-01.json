@@ -1,0 +1,124 @@
+{
+  "git_head": "8f6e7e626cd5d2b6b444616a5a17294ff29cc605",
+  "git_branch": "codex/solidity-h28-sol-20261104/non-vacuity",
+  "env_overrides": {},
+  "cache_reclaims": [],
+  "wrapper_command": [
+    "python3",
+    "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/measure.py",
+    "/workspace/solidity-lean/tests/h28-sol/non-vacuity/evidence/backfill-loop-01.rusage.json",
+    "lake",
+    "env",
+    "python3",
+    "tests/h28-sol/non-vacuity/kernel.py",
+    "--module",
+    "Solidity.Assurance.NonVacuityH28.LoopContracts",
+    "--fresh"
+  ],
+  "rusage": {
+    "command": [
+      "lake",
+      "env",
+      "python3",
+      "tests/h28-sol/non-vacuity/kernel.py",
+      "--module",
+      "Solidity.Assurance.NonVacuityH28.LoopContracts",
+      "--fresh"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 1.8507693889987422,
+    "children_user_seconds": 1.5120369999999999,
+    "children_system_seconds": 0.334937,
+    "children_max_rss_kib": 799956,
+    "children_major_faults": 0,
+    "children_minor_faults": 134340
+  },
+  "rusage_file": "tests/h28-sol/non-vacuity/evidence/backfill-loop-01.rusage.json",
+  "rusage_sha256": "32675efb377259626821d9f517f9cb4ab60541bb7f418e6c5d112669756bbd77",
+  "runner_sha256": "82d93eda9d261faa5450c45fa29ea000781f554db2667e6579a016f2d7c39809",
+  "initial_memory_events": {
+    "low": 0,
+    "high": 0,
+    "max": 0,
+    "oom": 0,
+    "oom_kill": 0,
+    "oom_group_kill": 0
+  },
+  "final_memory_events": {
+    "low": 0,
+    "high": 0,
+    "max": 0,
+    "oom": 0,
+    "oom_kill": 0,
+    "oom_group_kill": 0
+  },
+  "headroom_method": "estimated min(host MemAvailable, cgroup max-current+max(0,inactive_file-dirty-writeback))",
+  "initial_vm_headroom": {
+    "limit": 17179869184,
+    "current": 9048055808,
+    "inactive_file": 3401138176,
+    "file_dirty": 45056,
+    "file_writeback": 0,
+    "reclaimable_file_estimate": 3401093120,
+    "host_available": 17926434816,
+    "cgroup_available": 11532906496,
+    "available": 11532906496
+  },
+  "minimum_vm_available_bytes": 11374616576,
+  "input_sha256": {
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean": "d5dc65f12cb87285126a64e1568a315dcacf95beb10e2d3337aa0647657eb8bd",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/JointWorld.lean": "48039411d0a2a4564cb973dbcd4c7167e3f4f739b51be903500b0b7f7db9354c",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/HeapQueries.lean": "50b42c0cf74da8483e94963998007407699827ce68ebe525dd4fe1807e67f3bd",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/MemoryControls.lean": "e1513674823379e0d48811c2ed85e833b45fea3fabe5a124566fcac35a79f8a4",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Families.lean": "a788d401524b6b84282d823693167f2a7eb5b681866d9f457e639ce7dd1e2a16",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/ScalarPremises.lean": "2ed06295f8f319713973356f6b5251d186ce21f1a654933371a90a83be0781ac",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CheckedFamilies.lean": "80ac292dac21fbb44e652e4cda5b44ab7e45464685829e909222439523ff68e7",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LogicalGates.lean": "18a0edf9be3c293f9215acb212d7d334ff44f520a704136b7a9ea4da9fe2b18b",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/AllocatorGrowth.lean": "31aa4870ff4dc1dce6eab9f55e728abc65c22faff0b4f383b4a18324a813105b",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/VacuityControls.lean": "5a3bb217cf4afa4abf311dbe211cc2f8bc2875626ba52e4ef05f2af4181aee6a",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Storage.lean": "56b4bae3ffc1b46e8436c648b63e67a56ec709a17482b7b8e5df9677caf8f535",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CallbackFrames.lean": "17f50bd07055241666dc9a65fee040e217b3a46e1d06f2eb67d83f00cfc44f79",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/MemoryInputs.lean": "09f5da2c46af38b7c4ac523545ef3abf168102339b5643dc357a0f837407cc4f",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Originals.lean": "79c55443a210676ba26c726641804ad99532c4a0315cfb767e59ccc46b8e3b5b",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/CheckedObjects.lean": "5fe46db514397dac6c2622d346e725a56cdea9fe153c44036834f33f05d4c0c5",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean": "0d47b7e39db5fc53d0dde19881bd07043d74a0dd7a4f7fcd7782aca289ec94a5",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/PrimitiveFamilies.lean": "a03b5c1dd4e96dee35a0311625eb57cb217d50fed265a33e073e0400bcd1e8b3",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Calculus.lean": "58319601b367c192d157bc933413b12c314b5065b387150f1ce7dd4df4b8e69d",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Signatures.lean": "34ba71aad7f5eb0fe894b43ad620c9049f086a18a19b465c5019df4f7857c05a",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/TailSensitive.lean": "958428bfc16f03e6f466fe99dfb993ef786c78b3424e5808c26be6404a9e197f",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Locals.lean": "76961df502ebc01aee974ad8df14f824baed9578c9d3db0e8bdf03b4ae4015d6",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Outcomes.lean": "f0d5e69e32c77bf9d746af974405936bc9fd9422d48296d2f4747246a098046a",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Preconditions.lean": "67784d0377ba4db803b7b91e8110545a0e753fc75c18791ea5f5eb649e7bc011",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Fragile.lean": "c43a9c57dc5d45d8f34d8527638059043e763836017f730195eaccac898a72cb",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Callbacks.lean": "625b37c9fd5a0b4523a4f192c0572a27da8b17b532119f026a220cf40e8ad720",
+    "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Environments.lean": "4637b20358cd828047c09258d158d29689043a28a542af5a7c8b0c9519aaaf0d",
+    "tests/h28-sol/non-vacuity/kernel.py": "a8b5e8ace94c566e75a80dba34986d69bab96461ff82577daff6fac592233645",
+    "tests/h28-sol/non-vacuity/runtime/measure.py": "f1620c519d318b39e1d43dc0396c387ec9423e7e79c6841396e908e724892bfa",
+    "tests/h28-sol/non-vacuity/runtime/workers.py": "3d790417a36f117c1e4bcbbf4eb230655d083059cabb9a65a40a7ca39ac3d775"
+  },
+  "log_sha256": "f1c044bb03ce9347608a1e04f42ee2b1d00f6431aedcd9af8f812b513257ea0c",
+  "command": [
+    "lake",
+    "env",
+    "python3",
+    "tests/h28-sol/non-vacuity/kernel.py",
+    "--module",
+    "Solidity.Assurance.NonVacuityH28.LoopContracts",
+    "--fresh"
+  ],
+  "container": "h28-non-vacuity-runtime",
+  "exit": 0,
+  "elapsed_seconds": 2.131970746006118,
+  "sampled_peak_aggregate_rss_bytes": 875372544,
+  "cgroup_memory_peak_bytes": 11908792320,
+  "limits": [
+    "12884901888",
+    "0"
+  ],
+  "stop": null,
+  "worker_snapshots": [
+    [
+      "785112 lean -j1 --tstack=131072 --root=/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean -o /workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/build/lib/Solidity/Assurance/NonVacuityH28/LoopContracts.olean /workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean"
+    ]
+  ]
+}

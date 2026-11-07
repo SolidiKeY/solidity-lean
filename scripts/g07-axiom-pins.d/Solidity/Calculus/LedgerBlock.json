@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/LedgerBlock.lean:Solidity.Decide.ledgerBlockReduction?_isSome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/LedgerBlock.lean:Solidity.Decide.LedgerBlockReduction.verify": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

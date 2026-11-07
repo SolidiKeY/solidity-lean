@@ -1,0 +1,140 @@
+{
+  "status": "PROVED_METADATA_COMPONENT_JOINT_MODEL",
+  "checked_head": "4ca6c67ee1c0e26616a74e7350e86501e6bec5a3",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/CallableMetadataJoint.lean": "2e1d05ecbd3f0323b41506a847f74a2644d503bfb3c4e73fce4f64a7cd8f82e9",
+    "Solidity/Lowering/V08/CallableMetadata.lean": "15fad62fc7f10cc948cf317e7dc234069bc73782ad5c8441c0ba8740669e62d4",
+    "Solidity/Lowering/V08/MetadataControls.lean": "0bce76229d647ad1f83d68fa08396d048d727adf30811963a65fd23f76b1e7d2"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.CallableMetadata.convert_originTypes",
+    "Solidity.Lowering.V08.CallableMetadata.paramsOf_unique",
+    "Solidity.Lowering.V08.CallableMetadata.matched_names_length"
+  ],
+  "joint_fixture_facts": 8,
+  "additional_fixture_data": [
+    "function declaration membership",
+    "error declaration membership",
+    "function signature"
+  ],
+  "new_joint_model_families": 1,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/CallableMetadataJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.248,
+    "peak_sampled_aggregate_rss": 700428288,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "reviews": "Independent read-only finder/skeptic accepted same-environment fits/declarations/conversion metadata, nonempty target binding and ordering controls; no findings, no reviewer tests/builds.",
+  "limitations": [
+    "Existing abstract source unit; metadata does not prove Source function execution or deployment admission.",
+    "Actual target argument binding is not source/target body preservation, ABI or compiler/H68 adequacy.",
+    "Initial ambiguous Ctx annotation failure retained; corrected Solidity.Ctx changes no public statement or budget.",
+    "Complete census-fidelity and full-family timing remain open."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "54b14c8f4d503bd4a93b82acd096397e61c76aaf414d4245aadc8838542af53f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-first/console.log",
+      "bytes": 165,
+      "sha256": "c750306028857222e935565eab2f977244d2fcd959cc3e01aeed9b290775fec0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-first/failed-source.lean",
+      "bytes": 3664,
+      "sha256": "9d70e713778d069a0a643a07fee6f289f40d2726dbbac0de9a0b38c150d54886"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-first/gates/1.log",
+      "bytes": 13168,
+      "sha256": "63ae40ba92dfca56704f593a7e9f69fd4f8a7b355f48977b1b235a89dc06d4b2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-first/gates/HEAD",
+      "bytes": 41,
+      "sha256": "3f7b7b33b5a7a51795459b24bda6094a3bda5328a15623d595258308118db492"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-first/gates/gates.tsv",
+      "bytes": 256,
+      "sha256": "0de46969a29f9f5bcb558459eb46d02a91fa80cef35d8451783789c0a695134c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-first/results.json",
+      "bytes": 401,
+      "sha256": "0ac2a1344fcac0137bd479e021ff0bc933a12c121a3a658f0e70bcb374887735"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-final/console.log",
+      "bytes": 165,
+      "sha256": "a47b92d3a4647b9d9b688239c903edbbf57da1e86c5dd42534971841c998fbad"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-final/gates/1.log",
+      "bytes": 12499,
+      "sha256": "04c762f9d255e82626b34a59b350a66be75791ea8841d5398d9af9677e4b4cb3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-final/gates/HEAD",
+      "bytes": 41,
+      "sha256": "3f7b7b33b5a7a51795459b24bda6094a3bda5328a15623d595258308118db492"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-final/gates/gates.tsv",
+      "bytes": 256,
+      "sha256": "c436d60fef02f08e65e9da7980e0e36190eef6f08b192ac80201c1b2bfa24995"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-metadata-joint-20261107-final/results.json",
+      "bytes": 401,
+      "sha256": "25a2edc40610d04e5f226af2a70da2942172241ee9c8b599d0c07aaebf9f716c"
+    }
+  ],
+  "checkpoint_audit": {
+    "scope": "Complete review of this component checkpoint only; not complete original assignment or module-wide statement-fidelity acceptance.",
+    "source_and_evidence_verification": "All three source bindings and all 13 evidence files verified by SHA256 and recorded byte size against adopted master 902e87762e5c3fb863bc3a592892f2dc09dfa979.",
+    "joint_fact_partition": {
+      "same_unit_membership": 2,
+      "function_signature": 1,
+      "identity_argument_fit": 1,
+      "heterogeneous_error_fit": 1,
+      "declared_error_parameters": 1,
+      "heterogeneous_argument_fit": 1,
+      "matching_target_names": 1
+    },
+    "law_hypotheses": "convert_originTypes uses actual typed argument lists and fit proofs; paramsOf_unique uses fitsParams and paramTys for the same error declaration/environment; matched_names_length uses the same nonempty target arguments and namesMatch proof.",
+    "execution_boundary": "actual_binding evaluates target Args.evalT only. No Source.callInternal evaluation, Source execution/admission, body correspondence or compiler certificate is proved.",
+    "inherited_controls": [
+      "same_arity_wrong_names combines existing names/wrong_names with equal lengths",
+      "wrong_binding_refused reuses wrong_argument_order",
+      "heterogeneous_order_refused reuses wrong_error_order"
+    ],
+    "new_execution_evidence": 0,
+    "new_joint_model_families": 0,
+    "new_full_statement_fidelity_acceptances": 0,
+    "new_lean_run": false
+  }
+}

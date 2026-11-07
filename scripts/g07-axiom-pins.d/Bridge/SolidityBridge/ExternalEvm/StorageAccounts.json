@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/StorageAccounts.lean:Solidity.Evm.StorageSlots.account_read_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/StorageAccounts.lean:Solidity.Evm.StorageSlots.storage_read_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

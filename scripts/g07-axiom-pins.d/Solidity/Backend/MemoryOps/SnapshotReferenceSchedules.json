@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.boundary33": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.fixed_cycles": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.fixed_intermediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.reference_cycles": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.reference_final": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotReferenceSchedules.lean:Solidity.Backend.MemoryOps.ReferenceScheduleControls.reference_intermediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

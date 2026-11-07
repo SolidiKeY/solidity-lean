@@ -1,0 +1,43 @@
+{
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.effectfulHeads_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.failedHead_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.false_not_certified": [
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.false_still_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.hypothesis_projection": [
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.memoryAlias_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.pointerPanic_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.unassigned_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/FunctionDispatch.lean:Solidity.Upstream.Group05.wrongByte_panics": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

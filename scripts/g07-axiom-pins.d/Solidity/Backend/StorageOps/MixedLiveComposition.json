@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/MixedLiveComposition.lean:Solidity.Backend.StorageOps.MixedLiveComposition.live_root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -67,6 +67,13 @@ theorem Prepared.complete {X scope tier outside localNames body}
     · next reason failed => cases (failed.symm.trans policyEq)
     · rfl
 
+/-- At fixed original syntax and supplied namespaces, checker completeness
+determines the entire preparation certificate. This does not establish the
+Source/JSON provenance of those supplied inputs. -/
+theorem Prepared.unique {X scope tier outside localNames body}
+    (first second : @Prepared X scope tier outside localNames body) : first = second := by
+  exact Except.ok.inj (first.complete.symm.trans second.complete)
+
 theorem prepare_iff {X} (scope : Scope X) (tier : Tier) (outside localNames : List String)
     (body : Syn (.list .yulStmt)) :
     (prepare scope tier outside localNames body).isOk = true ↔
@@ -84,6 +91,12 @@ def Prepared.code {X scope tier outside localNames body}
     (p : @Prepared X scope tier outside localNames body) :
     Stmt [] X ClosedSyntax.rootControl 0 :=
   p.typing.code
+
+/-- Fixed preparation inputs determine the extracted intrinsic statement. -/
+theorem Prepared.code_unique {X scope tier outside localNames body}
+    (first second : @Prepared X scope tier outside localNames body) :
+    first.code = second.code := by
+  exact congrArg Prepared.code (Except.ok.inj (first.complete.symm.trans second.complete))
 
 /-- The concrete closed tier-A instance constructs the ACTUAL existing word
 program/profile, not a parameterized promise about later semantics. -/
@@ -114,6 +127,14 @@ def Prepared.wordRun {scope : Scope []} {outside localNames body}
     (p : Prepared scope .A outside localNames body) (fuel : Nat) :=
   Closed.evalStmt fuel WordSyntax.emptyModel.environment WordSyntax.emptyModel.words
     p.wordProgram.code p.wordProgram.words Fin.elim0
+
+/-- Equal preparation inputs determine the actual closed-word result at
+each fixed fuel, including failure to complete. No termination is asserted. -/
+theorem Prepared.wordRun_unique {scope : Scope []} {outside localNames body}
+    (first second : Prepared scope .A outside localNames body) (fuel : Nat) :
+    first.wordRun fuel = second.wordRun fuel := by
+  exact congrArg (fun p => Prepared.wordRun p fuel)
+    (Except.ok.inj (first.complete.symm.trans second.complete))
 
 theorem Prepared.word_rule_exists {scope : Scope []} {outside localNames body}
     (p : Prepared scope .A outside localNames body) (mode : Solidity.Modality)

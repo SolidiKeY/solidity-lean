@@ -1,0 +1,17 @@
+# Historical full benchmark files remain on VM, outside this increment.
+/*
+!/.gitignore
+!/README.md
+!/measure.py
+!/scope_policy.py
+!/test_scope_policy.py
+!/run_controls.py
+!/test_controls.py
+!/ContextControls.lean
+!/ScalarControls.lean
+!/ChainControls.lean
+!/ProveZeroBaseline.lean
+!/ProveZeroCandidate.lean
+!/ChainRefusalBaseline.lean
+!/ChainRefusalCandidate.lean
+!/bulk-data-manifest.json

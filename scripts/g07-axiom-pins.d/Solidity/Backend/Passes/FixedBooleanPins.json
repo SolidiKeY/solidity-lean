@@ -1,0 +1,187 @@
+{
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.compilation_pair_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.actual_capture_prefix_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.actual_source_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.allocated_prefix_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.both_complete_source_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.both_complete_target_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.capture_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.failure_not_divergence_or_panic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.final_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.fixed_program_recognized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.fresh_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.fresh_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.inhabited_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.initialize_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.initialized_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.initializer_fragment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.initializer_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.middle_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.opposite_branch_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.populated_stack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.population_fragment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.population_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.population_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.population_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.reached_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.reached_population": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.receiver_prefix_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.receiver_recognized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.runtime_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.skipped_capture_discriminated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.tail_corruption_discriminated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.wrong_order_complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.wrong_order_discriminated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FixedBooleanPins.lean:Solidity.Backend.Passes.FixedBooleanSequence.wrong_value_discriminated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

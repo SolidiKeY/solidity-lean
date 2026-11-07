@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Checks/BlockTyping.lean:Solidity.Yul.ScopedBlockTyping.BlockD.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/BlockTyping.lean:Solidity.Yul.ScopedBlockTyping.CaseD.result_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/BlockTyping.lean:Solidity.Yul.ScopedBlockTyping.CasesD.result_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/BlockTyping.lean:Solidity.Yul.ScopedBlockTyping.DefaultD.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/BlockTyping.lean:Solidity.Yul.ScopedBlockTyping.InitializerD.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/BlockTyping.lean:Solidity.Yul.ScopedBlockTyping.StatementD.result_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/BlockTyping.lean:Solidity.Yul.ScopedBlockTyping.WalkD.result_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

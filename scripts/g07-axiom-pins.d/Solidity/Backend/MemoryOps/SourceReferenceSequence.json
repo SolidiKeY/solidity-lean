@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceSequence.lean:Solidity.Backend.MemoryOps.resolved_reference_delete_late_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceSequence.lean:Solidity.Backend.MemoryOps.resolved_reference_delete_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

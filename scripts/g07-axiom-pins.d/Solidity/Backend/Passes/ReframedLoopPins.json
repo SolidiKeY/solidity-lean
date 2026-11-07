@@ -1,0 +1,20 @@
+{
+ "Solidity/Backend/Passes/ReframedLoopPins.lean:Solidity.Backend.Passes.loop_scopes_shrinking_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedLoopPins.lean:Solidity.Backend.Passes.loops_shrinking_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedLoopPins.lean:Solidity.Backend.Passes.ReframedLoopControls.bounds": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedLoopPins.lean:Solidity.Backend.Passes.ReframedLoopControls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

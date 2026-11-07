@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/FramedWordLowering.lean:Solidity.Yul.Compilation.FramedWordLowering.expression_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLowering.lean:Solidity.Yul.Compilation.FramedWordLowering.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLowering.lean:Solidity.Yul.Compilation.FramedWordLowering.statement_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

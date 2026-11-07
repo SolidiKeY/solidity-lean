@@ -1,0 +1,6 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerStorageFrame.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerStorageFrame.reframe": [
+  "Quot.sound",
+  "propext"
+ ]
+}

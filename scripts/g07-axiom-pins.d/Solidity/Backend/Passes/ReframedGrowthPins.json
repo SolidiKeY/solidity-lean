@@ -1,0 +1,20 @@
+{
+ "Solidity/Backend/Passes/ReframedGrowthPins.lean:Solidity.Backend.Passes.allocator_growth_reframed_comp": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedGrowthPins.lean:Solidity.Backend.Passes.allocator_growth_reservation_shrink": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedGrowthPins.lean:Solidity.Backend.Passes.ReframedGrowthControls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReframedGrowthPins.lean:Solidity.Backend.Passes.ReframedGrowthControls.skipped_allocation_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

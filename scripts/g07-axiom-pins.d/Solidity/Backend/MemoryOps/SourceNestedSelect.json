@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.source_selected_alias_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedSelect.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.selected_alias_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

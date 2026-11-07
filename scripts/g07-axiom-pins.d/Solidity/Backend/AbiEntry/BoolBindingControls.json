@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/AbiEntry/BoolBindingControls.lean:Solidity.Backend.AbiEntry.BoolBindingControls.both_bits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BoolBindingControls.lean:Solidity.Backend.AbiEntry.BoolBindingControls.dirty_not_laundered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BoolBindingControls.lean:Solidity.Backend.AbiEntry.BoolBindingControls.fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BoolBindingControls.lean:Solidity.Backend.AbiEntry.BoolBindingControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/BoolBindingControls.lean:Solidity.Backend.AbiEntry.BoolBindingControls.raw_decoded_and_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BoolBindingControls.lean:Solidity.Backend.AbiEntry.BoolBindingControls.short_before_malformed_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/BoolBindingControls.lean:Solidity.Backend.AbiEntry.BoolBindingControls.typed_branch_reads_argument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

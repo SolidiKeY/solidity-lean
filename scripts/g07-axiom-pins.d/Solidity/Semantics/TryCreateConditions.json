@@ -1,0 +1,7 @@
+{
+ "Solidity/Semantics/TryCreateConditions.lean:Solidity.ContractWorld.creationTry_eq_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

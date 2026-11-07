@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/Creation/ExecutionChecks.lean:Solidity.Backend.Creation.Exec.deterministic": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ExecutionChecks.lean:Solidity.Backend.Creation.installs_runtime": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/ExecutionChecks.lean:Solidity.Backend.Creation.wrapper_exec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

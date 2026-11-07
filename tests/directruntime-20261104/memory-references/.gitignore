@@ -1,0 +1,7 @@
+/evidence/original.patch
+/evidence/checksums.sha256
+/evidence/receipt.json
+
+/runtime/
+
+/__pycache__/

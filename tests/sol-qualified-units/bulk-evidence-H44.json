@@ -1,0 +1,1626 @@
+{
+  "decision": "H44",
+  "preserved_head": "364bd1e47fa1267a05343e1130e0eb728a32fc77",
+  "preserved_branch": "codex/solidity-sol-20261103/qualified-units-pre-H44",
+  "base": "260441fd82852fc1c294e62f6818e15de6375ceb",
+  "bulk_directory": "/workspace/sol-qn-bulk/H44-364bd1e47fa1",
+  "files": [
+    {
+      "original": "tests/sol-qualified-units/evidence/acceptance-gates.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/acceptance-gates.json",
+      "bytes": 1762,
+      "sha256": "1c2ef99c485e38b414d2b6664bb1967975a571e8114ed6cd15993bb2eebc9850"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/acceptance-pending.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/acceptance-pending.log",
+      "bytes": 8619,
+      "sha256": "c1d43d29bfcfcc2756a5698a5ba35b32dac0241f781292d23f5e867b83bdcc12"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-3ad.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-3ad.json",
+      "bytes": 679,
+      "sha256": "26fa3b1af3cce148a613c3ae22a52e4eedbc4b3d840bdceb8ad8dbdc5b1eab49"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-9584.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-9584.json",
+      "bytes": 814,
+      "sha256": "9c887491a8b762c36a82b247f885d9803639c6b6dc42946ad16a74e2770b83f5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-acceptance.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-acceptance.log",
+      "bytes": 8619,
+      "sha256": "c1d43d29bfcfcc2756a5698a5ba35b32dac0241f781292d23f5e867b83bdcc12"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-b86.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-b86.json",
+      "bytes": 769,
+      "sha256": "09be4ebbdbc7e7bc87425c09901fc89f8ea5de2a817f0ab6e005260a00079cef"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-interrupted-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-interrupted-build.log",
+      "bytes": 100046,
+      "sha256": "d6fe5fc02d0bb952a3773066ae1ec8d54f6713ffee25565d93814c42ffa76d41"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-interrupted-gate.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-interrupted-gate.json",
+      "bytes": 5136,
+      "sha256": "5c4103fdf0053cc38272319dc3f90085ca7bcb0f9c32b4b1b768c188b3e92b73"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-interrupted-repository.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-interrupted-repository.log",
+      "bytes": 3104,
+      "sha256": "0d134915bafcf8e9d47009f87425b828db60137adf33d61655af0ab1b79d1f06"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-library-incomplete.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-library-incomplete.log",
+      "bytes": 2849,
+      "sha256": "b3c85f90da3910f8f3e22622634c8c87a79e9ee19987ce620d76296d19442501"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-reviews.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-reviews.json",
+      "bytes": 1384,
+      "sha256": "3e1da02aa9d2007d445e8a62a30b36ce327605ec6b322d56a9a7a047d0b85f7d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-static-axiom-pins.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-static-axiom-pins.log",
+      "bytes": 184,
+      "sha256": "ff47cc593ffb7aa34f5e8fdf258b29f1a005f5c9bc74d6a481e5dac08397725e"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-static-doc-paths.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-static-doc-paths.log",
+      "bytes": 5143,
+      "sha256": "bc335648c47b39eefa421103789dd9cff0e7e61f7164dcc27b41aecb8e8c1444"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-static-driver.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-static-driver.json",
+      "bytes": 2643,
+      "sha256": "eca401209e81931458987decb064cbbfa635e1b254b933fd949904de8b7ee80f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-static-layers.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-static-layers.log",
+      "bytes": 95,
+      "sha256": "19e8bccbe0860e357186844395efd706ef22be067d42d4f7c19b24d8d95d53bc"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-static-orphans.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-static-orphans.log",
+      "bytes": 816,
+      "sha256": "c7f0ea0dd322b2418280190b40ac0bb8141ad9729d700139b728822215492ce3"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-static-roots.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-static-roots.log",
+      "bytes": 1125,
+      "sha256": "426629208bcc93601c568ff08c8f90d56a55d101b5225bccf70a59b2c5db3611"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-static-trust.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-static-trust.log",
+      "bytes": 79,
+      "sha256": "75bd5742f0b01e210735c3ecd0e5f1547a2a0b7d097bacb95e56adbd46895803"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/adoption-static.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/adoption-static.json",
+      "bytes": 1874,
+      "sha256": "8d1e5febd603c0dfc397928f2efb9c18fac57defc75b8b8af58494e567f91fa0"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/audit-controls.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/audit-controls.json",
+      "bytes": 1144,
+      "sha256": "ce05a0676087ed20a9ad368cc3d6d75cdc86dc24808b98a07149bdbfb75105bd"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/audit-only.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/audit-only.log",
+      "bytes": 8083,
+      "sha256": "da5f8461208657bb72db8b58f6cc3be41c2a3efafebe66f127e8d265cf107472"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/axioms-input.lean.txt",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/axioms-input.lean.txt",
+      "bytes": 30475,
+      "sha256": "5827a373c57bff265c4ae393f7b88380d604380afa6a4626618210b8b18a575b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/bulk-evidence-manifest.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/bulk-evidence-manifest.json",
+      "bytes": 625,
+      "sha256": "8b9552b8c37234c3538503f5ad2040279a38e9648cc9b354af4ca748927b279c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-axioms.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-axioms.log",
+      "bytes": 45145,
+      "sha256": "6a708716dcd068bbf820b746b3de24d044197977852cf0d77469df551a5d1d94"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-build.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-build.json",
+      "bytes": 6085,
+      "sha256": "81a2ed7701db57a34addf492622031a29e3019370a8f355ae14e1e98ba15350b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-build.log",
+      "bytes": 8015,
+      "sha256": "4b53805202b1e76be54273fa860dd5f420fb9c22901be6d7390b31942477f167"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-declarations.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-declarations.log",
+      "bytes": 364702,
+      "sha256": "ae1f28841a47f2ba4bbeb4ee8aa9976f5ada8748a5c36f5a50b9e540adce2359"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-keysort.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-keysort.log",
+      "bytes": 6561,
+      "sha256": "2079ef5425e8b2597ed94ef9eafb6ac58702313a7b2aa7cbaab92955ea53a974"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-queries.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-queries.log",
+      "bytes": 8134,
+      "sha256": "41390a7f5b8fd6ee96577a920be891e66b5eb5f188128ffadd466cd022ff7ca5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-repository-ambient.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-repository-ambient.log",
+      "bytes": 4060,
+      "sha256": "715102aafeaa3a00959558f02e588c09c2c82c084d1b3ba76b45cd54034d3329"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-repository.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-repository.log",
+      "bytes": 7318,
+      "sha256": "71dfbd24f9ce8001b0da256aa694809ab9e595086b543b168fa8e3877ff5d85b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-resolution-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-resolution-probes.log",
+      "bytes": 6071,
+      "sha256": "b12ed9d4b034407767caec9c0afb4efd6ea0c518ee56252c04784f649ca39c44"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-signature-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-signature-probes.log",
+      "bytes": 6200,
+      "sha256": "a767e5e89f5318d85f295adc7e6513c2a2d363383582ea183a98388a7bf69748"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-signature-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-signature-probes.log.raw.gz",
+      "bytes": 1074,
+      "sha256": "413547b6ea74513ec5c91c709d1a3801b90611641fdf95d174f2cf8cda7b2015"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/candidate-solc.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/candidate-solc.log",
+      "bytes": 31876,
+      "sha256": "e2ef66b3fa8d8e3585206f83bd32158175f8508a8be599d3bc3deee9b4085d58"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/checkpoint-counts.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/checkpoint-counts.json",
+      "bytes": 398,
+      "sha256": "166bb518d5c5d727bfadac4904ecc77bbea89697dd99f8e2fe277fe84af3ea58"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-bundle-manifest.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-bundle-manifest.json",
+      "bytes": 30524,
+      "sha256": "4f81749c0662feed9d83ef5e9251ada0d94ebc75fd96977bf55847cd9c826ba6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-bundle.tar.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-bundle.tar.gz",
+      "bytes": 3921550,
+      "sha256": "04894a5788a8e2a4717d04d60af9eff11a48f0dce458fe207245030c785f0453"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-checkpoint-handoff.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-checkpoint-handoff.json",
+      "bytes": 14089,
+      "sha256": "247db4528375a476859b5c118e576219a9d36c6edddcb8347a7ec7c099700dc0"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-commands.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-commands.json",
+      "bytes": 2126,
+      "sha256": "1d1a0b12f490eb23f201e53cf3cec1d3d371927461d27b7fc948d82fa6ea89fc"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-axioms.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-axioms.log",
+      "bytes": 101,
+      "sha256": "456515041b6c9b8d1dcf6925b32ed54e87c8039b27f23c9dd75105afb8294b71"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-axioms.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-axioms.log.raw.gz",
+      "bytes": 115,
+      "sha256": "9eb6b3d82c841fb0ebdd9180dad1cb6d5fcbeff7dcc7cd4988b2c30e0f2a8e92"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-build.log",
+      "bytes": 112,
+      "sha256": "f739699a1b41a6f646c592a07af841c31156771e90780eaae6843c1b8fa10bd2"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-build.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-build.log.raw.gz",
+      "bytes": 125,
+      "sha256": "57302e0707aa723e3ccc209b36a4980f56dd6f250822d21003bc53d7c097d302"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-declarations.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-declarations.log",
+      "bytes": 111,
+      "sha256": "4b62c4e67d2115edcf82b73f20c5bf3491ff9f5e817d514c1faaae1a4e1674d8"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-declarations.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-declarations.log.raw.gz",
+      "bytes": 126,
+      "sha256": "4a6dff8df97d4d382fce7428cac99b9414eeaefde63da93f8eac23491abac662"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-keysort.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-keysort.log",
+      "bytes": 3983,
+      "sha256": "6680785eb493d923adb303860a1bb57cf24bd6f55461c76789961d3e48d69976"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-keysort.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-keysort.log.raw.gz",
+      "bytes": 1102,
+      "sha256": "c1604d4887a127e7a51f0ffe9309403fb77e40ce5c40ab66018971a1bc9f29fb"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-queries.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-queries.log",
+      "bytes": 82,
+      "sha256": "4ef7a76cd67fb6ec2385d6054c5c0f48ae7f519962fc6c87efaa053374d28fc2"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-queries.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-queries.log.raw.gz",
+      "bytes": 90,
+      "sha256": "a4dba8467b57a2daab0c523e25bce512458327021ac777ae72c97b3fc8105651"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-repository.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-repository.log",
+      "bytes": 296,
+      "sha256": "15d862437a141503a264993ac616e98ca1a0dbb76398e662f50ccf2ee5e48f5c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-repository.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-repository.log.raw.gz",
+      "bytes": 214,
+      "sha256": "8e5dafe0afe4356436759170b3ee6a5a73aa445643f9bf5d4e752abf4d4c075d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-signature-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-signature-probes.log",
+      "bytes": 3307,
+      "sha256": "d2d94756f1e40855b7e0605ec8fe6f36947bb26ec0294e2987267bfc5af0cbc0"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-signature-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-signature-probes.log.raw.gz",
+      "bytes": 857,
+      "sha256": "5ff7e83ec6d58b3e52c47811b0e29af0dccb4e669f4e180b3fb52b65ec2ba4e9"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-solc.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-solc.log",
+      "bytes": 99,
+      "sha256": "e6e3d82bb658b4aa08a97ae43ba0738b25f54be9a3079769765f54c68d60852f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-controller-solc.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-controller-solc.log.raw.gz",
+      "bytes": 111,
+      "sha256": "6b7971d610944e76fadef930b172637448e0d94ea9f370171fb9919a5d36cdf5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-followup.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-followup.patch.gz",
+      "bytes": 71139,
+      "sha256": "76fe339f707b2b579f1fbf027300575705a978fc1373be6b7e520e071918ec08"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-initial-audit.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-initial-audit.json",
+      "bytes": 351,
+      "sha256": "445b168261107bf894dc37a0efe8d3247d302724429d6b492501c07d4095a1d3"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-original.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-original.patch.gz",
+      "bytes": 1272803,
+      "sha256": "1045c478ca3ddd74c2af136dd8d2d0d60938f31cebeef9ee5dae8e2d7be272ec"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-registration-proposal.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-registration-proposal.json",
+      "bytes": 4756,
+      "sha256": "18f079eb8ad256de92d39635b3ef269c0d2cc8d4ee1aa8d34d5ffcf82e7cef46"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-repository-gates-raw.tsv.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-repository-gates-raw.tsv.gz",
+      "bytes": 121,
+      "sha256": "04d1541788b38f797dcb22dc4aaf3ead5a8773c72b0e299c6d64e29dcb95e562"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-reviews.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-reviews.json",
+      "bytes": 1616,
+      "sha256": "11aa19f5b48c1917cc6975bfeab0b2755de53e169a9d20e804b5c8756807f963"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/collection-toolchain.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/collection-toolchain.json",
+      "bytes": 630,
+      "sha256": "7b0e77fb4010b426d5431c4ae0989fc3cf15503d38da86a4c86bfd9a0ef87765"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/compiler-helper-baseline.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/compiler-helper-baseline.json",
+      "bytes": 6767,
+      "sha256": "52e8c0ba96ea531b00807761c45da416ac27af89f54282244dec400765397cde"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-axioms.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-axioms.log",
+      "bytes": 101,
+      "sha256": "5cc9714bfc316248e8c011fe6055bbbdc3a21626acd8357b9919d7ca7aa7c0f7"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-build.log",
+      "bytes": 112,
+      "sha256": "404d5dbc5bcaebefc7ba6fb6d7af9a30eae13e02b1005dea5566dc67cd40133c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-declarations.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-declarations.log",
+      "bytes": 111,
+      "sha256": "2ce6cebb9dfb74fac6ec5e678e9efca7e556b9e5f26aa3244be33857ff8a995d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-keysort.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-keysort.log",
+      "bytes": 3251,
+      "sha256": "041a08c77eebfe7d63f0e34a631ffab731fcdd315b105c504498969400cb1d40"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-keysort.log.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-keysort.log.gz",
+      "bytes": 944,
+      "sha256": "bd997adf45c0a75c9004976e50e2e9d9b96bb44dfe36eb603bd3019361b032e1"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-queries.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-queries.log",
+      "bytes": 82,
+      "sha256": "4ef7a76cd67fb6ec2385d6054c5c0f48ae7f519962fc6c87efaa053374d28fc2"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-repository.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-repository.log",
+      "bytes": 4347,
+      "sha256": "580abc13e81b039774853b61770d56770e8d27afa0e132e410adaf06c955de89"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-repository.log.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-repository.log.gz",
+      "bytes": 1108,
+      "sha256": "9aa3d0ca9ff7416ea511f800a47189ebd4925743609fabfc9385bef6ad394eec"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/controller-solc.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/controller-solc.log",
+      "bytes": 99,
+      "sha256": "e6e3d82bb658b4aa08a97ae43ba0738b25f54be9a3079769765f54c68d60852f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/declaration-report.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/declaration-report.json",
+      "bytes": 479594,
+      "sha256": "9e21011ccb7d5e327569cf24721001ab7835d00581215fcf8eb57b749978a918"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/declarations-input.lean.txt",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/declarations-input.lean.txt",
+      "bytes": 2664,
+      "sha256": "b5d0817d8bf7c91b4de6985c4b0ce57d1ab1a8ea6ada1b014796ccfdc30602b2"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261104-audit.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261104-audit.log",
+      "bytes": 8083,
+      "sha256": "da5f8461208657bb72db8b58f6cc3be41c2a3efafebe66f127e8d265cf107472"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261104-doc-paths.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261104-doc-paths.log",
+      "bytes": 5143,
+      "sha256": "bc335648c47b39eefa421103789dd9cff0e7e61f7164dcc27b41aecb8e8c1444"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261104-inventory.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261104-inventory.log",
+      "bytes": 8000,
+      "sha256": "0b1075d0afe9dd0604d7f3e5dd6688a0df3c836b8162e6b2b97d492042b3c5b6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261104-orphans.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261104-orphans.log",
+      "bytes": 716,
+      "sha256": "408cd1395684f81d4935cc1a8e26d2c3a5473bc552d17926553c804d33da3779"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261104-roots.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261104-roots.log",
+      "bytes": 983,
+      "sha256": "dd2216c9b92b640f243b6e862cb72ce65b4f38f5de07a6b35e3a7a370abe10c5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261104.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261104.json",
+      "bytes": 7279,
+      "sha256": "9ccb0f8d2824c48c946bc65f4982da9b05146875b8d57d84e782f66fa0d3bee7"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261104T122441Z.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261104T122441Z.json",
+      "bytes": 495,
+      "sha256": "c8e12554b03cdd7e9e69d1db23213ae44e9114e338bb41739342f5e3f9b37343"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261104T182351Z.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261104T182351Z.json",
+      "bytes": 424,
+      "sha256": "7b89523b1f9ce74c85b495d2780988a38e36413da1da69da377e9bfd12f015fb"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/dependency-20261105.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/dependency-20261105.json",
+      "bytes": 412,
+      "sha256": "41cd423ecf4e1304e503dc390624fa4d0f6839d79346b96bacb09bee7a94c481"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/doc-paths-final.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/doc-paths-final.log",
+      "bytes": 5151,
+      "sha256": "14f9f90885b3df3b3e9f914f952b83b3d5fd629d11c872f0d75288fea5e3888b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-bundle-manifest.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-bundle-manifest.json",
+      "bytes": 42054,
+      "sha256": "aeab1c9b80e5d0401b87f722596d4e5a2829c5cc4573e633c0d8e9b0c92ff28e"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-casesOn-budget-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-casesOn-budget-failure.log",
+      "bytes": 43945,
+      "sha256": "d12b17fb5a5c83c0b29595ea650fc9d51664a1d41beaa2e296b27c94d529bf91"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-checkpoint-handoff.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-checkpoint-handoff.json",
+      "bytes": 14998,
+      "sha256": "4fe2d55f894f6c09903c8d819511ae1e15042a80132c2a3841c3e374e2baa978"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-commands.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-commands.json",
+      "bytes": 2333,
+      "sha256": "7f1b1715f34f2b7f8076bc3428454ceafc63d74aaa05d5fe654aa46f99ea160c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-consumer-unfold-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-consumer-unfold-failure.log",
+      "bytes": 15332,
+      "sha256": "e92c1138046370ebe675a7e513cbcbda041dea300eab3c205db167b6e06542e1"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-axioms.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-axioms.log",
+      "bytes": 101,
+      "sha256": "447503b2445641f7c1c6d99308c565a8108ae1a684cf092790f807beb9c9d279"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-axioms.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-axioms.log.raw.gz",
+      "bytes": 115,
+      "sha256": "37c3578db7b91347d1a9bc3f42900046208f996a2355f904776d0d59e96f7cc2"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-build.log",
+      "bytes": 112,
+      "sha256": "4a5f9dea2bb0351ead89f7493a3bcc2881b8b6b9961bc5554079b338500141d1"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-build.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-build.log.raw.gz",
+      "bytes": 126,
+      "sha256": "032e0db02b1f426408d8c92f1068ce8dbc86e876990778930d5d32faae99a55c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-declarations.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-declarations.log",
+      "bytes": 111,
+      "sha256": "be006d01b6a0bf10eb8b66f19792ebcc851b54b514b991cc9e21b8c3c086ffc5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-declarations.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-declarations.log.raw.gz",
+      "bytes": 126,
+      "sha256": "54288c1f7e883ebc663b04bc38e98da95698b5c17d71d721178b6838c00f7225"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-keysort.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-keysort.log",
+      "bytes": 5623,
+      "sha256": "7b1b0c858973c61244e97005321373e250d5374354b6c9b8702fe3b3417bd989"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-keysort.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-keysort.log.raw.gz",
+      "bytes": 1268,
+      "sha256": "b4b810e521c8b807e5ce3147f1b0a312bd5273062de7b4f630befc6bf8fc623d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-queries.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-queries.log",
+      "bytes": 7768,
+      "sha256": "185492e08fdd4a04519096b274fc304d96d5f65d4343d58fd7bc8ff65254e3a6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-queries.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-queries.log.raw.gz",
+      "bytes": 1409,
+      "sha256": "a0ca263a70874d28653bc834ab69e58fc8cab4411af95842b505f52050bdebad"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-repository.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-repository.log",
+      "bytes": 294,
+      "sha256": "a0ed5c6d248859ab5a28ff2486f2c78dd02c99a8560ecf57ae8e13f6abbfb903"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-repository.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-repository.log.raw.gz",
+      "bytes": 212,
+      "sha256": "fe7e57b7874ae62600c0b5db06566ed5e88947753d6ee00039dc39fba62243c0"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-resolution-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-resolution-probes.log",
+      "bytes": 4830,
+      "sha256": "ef89eace5fcbb883791fe0cc0f9bd745007c0bc5fd0b414107c37c1ee13f9197"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-resolution-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-resolution-probes.log.raw.gz",
+      "bytes": 1002,
+      "sha256": "6b6b59aadef29a1770f9f951f2bdb71bf81071189949afc69cc5faaf81d533f6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-signature-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-signature-probes.log",
+      "bytes": 4660,
+      "sha256": "bcf76c55cff9878fed6671241043ff5fa5b13245f878c14b1648812ee869db1a"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-signature-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-signature-probes.log.raw.gz",
+      "bytes": 1004,
+      "sha256": "4b2890dc0cab1df0125fbf0408dc2398b9d93ce91b3a93f13dafa6de7b0c3333"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-solc.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-solc.log",
+      "bytes": 99,
+      "sha256": "e6e3d82bb658b4aa08a97ae43ba0738b25f54be9a3079769765f54c68d60852f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-controller-solc.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-controller-solc.log.raw.gz",
+      "bytes": 111,
+      "sha256": "6b7971d610944e76fadef930b172637448e0d94ea9f370171fb9919a5d36cdf5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-followup.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-followup.patch.gz",
+      "bytes": 159207,
+      "sha256": "11083b502c63fabed04ecd248cdcaa131a476dfaa5d4b1220e14847a9682df0f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-original.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-original.patch.gz",
+      "bytes": 35467943,
+      "sha256": "c7862f314aa32dc3e884b66e0138214dd2904e1eaaea4522aea73a9c3e181338"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-preliminary-repair-scope.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-preliminary-repair-scope.json",
+      "bytes": 455,
+      "sha256": "a4b4c9a1251bc27eb9915734ed56352ad25a28e54ca7f694e9e8e302c7ca2817"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-prior-axiom-pins.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-prior-axiom-pins.json",
+      "bytes": 37858,
+      "sha256": "9b1ea6e891890c5879d6a89f1898e7ca8d7f65924289ca5d2fa2e9fb9187616b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-prior-declaration-pins.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-prior-declaration-pins.json",
+      "bytes": 685845,
+      "sha256": "02660e32c83b87ba9d4e84892946ca69709835e9b417de9ce97e9e12b412613c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-prior-helper-baseline.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-prior-helper-baseline.json",
+      "bytes": 4749,
+      "sha256": "7c322f30d3f247bd52bad9d2bcf9361d36fb9cfe57f1545173187abd68e3ff68"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-rec-link-first-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-rec-link-first-failure.log",
+      "bytes": 13143,
+      "sha256": "e6f7e1a32e11aadbe48ab2b48292f0fbf7e29fde5f746cddfd0adb80082177ea"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-rec-link-fourth-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-rec-link-fourth-failure.log",
+      "bytes": 6128,
+      "sha256": "78083303e30a849bf8b08262b5205b3dc0fa022032db94f00e00b39183d8b6ee"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-rec-link-second-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-rec-link-second-failure.log",
+      "bytes": 8875,
+      "sha256": "8535cdcb021a375ea665785f21029c532bebf2018d463893ecf5911db2df9b04"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-rec-link-third-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-rec-link-third-failure.log",
+      "bytes": 6184,
+      "sha256": "cb0c57b24d0b9e10dc5c92a3fd657ffaaa7a80520b5335920994989e65313c47"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-registration-proposal.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-registration-proposal.json",
+      "bytes": 3893,
+      "sha256": "6b04eaf3d52f7fd9a12562ab7a75e3140fcc1e0573e5a090d2f8887de1492b7a"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-repair-scope.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-repair-scope.json",
+      "bytes": 656,
+      "sha256": "2cbfcbd9c15c4576ee7034684efe737a9d8c05ffc83453fa59ada82618e4a3fd"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-repository-gates-raw.tsv.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-repository-gates-raw.tsv.gz",
+      "bytes": 120,
+      "sha256": "6a065659a3615f60d45109bae0ec089bc280717fd70323aa7c632c6546475e2a"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-reviews.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-reviews.json",
+      "bytes": 1264,
+      "sha256": "d3575fdd59bd9a0f8097a06152196578b439b7f9f513c9c7c5fde1b3f1c774a8"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-scoped-audit.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-scoped-audit.json",
+      "bytes": 11371,
+      "sha256": "fd56dd75cff531f8c44e294018dad85184b4f2397c5402e23292b454e5969be4"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/g0-toolchain.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/g0-toolchain.json",
+      "bytes": 581,
+      "sha256": "5f489c2856ee88b680589ffe0803f20afb77c3618ce7c36efd78839ccc920b29"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-axioms.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-axioms.json",
+      "bytes": 5026,
+      "sha256": "22f3a1aa7d4070b1a6ce4ddde8097051891dfd917a7a73068f920a6fe333256c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-build.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-build.json",
+      "bytes": 6327,
+      "sha256": "9760165b6e629034e6de91b3ad14ca8efbf40cccb0cd07bcaf90b036f90457fd"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-declarations.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-declarations.json",
+      "bytes": 5038,
+      "sha256": "66b768aecc627610069cb890f07a618ac0ef26108e6b93c941fdcb51cae09e0a"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-keysort.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-keysort.json",
+      "bytes": 5188,
+      "sha256": "39ade6feeaa7141805fcc299c89487df9eeb2a05c44e790db8d819454c93bf37"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-queries.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-queries.json",
+      "bytes": 5028,
+      "sha256": "5f51f90aa205ce7a7597dcc72aa1aab2e38af5237067b810952c98731dcba45f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-repository.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-repository.json",
+      "bytes": 6351,
+      "sha256": "6406f06c4525d214680b400af44e3c824a6aa2611a0bbe75ba4ed9a00b455938"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-resolution-probes.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-resolution-probes.json",
+      "bytes": 5087,
+      "sha256": "7a688c0218270c2afa9d791b51dd1211025e2bcd188065054b5ad33f168cb19c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-signature-probes.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-signature-probes.json",
+      "bytes": 5079,
+      "sha256": "8d76610336d843d5d769ca87ec78223618f05494b75a4d50200f1b8574c2d303"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/gate-solc.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/gate-solc.json",
+      "bytes": 5050,
+      "sha256": "6ac870b7fa27196a1056764bc055c47a61bffaa779e1f0d896ea45ddba251c03"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-axiom-parser-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-axiom-parser-failure.log",
+      "bytes": 32632,
+      "sha256": "05a9bfebf8447aeb346f7fb06b11dcb8722c9ca94ab4614de4652994efb0fddd"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-axioms-first-audit.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-axioms-first-audit.log",
+      "bytes": 30637,
+      "sha256": "726c25bd1e2fbbebb1fc453bbf87c1140e36bd3900f09ad30617aba3dc6d08b4"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-bundle-manifest.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-bundle-manifest.json",
+      "bytes": 25849,
+      "sha256": "b0ec239f4667338c2c59e91c6b6e69e7383488a2563b4745ffad5f31bd197f08"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-bundle.tar.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-bundle.tar.gz",
+      "bytes": 609413,
+      "sha256": "6972f5b8ee45f08ffe29901e27702e3c544530b7740392460d7603eaba0d6428"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-checkpoint-handoff.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-checkpoint-handoff.json",
+      "bytes": 13328,
+      "sha256": "6ed720ca36fc12e8ffe7979cbb2e01d598cf899c1e0e0c4d79721fe2c60edaa6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-collection-first-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-collection-first-failure.log",
+      "bytes": 7343,
+      "sha256": "075d3ce41c5e3a49f9454cc3fd4be44c98573f3e94fa9bd6aa4bb8c77d0d91a1"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-commands.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-commands.json",
+      "bytes": 1779,
+      "sha256": "0e00e1ee640aaf8a614f5f51c3432fbc005cebf925206b7ec7277570c1efec6e"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-comparison-first-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-comparison-first-failure.log",
+      "bytes": 12804,
+      "sha256": "9c083bac2915315d08b853ee79ae09c53632ccf8b1cdc138af2add4a4d53c261"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-comparison-second-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-comparison-second-failure.log",
+      "bytes": 8600,
+      "sha256": "3ec91196dceeee3d47a33f3013e321e8d6f689893bcaac6f526cb10ac7c5a6c8"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-axioms.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-axioms.log",
+      "bytes": 101,
+      "sha256": "53e57fc289869d0e84d93e3a1d42395accbdc90c8f92e044bdab31d6c710ed93"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-build.log",
+      "bytes": 112,
+      "sha256": "1c7c5aff3dc3ee9bd29ba32c640f2d3b6270c2a629a69e3259e6562431fba350"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-declarations.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-declarations.log",
+      "bytes": 111,
+      "sha256": "d08f81c87e9b95894b4a18b945aa8fd94910344371e1bc3d49c077b95a624952"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-keysort.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-keysort.log",
+      "bytes": 5553,
+      "sha256": "ffc0b3e19f655500d42d0d3c2f7b01b6e9eefb0c0a07955c28beef6d93200611"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-keysort.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-keysort.log.raw.gz",
+      "bytes": 1303,
+      "sha256": "e27b938b4dd1e644a73ac027fa78ba800d97fdb39bd090a05989711557272d74"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-queries.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-queries.log",
+      "bytes": 82,
+      "sha256": "4ef7a76cd67fb6ec2385d6054c5c0f48ae7f519962fc6c87efaa053374d28fc2"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-signature-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-signature-probes.log",
+      "bytes": 5941,
+      "sha256": "5aacb9f5feada03d14af26e8c72d1d65bd4123cf8b52a5336e20fc12f2c6e187"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-signature-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-signature-probes.log.raw.gz",
+      "bytes": 1074,
+      "sha256": "142297f98740623e67ff81d5dd5d1577a33f9197ebda7308dced1b526f72406f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-controller-solc.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-controller-solc.log",
+      "bytes": 99,
+      "sha256": "e6e3d82bb658b4aa08a97ae43ba0738b25f54be9a3079769765f54c68d60852f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-declarations-first-audit.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-declarations-first-audit.log",
+      "bytes": 456632,
+      "sha256": "72b0a6bc02dad7463507ef1edcefdab72d83868ef51b0176fe9d86b45869eb63"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-foundation-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-foundation-build.log",
+      "bytes": 3121,
+      "sha256": "adf4e79edac4e846e671ff407bd48ff9d975e725c779944eeaeb2919e52ef0eb"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-foundation.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-foundation.patch.gz",
+      "bytes": 151893,
+      "sha256": "c6057dee510917ed3415adc521178fc12b748799c6bf4ef41886d56d287a607a"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-idle-cache-release.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-idle-cache-release.json",
+      "bytes": 256,
+      "sha256": "859f558364a956f5373c8f3c061ee94f13564945c0bab06f167206ceec33a469"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-location-controls-first-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-location-controls-first-failure.log",
+      "bytes": 5636,
+      "sha256": "c492a252f11fa9e5add256a82469f7f3cf064e4c7df3c9b8f7d1f6f4f713502b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-location-probe-command.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-location-probe-command.json",
+      "bytes": 899,
+      "sha256": "fb757df69696d998d39fcefcc7b693d6b03a06be78293100bc518ef5a272eff3"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-location-probe.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-location-probe.json",
+      "bytes": 2863,
+      "sha256": "de20202fb493092ebafe81642c188a5a63e900fd2c451e01fe0a92af09f97792"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-log-normalization.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-log-normalization.json",
+      "bytes": 384,
+      "sha256": "fa96557376e5c41e6de732cd360c34920777855d4dbc01e02b3a41501b85decc"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-nominal-origin-first-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-nominal-origin-first-failure.log",
+      "bytes": 6240,
+      "sha256": "380eef1da7ac65c7de9f224831632ef11e2747bcfaba3557c496f81ffabdddca"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-repository-gates-raw.tsv.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-repository-gates-raw.tsv.gz",
+      "bytes": 121,
+      "sha256": "04d1541788b38f797dcb22dc4aaf3ead5a8773c72b0e299c6d64e29dcb95e562"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-reserve-stop-candidate-axioms.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-reserve-stop-candidate-axioms.log",
+      "bytes": 31269,
+      "sha256": "718e73cc1acd079fdd4b0104916a6f781acb510061c405fb9c900353a340734a"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-reserve-stop-candidate-repository.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-reserve-stop-candidate-repository.log",
+      "bytes": 5012,
+      "sha256": "c402be95f4993731918295e6ef938acd7d62eefbcfde044f9961e24980b016db"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-reserve-stop-gate-repository.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-reserve-stop-gate-repository.json",
+      "bytes": 5814,
+      "sha256": "acd88b34b12fb44b552be9bbbd0886c8dbed21943167a5aa9383daeef52b7c1e"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-reviews.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-reviews.json",
+      "bytes": 1682,
+      "sha256": "c673f77607e859eb40f16333a5cb39e76dd8f68029f6d44610fdbfd95b22fc1b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-scoped-audit.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-scoped-audit.json",
+      "bytes": 707,
+      "sha256": "6944ade67243987596def0f54685413ec64f9002e7b0292664c3d71a9b166ea9"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-signature-equality-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-signature-equality-failure.log",
+      "bytes": 4408,
+      "sha256": "c4bd7b20f8260fda0c4ae572cadd6a8a951fc5cca1580cc1b4579294cbffbacc"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-signature-first-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-signature-first-failure.log",
+      "bytes": 6330,
+      "sha256": "7b8385978b7cc47c6421086c0502330d9eb6f348f570dcd5c467803e120fed94"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-signature-probes-first-audit.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-signature-probes-first-audit.log",
+      "bytes": 3421,
+      "sha256": "08f0c51063ed1c7fd7d84c0b2320f0ed562b7cabcbac794063089d6a2f7a5c63"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/h27-toolchain.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/h27-toolchain.json",
+      "bytes": 775,
+      "sha256": "d2bd5284898f4ce95af3b90bf3d598359819183b75d9ab3ac52de4cf4d5d02d3"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/inventory.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/inventory.log",
+      "bytes": 8000,
+      "sha256": "0b1075d0afe9dd0604d7f3e5dd6688a0df3c836b8162e6b2b97d492042b3c5b6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/log-normalization.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/log-normalization.json",
+      "bytes": 1157,
+      "sha256": "956331e92e5d0eeddfa58186247ec3812d278670749b22a336c66c1ea7a85e12"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/m3-reviews.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/m3-reviews.json",
+      "bytes": 3121,
+      "sha256": "8a60f5f439e3f28ea2ba372ee41687769b06d4d541a23db0ca34acb2bed41117"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-adoption.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-adoption.json",
+      "bytes": 605,
+      "sha256": "b76ef026a21b405331dd1cc1af4e1ca3ec476d5ac3e127d5d0cce7c047d160b6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-axiom-ordering-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-axiom-ordering-failure.log",
+      "bytes": 272,
+      "sha256": "22d57cf2c2c92c5ea1bc4fc46a15d76a567479817f3c79657f0aad8d0eb031fd"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-bundle-manifest.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-bundle-manifest.json",
+      "bytes": 63987,
+      "sha256": "f0efe8cf43e8cab9550492b49927709e4cb07e5f7a7bee55dc56c8a20790df03"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-bundle.tar.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-bundle.tar.gz",
+      "bytes": 631621,
+      "sha256": "4b7f14d3acc5013a1046f39aa157847353c61286b673321ebeb6390884b01138"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-checkpoint-handoff.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-checkpoint-handoff.json",
+      "bytes": 5785,
+      "sha256": "a872eceea8958438ef6751ce6533e57314ce43e184a7a421eed59ebbba1abb7d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-commands.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-commands.json",
+      "bytes": 2098,
+      "sha256": "57ac52bc156ab1cc5116564babec68a92d60e167a1be11cd10eca6f39221d13d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-axioms.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-axioms.log",
+      "bytes": 101,
+      "sha256": "db719c718a5185314b56ceff8ac167edb16373e6c3eaa691c5030a1094c59694"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-axioms.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-axioms.log.raw.gz",
+      "bytes": 115,
+      "sha256": "ccd32a9ac0bb68eb0c62cc8ec9a22afa5e649b9e97fe5abd01d07dd460936932"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-build.log",
+      "bytes": 112,
+      "sha256": "bdd6f79dc0f217f4c41339beaccefada36817671c2dcf1d3734c5abb2d1998ab"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-build.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-build.log.raw.gz",
+      "bytes": 126,
+      "sha256": "b75fbf4f259307902886e6c9d698b5e8c0a6fffffc61019c4915fb4428049834"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-declarations-first.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-declarations-first.log",
+      "bytes": 468,
+      "sha256": "ce53871e7185bac866fed51898fa0c6a55106d4bdf3a5ee9e6df4de5c6d5b067"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-declarations-first.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-declarations-first.log.raw.gz",
+      "bytes": 250,
+      "sha256": "6277ba50b7acb53ba589e39b3414260c3bc8a736ee2bdbf48175caedfbd930c6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-declarations.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-declarations.log",
+      "bytes": 111,
+      "sha256": "05b09adc6740275663275ba9ebc7f3bb6503b60bb66e562bee583046fd6cea21"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-declarations.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-declarations.log.raw.gz",
+      "bytes": 126,
+      "sha256": "e1638a491b832d4c1d3ef821f79b1eafbb9ab5527a86dcf677d451a70df7e1e0"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-keysort.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-keysort.log",
+      "bytes": 6561,
+      "sha256": "2079ef5425e8b2597ed94ef9eafb6ac58702313a7b2aa7cbaab92955ea53a974"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-keysort.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-keysort.log.raw.gz",
+      "bytes": 1359,
+      "sha256": "7b1bcab74f9fc3cd7edc7a6c2a72984a95050aeee417d1a70a4b13a6d3f7d781"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-queries.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-queries.log",
+      "bytes": 8134,
+      "sha256": "41390a7f5b8fd6ee96577a920be891e66b5eb5f188128ffadd466cd022ff7ca5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-queries.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-queries.log.raw.gz",
+      "bytes": 1463,
+      "sha256": "a7ce73db2130d4f056b53b7f212a6589b545ab26741a3598378c3e16f4845c1e"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-resolution-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-resolution-probes.log",
+      "bytes": 6071,
+      "sha256": "b12ed9d4b034407767caec9c0afb4efd6ea0c518ee56252c04784f649ca39c44"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-resolution-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-resolution-probes.log.raw.gz",
+      "bytes": 1111,
+      "sha256": "a1cae742f778658d9bc126b17f0f22d750f171bb460e6687d28468e126c23649"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-signature-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-signature-probes.log",
+      "bytes": 6200,
+      "sha256": "a767e5e89f5318d85f295adc7e6513c2a2d363383582ea183a98388a7bf69748"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-signature-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-signature-probes.log.raw.gz",
+      "bytes": 1135,
+      "sha256": "d75963e4bc33d7cd0a476e6ee603f93941811af7aba778fb942632b78f042cd6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-solc.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-solc.log",
+      "bytes": 99,
+      "sha256": "e6e3d82bb658b4aa08a97ae43ba0738b25f54be9a3079769765f54c68d60852f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-controller-solc.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-controller-solc.log.raw.gz",
+      "bytes": 111,
+      "sha256": "6b7971d610944e76fadef930b172637448e0d94ea9f370171fb9919a5d36cdf5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-development-diagnostics.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-development-diagnostics.json",
+      "bytes": 952,
+      "sha256": "ab771bc9b2ebd672eafa3bb2ce2ba1f3e9de9a5727c4cf67a2566a6d009ea3b9"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-first-commands.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-first-commands.json",
+      "bytes": 781,
+      "sha256": "cbbfcc7951d7d4fe1cae688f4f8ad3139920364e78b995ee15d8e13573a48353"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-followup.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-followup.patch.gz",
+      "bytes": 85873,
+      "sha256": "88adea867264343d011e1adfd2161c0a246d9d55d78b746cef06a298b6fa029b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-original.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-original.patch.gz",
+      "bytes": 127588,
+      "sha256": "4d158e01df5b396503cbf7ec995723dec114039a040b9a339f89a91584b213b6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-prior-axiom-pins.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-prior-axiom-pins.json",
+      "bytes": 33918,
+      "sha256": "457552eb7b7b63d1008b3363acfb5639a085ef69f28579bcc56de3c479e5ea6a"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-prior-declaration-pins.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-prior-declaration-pins.json",
+      "bytes": 454517,
+      "sha256": "38cfdc9e6ebd580ddd59d8e5c08b16c867f510fefe688517196d4049d881ed91"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-registration-proposal.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-registration-proposal.json",
+      "bytes": 4582,
+      "sha256": "875156a193bebd229a91d1ec2d8ce063168f144730390838b6fe8145ac17ef2d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-reviews.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-reviews.json",
+      "bytes": 675,
+      "sha256": "dca23a9f8421e0a58d620d1908baba30f26767e3c33ac37fd13a291716f6d1ab"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-scoped-audit.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-scoped-audit.json",
+      "bytes": 16056,
+      "sha256": "f56fe93adb5a65991454d94e671077fbf8af5215625dd872e809817369cf5067"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/merge-trust-transition.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/merge-trust-transition.json",
+      "bytes": 21069,
+      "sha256": "bf32548a086c4f491f94b3b8798de2a7fcaa3dad2b98b1dfbd584cd7e66859ad"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/original-qualified-units.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/original-qualified-units.patch.gz",
+      "bytes": 226217,
+      "sha256": "e52b3211495484927871135813fafdc1c95649e0d31fa8c1c4e19ef9ab1c5028"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/queries-input.lean.txt",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/queries-input.lean.txt",
+      "bytes": 4857,
+      "sha256": "58bd89e59d5af94e6890b296cc5515f0d79d6c5f113024a8f06ef29d239fbc26"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/query-report.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/query-report.json",
+      "bytes": 16725,
+      "sha256": "cfb9e8dcedae50caf81739dc8cec8394d5ebfcf7c5fb0e501ad935b529eb9716"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/rebase-e684.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/rebase-e684.json",
+      "bytes": 763,
+      "sha256": "89c2bb944d9c171a3de5e22e547f5cddcdc8016d182a7633616fc04a538264f6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/1.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/1.log",
+      "bytes": 1472,
+      "sha256": "8808f4d7651a571e9b900f6e0694978bb4a3a01b7095e7487ca6087064676cf6"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/2.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/2.log",
+      "bytes": 1292,
+      "sha256": "24a3201fb0d54a41cd998399bb179e24b04d31b60bab80a7a7798c7d3c51286f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/3.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/3.log",
+      "bytes": 79,
+      "sha256": "cde9f1e05ffeab9b674a9e7d606451b922f2521c272ac66ea39985a09783d349"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/4.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/4.log",
+      "bytes": 867,
+      "sha256": "93731a1ae7ea1f13fad1ba8f48cbb7e5017e60d185cd64d6ee10b8cc24437b0b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/5.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/5.log",
+      "bytes": 95,
+      "sha256": "ad90d5fc3c059460e60a69847bc01b2d17f8cc49d6bacd974dec98e77aef5cb7"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/6.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/6.log",
+      "bytes": 1197,
+      "sha256": "1be97edbd924356ccfc48de584e38d724891166cc473b2739645469b3b21f163"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/7.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/7.log",
+      "bytes": 5039,
+      "sha256": "8f1d50c404a4f3b8721351c9cf81c5878c32b9e7b3134bf4759fdb2ebe820c52"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/8.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/8.log",
+      "bytes": 206,
+      "sha256": "39787abb09389e29b9c9a5b09bb3d894bb071f42248c787c58b0915385d0765f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/HEAD",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/HEAD",
+      "bytes": 41,
+      "sha256": "2d1871e7ab2ba6462c6e2cbce84fcdcddf305d896030a152bf595638a1458b07"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/gates.tsv",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/gates.tsv",
+      "bytes": 1024,
+      "sha256": "f4316850321f2f7bd6c8b156522064c5a300c3bb3487c25955d7fc2c1242e17f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-ambient/gates.tsv.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-ambient/gates.tsv.gz",
+      "bytes": 281,
+      "sha256": "3cb8d4f51b81a4b3beadc462d08d3c9b8d76f89aee31d2651f8ddf5f2ca58f64"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-cache-boundary.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-cache-boundary.json",
+      "bytes": 433,
+      "sha256": "73d99936cda68455fbfd3a8e8254882769c4333ecba51cee605bce1c6cda9437"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/1.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/1.log",
+      "bytes": 1896,
+      "sha256": "6a03f66831f5a524fd7899f999955ae6e807cf703af855af58a3026fc1786e96"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/2.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/2.log",
+      "bytes": 54472,
+      "sha256": "f70557f4dad43d7c4430ed107fced3f83487c751fa34c86c24bbbdd3dc59dcf5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/3.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/3.log",
+      "bytes": 79,
+      "sha256": "cde9f1e05ffeab9b674a9e7d606451b922f2521c272ac66ea39985a09783d349"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/4.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/4.log",
+      "bytes": 867,
+      "sha256": "93731a1ae7ea1f13fad1ba8f48cbb7e5017e60d185cd64d6ee10b8cc24437b0b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/5.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/5.log",
+      "bytes": 95,
+      "sha256": "ad90d5fc3c059460e60a69847bc01b2d17f8cc49d6bacd974dec98e77aef5cb7"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/6.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/6.log",
+      "bytes": 1197,
+      "sha256": "1be97edbd924356ccfc48de584e38d724891166cc473b2739645469b3b21f163"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/7.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/7.log",
+      "bytes": 5039,
+      "sha256": "8f1d50c404a4f3b8721351c9cf81c5878c32b9e7b3134bf4759fdb2ebe820c52"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/8.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/8.log",
+      "bytes": 184,
+      "sha256": "16a1d8f52812b94f8fa4889a35c91e47a85db164e3a9c6f98d60dbf8302bc360"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/HEAD",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/HEAD",
+      "bytes": 41,
+      "sha256": "7a0c2bb8ecae49431c03e5894706afe85e473dfc7bef3fe605983ac5fc067e6c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/gates.tsv",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/gates.tsv",
+      "bytes": 118,
+      "sha256": "b58d95223781af85e2f41b07c5dfbc4c37d2e2153f5553ba84f4efeca72e0025"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/repository-gates/gates.tsv.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/repository-gates/gates.tsv.gz",
+      "bytes": 121,
+      "sha256": "04d1541788b38f797dcb22dc4aaf3ead5a8773c72b0e299c6d64e29dcb95e562"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-barrier-probe.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-barrier-probe.json",
+      "bytes": 1434,
+      "sha256": "4eb5f397f6d9be050f3a27555862aa7aab267af600b3c46a07530a533f73211c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-barrier-proof-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-barrier-proof-failure.log",
+      "bytes": 7079,
+      "sha256": "3da4c971a8297fa7c0c30cfc7eb17a3cac3c1f52571962323742c079338f319e"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-bundle-manifest.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-bundle-manifest.json",
+      "bytes": 36340,
+      "sha256": "c9b8baba6339e1121d1715e189dbadc655e1f9ddb5486b6cf4bec6b0ad3f4dfe"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-bundle.tar.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-bundle.tar.gz",
+      "bytes": 20365654,
+      "sha256": "1e56ff5cd683d433afe45533000e928bf13f87a50fc2b4e74b31f3163cd7b85b"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-checkpoint-handoff.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-checkpoint-handoff.json",
+      "bytes": 15295,
+      "sha256": "1d13bd741eecb4720c769f80eb8d0d9b6ab58fc3a73f099617314212e463f112"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-commands.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-commands.json",
+      "bytes": 2409,
+      "sha256": "2a9609203b7f8fc0147d0155e7ef6e4397957126ea90f5b041420d259b72bb80"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-axioms.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-axioms.log",
+      "bytes": 101,
+      "sha256": "95cf102a68f944233292da2d77bac0101c6c48c3e31f387992b68c148e5906a9"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-axioms.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-axioms.log.raw.gz",
+      "bytes": 115,
+      "sha256": "33c89bfbd6f6fe4d18484548ce2e50301b547b7435c1e763ca7c1e17c4c85799"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-build.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-build.log",
+      "bytes": 112,
+      "sha256": "4a5f9dea2bb0351ead89f7493a3bcc2881b8b6b9961bc5554079b338500141d1"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-build.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-build.log.raw.gz",
+      "bytes": 126,
+      "sha256": "032e0db02b1f426408d8c92f1068ce8dbc86e876990778930d5d32faae99a55c"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-declarations.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-declarations.log",
+      "bytes": 111,
+      "sha256": "7417dc3596924b7a7043b492cfa87841433ca83bc9185474b8a8b2719bcaca6d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-declarations.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-declarations.log.raw.gz",
+      "bytes": 126,
+      "sha256": "18b9d6fced4c57dbd2202e1e86977739fb49d164d26c71ffbb43e67b79573b1e"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-keysort.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-keysort.log",
+      "bytes": 5486,
+      "sha256": "adae6bdda5913a40ca4e1c5e95d9b9f53bac5bbab54224d71b0ccab0a5c1fcb4"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-keysort.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-keysort.log.raw.gz",
+      "bytes": 1236,
+      "sha256": "5df86017952c6bbdd6753c95865a46493e8d42d04b703eca8386de3fb20580f9"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-queries.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-queries.log",
+      "bytes": 7489,
+      "sha256": "878bc1d6c8730ede6dc976843c207f51dd3448a946775936d195db14a23dad1f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-queries.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-queries.log.raw.gz",
+      "bytes": 1368,
+      "sha256": "a59997b2793195f8f687b415e80a373a41f2760480e2d96d1a3ecbfe56f2dc32"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-repository.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-repository.log",
+      "bytes": 296,
+      "sha256": "ad48380d6cfd29c8507467576c240ceed62c65ffd93e11de7208420f35482da4"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-repository.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-repository.log.raw.gz",
+      "bytes": 214,
+      "sha256": "3f8b97bf80d1effe2e32c3b4448127c7e465045a092aa36ab20a8c585fa8f4a1"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-resolution-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-resolution-probes.log",
+      "bytes": 4819,
+      "sha256": "44dbee4c82e1bcedfb03a52b470ce7e86a068038b6f7289e8c410602433c7873"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-resolution-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-resolution-probes.log.raw.gz",
+      "bytes": 968,
+      "sha256": "9217a58f31f665ab6367f8a00c328e0914be0bcd30182bc62c6f8688c0947090"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-signature-probes.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-signature-probes.log",
+      "bytes": 4633,
+      "sha256": "a4f042e0e0dd0861cdcd94ef66ee731703a4bc6745e3f2fb20dbc01c8c7e5664"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-signature-probes.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-signature-probes.log.raw.gz",
+      "bytes": 991,
+      "sha256": "244c6f41e6c2a3fec2d540d175e2b18dfe51f2beefca21a47c820d3ddfda13d9"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-solc.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-solc.log",
+      "bytes": 99,
+      "sha256": "e6e3d82bb658b4aa08a97ae43ba0738b25f54be9a3079769765f54c68d60852f"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controller-solc.log.raw.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controller-solc.log.raw.gz",
+      "bytes": 111,
+      "sha256": "6b7971d610944e76fadef930b172637448e0d94ea9f370171fb9919a5d36cdf5"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-controls-first-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-controls-first-failure.log",
+      "bytes": 13857,
+      "sha256": "0ea020c9816d7940fe2ee048fd59e69b43f4d93d236e3959c11c120f8dd924aa"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-first-failure.log",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-first-failure.log",
+      "bytes": 6862,
+      "sha256": "a2963eae7b2cb61743034a623685bd6a22d8f868fa2dcdd246065c432093b48d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-followup.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-followup.patch.gz",
+      "bytes": 93655,
+      "sha256": "b33d4c8cb0fa9c2ac0cdaacdac7309699245c603ce77fc87b70b6479699e0749"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-original.patch.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-original.patch.gz",
+      "bytes": 6821300,
+      "sha256": "894451738172b6813f1931da91208e8c536ae361ac5526053c45228014b2437d"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-registration-proposal.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-registration-proposal.json",
+      "bytes": 4926,
+      "sha256": "520ea2d3db99a76e3eb1fdd4c50f371a8314a3d095267328de4703868fb17bba"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-repository-gates-raw.tsv.gz",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-repository-gates-raw.tsv.gz",
+      "bytes": 120,
+      "sha256": "6a065659a3615f60d45109bae0ec089bc280717fd70323aa7c632c6546475e2a"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-reviews.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-reviews.json",
+      "bytes": 1752,
+      "sha256": "a977dcb951ae4145826535a475ef9dc5ce6473605a134a6fb62083de5df9c401"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-scoped-audit.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-scoped-audit.json",
+      "bytes": 6418,
+      "sha256": "bf40011996c41ac0cd5fe068e93b0509c4bfbbafc49498fc576faa2a371b846e"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/resolution-toolchain.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/resolution-toolchain.json",
+      "bytes": 614,
+      "sha256": "3d3a049eac1a801947f79eb1d2b3a102ebfb991e655a09bfd4534bc8c3046508"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/setup.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/setup.json",
+      "bytes": 1622,
+      "sha256": "2a070f282eba2584dbcc08c87bff809a75de57d6d385c0ca6ddce3b941677367"
+    },
+    {
+      "original": "tests/sol-qualified-units/evidence/solc-report.json",
+      "path": "/workspace/sol-qn-bulk/H44-364bd1e47fa1/tests/sol-qualified-units/evidence/solc-report.json",
+      "bytes": 26163,
+      "sha256": "08fa3434fc7df632d2694c70e080a3e403c25b88078fcbe0983b8f6fc8006331"
+    }
+  ],
+  "total_bytes": 73851319,
+  "scope": "Only evidence differed from master; all Lean/docs/scripts already published. No theorem/gate/budget changes.",
+  "outstanding": "Original queue obligations unchanged; no completion claim"
+}

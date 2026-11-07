@@ -1,0 +1,8 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceAliasDelete.lean:Solidity.Backend.MemoryOps.source_bool_alias_uint_frame": [],
+ "Solidity/Backend/MemoryOps/SourceReferenceAliasDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_alias_delete_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,234 @@
+{
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.budgeted_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.first_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.first_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.initial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.last_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.middle_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.middle_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.missing_default_headers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.AllocatingMiddle.reached_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.construction_budgeted_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.construction_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.construction_objects_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.construction_referenceArrays_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.corrupted_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.observed_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.reached_source_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.reached_target_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.read_before_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.skipped_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.skipped_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.stale_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapApplication.wrong_failure_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.allocation_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.allocator": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.empty_heap": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.mutation_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.observation_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.reached_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.source_answer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapBoundaryControls.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapObservations.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapObservations.mutation_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapObservations.mutation_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapObservations.observation_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapObservations.read_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapObservations.read_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapObservations.source_objects": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapPrefix.allocation_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.HeapPrefix.allocation_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.objects_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.objects_objects_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.objects_referenceArrays_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/HeapBoundaryPins.lean:Solidity.Backend.Passes.referenceArrays_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

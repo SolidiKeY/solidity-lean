@@ -1,0 +1,7 @@
+{
+ "Solidity/Counterexamples/DiamondTry.lean:Solidity.Counterexamples.DiamondTry.callback_diamond_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

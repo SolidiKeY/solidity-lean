@@ -1,0 +1,31 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {prepare,validateInputs,measureNative} from '../../../scripts/testsuite-performance.mjs';
+import {compileFixture} from '../../../scripts/solc-ast.mjs';
+const out=path.resolve(process.env.NATIVE_BROWSER_CHECK_OUTPUT||'docs/benchmarks/directruntime-2026-11-04/hardening');
+const dir=path.join(out,'inputs'),binary=path.resolve(process.env.NATIVE_BROWSER_NATIVE_OUTPUT||'.lake/native-browser-hardening/native','direct-check');
+assert.ok(!fs.existsSync(dir),'Refusing input overwrite');
+const inputs=await prepare(dir);validateInputs(inputs);assert.equal(inputs.count,83);
+const matrix=await measureNative(inputs,binary,3);
+matrix.failures=matrix.trials.filter(t=>t.result.results?.length!==1||t.result.results[0].function!==t.name||t.result.results[0].status!=='proved');
+matrix.passed=matrix.trials.length===249&&!matrix.failures.length;
+fs.writeFileSync(path.join(out,'native.json'),JSON.stringify(matrix,null,2)+'\n');
+const controls=[],sha=b=>createHash('sha256').update(b).digest('hex');
+const six=[['additionSimple',['pending','refuted']],['storageRootReadWrite',['pending','refuted']],['storageIndexRootMapping',['pending','refuted']],['whileCountsUp',['pending','refuted']],['invariantCountsToBound',['pending','refuted']],['requireFalseLiteral',['proved']]];
+const groups=six.map(([name,status])=>({name,source:path.resolve('docs/benchmarks/directruntime-2026-11-04/before/existing-controls',name+'.sol'),expected:[[name,status]]}));
+groups.push({name:'ClosedSpecs',source:path.resolve('tests/automation/ClosedSpecs.sol'),expected:[['maximum',['proved']],['falseMaximum',['refuted']],['storeMaximum',['proved']],['twoChoices',['proved']],['constantOne',['proved']],['falseConstant',['refuted']],['store',['proved']],['falseStore',['refuted']]]});
+const cdir=path.join(out,'controls');fs.mkdirSync(cdir);
+for(const group of groups){
+ const text=fs.readFileSync(group.source),source=path.join(cdir,group.name+'.sol'),fixture=path.join(cdir,group.name+'.ast.json');fs.writeFileSync(source,text);
+ const compiled=compileFixture({args:['--source',source,'--out',fixture,'--no-wrapper'],quiet:true});assert.equal(compiled.fixture.header.sourceSha256,sha(text));
+ const ast=compiled.primaryAst??compiled.fixture.ast,contract=ast.nodes.find(n=>n.nodeType==='ContractDefinition');
+ for(const [name,statuses]of group.expected)controls.push({name,statuses,source,sourceHash:sha(text),fixture,fixtureSha256:sha(fs.readFileSync(fixture)),request:{contract,function:name}});
+}
+fs.writeFileSync(path.join(cdir,'inputs.json'),JSON.stringify({trials:controls},null,2)+'\n');
+const report=await measureNative({trials:controls},binary,1);
+report.failures=report.trials.filter((t,i)=>t.result.results?.length!==1||t.result.results[0].function!==t.name||!controls[i].statuses.includes(t.result.results[0].status));report.passed=report.trials.length===14&&!report.failures.length;
+fs.writeFileSync(path.join(out,'native-controls.json'),JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify({matrix:matrix.passed,requests:matrix.trials.length,controls:report.passed,controlRequests:report.trials.length}));
+assert.ok(matrix.passed&&report.passed);

@@ -1,0 +1,86 @@
+[
+ {
+  "id": "EU-01",
+  "obligation": "exhaustive constructor and boundary inventory",
+  "status": "proved-inventory",
+  "evidence": "All 29 constructors, token boundaries, root conditions and layout witnesses inventoried."
+ },
+ {
+  "id": "EU-02",
+  "obligation": "layout erasure and fragments reconstruction",
+  "status": "proved",
+  "evidence": "Exhaustive intrinsic equality accounts for arbitrary independent fragment and attribute layouts; no layout equality premise. Actual attribute fields and arbitrary literal payloads reconstruct."
+ },
+ {
+  "id": "EU-03",
+  "obligation": "balanced delimiter and token splitting lemmas",
+  "status": "proved",
+  "evidence": "Reusable arbitrary balanced/token/operand/conditional/comma cuts and all original source-derived scanner conditions completed; public proof introduces no desired split premise."
+ },
+ {
+  "id": "EU-04",
+  "obligation": "root reconstruction for all precedence levels",
+  "status": "proved",
+  "evidence": "All17rootlevels/all29constructor families and actual operators/children reconstruct; exhaustive recursive_yield_property supplies full tree identity."
+ },
+ {
+  "id": "EU-05",
+  "obligation": "all operator associativity and precedence boundaries",
+  "status": "proved",
+  "evidence": "All34intrinsic operator constructors bound to universal identity and original refusal theorems; all17precedence/association classes, arbitrary trees and lengths covered. Frozen expected refusals unchanged."
+ },
+ {
+  "id": "EU-06",
+  "obligation": "primary/type/tuple/list/option/call argument uniqueness",
+  "status": "proved",
+  "evidence": "Full mutual Syn induction closes every expression/type/param/namedArg/callArgs/list/optional cycle; list item vectors preserve tuple holes. All5typeconstructors and9primary families included."
+ },
+ {
+  "id": "EU-07",
+  "obligation": "certified expression yield uniqueness",
+  "status": "proved",
+  "evidence": "certifiedYieldUnique inhabits the exact original target with only independent Derives+prec premises; actual kernel/MCP/signature/axiom guards PASS. Axioms exactly propext, Classical.choice, Quot.sound."
+ },
+ {
+  "id": "EU-08",
+  "obligation": "parseCat accepted-tree corollary",
+  "status": "proved",
+  "evidence": "Accepted.parseCat_expression_accepted_unique combines original parseCat_sound with certified uniqueness; same-source cross-producer corollary also proved. No parser determinism substitution."
+ },
+ {
+  "id": "EU-09",
+  "obligation": "documented prefix/postfix/conditional assignment refusals reproduced",
+  "status": "pass",
+  "evidence": "Frozen four refusal examples, four additional postfix bases and grouped accepted variants rerun with kernel proofs."
+ },
+ {
+  "id": "EU-10",
+  "obligation": "arbitrary-family inhabited and negative controls",
+  "status": "proved",
+  "evidence": "Arbitrary depths/counts/optionalreturns/bothattributeorders inhabit wrapped function meta expressions; original DIRECTfnmeta refused. Arbitrarytupleholes, arrays, postfix/group/unary/mixedbinary families retained; controls compare ANYcertifiedcompetitor."
+ },
+ {
+  "id": "EU-11",
+  "obligation": "all module/declaration inventory and standard-only axiom pins",
+  "status": "pass",
+  "evidence": "100modules/1241explicitsource declarations;2323uniqueownedlogical declarations across2447audited emissions;124re-emissions agree. Allactualkerneltypes/stdaxioms+exactSourcepins covered.387extra metadata names=34logical overlaps+353compiler-only; exactowners/toolhashes/resources/coverage checked."
+ },
+ {
+  "id": "EU-12",
+  "obligation": "runtime, KeySort, import closure, trust and fixture gates",
+  "status": "pass",
+  "evidence": "Claude VM, 2026-11-06, Lean 4.24.0 / Lake 5.0.0-src+797c613. tests/sol-expression-uniqueness/gate.sh (./run-lean.sh: check-layers, register.sh --check, fragments.sh --check, lake build Solidity SolidityExamples solkeycheck solidity-lean SolkeyTestSuite, solkeycheck) exit 0 at source digest efb3b3d9\u2026; build completed (5922 jobs); KeySort at the pinned snapshot: 377 taclets, 131 read-bearing, OK. check-sol-expression-uniqueness.py --checkpoint: CHECKPOINT_PASS (1241 kernel axiom guards, 100 modules). node scripts/check-orphans.mjs: 0 orphaned. Log hashes: tests/sol-expression-uniqueness/gate-logs.sha256."
+ },
+ {
+  "id": "EU-13",
+  "obligation": "independent finder and skeptic reviews",
+  "status": "pass",
+  "evidence": "Codex-VM review verdicts are externalized (H44, bulk-manifest.json). Claude-VM post-split finder and skeptic reviews (read-only, no Lean server) and their fixes: docs/feature-work/expression-uniqueness.md, 'Claude-VM reviews'."
+ },
+ {
+  "id": "EU-14",
+  "obligation": "sealed full proof handoff",
+  "status": "pass",
+  "evidence": "Sealed handoff: docs/feature-work/expression-uniqueness.md, 'Sealed handoff (Claude VM)'."
+ }
+]

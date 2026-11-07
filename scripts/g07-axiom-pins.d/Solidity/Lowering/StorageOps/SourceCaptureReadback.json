@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCaptureReadback.lean:Solidity.Lowering.StorageOps.SourceCaptureReadback.allocation_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

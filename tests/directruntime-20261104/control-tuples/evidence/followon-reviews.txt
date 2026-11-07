@@ -1,0 +1,8 @@
+Independent finder and skeptic, read-only; neither used Lean server, builds or writes.
+Both reviewed new obligation fixture/controls and package-aware serial wrapper. Skeptic found unattached inline loop comments; fixed standalone annotations, regenerated AST, asserted all six metadata arrays, reran coherent checks successfully. Both accepted corrected controls/wrapper with no further source finding.
+Both independently verified new H41 pack SHA256 02a0e8d81866887a295556c8e3715337cff62816e33621232b699216559b1f17, 1694376 bytes, 15 unique regular members with internal checksums, 9 content-addressed artifacts and 3 exact trace/output mappings; checked source hashes against current files.
+Finder independently checked all12 validation source/fixture hashes and native binary hash 6e486ce1e4c5876741004d9b1e82caafe884ef5ad4cd15b62c67d4310d74c0b9, size189746408, trace zero serialized-env opens and expected model/KeySort results. No ordinary-verifier closure inferred.
+Both accepted full retry interpretation: only remaining IntrinsicControls registration failures, corpus/strict pass; first reserve-stopped attempt preserved separately.
+Both flagged stale current cache pointer/unqualified old pull flag. Fixed current pointer to f77 receipt, current pull=false; old pull/receipt explicitly historical. Current gates now use full-retry table; original gates retained under historical_original_gates. Final fix recheck requested.
+Finder final recheck: current f77 pointers/pull=false and historical old receipt/pull correct; current gates match retry; no remaining finding.
+Skeptic final recheck: current f77 pointers/pull=false and historical evidence correct; no remaining finding.

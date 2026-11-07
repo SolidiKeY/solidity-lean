@@ -1,3 +1,7 @@
 Solidity.lean merge=union
 SolidityExamples.lean merge=union
 Bridge/SolidityBridge.lean merge=union
+docs/module-map.md merge=union
+docs/module-map/*.md merge=union
+docs/README.md merge=union
+TERRA-TODO.md merge=union

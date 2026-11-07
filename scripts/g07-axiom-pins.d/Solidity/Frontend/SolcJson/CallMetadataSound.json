@@ -1,0 +1,11 @@
+{
+ "Solidity/Frontend/SolcJson/CallMetadataSound.lean:Solidity.Frontend.CallMetadata.checked_call_exact": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataSound.lean:Solidity.Frontend.CallMetadata.checked_static_declaration": [
+  "propext"
+ ],
+ "Solidity/Frontend/SolcJson/CallMetadataSound.lean:Solidity.Frontend.CallMetadata.checked_static_target": [
+  "propext"
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarReturn.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.one_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarReturn.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.return_turn": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarReturn.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.two_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

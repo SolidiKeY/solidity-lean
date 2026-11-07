@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/NestedPopFrames.lean:Solidity.Backend.StorageOps.NestedPopFrames.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopFrames.lean:Solidity.Backend.StorageOps.NestedPopFrames.context_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopFrames.lean:Solidity.Backend.StorageOps.NestedPopFrames.store_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.budgeted_reference_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.budgeted_reference_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.budgeted_reference_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.budgetedReference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.reference_budget_guard_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.reference_budget_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.reference_budget_large": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.reference_budget_remaining": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.reference_budget_tail_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

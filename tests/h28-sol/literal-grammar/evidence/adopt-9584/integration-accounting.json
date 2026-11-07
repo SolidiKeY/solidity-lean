@@ -1,0 +1,33 @@
+{
+  "published": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "integrated": [
+    "Solidity.Frontend.LiteralGrammarH28.Body",
+    "Solidity.Frontend.LiteralGrammarH28.BodyControls",
+    "Solidity.Frontend.LiteralGrammarH28.BoundaryControls",
+    "Solidity.Frontend.LiteralGrammarH28.Hex",
+    "Solidity.Frontend.LiteralGrammarH28.HexEncoding",
+    "Solidity.Frontend.LiteralGrammarH28.Quoted",
+    "Solidity.Frontend.LiteralGrammarH28.Scanner"
+  ],
+  "remaining_unregistered": [
+    "Solidity.Frontend.LiteralGrammarH28.BodyPins",
+    "Solidity.Frontend.LiteralGrammarH28.BoundaryPins",
+    "Solidity.Frontend.LiteralGrammarH28.Classification",
+    "Solidity.Frontend.LiteralGrammarH28.EncodingValue",
+    "Solidity.Frontend.LiteralGrammarH28.FragmentCompleteness",
+    "Solidity.Frontend.LiteralGrammarH28.Fragments",
+    "Solidity.Frontend.LiteralGrammarH28.FullControls",
+    "Solidity.Frontend.LiteralGrammarH28.FullPins",
+    "Solidity.Frontend.LiteralGrammarH28.Global",
+    "Solidity.Frontend.LiteralGrammarH28.HexControls",
+    "Solidity.Frontend.LiteralGrammarH28.HexPins",
+    "Solidity.Frontend.LiteralGrammarH28.ModeGrammar",
+    "Solidity.Frontend.LiteralGrammarH28.ProofSafety",
+    "Solidity.Frontend.LiteralGrammarH28.Roundtrips",
+    "Solidity.Frontend.LiteralGrammarH28.Split",
+    "Solidity.Frontend.LiteralGrammarH28.TaggedEncoding",
+    "Solidity.Frontend.LiteralGrammarH28.WordTable"
+  ],
+  "unchanged_owned_sources": 24,
+  "unchanged_original_input_pins": 4
+}

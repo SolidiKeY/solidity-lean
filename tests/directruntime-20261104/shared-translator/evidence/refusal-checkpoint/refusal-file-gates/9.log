@@ -1,0 +1,30 @@
+Solidity.Frontend.ExecutableAst.Shared.Reader : Type
+Solidity.Frontend.ExecutableAst.Shared.Reader.typeName (self : Reader) :
+  Lean.Json → Except String (Solidity.Ty × Solidity.RawTy)
+Solidity.Frontend.ExecutableAst.Shared.Reader.expression (self : Reader) : Lean.Json → Except String Solidity.RawExpr
+Solidity.Frontend.ExecutableAst.Shared.Reader.statements (self : Reader) :
+  Lean.Json → Except String (List Solidity.RawStmt)
+Solidity.Frontend.ExecutableAst.Shared.Reader.params (self : Reader) :
+  Lean.Json → Bool → String → Except String (List (String × Solidity.Ty))
+Solidity.Frontend.ExecutableAst.Shared.Reader.specification (self : Reader) : Lean.Json → Except String Solidity.FunSpec
+Solidity.Frontend.ExecutableAst.Shared.typeNameStep (read : Lean.Json → Except String (Solidity.Ty × Solidity.RawTy))
+  (j : Lean.Json) : Except String (Solidity.Ty × Solidity.RawTy)
+Solidity.Frontend.ExecutableAst.Shared.expressionStep (read : Lean.Json → Except String Solidity.RawExpr)
+  (j : Lean.Json) : Except String Solidity.RawExpr
+Solidity.Frontend.ExecutableAst.Shared.statementsStep (readExpr : Lean.Json → Except String Solidity.RawExpr)
+  (readStmts : Lean.Json → Except String (List Solidity.RawStmt))
+  (readType : Lean.Json → Except String (Solidity.Ty × Solidity.RawTy)) (j : Lean.Json) :
+  Except String (List Solidity.RawStmt)
+Solidity.Frontend.ExecutableAst.Shared.reader : Reader
+Solidity.Frontend.ExecutableAst.Shared.function (read : Reader) (j : Lean.Json) (avoid : String) :
+  Except String (String × Solidity.FunDecl)
+Solidity.Frontend.ExecutableAst.Shared.contract (read : Reader) (j : Lean.Json) : Except String Solidity.Contract
+Solidity.Frontend.ExecutableAst.Shared.BodyLoopLowerer : Type
+Solidity.Frontend.ExecutableAst.Shared.PlainEntryPre : Type
+Solidity.Frontend.ExecutableAst.Shared.assertionObligation (lowerBodyLoops : BodyLoopLowerer) (callPre : PlainEntryPre)
+  (C : Solidity.Contract) (name : String) (box : Bool) : Except String (Solidity.Fml C [])
+Solidity.Frontend.ExecutableAst.Shared.obligation (lowerBodyLoops : BodyLoopLowerer) (callPre : PlainEntryPre)
+  (C : Solidity.Contract) (name : String) (specified box : Bool) : Except String (Solidity.Fml C [])
+Solidity.Frontend.ExecutableAst.Shared.validateMetadata (j : Lean.Json) : Except String Unit
+Solidity.Frontend.ExecutableAst.Shared.checkedExpression (j : Lean.Json) : Except String Solidity.RawExpr
+Solidity.Frontend.ExecutableAst.Shared.checkedStatements (j : Lean.Json) : Except String (List Solidity.RawStmt)

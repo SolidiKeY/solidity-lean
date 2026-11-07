@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.failure_outcomes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.source_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWriteControls.lean:Solidity.Lowering.StorageOps.SourceWordWriteControls.target_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/Tactics/FiniteSets.lean:Solidity.Examples.Tactics.FiniteSets.echo_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/FiniteSets.lean:Solidity.Examples.Tactics.FiniteSets.one_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

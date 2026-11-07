@@ -9,7 +9,7 @@ def ts := rootTempRegistry
 
 def frame : Source.Fr := {this:=account,sender:=account,value:=0,static:=false,contract:="Slots",checked:=true,depth:=0,cd:=[]}
 def state : Source.EMState rootEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _=>Source.Account.empty (D:=rootEnv.layout) (rootEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _=>Source.Account.empty (D:=rootEnv.layout) (rootEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def residual := initialPackedComplement ps ts (fun _=>0xbeef0000)
 def initial : ResidualCompanion rootEnv.layout rootEnv.lay rootEnv.lay complementCarrierOwnership := ⟨state.2.ex,residual⟩
 def rawA : Roadmap.Word := 0xa5a51234

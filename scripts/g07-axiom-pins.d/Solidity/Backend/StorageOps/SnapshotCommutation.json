@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/StorageOps/SnapshotCommutation.lean:Solidity.Backend.StorageOps.actual_mapping_copies_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SnapshotCommutation.lean:Solidity.Backend.StorageOps.common_prefix_copies_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SnapshotCommutation.lean:Solidity.Backend.StorageOps.copySibling_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SnapshotCommutation.lean:Solidity.Backend.StorageOps.copySibling_eq_actual": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SnapshotCommutation.lean:Solidity.Backend.StorageOps.copySibling_source_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SnapshotCommutation.lean:Solidity.Backend.StorageOps.recursiveCopyAt_append": [
+  "Quot.sound",
+  "propext"
+ ]
+}

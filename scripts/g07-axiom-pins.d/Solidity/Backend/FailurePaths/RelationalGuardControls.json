@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.equal_lt_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.equality": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.maximum_lt_zero_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.negative_lt_zero_succeeds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.old_selector_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.sign_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.signed_extremes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.unsigned_maximum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

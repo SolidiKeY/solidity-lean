@@ -364,7 +364,7 @@ def RLVal.OpsOK {E : Env} {Γ : RCtx} : {τ : STy} → RLVal E Γ τ → Prop
 end
 
 theorem RArgs.convert_opsOK {E : Env} {Γ : RCtx} : {σs : List STy} → (ps : List STy) →
-    (a : RArgs E Γ σs) → (h : argsFit E.isBase σs ps = true) → RArgs.OpsOK a →
+    (a : RArgs E Γ σs) → (h : argsFit E.isBase E.mapFree σs ps = true) → RArgs.OpsOK a →
     RConvArgs.OpsOK (a.convert ps h)
   | [], [], .nil, _, _ => trivial
   | _ :: _, _ :: ps, .cons _ es, _, ho => by
@@ -655,8 +655,8 @@ theorem convVal_self_ok {σ : STy} (x : Val D σ) (hf : convVal σ x = if h : σ
 /-- **`convVal` is never stuck on an implicit conversion of a value
 type**, or on the identity: the conversions `toR` inserts around operands
 of value type. -/
-theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.isValue = true)
-    (h : σ.implicit B τ = true ∨ σ = τ) (x : Val D σ) : NotStuckR (convVal τ x) := by
+theorem convVal_ok (B : DeclName → DeclName → Bool) (M : DeclName → Bool) {σ τ : STy} (hσ : σ.isValue = true)
+    (h : σ.implicit B M τ = true ∨ σ = τ) (x : Val D σ) : NotStuckR (convVal τ x) := by
   rcases h with h | rfl
   · cases σ <;> (try (cases hσ <;> done)) <;> cases τ <;> (try (cases h <;> done))
     · rename_i t t'
@@ -667,7 +667,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
     · rename_i t f
       obtain ⟨v, hv, rfl⟩ := Val.eq_int x
       have h' : f.minInt ≤ t.lo ∧ t.hi ≤ f.maxInt := by
-        rw [show STy.implicit B (.int t) (.fixed f) = f.intImplicit t.lo t.hi from rfl] at h
+        rw [show STy.implicit B M (.int t) (.fixed f) = f.intImplicit t.lo t.hi from rfl] at h
         simpa only [FixTy.intImplicit, Bool.and_eq_true, decide_eq_true_eq] using h
       rw [show convVal (D := D) (.fixed f) (Val.int (t := t) v hv) = mkFix f (v * f.scale) from rfl]
       exact mkFix_ok _ (f.scaled_mem (Int.le_trans h'.1 hv.1) (Int.le_trans hv.2 h'.2))
@@ -686,7 +686,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
     · rename_i f f'
       obtain ⟨v, hv, rfl⟩ := Val.eq_fixed x
       have h' : f.subsumes f' = true := by
-        rw [show STy.implicit B (.fixed f) (.fixed f') = f.implicitOK f' from rfl] at h
+        rw [show STy.implicit B M (.fixed f) (.fixed f') = f.implicitOK f' from rfl] at h
         simp only [FixTy.implicitOK, Bool.and_eq_true] at h
         exact h.2
       have r := FixTy.subsumes_inRange h' hv
@@ -698,7 +698,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
       rw [e]; exact r
     · rename_i d d'
       have e : d = d' := by
-        rw [show STy.implicit B (.enum d) (.enum d') = (d == d') from rfl] at h
+        rw [show STy.implicit B M (.enum d) (.enum d') = (d == d') from rfl] at h
         exact beq_iff_eq.mp h
       subst e
       obtain ⟨i, rfl⟩ := Val.eq_enum x
@@ -707,7 +707,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
       exact NotStuckR.pure _
     · rename_i d d'
       have e : d = d' := by
-        rw [show STy.implicit B (.udvt d) (.udvt d') = (d == d') from rfl] at h
+        rw [show STy.implicit B M (.udvt d) (.udvt d') = (d == d') from rfl] at h
         exact beq_iff_eq.mp h
       subst e
       rw [show convVal (D := D) (.udvt d) x = (if h : d = d then pure (h ▸ x) else
@@ -724,7 +724,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
       exact NotStuckR.pure _
     · rename_i e ps rs m e' ps' rs' m'
       have he : STy.fn e ps rs m = STy.fn e' ps' rs' m' := by
-        rw [show STy.implicit B (.fn e ps rs m) (.fn e' ps' rs' m') = (e == e' && STy.sameList ps ps' &&
+        rw [show STy.implicit B M (.fn e ps rs m) (.fn e' ps' rs' m') = (e == e' && STy.sameList ps ps' &&
           STy.sameList rs rs' && m == m') from rfl] at h
         simp only [Bool.and_eq_true, beq_iff_eq] at h
         obtain ⟨⟨⟨h1, h2⟩, h3⟩, h4⟩ := h
@@ -788,25 +788,25 @@ theorem Q.toFixed?_mem {q : Q} {f : FixTy} {v : Int} (h : q.toFixed? f = some v)
 /-- **`constVal` is never stuck on an implicit conversion of a constant**
 (to an integer type it fits, a fixed-point type that holds it exactly, or
 `bytesN` from zero). -/
-theorem constVal_ok (B : DeclName → DeclName → Bool) {q : Q} {τ : STy}
-    (h : (STy.rational q).implicit B τ = true) : NotStuckR (constVal (D := D) q τ) := by
+theorem constVal_ok (B : DeclName → DeclName → Bool) (M : DeclName → Bool) {q : Q} {τ : STy}
+    (h : (STy.rational q).implicit B M τ = true) : NotStuckR (constVal (D := D) q τ) := by
   cases τ <;> (try (cases h <;> done))
   · rename_i t
     have hf : q.FitsInt t := by
-      rw [show STy.implicit B (.rational q) (.int t) = decide (q.FitsInt t) from rfl] at h
+      rw [show STy.implicit B M (.rational q) (.int t) = decide (q.FitsInt t) from rfl] at h
       exact of_decide_eq_true h
     rw [show constVal (D := D) q (.int t) = (if q.isInt then mkInt t q.toInt
       else stuck "fractional constant at an integer type") from rfl, if_pos hf.1]
     exact mkInt_ok _ hf.2
   · rename_i n hn
     have h0 : q.num = 0 := by
-      rw [show STy.implicit B (.rational q) (.fixedBytes n hn) = (q.num == 0) from rfl] at h
+      rw [show STy.implicit B M (.rational q) (.fixedBytes n hn) = (q.num == 0) from rfl] at h
       exact beq_iff_eq.mp h
     rw [show constVal (D := D) q (.fixedBytes n hn) = (if q.num = 0 then pure (mkBytes (n := n) (h := hn) [])
       else stuck "constant at bytes") from rfl, if_pos h0]
     exact NotStuckR.pure _
   · rename_i f
-    rw [show STy.implicit B (.rational q) (.fixed f) = (q.toFixed? f).isSome from rfl] at h
+    rw [show STy.implicit B M (.rational q) (.fixed f) = (q.toFixed? f).isSome from rfl] at h
     rcases hv : q.toFixed? f with _ | v
     · rw [hv] at h; cases h
     · rw [show constVal (D := D) q (.fixed f) = (match q.toFixed? f with

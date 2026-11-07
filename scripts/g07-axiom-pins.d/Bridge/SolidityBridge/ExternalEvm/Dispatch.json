@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.BinaryOpcode.agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.EnvironmentOpcode.agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.pop_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.push_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Dispatch.lean:Solidity.Evm.External.UnaryOpcode.agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

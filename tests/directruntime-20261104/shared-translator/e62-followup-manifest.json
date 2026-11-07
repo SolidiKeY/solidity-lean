@@ -1,0 +1,10 @@
+{
+  "publication": "e62f0230bcb683240be287b543443a38f317887c",
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/e62-followup/evidence-1aa73c9bc42f5844.tar.zst",
+  "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/e62-followup/evidence-1aa73c9bc42f5844.tar.zst",
+  "archiveBytes": 9689,
+  "archiveSha256": "1aa73c9bc42f5844dcdb9fbbfb0153fbc3411132f2aea284394b5702f735a76f",
+  "outcome": "PASS54.820511s,RSS1254768KiB,minOuterAvailable13906223104B;12GiB/swap0/CPU1/threads1/-j1;Lean4.24.0/Lake5.0.0-src+797c613.",
+  "contents": "Actualcommands/exits/axiom-signatures/frozen-control/native/KeySort/SolKey output,12exactrejections,frozenmetadata checks,adoption/review records.",
+  "boundary": "Artifact verification hardening only;not full source/semantic/runtime closure."
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/ReferenceCaptureCertificate.lean:Solidity.Backend.Passes.ReferenceCaptureCertificate.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

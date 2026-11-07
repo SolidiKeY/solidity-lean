@@ -1,0 +1,6 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViews.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.context_eq": [
+  "Quot.sound",
+  "propext"
+ ]
+}

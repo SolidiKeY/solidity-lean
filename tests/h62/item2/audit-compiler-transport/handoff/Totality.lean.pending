@@ -1,0 +1,46 @@
+import tests.h62.item2.«audit-compiler-transport».Audit
+
+/-! Unbounded-length supported programs. Every Boolean literal list is compiled
+through the unchanged public entry and writes a real existing local. The source
+and abstract machine succeed without an acceptance or execution hypothesis.
+This certifies intrinsic programs and abstract instructions, not bytecode gas. -/
+namespace H62.CompilerTransport.Totality
+open Solidity Solidity.Evm Solidity.Evm.Compiler
+variable {C : Contract}
+abbrev Context : Ctx := [.val .bool]
+
+def program (C : Contract) : List Bool → Prog C Context Context
+  | [] => .nil
+  | value :: rest => .cons (.assignLocal .here (.simple (.bool value))) (program C rest)
+
+def fragment : Frag Context := Frag.init Context
+
+theorem recognized (values : List Bool) :
+    inFragP fragment (program C values) = some fragment := by
+  induction values with
+  | nil => rfl
+  | cons value rest ih =>
+    change inFragP fragment (program C rest) = some fragment
+    exact ih
+
+def certificate (C : Contract) (values : List Bool) :
+    Compilation 0 fragment (program C values) := .core fragment (recognized values)
+
+theorem public_accepts (values : List Bool) :
+    Compiler.compile 0 fragment (program C values) = some (certificate C values) := by
+  simp only [Compiler.compile, recognized]
+  rfl
+
+def code (C : Contract) (values : List Bool) : List Instr :=
+  (certificate C values).code
+
+theorem public_code (values : List Bool) :
+    (Compiler.compile 0 fragment (program C values)).map (·.code) = some (code C values) := by
+  rw [public_accepts]
+  rfl
+
+def lastValue : List Bool → Bool → Bool
+  | [], initial => initial
+  | value :: rest, _ => lastValue rest value
+
+end H62.CompilerTransport.Totality

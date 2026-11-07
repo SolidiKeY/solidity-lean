@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Compilation/LetBranchCompletionControls.lean:Solidity.Yul.Compilation.LetBranchCompletion.Controls.inverted_high_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletionControls.lean:Solidity.Yul.Compilation.LetBranchCompletion.Controls.inverted_high_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletionControls.lean:Solidity.Yul.Compilation.LetBranchCompletion.Controls.inverted_zero_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletionControls.lean:Solidity.Yul.Compilation.LetBranchCompletion.Controls.inverted_zero_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletionControls.lean:Solidity.Yul.Compilation.LetBranchCompletion.Controls.recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletionControls.lean:Solidity.Yul.Compilation.LetBranchCompletion.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetBranchCompletionControls.lean:Solidity.Yul.Compilation.LetBranchCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

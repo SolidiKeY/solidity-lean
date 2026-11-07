@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.38;
+contract C {
+mapping(bool => uint) v0;
+mapping(bool => A.B) v1;
+mapping(bool => uint[][N+1]) v2;
+mapping(bool => mapping(address=>bool)) v3;
+mapping(bool => function(uint memory x) external view returns(bool y)) v4;
+mapping(bool => uint value) v5;
+mapping(bool => A.B value) v6;
+mapping(bool => uint[][N+1] value) v7;
+mapping(bool => mapping(address=>bool) value) v8;
+mapping(bool => function(uint memory x) external view returns(bool y) value) v9;
+mapping(bool key => uint) v10;
+mapping(bool key => A.B) v11;
+mapping(bool key => uint[][N+1]) v12;
+mapping(bool key => mapping(address=>bool)) v13;
+mapping(bool key => function(uint memory x) external view returns(bool y)) v14;
+mapping(bool key => uint value) v15;
+mapping(bool key => A.B value) v16;
+mapping(bool key => uint[][N+1] value) v17;
+mapping(bool key => mapping(address=>bool) value) v18;
+mapping(bool key => function(uint memory x) external view returns(bool y) value) v19;
+mapping(A.B => uint) v20;
+mapping(A.B => A.B) v21;
+mapping(A.B => uint[][N+1]) v22;
+mapping(A.B => mapping(address=>bool)) v23;
+mapping(A.B => function(uint memory x) external view returns(bool y)) v24;
+mapping(A.B => uint value) v25;
+mapping(A.B => A.B value) v26;
+mapping(A.B => uint[][N+1] value) v27;
+mapping(A.B => mapping(address=>bool) value) v28;
+mapping(A.B => function(uint memory x) external view returns(bool y) value) v29;
+mapping(A.B key => uint) v30;
+mapping(A.B key => A.B) v31;
+mapping(A.B key => uint[][N+1]) v32;
+mapping(A.B key => mapping(address=>bool)) v33;
+mapping(A.B key => function(uint memory x) external view returns(bool y)) v34;
+mapping(A.B key => uint value) v35;
+mapping(A.B key => A.B value) v36;
+mapping(A.B key => uint[][N+1] value) v37;
+mapping(A.B key => mapping(address=>bool) value) v38;
+mapping(A.B key => function(uint memory x) external view returns(bool y) value) v39;
+}

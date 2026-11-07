@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/NumericRetainedCycle.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.after_pop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycle.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.capacity_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycle.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.clear_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycle.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycle.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.paired_reuse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycle.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.popped_headers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericRetainedCycle.lean:Solidity.Backend.StorageOps.NumericRetainedCycle.reuse_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

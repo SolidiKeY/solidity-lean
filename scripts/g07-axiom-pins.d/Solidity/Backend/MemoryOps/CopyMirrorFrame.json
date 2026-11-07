@@ -1,0 +1,19 @@
+{
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.captureAfterCopy_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.captureAfterDefault_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.fields_mirrors_frame": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.mirrors_frame": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorFrame.lean:Solidity.Backend.MemoryOps.vec_mirrors_frame": [
+  "propext"
+ ]
+}

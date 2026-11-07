@@ -1,0 +1,13 @@
+{
+  "oldHead": "19f8973dc13f2ee47703f6e8b2e7d3fbbb7d7b98",
+  "target": "1aeaf276da8145d9cffdbbc76ff4b192f6360efb",
+  "headAfterRebase": "1aeaf276da8145d9cffdbbc76ff4b192f6360efb",
+  "publicationForm": "source-equivalent cherry-picks 1dcfab2e/79dca631; original oldHead is not an ancestor",
+  "ownedTreeByteIdenticalBeforeRebase": true,
+  "replayedCommitsSkippedAsAlreadyApplied": [
+    "8f03f212",
+    "19f8973d"
+  ],
+  "recoveryRef": "refs/codex-recovery/shared-translator/pre-1aeaf276",
+  "boundary": "Mandated rebase complete;source equality,not original commit ancestry,is the preservation evidence."
+}

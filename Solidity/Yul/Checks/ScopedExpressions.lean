@@ -101,4 +101,11 @@ example : (Solidity.Yul.ScopedExpressions.check localChecked emptyCurrent
       ([] : FunctionNames [])) tiny :=
   Solidity.Yul.ScopedExpressions.closed_erasure _ _ _ _ _
 
+/-- info: 'Solidity.Yul.ScopedExpressions.Checked.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedExpressions.Checked.unique
+/-- info: 'Solidity.Yul.ScopedExpressions.Checked.term_result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedExpressions.Checked.term_result_unique
+
 end Solidity.Yul.Checks.ScopedExpressions

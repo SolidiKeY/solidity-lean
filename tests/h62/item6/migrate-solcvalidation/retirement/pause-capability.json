@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "requested_state": "PAUSED",
+  "authority": "Human H82 stop-and-handoff plus explicit concurrent-message ordering correction",
+  "available_goal_tools": [
+    {
+      "name": "stop_goal",
+      "accepted_outcomes": [
+        "complete",
+        "blocked"
+      ]
+    }
+  ],
+  "pause_action_available": false,
+  "failure": "No pause/set-state/get-goal tool is exposed. stop_goal supports only complete or blocked; neither is a valid substitute for requested PAUSED. Prior stop calls also lacked trusted CCA goal/source-turn context.",
+  "complete_or_blocked_substituted": false,
+  "goal_created_or_reset": false,
+  "worker_implementation_stopped": true,
+  "automatic_implementation_continuation_authorized": false,
+  "active_Lean_jobs": false,
+  "active_collectors": false,
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate"
+}

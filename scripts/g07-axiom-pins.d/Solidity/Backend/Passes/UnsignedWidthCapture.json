@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.never_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.public_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.public_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.reader_emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCapture.lean:Solidity.Backend.Passes.UnsignedWidthCapture.whole_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

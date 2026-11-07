@@ -1,0 +1,72 @@
+{
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.argument_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.collision_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.constructor_failure_caught": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.enclosing_atomic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.from_created": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.later_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.read_commit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.read_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.selects_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.source_to_tryread": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.static_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.success_failure_not_recaught": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.wrong_catch_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.wrong_rollback_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

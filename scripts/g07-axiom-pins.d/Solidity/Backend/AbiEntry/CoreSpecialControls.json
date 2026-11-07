@@ -1,0 +1,53 @@
+{
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.absent_endpoints": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.empty_prefers_receive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.empty_without_receive_uses_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.incoming_local_and_saved_state": [],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.missing_fallback_rejects_nonempty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.nonempty_ignores_receive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.nonpayable_fallback_before_argument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.nonpayable_receive_terminal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.payable_receive_every_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.public_selections": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/CoreSpecialControls.lean:Solidity.Backend.AbiEntry.CoreSpecialControls.reverting_fallback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

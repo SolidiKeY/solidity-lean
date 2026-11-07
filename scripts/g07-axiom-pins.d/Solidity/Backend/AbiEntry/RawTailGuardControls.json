@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/AbiEntry/RawTailGuardControls.lean:Solidity.Backend.AbiEntry.RawTailGuardControls.empty_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawTailGuardControls.lean:Solidity.Backend.AbiEntry.RawTailGuardControls.huge_metadata": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawTailGuardControls.lean:Solidity.Backend.AbiEntry.RawTailGuardControls.malformed_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawTailGuardControls.lean:Solidity.Backend.AbiEntry.RawTailGuardControls.negative_condition": [],
+ "Solidity/Backend/AbiEntry/RawTailGuardControls.lean:Solidity.Backend.AbiEntry.RawTailGuardControls.negative_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawTailGuardControls.lean:Solidity.Backend.AbiEntry.RawTailGuardControls.negative_reference": [
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingPrefixes.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

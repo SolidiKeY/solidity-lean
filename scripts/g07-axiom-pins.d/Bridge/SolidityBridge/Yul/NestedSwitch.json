@@ -1,0 +1,43 @@
+{
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.branch": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.compileArms": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.cons": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.dispatch": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.letOne": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.nil": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.sequence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

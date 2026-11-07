@@ -1,0 +1,447 @@
+CWD: /workspace/solidity-lean/Bridge
+COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 tests/precompile-agreement/Acceptance.lean
+SolidityBridge.PrecompileAgreement.byte_list (b : ByteArray) : b.toList = b.data.toList
+SolidityBridge.PrecompileAgreement.byte_length (b : ByteArray) : b.toList.length = b.size
+SolidityBridge.PrecompileAgreement.ofNat_nat (n : ℕ) (h : n < EvmYul.UInt256.size) : (EvmYul.UInt256.ofNat n).toNat = n
+SolidityBridge.PrecompileAgreement.subtract_nat (g : EvmYul.UInt256) (n : ℕ) (h : n ≤ g.toNat) :
+  (g - EvmYul.UInt256.ofNat n).toNat = g.toNat - n
+SolidityBridge.PrecompileAgreement.words_multiple (n : ℕ) : Solidity.Precompiles.words (32 * n) = n
+SolidityBridge.PrecompileAgreement.words_next (n : ℕ) : Solidity.Precompiles.words (32 * n + 1) = n + 1
+SolidityBridge.PrecompileAgreement.words_last (n : ℕ) : Solidity.Precompiles.words (32 * n + 31) = n + 1
+SolidityBridge.PrecompileAgreement.words_boundary (n : ℕ) : Solidity.Precompiles.words (32 * n + 32) = n + 1
+SolidityBridge.PrecompileAgreement.words_rounding (n : ℕ) :
+  Solidity.Precompiles.words n = n / 32 + if n % 32 = 0 then 0 else 1
+SolidityBridge.PrecompileAgreement.Controls.array (xs : List UInt8) : ByteArray
+SolidityBridge.PrecompileAgreement.Controls.filled (n : ℕ) : ByteArray
+SolidityBridge.PrecompileAgreement.Controls.zeros (n : ℕ) : Solidity.Roadmap.Evm.Bytes
+SolidityBridge.PrecompileAgreement.Controls.input (d : ByteArray) : EvmYul.ExecutionEnv EvmYul.OperationType.EVM
+SolidityBridge.PrecompileAgreement.Controls.lengths : List ℕ
+SolidityBridge.PrecompileAgreement.Controls.identity_lengths :
+  List.map (fun n => Solidity.Precompiles.identityGas (SolidityBridge.PrecompileAgreement.Controls.filled n).toList)
+      SolidityBridge.PrecompileAgreement.Controls.lengths =
+    [15, 18, 18, 18, 21, 21, 21, 24]
+SolidityBridge.PrecompileAgreement.Controls.sha_lengths :
+  List.map
+      (fun n =>
+        Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.sha256
+          (SolidityBridge.PrecompileAgreement.Controls.filled n).toList)
+      SolidityBridge.PrecompileAgreement.Controls.lengths =
+    [60, 72, 72, 72, 84, 84, 84, 96]
+SolidityBridge.PrecompileAgreement.Controls.ripemd_lengths :
+  List.map
+      (fun n =>
+        Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.ripemd160
+          (SolidityBridge.PrecompileAgreement.Controls.filled n).toList)
+      SolidityBridge.PrecompileAgreement.Controls.lengths =
+    [600, 720, 720, 720, 840, 840, 840, 960]
+SolidityBridge.PrecompileAgreement.Controls.identity_nonzero_output :
+  (Ξ_ID default (EvmYul.UInt256.ofNat 18) default
+              (SolidityBridge.PrecompileAgreement.Controls.input
+                (SolidityBridge.PrecompileAgreement.Controls.array [0, 128, 255, 1]))).2.2.2.2 =
+    SolidityBridge.PrecompileAgreement.Controls.array [0, 128, 255, 1]
+SolidityBridge.PrecompileAgreement.Controls.identity_boundary :
+  (Ξ_ID default (EvmYul.UInt256.ofNat 17) default
+          (SolidityBridge.PrecompileAgreement.Controls.input
+            (SolidityBridge.PrecompileAgreement.Controls.array [0, 128, 255, 1]))).1 =
+      false ∧
+    (Ξ_ID default (EvmYul.UInt256.ofNat 18) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array [0, 128, 255, 1]))).1 =
+        true ∧
+      (Ξ_ID default (EvmYul.UInt256.ofNat 19) default
+                  (SolidityBridge.PrecompileAgreement.Controls.input
+                    (SolidityBridge.PrecompileAgreement.Controls.array [0, 128, 255, 1]))).2.2.1.toNat =
+        1
+SolidityBridge.PrecompileAgreement.Controls.sha_boundary :
+  (Ξ_SHA256 default (EvmYul.UInt256.ofNat 71) default
+          (SolidityBridge.PrecompileAgreement.Controls.input
+            (SolidityBridge.PrecompileAgreement.Controls.array [97, 98, 99]))).1 =
+      false ∧
+    (Ξ_SHA256 default (EvmYul.UInt256.ofNat 72) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array [97, 98, 99]))).1 =
+        true ∧
+      (Ξ_SHA256 default (EvmYul.UInt256.ofNat 73) default
+                  (SolidityBridge.PrecompileAgreement.Controls.input
+                    (SolidityBridge.PrecompileAgreement.Controls.array [97, 98, 99]))).2.2.1.toNat =
+        1
+SolidityBridge.PrecompileAgreement.Controls.ripemd_boundary :
+  (Ξ_RIP160 default (EvmYul.UInt256.ofNat 719) default
+          (SolidityBridge.PrecompileAgreement.Controls.input
+            (SolidityBridge.PrecompileAgreement.Controls.array [97, 98, 99]))).1 =
+      false ∧
+    (Ξ_RIP160 default (EvmYul.UInt256.ofNat 720) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array [97, 98, 99]))).1 =
+        true ∧
+      (Ξ_RIP160 default (EvmYul.UInt256.ofNat 721) default
+                  (SolidityBridge.PrecompileAgreement.Controls.input
+                    (SolidityBridge.PrecompileAgreement.Controls.array [97, 98, 99]))).2.2.1.toNat =
+        1
+SolidityBridge.PrecompileAgreement.Controls.invalid_recovery : Solidity.Roadmap.Evm.Bytes
+SolidityBridge.PrecompileAgreement.Controls.ecrecover_controls :
+  Solidity.Precompiles.ecrecover SolidityBridge.PrecompileAgreement.Controls.invalid_recovery = some [] ∧
+    (Ξ_ECREC default (EvmYul.UInt256.ofNat 2999) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array
+                SolidityBridge.PrecompileAgreement.Controls.invalid_recovery))).1 =
+        false ∧
+      (Ξ_ECREC default (EvmYul.UInt256.ofNat 3000) default
+              (SolidityBridge.PrecompileAgreement.Controls.input
+                (SolidityBridge.PrecompileAgreement.Controls.array
+                  SolidityBridge.PrecompileAgreement.Controls.invalid_recovery))).1 =
+          true ∧
+        (Ξ_ECREC default (EvmYul.UInt256.ofNat 3001) default
+                    (SolidityBridge.PrecompileAgreement.Controls.input
+                      (SolidityBridge.PrecompileAgreement.Controls.array
+                        SolidityBridge.PrecompileAgreement.Controls.invalid_recovery))).2.2.1.toNat =
+          1
+SolidityBridge.PrecompileAgreement.Controls.bad_point : Solidity.Roadmap.Evm.Bytes
+SolidityBridge.PrecompileAgreement.Controls.bnadd_controls :
+  List.map (fun n => (Solidity.Precompiles.Bn254.add (SolidityBridge.PrecompileAgreement.Controls.zeros n)).isSome)
+        [127, 128, 129] =
+      [true, true, true] ∧
+    (Solidity.Precompiles.Bn254.add SolidityBridge.PrecompileAgreement.Controls.bad_point).isNone = true ∧
+      (Ξ_BN_ADD default (EvmYul.UInt256.ofNat 149) default
+              (SolidityBridge.PrecompileAgreement.Controls.input
+                (SolidityBridge.PrecompileAgreement.Controls.array
+                  (SolidityBridge.PrecompileAgreement.Controls.zeros 128)))).1 =
+          false ∧
+        (Ξ_BN_ADD default (EvmYul.UInt256.ofNat 150) default
+                (SolidityBridge.PrecompileAgreement.Controls.input
+                  (SolidityBridge.PrecompileAgreement.Controls.array
+                    (SolidityBridge.PrecompileAgreement.Controls.zeros 128)))).1 =
+            true ∧
+          (Ξ_BN_ADD default (EvmYul.UInt256.ofNat 151) default
+                      (SolidityBridge.PrecompileAgreement.Controls.input
+                        (SolidityBridge.PrecompileAgreement.Controls.array
+                          (SolidityBridge.PrecompileAgreement.Controls.zeros 128)))).2.2.1.toNat =
+            1
+SolidityBridge.PrecompileAgreement.Controls.bnmul_controls :
+  List.map (fun n => (Solidity.Precompiles.Bn254.mul (SolidityBridge.PrecompileAgreement.Controls.zeros n)).isSome)
+        [95, 96, 97] =
+      [true, true, true] ∧
+    (Solidity.Precompiles.Bn254.mul (List.take 96 SolidityBridge.PrecompileAgreement.Controls.bad_point)).isNone =
+        true ∧
+      (Ξ_BN_MUL default (EvmYul.UInt256.ofNat 5999) default
+              (SolidityBridge.PrecompileAgreement.Controls.input
+                (SolidityBridge.PrecompileAgreement.Controls.array
+                  (SolidityBridge.PrecompileAgreement.Controls.zeros 96)))).1 =
+          false ∧
+        (Ξ_BN_MUL default (EvmYul.UInt256.ofNat 6000) default
+                (SolidityBridge.PrecompileAgreement.Controls.input
+                  (SolidityBridge.PrecompileAgreement.Controls.array
+                    (SolidityBridge.PrecompileAgreement.Controls.zeros 96)))).1 =
+            true ∧
+          (Ξ_BN_MUL default (EvmYul.UInt256.ofNat 6001) default
+                      (SolidityBridge.PrecompileAgreement.Controls.input
+                        (SolidityBridge.PrecompileAgreement.Controls.array
+                          (SolidityBridge.PrecompileAgreement.Controls.zeros 96)))).2.2.1.toNat =
+            1
+SolidityBridge.PrecompileAgreement.Controls.pairing_controls :
+  List.map (fun n => (Solidity.Precompiles.Bn254.pairing (SolidityBridge.PrecompileAgreement.Controls.zeros n)).isNone)
+        [0, 1, 191, 192, 193, 383, 384, 385] =
+      [false, true, true, false, true, true, false, true] ∧
+    (Ξ_SNARKV default (EvmYul.UInt256.ofNat 78999) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array
+                (SolidityBridge.PrecompileAgreement.Controls.zeros 192)))).1 =
+        false ∧
+      (Ξ_SNARKV default (EvmYul.UInt256.ofNat 79000) default
+              (SolidityBridge.PrecompileAgreement.Controls.input
+                (SolidityBridge.PrecompileAgreement.Controls.array
+                  (SolidityBridge.PrecompileAgreement.Controls.zeros 192)))).1 =
+          true ∧
+        (Ξ_SNARKV default (EvmYul.UInt256.ofNat 79001) default
+                    (SolidityBridge.PrecompileAgreement.Controls.input
+                      (SolidityBridge.PrecompileAgreement.Controls.array
+                        (SolidityBridge.PrecompileAgreement.Controls.zeros 192)))).2.2.1.toNat =
+          1
+SolidityBridge.PrecompileAgreement.Controls.blake_one : ByteArray
+SolidityBridge.PrecompileAgreement.Controls.blake_bad_flag : ByteArray
+SolidityBridge.PrecompileAgreement.Controls.blake_controls :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f
+        SolidityBridge.PrecompileAgreement.Controls.blake_one.toList =
+      1 ∧
+    (Solidity.Precompiles.Blake2f.blake2f SolidityBridge.PrecompileAgreement.Controls.blake_one.toList).isSome = true ∧
+      (Solidity.Precompiles.Blake2f.blake2f SolidityBridge.PrecompileAgreement.Controls.blake_bad_flag.toList).isNone =
+          true ∧
+        (Ξ_BLAKE2_F default (EvmYul.UInt256.ofNat 0) default
+                (SolidityBridge.PrecompileAgreement.Controls.input
+                  SolidityBridge.PrecompileAgreement.Controls.blake_one)).1 =
+            false ∧
+          (Ξ_BLAKE2_F default (EvmYul.UInt256.ofNat 1) default
+                  (SolidityBridge.PrecompileAgreement.Controls.input
+                    SolidityBridge.PrecompileAgreement.Controls.blake_one)).1 =
+              true ∧
+            (Ξ_BLAKE2_F default (EvmYul.UInt256.ofNat 2) default
+                          (SolidityBridge.PrecompileAgreement.Controls.input
+                            SolidityBridge.PrecompileAgreement.Controls.blake_one)).2.2.1.toNat =
+                1 ∧
+              (Ξ_BLAKE2_F default (EvmYul.UInt256.ofNat 2) default
+                      (SolidityBridge.PrecompileAgreement.Controls.input
+                        SolidityBridge.PrecompileAgreement.Controls.blake_bad_flag)).1 =
+                  false ∧
+                (Ξ_BLAKE2_F default (EvmYul.UInt256.ofNat 2) default
+                            (SolidityBridge.PrecompileAgreement.Controls.input
+                              SolidityBridge.PrecompileAgreement.Controls.blake_bad_flag)).2.2.1.toNat =
+                  0
+SolidityBridge.PrecompileAgreement.Controls.blake_short_mismatch :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f
+        (SolidityBridge.PrecompileAgreement.Controls.array [1]).toList =
+      16777216 ∧
+    EvmYul.fromByteArrayBigEndian ((SolidityBridge.PrecompileAgreement.Controls.array [1]).extract 0 4) = 1 ∧
+      (Ξ_BLAKE2_F default (EvmYul.UInt256.ofNat 1) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array [1]))).1 =
+        false
+SolidityBridge.PrecompileAgreement.Controls.blake_byte_order :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f
+        (SolidityBridge.PrecompileAgreement.Controls.array [1, 2, 3, 4]).toList =
+      16909060 ∧
+    EvmYul.fromByteArrayBigEndian ((SolidityBridge.PrecompileAgreement.Controls.array [1, 2, 3, 4]).extract 0 4) =
+      16909060
+SolidityBridge.PrecompileAgreement.Controls.point_controls :
+  List.map
+        (fun n =>
+          (Solidity.Precompiles.PointEval.pointEval (SolidityBridge.PrecompileAgreement.Controls.zeros n)).isNone)
+        [0, 191, 192, 193] =
+      [true, true, true, true] ∧
+    (Ξ_PointEval default (EvmYul.UInt256.ofNat 49999) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array
+                (SolidityBridge.PrecompileAgreement.Controls.zeros 192)))).1 =
+        false ∧
+      (Ξ_PointEval default (EvmYul.UInt256.ofNat 50000) default
+              (SolidityBridge.PrecompileAgreement.Controls.input
+                (SolidityBridge.PrecompileAgreement.Controls.array
+                  (SolidityBridge.PrecompileAgreement.Controls.zeros 192)))).1 =
+          true ∧
+        (Ξ_PointEval default (EvmYul.UInt256.ofNat 50001) default
+                    (SolidityBridge.PrecompileAgreement.Controls.input
+                      (SolidityBridge.PrecompileAgreement.Controls.array
+                        (SolidityBridge.PrecompileAgreement.Controls.zeros 192)))).2.2.1.toNat =
+          1
+SolidityBridge.PrecompileAgreement.Controls.ffi_logical_mismatch :
+  (Solidity.Precompiles.Bn254.add SolidityBridge.PrecompileAgreement.Controls.bad_point).isNone = true ∧
+    (Ξ_BN_ADD default (EvmYul.UInt256.ofNat 150) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array
+                SolidityBridge.PrecompileAgreement.Controls.bad_point))).1 =
+        true ∧
+      (Solidity.Precompiles.PointEval.pointEval (SolidityBridge.PrecompileAgreement.Controls.zeros 192)).isNone = true ∧
+        (Ξ_PointEval default (EvmYul.UInt256.ofNat 50000) default
+              (SolidityBridge.PrecompileAgreement.Controls.input
+                (SolidityBridge.PrecompileAgreement.Controls.array
+                  (SolidityBridge.PrecompileAgreement.Controls.zeros 192)))).1 =
+          true
+SolidityBridge.PrecompileAgreement.Controls.modexp_empty_mismatch :
+  Solidity.Precompiles.Modexp.gas [] = 500 ∧
+    (Ξ_EXPMOD default (EvmYul.UInt256.ofNat 200) default
+            (SolidityBridge.PrecompileAgreement.Controls.input
+              (SolidityBridge.PrecompileAgreement.Controls.array []))).1 =
+        true ∧
+      (Ξ_EXPMOD default (EvmYul.UInt256.ofNat 200) default
+                  (SolidityBridge.PrecompileAgreement.Controls.input
+                    (SolidityBridge.PrecompileAgreement.Controls.array []))).2.2.1.toNat =
+        0
+SolidityBridge.PrecompileAgreement.Controls.oversized_modexp : Solidity.Roadmap.Evm.Bytes
+SolidityBridge.PrecompileAgreement.Controls.modexp_bound_mismatch :
+  (Solidity.Precompiles.Modexp.modexp SolidityBridge.PrecompileAgreement.Controls.oversized_modexp).isNone = true ∧
+    Solidity.Precompiles.Modexp.gas SolidityBridge.PrecompileAgreement.Controls.oversized_modexp = 0 ∧
+      (Ξ_EXPMOD default (EvmYul.UInt256.ofNat 6000) default
+              (SolidityBridge.PrecompileAgreement.Controls.input
+                (SolidityBridge.PrecompileAgreement.Controls.array
+                  SolidityBridge.PrecompileAgreement.Controls.oversized_modexp))).1 =
+          true ∧
+        (Ξ_EXPMOD default (EvmYul.UInt256.ofNat 6000) default
+                    (SolidityBridge.PrecompileAgreement.Controls.input
+                      (SolidityBridge.PrecompileAgreement.Controls.array
+                        SolidityBridge.PrecompileAgreement.Controls.oversized_modexp))).2.2.1.toNat =
+          453
+SolidityBridge.PrecompileAgreement.Controls.unsupported : List Solidity.Roadmap.Evm.Precompile
+SolidityBridge.PrecompileAgreement.Controls.unsupported_core :
+  List.map (fun p => (Solidity.Precompiles.Osaka.run p []).isNone)
+        SolidityBridge.PrecompileAgreement.Controls.unsupported =
+      [true, true, true, true, true, true, true, false] ∧
+    List.map (fun p => Solidity.Precompiles.Osaka.gas p []) SolidityBridge.PrecompileAgreement.Controls.unsupported =
+      [375, 0, 600, 0, 37700, 5500, 23800, 6900]
+SolidityBridge.PrecompileAgreement.Controls.blake_malformed_lengths (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (n : ℕ) (member : n ∈ [0, 1, 2, 3, 4, 212, 214]) :
+  Ξ_BLAKE2_F σ g A
+      (SolidityBridge.PrecompileAgreement.Controls.input (SolidityBridge.PrecompileAgreement.Controls.filled n)) =
+    (false, ∅, { val := 0 }, A, ByteArray.empty)
+SolidityBridge.PrecompileAgreement.Controls.blake_core_lengths :
+  List.map
+      (fun n => (Solidity.Precompiles.Blake2f.blake2f (SolidityBridge.PrecompileAgreement.Controls.zeros n)).isSome)
+      [0, 1, 2, 3, 4, 212, 213, 214] =
+    [false, false, false, false, false, false, true, false]
+SolidityBridge.PrecompileAgreement.Controls.blake_final_one : ByteArray
+SolidityBridge.PrecompileAgreement.Controls.blake_final_one_control :
+  (Solidity.Precompiles.Blake2f.blake2f SolidityBridge.PrecompileAgreement.Controls.blake_final_one.toList).isSome =
+      true ∧
+    (Ξ_BLAKE2_F default (EvmYul.UInt256.ofNat 1) default
+          (SolidityBridge.PrecompileAgreement.Controls.input
+            SolidityBridge.PrecompileAgreement.Controls.blake_final_one)).1 =
+      true
+SolidityBridge.PrecompileAgreement.Controls.bls_discount_boundaries :
+  List.map
+        (fun n => Solidity.Precompiles.Bls12381.g1MsmGas (SolidityBridge.PrecompileAgreement.Controls.zeros (160 * n)))
+        [0, 1, 128, 129] =
+      [0, 12000, 797184, 803412] ∧
+    List.map
+        (fun n => Solidity.Precompiles.Bls12381.g2MsmGas (SolidityBridge.PrecompileAgreement.Controls.zeros (288 * n)))
+        [0, 1, 128, 129] =
+      [0, 22500, 1509120, 1520910]
+SolidityBridge.PrecompileAgreement.Controls.blake_high_header :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f
+        (SolidityBridge.PrecompileAgreement.Controls.array [1, 0, 0, 0]).toList =
+      16777216 ∧
+    EvmYul.fromByteArrayBigEndian ((SolidityBridge.PrecompileAgreement.Controls.array [1, 0, 0, 0]).extract 0 4) =
+      16777216
+SolidityBridge.PrecompileAgreement.Controls.wide_base : ByteArray
+SolidityBridge.PrecompileAgreement.Controls.modexp_base_truncation :
+  Solidity.Precompiles.Modexp.modexp SolidityBridge.PrecompileAgreement.Controls.wide_base.toList = some [2] ∧
+    nat_of_slice SolidityBridge.PrecompileAgreement.Controls.wide_base 96 33 = 2 ^ 256 + 1 ∧
+      (EvmYul.UInt256.ofNat (nat_of_slice SolidityBridge.PrecompileAgreement.Controls.wide_base 96 33)).toNat = 1
+SolidityBridge.PrecompileAgreement.address_table :
+  List.map Solidity.Roadmap.Evm.Precompile.address Solidity.Roadmap.Evm.Precompile.all =
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 256]
+SolidityBridge.PrecompileAgreement.address_complete (p : Solidity.Roadmap.Evm.Precompile) :
+  p ∈ Solidity.Roadmap.Evm.Precompile.all
+SolidityBridge.PrecompileAgreement.sha_price (d : ByteArray) :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.sha256 d.toList = 60 + 12 * ((d.size + 31) / 32)
+SolidityBridge.PrecompileAgreement.ripemd_price (d : ByteArray) :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.ripemd160 d.toList = 600 + 120 * ((d.size + 31) / 32)
+SolidityBridge.PrecompileAgreement.pairing_price (d : ByteArray) :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.bnPairing d.toList = 34000 * (d.size / 192) + 45000
+SolidityBridge.PrecompileAgreement.ecrecover_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  (Ξ_ECREC σ g A I).2.2.1.toNat =
+    if g.toNat < Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.ecrecover I.calldata.toList then 0
+    else g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.ecrecover I.calldata.toList
+SolidityBridge.PrecompileAgreement.sha_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  (Ξ_SHA256 σ g A I).2.2.1.toNat =
+    if g.toNat < Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.sha256 I.calldata.toList then 0
+    else g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.sha256 I.calldata.toList
+SolidityBridge.PrecompileAgreement.ripemd_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  (Ξ_RIP160 σ g A I).2.2.1.toNat =
+    if g.toNat < Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.ripemd160 I.calldata.toList then 0
+    else g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.ripemd160 I.calldata.toList
+SolidityBridge.PrecompileAgreement.bnadd_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  (Ξ_BN_ADD σ g A I).2.2.1.toNat =
+    if (Ξ_BN_ADD σ g A I).1 = true then
+      g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.bnAdd I.calldata.toList
+    else 0
+SolidityBridge.PrecompileAgreement.bnmul_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  (Ξ_BN_MUL σ g A I).2.2.1.toNat =
+    if (Ξ_BN_MUL σ g A I).1 = true then
+      g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.bnMul I.calldata.toList
+    else 0
+SolidityBridge.PrecompileAgreement.pairing_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  (Ξ_SNARKV σ g A I).2.2.1.toNat =
+    if (Ξ_SNARKV σ g A I).1 = true then
+      g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.bnPairing I.calldata.toList
+    else 0
+SolidityBridge.PrecompileAgreement.point_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  (Ξ_PointEval σ g A I).2.2.1.toNat =
+    if (Ξ_PointEval σ g A I).1 = true then
+      g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.pointEvaluation I.calldata.toList
+    else 0
+SolidityBridge.PrecompileAgreement.big_reader (bs : List UInt8) :
+  EvmYul.fromBytesBigEndian bs = Solidity.Precompiles.ofBE (List.map UInt8.toNat bs)
+SolidityBridge.PrecompileAgreement.first_four (d : ByteArray) : (d.extract 0 4).toList = List.take 4 d.toList
+SolidityBridge.PrecompileAgreement.zero_padding (bs : List ℕ) (n : ℕ) :
+  Solidity.Precompiles.ofBE (bs ++ List.replicate n 0) = Solidity.Precompiles.ofBE bs * 256 ^ n
+SolidityBridge.PrecompileAgreement.blake_padding (d : ByteArray) :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f d.toList =
+    EvmYul.fromByteArrayBigEndian (d.extract 0 4) * 256 ^ (4 - min 4 d.size)
+SolidityBridge.PrecompileAgreement.blake_zero_header (d : ByteArray)
+  (zero : EvmYul.fromByteArrayBigEndian (d.extract 0 4) = 0) :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f d.toList = 0
+SolidityBridge.PrecompileAgreement.blake_price (d : ByteArray) (header : 4 ≤ d.size) :
+  Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f d.toList =
+    EvmYul.fromByteArrayBigEndian (d.extract 0 4)
+SolidityBridge.PrecompileAgreement.blake_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) (header : 4 ≤ I.calldata.size) :
+  (Ξ_BLAKE2_F σ g A I).2.2.1.toNat =
+    if (Ξ_BLAKE2_F σ g A I).1 = true then
+      g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f I.calldata.toList
+    else 0
+SolidityBridge.PrecompileAgreement.blake_valid (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (enough : EvmYul.fromByteArrayBigEndian (I.calldata.extract 0 4) ≤ g.toNat) (size : I.calldata.size = 213)
+  (flag : I.calldata[212]! = 0) :
+  Ξ_BLAKE2_F σ g A I =
+    (true, σ, g - EvmYul.UInt256.ofNat (EvmYul.fromByteArrayBigEndian (I.calldata.extract 0 4)), A,
+      ffi.BLAKE2Compress I.calldata)
+SolidityBridge.PrecompileAgreement.blake_insufficient (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (short : g.toNat < EvmYul.fromByteArrayBigEndian (I.calldata.extract 0 4)) :
+  Ξ_BLAKE2_F σ g A I = (false, ∅, { val := 0 }, A, ByteArray.empty)
+SolidityBridge.PrecompileAgreement.blake_invalid_flag (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (size : I.calldata.size = 213) (flag : I.calldata[212]! = 2) :
+  Ξ_BLAKE2_F σ g A I = (false, ∅, { val := 0 }, A, ByteArray.empty)
+SolidityBridge.PrecompileAgreement.blake_valid_one (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (enough : EvmYul.fromByteArrayBigEndian (I.calldata.extract 0 4) ≤ g.toNat) (size : I.calldata.size = 213)
+  (flag : I.calldata[212]! = 1) :
+  Ξ_BLAKE2_F σ g A I =
+    (true, σ, g - EvmYul.UInt256.ofNat (EvmYul.fromByteArrayBigEndian (I.calldata.extract 0 4)), A,
+      ffi.BLAKE2Compress I.calldata)
+SolidityBridge.PrecompileAgreement.blake_invalid_size (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (size : I.calldata.size ≠ 213) : Ξ_BLAKE2_F σ g A I = (false, ∅, { val := 0 }, A, ByteArray.empty)
+SolidityBridge.PrecompileAgreement.blake_zero_gas (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (zero : EvmYul.fromByteArrayBigEndian (I.calldata.extract 0 4) = 0) :
+  (Ξ_BLAKE2_F σ g A I).2.2.1.toNat =
+    if (Ξ_BLAKE2_F σ g A I).1 = true then
+      g.toNat - Solidity.Precompiles.Osaka.gas Solidity.Roadmap.Evm.Precompile.blake2f I.calldata.toList
+    else 0
+SolidityBridge.PrecompileAgreement.identity_gas (d : ByteArray) :
+  Solidity.Precompiles.identityGas d.toList = 15 + 3 * ((d.size + 31) / 32)
+SolidityBridge.PrecompileAgreement.identity_output (d : ByteArray) :
+  Solidity.Precompiles.identity d.toList = some d.toList
+SolidityBridge.PrecompileAgreement.identity_run (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (g : EvmYul.UInt256)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  Ξ_ID σ g A I =
+    if g.toNat < Solidity.Precompiles.identityGas I.calldata.toList then (false, ∅, { val := 0 }, A, ByteArray.empty)
+    else (true, σ, g - EvmYul.UInt256.ofNat (Solidity.Precompiles.identityGas I.calldata.toList), A, I.calldata)
+SolidityBridge.PrecompileAgreement.identity_success (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (enough : Solidity.Precompiles.identityGas I.calldata.toList ≤ g.toNat) :
+  Ξ_ID σ g A I = (true, σ, g - EvmYul.UInt256.ofNat (Solidity.Precompiles.identityGas I.calldata.toList), A, I.calldata)
+SolidityBridge.PrecompileAgreement.identity_failure (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (short : g.toNat < Solidity.Precompiles.identityGas I.calldata.toList) :
+  Ξ_ID σ g A I = (false, ∅, { val := 0 }, A, ByteArray.empty)
+SolidityBridge.PrecompileAgreement.identity_charged (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (enough : Solidity.Precompiles.identityGas I.calldata.toList ≤ g.toNat) :
+  (Ξ_ID σ g A I).2.2.1.toNat + Solidity.Precompiles.identityGas I.calldata.toList = g.toNat
+SolidityBridge.PrecompileAgreement.identity_success_iff (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM) :
+  (Ξ_ID σ g A I).1 = true ↔ Solidity.Precompiles.identityGas I.calldata.toList ≤ g.toNat
+SolidityBridge.PrecompileAgreement.identity_exact (σ : EvmYul.AccountMap EvmYul.OperationType.EVM) (A : EvmYul.Substate)
+  (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (fits : Solidity.Precompiles.identityGas I.calldata.toList < EvmYul.UInt256.size) :
+  Ξ_ID σ (EvmYul.UInt256.ofNat (Solidity.Precompiles.identityGas I.calldata.toList)) A I =
+    (true, σ, EvmYul.UInt256.ofNat 0, A, I.calldata)
+SolidityBridge.PrecompileAgreement.identity_one_short (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (fits : Solidity.Precompiles.identityGas I.calldata.toList < EvmYul.UInt256.size) :
+  Ξ_ID σ (EvmYul.UInt256.ofNat (Solidity.Precompiles.identityGas I.calldata.toList - 1)) A I =
+    (false, ∅, { val := 0 }, A, ByteArray.empty)
+SolidityBridge.PrecompileAgreement.identity_unaffordable (σ : EvmYul.AccountMap EvmYul.OperationType.EVM)
+  (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
+  (huge : EvmYul.UInt256.size ≤ Solidity.Precompiles.identityGas I.calldata.toList) :
+  Ξ_ID σ g A I = (false, ∅, { val := 0 }, A, ByteArray.empty)
+EXIT=0 SECONDS=2.117 PEAK_RSS=391974912 MIN_AVAILABLE=17608105984 RESOURCE_STOP=False

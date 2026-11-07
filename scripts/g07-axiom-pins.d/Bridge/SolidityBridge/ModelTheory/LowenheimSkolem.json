@@ -1,0 +1,22 @@
+{
+ "Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean:Solidity.FO.holds_iff_submodel_realize": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean:Solidity.FO.solTheory_compact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean:Solidity.FO.solTheory_elementary_submodel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean:Solidity.FO.solTheory_models_of_card": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

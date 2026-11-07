@@ -1,0 +1,17 @@
+{
+ "Solidity/Semantics/Dispatch.lean:Solidity.DispatchArm.chain_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Dispatch.lean:Solidity.DispatchArm.chain_select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Dispatch.lean:Solidity.DispatchArm.chain_tag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

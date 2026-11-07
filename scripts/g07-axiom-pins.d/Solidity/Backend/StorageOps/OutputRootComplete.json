@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/OutputRootComplete.lean:Solidity.Backend.StorageOps.OutputRootComplete.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

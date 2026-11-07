@@ -1,0 +1,5 @@
+#!/bin/bash
+for arg in "$@"; do
+ case "$arg" in --server|--worker) exec /workspace/shared/downloads/lean-4.24.0-linux/bin/lean.actual -j1 "$@";; esac
+done
+exec flock /runtime/lean.lock /workspace/shared/downloads/lean-4.24.0-linux/bin/lean.actual -j1 "$@"

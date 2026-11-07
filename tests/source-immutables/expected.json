@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "evmVersion": "osaka",
+  "pipelines": [
+    "legacy",
+    "viaIR"
+  ],
+  "optimizer": [
+    false,
+    true
+  ],
+  "fixtures": [
+    {
+      "file": "Constructor.sol",
+      "compilerAccepted": true,
+      "sourceDesiredAccepted": true,
+      "sourceSha256": "52d45fc99367b1552c4126310c93e4dd1c828eb72bc30f65624fd4e99da3a0aa"
+    },
+    {
+      "file": "Initializer.sol",
+      "compilerAccepted": true,
+      "sourceDesiredAccepted": true,
+      "sourceSha256": "bc0b93b390b2dc3d3531e15f625d1ef73c8cce1a7ea41c50721f95f7a76f865a"
+    },
+    {
+      "file": "OrdinaryWrite.sol",
+      "compilerAccepted": false,
+      "sourceDesiredAccepted": false,
+      "sourceSha256": "6ed550d388e9aed5fe05cdf4877130ddd2360384c1d0912379b5a9afb577d897"
+    },
+    {
+      "file": "ConstantWrite.sol",
+      "compilerAccepted": false,
+      "sourceDesiredAccepted": false,
+      "sourceSha256": "3b652b5f9c4543b688c2754cd34b2e09d02e81cefbdd6446da1899ec568438e9"
+    },
+    {
+      "file": "MutableConstructor.sol",
+      "compilerAccepted": true,
+      "sourceDesiredAccepted": true,
+      "sourceSha256": "0b5a3188146e777fc88f5b81da918fa71a7d971cbaf5aa2839d5e454ff110315"
+    }
+  ],
+  "boundary": "Compiler admission expectations, not runtime results or a Source correspondence proof. Constructor Source acceptance is a known unresolved gate, not an approved exclusion.",
+  "baselineSourceHead": "55083d60976573443c821afde569b6cd442eee5e",
+  "baselineSha256": "5d06bf467c037a2a332fc59bd2f7f84799567d3f4c8c4768d59b50d4c8806ce1",
+  "compilerHelperSha256": "f5e154268fab93a14f7cad9ef03294da99d4b5e47398840cbf443ec03fadcd73"
+}

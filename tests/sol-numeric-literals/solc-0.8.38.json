@@ -1,0 +1,621 @@
+{
+  "version": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "boundary": "External solc analysis of expression statements; rejection may be lexical, parsing or semantic. This is not a Lean proof or a lexer-only equivalence claim.",
+  "results": [
+    {
+      "id": "S00",
+      "mode": "sol",
+      "spelling": "0",
+      "sourceSha256": "7da8bf8d3dbcae3560b59fa9082a15948a44ae2ce9602772ccf4fe95903f0f6c",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "0",
+          "type": "int_const 0"
+        }
+      ]
+    },
+    {
+      "id": "S01",
+      "mode": "sol",
+      "spelling": "1",
+      "sourceSha256": "5b2e7f68524d115569d71eb467cbd79ee1b0793f4db1f9e88a25426067b37f5e",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1",
+          "type": "int_const 1"
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "mode": "sol",
+      "spelling": "123456789012345678901234567890",
+      "sourceSha256": "670be1a5d43cd6188ea4d158ce539d4573f56574708a3ad034b7f66e544c684f",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "123456789012345678901234567890",
+          "type": "int_const 123456789012345678901234567890"
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "mode": "sol",
+      "spelling": "1_2_3",
+      "sourceSha256": "84ddff254b9cecfe7cfe0ab87ca434517a29ec9a76171fbeb132bf7c6983a669",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1_2_3",
+          "type": "int_const 123"
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "mode": "sol",
+      "spelling": "0_1",
+      "sourceSha256": "825dc5c6df971b2f376af8b09ccaa81b31917de44d4e98b9a86012cb6858c871",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Identifier-start is not allowed at end of a number."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S05",
+      "mode": "sol",
+      "spelling": "01",
+      "sourceSha256": "a694504d8ecc23a280c992776057fdb9d79a7e2f2159b3b3a7cb283abffed660",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Octal numbers not allowed."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S06",
+      "mode": "sol",
+      "spelling": ".1",
+      "sourceSha256": "14ceff9eb54b88878f0483db53f5a16e978e05cd88013ee741ae5f9873db4c2a",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": ".1",
+          "type": "rational_const 1 / 10"
+        }
+      ]
+    },
+    {
+      "id": "S07",
+      "mode": "sol",
+      "spelling": "1.",
+      "sourceSha256": "a8785c0801a3ca46832641a4f10b011dbce0617c3cf5cbb88116e163d5655ad0",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "2314",
+          "message": "Expected identifier but got ';'"
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S08",
+      "mode": "sol",
+      "spelling": "1.0",
+      "sourceSha256": "df5ff0098104832afde6a4ae808560719261cda67c299bcf48d78a3c65c212a5",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1.0",
+          "type": "int_const 1"
+        }
+      ]
+    },
+    {
+      "id": "S09",
+      "mode": "sol",
+      "spelling": "1.0_2",
+      "sourceSha256": "90914023806054132a88b068ef7b0f84a23931e8cbc40ac4f4892e42b0a3301d",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1.0_2",
+          "type": "rational_const 51 / 50"
+        }
+      ]
+    },
+    {
+      "id": "S10",
+      "mode": "sol",
+      "spelling": "1e2",
+      "sourceSha256": "e5456a78d83f78e174afd2025f71e24525a57aadf1070f0c0d9d91829b41ea00",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1e2",
+          "type": "int_const 100"
+        }
+      ]
+    },
+    {
+      "id": "S11",
+      "mode": "sol",
+      "spelling": "1E2",
+      "sourceSha256": "46e29a78ca235074d09fbd48e87c3a8cf1cc73bb1bd315358c192dc30cc118ca",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1E2",
+          "type": "int_const 100"
+        }
+      ]
+    },
+    {
+      "id": "S12",
+      "mode": "sol",
+      "spelling": "1e-2",
+      "sourceSha256": "106a5fa82d8f496c6aa8985c3710dc8a133f61cbf5168e3b0b99f113eb07bafe",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1e-2",
+          "type": "rational_const 1 / 100"
+        }
+      ]
+    },
+    {
+      "id": "S13",
+      "mode": "sol",
+      "spelling": "1e+2",
+      "sourceSha256": "fae6a5e9df55178bc1740a4f1bee5b89595eff6371fded2dd41a4afb1ad449ff",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "TypeError",
+          "code": "2826",
+          "message": "Invalid literal value."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S14",
+      "mode": "sol",
+      "spelling": "1e",
+      "sourceSha256": "ca4ebc0f068a69c560c9edf430e4f5a94e787aa43e8672b8b7ed23f4d7ef7874",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid exponent."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S15",
+      "mode": "sol",
+      "spelling": "1e-",
+      "sourceSha256": "54217e516c33632682a367e90479ed925ab74886184c7eb6cee431318f45754c",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid exponent."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S16",
+      "mode": "sol",
+      "spelling": "1__2",
+      "sourceSha256": "7ac991292fd6a5dd70df4f206d4547bd6ecb2d78d7649a617e5eb1150ff08b02",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "SyntaxError",
+          "code": "2990",
+          "message": "Invalid use of underscores in number literal. Only one consecutive underscore between digits is allowed."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S17",
+      "mode": "sol",
+      "spelling": "1_",
+      "sourceSha256": "f1c47844e084829aa0a7f8d7039ad22e5bcc1ace30a8f7e8c2c26fa4bf4f174e",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "SyntaxError",
+          "code": "2090",
+          "message": "Invalid use of underscores in number literal. No trailing underscores allowed."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S18",
+      "mode": "sol",
+      "spelling": "_1",
+      "sourceSha256": "cecada6caae47a785f4e30ff7225d7c379161f5bd37d6239d31b2b0aea44aedd",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "DeclarationError",
+          "code": "7576",
+          "message": "Undeclared identifier."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S19",
+      "mode": "sol",
+      "spelling": "0x",
+      "sourceSha256": "4e73efa83455c5e58b0e8a73772cb61026882b70dcd2ba9d62f752413f3815dd",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Hexadecimal digit missing or invalid."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S20",
+      "mode": "sol",
+      "spelling": "0X1",
+      "sourceSha256": "8023081b499f7115a06521c6bf886b3a4da9b3ca4fa33639649ac3d4a7bdf251",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Identifier-start is not allowed at end of a number."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S21",
+      "mode": "sol",
+      "spelling": "0x1_2",
+      "sourceSha256": "101867595191831f9668e4004e1968ef03bdea512710e01b31b2cb7a7be36451",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "0x1_2",
+          "type": "int_const 18"
+        }
+      ]
+    },
+    {
+      "id": "S22",
+      "mode": "sol",
+      "spelling": "0x_1",
+      "sourceSha256": "3bbc8a4965d96db118e65b1c8f2ca08715713eb255d6717647bcb0e48f2d3791",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Hexadecimal digit missing or invalid."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S23",
+      "mode": "sol",
+      "spelling": "0x1__2",
+      "sourceSha256": "eaad6825377c511708d56cc0344f83fde4378c33a1207430a5191320f2edd248",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "SyntaxError",
+          "code": "2990",
+          "message": "Invalid use of underscores in number literal. Only one consecutive underscore between digits is allowed."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S24",
+      "mode": "sol",
+      "spelling": "0x1_",
+      "sourceSha256": "11cb6781b47aeac3eb669f2c9b97c465c907f79cd437908130ac80eeaf032895",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "SyntaxError",
+          "code": "2090",
+          "message": "Invalid use of underscores in number literal. No trailing underscores allowed."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S25",
+      "mode": "sol",
+      "spelling": "0xAb",
+      "sourceSha256": "ef0e55d4915e471f2433c211109101443347b16fbd4098dbb96e43a4ecade882",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "0xAb",
+          "type": "int_const 171"
+        }
+      ]
+    },
+    {
+      "id": "S26",
+      "mode": "sol",
+      "spelling": "0x0000000000000000000000000000000000000000",
+      "sourceSha256": "12008e4de0160619f4788c170a7540c66ebfe61fb8600ecbc9aa4ff9b0235ebe",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "0x0000000000000000000000000000000000000000",
+          "type": "address"
+        }
+      ]
+    },
+    {
+      "id": "S27",
+      "mode": "sol",
+      "spelling": "1wei",
+      "sourceSha256": "7334931f684b235b461a8633518d8a22d38fbda73fdee47656417993d02670d5",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Identifier-start is not allowed at end of a number."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S28",
+      "mode": "sol",
+      "spelling": "1 wei",
+      "sourceSha256": "8a8609fdb6e449cc7ef3b5ef4c0268156c4bdc329a18b16cdcd19b64937a286a",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1",
+          "type": "int_const 1"
+        }
+      ]
+    },
+    {
+      "id": "S29",
+      "mode": "sol",
+      "spelling": "1/*x*/wei",
+      "sourceSha256": "5ece90b0dd775f51dfdd7f7a425c18df4bc510ef823932422484a8cc37b82219",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "1",
+          "type": "int_const 1"
+        }
+      ]
+    },
+    {
+      "id": "S30",
+      "mode": "sol",
+      "spelling": "1uint8",
+      "sourceSha256": "82979c2ab5586452be71cfe901c1d10eb4128ad2ace9ae2c8159869ade1eb52e",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Identifier-start is not allowed at end of a number."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S31",
+      "mode": "sol",
+      "spelling": "1 uint8",
+      "sourceSha256": "23c557d704fa03c4f1b5432c92b08fea580176c4f98d22d56c71618b6b2578d0",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "2314",
+          "message": "Expected ';' but got 'uint8'"
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "Y00",
+      "mode": "yul",
+      "spelling": "0",
+      "sourceSha256": "81e4b898118bdbb95405b25c28418751e6e707067434488aa153ec042e8836f1",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "0",
+          "type": null,
+          "yul": true
+        }
+      ]
+    },
+    {
+      "id": "Y01",
+      "mode": "yul",
+      "spelling": "01",
+      "sourceSha256": "c1d8998f1f03649971e8e393d3bc56d9b3df09bdb1c32fdcf1eaa671b0034ce8",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Octal numbers not allowed."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "Y02",
+      "mode": "yul",
+      "spelling": "1_2",
+      "sourceSha256": "92de81e08c6df9740d103616046655df68e9494f205ec8ca1b3b67fc9383fee5",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "4828",
+          "message": "Invalid number literal."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "Y03",
+      "mode": "yul",
+      "spelling": "0x12",
+      "sourceSha256": "7e228ac60f369a28a55013915e820e8fea6619ae6bd836e0bc81e7e8999ea15b",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "0x12",
+          "type": null,
+          "yul": true
+        }
+      ]
+    },
+    {
+      "id": "Y04",
+      "mode": "yul",
+      "spelling": "0x1_2",
+      "sourceSha256": "4e9c827fb0d6d5a9416edfd0f949cdde7fd851b50080a0444e34cfa7c2b0ce58",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "4828",
+          "message": "Invalid number literal."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "Y05",
+      "mode": "yul",
+      "spelling": "0x",
+      "sourceSha256": "9340ff6a97c0f649a85e08bd4078b3875f2be7f7015adef4160c3989821b82e5",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Hexadecimal digit missing or invalid."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "Y06",
+      "mode": "yul",
+      "spelling": ".1",
+      "sourceSha256": "b1eb302995242be7e72d58c761baeeba74fc0ded60c5b7eb6a9fa4d50923f21b",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "4828",
+          "message": "Invalid number literal."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "Y07",
+      "mode": "yul",
+      "spelling": "1e2",
+      "sourceSha256": "f35568e0449dd2f7df2b529b2e007805ce301eee6bd8f324dfe084031ec2a36c",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "4828",
+          "message": "Invalid number literal."
+        }
+      ],
+      "literals": []
+    },
+    {
+      "id": "S32",
+      "mode": "sol",
+      "spelling": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "sourceSha256": "abf25859c27dd2079ce0a0095d8666934aa8b58d4ec7021b663a63b98027ea1c",
+      "accepted": true,
+      "errors": [],
+      "literals": [
+        {
+          "value": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+          "type": "address"
+        }
+      ]
+    },
+    {
+      "id": "S33",
+      "mode": "sol",
+      "spelling": "0x5aaeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "sourceSha256": "65f2f68013e1abf268864a921615ae003cd8deffc5aad06edb9a158029f2dc2f",
+      "accepted": false,
+      "errors": [
+        {
+          "type": "SyntaxError",
+          "code": "9429",
+          "message": "This looks like an address but has an invalid checksum. Correct checksummed address: \"0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed\". If this is not used as an address, please prepend '00'. For more information please see https://docs.soliditylang.org/en/develop/types.html#address-literals"
+        }
+      ],
+      "literals": []
+    }
+  ]
+}

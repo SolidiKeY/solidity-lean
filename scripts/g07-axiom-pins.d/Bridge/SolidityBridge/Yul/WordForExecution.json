@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/Yul/WordForExecution.lean:SolidityBridge.Yul.WordForExecution.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordForExecution.lean:SolidityBridge.Yul.WordForExecution.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

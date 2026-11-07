@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/Payments/Headlines.lean:Solidity.Main.compiler_checked_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/Headlines.lean:Solidity.Main.compiler_correct_v2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

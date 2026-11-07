@@ -1,0 +1,6 @@
+ORPHAN   Solidity.Backend.PrimitivePackets.UnsignedCast.Boundaries
+ORPHAN   Solidity.Backend.PrimitivePackets.UnsignedCast.Compiler
+ORPHAN   Solidity.Backend.PrimitivePackets.UnsignedCast.Controls
+ORPHAN   Solidity.Backend.PrimitivePackets.UnsignedCast.Semantics
+ORPHAN   Solidity.Backend.PrimitivePackets.UnsignedCast.Transport
+3656 reachable, 5 orphaned, 5 not allowed

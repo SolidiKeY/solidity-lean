@@ -1,0 +1,759 @@
+{
+  "version": 1,
+  "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "requiredCtors": [
+    "blockStmt",
+    "simpleStmt",
+    "ifStmt",
+    "forStmt",
+    "whileStmt",
+    "doWhile",
+    "continueStmt",
+    "breakStmt",
+    "tryStmt",
+    "returnStmt",
+    "emit",
+    "revert",
+    "assembly",
+    "block",
+    "stmtItem",
+    "uncheckedItem",
+    "declVar",
+    "declTuple",
+    "exprStmt",
+    "catchPlain",
+    "catchSig",
+    "nil",
+    "cons",
+    "none",
+    "some",
+    "yulBlock",
+    "yulLet",
+    "yulAssign",
+    "yulExprStmt",
+    "yulIf",
+    "yulFor",
+    "yulSwitch",
+    "yulCase",
+    "yulLeave",
+    "yulBreak",
+    "yulContinue",
+    "yulFun",
+    "yulPath",
+    "yulCall",
+    "yulLit"
+  ],
+  "cases": [
+    {
+      "id": "p00-block",
+      "file": "p00-block.sol",
+      "sha256": "a1c76b61f1dc0c36955d2ffbf34a3e0f9768bf2532a5f74d318a817599bdee10",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "blockStmt",
+        "block",
+        "stmtItem",
+        "nil",
+        "cons",
+        "returnStmt"
+      ],
+      "astRequired": [
+        "Block",
+        "Return"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p01-decl",
+      "file": "p01-decl.sol",
+      "sha256": "171f5c6482835d0bac4bc7b5c9641dadf3117b842da7014ae1fad33edfffc5ef",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "simpleStmt",
+        "declVar",
+        "varDecl",
+        "elem"
+      ],
+      "astRequired": [
+        "VariableDeclarationStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p02-init",
+      "file": "p02-init.sol",
+      "sha256": "fd311b9c3b00530b8d3604645497ef3867d39c2f8a57cf2818b3bc8acd97cbde",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "simpleStmt",
+        "declVar",
+        "some",
+        "lit"
+      ],
+      "astRequired": [
+        "VariableDeclarationStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p03-tuple-holes",
+      "file": "p03-tuple-holes.sol",
+      "sha256": "634563200d83e4f990dbe9c398560bbf4be76e3fa16c6dee36d2b24f1a9ab480",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "declTuple",
+        "none",
+        "some",
+        "varDecl"
+      ],
+      "astRequired": [
+        "VariableDeclarationStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p04-expression",
+      "file": "p04-expression.sol",
+      "sha256": "1fdaf3692f280bd50b7384b4495b874a830a7853489a7175da32dde7e3884888",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "exprStmt",
+        "assign",
+        "simpleStmt"
+      ],
+      "astRequired": [
+        "ExpressionStatement",
+        "Assignment"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p05-if",
+      "file": "p05-if.sol",
+      "sha256": "8a6e2b78277528fd8e363db22b97d1b8383e4300573b52f36891b9bb183291ba",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "ifStmt",
+        "none"
+      ],
+      "astRequired": [
+        "IfStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p06-if-else",
+      "file": "p06-if-else.sol",
+      "sha256": "ed5dad8ba4a5d74c162e8a88c0a9a14d57cb40015660c8d816d094ed61dd97f3",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "ifStmt",
+        "some"
+      ],
+      "astRequired": [
+        "IfStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p07-nearest-else",
+      "file": "p07-nearest-else.sol",
+      "sha256": "3919beab4a9515c97b0ebbb646e8d341cc8827c4bd79f10974abb035d2de6b6c",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "ifStmt",
+        "returnStmt"
+      ],
+      "astRequired": [
+        "IfStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p08-for-empty",
+      "file": "p08-for-empty.sol",
+      "sha256": "ed6a157b44c2ab9c63a786409b6ec21e22afb5945510d2c735a7c2128f67d886",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "forStmt",
+        "breakStmt"
+      ],
+      "astRequired": [
+        "ForStatement",
+        "Break"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p09-for-full",
+      "file": "p09-for-full.sol",
+      "sha256": "1a0df3b3a3a27ec16faa702e4a2a5e8a5f1f5430ec1ed449cd45ca6345cabf00",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "forStmt",
+        "declVar",
+        "order",
+        "unarySuffix",
+        "continueStmt"
+      ],
+      "astRequired": [
+        "ForStatement",
+        "Continue"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p10-while",
+      "file": "p10-while.sol",
+      "sha256": "5ceb51b490a94834f5023c5ca7a19849fc63edf47776ecc06668446909904500",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "whileStmt",
+        "breakStmt"
+      ],
+      "astRequired": [
+        "WhileStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p11-do",
+      "file": "p11-do.sol",
+      "sha256": "356ffd179578f5b4fcbcc31779136b809f80e666a52beff57a61925acd92bbc2",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "doWhile",
+        "continueStmt"
+      ],
+      "astRequired": [
+        "DoWhileStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p12-return",
+      "file": "p12-return.sol",
+      "sha256": "45c73e2617d8f06da2461dfc8c95e3db6d2cdb39b1812832284b353af43e4f18",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "returnStmt",
+        "none"
+      ],
+      "astRequired": [
+        "Return"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p13-return-value",
+      "file": "p13-return-value.sol",
+      "sha256": "69854b8b87be2449d831eea4504fb57232cd3dc8f5f427a7948846a571e99226",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "returnStmt",
+        "some",
+        "lit"
+      ],
+      "astRequired": [
+        "Return"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p14-unchecked",
+      "file": "p14-unchecked.sol",
+      "sha256": "b5eaec62b4d34ad7ffeea61b2bde726f1d964f3abacffb4c7facf5d76034bbe0",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "uncheckedItem",
+        "blockStmt"
+      ],
+      "astRequired": [
+        "UncheckedBlock"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p15-emit",
+      "file": "p15-emit.sol",
+      "sha256": "291ea850693e510c56925a72d7a4e8eb7819eaaca1ddb9bedbe5139b4a9f07cb",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "emit",
+        "positional"
+      ],
+      "astRequired": [
+        "EmitStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p16-emit-named",
+      "file": "p16-emit-named.sol",
+      "sha256": "a3155299dd12b4053b58f4a7321ad511830b24ac8165ad4cbf2ec4379cf8dedb",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "emit",
+        "named",
+        "namedArg"
+      ],
+      "astRequired": [
+        "EmitStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p17-revert",
+      "file": "p17-revert.sol",
+      "sha256": "4c302cc100c2073ac9351602ec3d029bf7e3355fec369449fc3dab7e0cef3058",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "revert",
+        "positional"
+      ],
+      "astRequired": [
+        "RevertStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p18-revert-named",
+      "file": "p18-revert-named.sol",
+      "sha256": "31342f04dc89fe773ce4acc3ba65b0d2c80e17667242a5638560e0c75b845f51",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "revert",
+        "named",
+        "namedArg"
+      ],
+      "astRequired": [
+        "RevertStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p19-try-plain",
+      "file": "p19-try-plain.sol",
+      "sha256": "cf24efacc37ee28bb0e4e40fa13d860114c80dd2437d4d2fa32db9211a2103b5",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "tryStmt",
+        "catchPlain"
+      ],
+      "astRequired": [
+        "TryStatement",
+        "TryCatchClause"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p20-try-signatures",
+      "file": "p20-try-signatures.sol",
+      "sha256": "c67aad7f2a05e0d65c23ad2279d529999f45a7eb02fddd063eafaeb77fdbb43d",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "tryStmt",
+        "catchSig",
+        "param"
+      ],
+      "astRequired": [
+        "TryStatement",
+        "TryCatchClause"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p21-try-returns",
+      "file": "p21-try-returns.sol",
+      "sha256": "1ff7121d2baa3970293eacf7eb3d37eb0e89d25c9181caaee68a4f44362d69aa",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "tryStmt",
+        "catchPlain",
+        "param"
+      ],
+      "astRequired": [
+        "TryStatement"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p22-assembly",
+      "file": "p22-assembly.sol",
+      "sha256": "6b346d4b9042db083146544f6c0eca56ce54125be9e3bc0c249f66c1a3208499",
+      "leanAccept": true,
+      "profile": false,
+      "solcAccept": true,
+      "ctors": [
+        "assembly"
+      ],
+      "astRequired": [
+        "InlineAssembly"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p23-assembly-flags",
+      "file": "p23-assembly-flags.sol",
+      "sha256": "ee8fab87d9332c4fd37a88fe06e7209d369405fa0943a6317fbd06590be4c30a",
+      "leanAccept": true,
+      "profile": false,
+      "solcAccept": true,
+      "ctors": [
+        "assembly",
+        "yulLet",
+        "yulExprStmt",
+        "yulCall",
+        "yulPath",
+        "yulLit"
+      ],
+      "astRequired": [
+        "InlineAssembly"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p24-canonical-rethrow",
+      "file": "p24-canonical-rethrow.sol",
+      "sha256": "acea5e26a28b902f87eb2c2630d5b70b0b75ab95660adfa6cdc6b3f624580d2d",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "tryStmt",
+        "catchSig",
+        "assembly",
+        "yulCall"
+      ],
+      "astRequired": [
+        "TryStatement",
+        "InlineAssembly"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p25-loop-unchecked",
+      "file": "p25-loop-unchecked.sol",
+      "sha256": "a6e3ee5364f49e32e4c58cbf9f20f6825ecf46dbdd954c92ead8ab583ad0f627",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "forStmt",
+        "uncheckedItem",
+        "continueStmt"
+      ],
+      "astRequired": [
+        "ForStatement",
+        "UncheckedBlock",
+        "Continue"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p26-return-tuple",
+      "file": "p26-return-tuple.sol",
+      "sha256": "53116465a6286c39ba6b5d731cfff4840a78b7c955a352e3b331f937cd3b36dc",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": true,
+      "ctors": [
+        "returnStmt",
+        "tuple"
+      ],
+      "astRequired": [
+        "Return",
+        "TupleExpression"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "p27-yul-constructors",
+      "file": "p27-yul-constructors.sol",
+      "sha256": "fd46fff6ab9e2a59949a60c7dfea61c9ba5bcc4136f39f7ad6f8be0062433b18",
+      "leanAccept": true,
+      "profile": false,
+      "solcAccept": true,
+      "ctors": [
+        "assembly",
+        "yulBlock",
+        "yulLet",
+        "yulAssign",
+        "yulExprStmt",
+        "yulIf",
+        "yulFor",
+        "yulSwitch",
+        "yulCase",
+        "yulLeave",
+        "yulBreak",
+        "yulContinue",
+        "yulFun",
+        "yulPath",
+        "yulCall",
+        "yulLit"
+      ],
+      "astRequired": [
+        "InlineAssembly"
+      ],
+      "kind": "positive"
+    },
+    {
+      "id": "n00-break",
+      "file": "n00-break.sol",
+      "sha256": "f59809705f254c1239121b1d0e93da83c4d73389797ff75c198b4ec6d7fce715",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "context"
+    },
+    {
+      "id": "n01-continue",
+      "file": "n01-continue.sol",
+      "sha256": "cf8e8a379e327642cae7abac0007689bbc319d0b4e8ae9d6150c805c6bed9772",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "context"
+    },
+    {
+      "id": "n02-nested-unchecked",
+      "file": "n02-nested-unchecked.sol",
+      "sha256": "3faf67479427c5474210cd1edcc6d8c9419aee63a19ec940cacca4cd2526fb49",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "context"
+    },
+    {
+      "id": "n03-unchecked-if",
+      "file": "n03-unchecked-if.sol",
+      "sha256": "f5bdfef9ed80c99d3f58ceaa2033ac645a51f102f402fb861547ad8af0c5f269",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n04-else",
+      "file": "n04-else.sol",
+      "sha256": "7bc61d1ec4b3accc16e749c399c8a9b0cec58df90a214608ac3a2611dd1856b4",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n05-extra-else",
+      "file": "n05-extra-else.sol",
+      "sha256": "9a5fe9464827db9d139b3928195ceea090f8a08d89419978d81756f134b9100f",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n06-return-semicolon",
+      "file": "n06-return-semicolon.sol",
+      "sha256": "2ffaa23b2221b6a1e8fa0efaa2c0d6bbd14b7c39dc14fcdfc17741564fd2910e",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n07-try-no-catch",
+      "file": "n07-try-no-catch.sol",
+      "sha256": "57c96574c7ec2f3c07638ebb28905053b41090425e1103b9873888235ce074b6",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n08-empty-catch",
+      "file": "n08-empty-catch.sol",
+      "sha256": "24c21ba3db1018f6f547def085568856d72cf101d2e4e73edfefe26cdad95769",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n09-try-no-block",
+      "file": "n09-try-no-block.sol",
+      "sha256": "41bd8101c0267e50caf52adcb6f09e9c194216725e1620ed6cc0d6852c95a21a",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n10-unchecked-for",
+      "file": "n10-unchecked-for.sol",
+      "sha256": "5c7e109217cfef99bf201fea5da96ba5090f9a55e50277a180e02ac681e20fc8",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n14-switch-no-case",
+      "file": "n14-switch-no-case.sol",
+      "sha256": "5dc84fc82d95ac5f87369ccb0a719bdebb09cb325f673a00f24b66b3d15a810b",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n15-return-paren",
+      "file": "n15-return-paren.sol",
+      "sha256": "88279b07f89417f3ca8228835bd65adebd69baf9d39254951380ae4c55419139",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n16-assembly-dialect",
+      "file": "n16-assembly-dialect.sol",
+      "sha256": "2f39fff2da1583efdcc593dc66bc104e84580b7da728c374b39c163951ff6a60",
+      "leanAccept": false,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [],
+      "astRequired": [],
+      "kind": "grammar"
+    },
+    {
+      "id": "n11-void-return-value",
+      "file": "n11-void-return-value.sol",
+      "sha256": "7ff553730e6421352b4f94fc015554a72a25f8f39814fc7ce9eac955d9daf6be",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [
+        "returnStmt"
+      ],
+      "astRequired": [],
+      "kind": "semantic-only",
+      "solcErrors": [
+        {
+          "type": "TypeError",
+          "code": "8863"
+        }
+      ]
+    },
+    {
+      "id": "n12-valued-empty-return",
+      "file": "n12-valued-empty-return.sol",
+      "sha256": "ea76b28ff7ad91ea193cc8e0f9c87c6e239675d93140a67324a4b4235d0af24e",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [
+        "returnStmt"
+      ],
+      "astRequired": [],
+      "kind": "semantic-only",
+      "solcErrors": [
+        {
+          "type": "TypeError",
+          "code": "6777"
+        }
+      ]
+    },
+    {
+      "id": "n13-unknown-catch",
+      "file": "n13-unknown-catch.sol",
+      "sha256": "875f3c5ee4df29fddd0961c8df5cef6b480615c4e22526c2daa4a8ec6dce01a7",
+      "leanAccept": true,
+      "profile": true,
+      "solcAccept": false,
+      "ctors": [
+        "tryStmt",
+        "catchSig"
+      ],
+      "astRequired": [],
+      "kind": "semantic-only",
+      "solcErrors": [
+        {
+          "type": "TypeError",
+          "code": "3542"
+        }
+      ]
+    }
+  ],
+  "boundary": "Finite parser/grammar/context controls; semantic-only cases intentionally differ from syntax acceptance. No universal completeness or solc correctness claim."
+}

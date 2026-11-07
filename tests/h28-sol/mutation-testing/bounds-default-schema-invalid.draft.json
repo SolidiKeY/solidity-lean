@@ -1,0 +1,39 @@
+{
+  "state": "invalid-development-candidate-not-runnable",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "note": "One array-read default substitution bypasses index evaluation. Dynamic and fixed bound kills plus inhabited live-read controls; no separate denominator count for two inputs.",
+  "cases": [
+    {
+      "id": "bounds.array-read-default-bypass",
+      "kind": "mutant",
+      "family": "index-bounds",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storageIndexReadArrayFind :\n      dl{ \u27e8[ v = arr[ie]; ]\u27e9 \u21dd { v := find(storage, arr[ie]) } \u27e8[ ]\u27e9 }",
+      "new": "  | storageIndexReadArrayFind :\n      dl{ \u27e8[ v = arr[ie]; ]\u27e9 \u21dd { v := defVal(T) } \u27e8[ ]\u27e9 }",
+      "source_symbol": "Taclet.storageIndexReadArrayFind",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/BoundsBaseline.lean",
+      "oracle_sha256": "059db341369f65869183ce8c422d2852b4fd9c2cf102678ee7641a1252e91cdc",
+      "oracle_declarations": [
+        "H28.BoundsBaseline.source_link",
+        "H28.BoundsBaseline.input_inhabited",
+        "H28.BoundsBaseline.dynamic_boundary_reverts",
+        "H28.BoundsBaseline.fixed_boundary_reverts",
+        "H28.BoundsBaseline.dynamic_positive_read",
+        "H28.BoundsBaseline.fixed_positive_read"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/BoundsDefaultKill.lean",
+      "witness_sha256": "bf0bcd51d147a8f308831451bd598e4b9cb880ee5f90f3424744a3f1a9d8ff84",
+      "witness_declarations": [
+        "H28.BoundsDefaultKill.source_link",
+        "H28.BoundsDefaultKill.input_inhabited",
+        "H28.BoundsDefaultKill.checked_kill",
+        "H28.BoundsDefaultKill.checked_fixed_kill",
+        "H28.BoundsDefaultKill.typed_landing"
+      ]
+    }
+  ],
+  "disposition": "invalid compilation, not killed or scored",
+  "archived_witness": "tests/h28-sol/mutation-testing/evidence/bounds-development-explicit-link/bounds.array-read-default-bypass/witness.lean.txt",
+  "evidence": "tests/h28-sol/mutation-testing/evidence/bounds-development-explicit-link"
+}

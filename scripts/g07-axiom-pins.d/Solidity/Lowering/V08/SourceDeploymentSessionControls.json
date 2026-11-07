@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/V08/SourceDeploymentSessionControls.lean:Solidity.Lowering.V08.SourceDeploymentSessionControls.event_is_not_installation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentSessionControls.lean:Solidity.Lowering.V08.SourceDeploymentSessionControls.failed_session_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentSessionControls.lean:Solidity.Lowering.V08.SourceDeploymentSessionControls.reached_continuation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentSessionControls.lean:Solidity.Lowering.V08.SourceDeploymentSessionControls.uninstalled_credit_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentSessionControls.lean:Solidity.Lowering.V08.SourceDeploymentSessionControls.wrong_final_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

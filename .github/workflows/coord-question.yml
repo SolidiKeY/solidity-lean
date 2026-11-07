@@ -1,0 +1,25 @@
+name: coord-question
+on:
+  push:
+    branches: ['coord-q/**']
+permissions:
+  contents: write
+  issues: write
+jobs:
+  open-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - name: Open one issue per question file
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          gh label create question --color d876e3 --description "Question from a VM lane" 2>/dev/null || true
+          for f in $(git diff --name-only --diff-filter=A HEAD^ HEAD -- coord/questions); do
+            title=$(sed -n 's/^title: //p' "$f" | head -1)
+            { echo '```'; sed -n '1,/^---$/p' "$f" | sed '$d'; echo '```'; sed '1,/^---$/d' "$f"; } > body.md
+            gh issue create --title "Q: $title" --label question --body-file body.md
+          done
+      - name: Delete the question ref
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${{ github.ref_name }}"

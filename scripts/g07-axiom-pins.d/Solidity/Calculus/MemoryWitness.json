@@ -1,0 +1,19 @@
+{
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.Fml.checkMemoryAt_eq_checkMemoryAtM": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.MemoryWitness.bind_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.MemoryWitness.Checked.refutes": [],
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.MemoryWitness.heap_get": [
+  "propext"
+ ],
+ "Solidity/Calculus/MemoryWitness.lean:Solidity.MemoryWitness.reference_eq_iff": [
+  "propext"
+ ]
+}

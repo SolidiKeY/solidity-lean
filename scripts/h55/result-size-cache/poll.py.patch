@@ -1,0 +1,77 @@
+--- a/poll.py
++++ b/poll.py
+@@ -15,0 +16,4 @@
++try:
++    from validate_result import ResultError, validate
++except Exception:
++    ResultError, validate = ValueError, None
+@@ -58,0 +63,24 @@
++# Explicit opt-in leaves existing producers under their original parser.
++# Strict items must carry both an authoritative turnId and final phase.
++H55_STRICT_BATCHES = frozenset(filter(None, os.environ.get('H55_STRICT_BATCHES', '').split(',')))
++
++def strict_result_block(text):
++    if validate is None:
++        raise RuntimeError('CLOUDVM-RESULT invalid: validator unavailable')
++    try:
++        return validate(text)
++    except ResultError as exc:
++        raise RuntimeError('CLOUDVM-RESULT invalid: ' + str(exc)) from exc
++
++def strict_turn_result(last, msgs, batch, slug):
++    turn_id = last.get('id')
++    if not isinstance(turn_id, str) or not turn_id:
++        raise RuntimeError('CLOUDVM-RESULT invalid: completed turn has no identity')
++    finals = [m for m in msgs if m.get('turnId') == turn_id and m.get('phase') == 'final_answer']
++    if len(finals) != 1:
++        raise RuntimeError('CLOUDVM-RESULT invalid: expected exactly one final message for completed turn')
++    result = strict_result_block(finals[0].get('text', ''))
++    if result['batch'] != batch or result['slug'] != slug:
++        raise RuntimeError('CLOUDVM-RESULT invalid: batch or slug mismatch')
++    return result
++
+@@ -74,4 +102,8 @@
+-    for m in msgs:
+-        res = result_block(m.get('text', ''))
+-        if res:
+-            break
++    if batch in H55_STRICT_BATCHES:
++        if last.get('status') == 'completed':
++            res = strict_turn_result(last, msgs, batch, slug)
++    else:
++        for m in msgs:
++            res = result_block(m.get('text', ''))
++            if res:
++                break
+@@ -231,0 +264,31 @@
++                    if b in H55_STRICT_BATCHES:
++                        old.pop('result', None)
++                        # Never leave a previously accepted result in the digest on error.
++                        digest = os.path.join(STATE, 'digest', f'{b}__{s}.json')
++                        try:
++                            with open(digest) as source:
++                                prior = json.load(source)
++                        except (OSError, ValueError):
++                            prior = {}
++                        if not isinstance(prior, dict):
++                            prior = {}
++                        prior['result'] = None
++                        prior['error'] = err
++                        import tempfile
++                        temp = None
++                        try:
++                            fd, temp = tempfile.mkstemp(prefix='.h55-digest-', dir=os.path.dirname(digest))
++                            with os.fdopen(fd, 'w') as target:
++                                json.dump(prior, target, indent=1)
++                            os.replace(temp, digest)
++                            old.pop('digestError', None)
++                        except OSError as digest_error:
++                            # This cannot make an unwritable existing digest safe.
++                            old['digestError'] = str(digest_error)
++                            say(f'ERROR {key} digest invalidation failed: {digest_error}')
++                        finally:
++                            if temp and os.path.exists(temp):
++                                try:
++                                    os.unlink(temp)
++                                except OSError:
++                                    pass

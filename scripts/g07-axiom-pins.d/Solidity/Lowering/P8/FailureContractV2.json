@@ -1,0 +1,9 @@
+{
+ "Solidity/Lowering/P8/FailureContractV2.lean:Solidity.Lowering.P8.FailureContractV2.CompleteProjection.toV1_ofV1": [],
+ "Solidity/Lowering/P8/FailureContractV2.lean:Solidity.Lowering.P8.FailureContractV2.nat_encodable_resource_impossible": [],
+ "Solidity/Lowering/P8/FailureContractV2.lean:Solidity.Lowering.P8.FailureContractV2.Producer.toV1_ofV1": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

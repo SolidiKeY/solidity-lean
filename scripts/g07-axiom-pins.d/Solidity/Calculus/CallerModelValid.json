@@ -1,0 +1,17 @@
+{
+ "Solidity/Calculus/CallerModelValid.lean:Solidity.Reentry.reachAny_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/CallerModelValid.lean:Solidity.validM_any": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/CallerModelValid.lean:Solidity.ValidM.weaken": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.prepare": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.source": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.source_loop": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/NormalFor.lean:SolidityBridge.Yul.NormalFor.structured": [
+  "Quot.sound",
+  "propext"
+ ]
+}

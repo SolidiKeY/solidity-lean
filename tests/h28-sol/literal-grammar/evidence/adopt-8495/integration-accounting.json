@@ -1,0 +1,35 @@
+{
+  "published": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+  "integrated": [
+    "Solidity.Frontend.LiteralGrammarH28.Body",
+    "Solidity.Frontend.LiteralGrammarH28.BodyControls",
+    "Solidity.Frontend.LiteralGrammarH28.Hex",
+    "Solidity.Frontend.LiteralGrammarH28.HexEncoding"
+  ],
+  "remaining_unregistered": [
+    "Solidity.Frontend.LiteralGrammarH28.BodyPins",
+    "Solidity.Frontend.LiteralGrammarH28.BoundaryControls",
+    "Solidity.Frontend.LiteralGrammarH28.BoundaryPins",
+    "Solidity.Frontend.LiteralGrammarH28.Classification",
+    "Solidity.Frontend.LiteralGrammarH28.EncodingValue",
+    "Solidity.Frontend.LiteralGrammarH28.FragmentCompleteness",
+    "Solidity.Frontend.LiteralGrammarH28.Fragments",
+    "Solidity.Frontend.LiteralGrammarH28.FullControls",
+    "Solidity.Frontend.LiteralGrammarH28.FullPins",
+    "Solidity.Frontend.LiteralGrammarH28.Global",
+    "Solidity.Frontend.LiteralGrammarH28.HexControls",
+    "Solidity.Frontend.LiteralGrammarH28.HexPins",
+    "Solidity.Frontend.LiteralGrammarH28.ModeGrammar",
+    "Solidity.Frontend.LiteralGrammarH28.ProofSafety",
+    "Solidity.Frontend.LiteralGrammarH28.Quoted",
+    "Solidity.Frontend.LiteralGrammarH28.Roundtrips",
+    "Solidity.Frontend.LiteralGrammarH28.Scanner",
+    "Solidity.Frontend.LiteralGrammarH28.Split",
+    "Solidity.Frontend.LiteralGrammarH28.TaggedEncoding",
+    "Solidity.Frontend.LiteralGrammarH28.WordTable"
+  ],
+  "proof_files": 24,
+  "proof_source_bytes": "all identical to preserved0858098f",
+  "original_inputs": "all4 original pins identical",
+  "new_master_gate_receipt": "Coordinator notice for published master only; not a fullgate receipt for20 unintegrated owned modules"
+}

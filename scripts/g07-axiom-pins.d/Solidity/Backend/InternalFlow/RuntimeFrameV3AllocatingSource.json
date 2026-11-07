@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSource.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSource.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

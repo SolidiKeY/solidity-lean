@@ -1,0 +1,54 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursive_prefix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveCopy_eq_overlay": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveCopy_mapping_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveCopy_shortened": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveCopy_tail": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveCopyAt_eq_semantics": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveCopyAt_missing_destination": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveCopyAt_missing_source": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveCopyAt_readback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.RecursiveCopyControls.mapping_all_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.RecursiveCopyControls.missing_outer_all_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.RecursiveCopyControls.varying_runtime_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveCopyControls.lean:Solidity.Backend.StorageOps.recursiveSlot_eq_overlay": [
+  "Quot.sound",
+  "propext"
+ ]
+}

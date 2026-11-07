@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Compilation/ZeroLoopScopeControls.lean:Solidity.Yul.Compilation.ZeroLoopScope.Controls.mutating_body_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScopeControls.lean:Solidity.Yul.Compilation.ZeroLoopScope.Controls.mutating_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScopeControls.lean:Solidity.Yul.Compilation.ZeroLoopScope.Controls.mutating_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScopeControls.lean:Solidity.Yul.Compilation.ZeroLoopScope.Controls.no_fresh_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScopeControls.lean:Solidity.Yul.Compilation.ZeroLoopScope.Controls.scalar_large_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScopeControls.lean:Solidity.Yul.Compilation.ZeroLoopScope.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroLoopScopeControls.lean:Solidity.Yul.Compilation.ZeroLoopScope.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/AbiEntry/EnumEntry.lean:Solidity.Backend.AbiEntry.EnumEntry.invalid_entry": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EnumEntry.lean:Solidity.Backend.AbiEntry.EnumEntry.invalid_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EnumEntry.lean:Solidity.Backend.AbiEntry.EnumEntry.truncated_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

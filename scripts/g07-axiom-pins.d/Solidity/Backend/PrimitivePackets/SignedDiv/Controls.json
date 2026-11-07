@@ -1,0 +1,65 @@
+{
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.checked_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.Controls.capacity_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.Controls.checked_not_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.Controls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.Controls.no_floor_rounding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.Controls.overflow_both": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.Controls.truncation_both": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.Controls.zero_both": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.locals_origin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.ordinary_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.overflow_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.public_selection": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedDiv/Controls.lean:Solidity.Backend.PrimitivePackets.SignedDiv.zero_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/TwoClearRepresentation.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TwoClearRepresentation.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.physical_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TwoClearRepresentation.lean:Solidity.Backend.StorageOps.TwoClearRepresentation.represented_clear_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/Yul/SwitchCompilation.lean:SolidityBridge.Yul.SwitchCompilation.Arms.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SwitchCompilation.lean:SolidityBridge.Yul.SwitchCompilation.Arms.structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SwitchCompilation.lean:SolidityBridge.Yul.SwitchCompilation.compare_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SwitchCompilation.lean:SolidityBridge.Yul.SwitchCompilation.Compiled.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SwitchCompilation.lean:SolidityBridge.Yul.SwitchCompilation.Compiled.structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

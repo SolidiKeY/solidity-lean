@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "scope": "H44 external evidence only; no parity or kernel-proof claim",
+  "checkpointSource": "7c586a31518cf24f7facf5842984f496f116f2eb",
+  "archive": {
+    "path": "/workspace/dafny-parity-decisions-20261105-evidence.tar.gz",
+    "bytes": 4179136,
+    "sha256": "e04d71585dd9b22f85bb85c9240b9b4d42b29aca01fc2611cdc87d6b8412e53a",
+    "files": 401
+  },
+  "externalAssets": [
+    {
+      "path": "/workspace/vscode-official/code-1.108.0-linux-x64.tar.gz",
+      "bytes": 163195533,
+      "sha256": "db4c9d0df1c5872dc13710bd6c71b52538326c563dcf1c5cf35100a4e561df09"
+    },
+    {
+      "path": "/workspace/vscode-official/update-api-1.108.0.json",
+      "bytes": 430,
+      "sha256": "2b54671d0a75251ed9708d8f69c1fcabcf0162fb178e97296d26ad032e8d23e7"
+    }
+  ],
+  "outcomes": {
+    "fullGate": "resource-stop; exit -9; supervisor exit1; available memory below12GiB reserve",
+    "peakAggregateRssBytes": 5023707136,
+    "swapBytes": 0,
+    "scopeEnforced": false,
+    "rendered": "Dafny five partial phases; local first feedback partial, open missing, proof scenarios broken/unsupported; no owned survivors",
+    "node": "334 passes,2 skips before two additional visual regression tests",
+    "parity": "not rerun yet; original exit1 remains binding"
+  }
+}

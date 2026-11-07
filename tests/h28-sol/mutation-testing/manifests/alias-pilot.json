@@ -1,0 +1,107 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "One receiver-getter duplicated-capture mutation, with true counter effect1 versus2 and exactlyoneappend, unchanged pure-getter control, and actualtypedcall/append/popframe executions. Pilot only; not full alias constructor/callsite or assignment coverage.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+  "inventory_sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/cache-bootstrap/manifest.json",
+  "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec",
+  "cache_root": "/workspace/h28-runtime/prepared-base-6f3eedf0",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "alias.receiver-getter-twice",
+      "kind": "mutant",
+      "family": "alias-capture-once",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storagePush_unfold_leftCallReceiver :\n      dl{ \u27e8[ fc.push(); ]\u27e9 \u21dd \u27e8[ aliasType storage sp = fc; sp.push(); ]\u27e9 }",
+      "new": "  | storagePush_unfold_leftCallReceiver {m : Modality} {\u0393 : Ctx} {f : Name} {x : Ctx}\n      {args : Args C \u0393 x} {r : Var} {x_1 : Ty} {x_2 : Ctx}\n      {body : Prog C ([.alias (.array x_1)] ++ x) x_2}\n      {hd : ((none : Option (Src C \u0393 x_1)).isSome || x_1.defaultOkS) = true} :\n      Taclet C k m (.callReceiver f args r body (.push none hd))\n        (.unfold\n          (.cons (.call f args (.storage (.array x_1) r) body)\n            (.cons (.call f (args.wk (.drop .refl)) (.storage (.array x_1) r) body)\n              (.cons (.push (.alias .here) none hd) .nil)))\n          (.push (.push .refl)))",
+      "source_symbol": "Taclet.storagePush_unfold_leftCallReceiver",
+      "interface_note": "Disposable constructor uses explicit typed premise to express duplicated getter. All original input binders/types and LHS preserved; only semantic RHS changes. Both constructor signatures printed for audit.",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/AliasBaseline.lean",
+      "oracle_sha256": "138befa4d0e3a9c8452201fe8c8dcd599c297f249e2134ca40f5394525a8a751",
+      "oracle_declarations": [
+        "H28.AliasBaseline.source_link",
+        "H28.AliasBaseline.input_inhabited",
+        "H28.AliasBaseline.getter_once",
+        "H28.AliasBaseline.pure_once",
+        "H28.AliasBaseline.pure_twice_control",
+        "H28.AliasBaseline.actual_counter_one",
+        "H28.AliasBaseline.actual_rejects_post"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/AliasTwiceKill.lean",
+      "witness_sha256": "53bd884bc0d62de6ac11bff9affa040f3ae42979ee5270b6caceab00abe1f624",
+      "witness_declarations": [
+        "H28.AliasTwiceKill.source_link",
+        "H28.AliasTwiceKill.input_inhabited",
+        "H28.AliasTwiceKill.checked_kill",
+        "H28.AliasTwiceKill.typed_landing",
+        "H28.AliasTwiceKill.pure_twice_control"
+      ],
+      "constructor_id": "Taclet.storagePush_unfold_leftCallReceiver",
+      "mutant_sha256": "e7b36c269b16493a8eeac8b2ee1e679a0504e6298b5f846f4b887e400f92d73e",
+      "oracle_signature_sha256": {
+        "H28.AliasBaseline.source_link": "414109d251f4c242f03dc12ef852256ef15df3b43af7444f37878c0e6f2a08ed",
+        "H28.AliasBaseline.input_inhabited": "7acf58f8f06785ae511a454b352ce5756d5cdafe132e19104a6b4ebe9a8a1f82",
+        "H28.AliasBaseline.getter_once": "ef81049bb1bc9677a518ba23b69b678b68a0d06bc9a0f4757e9e3c3c2c048f54",
+        "H28.AliasBaseline.pure_once": "c332caa7169b9c57ea7156e18eb0f73aada41f911f1fb935a06b7812ced619c2",
+        "H28.AliasBaseline.pure_twice_control": "918d5bdf975d22be24b3119cd26b79e54582c756bedbeec505d9cf232b070cea",
+        "H28.AliasBaseline.actual_counter_one": "e67bcc3946964f041bf8968cff3e713918c66bb39a30e15d70b7b2bd6d03b84d",
+        "H28.AliasBaseline.actual_rejects_post": "28840d07a89e0c4683f0eae9c13b032e9a6d6fdf0658b059267a8f7a5990626d"
+      },
+      "witness_signature_sha256": {
+        "H28.AliasTwiceKill.source_link": "c0fdd224e7af821649b56ad7535d00cd1315355eef61db7a8f7fe6da3e16bb27",
+        "H28.AliasTwiceKill.input_inhabited": "619c38954857e1f5a7b6266882005de847cdea901990b5fe5ba038c5d755b959",
+        "H28.AliasTwiceKill.checked_kill": "d8707677dc3567fb5b4b7ab218672d9636a18b53598ce35c1c6c6eacf36a5e2b",
+        "H28.AliasTwiceKill.typed_landing": "55038f5ada30b42ef1dc652b7899e01d41b2ded37ca033a90c5dbdceb17e055c",
+        "H28.AliasTwiceKill.pure_twice_control": "c62d5d0e6ff54839f97302f11c96dc70151561a2e79e783c5df019592750065c"
+      }
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    }
+  ]
+}

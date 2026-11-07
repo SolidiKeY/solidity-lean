@@ -1,0 +1,22 @@
+{
+ "Solidity/Calculus/LexVariantSound.lean:Solidity.LoopLex.lexFml_holds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/LexVariantSound.lean:Solidity.LoopLex.metrics_eval_saved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/LexVariantSound.lean:Solidity.LoopLex.snapshot_globT_iff_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/LexVariantSound.lean:Solidity.LoopLex.snapshot_lands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

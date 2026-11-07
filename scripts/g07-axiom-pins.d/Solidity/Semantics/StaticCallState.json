@@ -1,0 +1,11 @@
+{
+ "Solidity/Semantics/StaticCallState.lean:Solidity.State.resumeCall_call": [
+  "propext"
+ ],
+ "Solidity/Semantics/StaticCallState.lean:Solidity.State.resumeCall_static": [
+  "propext"
+ ],
+ "Solidity/Semantics/StaticCallState.lean:Solidity.StaticInvocation.Frame.resumeCall": [
+  "propext"
+ ]
+}

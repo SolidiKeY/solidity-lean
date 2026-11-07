@@ -1,0 +1,62 @@
+{
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.compilation_mapped_fault_reached_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.compilation_third_fault_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.compilation_triple_fault_reached_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.compilation_triple_fault_reached_left_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.FaultControls.distinct_terminals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.FaultControls.immediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.FaultControls.middle_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.FaultControls.middle_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.FaultControls.shared_third": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.FaultControls.third_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.FaultControls.third_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FaultPins.lean:Solidity.Backend.Passes.FaultControls.wrong_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

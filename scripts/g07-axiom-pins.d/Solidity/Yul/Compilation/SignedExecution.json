@@ -1,0 +1,32 @@
+{
+ "Solidity/Yul/Compilation/SignedExecution.lean:Solidity.Yul.Compilation.SignedExecution.expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecution.lean:Solidity.Yul.Compilation.SignedExecution.loweredExpr_machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecution.lean:Solidity.Yul.Compilation.SignedExecution.loweredStmt_machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecution.lean:Solidity.Yul.Compilation.SignedExecution.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecution.lean:Solidity.Yul.Compilation.SignedExecution.statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecution.lean:Solidity.Yul.Compilation.SignedExecution.step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

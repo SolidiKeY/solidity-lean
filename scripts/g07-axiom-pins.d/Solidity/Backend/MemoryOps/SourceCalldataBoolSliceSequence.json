@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean:Solidity.Backend.MemoryOps.source_bool_slice_copy_late_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

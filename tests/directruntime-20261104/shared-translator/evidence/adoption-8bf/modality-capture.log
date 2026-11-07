@@ -1,0 +1,4 @@
+Pinned modality fixture generated through existing compiler normalization.
+PASS lean:tests/directruntime-20261104/shared-translator/ModalityControls.lean 5s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/modality-capture/1.log
+{"childMaxRssKiB": 1260444, "command": ["env", "SHARED_MODALITY_CAPTURE=1", "GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/modality-capture", "bash", "-c", "set -e; node tests/directruntime-20261104/shared-translator/modality-fixture.mjs; bash scripts/coord-tools/gate.sh per-file tests/directruntime-20261104/shared-translator/ModalityControls.lean"], "exit": 0, "scopeMemoryPeakBytes": "186793984", "wallSeconds": 6.83318618699559}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 6068772864, "outerWallSeconds": 11.831404215990915}

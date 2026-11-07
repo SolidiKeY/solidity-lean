@@ -1,0 +1,42 @@
+{
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Bridge.Adversary.holdsC_iff_all_callees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Bridge.Arith.uint_addW_bitvec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Bridge.Arith.uint_subW_zmod": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Bridge.wp_dual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Evm.External.simulation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Checks.lean:Solidity.Evm.External.upstream_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Checks.lean:Solidity.FO.finite_support": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Checks.lean:Solidity.TLoop.run_correct_of_variant": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

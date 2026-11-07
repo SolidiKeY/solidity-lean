@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Passes/FramedMemoryBoundary.lean:Solidity.Backend.Passes.FramedMemoryBoundary.allocation_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FramedMemoryBoundary.lean:Solidity.Backend.Passes.FramedMemoryBoundary.allocation_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FramedMemoryBoundary.lean:Solidity.Backend.Passes.FramedMemoryBoundary.changed_memory_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/FramedMemoryBoundary.lean:Solidity.Backend.Passes.FramedMemoryBoundary.preserves_memory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

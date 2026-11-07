@@ -50,11 +50,11 @@ theorem accepted {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
     (evalE G F (n+2) (expression τ allowed false)).run
       (caller loc offset length start stop older,state) =
       (.ok (.val (.cdRef loc
-        (offset + (match τ with | .bytes _ | .string _ => 1 | _ => 32) * start.val)
+        (offset + τ.cdStride * start.val)
         (stop.val-start.val))), (caller loc offset length start stop older,state)) := by
   rw [run]
   simp only [sliceR, Bool.false_eq_true, ↓reduceIte, if_neg (Nat.not_lt.mpr ordered), if_neg (Nat.not_lt.mpr bounded)]
-  cases τ <;> rfl
+  rfl
 
 theorem reversed {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
     (τ : STy) (allowed : τ.sliceable = true) (loc : τ.loc? = some .calldata)
@@ -111,12 +111,12 @@ theorem accepted_toEnd {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
     (evalE G F (n+2) (expression τ allowed true)).run
       (caller loc offset length start stop older,state) =
       (.ok (.val (.cdRef loc
-        (offset + (match τ with | .bytes _ | .string _ => 1 | _ => 32) * start.val)
+        (offset + τ.cdStride * start.val)
         (length-start.val))), (caller loc offset length start stop older,state)) := by
   rw [run]
   simp only [sliceR, ↓reduceIte, if_neg (Nat.not_lt.mpr bounded),
     Nat.lt_irrefl]
-  cases τ <;> rfl
+  rfl
 
 /-- Actual subsequent bytes observation, not a target byte-memory encoder.
 Slice acceptance does not validate that the logical reference is in input. -/
@@ -133,7 +133,7 @@ theorem observed_bytes {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
   have step := accepted G F n (.bytes .calldata) rfl rfl offset length start stop ordered bounded older state
   simp only [ExceptT.run] at step
   rw [step]
-  simp only [Nat.one_mul]
+  simp only [STy.cdStride, Nat.one_mul]
   rfl
 
 /-- The two actual bound failures exhaust the explicit-end invalid range. -/

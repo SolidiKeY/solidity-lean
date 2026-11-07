@@ -1,0 +1,6 @@
+Solidity.Frontend.YulJson.CheckedExpression.contract {F : List Yul.Sig} {X : List Yul.ExternalType} {n : Nat}
+  {E : Yul.ExprEnv F X n} {bound : Nat} {j : Json} (e : YulJson.CheckedExpression E bound j) :
+  YulJson.expression bound j = Except.ok e.tree ∧ Nonempty (Yul.ExprD E e.tree e.arity)
+Solidity.Frontend.YulJson.ShapedBlock.contract {bound : Nat} {j : Json} (b : YulJson.ShapedBlock bound j) :
+  YulJson.blockAux bound j = Except.ok b.tree ∧ b.tree.prec = true
+YulJson: 16 compiler-emitted kinds decoded; grammar shape checked; no whole-assembly admission/execution claim.

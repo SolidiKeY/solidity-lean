@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3BarePrefix.lean:Solidity.Backend.InternalFlow.RuntimeFrame.BarePrefix.after_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

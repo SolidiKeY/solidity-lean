@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalReferenceStore.lean:Solidity.Backend.MemoryOps.Physical.reference_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

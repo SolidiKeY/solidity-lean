@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "scope": "Frozen 57-input H55 family queue; proof-entrypoint reuse is partial family migration, not definition or full-family completion.",
+  "frozen_input_count": 57,
+  "fully_migrated_families": 0,
+  "partially_migrated_input_files": 16,
+  "entries": [
+    {
+      "path": "Solidity/Yul/Compilation/CaseCompletion.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/GuardedForCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.GuardedForCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/GuardedForCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/InitializedLoopCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.InitializedLoopCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/InitializedLoopCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetBranchCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetBranchCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetBranchCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetBranchCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetBranchCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetControlCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetControlCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetControlCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetControlCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetControlCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetScopeCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetScopeCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetScopeCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetScopeCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetScopeCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetSequenceCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetSequenceCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetSequenceCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetSequenceCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LetSequenceCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LoopControlCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LoopControlCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/LoopControlCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/MultiSwitchCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.MultiSwitchCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/MultiSwitchCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedControlCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedControlCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedControlCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedControlCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedForCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedForCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedForCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedForCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedForCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ScopedLoopCompletion.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SequenceCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SequenceCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SequenceCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SourceLoopCompletion.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SourceLoopCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SourceLoopModelCompletion.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/StructuredSequenceCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/StructuredSequenceCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/StructuredSequenceCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.StructuredSequenceCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/StructuredSequenceCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SwitchCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SwitchCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SwitchCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SwitchCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SwitchSequence.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SwitchSequenceCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.SwitchSequenceCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SwitchSequenceCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/SwitchSequenceControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ZeroControlCompilation.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ZeroControlCompilationControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ZeroControlCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ZeroControlCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ZeroControlCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ZeroScopeCompletion.lean",
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ZeroScopeCompletion.completion_iff"
+      ],
+      "existing_definitions_changed": false
+    },
+    {
+      "path": "Solidity/Yul/Compilation/ZeroScopeCompletionControls.lean",
+      "status": "pending",
+      "migrated_declarations": [],
+      "existing_definitions_changed": false
+    }
+  ]
+}

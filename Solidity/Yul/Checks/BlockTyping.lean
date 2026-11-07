@@ -146,4 +146,61 @@ example : expressionPolicy .C (call "gas" []) = some (.error (.compilerDependent
 example : expressionPolicy .A (call "mload" [lit 0]) = some (.error (.needsTier .B)) := rfl
 example : expressionPolicy .A (call "add" [lit 257, lit 1]) = some (.ok ()) := rfl
 
+/- Packed results retain declaration growth, final bindings and scope closure. -/
+#guard (checkStatement ClosedSyntax.rootEnv ClosedSyntax.rootControl (zero "x")).map (·.1) = some 1
+#guard (checkWalk ClosedSyntax.rootEnv ClosedSyntax.rootControl (list [zero "x",zero "y"])).map (·.1) = some 2
+#guard (checkWalk ClosedSyntax.rootEnv ClosedSyntax.rootControl (list [zero "x",zero "y"])).map
+  (fun result => result.2.1.locals.map (·.1)) = some ["y","x"]
+#guard (checkStatement ClosedSyntax.rootEnv ClosedSyntax.rootControl (block [zero "x"])).map (·.1) = some 0
+
+/-- info: 'Solidity.Yul.ScopedBlockTyping.StatementD.result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.StatementD.result_unique
+/-- info: 'Solidity.Yul.ScopedBlockTyping.WalkD.result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.WalkD.result_unique
+
+/- Literal spelling differences do not bypass normalized switch-label uniqueness. -/
+def normalizedDuplicateCases : Syn (.list .yulCase) :=
+  list [.yulCase (.dec 1) .nil,.yulCase (.hex 1) .nil]
+def normalizedDistinctCases : Syn (.list .yulCase) :=
+  list [.yulCase (.dec 1) .nil,.yulCase (.hex 2) .nil]
+#guard (ScopedBlockTyping.checkNode .closed normalizedDuplicateCases
+  ClosedSyntax.rootEnv ClosedSyntax.rootControl).map
+  (fun result => result.1.map (fun value => value.val)) = some [1,1]
+#guard (checkStatement ClosedSyntax.rootEnv ClosedSyntax.rootControl
+  (.yulSwitch (lit 0) normalizedDuplicateCases .none)).isNone
+#guard (ScopedBlockTyping.checkNode .closed normalizedDistinctCases
+  ClosedSyntax.rootEnv ClosedSyntax.rootControl).map
+  (fun result => result.1.map (fun value => value.val)) = some [1,2]
+#guard (checkStatement ClosedSyntax.rootEnv ClosedSyntax.rootControl
+  (.yulSwitch (lit 0) normalizedDistinctCases .none)).isSome
+
+/-- info: 'Solidity.Yul.ScopedBlockTyping.CaseD.result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.CaseD.result_unique
+/-- info: 'Solidity.Yul.ScopedBlockTyping.CasesD.result_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.CasesD.result_unique
+
+/- Fixed initializer arities and default-body control indices remain significant. -/
+#guard (ScopedBlockTyping.checkInitializer .closed ClosedSyntax.rootEnv 2 .none).isSome
+#guard (ScopedBlockTyping.checkInitializer .closed ClosedSyntax.rootEnv 2 (.some (lit 7))).isNone
+#guard (ScopedBlockTyping.checkInitializer .closed ClosedSyntax.rootEnv 1 (.some (lit 7))).isSome
+#guard (ScopedBlockTyping.checkNode .closed (.none : Syn (.opt (.list .yulStmt)))
+  ClosedSyntax.rootEnv ClosedSyntax.rootControl).isSome
+#guard (ScopedBlockTyping.checkNode .closed
+  (.some (list [.yulBreak]) : Syn (.opt (.list .yulStmt)))
+  ClosedSyntax.rootEnv ClosedSyntax.rootControl).isNone
+
+/-- info: 'Solidity.Yul.ScopedBlockTyping.BlockD.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.BlockD.unique
+/-- info: 'Solidity.Yul.ScopedBlockTyping.DefaultD.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.DefaultD.unique
+/-- info: 'Solidity.Yul.ScopedBlockTyping.InitializerD.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedBlockTyping.InitializerD.unique
+
 end Solidity.Yul.Checks.BlockTyping

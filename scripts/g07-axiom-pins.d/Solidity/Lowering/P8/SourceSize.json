@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/P8/SourceSize.lean:Solidity.Backend.MemoryCopies.NewArrayLengthPanicPremise.failure_of_parts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

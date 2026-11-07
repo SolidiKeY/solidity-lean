@@ -1,0 +1,107 @@
+CWD: /workspace/solidity-lean/Bridge
+COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 tests/precompile-agreement/ActualAxioms.lean
+'SolidityBridge.PrecompileAgreement.byte_list' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.byte_length' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.ofNat_nat' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.subtract_nat' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.words_multiple' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.words_next' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.words_last' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.words_boundary' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.words_rounding' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.array' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.filled' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.zeros' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.input' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.lengths' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.identity_lengths' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.sha_lengths' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.ripemd_lengths' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.identity_nonzero_output' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.identity_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.sha_boundary' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.ripemd_boundary' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.invalid_recovery' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.ecrecover_controls' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.bad_point' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.bnadd_controls' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.bnmul_controls' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.pairing_controls' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.blake_one' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.blake_bad_flag' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.blake_controls' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.blake_short_mismatch' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.blake_byte_order' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.point_controls' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.ffi_logical_mismatch' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.modexp_empty_mismatch' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.oversized_modexp' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.modexp_bound_mismatch' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.unsupported' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.unsupported_core' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.blake_malformed_lengths' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.blake_core_lengths' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.blake_final_one' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.blake_final_one_control' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.bls_discount_boundaries' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.blake_high_header' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.Controls.wide_base' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.Controls.modexp_base_truncation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SolidityBridge.PrecompileAgreement.address_table' does not depend on any axioms
+'SolidityBridge.PrecompileAgreement.address_complete' depends on axioms: [propext]
+'SolidityBridge.PrecompileAgreement.sha_price' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.ripemd_price' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.pairing_price' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.ecrecover_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.sha_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.ripemd_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.bnadd_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.bnmul_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.pairing_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.point_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.big_reader' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.first_four' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.zero_padding' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_padding' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_zero_header' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_price' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_insufficient' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_invalid_flag' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_valid_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_invalid_size' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.blake_zero_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_gas' depends on axioms: [propext, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_output' depends on axioms: [propext]
+'SolidityBridge.PrecompileAgreement.identity_run' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_success' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_failure' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_charged' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_success_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_one_short' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_unaffordable' depends on axioms: [propext, Classical.choice, Quot.sound]
+EXIT=0 SECONDS=3.316 PEAK_RSS=389980160 MIN_AVAILABLE=17666637824 RESOURCE_STOP=False

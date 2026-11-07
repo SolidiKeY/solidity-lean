@@ -1,0 +1,93 @@
+{
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.paired": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.payload_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.raw_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.request_clock_override": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.return_bytes_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.setup_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.source_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.source_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.source_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.source_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.stale_clock_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.target_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.target_projection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.target_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.timeout_not_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.timeout_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.transient_effect_not_erased": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.wrong_global_bytes": [],
+ "Solidity/Lowering/V08/SourceClockTransactions.lean:Solidity.Lowering.V08.SourceClockTransactions.wrong_target_clock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

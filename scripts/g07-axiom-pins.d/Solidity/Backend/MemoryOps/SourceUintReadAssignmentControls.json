@@ -1,0 +1,186 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.actual_selector_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.complete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.computed_rhs_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.computed_rhs_statement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_concrete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_negatives": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_delete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_four_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_four_skip_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_four_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_self_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_stale_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_concrete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_delete_concrete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_delete_negatives": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_delete_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_delete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_negatives": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_read_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_read_concrete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_read_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_read_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.early_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.endpoint_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.reached_chain_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.reached_chain_frozen_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.reached_chain_prefix_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.reached_chain_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintReadAssignmentControls.lean:Solidity.Backend.MemoryOps.UintReadAssignmentControls.stale_rhs_negative": [
+  "Quot.sound",
+  "propext"
+ ]
+}

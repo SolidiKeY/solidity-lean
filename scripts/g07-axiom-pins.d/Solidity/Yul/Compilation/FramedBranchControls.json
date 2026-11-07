@@ -1,0 +1,42 @@
+{
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.chosen_literal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.empty_untaken_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.high_only_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.left": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.right": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.zero_division": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.zero_takes_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

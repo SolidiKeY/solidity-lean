@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/GuardedForControls.lean:Solidity.Yul.Compilation.GuardedFor.Controls.skipped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForControls.lean:Solidity.Yul.Compilation.GuardedFor.Controls.source_skipped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForControls.lean:Solidity.Yul.Compilation.GuardedFor.Controls.source_taken": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedForControls.lean:Solidity.Yul.Compilation.GuardedFor.Controls.target_taken": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

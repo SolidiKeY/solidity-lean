@@ -1,0 +1,26 @@
+{
+ "Solidity/Storage/HashedKeccak.lean:Solidity.Storage.collisionFree_keccakH_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/HashedKeccak.lean:Solidity.Storage.encode_inj": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/HashedKeccak.lean:Solidity.Storage.keccak_word_inj": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/HashedKeccak.lean:Solidity.Storage.keccakH_lt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/HashedKeccak.lean:Solidity.Storage.regionsDisjoint_keccakH_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

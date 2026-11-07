@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurn.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_turn_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurn.lean:Solidity.Backend.MemoryCopies.fixed_reference_storage_turn_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceStorageTurn.lean:Solidity.Backend.MemoryCopies.fixedReferenceStorageTurn": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

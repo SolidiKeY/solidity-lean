@@ -1,0 +1,30 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.all_stack_classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.empty_stack_boundary": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.overlap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.populated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.stack_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

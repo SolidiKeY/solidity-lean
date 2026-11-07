@@ -1,0 +1,6 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveCopy.lean:Solidity.Backend.StorageOps.fixedView": [],
+ "Solidity/Backend/StorageOps/RecursiveCopy.lean:Solidity.Backend.StorageOps.FixedView": [],
+ "Solidity/Backend/StorageOps/RecursiveCopy.lean:Solidity.Backend.StorageOps.nodeView": [],
+ "Solidity/Backend/StorageOps/RecursiveCopy.lean:Solidity.Backend.StorageOps.NodeView": []
+}

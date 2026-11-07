@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/Sound.lean:Solidity.Proves.fmlValid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Sound.lean:Solidity.Proves.valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

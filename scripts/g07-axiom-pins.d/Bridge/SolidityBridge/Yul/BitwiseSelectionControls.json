@@ -1,0 +1,102 @@
+{
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.andFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.band": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.bor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.bxor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.compileBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.compileLeaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.orFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.prefixed_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.prefixed_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.shl": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.shlFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.shr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.shrFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/BitwiseSelectionControls.lean:SolidityBridge.Yul.BitwiseSelection.xorFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

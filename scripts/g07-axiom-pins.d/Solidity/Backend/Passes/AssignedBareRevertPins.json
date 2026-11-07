@@ -1,0 +1,64 @@
+{
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.initial_observations": [],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.initial_repr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.inner_source_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.instantiated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.prefix_instructions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.prefix_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.reached_observations": [],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.skipped_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.source_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignedBareRevertPins.lean:Solidity.Backend.Passes.AssignedBareRevert.Controls.wrong_cursor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

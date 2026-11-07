@@ -1,0 +1,38 @@
+import Solidity.Backend.Aggregates.CalldataCopyAccessControls
+
+#print axioms Solidity.Source.decode_traversal_shape
+#print axioms Solidity.Source.cdToMem_array_length
+#print axioms Solidity.Source.heapObj_alloc_run
+#print axioms Solidity.Source.readLoc_alloc_array_run
+#print axioms Solidity.Source.cdToMem_array_read_run
+#print axioms Solidity.Source.readLoc_alloc_array_out_run
+#print axioms Solidity.Source.cdToMem_array_read_failure
+#print axioms Solidity.Source.cdToMem_array_read_out_run
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.extent_derived
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.second_decoder_and_read
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.bounds_after_copy
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.bounds_keeps_allocation
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.dirty_before_bounds
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.offset_validation
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.nonzero_origin_read
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.wrong_origin_read
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.empty_copy_then_read
+#print axioms Solidity.Backend.Aggregates.CalldataCopyAccessControls.wrong_post_copy_rollback
+#check Solidity.Source.decode_traversal_shape
+#check Solidity.Source.cdToMem_array_length
+#check Solidity.Source.heapObj_alloc_run
+#check Solidity.Source.readLoc_alloc_array_run
+#check Solidity.Source.cdToMem_array_read_run
+#check Solidity.Source.readLoc_alloc_array_out_run
+#check Solidity.Source.cdToMem_array_read_failure
+#check Solidity.Source.cdToMem_array_read_out_run
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.extent_derived
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.second_decoder_and_read
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.bounds_after_copy
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.bounds_keeps_allocation
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.dirty_before_bounds
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.offset_validation
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.nonzero_origin_read
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.wrong_origin_read
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.empty_copy_then_read
+#check Solidity.Backend.Aggregates.CalldataCopyAccessControls.wrong_post_copy_rollback

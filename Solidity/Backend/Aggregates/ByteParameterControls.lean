@@ -60,7 +60,7 @@ def sourceHeap : Source.Heap E.layout :=
 
 def sourceState : Source.St E :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩, Source.Transient.empty, []⟩,
-    sourceHeap, [], [], ⟨[], .nil⟩⟩
+    sourceHeap, [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩
 def sourceLocals : Source.Locals E.layout [.bytes .memory,.bytes .memory] :=
   .cons (.memRef rfl 0) (.cons (.memRef rfl 0) .nil)
 def sourceBefore := (sourceLocals,sourceState)

@@ -1,0 +1,17 @@
+{
+ "Solidity/Frontend/Admission/NameResolutionRoots.lean:Solidity.Frontend.Admission.NameResolutionRoots.functions_registered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/NameResolutionRoots.lean:Solidity.Frontend.Admission.NameResolutionRoots.lookup_registered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/NameResolutionRoots.lean:Solidity.Frontend.Admission.NameResolutionRoots.path_registered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/NameResolutionRoots.lean:Solidity.Frontend.Admission.NameResolutionRoots.resolved_registered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/NameResolutionRoots.lean:Solidity.Frontend.Admission.NameResolutionRoots.selected_function_membership": [
+  "propext"
+ ]
+}

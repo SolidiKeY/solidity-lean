@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.array_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.array_trace_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.clear_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.clear_slot_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.family_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.fixed_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.indices_nodup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.node_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutput.lean:Solidity.Backend.StorageOps.CopyOutput.positions_nodup": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,191 @@
+{
+  "1": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.ecrecover_gas"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.ecrecover_controls"
+    ],
+    "proof_status": "kernel-matching-row"
+  },
+  "2": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.sha_price",
+      "SolidityBridge.PrecompileAgreement.sha_gas"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.sha_lengths",
+      "SolidityBridge.PrecompileAgreement.Controls.sha_boundary"
+    ],
+    "proof_status": "kernel-matching-row"
+  },
+  "3": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.ripemd_price",
+      "SolidityBridge.PrecompileAgreement.ripemd_gas"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.ripemd_lengths",
+      "SolidityBridge.PrecompileAgreement.Controls.ripemd_boundary"
+    ],
+    "proof_status": "kernel-matching-row"
+  },
+  "4": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.identity_gas",
+      "SolidityBridge.PrecompileAgreement.identity_output",
+      "SolidityBridge.PrecompileAgreement.identity_run",
+      "SolidityBridge.PrecompileAgreement.identity_success",
+      "SolidityBridge.PrecompileAgreement.identity_failure",
+      "SolidityBridge.PrecompileAgreement.identity_charged",
+      "SolidityBridge.PrecompileAgreement.identity_success_iff",
+      "SolidityBridge.PrecompileAgreement.identity_exact",
+      "SolidityBridge.PrecompileAgreement.identity_one_short",
+      "SolidityBridge.PrecompileAgreement.identity_unaffordable",
+      "SolidityBridge.PrecompileAgreement.words_multiple",
+      "SolidityBridge.PrecompileAgreement.words_next",
+      "SolidityBridge.PrecompileAgreement.words_last",
+      "SolidityBridge.PrecompileAgreement.words_boundary",
+      "SolidityBridge.PrecompileAgreement.words_rounding"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.identity_lengths",
+      "SolidityBridge.PrecompileAgreement.Controls.identity_nonzero_output",
+      "SolidityBridge.PrecompileAgreement.Controls.identity_boundary"
+    ],
+    "proof_status": "kernel-matching-row"
+  },
+  "5": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.modexp_empty_mismatch",
+      "SolidityBridge.PrecompileAgreement.Controls.modexp_bound_mismatch",
+      "SolidityBridge.PrecompileAgreement.Controls.modexp_base_truncation"
+    ],
+    "proof_status": "kernel-mismatch-only"
+  },
+  "6": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.bnadd_gas"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.bnadd_controls",
+      "SolidityBridge.PrecompileAgreement.Controls.ffi_logical_mismatch"
+    ],
+    "proof_status": "kernel-matching-row"
+  },
+  "7": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.bnmul_gas"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.bnmul_controls"
+    ],
+    "proof_status": "kernel-matching-row"
+  },
+  "8": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.pairing_price",
+      "SolidityBridge.PrecompileAgreement.pairing_gas"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.pairing_controls"
+    ],
+    "proof_status": "kernel-matching-row"
+  },
+  "9": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.big_reader",
+      "SolidityBridge.PrecompileAgreement.first_four",
+      "SolidityBridge.PrecompileAgreement.zero_padding",
+      "SolidityBridge.PrecompileAgreement.blake_padding",
+      "SolidityBridge.PrecompileAgreement.blake_zero_header",
+      "SolidityBridge.PrecompileAgreement.blake_price",
+      "SolidityBridge.PrecompileAgreement.blake_gas",
+      "SolidityBridge.PrecompileAgreement.blake_zero_gas",
+      "SolidityBridge.PrecompileAgreement.blake_valid",
+      "SolidityBridge.PrecompileAgreement.blake_valid_one",
+      "SolidityBridge.PrecompileAgreement.blake_insufficient",
+      "SolidityBridge.PrecompileAgreement.blake_invalid_flag",
+      "SolidityBridge.PrecompileAgreement.blake_invalid_size"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.blake_controls",
+      "SolidityBridge.PrecompileAgreement.Controls.blake_short_mismatch",
+      "SolidityBridge.PrecompileAgreement.Controls.blake_byte_order",
+      "SolidityBridge.PrecompileAgreement.Controls.blake_high_header",
+      "SolidityBridge.PrecompileAgreement.Controls.blake_malformed_lengths",
+      "SolidityBridge.PrecompileAgreement.Controls.blake_core_lengths",
+      "SolidityBridge.PrecompileAgreement.Controls.blake_final_one_control"
+    ],
+    "proof_status": "kernel-common-header-domain"
+  },
+  "10": {
+    "proofs": [
+      "SolidityBridge.PrecompileAgreement.point_gas"
+    ],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.point_controls",
+      "SolidityBridge.PrecompileAgreement.Controls.ffi_logical_mismatch"
+    ],
+    "proof_status": "kernel-matching-row"
+  },
+  "11": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+    ],
+    "proof_status": "open-unsupported-vendor"
+  },
+  "12": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.unsupported_core",
+      "SolidityBridge.PrecompileAgreement.Controls.bls_discount_boundaries"
+    ],
+    "proof_status": "open-unsupported-vendor"
+  },
+  "13": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+    ],
+    "proof_status": "open-unsupported-vendor"
+  },
+  "14": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.unsupported_core",
+      "SolidityBridge.PrecompileAgreement.Controls.bls_discount_boundaries"
+    ],
+    "proof_status": "open-unsupported-vendor"
+  },
+  "15": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+    ],
+    "proof_status": "open-unsupported-vendor"
+  },
+  "16": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+    ],
+    "proof_status": "open-unsupported-vendor"
+  },
+  "17": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+    ],
+    "proof_status": "open-unsupported-vendor"
+  },
+  "256": {
+    "proofs": [],
+    "fixture_theorems": [
+      "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+    ],
+    "proof_status": "open-unsupported-vendor"
+  }
+}

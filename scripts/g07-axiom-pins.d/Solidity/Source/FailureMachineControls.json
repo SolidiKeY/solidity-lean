@@ -1,0 +1,133 @@
+{
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.actual_local_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.ancestor_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.caller_prefix_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.child_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.child_write_reverted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.dangling_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.disabled_check": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.disabled_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.disabled_pending": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.dispatch_zero_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.empty_bytes_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.full_bytes_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.journal_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.journal_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.no_false_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.own_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.panic_bytes": [],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.panic_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.refused_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.request_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.request_not_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.stuck_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.timeout_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.wrong_child_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.wrong_full_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.wrong_mark_loses_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureMachineControls.lean:Solidity.Source.FailureExecution.Controls.zero_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

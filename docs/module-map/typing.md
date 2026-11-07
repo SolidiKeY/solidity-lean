@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/typing.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Typing and sort faithfulness
 
 | Module | What it defines |

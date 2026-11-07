@@ -1,0 +1,120 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "One sendNoCallbackBox successfulreturn flag mutation; funded accepted ledger/balance control, concrete recipient-refusal fullstate rollback, two actual typed mutant update landings. Pilot only; full payment/callback constructors and assignment acceptance remain pending.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+  "inventory_sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/cache-bootstrap/manifest.json",
+  "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec",
+  "cache_root": "/workspace/h28-runtime/prepared-base-6f3eedf0",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "payment.success-flag-false",
+      "kind": "mutant",
+      "family": "rollback-payment",
+      "source_symbol": "Taclet.sendNoCallbackBox",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := true }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "new": "  | sendNoCallbackBox :\n      dl{ [ pv = sadr.send(se); ] \u21dd\n          \"send succeeded\":\n            { pay(sadr, se) \u2016 pv := false }\n            \u27e8[ ]\u27e9\n        ; \"send failed\": { pv := false } \u27e8[ ]\u27e9 }\n",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PaymentBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/PaymentFalseKill.lean",
+      "oracle_sha256": "171c3b08a4286826f67e1eefada3b0800d1e560efc5cd9c7701c0a96c235cbc4",
+      "witness_sha256": "fbb4ebd568b499a5fe08314307700c3229380915c0a661c0e64939276e9b797f",
+      "oracle_declarations": [
+        "H28.PaymentBaseline.source_link",
+        "H28.PaymentBaseline.input_inhabited",
+        "H28.PaymentBaseline.accepted_run",
+        "H28.PaymentBaseline.paid_ledger",
+        "H28.PaymentBaseline.refused_rollback"
+      ],
+      "witness_declarations": [
+        "H28.PaymentFalseKill.source_link",
+        "H28.PaymentFalseKill.input_inhabited",
+        "H28.PaymentFalseKill.accepted_run",
+        "H28.PaymentFalseKill.paid_ledger",
+        "H28.PaymentFalseKill.refused_rollback",
+        "H28.PaymentFalseKill.first_typed_landing",
+        "H28.PaymentFalseKill.second_typed_landing",
+        "H28.PaymentFalseKill.mutant_ledger_controls",
+        "H28.PaymentFalseKill.first_post",
+        "H28.PaymentFalseKill.second_post",
+        "H28.PaymentFalseKill.premise_accepts_post",
+        "H28.PaymentFalseKill.real_frames",
+        "H28.PaymentFalseKill.execution_rejects_post",
+        "H28.PaymentFalseKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.sendNoCallbackBox",
+      "mutant_sha256": "ba4b6124ba0f7b17edceab290bf43f6077fc2e4e7e912ac1dbcb752dcf3b6e16",
+      "oracle_signature_sha256": {
+        "H28.PaymentBaseline.source_link": "6dd43a26f87a912c0ec69c48afbfe7b57db647ab3e737d1cea81599a0a7e912f",
+        "H28.PaymentBaseline.input_inhabited": "0f71899afe6282c540c5d765f9345a1176d2d1860c29e4f2d5e2acb738462b4e",
+        "H28.PaymentBaseline.accepted_run": "d258e1f43f22665facd2fc370748d50e73b2e5b0aacf20f73d89ea487ac8a3f3",
+        "H28.PaymentBaseline.paid_ledger": "9ffc80d00d43b44cfa722d72636007c406a5a82919e56aa629c860d71f19b870",
+        "H28.PaymentBaseline.refused_rollback": "cd633d025c1bf8169234d3470792cf7738de02e8fdc228282000bfdb7c5a7604"
+      },
+      "witness_signature_sha256": {
+        "H28.PaymentFalseKill.source_link": "5279c1f75653101257d968e898c77cae8cad8589fef7d83e753b17e57a9106c9",
+        "H28.PaymentFalseKill.input_inhabited": "6bb8acda61e4291103d4fbe3d504c37b8b025a8cca48b31e6eec513d734c8038",
+        "H28.PaymentFalseKill.accepted_run": "36e082e2534ce3f24ce302cd58f8b98d209da608d757dfdad28691163ba5b58b",
+        "H28.PaymentFalseKill.paid_ledger": "fa80cdc876d8bb215592aa3cdfaa45a9656f8c4a8c14cfaaa6850ab991a9213f",
+        "H28.PaymentFalseKill.refused_rollback": "87308770010deb012bff14f51ac58926fb99631ef68e0d134e6281f260154163",
+        "H28.PaymentFalseKill.first_typed_landing": "3cd87b10319a2329f22de1de0a49a77048855bd8ee484d15e3ad5ef819c446f7",
+        "H28.PaymentFalseKill.second_typed_landing": "ff39d287ce260e6ee59c840aca46a3ce32e5315d158d7aa2e0cdf996f112f62d",
+        "H28.PaymentFalseKill.mutant_ledger_controls": "8ec5a506559074d7be8207bd5c3d14193c6f3a85cb1054ac8bfabaf8efeb02fe",
+        "H28.PaymentFalseKill.first_post": "e97d6ef8ffbb9bce636c899c99affb6b30a8e10042b4e01f003a6a61f379d3a0",
+        "H28.PaymentFalseKill.second_post": "8016be2a920d531e4f3d3de4850de29cfdfc1dbcd8e07ab4441fddc4e233eb46",
+        "H28.PaymentFalseKill.premise_accepts_post": "e3da2ca11fb3ea848fb298e7861adef3e7d2cb1ae432b7b77d0fd222d6d09f14",
+        "H28.PaymentFalseKill.real_frames": "6ff6e7d048b5ccbfdbdbc47c8d98526340cd805b06f1ce8644abbe75b84358ab",
+        "H28.PaymentFalseKill.execution_rejects_post": "8cab364a706f16d828e218cf69f7de167ff8e0a9b5844a45af885893c73ecc75",
+        "H28.PaymentFalseKill.checked_kill": "a4658e58244d5d2a173d80bcea111c435ecd0c37ebb28c683955ca3bd7b9cb0d"
+      }
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    }
+  ]
+}

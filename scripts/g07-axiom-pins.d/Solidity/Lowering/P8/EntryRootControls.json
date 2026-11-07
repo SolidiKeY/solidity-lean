@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/P8/EntryRootControls.lean:Solidity.Lowering.P8.EntryRootControls.populated_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/EntryRootControls.lean:Solidity.Lowering.P8.EntryRootControls.selectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

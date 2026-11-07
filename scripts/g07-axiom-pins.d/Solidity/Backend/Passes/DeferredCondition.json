@@ -1,0 +1,15 @@
+{
+ "Solidity/Backend/Passes/DeferredCondition.lean:Solidity.Backend.Passes.DeferredCondition.expression_source": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredCondition.lean:Solidity.Backend.Passes.DeferredCondition.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredCondition.lean:Solidity.Backend.Passes.DeferredCondition.unpack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

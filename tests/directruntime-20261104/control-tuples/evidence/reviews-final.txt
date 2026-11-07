@@ -1,0 +1,8 @@
+Independent finder and skeptic, read-only, no Lean server/builds/writes:
+Both found no additional adapter defect after the discarded-read guard. Both required strengthening the native discarded-division check: a generic model halt could be exhaustion or unrelated failure. Fixed by matching .error .revert structurally and requiring exact error text. Immutable Semantics/Run.lean:TRes.ofOpt maps arithmetic failure to .revert; no claim about Solidity panic bytes.
+Both emphasized that dynamic aliases may pass the AST reader but fail existing intrinsic elaboration, and that model-only a++/pair() proofs do not establish adapter admission of side effects/internal calls. The handoff preserves these boundaries.
+Finder noted synthetic tuple metadata is not compiler-produced evidence for malformed/singleton/nested cases. Those remain reader-negative/unit controls; compiler-generated fixtures provide separate evidence.
+Skeptic identified potentially failing discarded pure member reads under memory composition. preserveDiscarded now refuses pure discarded leaves other than num/bool/name; both reviewers confirmed guard behavior. Typed totality is not added to the interface.
+Earlier finder boundary wording and skeptic existing-route labeling corrections were also applied in the backfill checkpoint. Final native outcomes and diagnostics are retained separately, not attributed to these read-only reviewers.
+
+Final follow-up finder and skeptic both independently verified the structural .error .revert fix, exact text equality and fresh native output. Both confirmed three proposed modules, no installed producer wiring, correct model/source/verifier boundaries, and explicit full-gate/registration/composition pending. No new findings; neither used Lean or builds.

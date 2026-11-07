@@ -1,0 +1,67 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.source_uint_alloc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.source_uint_alloc_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.source_uint_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.source_uint_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.copy_schedule": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.eval_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.indexLoc_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.indexLoc_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.length_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.read_nat_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintMemory.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.schedule_read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

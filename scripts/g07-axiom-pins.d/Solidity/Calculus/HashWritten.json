@@ -1,0 +1,17 @@
+{
+ "Solidity/Calculus/HashWritten.lean:Solidity.Decide.WrittenMemory.HashInputReduction.cut?": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/HashWritten.lean:Solidity.Decide.WrittenMemory.HashInputReduction.refutes_of_decideMem": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/HashWritten.lean:Solidity.Decide.WrittenMemory.HashInputReduction.valid_of_decideMem": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

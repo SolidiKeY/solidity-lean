@@ -1,0 +1,16 @@
+ERROR 98:5 Tactic `rfl` failed: The left-hand side
+  true
+is not definitionally equal to the right-hand side
+  false
+
+case true
+p q : Piece
+ps : List Piece
+n : NumLit
+hk : p.kind = Kind.tok (Tok.num n)
+h : (!(Option.map isIdPart (List.head? q.raw)).getD false && noGlue (q :: ps)) = true
+hh : (Option.map isIdPart (List.head? q.raw)).getD false = true
+hn : (!true) = true
+⊢ true = false
+ERROR 99:3 No goals to be solved
+diag: 2 errors

@@ -1,0 +1,50 @@
+{
+  "scope": "Optional static packet path relocation and fail-closed checksum controls; no new Lean/semantic rows",
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/evidence.tar.gz",
+      "bytes": 365334,
+      "sha256": "0c7af59f67eaf2f9814fee2f8ddc9df15d9fa97d28a6dd3691eda5288288f0ea"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/inputs.json",
+      "bytes": 1275,
+      "sha256": "703cde2c6b218a5a24f00322b04a70cd9ddcc0bbc1101249f2ef35095fc5d9d4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/gates.json",
+      "bytes": 2525,
+      "sha256": "b5d09c4e6b3bf09d7b81a0e8f5f8a727f9339650afcafc66447cac0c4eef0805"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/reviews.md",
+      "bytes": 1214,
+      "sha256": "0281d2e16aa0bd12f9b948c49a79713974e68b9ba3d2dfa187af0dd631278496"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/real-relocation.json",
+      "bytes": 11948,
+      "sha256": "a56e241695c421fd9f63f9e570297119453a7cbe2df12aa7bd44ad26cf00751a"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/timing-comparison.json",
+      "bytes": 381,
+      "sha256": "9fb70d556a5dd48b0b08f2757e401e5ee6bb814bd58ca41da7f103f03515c854"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/timing-statistics.json",
+      "bytes": 756,
+      "sha256": "19481fbdf1d5c6ed3f02efc413189729538f6a4e0c3c7ee955906f9665ce2952"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/environment.json",
+      "bytes": 565,
+      "sha256": "f5c90d71e5cfe15e1a25543b683a6ba8cb8673227806b9664545e458229e6186"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/packet-relocation-v71/setup-errors.json",
+      "bytes": 1261,
+      "sha256": "643ee9da28cd4f911db268428465d629b2b56b5b03f5d3367a8863249b46e9a0"
+    }
+  ]
+}

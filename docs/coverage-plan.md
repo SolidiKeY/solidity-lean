@@ -1,30 +1,28 @@
 # Full compiler and proof roadmap
 
-The endpoint is a complete compiler for the pinned Solidity language **except
-features the user explicitly excluded**, with kernel-checked proofs from source
-through executable EVM bytecode. Source-model coverage, a restricted compiler
+The endpoint is a complete, optimizing compiler for the **whole** pinned
+Solidity language, with kernel-checked proofs from source through executable
+EVM bytecode, and a checker that proves solc's own output refines the same
+semantics ([full scope](feature-work/full-scope.md), 2026-11-04). Source-model coverage, a restricted compiler
 simulation, passing fixtures, or a list of named proof gaps does not meet this
 endpoint. This roadmap replaces the former 19-step feature-coverage plan.
 Existing integrated work is reused after checking its exact theorem and input
 coverage; the groups below are remaining obligations, not claims of missing code.
 
+Audit: [proof-coverage audit](audits/proof-coverage.md) (2026-11-06) traces each claimed row to its backing theorem and lists the open end-to-end links.
+
 ## Scope contract
 
 The versioned starting point is [solidity-scope.md](solidity-scope.md), the
 [feature manifest](solidity-features.json) and the
-[upstream ledger](solidity-upstream-inventory.json). G00 records the precise
-user-approved exclusions and their evidence. A manifest exclusion without that
-evidence is a scope question to resolve, not permission to drop work. Until that
-reconciliation, preserve the recorded profile; never enlarge its exclusions.
-
-The recorded excluded families include general assembly/Yul, gas observations
-and exact machine-resource behavior, raw calldata and arbitrary low-level calls,
-`delegatecall`/low-level `staticcall`, selfdestruct, salted creation, raw code
-observations/execution, physical storage/transient layout and raw memory
-observations, observable logs, and listed extra chain/transaction fields. Use the
-exact feature IDs and exceptions in the scope document, not this summary, for
-admission. The old D1/D2 recommendations to add environment fields and logs are
-not approvals. Any such extension is conditional on an explicit user decision.
+[upstream ledger](solidity-upstream-inventory.json). The
+[full-scope decision](solidity-scope.md#full-scope-decision-2026-11-04)
+withdrew every exclusion: general assembly/Yul, gas and machine resources, raw
+calldata and low-level calls, `delegatecall`/`staticcall`, selfdestruct, salted
+creation, code observations and execution, physical storage/transient/memory
+layout, logs and the extra chain/transaction fields are all in profile. Groups
+X01–X08 of [full-scope.md](feature-work/full-scope.md) own them; a manifest
+row still marked `exclude` is open work, never a boundary.
 
 An implementation refusal, recursive type, signature, combination of features,
 proof timeout, difficult theorem, finite test universe or backend limitation is
@@ -32,11 +30,10 @@ proof timeout, difficult theorem, finite test universe or backend limitation is
 made complete by narrowing the profile, adding an oracle, assuming the desired
 result, or treating unsupported input as a successful compilation.
 
-Physical layout being unobservable does not remove the obligation to implement
-and prove the compiler's internal storage/memory representation. The compiler
-may choose its own representation; matching solc's packing is not required when
-excluded observations cannot distinguish it. The abstraction from EVM execution
-must still be proved. Hash collisions cannot be dismissed by assuming global
+Physical layout is observable (raw slots, `layout at`, memory addresses), so
+the compiler's storage, transient and memory representation must agree with
+solc's documented layout (decision D3), and the abstraction from EVM execution
+must be proved. Hash collisions cannot be dismissed by assuming global
 injectivity. Existing cryptographic/environment premises must be stated exactly;
 new premises require approval and cannot conceal a representation defect.
 
@@ -71,8 +68,10 @@ correctness true merely by running the compiler to define source semantics.
    nondeterministic environment quantification precisely. Preserve success and
    failure observations; do not permit a compiler that always reverts. Include
    termination/divergence or matching finite-prefix behavior; arbitrary fixed
-   fuel cannot stand in for source semantics. Excluded gas/resource observations
-   permit an explicit resource abstraction, not silent loss of functional behavior.
+   fuel cannot stand in for source semantics. Gas values are observations
+   read from the compiled artifact (decision D1 of
+   [full-scope.md](feature-work/full-scope.md)); exhaustion stays a failure the
+   source allows, never silent loss of functional behavior.
    G01/G06 must define it before backend work: for each finite source execution
    prefix, prove a corresponding EVM prefix with sufficient gas/memory/stack/code
    resources under the approved profile; conversely, each target functional step
@@ -89,10 +88,18 @@ correctness true merely by running the compiler to define source semantics.
    and exclusions remain unchanged. Incomplete search is distinct from an
    incomplete compiler proof.
 
-This proves this repository's compiler, not the correctness of solc's optimizer
-or every solc release. solc remains an external compatibility oracle unless its
-output is independently certified by the checked pipeline. An optional external
-EVM integration stays in `Bridge/`; the core stays dependency-free.
+7. **Optimizer:** every optimization pass of this compiler proved to preserve
+   obligations 3–5, or checked per program by a validator proved sound
+   (O01–O05).
+8. **solc validation:** for solc 0.8.38 in both pipelines, optimizer off and
+   on, a kernel-checked per-contract theorem that the emitted bytecode refines
+   the source semantics, by translation validation of the IR, each Yul
+   optimizer step, the Yul-to-bytecode transform and the legacy pipeline
+   (T01–T08). This certifies solc's output contract by contract, not solc's
+   source code.
+
+An optional external EVM integration stays in `Bridge/`; the core stays
+dependency-free.
 
 ## VM execution contract
 
@@ -115,9 +122,10 @@ with a refusal, a new exclusion or a promise of a later proof.
   `MemoryMax=12G` and `MemorySwapMax=0`; leave the remaining RAM for the OS.
   Use disk-backed private caches, monitor aggregate RSS and available memory,
   and stop before exhausting the VM. Run Lean MCP or a build, not both.
-- A cold build is a prerequisite to measure, not a free operation hidden in
-  every estimate. Publish a reproducible dependency cache with source/toolchain
-  identities; if clean validation exceeds one timebox, split validation targets
+- Seed the build first: `bash scripts/ci/fetch-lake-cache.sh` installs
+  master's Lake artifacts from the `lake-cache` release (H88), so unchanged
+  modules are fetched; a cold build is needed only if that download fails.
+  If clean validation still exceeds one timebox, split validation targets
   into VM groups and check their final joint import closure.
 - Use [module-map.md](module-map.md), the feature's `localEvidence` and current
   source before editing. Reproduce current behavior and audit existing proofs;
@@ -314,7 +322,7 @@ G11 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g11-
 | G20 | Prove callable lowering: getters, receive/fallback within scope, internal/external function values, overloads, inherited/library functions and all parameter/result signatures. |
 | G21 | Prove ABI/calldata and exception lowering: nested dynamic/reference values, slices, custom errors, revert reasons and every in-profile panic/catch case; preserve payloads and decoding failures. |
 | G22 | Complete ordinary source-world semantics/lowering for typed calls, callbacks, creation/try-new and linked libraries. Include payment entry, balance changes, rollback and source-order failures without bounded call expansion as a semantic restriction. |
-| G23 | Prove source lowering for transient lifetime/reset/rollback, allowed environment inputs, cryptographic builtins and event argument effects; maintain recorded excluded observations. Compose source-unit lowering coverage from G16–G22 contracts. |
+| G23 | Prove source lowering for transient lifetime/reset/rollback, allowed environment inputs, cryptographic builtins and event argument effects; the formerly excluded observations follow X01–X07. Compose source-unit lowering coverage from G16–G22 contracts. |
 
 ### Wave 3 — compiler values and persistent representation (G24–G31)
 
@@ -353,7 +361,7 @@ G11 status (2026-10-29): [frontend-parse.md](feature-work/frontend-parse.md#g11-
 | G44 | Compile constructor/initcode/runtime artifacts, inheritance initialization, deployment/new and try-new, address/world installation and linking; prove fresh instance identity and constructor rollback. |
 | G45 | Implement and prove instruction selection/expansion to actual EVM operations, stack manipulation, labels/jumps, assembly and byte encoding/decoding. Structured LOOP/relative jumps must have checked executable realizations. |
 | G46 | Prove primitive instruction/byte-memory/storage/environment correspondence with the pinned EVM semantics. Discharge symbolic-slot, word-addressing, truncation and hash-model obstructions or identify an unresolved approved-premise obligation; unresolved means incomplete. |
-| G47 | Prove EVM call/create/return/revert and transaction correspondence, including excluded-resource abstraction and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
+| G47 | Prove EVM call/create/return/revert and transaction correspondence, including exact gas (X03) and finite/infinite traces; actual account execution replaces a payment-acceptance boolean where typed code is in scope. |
 
 G46.05/G27.05 hash premise status (2026-10-29): the approved per-run premises `CollisionFree` and `RegionsDisjoint` and their non-adaptive bounds (q²/2²⁵⁷ and about (q²L + qRL)/2²⁵⁶ for keccak) are proved in `Solidity/Hash/CollisionBound.lean`, and for adaptive runs (eager sampling, repeated queries, early stopping, regions) in `Solidity/Hash/Adaptive.lean` (random-oracle model; `q` counts every oracle query of the run and of whoever chose its inputs); bounded slot offsets are proved for the model's terms (`STy.locate_bounded`); only their tie to compiled code is open ([feature-work/hash-collision-bound.md](feature-work/hash-collision-bound.md)).
 
@@ -521,7 +529,9 @@ must hold roughly three times more work than estimated.
   - or a resource limit stops it.
 - **Backfill before stopping.** A blocked or empty lane takes the next ready
   item from the [backfill queue](#backfill-queue) before it stops.
-- **One cold build per lane.** The cold build is paid once. Later
+- **Seed, then build warm.** A lane seeds the Lake cache from the
+  `lake-cache` release before its first build and after each merge of
+  master ([contributing.md](contributing.md#build-cache-and-ci)); later
   checkpoints use per-file Lean server diagnostics and warm rebuilds.
 - **Handoff per checkpoint.** Each checkpoint records its own handoff
   (revision, theorems, premises, checks, remaining obligations) in its
@@ -569,7 +579,7 @@ first group, and the coordinator merges the lane in parts.
 
 ### Authorized extension: inline assembly (2026-10-31)
 
-Inline assembly (Yul) remains excluded by current admission. The human has
+Inline assembly (Yul) is still refused by current admission. The human has
 [authorized its implementation](solidity-scope.md#inline-assembly-decisions-2026-10-31)
 in ten groups Y01–Y10 and five lanes VY1–VY5 (tier A, words only: VY1;
 tier B, physical storage/memory/inputs: VY2–VY3; tier C, raw calls, creation
@@ -578,6 +588,15 @@ YQ1–YQ7 are approved; prerequisite gates still apply. V10 and V11 already have
 active workers, so they inherit agreement obligations for VY2's storage and
 memory layout definitions (Y04, Y05). Parallel VY preparation does not discharge
 those obligations or establish implemented support.
+
+### Authorized extension: full scope, optimizer and solc validation (2026-11-04)
+
+The user withdrew all exclusions and asked for an optimizer and for proofs
+about solc's output. [full-scope.md](feature-work/full-scope.md) plans groups
+X01–X08, O01–O05 and T01–T08 in eleven lanes (VX1–VX5, VO1–VO2, VT1–VT4)
+over four parallel waves: VX1, VO1 and VT1 start now, independent of the main
+chain; the rest follow their integrated prerequisites. G48–G55 (V16, V17)
+close only with X, O and T included.
 
 ### Backfill queue
 
@@ -636,8 +655,11 @@ Completion requires **all** of the following on one integrated revision:
   compiler exclusions or excuses for missing preservation proofs.
 - All integrated kernel/trust/build gates pass, the TestSuite has zero pending,
   and the upstream corpus has zero unexplained broken or blocked in-profile
-  rows. Every excluded, invalid-upstream or resource-observation-only row has an
-  exact ledger justification; finite oracle agreement is never a theorem.
+  rows. Every manifest row is `model` or approved `abstract`; only
+  invalid-upstream rows carry a ledger justification. Finite oracle agreement
+  is never a theorem.
+- The optimizer (O01–O05) is inside the public theorem, and `solc_validated`
+  (T07) is kernel-checked with the T08 corpus run published.
 - All child groups, review findings and scope questions are closed, with the
   revision, commands, theorem names, assumptions and measured resource costs
   published. A timeout or an unfinished proof keeps the roadmap open.

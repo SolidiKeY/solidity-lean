@@ -1,0 +1,10 @@
+word table: 98 fixed words, 439 prefix proofs, 30 serial modules
+paired fixtures: 42 typed Lean rows, all spellings covered
+solc fixtures: 42 exact results, 18 accepted; 0.8.38+commit.1835d247.Emscripten.clang
+differential: 42 paired spellings, 18 exact accepted values, 5 explicit stage differences
+MOCK controls: auto-removal and concurrent exit-0 race retain failure evidence and never pass; no actual container stopped
+H35 axioms: 627 authored prints and all808 theorem-constant prints match pins; full991 inventory checked; no new axioms or unsafe declarations
+H41: authorized preserved pack passes; self-consistent replacement archive and metadata rejected; no real asset changed
+acceptance negative controls: 5 inventory mutations, forged completion, uncommitted input and MOCK resource-stop reporting passed
+implementation acceptance: 42 modules, 652 authored declarations, 991 kernel declarations, 32 inhabited constructors, 68 scanner controls, 42 paired fixtures
+open assignment obligations: static-gates, coordinator-registration, full-runtime-gate, immutable-handoff

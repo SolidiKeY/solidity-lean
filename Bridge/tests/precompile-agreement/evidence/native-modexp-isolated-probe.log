@@ -1,0 +1,5 @@
+CWD: /workspace/solidity-lean/Bridge
+COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 tests/precompile-agreement/NativeModexpProbe.lean
+tests/precompile-agreement/NativeModexpProbe.lean:5:0: error: Could not find native implementation of external declaration 'ffi.ByteArray.zeroes' (symbols 'l_ffi_ByteArray_zeroes___boxed' or 'l_ffi_ByteArray_zeroes').
+For declarations from `Init`, `Std`, or `Lean`, you need to set `supportInterpreter := true` in the relevant `lean_exe` statement in your `lakefile.lean`.
+EXIT=1 SECONDS=1.808 PEAK_RSS=391745536 MIN_AVAILABLE=17696468992 RESOURCE_STOP=False

@@ -1,0 +1,72 @@
+{
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.cycle_origin": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.cycle_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.cycles_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.cycles_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.endpoints": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.frozen_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.frozen_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.invalid_later": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.primitive_cycles": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.primitive_final": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.primitive_intermediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.primitive_provenance": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.reversed_negative": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.three_meaningful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotScheduleControls.lean:Solidity.Backend.MemoryOps.ScheduleControls.touching": [
+  "Quot.sound",
+  "propext"
+ ]
+}

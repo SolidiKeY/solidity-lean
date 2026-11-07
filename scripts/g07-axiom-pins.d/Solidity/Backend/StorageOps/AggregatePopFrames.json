@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/StorageOps/AggregatePopFrames.lean:Solidity.Backend.StorageOps.AggregatePopFrames.compatible_other": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrames.lean:Solidity.Backend.StorageOps.AggregatePopFrames.complete_all": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrames.lean:Solidity.Backend.StorageOps.AggregatePopFrames.complete_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrames.lean:Solidity.Backend.StorageOps.AggregatePopFrames.read_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrames.lean:Solidity.Backend.StorageOps.AggregatePopFrames.updates_covered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

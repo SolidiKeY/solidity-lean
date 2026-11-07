@@ -1,0 +1,37 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.fitting": [
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.initialized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.numeric_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.performed": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.run": [
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteNumericControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteNumericControls.transported": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

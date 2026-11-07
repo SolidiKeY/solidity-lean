@@ -1,0 +1,29 @@
+$ git show --no-patch --format=%H%n%P e98653edc48f5e9c3b81f4cbc09102bf64d79b8b
+e98653edc48f5e9c3b81f4cbc09102bf64d79b8b
+9f857f9bd5492d6304a3e855f3e36eb636b32461 b419c3cf4f642ae519b66bebc26cdf2f7cf93574
+EXIT=0
+
+$ git diff --exit-code 584d34226053a12ae8e7cf82f58da44c177b54c5 b419c3cf4f642ae519b66bebc26cdf2f7cf93574 -- Solidity/Backend/PrimitivePackets/SignedMod
+EXIT=0
+
+$ python3 scripts/check-precompile-agreement.py --inventory-only
+PASS source inventory: 18 unique addresses, actual vendor dispatch/definitions, exact input hashes
+Source inventory only; no kernel or cryptographic equality claim
+EXIT=0
+
+$ python3 Bridge/tests/precompile-agreement/test_inventory.py
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.099s
+
+OK
+EXIT=0
+
+$ bash scripts/coord-tools/register.sh --check
+EXIT=0
+
+$ node scripts/check-axiom-pins.mjs
+axiom-pins: 6509 pinned theorems {"[Classical.choice, Quot.sound, propext]":5240,"[propext]":243,"[Quot.sound, propext]":795,"[]":227,"[Quot.sound]":4}, 0 errors, 0 unrecorded changes
+EXIT=0
+
+Mathlib.Data.Nat.Log artifact present: False

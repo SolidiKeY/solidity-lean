@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalByteOverwrite.lean:Solidity.Backend.MemoryOps.Physical.ByteOverwriteControls.distinct": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteOverwrite.lean:Solidity.Backend.MemoryOps.Physical.ByteOverwriteControls.overwrite": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteOverwrite.lean:Solidity.Backend.MemoryOps.Physical.ByteOverwriteControls.wrong_order": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteOverwrite.lean:Solidity.Backend.MemoryOps.Physical.mstore8_pair_payload": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteOverwrite.lean:Solidity.Backend.MemoryOps.Physical.mstore8_pair_revert": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteOverwrite.lean:Solidity.Backend.MemoryOps.Physical.mstore8_pair_short": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteOverwrite.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.mstore8_pair": [
+  "Quot.sound",
+  "propext"
+ ]
+}

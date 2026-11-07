@@ -1,0 +1,46 @@
+{
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.ancestor_alias_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.ancestor_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.ancestor_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.combined_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.failed_numeric_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.sibling_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.wrong_ancestor_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopRootFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopRootFrameControls.wrong_outside_negatives": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

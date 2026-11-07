@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmpty.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmpty.copy_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

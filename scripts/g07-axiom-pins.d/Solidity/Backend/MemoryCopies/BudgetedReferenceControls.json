@@ -1,0 +1,77 @@
+{
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.actual_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.empty_parent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.full_budget_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.huge_child_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.huge_parent_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.long_parent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.semantic_demands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.strict_boundary_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.token_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.two_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.unselected_account": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.unused_huge_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.wrong_cursor_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReferenceControls.lean:Solidity.Backend.MemoryCopies.BudgetedReferenceControls.zero_budget_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

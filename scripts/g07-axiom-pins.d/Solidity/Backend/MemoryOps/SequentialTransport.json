@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.BoolChildRepr.overwriteIntervals": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.captureTwice_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.checkedCaptureSequence_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.overwriteIntervals_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SequentialTransport.lean:Solidity.Backend.MemoryOps.RefChildRepr.overwriteIntervals": [
+  "Quot.sound",
+  "propext"
+ ]
+}

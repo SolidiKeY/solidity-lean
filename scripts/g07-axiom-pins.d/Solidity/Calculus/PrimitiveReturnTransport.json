@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/PrimitiveReturnTransport.lean:Solidity.ExecS.static_tryOk_of_declared_return_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

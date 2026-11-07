@@ -1,0 +1,109 @@
+{
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.actual_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.capacity_not_operands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.dirty_full_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.dirty_full_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.dirty_index_guard": [],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.dirty_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.operand_missing": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.oversized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.packet_instructions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_emission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plain_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.plainPacket": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.result_zero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.shifted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.shifted_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.target_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/PureVisitorShapesControls.lean:Solidity.Yul.Compilation.PureVisitorShapes.Controls.unbounded_sum": [
+  "Quot.sound",
+  "propext"
+ ]
+}

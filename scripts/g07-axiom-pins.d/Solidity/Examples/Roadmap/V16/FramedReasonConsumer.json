@@ -1,0 +1,44 @@
+{
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.empty_reason_not_bare": [],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.of_failure_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.protected_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.wrong_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.wrong_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.wrong_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.wrong_window": [],
+ "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean:Solidity.Roadmap.V16.FramedReasonConsumer.zero_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

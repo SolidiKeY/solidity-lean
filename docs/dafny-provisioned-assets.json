@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "Q-VIS-01 coordinator follow-up2026-11-05",
+  "archive": {
+    "path": "/workspace/vscode-official/code-1.108.0-linux-x64.tar.gz",
+    "bytes": 163195533,
+    "sha256": "db4c9d0df1c5872dc13710bd6c71b52538326c563dcf1c5cf35100a4e561df09"
+  },
+  "officialApi": {
+    "path": "/workspace/vscode-official/update-api-1.108.0.json",
+    "sha256": "2b54671d0a75251ed9708d8f69c1fcabcf0162fb178e97296d26ad032e8d23e7",
+    "url": "https://vscode.download.prss.microsoft.com/dbazure/download/stable/94e8ae2b28cb5cc932b86e1070569c4463565c37/code-stable-x64-1767881871.tar.gz"
+  },
+  "verification": "sha256sum -c passed; archive matches saved official API sha256hash; rendered rows still need actual evidence."
+}

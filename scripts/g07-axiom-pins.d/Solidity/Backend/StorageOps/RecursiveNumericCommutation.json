@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutation.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutation.copy_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutation.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutation.finite_copy_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutation.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutation.read_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutation.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutation.readSet": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutation.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutation.sequence_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutation.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutation.source_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutation.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutation.writeSet": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

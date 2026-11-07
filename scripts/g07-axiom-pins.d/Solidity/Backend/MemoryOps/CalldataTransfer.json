@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.calldataBool_exact": [],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.calldataBools_lookup": [],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.calldataBools_slice_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_no_payload": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransfer.lean:Solidity.Backend.MemoryOps.checkedCalldataBools_some": [
+  "Quot.sound",
+  "propext"
+ ]
+}

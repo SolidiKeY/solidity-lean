@@ -1,0 +1,57 @@
+{
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.capacity_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.empty_blocks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.first_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.multi_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.multi_reverse_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.multi_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.popPush_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.pushPop_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.second_failure_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/MixedLifecycleControls.lean:Solidity.Backend.StorageOps.MixedLifecycleControls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

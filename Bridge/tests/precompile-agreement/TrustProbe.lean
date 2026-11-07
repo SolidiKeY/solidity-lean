@@ -1,0 +1,8 @@
+import SolidityBridge.PrecompileAgreement.Identity
+import SolidityBridge.PrecompileAgreement.Gas
+#print axioms SolidityBridge.PrecompileAgreement.identity_success
+#print axioms SolidityBridge.PrecompileAgreement.identity_charged
+#print axioms SolidityBridge.PrecompileAgreement.sha_gas
+#print axioms SolidityBridge.PrecompileAgreement.ecrecover_gas
+#print axioms SolidityBridge.PrecompileAgreement.bnadd_gas
+#print axioms SolidityBridge.PrecompileAgreement.point_gas

@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean:Solidity.Backend.Passes.MemoryTripleAdmission.Controls.complete_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean:Solidity.Backend.Passes.MemoryTripleAdmission.Controls.reached_third_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean:Solidity.Backend.Passes.MemoryTripleAdmission.Controls.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean:Solidity.Backend.Passes.MemoryTripleAdmission.Controls.source_both": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean:Solidity.Backend.Passes.MemoryTripleAdmission.Controls.third_frame_required": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean:Solidity.Backend.Passes.MemoryTripleAdmission.links": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean:Solidity.Backend.Passes.MemoryTripleAdmission.public_admission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

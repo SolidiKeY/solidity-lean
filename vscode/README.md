@@ -212,3 +212,122 @@ runs the real servers without Electron. It defaults to language-service checks;
 `parity:check` also checks the independent upstream test-discovery ledger. The
 manual editor-parity workflow offers both transports. Stdio results do not
 establish VS Code UI behavior.
+
+Startup checks the configured Node executable against the existing Node18+ requirement and verifies that the backend directory contains readable `scripts/test-solidity.mjs` and `lean-toolchain` files. Failures offer settings or an explicit Node download-page link; the extension does not install or replace executables. The version item shows actual server initialize identity (or unknown), Node runtime and extension metadata. Initialization is not proof/backend readiness: compiler/runtime/toolchain checks still occur when their operations run. Resource configuration changes restart affected owners while retaining healthy clients.
+
+After LSP initialization, the version item waits separately up to five seconds for the running server's `solidityLean/serverVersion` metadata notification. Missing/malformed data yields unknown; a late notification cannot replace that settled result. The separate initialization deadline remains30seconds. Timers and subscriptions are released on decision, failure or disposal. Early metadata retains normalized name/version only; more than128 candidates or64KiB fails explicitly as startup metadata overflow. These transport bounds do not change version-support or proof budgets.
+
+The status summary distinguishes document compilation/queue/running phases from reported function outcomes. Completion counts include reported proved/direct-correct/failed outcomes, not a count of kernel proofs; unknown, unsupported, stale, cancelled, skipped and audit-qualified results stay explicit. Direct checks are labeled separately. Status packets carry source hashes and reopen synchronization identities. The menu offers local output inspection and a repository-derived issue draft with current version metadata and no automatically attached source; it never submits the issue. Qualified status actions open the project documentation index and proof guide; this does not submit an issue or supply missing proof metadata.
+
+## Testing hierarchy and editor context
+
+Accepted function results appear under their current compiler symbol ancestors when matching symbols are available. A row verified in a derived contract can refer to a base declaration; its label retains the verification contract and its description identifies that distinction. Missing or historical symbols use a labeled result grouping without inventing parent locations. Parent selection and exclusion apply to their descendants.
+
+The trusted Solidity-file context menu exposes compiler-AST Build/import options, concrete typed-model Run/Test, verification, discovery, cancellation, output, status and restart actions. Compiler artifacts and concrete outcomes remain distinct from verification. Positioned verification traces and full Dafny command equivalence remain incomplete.
+
+Owned worker retirement now waits for closure before reusing capacity. The matching local server/client negotiate process ownership for compiler workers and builds; an existing build command starts only after ownership acknowledgement. Cleanup failures remain visible and can block replacement admission. Legacy servers/platforms without these ownership observations do not establish the same crash-cleanup guarantees. This lifecycle infrastructure does not certify proofs, solver retention or rendered Dafny parity.
+
+
+### Concrete execution contract (human decision Q-CLI-01)
+
+Build Compiler Artifact saves the current file and runs the pinned compiler,
+writing an AST plus source-hash manifest under
+`solidityLean.compilerOutputDir` (default `bin`, relative to this file's workspace folder, or an absolute path). Each build writes a fresh source-named child directory; the report records that directory and the source hash. This setting affects Build and custom Build only; concrete Run/Test retain their existing artifact storage. It does not prove obligations or claim an EVM
+binary. Concrete Run uses the existing `scripts/solidity-lean.mjs run` typed-model
+executor (`Solidity.Frontend.Cli`), with an explicit `Contract::function(signature)`
+selection and JSON arguments (booleans or exact integer strings). Initial state
+defaults to that CLI's empty state; concrete JSON test cases can specify its
+primitive storage/transaction state. Constructor calls and unsupported model
+inputs remain unsupported; execution is not kernel proof or EVM equivalence.
+
+Concrete Test reads a user-selected JSON file:
+
+```json
+{"schemaVersion":1,"cases":[{"name":"increment","target":"Counter::inc(uint256)","args":["1"],"state":{"storage":{"count":"41"}},"expect":{"status":"ok","text":"ok\nreturns 42\ncount = 42"}}]}
+```
+
+The example's exact text must match that contract's actual CLI result. Each case
+executes independently in the typed model and compares exact status/text;
+`unsupported`, `error` and `diverge` never pass. Expected `revert`/`panic` may be
+asserted explicitly. No test success is published as verification evidence.
+Cases share the existing overall command timeout; jobs are canceled on edit,
+close, relevant resource configuration changes or extension disposal. Save/prompt
+ownership and stale results are checked. Custom include-path/remapping settings
+are explicitly refused for concrete CLI execution until that public CLI exposes
+them; compiler Build supports the existing compiler configuration.
+
+Proof-help offers the project documentation index (`docs/README.md`) and proof
+guide (`docs/calculus.md`). No proof-help exclusion or parity waiver follows.
+
+Build uses **Ctrl+Shift+B** (**⇧⌘B** on macOS); Run uses **F5**; concrete Test uses
+**Shift+F5**. These bindings apply only to a focused, file-backed Solidity editor
+in a trusted workspace and invoke the documented compiler-AST/concrete typed-model
+commands. They do not turn compilation or concrete tests into proof results.
+Custom compiler import options use **F6**. Verification-trace shortcuts remain unavailable without a positioned producer.
+
+The existing parity launcher supports `--suite commands --targets local` for a
+native Linux Ctrl+Shift+B observation in real VS Code. It starts with an unsaved
+buffer containing Unicode text, checks saving as UTF-8 with CRLF line endings,
+verifies compiler AST source identity, and captures the renderer. UTF-16 describes
+LSP position units, not the file encoding. Automatic verification is disabled.
+This suite does not measure proof
+performance or establish Dafny compile/run/test equivalence; Run/Test and macOS
+key dispatch still require native observations.
+
+**Build Compiler Artifact with Import Options** (**F6**) accepts a JSON object
+containing only `includePaths` and `remappings`, initially populated from this
+resource's settings. For example:
+
+```json
+{"includePaths":["vendor with spaces"],"remappings":["alias/=lib/"]}
+```
+
+Omitted fields retain resource defaults; an empty array clears that field for
+this invocation. Relative include paths resolve against the project root and
+are passed as absolute paths. The command does not modify workspace settings.
+Unknown fields, runtime/proof options and malformed values are rejected; no
+shell string is executed. The artifact is a compiler AST, not a binary or proof.
+This finite JSON contract differs from Dafny's arbitrary custom CLI string;
+full custom-build equivalence and native F6/macOS observations remain open.
+
+
+Offline CI without H44 data may run `node vscode/parity/discover.cjs --check`
+and `node vscode/parity/audit.cjs --check`. They explicitly report **digest-only**:
+the committed inventory descriptor and restore manifest are consistent, but full
+feature/source/evidence reconciliation did not run. With a full payload present,
+these commands perform their original full checks; corrupt or symbolic paths
+fail. `--check-source`, `inventory-check` and `parity-gate` always require the
+checksum-bound full inventory and remain failing when it is absent.
+
+Native hover and large-file recording tests explicitly skip only when their
+entire H44 input set is absent. Partial, malformed or linked recordings fail.
+Injected transport and assertion-rejection tests run without that data and do
+not certify compiler, proof or rendered correspondence. Restore both bulk
+bundles for the complete parity checks. A script-only CI pass does not establish
+parity, runtime equivalence or a kernel proof.
+
+
+The existing native launcher also supports `--suite custom-import-actions` with
+one worker/obligation and one trial. It is a separate compiler-only import
+fixture; the annotated `custom-commands` fixture remains unchanged and its
+admission failure remains recorded. The local case accepts resource-scoped
+include paths/remappings from the actual F6 prompt, observes cancellation and
+its save, then makes a new dirty edit before the accepted Build. URI, version,
+source-object session, exact source/dependency bytes and artifact receipts are
+checked. The paired Dafny case preserves its default CLI build arguments and
+records actual terminal output/exit and compiler artifacts. Both cases capture
+real menus, DOM, accessibility and screenshots in a trusted file workspace.
+Untrusted/untitled/menu-click variants, upstream cancellation and macOS remain
+separate unfinished observations. These instrumented trials do not establish
+proof performance, EVM equivalence or complete menu/trace parity.
+
+Starting another source command now retires the invalidated older command
+before asking a prompt that might be cancelled. Retirement still uses the
+existing ownership checks and deadline; new work cannot bypass a failed cleanup.
+
+The existing headless parity runner supports `--suite compiler-output --targets local` for Settings UI/resource JSON, ordinary/custom key builds and actual two-folder pending-prompt configuration ownership. It reuses the compiler/import fixture with verification disabled. The observations distinguish local AST directory placement from Dafny executable stems; paired upstream settings, macOS and full lifecycle evidence remain incomplete.
+
+
+Trace presentation currently has no production positioned producer. F7/Show and Copy report this unavailability; they do not reinterpret model counterexamples, start proof work or derive locations from function ranges. F8/Hide clears owned presentation. A source-bound consumer handles per-document enablement, cancellation, debounce, theme decoration and exact assumption copying, but its rendering tests inject a presentation adapter and are not real trace/kernel evidence. Any future producer adapter must establish its source/version/session correspondence before using that boundary. `solidityLean.verificationTraceColor` configures resource-owned colors only when real positioned data is available. Native trace equivalence remains incomplete.
+
+The Testing view can show current compiler declarations before verification obligations are discovered. These items are labelled as compiler-only, have no verification outcome and do not carry the Verify profile obligation tag. Compiler symbol loading is read-only. Discover Obligations and refresh retain their existing discovery contract; accepted obligation results use their separate identities and runnable tags. Edits, close, configuration and cancellation retire pending compiler-only snapshots. A visible compiler declaration is not proof readiness or a passed test.

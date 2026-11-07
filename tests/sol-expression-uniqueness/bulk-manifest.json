@@ -1,0 +1,11 @@
+{
+  "policy": "H44",
+  "archive": "/tmp/sol-eu-h44-bulk-20261105/bulk.tar.gz",
+  "bytes": 40669379,
+  "sha256": "92a82be817495dd416f09b1d67b1910258af4952391ff4253614e1651e6943fc",
+  "file_count": 1137,
+  "uncompressed_bytes": 58093229,
+  "file_manifest": "/tmp/sol-eu-h44-bulk-20261105/files.json",
+  "original_paths_preserved": true,
+  "retained": "All control, obligation, source-pin, axiom, declaration and registration JSON retained in Git. Only evidence and five generated kernel inventory dumps externalized."
+}

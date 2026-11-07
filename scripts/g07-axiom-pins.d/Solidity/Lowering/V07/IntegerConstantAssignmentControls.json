@@ -1,0 +1,62 @@
+{
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.code_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.collapsed_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.equal_content_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.family_extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.frame_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.operand_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.pass_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.repeated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantAssignmentControls.lean:Solidity.Lowering.V07.IntegerConstantAssignmentControls.write_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

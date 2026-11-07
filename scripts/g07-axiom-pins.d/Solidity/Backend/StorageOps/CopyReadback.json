@@ -1,0 +1,68 @@
+{
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.copy_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.default_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.fields_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.fixed_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.fresh_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.indices_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.numeric_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.prefix_injective": [],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.prefix_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.represented_copy_trace": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.traceWord": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.traceWord_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.traceWord_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadback.lean:Solidity.Backend.StorageOps.CopyReadback.zero_member": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

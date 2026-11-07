@@ -1,0 +1,30 @@
+import Solidity.Frontend.StatementGrammarH28.ConditionalList
+
+namespace Solidity.Frontend.StatementGrammarH28
+#check boolean_statement_no_else_input
+#print axioms boolean_statement_no_else_input
+#check boolean_statement_tokens_nonempty
+#print axioms boolean_statement_tokens_nonempty
+#check boolean_item_list_no_else
+#print axioms boolean_item_list_no_else
+#check boolean_item_list_yield
+#print axioms boolean_item_list_yield
+#check boolean_item_list_token_unique
+#print axioms boolean_item_list_token_unique
+#check boolean_item_segments_unique
+#print axioms boolean_item_segments_unique
+#check boolean_item_list_derives_iff
+#print axioms boolean_item_list_derives_iff
+#check boolean_item_list_yield_unique
+#print axioms boolean_item_list_yield_unique
+#check boolean_item_list_balanced
+#print axioms boolean_item_list_balanced
+#check boolean_item_block_yield
+#print axioms boolean_item_block_yield
+#check boolean_item_block_prefix_unique
+#print axioms boolean_item_block_prefix_unique
+#check BooleanItemList.nil
+#print axioms BooleanItemList.nil
+#check BooleanItemList.cons
+#print axioms BooleanItemList.cons
+end Solidity.Frontend.StatementGrammarH28

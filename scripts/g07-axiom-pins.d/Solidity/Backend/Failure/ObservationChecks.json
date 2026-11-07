@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/Failure/ObservationChecks.lean:Solidity.Backend.Failure.assert_false_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/ObservationChecks.lean:Solidity.Backend.Failure.custom_parts_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/ObservationChecks.lean:Solidity.Backend.Failure.custom_parts_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/ObservationChecks.lean:Solidity.Backend.Failure.intrinsic_emission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/ObservationChecks.lean:Solidity.Backend.Failure.require_false_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/ObservationChecks.lean:Solidity.Backend.Failure.source_emitter_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

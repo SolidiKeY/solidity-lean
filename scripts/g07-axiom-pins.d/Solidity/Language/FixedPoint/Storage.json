@@ -1,0 +1,30 @@
+{
+ "Solidity/Language/FixedPoint/Storage.lean:Solidity.Language.FixedPoint.Fx.field_store_disjoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Storage.lean:Solidity.Language.FixedPoint.Fx.keyWord_injective": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Storage.lean:Solidity.Language.FixedPoint.Fx.layout_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Storage.lean:Solidity.Language.FixedPoint.Fx.load_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Storage.lean:Solidity.Language.FixedPoint.Fx.load_store_disjoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Storage.lean:Solidity.Language.FixedPoint.place_pairwise": [
+  "Quot.sound",
+  "propext"
+ ]
+}

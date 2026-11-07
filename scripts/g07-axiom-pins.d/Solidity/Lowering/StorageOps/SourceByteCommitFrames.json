@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean:Solidity.Lowering.StorageOps.SourceByteCommitFrames.byteWrites_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean:Solidity.Lowering.StorageOps.SourceByteCommitFrames.phase_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean:Solidity.Lowering.StorageOps.SourceByteCommitFrames.plans_prefix_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteCommitFrames.lean:Solidity.Lowering.StorageOps.SourceByteCommitFrames.prefix_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

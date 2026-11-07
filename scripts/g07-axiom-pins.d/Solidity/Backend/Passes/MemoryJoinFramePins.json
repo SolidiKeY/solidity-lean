@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.boundary_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.Controls.admitted_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.Controls.scoped_slot_reuse": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.Controls.unreachable_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.Controls.unreachable_other_fields": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.frame_join": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.input_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.left_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinFramePins.lean:Solidity.Backend.Passes.MemoryJoinFrame.public_admission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

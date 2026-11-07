@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-11-04T21:46:29.638529+00:00",
+  "repository": "/workspace/solidity-lean",
+  "branch": "codex/solidity-h28-sol-20261104/literal-grammar",
+  "head": "48f92c6515347d8f342670b53003719a784936a2",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "published": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "fetched_master": "9c44a2f9acbdddba82d56a693eb7dba6e8eb8028",
+  "ancestry_verified": true,
+  "integrated": [
+    {
+      "path": "Solidity/Frontend/LiteralGrammarH28/Hex.lean",
+      "snapshot_blob": "e8fa60937a80f3d5c07da25b137bea15ece7148e",
+      "published_blob": "27552c5e308db29320003eb7e731302eb28714b6",
+      "byte_identical": false,
+      "equal_after_trimming_only_terminal_LF": true,
+      "difference": "published Hex removes one terminal blank line"
+    },
+    {
+      "path": "Solidity/Frontend/LiteralGrammarH28/HexEncoding.lean",
+      "snapshot_blob": "d2b629369820e2516043a312484fdd38f8e9f5e5",
+      "published_blob": "d2b629369820e2516043a312484fdd38f8e9f5e5",
+      "byte_identical": true,
+      "equal_after_trimming_only_terminal_LF": true,
+      "difference": "none"
+    }
+  ],
+  "initial_strict_blob_assertion": "exit1: Hex blob differs; inspected complete diff and found only a removed final blank line; no semantic mismatch",
+  "remaining": "All other lane files and validation obligations remain H28-owned; no merge/reset/source changes."
+}

@@ -1,0 +1,7 @@
+{
+ "tests/upstream/Declarations.lean:Solidity.Upstream.Declarations.deleteLocal_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

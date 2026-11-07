@@ -1,0 +1,87 @@
+{
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.compilation_core_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.compilation_core_mapped_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.compilation_rep_core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.core_input_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.panic_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.physical_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.reached_asserting_panic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.reached_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.resource_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.resource_recognized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.resource_source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.skipped_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.source_associations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.suffix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.CoreBoundaryControls.suffix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CoreBoundaryPins.lean:Solidity.Backend.Passes.mapped_output_core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

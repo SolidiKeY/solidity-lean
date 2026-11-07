@@ -1,0 +1,54 @@
+{
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.copy_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.copy_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.copy_log": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.copy_self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.generated_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.log_write_member": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.reads_determine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.readSet": [],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.sequence_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.touches": [],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.write_logs_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.writeLog": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutation.lean:Solidity.Backend.StorageOps.NumericCopyCommutation.writeSet": []
+}

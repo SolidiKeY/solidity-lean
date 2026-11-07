@@ -1,0 +1,137 @@
+{
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Allocation.body_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Allocation.initial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Allocation.positive_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Allocation.scope_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Allocation.scoped_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Allocation.shared_allocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Allocation.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.dropped_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.old_private_word_not_cleared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.reached_source_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.reached_target_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.scoped_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.suffix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.wrong_context_cell": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.Controls.wrong_joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.source_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryScopePins.lean:Solidity.Backend.Passes.MemoryScopeBoundary.target_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,4 +1,5 @@
 import Solidity.Source.Types
+import Solidity.Source.CalldataLayout
 import Solidity.Source.Resolve
 
 /-!
@@ -196,22 +197,22 @@ def STy.isZeroConst : STy → Bool
 
 /-- The result type of a call of an admitted builtin function on arguments
 of the given types. -/
-def Builtin.callTy (isBase : DeclName → DeclName → Bool) : Builtin → List STy → Option STy
+def Builtin.callTy (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) : Builtin → List STy → Option STy
   | .require, [c] | .assert, [c] => if c matches .bool then Option.some (.tuple []) else Option.none
   | .require, [c, m] =>
     if (c matches .bool) && m.isStringy then Option.some (.tuple []) else Option.none
   | .revert, [] => Option.some (.tuple [])
   | .revert, [m] => if m.isStringy then Option.some (.tuple []) else Option.none
-  | .keccak256, [b] => if b.implicit isBase (.bytes .memory) then Option.some .bytes32 else Option.none
-  | .sha256, [b] => if b.implicit isBase (.bytes .memory) then Option.some .bytes32 else Option.none
-  | .ripemd160, [b] => if b.implicit isBase (.bytes .memory) then Option.some .bytes20 else Option.none
+  | .keccak256, [b] => if b.implicit isBase mapFree (.bytes .memory) then Option.some .bytes32 else Option.none
+  | .sha256, [b] => if b.implicit isBase mapFree (.bytes .memory) then Option.some .bytes32 else Option.none
+  | .ripemd160, [b] => if b.implicit isBase mapFree (.bytes .memory) then Option.some .bytes20 else Option.none
   | .addmod, [x, y, k] | .mulmod, [x, y, k] =>
-    if [x, y, k].all (·.implicit isBase (.int IntTy.u256)) && !k.isZeroConst then
+    if [x, y, k].all (·.implicit isBase mapFree (.int IntTy.u256)) && !k.isZeroConst then
       Option.some (.int IntTy.u256)
     else Option.none
   | .ecrecover, [h, v, r, s] =>
-    if h.implicit isBase .bytes32 && v.implicit isBase (.int IntTy.u8) &&
-      r.implicit isBase .bytes32 && s.implicit isBase .bytes32 then Option.some (.address false)
+    if h.implicit isBase mapFree .bytes32 && v.implicit isBase mapFree (.int IntTy.u8) &&
+      r.implicit isBase mapFree .bytes32 && s.implicit isBase mapFree .bytes32 then Option.some (.address false)
     else Option.none
   | _, _ => Option.none
 
@@ -318,10 +319,10 @@ mobile-type step): the left operand's mobile type if the right converts to
 it, else the right's mobile type if the left converts to it.  Two constants
 never meet (they fold), and a constant on the left of a `bytesN` operand
 does not either (solc's `RationalNumberType::binaryOperatorResult`). -/
-def STy.common? (isBase : DeclName → DeclName → Bool) (a b : STy) : Option STy :=
+def STy.common? (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) (a b : STy) : Option STy :=
   if a.isConstTy && (b.isConstTy || b.isFixedBytes) then Option.none
-  else if b.implicit isBase a.mobile then Option.some a.mobile
-  else if a.implicit isBase b.mobile then Option.some b.mobile else Option.none
+  else if b.implicit isBase mapFree a.mobile then Option.some a.mobile
+  else if a.implicit isBase mapFree b.mobile then Option.some b.mobile else Option.none
 
 /-- The type of a shift's or power's left operand: a constant at `uint256`
 (`int256` when negative), as solc types `lit << x` and `lit ** x` with a
@@ -435,10 +436,10 @@ def AssignOp.kind? : AssignOp → Option BinKind
 
 /-- Whether a compound assignment's operand `σ` fits the target `τ`: as
 `τ ∘ σ` would for the operator's family. -/
-def AssignOp.fits (isBase : DeclName → DeclName → Bool) (op : AssignOp) (σ τ : STy) : Bool :=
+def AssignOp.fits (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) (op : AssignOp) (σ τ : STy) : Bool :=
   match op.kind? with
-  | Option.some .arith => σ.implicit isBase τ && τ.isNumeric
-  | Option.some .bit => σ.implicit isBase τ && τ.isBits
+  | Option.some .arith => σ.implicit isBase mapFree τ && τ.isNumeric
+  | Option.some .bit => σ.implicit isBase mapFree τ && τ.isBits
   | Option.some _ => τ.isBits && σ.isAmount
   | Option.none => false
 
@@ -525,13 +526,13 @@ def Syn.isDecl {k : SCtx} : Syn (.stmt k) → Bool
 /-! ## Expression typing -/
 
 /-- Whether arguments convert pointwise to parameters. -/
-def argsFit (isBase : DeclName → DeclName → Bool) (σs ps : List STy) : Bool :=
-  σs.length == ps.length && (List.zip σs ps).all (fun p => p.1.implicit isBase p.2)
+def argsFit (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) (σs ps : List STy) : Bool :=
+  σs.length == ps.length && (List.zip σs ps).all (fun p => p.1.implicit isBase mapFree p.2)
 
 /-- Whether an event or error accepts arguments of types `σs`. -/
-def Decl.fitsParams (E : Env) (isBase : DeclName → DeclName → Bool) (σs : List STy) (d : Decl) : Bool :=
+def Decl.fitsParams (E : Env) (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) (σs : List STy) (d : Decl) : Bool :=
   match d.paramTys E with
-  | Option.some ps => argsFit isBase σs ps
+  | Option.some ps => argsFit isBase mapFree σs ps
   | Option.none => false
 
 
@@ -578,6 +579,49 @@ def Env.hasMapping (E : Env) : Nat → STy → Bool
 mapping it contains visits each struct at most once. -/
 def Env.structCount (E : Env) : Nat := (E.decls.filter (·.kind == .struct)).length
 
+/-- Whether a type name or member list names a mapping outside any user
+type, and the user types it names (through arrays and members). -/
+def Syn.mappingRefs : {c : Cat} → Syn c → Bool × List IdPath
+  | _, .mapping _ _ _ _ => (true, [])
+  | _, .array t _ => t.mappingRefs
+  | _, .structMember t _ => t.mappingRefs
+  | _, .userType p => (false, [p])
+  | _, .cons x xs => let a := x.mappingRefs; let b := xs.mappingRefs; (a.1 || b.1, a.2 ++ b.2)
+  | _, _ => (false, [])
+
+/-- Whether the struct a user type name denotes holds a mapping through its
+members, nested structs read `n` levels deep. -/
+def Env.structHoldsMapping (E : Env) : Nat → Option String → IdPath → Bool
+  | 0, _, _ => false
+  | n + 1, scope, p =>
+    match E.lookupPath scope p with
+    | [d] =>
+      match d.kind, d.top, d.node with
+      | .struct, _, .struct _ m ms =>
+        let r := (Syn.cons m ms).mappingRefs
+        r.1 || r.2.any (E.structHoldsMapping n d.scope)
+      | _, _, _ => false
+    | _ => false
+
+/-- **Whether struct `d` holds no mapping** (through its members, arrays and
+nested structs, one level per struct declaration): a struct a conversion
+may copy out of `storage` (`STy.implicit`'s `mapFree`; solc refuses the
+copy otherwise). It reads the members' type names, not their elaborated
+types (`Env.hasMapping`), so that it depends on no axiom: a conversion
+proof embedded in an elaborated term mentions it. -/
+def Env.mapFree (E : Env) (d : DeclName) : Bool :=
+  match E.declOf .struct d with
+  | Option.some dc =>
+    match dc.kind, dc.top, dc.node with
+    | .struct, _, .struct _ m ms =>
+      let r := (Syn.cons m ms).mappingRefs
+      !(r.1 || r.2.any (E.structHoldsMapping E.structCount dc.scope))
+    | _, _, _ => true
+  | Option.none => true
+
+/-- Which structs of the environment hold no mapping (`Env.mapFree`). -/
+abbrev Ctx.mapFree (Γ : Ctx) : DeclName → Bool := Γ.env.mapFree
+
 /-- Whether a value of type `τ` contains a mapping (one level per struct
 declaration reaches every struct a type can contain). -/
 def Ctx.assignsMapping (Γ : Ctx) (τ : STy) : Bool := Γ.env.hasMapping (Γ.env.structCount + 1) τ
@@ -615,10 +659,10 @@ def Env.extFunctions (E : Env) (dn : DeclName) (f : String) : List Decl :=
     d.kind == .function && (d.fnVis == Option.some .external || d.fnVis == Option.some .pub)
 
 /-- The external overload that accepts arguments of types `σs`. -/
-def extOverloads (E : Env) (B : DeclName → DeclName → Bool) (dn : DeclName) (f : String)
+def extOverloads (E : Env) (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (dn : DeclName) (f : String)
     (σs : List STy) : List Decl :=
   (E.extFunctions dn f).filter fun d' => match d'.fnSig E with
-    | Option.some (ps', _) => argsFit B σs ps'
+    | Option.some (ps', _) => argsFit B M σs ps'
     | Option.none => false
 
 /-- The ABI encoding functions. -/
@@ -646,9 +690,9 @@ def STy.abiArg : STy → Bool
 
 /-- The arguments an encoding function accepts: a `bytes4` selector or a
 signature string first, where it takes one. -/
-def AbiKind.argsOK (B : DeclName → DeclName → Bool) : AbiKind → List STy → Bool
+def AbiKind.argsOK (B : DeclName → DeclName → Bool) (M : DeclName → Bool) : AbiKind → List STy → Bool
   | .encode, σs | .encodePacked, σs => σs.all STy.abiArg
-  | .encodeWithSelector, σ :: σs => σ.implicit B (.fixedBytes 4 (by decide)) && σs.all STy.abiArg
+  | .encodeWithSelector, σ :: σs => σ.implicit B M (.fixedBytes 4 (by decide)) && σs.all STy.abiArg
   | .encodeWithSignature, σ :: σs => σ.isStringy && σs.all STy.abiArg
   | _, _ => false
 
@@ -711,26 +755,20 @@ def STy.decodeSrc : STy → Bool
   | .bytes .memory | .bytes .storage | .bytes .calldata | .stringLit _ => true
   | _ => false
 
-/-- A one-word value type (an ABI head word): `STy.isValue` without
-function types. -/
-def STy.oneWord : STy → Bool
-  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
-  | _ => false
-
 /-- solc's `Type::commonType` of two element types of an inline array:
 `a`'s mobile type if `b` converts to it, else `b`'s if `a`'s mobile type
 converts to it (lane FU2-B; solc's fold starts at the first element's
 mobile type, so `[1, -1]` has none: `uint8` and `int8`). -/
-def STy.common (B : DeclName → DeclName → Bool) (a b : STy) : Option STy :=
-  if b.implicit B a.mobile then Option.some a.mobile
-  else if a.mobile.implicit B b.mobile then Option.some b.mobile else Option.none
+def STy.common (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (a b : STy) : Option STy :=
+  if b.implicit B M a.mobile then Option.some a.mobile
+  else if a.mobile.implicit B M b.mobile then Option.some b.mobile else Option.none
 
 /-- The common type of an inline array's element types, folded left to
 right from the first's mobile type, as solc's `TypeChecker` does. -/
-def STy.commonOf (B : DeclName → DeclName → Bool) (a : STy) : List STy → Option STy
+def STy.commonOf (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (a : STy) : List STy → Option STy
   | [] => Option.some a.mobile
-  | b :: bs => match STy.common B a b with
-    | Option.some c => STy.commonOf B c bs
+  | b :: bs => match STy.common B M a b with
+    | Option.some c => STy.commonOf B M c bs
     | Option.none => Option.none
 
 /-- **A type `new` allocates with a length** (lane FU2-B): `bytes`,
@@ -740,12 +778,12 @@ def STy.newable : STy → Bool
   | .array .memory σ none => σ.oneWord
   | _ => false
 
-/-- **A sliceable type** (`a[s:e]`, lane FU2-B): `bytes` or a dynamic array
-of one-word values in `calldata` (solc: index range access only for
-dynamic calldata arrays). -/
+/-- **A sliceable type** (`a[s:e]`): bytes/string calldata or a dynamic
+calldata array with a represented statically encoded element. Dynamically
+encoded base elements remain refused (solc2148); struct layouts remain open. -/
 def STy.sliceable : STy → Bool
-  | .bytes .calldata => true
-  | .array .calldata σ none => σ.oneWord
+  | .bytes .calldata | .string .calldata => true
+  | .array .calldata σ none => 0 < σ.cdStaticWords
   | _ => false
 
 /-- A one-word ABI value the decoder reads (`decodeElemWord`), other than
@@ -778,14 +816,6 @@ def STy.decodable (E : Env) : STy → Bool
   | .bytes .memory | .string .memory => true
   | .array .memory σ none => σ.decodableElem E
   | τ => τ.decodableElem E
-
-/-- A reference type moved to a location (nested arrays with it). -/
-def STy.withLoc (l : DataLoc) : STy → STy
-  | .bytes _ => .bytes l
-  | .string _ => .string l
-  | .array _ τ n => .array l (τ.withLoc l) n
-  | .struct _ d => .struct l d
-  | τ => τ
 
 /-- A copy into storage (`s = m`): the source is the target's type in
 `memory` or `calldata`, or a string literal into `bytes`/`string`
@@ -851,11 +881,11 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       Typed Γ (.unaryPrefix .delete e) (.tuple [])
   /-- `a ∘ b` for `+ - * / %`: numbers meeting at a common type. -/
   | arith {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.arith, a, b) →
-      Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
+      Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase Γ.mapFree τa τb = Option.some τ →
       τ.isNumeric = true → (e.isDivMod && τb.isZeroConst) = false → Typed Γ e τ
   /-- `a ∘ b` for `& | ^`: integers or `bytesN`. -/
   | bit {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.bit, a, b) →
-      Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
+      Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase Γ.mapFree τa τb = Option.some τ →
       τ.isBits = true → Typed Γ e τ
   /-- `a << b`, `a >> b`: an integer or `bytesN` by an unsigned amount, at
   `a`'s type (a constant `a` with a non-constant amount: `uint256`, or
@@ -870,10 +900,10 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       Typed Γ a τa → Typed Γ b τb → τa.shiftTy.isInt = true → τb.isAmount = true →
       (a.const.isSome && b.const.isSome) = false → Typed Γ e τa.shiftTy
   | order {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.order, a, b) →
-      Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
+      Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase Γ.mapFree τa τb = Option.some τ →
       τ.isOrdered = true → Typed Γ e .bool
   | eq {e a b : Syn .expr} {τa τb τ : STy} : e.binOp? = Option.some (.eq, a, b) →
-      Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase τa τb = Option.some τ →
+      Typed Γ a τa → Typed Γ b τb → STy.common? Γ.isBase Γ.mapFree τa τb = Option.some τ →
       τ.hasEq = true → Typed Γ e .bool
   /-- A comparison of two constants is a boolean. -/
   | compareConst {e a b : Syn .expr} {k : BinKind} {qa qb : Q} :
@@ -883,21 +913,21 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       Typed Γ b .bool → Typed Γ e .bool
   /-- `c ? a : b`: the branches' mobile types meet. -/
   | cond {c a b : Syn .expr} {τa τb τ : STy} : Typed Γ c .bool → Typed Γ a τa → Typed Γ b τb →
-      STy.common? Γ.isBase τa.mobile τb.mobile = Option.some τ → Typed Γ (.cond c a b) τ
+      STy.common? Γ.isBase Γ.mapFree τa.mobile τb.mobile = Option.some τ → Typed Γ (.cond c a b) τ
   /-- `a = b`: `b` converts implicitly to `a`'s type; a type containing a
   mapping is never copied, only rebound by a local (`Ctx.assignRefused`). -/
   | assign {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ →
-      σ.implicit Γ.isBase τ = true → Γ.assignRefused τ a = false → Typed Γ (.assign .assign a b) τ
+      σ.implicit Γ.isBase Γ.mapFree τ = true → Γ.assignRefused τ a = false → Typed Γ (.assign .assign a b) τ
   /-- `a ∘= b`: as `a = a ∘ b`. -/
   | compound {a b : Syn .expr} {op : AssignOp} {τ σ : STy} :
-      LVal Γ a τ → Typed Γ b σ → op.fits Γ.isBase σ τ = true → Typed Γ (.assign op a b) τ
+      LVal Γ a τ → Typed Γ b σ → op.fits Γ.isBase Γ.mapFree σ τ = true → Typed Γ (.assign op a b) τ
   /-- `a[i]` on an array: its element. -/
   | indexArray {a i : Syn .expr} {l : DataLoc} {τ σ : STy} {n : Option Nat} :
       Typed Γ a (.array l τ n) → Typed Γ i σ → σ.isIndex = true → inBounds σ n = true →
       Typed Γ (.index a (.some i)) τ
   /-- `m[k]` on a mapping: its value. -/
   | indexMapping {a i : Syn .expr} {τk τv σ : STy} : Typed Γ a (.mapping τk τv) → Typed Γ i σ →
-      σ.implicit Γ.isBase τk = true → Typed Γ (.index a (.some i)) τv
+      σ.implicit Γ.isBase Γ.mapFree τk = true → Typed Γ (.index a (.some i)) τv
   /-- `b[i]` on `bytes` or `bytesN`: one byte (read only for `bytesN`). -/
   | indexBytes {a i : Syn .expr} {τ σ : STy} : Typed Γ a τ →
       (match τ with | .bytes _ => true | .fixedBytes _ _ => true | _ => false) = true →
@@ -911,11 +941,11 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   keep the argument's location). -/
   | convElem {x : Syn .expr} {el : Elem} {h : el ≠ .addressPayable} {σ τ : STy} : Typed Γ x σ →
       τ = el.ty (match σ with | .bytes l => l | .string l => l | _ => .memory) →
-      σ.explicit Γ.isBase τ = true →
+      σ.explicit Γ.isBase Γ.mapFree τ = true →
       Typed Γ (.call (.elemType el h) (.positional (.cons x .nil))) τ
   /-- `C(e)`, `E(e)`: an explicit conversion to a contract or enum. -/
   | convUser {x : Syn .expr} {n : String} {τ σ : STy} : Γ.convTarget n = Option.some τ →
-      Typed Γ x σ → σ.explicit Γ.isBase τ = true →
+      Typed Γ x σ → σ.explicit Γ.isBase Γ.mapFree τ = true →
       Typed Γ (.call (.ident n) (.positional (.cons x .nil))) τ
   /-- `payable(e)` of an address or contract. -/
   | payable {x : Syn .expr} {σ : STy} : Typed Γ x σ →
@@ -926,7 +956,7 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   | callInternal {f : String} {args : Syn (.list .expr)} {d : Decl} {ps rs σs : List STy} :
       TypedArgs Γ args σs →
       (Γ.functions f).filter (fun d' => match d'.fnSig Γ.env with
-        | Option.some (ps', _) => argsFit Γ.isBase σs ps'
+        | Option.some (ps', _) => argsFit Γ.isBase Γ.mapFree σs ps'
         | Option.none => false) = [d] →
       d.fnSig Γ.env = Option.some (ps, rs) →
       Typed Γ (.call (.ident f) (.positional args)) (STy.ret rs)
@@ -944,42 +974,42 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   | builtinCall {f : String} {args : Syn (.list .expr)} {b : Builtin} {σs : List STy} {τ : STy}
       {feature : String} : Γ.resolve f = Option.some (.builtin b) →
       b.status = .admitted feature → TypedArgs Γ args σs →
-      b.callTy Γ.isBase σs = Option.some τ → Typed Γ (.call (.ident f) (.positional args)) τ
+      b.callTy Γ.isBase Γ.mapFree σs = Option.some τ → Typed Γ (.call (.ident f) (.positional args)) τ
   /-- `a.x` on a struct: its member. -/
   | member {a : Syn .expr} {x : String} {l : DataLoc} {dn : DeclName} {i : Nat} {τ : STy} :
       Typed Γ a (.struct l dn) → Γ.env.fieldAt dn l x = Option.some (i, τ) → Typed Γ (.member a x) τ
   /-- `S(args)`: a new struct in memory, the members accepting the arguments. -/
   | structNew {S : String} {args : Syn (.list .expr)} {dn : DeclName} {fs : List (String × STy)}
       {σs : List STy} : Γ.structOf S = Option.some dn → Γ.env.structFields dn .memory = Option.some fs →
-      TypedArgs Γ args σs → argsFit Γ.isBase σs (fs.map Prod.snd) = true →
+      TypedArgs Γ args σs → argsFit Γ.isBase Γ.mapFree σs (fs.map Prod.snd) = true →
       Typed Γ (.call (.ident S) (.positional args)) (.struct .memory dn)
   /-- `c.f(args)`: an external call; exactly one exposed overload accepts
   the arguments. -/
   | extCall {c : Syn .expr} {f : String} {args : Syn (.list .expr)} {dn : DeclName} {d : Decl}
       {ps rs σs : List STy} : Typed Γ c (.contract dn) → TypedArgs Γ args σs →
-      extOverloads Γ.env Γ.isBase dn f σs = [d] → d.fnSig Γ.env = Option.some (ps, rs) →
+      extOverloads Γ.env Γ.isBase Γ.mapFree dn f σs = [d] → d.fnSig Γ.env = Option.some (ps, rs) →
       Typed Γ (.call (.member c f) (.positional args)) (STy.ret rs)
   /-- `c.f{value: v}(args)`: an external call of a `payable` function with
   value. -/
   | extCallValue {c v : Syn .expr} {f : String} {args : Syn (.list .expr)} {dn : DeclName} {d : Decl}
       {ps rs σs : List STy} {σ : STy} : Typed Γ c (.contract dn) → Typed Γ v σ →
-      σ.implicit Γ.isBase (.int IntTy.u256) = true → TypedArgs Γ args σs →
-      extOverloads Γ.env Γ.isBase dn f σs = [d] → d.fnSig Γ.env = Option.some (ps, rs) →
+      σ.implicit Γ.isBase Γ.mapFree (.int IntTy.u256) = true → TypedArgs Γ args σs →
+      extOverloads Γ.env Γ.isBase Γ.mapFree dn f σs = [d] → d.fnSig Γ.env = Option.some (ps, rs) →
       d.fnMut = Option.some .payable →
       Typed Γ (.call (.callOptions (.member c f) (.namedArg "value" v) .nil) (.positional args)) (STy.ret rs)
   /-- `a.transfer(v)` on an `address payable`. -/
   | transfer {a v : Syn .expr} {σ : STy} : Typed Γ a (.address true) → Typed Γ v σ →
-      σ.implicit Γ.isBase (.int IntTy.u256) = true →
+      σ.implicit Γ.isBase Γ.mapFree (.int IntTy.u256) = true →
       Typed Γ (.call (.member a "transfer") (.positional (.cons v .nil))) (.tuple [])
   /-- `a.send(v)` on an `address payable`: whether the payment succeeded. -/
   | send {a v : Syn .expr} {σ : STy} : Typed Γ a (.address true) → Typed Γ v σ →
-      σ.implicit Γ.isBase (.int IntTy.u256) = true →
+      σ.implicit Γ.isBase Γ.mapFree (.int IntTy.u256) = true →
       Typed Γ (.call (.member a "send") (.positional (.cons v .nil))) .bool
   /-- `abi.encode(…)`, `abi.encodePacked(…)`, `abi.encodeWithSelector(…)`,
   `abi.encodeWithSignature(…)`: `bytes memory`. -/
   | abiEncode {g m : String} {args : Syn (.list .expr)} {σs : List STy} {k : AbiKind} :
       Γ.resolve g = Option.some (.builtin .abi) → AbiKind.ofMember m = Option.some k →
-      TypedArgs Γ args σs → k.argsOK Γ.isBase σs = true →
+      TypedArgs Γ args σs → k.argsOK Γ.isBase Γ.mapFree σs = true →
       Typed Γ (.call (.member (.ident g) m) (.positional args)) (.bytes .memory)
   /-- `s = e` copying into storage: from `memory`, `calldata`, or a string
   literal; the target is a storage location, not a local `storage` pointer. -/
@@ -1008,8 +1038,8 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   common type (`STy.commonOf`), each element converting to it; only
   one-word element types (references are not modelled). -/
   | inlineArray {e : Syn .expr} {es : Syn (.list .expr)} {τ σ : STy} {τs : List STy} :
-      Typed Γ e τ → TypedArgs Γ es τs → STy.commonOf Γ.isBase τ τs = Option.some σ → σ.oneWord = true →
-      argsFit Γ.isBase (τ :: τs) (List.replicate (τs.length + 1) σ) = true →
+      Typed Γ e τ → TypedArgs Γ es τs → STy.commonOf Γ.isBase Γ.mapFree τ τs = Option.some σ → σ.oneWord = true →
+      argsFit Γ.isBase Γ.mapFree (τ :: τs) (List.replicate (τs.length + 1) σ) = true →
       Typed Γ (.inlineArray e es) (.array .memory σ (Option.some (τs.length + 1)))
   /-- `new T[](n)`, `new bytes(n)`, `new string(n)` (lane FU2-B): a new
   memory object of `n` zeroed elements (`STy.newable`); `n` an index. -/
@@ -1043,7 +1073,7 @@ inductive LVal (Γ : Ctx) : Syn .expr → STy → Type where
       Typed Γ a (.array l τ n) → l ≠ .calldata → Typed Γ i σ → σ.isIndex = true →
       inBounds σ n = true → LVal Γ (.index a (.some i)) τ
   | indexMapping {a i : Syn .expr} {τk τv σ : STy} : Typed Γ a (.mapping τk τv) → Typed Γ i σ →
-      σ.implicit Γ.isBase τk = true → LVal Γ (.index a (.some i)) τv
+      σ.implicit Γ.isBase Γ.mapFree τk = true → LVal Γ (.index a (.some i)) τv
   /-- A byte of a `storage` or `memory` `bytes`. -/
   | indexBytes {a i : Syn .expr} {l : DataLoc} {σ : STy} : Typed Γ a (.bytes l) → l ≠ .calldata →
       Typed Γ i σ → σ.isIndex = true → LVal Γ (.index a (.some i)) (.fixedBytes 1 (by decide))
@@ -1176,10 +1206,10 @@ def STy.nonEmpty : STy → Bool
 /-- **Each declared slot's component converts implicitly** to its type;
 a hole takes any non-empty component; the slots are as many as the
 components. -/
-def slotsFit (B : DeclName → DeclName → Bool) : List (Option STy) → List STy → Bool
+def slotsFit (B : DeclName → DeclName → Bool) (M : DeclName → Bool) : List (Option STy) → List STy → Bool
   | [], [] => true
-  | Option.none :: ss, σ :: σs => σ.nonEmpty && slotsFit B ss σs
-  | Option.some τ :: ss, σ :: σs => σ.implicit B τ && slotsFit B ss σs
+  | Option.none :: ss, σ :: σs => σ.nonEmpty && slotsFit B M ss σs
+  | Option.some τ :: ss, σ :: σs => σ.implicit B M τ && slotsFit B M ss σs
   | _, _ => false
 
 /-- An optional loop step, typed at some type. -/
@@ -1211,12 +1241,12 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
   | declTuple {k : SCtx} {L : List (String × STy)} {h : Nat} {d : Syn .varDecl}
       {ds : Syn (.list (.opt .varDecl))} {e : Syn .expr} {slots : List (Option (String × STy))}
       {σs : List STy} : C.tupleSlots h d ds = Option.some slots → Typed (C.at L) e (.tuple σs) →
-      slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true →
+      slotsFit C.isBase C.mapFree (slots.map (Option.map Prod.snd)) σs = true →
       StmtD C (k := k) L (.simpleStmt (.declTuple h d ds e)) (pushSlots slots L)
   /-- `T l x = e;`: `e` converts implicitly to `T`. -/
   | declInit {k : SCtx} {L : List (String × STy)} {t : Syn .typeName} {l : Option DataLoc} {x : String}
       {e : Syn .expr} {τ σ : STy} : t.ty C.env C.scope (l.getD .memory) = Option.some τ →
-      locOK τ l true = true → Typed (C.at L) e σ → σ.implicit C.isBase τ = true →
+      locOK τ l true = true → Typed (C.at L) e σ → σ.implicit C.isBase C.mapFree τ = true →
       StmtD C (k := k) L (.simpleStmt (.declVar (.varDecl t l x) (.some e))) ((x, τ) :: L)
   | block {k : SCtx} {L L' : List (String × STy)} {b : Syn (.list (.item k))} :
       ItemsD C L b L' → StmtD C L (.blockStmt (.block b)) L
@@ -1247,21 +1277,21 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
   | ret {k : SCtx} {L : List (String × STy)} : C.rets = [] → StmtD C (k := k) L (.returnStmt .none) L
   /-- `return e;`: `e` converts implicitly to the single return type. -/
   | retVal {k : SCtx} {L : List (String × STy)} {e : Syn .expr} {τ σ : STy} : C.rets = [τ] →
-      Typed (C.at L) e σ → σ.implicit C.isBase τ = true → StmtD C (k := k) L (.returnStmt (.some e)) L
+      Typed (C.at L) e σ → σ.implicit C.isBase C.mapFree τ = true → StmtD C (k := k) L (.returnStmt (.some e)) L
   /-- `return (a, b, …);`: each component converts to its return type. -/
   | retTuple {k : SCtx} {L : List (String × STy)} {e : Syn .expr} {s : Syn (.list (.opt .expr))}
       {σ : STy} {σs : List STy} : Typed (C.at L) e σ → TypedSlots (C.at L) s σs → σs ≠ [] →
-      argsFit C.isBase (σ :: σs) C.rets = true →
+      argsFit C.isBase C.mapFree (σ :: σs) C.rets = true →
       StmtD C (k := k) L (.returnStmt (.some (.tuple (.some e) s))) L
   /-- `emit E(args);`: exactly one event accepts the arguments. -/
   | emit {k : SCtx} {L : List (String × STy)} {ev : String} {args : Syn (.list .expr)} {d : Decl}
       {σs : List STy} : TypedArgs (C.at L) args σs →
-      ((C.at L).declsOf .event ev).filter (·.fitsParams C.env C.isBase σs) = [d] →
+      ((C.at L).declsOf .event ev).filter (·.fitsParams C.env C.isBase C.mapFree σs) = [d] →
       StmtD C (k := k) L (.emit (.ident ev) (.positional args)) L
   /-- `revert E(args);`: exactly one error accepts the arguments. -/
   | revertError {k : SCtx} {L : List (String × STy)} {er : String} {args : Syn (.list .expr)} {d : Decl}
       {σs : List STy} : TypedArgs (C.at L) args σs →
-      ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase σs) = [d] →
+      ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase C.mapFree σs) = [d] →
       StmtD C (k := k) L (.revert (.ident er) (.positional args)) L
   /-- `try c.f(args) returns (T₁ x₁, …) { … } catch … { … }` (lane FU2-B):
   an external call without value whose revert runs the one `catch` clause
@@ -1273,8 +1303,8 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       {cl : Syn (.catchClause k)} {dn : DeclName} {d : Decl} {ps rs σs tys : List STy}
       {x : Option String} {cb : Syn (.list (.item k))} :
       Typed (C.at L) c (.contract dn) → TypedArgs (C.at L) args σs →
-      extOverloads C.env C.isBase dn f σs = [d] → d.fnSig C.env = Option.some (ps, rs) →
-      argsFit C.isBase σs ps = true →
+      extOverloads C.env C.isBase C.mapFree dn f σs = [d] → d.fnSig C.env = Option.some (ps, rs) →
+      argsFit C.isBase C.mapFree σs ps = true →
       rets.tys C.env C.scope .memory = Option.some tys → (tys.isEmpty || STy.sameList tys rs) = true →
       ItemsD C ((tryLocals rets.paramNames rs).reverse ++ L) okb L₁ →
       CatchD cl x cb → ItemsD C (catchLocals x L) cb L₂ →

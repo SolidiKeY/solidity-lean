@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "c352ea6707bff3551b1978ae83276cdf682a8263",
+  "status": "partial",
+  "fileCount": 168,
+  "uncompressedBytes": 7549849,
+  "archive": {
+    "path": "/workspace/dafny-parity-proof-help-20261106/evidence/bulk.tar.gz",
+    "bytes": 1702280,
+    "sha256": "fae0320a0068f8000fd37400aa5ca5ca50979c489865bd3d1ee83a85c38f16c5"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-proof-help-20261106/evidence/files.json",
+    "bytes": 36327,
+    "sha256": "3cdaf96e8c67a62c8dc6afbba795e536339186057d7cc1e9860bf87327a50dd6"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-proof-help-evidence-manifest.json --restore",
+  "boundary": "Development native certified service + real QuickPick/document captures; original2failures and ownership refusals retained. No pairedDafny/macOS or completeparity. Exactcommitted-head native rerun pending; orphanZLean records remain separate retention gap.",
+  "reviews": {
+    "path": "/workspace/dafny-parity-proof-help-20261106/REVIEWS.md",
+    "bytes": 1561,
+    "sha256": "39d9c628e11ad5e9e964c9fffffaff8752d27f3cd2ca4d6f74d49918d191eced"
+  },
+  "boundaries": {
+    "path": "/workspace/dafny-parity-proof-help-20261106/BOUNDARIES.md",
+    "bytes": 1584,
+    "sha256": "3222caa074ebc7dc20afdce920ae226daf5ccf3c4e83a2d9a7fb4c888cbe08ab"
+  },
+  "inventoryUpdate": {
+    "path": "/workspace/dafny-parity-proof-help-20261106/INVENTORY-UPDATE.json",
+    "bytes": 765,
+    "sha256": "bd099b848ea073a4e118303da669b053c69a1231dfd16964d92a2a471ae22a51"
+  }
+}

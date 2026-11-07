@@ -1,0 +1,55 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.changed_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.frozen_source_is_wrong": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.live_payload_then_local_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.physical_delete_endpoint_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.physical_delete_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.physical_delete_skipped_differs": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.physical_delete_typed_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.reached_source_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.reframe_stack_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.source_read_and_neighbor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalMemoryControls.lean:Solidity.Backend.MemoryOps.Physical.Controls.wrong_unscaled_offset": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "Solidity/Frontend/Admission/ProgramRootControls.lean:Solidity.Frontend.Admission.RootControls.body_constant_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramRootControls.lean:Solidity.Frontend.Admission.RootControls.exact_inventory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramRootControls.lean:Solidity.Frontend.Admission.RootControls.omission_changes_cardinality": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramRootControls.lean:Solidity.Frontend.Admission.RootControls.omitted_constructor_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

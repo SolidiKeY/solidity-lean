@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathFrame.lean:Solidity.Backend.MemoryCopies.nestedMemoryPathFrame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedMemoryPathFrame.lean:Solidity.Backend.MemoryCopies.SelectedAlias.nestedDeepFramedBindExecute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

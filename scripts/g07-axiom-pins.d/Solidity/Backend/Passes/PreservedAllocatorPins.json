@@ -1,0 +1,192 @@
+{
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.construction_budgeted_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.objects_budgeted_construction_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.objects_budgeted_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorApplication.observed_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorApplication.prefix_bases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorApplication.stale_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.memory_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.object_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.reached_allocator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.reached_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.reached_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.suffix_codes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.suffix_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorControls.suffix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.bad_value_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.failed_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.failed_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.failed_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.failing_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.failing_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.memory_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.reached_failure_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.skipped_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.skipped_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorNegatives.skipped_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorObservations.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorObservations.fresh_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorObservations.old_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorObservations.parent_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorObservations.source_heap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorObservations.suffix_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.PreservedAllocatorObservations.suffix_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.reference_prog_objects": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.reference_ptr_objects": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.reference_stmt_objects": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.referenceObjects": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PreservedAllocatorPins.lean:Solidity.Backend.Passes.referenceObjects_code": [
+  "Quot.sound",
+  "propext"
+ ]
+}

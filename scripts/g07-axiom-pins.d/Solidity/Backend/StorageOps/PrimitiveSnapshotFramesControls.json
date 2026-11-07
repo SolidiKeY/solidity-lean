@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.frame_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.graph_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.header_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.inside_not_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.retained_not_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.storage_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.whole_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFramesControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.Controls.wrong_header_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

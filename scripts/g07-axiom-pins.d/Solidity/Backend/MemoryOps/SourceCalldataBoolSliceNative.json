@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceNative.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.slice_bool_copy_native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

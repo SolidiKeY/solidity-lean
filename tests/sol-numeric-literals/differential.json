@@ -1,0 +1,1095 @@
+{
+  "boundary": "Finite paired observations, not universal compiler parity. Every case is retained; stage differences do not restrict any decoder theorem.",
+  "results": [
+    {
+      "id": "S00",
+      "mode": "sol",
+      "spelling": "0",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 0,
+        "fraction": 0,
+        "exponent": 0
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 0,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 0,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S01",
+      "mode": "sol",
+      "spelling": "1",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 1,
+        "fraction": 0,
+        "exponent": 0
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S02",
+      "mode": "sol",
+      "spelling": "123456789012345678901234567890",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 123456789012345678901234567890,
+        "fraction": 0,
+        "exponent": 0
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 123456789012345678901234567890,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 123456789012345678901234567890,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S03",
+      "mode": "sol",
+      "spelling": "1_2_3",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 123,
+        "fraction": 0,
+        "exponent": 0
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 123,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 123,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S04",
+      "mode": "sol",
+      "spelling": "0_1",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Identifier-start is not allowed at end of a number."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S05",
+      "mode": "sol",
+      "spelling": "01",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Octal numbers not allowed."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S06",
+      "mode": "sol",
+      "spelling": ".1",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 1,
+        "fraction": 1,
+        "exponent": 0
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 1,
+          "denominator": 10
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 1,
+          "denominator": 10
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S07",
+      "mode": "sol",
+      "spelling": "1.",
+      "lexical_acceptance": true,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "2314",
+          "message": "Expected identifier but got ';'"
+        }
+      ],
+      "stage_difference": "The fragment is a numeric token followed by a period; the compiler rejects the expression context."
+    },
+    {
+      "id": "S08",
+      "mode": "sol",
+      "spelling": "1.0",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 10,
+        "fraction": 1,
+        "exponent": 0
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S09",
+      "mode": "sol",
+      "spelling": "1.0_2",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 102,
+        "fraction": 2,
+        "exponent": 0
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 51,
+          "denominator": 50
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 51,
+          "denominator": 50
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S10",
+      "mode": "sol",
+      "spelling": "1e2",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 1,
+        "fraction": 0,
+        "exponent": 2
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 100,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 100,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S11",
+      "mode": "sol",
+      "spelling": "1E2",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 1,
+        "fraction": 0,
+        "exponent": 2
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 100,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 100,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S12",
+      "mode": "sol",
+      "spelling": "1e-2",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "dec",
+        "mantissa": 1,
+        "fraction": 0,
+        "exponent": -2
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 1,
+          "denominator": 100
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 1,
+          "denominator": 100
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S13",
+      "mode": "sol",
+      "spelling": "1e+2",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "TypeError",
+          "code": "2826",
+          "message": "Invalid literal value."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S14",
+      "mode": "sol",
+      "spelling": "1e",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid exponent."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S15",
+      "mode": "sol",
+      "spelling": "1e-",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Invalid exponent."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S16",
+      "mode": "sol",
+      "spelling": "1__2",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "SyntaxError",
+          "code": "2990",
+          "message": "Invalid use of underscores in number literal. Only one consecutive underscore between digits is allowed."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S17",
+      "mode": "sol",
+      "spelling": "1_",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "SyntaxError",
+          "code": "2090",
+          "message": "Invalid use of underscores in number literal. No trailing underscores allowed."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S18",
+      "mode": "sol",
+      "spelling": "_1",
+      "lexical_acceptance": true,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "DeclarationError",
+          "code": "7576",
+          "message": "Undeclared identifier."
+        }
+      ],
+      "stage_difference": "The fragment is an identifier; the compiler rejects an undeclared name."
+    },
+    {
+      "id": "S19",
+      "mode": "sol",
+      "spelling": "0x",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Hexadecimal digit missing or invalid."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S20",
+      "mode": "sol",
+      "spelling": "0X1",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Identifier-start is not allowed at end of a number."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S21",
+      "mode": "sol",
+      "spelling": "0x1_2",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "hex",
+        "flag": false,
+        "digits": [
+          1,
+          2
+        ]
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 18,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 18,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S22",
+      "mode": "sol",
+      "spelling": "0x_1",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Hexadecimal digit missing or invalid."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S23",
+      "mode": "sol",
+      "spelling": "0x1__2",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "SyntaxError",
+          "code": "2990",
+          "message": "Invalid use of underscores in number literal. Only one consecutive underscore between digits is allowed."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S24",
+      "mode": "sol",
+      "spelling": "0x1_",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "SyntaxError",
+          "code": "2090",
+          "message": "Invalid use of underscores in number literal. No trailing underscores allowed."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S25",
+      "mode": "sol",
+      "spelling": "0xAb",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "hex",
+        "flag": false,
+        "digits": [
+          10,
+          11
+        ]
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 171,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 171,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S26",
+      "mode": "sol",
+      "spelling": "0x0000000000000000000000000000000000000000",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "hex",
+        "flag": true,
+        "digits": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 0,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 0,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S27",
+      "mode": "sol",
+      "spelling": "1wei",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Identifier-start is not allowed at end of a number."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S28",
+      "mode": "sol",
+      "spelling": "1 wei",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S29",
+      "mode": "sol",
+      "spelling": "1/*x*/wei",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S30",
+      "mode": "sol",
+      "spelling": "1uint8",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "8936",
+          "message": "Identifier-start is not allowed at end of a number."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S31",
+      "mode": "sol",
+      "spelling": "1 uint8",
+      "lexical_acceptance": true,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 1,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "2314",
+          "message": "Expected ';' but got 'uint8'"
+        }
+      ],
+      "stage_difference": "The number and elementary type are separately lexed; the compiler rejects the expression context."
+    },
+    {
+      "id": "Y00",
+      "mode": "yul",
+      "spelling": "0",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": null,
+      "raw_yul": {
+        "value": 0,
+        "tag": "dec"
+      },
+      "lean_values": [
+        {
+          "numerator": 0,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 0,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "Y01",
+      "mode": "yul",
+      "spelling": "01",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Octal numbers not allowed."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "Y02",
+      "mode": "yul",
+      "spelling": "1_2",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "4828",
+          "message": "Invalid number literal."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "Y03",
+      "mode": "yul",
+      "spelling": "0x12",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": null,
+      "raw_yul": {
+        "value": 18,
+        "tag": "hex"
+      },
+      "lean_values": [
+        {
+          "numerator": 18,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 18,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "Y04",
+      "mode": "yul",
+      "spelling": "0x1_2",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "4828",
+          "message": "Invalid number literal."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "Y05",
+      "mode": "yul",
+      "spelling": "0x",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "1465",
+          "message": "Illegal token: Hexadecimal digit missing or invalid."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "Y06",
+      "mode": "yul",
+      "spelling": ".1",
+      "lexical_acceptance": true,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "4828",
+          "message": "Invalid number literal."
+        }
+      ],
+      "stage_difference": "The Yul fragment tokenizes as period plus integer; raw yulNumber refuses .1 and the compiler rejects it."
+    },
+    {
+      "id": "Y07",
+      "mode": "yul",
+      "spelling": "1e2",
+      "lexical_acceptance": false,
+      "compiler_acceptance": false,
+      "raw_numeric": null,
+      "raw_yul": null,
+      "lean_values": [],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "ParserError",
+          "code": "4828",
+          "message": "Invalid number literal."
+        }
+      ],
+      "stage_difference": null
+    },
+    {
+      "id": "S32",
+      "mode": "sol",
+      "spelling": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "lexical_acceptance": true,
+      "compiler_acceptance": true,
+      "raw_numeric": {
+        "tag": "hex",
+        "flag": true,
+        "digits": [
+          5,
+          10,
+          10,
+          14,
+          11,
+          6,
+          0,
+          5,
+          3,
+          15,
+          3,
+          14,
+          9,
+          4,
+          12,
+          9,
+          11,
+          9,
+          10,
+          0,
+          9,
+          15,
+          3,
+          3,
+          6,
+          6,
+          9,
+          4,
+          3,
+          5,
+          14,
+          7,
+          14,
+          15,
+          1,
+          11,
+          14,
+          10,
+          14,
+          13
+        ]
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 517705355260207604495801938720638392742277016301,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [
+        {
+          "numerator": 517705355260207604495801938720638392742277016301,
+          "denominator": 1
+        }
+      ],
+      "compiler_errors": [],
+      "stage_difference": null
+    },
+    {
+      "id": "S33",
+      "mode": "sol",
+      "spelling": "0x5aaeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "lexical_acceptance": true,
+      "compiler_acceptance": false,
+      "raw_numeric": {
+        "tag": "hex",
+        "flag": false,
+        "digits": [
+          5,
+          10,
+          10,
+          14,
+          11,
+          6,
+          0,
+          5,
+          3,
+          15,
+          3,
+          14,
+          9,
+          4,
+          12,
+          9,
+          11,
+          9,
+          10,
+          0,
+          9,
+          15,
+          3,
+          3,
+          6,
+          6,
+          9,
+          4,
+          3,
+          5,
+          14,
+          7,
+          14,
+          15,
+          1,
+          11,
+          14,
+          10,
+          14,
+          13
+        ]
+      },
+      "raw_yul": null,
+      "lean_values": [
+        {
+          "numerator": 517705355260207604495801938720638392742277016301,
+          "denominator": 1
+        }
+      ],
+      "compiler_values": [],
+      "compiler_errors": [
+        {
+          "type": "SyntaxError",
+          "code": "9429",
+          "message": "This looks like an address but has an invalid checksum. Correct checksummed address: \"0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed\". If this is not used as an address, please prepend '00'. For more information please see https://docs.soliditylang.org/en/develop/types.html#address-literals"
+        }
+      ],
+      "stage_difference": "The hex token retains a false deterministic checksum flag; the compiler diagnoses its checksum."
+    }
+  ]
+}

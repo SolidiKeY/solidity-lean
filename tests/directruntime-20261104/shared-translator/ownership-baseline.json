@@ -1,0 +1,53 @@
+{
+  "commit": "e286f18439c92701e20b109bf3059f9651348401",
+  "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "authority": "H82b authenticated translator scope and H90 reader extension; explicit published-master adoption",
+  "publication": "Immutable published master e286f18439c92701e20b109bf3059f9651348401 adopted before candidate archive-label clarification. Scope allowlists and all prior lane work preserved.",
+  "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref.",
+  "exclusiveFiles": [
+    "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
+    "Solidity/Frontend/ExecutableAst/ControlTuple/AdmissionControls.lean",
+    "Solidity/Frontend/ExecutableAst/ControlTuple/IntrinsicControls.lean",
+    "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
+    "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+    "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+    "Solidity/Frontend/ExecutableAst/Shared/Scope.lean",
+    "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+    "Solidity/Source/Agreement/BoolSlotAndControls.lean",
+    "Solidity/Source/Agreement/BoolSlotConditionalControls.lean",
+    "Solidity/Source/Agreement/BoolSlotControls.lean",
+    "Solidity/Source/Agreement/BoolSlotNotControls.lean",
+    "Solidity/Source/Agreement/BoolSlotOrControls.lean",
+    "Solidity/Source/Agreement/BoolSlotReadControls.lean",
+    "Solidity/Source/Agreement/BoolSlotRepeatedControls.lean",
+    "Solidity/Source/Agreement/BoolSlotSavedControls.lean",
+    "Solidity/Source/Agreement/BoolSlotToggleControls.lean",
+    "Solidity/Source/Agreement/NormalBoolAssignControls.lean",
+    "Solidity/Source/Agreement/NormalBoolControls.lean",
+    "Solidity/Source/Agreement/NormalControls.lean",
+    "Solidity/Source/Agreement/NormalDefaultControls.lean",
+    "Solidity/Source/Agreement/PrimitiveCopySequenceControls.lean",
+    "Solidity/Source/Agreement/PrimitiveSavedAssignControls.lean",
+    "Solidity/Source/Agreement/PrimitiveSlotAssignControls.lean",
+    "Solidity/Source/Agreement/PrimitiveSlotControls.lean",
+    "Solidity/Source/Agreement/PrimitiveSlotReverseControls.lean",
+    "Solidity/Tools/DirectRuntime.lean"
+  ],
+  "newFileScopes": [
+    "docs/feature-work/directruntime-control-tuples.md",
+    "docs/feature-work/directruntime-shared-translator.md",
+    "docs/feature-work/h62-1-binding-fixtures.md",
+    "scripts/h62/item1/binding-fixtures/**",
+    "tests/directruntime-20261104/control-tuples/**",
+    "tests/directruntime-20261104/shared-translator/**",
+    "tests/h62/item1/binding-fixtures/**"
+  ],
+  "publishedAncestor": "e286f18439c92701e20b109bf3059f9651348401",
+  "preservedInheritedWork": [
+    {
+      "commit": "636fc9880a8480a921abc7a328efc85222394981",
+      "path": "docs/README.md",
+      "boundary": "Present before this proof work; preserved, not authored or modified by this increment."
+    }
+  ]
+}

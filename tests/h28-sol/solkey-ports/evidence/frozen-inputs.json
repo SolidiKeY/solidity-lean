@@ -1,0 +1,7 @@
+{
+  "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+  "Solidity/Calculus/KeyTaclets.lean": "45c00a01e81f9bcba148cb2702c11ade936d324888ccff3c18dd7145641221e2",
+  "docs/lean-key-rule-map.md": "0b3874517d8fa339668159207cb2e33a242757f2701ad955916b3d44082dab5e",
+  "docs/solkey-migration.md": "e7790d197946848b8bf128668abc6718b85b582f345ef68bc9e3df628c477ccd",
+  "tests/migration/solkey.pin.json": "ded1d0661919b11930e38048a876962423631c09b0f0167cb110c3b5de388f3f"
+}

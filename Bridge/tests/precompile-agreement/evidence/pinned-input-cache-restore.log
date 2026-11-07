@@ -1,0 +1,177 @@
+✖ [340/606] Building Batteries.Data.RBMap.Basic
+error: target is out-of-date and needs to be rebuilt
+✔ [882/893] Fetched EvmYul.UInt256
+✔ [917/1043] Fetched EvmYul.FFI.ffi
+✔ [918/1043] Fetched EvmYul.Wheels
+✔ [920/1043] Fetched EvmYul.PerformIO
+✔ [921/1043] Fetched EvmYul.State.TrieRoot
+✔ [922/1043] Fetched EvmYul.SpongeHash.Keccak256
+✖ [924/1043] Building Batteries.Classes.Cast
+error: target is out-of-date and needs to be rebuilt
+✖ [925/1043] Building Batteries.Classes.Deprecated
+error: target is out-of-date and needs to be rebuilt
+✖ [926/1043] Building Batteries.Control.ForInStep
+error: target is out-of-date and needs to be rebuilt
+✖ [927/1043] Building Batteries.Control.Monad
+error: target is out-of-date and needs to be rebuilt
+✖ [928/1043] Building Batteries.Data.Array.Init.Lemmas
+error: target is out-of-date and needs to be rebuilt
+✖ [929/1043] Building Batteries.Data.Array.Lemmas
+error: target is out-of-date and needs to be rebuilt
+✖ [930/1043] Building Batteries.Data.Array.Monadic
+error: target is out-of-date and needs to be rebuilt
+✖ [931/1043] Building Batteries.Data.Array.Pairwise
+error: target is out-of-date and needs to be rebuilt
+✖ [933/1043] Building Batteries.Data.AssocList
+error: target is out-of-date and needs to be rebuilt
+✖ [934/1043] Building Batteries.Data.BinaryHeap
+error: target is out-of-date and needs to be rebuilt
+✖ [935/1043] Building Batteries.Data.BinomialHeap.Lemmas
+error: target is out-of-date and needs to be rebuilt
+✖ [937/1043] Building Batteries.Data.BitVec.Basic
+error: target is out-of-date and needs to be rebuilt
+✖ [938/1043] Building Batteries.Data.Fin.OfBits
+error: target is out-of-date and needs to be rebuilt
+✖ [939/1043] Building Batteries.Data.Int
+error: target is out-of-date and needs to be rebuilt
+✖ [942/1043] Building Batteries.Data.ByteArray
+error: target is out-of-date and needs to be rebuilt
+✖ [943/1043] Building Batteries.Data.ByteSlice
+error: target is out-of-date and needs to be rebuilt
+✖ [944/1043] Building Batteries.Data.Char.Basic
+error: target is out-of-date and needs to be rebuilt
+✖ [947/1043] Building Batteries.Data.DList.Basic
+error: target is out-of-date and needs to be rebuilt
+✖ [950/1043] Building Batteries.Data.Fin.Fold
+error: target is out-of-date and needs to be rebuilt
+✖ [951/1043] Building Batteries.Data.Fin.Lemmas
+error: target is out-of-date and needs to be rebuilt
+✖ [953/1043] Building Batteries.Data.FloatArray
+error: target is out-of-date and needs to be rebuilt
+✖ [954/1043] Building Batteries.Lean.HashMap
+error: target is out-of-date and needs to be rebuilt
+✖ [957/1043] Building Batteries.Data.MLList.Heartbeats
+error: target is out-of-date and needs to be rebuilt
+✖ [958/1043] Building Batteries.Lean.System.IO
+error: target is out-of-date and needs to be rebuilt
+✖ [961/1043] Building Batteries.Data.NameSet
+error: target is out-of-date and needs to be rebuilt
+✖ [962/1043] Building Batteries.Data.Nat.Bisect
+error: target is out-of-date and needs to be rebuilt
+✖ [963/1043] Building Batteries.Data.Nat.Digits
+error: target is out-of-date and needs to be rebuilt
+✖ [964/1043] Building Batteries.Data.Nat.Gcd
+error: target is out-of-date and needs to be rebuilt
+✖ [966/1043] Building Batteries.Data.PairingHeap
+error: target is out-of-date and needs to be rebuilt
+✖ [967/1043] Building Batteries.Data.Random.MersenneTwister
+error: target is out-of-date and needs to be rebuilt
+✖ [969/1043] Building Batteries.Data.Range.Lemmas
+error: target is out-of-date and needs to be rebuilt
+✖ [971/1043] Building Batteries.Lean.Float
+error: target is out-of-date and needs to be rebuilt
+✖ [974/1043] Building Batteries.Data.Stream
+error: target is out-of-date and needs to be rebuilt
+✖ [976/1043] Building Batteries.Data.String.Lemmas
+error: target is out-of-date and needs to be rebuilt
+✖ [979/1043] Building Batteries.Data.UInt
+error: target is out-of-date and needs to be rebuilt
+✖ [980/1043] Building Batteries.Util.Panic
+error: target is out-of-date and needs to be rebuilt
+✖ [984/1043] Building Batteries.Data.Vector.Basic
+error: target is out-of-date and needs to be rebuilt
+✖ [985/1043] Building Batteries.Data.Vector.Lemmas
+error: target is out-of-date and needs to be rebuilt
+✖ [988/1043] Building Batteries.Lean.IO.Process
+error: target is out-of-date and needs to be rebuilt
+✖ [990/1043] Building Batteries.Lean.LawfulMonad
+error: target is out-of-date and needs to be rebuilt
+✖ [991/1043] Building Batteries.Lean.LawfulMonadLift
+error: target is out-of-date and needs to be rebuilt
+✖ [992/1043] Building Batteries.Lean.Meta.Simp
+error: target is out-of-date and needs to be rebuilt
+✖ [994/1043] Building Batteries.Lean.Util.EnvSearch
+error: target is out-of-date and needs to be rebuilt
+✖ [995/1043] Building Batteries.Tactic.Instances
+error: target is out-of-date and needs to be rebuilt
+✖ [996/1043] Building Batteries.Tactic.Lemma
+error: target is out-of-date and needs to be rebuilt
+✖ [997/1043] Building Batteries.Tactic.NoMatch
+error: target is out-of-date and needs to be rebuilt
+✖ [998/1043] Building Batteries.Tactic.PrintDependents
+error: target is out-of-date and needs to be rebuilt
+✖ [999/1043] Building Batteries.Tactic.PrintOpaques
+error: target is out-of-date and needs to be rebuilt
+✖ [1001/1043] Building Batteries.Tactic.ShowUnused
+error: target is out-of-date and needs to be rebuilt
+✖ [1002/1043] Building Batteries.Tactic.SqueezeScope
+error: target is out-of-date and needs to be rebuilt
+✖ [1003/1043] Building Batteries.Util.Pickle
+error: target is out-of-date and needs to be rebuilt
+✔ [1015/1043] Fetched EvmYul.State.BlockHeader
+✔ [1029/1043] Fetched Solidity.Roadmap.Evm
+✔ [1031/1043] Fetched Solidity.Precompiles.Field
+✔ [1033/1043] Fetched Solidity.Secp256k1
+✔ [1034/1043] Fetched Solidity.Precompiles.Basic
+✔ [1035/1043] Fetched Solidity.Precompiles.Modexp
+✔ [1036/1043] Fetched Solidity.Precompiles.Pairing
+✔ [1037/1043] Fetched Solidity.Precompiles.Bn254
+✔ [1038/1043] Fetched Solidity.Precompiles.Blake2f
+✔ [1039/1043] Fetched Solidity.Precompiles.P256
+✔ [1040/1043] Fetched Solidity.Precompiles.Bls12381Iso
+✔ [1041/1043] Fetched Solidity.Precompiles.Bls12381
+✔ [1042/1043] Fetched Solidity.Precompiles.PointEval
+✔ [1043/1043] Fetched Solidity.Precompiles.Osaka
+Some required targets logged failures:
+- Batteries.Data.RBMap.Basic
+- Batteries.Classes.Cast
+- Batteries.Classes.Deprecated
+- Batteries.Control.ForInStep
+- Batteries.Control.Monad
+- Batteries.Data.Array.Init.Lemmas
+- Batteries.Data.Array.Lemmas
+- Batteries.Data.Array.Monadic
+- Batteries.Data.Array.Pairwise
+- Batteries.Data.AssocList
+- Batteries.Data.BinaryHeap
+- Batteries.Data.BinomialHeap.Lemmas
+- Batteries.Data.BitVec.Basic
+- Batteries.Data.Fin.OfBits
+- Batteries.Data.Int
+- Batteries.Data.ByteArray
+- Batteries.Data.ByteSlice
+- Batteries.Data.Char.Basic
+- Batteries.Data.DList.Basic
+- Batteries.Data.Fin.Fold
+- Batteries.Data.Fin.Lemmas
+- Batteries.Data.FloatArray
+- Batteries.Lean.HashMap
+- Batteries.Data.MLList.Heartbeats
+- Batteries.Lean.System.IO
+- Batteries.Data.NameSet
+- Batteries.Data.Nat.Bisect
+- Batteries.Data.Nat.Digits
+- Batteries.Data.Nat.Gcd
+- Batteries.Data.PairingHeap
+- Batteries.Data.Random.MersenneTwister
+- Batteries.Data.Range.Lemmas
+- Batteries.Lean.Float
+- Batteries.Data.Stream
+- Batteries.Data.String.Lemmas
+- Batteries.Data.UInt
+- Batteries.Util.Panic
+- Batteries.Data.Vector.Basic
+- Batteries.Data.Vector.Lemmas
+- Batteries.Lean.IO.Process
+- Batteries.Lean.LawfulMonad
+- Batteries.Lean.LawfulMonadLift
+- Batteries.Lean.Meta.Simp
+- Batteries.Lean.Util.EnvSearch
+- Batteries.Tactic.Instances
+- Batteries.Tactic.Lemma
+- Batteries.Tactic.NoMatch
+- Batteries.Tactic.PrintDependents
+- Batteries.Tactic.PrintOpaques
+- Batteries.Tactic.ShowUnused
+- Batteries.Tactic.SqueezeScope
+- Batteries.Util.Pickle

@@ -1,0 +1,38 @@
+/-! Lane FU2-A: several returns with memory ones in the call frame
+(`RetBinders`), the call rules' soundness over them, and the runs. -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.RetBinders.enterT_lift,
+    ``Solidity.RetBinders.runSt_declsThen,
+    ``Solidity.Stmt.runSt_callRets,
+    ``Solidity.Premise.sound_callRets,
+    ``Solidity.Premise.sound_callCaptureRets,
+    ``Solidity.ExecS.callRets_inline,
+    ``Solidity.holdsC_callRets,
+    ``Solidity.holds_callRets,
+    ``Solidity.holds_callContract,
+    ``Solidity.FunContract.forall_rets,
+    ``Solidity.FunContractC.forall_rets,
+    ``Solidity.holdsC_callRecContract,
+    ``Solidity.Stmt.sound,
+    ``Solidity.Examples.Tactics.MemoryReturns.splitAssign_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.bothAlias_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.untouchedDefault_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.omitted_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.falseObservation_panics,
+    ``Solidity.Examples.Tactics.MemoryReturns.narrowAssign_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.untouched_proved,
+    ``Solidity.Examples.Tactics.MemoryReturns.split_proved,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueSplit_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueTernaryT_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueTernaryF_run,
+    ``Solidity.Examples.Tactics.MemoryReturns.valueAlias_run]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} lane FU2-A frame theorems use only the standard axioms"
+

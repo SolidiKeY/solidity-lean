@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/TargetCopyRead.lean:Solidity.Backend.StorageOps.TargetCopyRead.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyRead.lean:Solidity.Backend.StorageOps.TargetCopyRead.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyRead.lean:Solidity.Backend.StorageOps.TargetCopyRead.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyRead.lean:Solidity.Backend.StorageOps.TargetCopyRead.run_failed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

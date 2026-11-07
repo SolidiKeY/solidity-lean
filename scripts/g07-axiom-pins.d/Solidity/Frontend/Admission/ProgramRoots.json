@@ -1,0 +1,17 @@
+{
+ "Solidity/Frontend/Admission/ProgramRoots.lean:Solidity.Frontend.Admission.programRoots_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramRoots.lean:Solidity.Frontend.Admission.programRoots_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/ProgramRoots.lean:Solidity.Frontend.Admission.root_admission_equivalence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

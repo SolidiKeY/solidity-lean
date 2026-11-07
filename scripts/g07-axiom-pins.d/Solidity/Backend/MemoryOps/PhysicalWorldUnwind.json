@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.reason_live_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.source_mark": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.source_reason_world_unwind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.source_rollback_to": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.world_reason_restored_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.world_reason_saved_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.world_reason_unwind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

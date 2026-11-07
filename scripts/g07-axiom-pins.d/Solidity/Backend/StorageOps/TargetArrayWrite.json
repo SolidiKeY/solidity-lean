@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/TargetArrayWrite.lean:Solidity.Backend.StorageOps.TargetArrayWrite.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayWrite.lean:Solidity.Backend.StorageOps.TargetArrayWrite.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayWrite.lean:Solidity.Backend.StorageOps.TargetArrayWrite.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayWrite.lean:Solidity.Backend.StorageOps.TargetArrayWrite.header_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayWrite.lean:Solidity.Backend.StorageOps.TargetArrayWrite.location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayWrite.lean:Solidity.Backend.StorageOps.TargetArrayWrite.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayWrite.lean:Solidity.Backend.StorageOps.TargetArrayWrite.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

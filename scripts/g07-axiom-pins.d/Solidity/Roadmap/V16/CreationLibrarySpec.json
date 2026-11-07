@@ -1,0 +1,27 @@
+{
+ "Solidity/Roadmap/V16/CreationLibrarySpec.lean:Solidity.Roadmap.V16.CreationLibrarySpec.actual_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationLibrarySpec.lean:Solidity.Roadmap.V16.CreationLibrarySpec.complete_spec_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationLibrarySpec.lean:Solidity.Roadmap.V16.CreationLibrarySpec.distinguishing_post": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationLibrarySpec.lean:Solidity.Roadmap.V16.CreationLibrarySpec.referenced_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/CreationLibrarySpec.lean:Solidity.Roadmap.V16.CreationLibrarySpec.unused_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/StorageOps/NestedRootComposition.lean:Solidity.Backend.StorageOps.NestedRootComposition.live_root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedRootComposition.lean:Solidity.Backend.StorageOps.NestedRootComposition.retained_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedRootComposition.lean:Solidity.Backend.StorageOps.NestedRootComposition.root_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedRootComposition.lean:Solidity.Backend.StorageOps.NestedRootComposition.rootQueries": []
+}

@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/TargetPrimitivePop.lean:Solidity.Backend.StorageOps.TargetPrimitivePop.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePop.lean:Solidity.Backend.StorageOps.TargetPrimitivePop.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePop.lean:Solidity.Backend.StorageOps.TargetPrimitivePop.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePop.lean:Solidity.Backend.StorageOps.TargetPrimitivePop.run_clear": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePop.lean:Solidity.Backend.StorageOps.TargetPrimitivePop.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePop.lean:Solidity.Backend.StorageOps.TargetPrimitivePop.run_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePop.lean:Solidity.Backend.StorageOps.TargetPrimitivePop.write_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

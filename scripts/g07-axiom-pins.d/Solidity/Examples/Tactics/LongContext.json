@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/Tactics/LongContext.lean:Solidity.Examples.Tactics.LongContext.falseLengthRefuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/MemoryOps/SliceBounds.lean:Solidity.Backend.MemoryOps.SliceBounds.compose": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceBounds.lean:Solidity.Backend.MemoryOps.SliceBounds.index": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceBounds.lean:Solidity.Backend.MemoryOps.sliceElems_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SliceBounds.lean:Solidity.Backend.MemoryOps.sliceElems_read": [
+  "Quot.sound",
+  "propext"
+ ]
+}

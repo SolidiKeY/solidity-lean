@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/LoopLawsControls.lean:Solidity.Backend.StorageOps.LoopLawsControls.ordered_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LoopLawsControls.lean:Solidity.Backend.StorageOps.LoopLawsControls.single_loop_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

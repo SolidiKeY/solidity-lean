@@ -1,0 +1,40 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.byte_mstore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.cell_write_other": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.cell_write_same": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.readMemory_congr": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.readMemory_write_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.word_bytes_length": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.word_mstore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.mstore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWordFrame.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.write": [
+  "Quot.sound",
+  "propext"
+ ]
+}

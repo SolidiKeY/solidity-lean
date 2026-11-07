@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZeroControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZeroControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZeroControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.no_allocator": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZeroControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZeroControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterZero.Controls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

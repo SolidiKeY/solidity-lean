@@ -1,0 +1,192 @@
+{
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.compilation_triple_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.compilation_triple_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.compilation_triple_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.memory_third_budgeted_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.memory_triple_resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.triple_source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.allocating_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.capture_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.ordered_results": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.source_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.stale_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleAllocation.stale_new": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.capture_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.corruption": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.first_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.fresh_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.initial_repr7": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.observe_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.ordered_results": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.prefix_input7": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.second_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.shared_resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleControls.stale_map": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleFailures.first_short_circuit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleFailures.first_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleFailures.joined_sources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleFailures.ordered_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleFailures.second_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleFailures.third_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleFailures.third_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleSuffix.last_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleSuffix.last_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleSuffix.ordered_results": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleSuffix.resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TriplePins.lean:Solidity.Backend.Passes.TripleSuffix.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

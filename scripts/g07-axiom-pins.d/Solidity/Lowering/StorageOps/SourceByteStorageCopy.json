@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopy.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopy.load_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopy.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopy.store_bytes_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

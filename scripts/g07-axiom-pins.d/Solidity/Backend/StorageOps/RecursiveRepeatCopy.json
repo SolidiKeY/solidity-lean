@@ -1,0 +1,10 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopy.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopy.slot_repeat": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopy.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopy.value_repeat": [
+  "Quot.sound",
+  "propext"
+ ]
+}

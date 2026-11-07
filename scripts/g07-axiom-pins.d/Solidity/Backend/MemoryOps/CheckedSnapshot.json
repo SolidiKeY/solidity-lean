@@ -1,0 +1,36 @@
+{
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.captureOverwrite_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_none_keeps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CheckedSnapshot.lean:Solidity.Backend.MemoryOps.checkedCaptureOverwrite_some_iff": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.BoolChildRepr.schedule_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.captureOrigin_append": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.captureOrigin_in_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.captureOrigin_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.checkedCapture_origin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.runCaptures_heap_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.runCaptures_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.runCaptures_target_restore_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SnapshotProvenance.lean:Solidity.Backend.MemoryOps.snapshotOrigin_in_bounds": [
+  "Quot.sound",
+  "propext"
+ ]
+}

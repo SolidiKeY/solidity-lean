@@ -1,0 +1,11 @@
+ERROR 110:40 Tactic `assumption` failed
+
+b✝ : UInt8
+r✝ : List UInt8
+h✝ : (isHexDigit b✝ && !r✝.isEmpty) = true
+ih1✝ : ∀ (ds : Bytes), hexDigits r✝ = some ds → HexDigits r✝ ds
+out : List UInt8
+hout : hexDigits r✝ = some out
+⊢ isHexDigit b✝ = true
+ERROR 110:56 failed
+diag: 2 errors

@@ -1,0 +1,26 @@
+{
+ "Solidity/Yul/Compilation/TraceFrameCapacity.lean:Solidity.Yul.Compilation.TraceFrameCapacity.capacity_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacity.lean:Solidity.Yul.Compilation.TraceFrameCapacity.expression": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacity.lean:Solidity.Yul.Compilation.TraceFrameCapacity.frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacity.lean:Solidity.Yul.Compilation.TraceFrameCapacity.frame?": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacity.lean:Solidity.Yul.Compilation.TraceFrameCapacity.peak_spec": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/TraceFrameCapacity.lean:Solidity.Yul.Compilation.TraceFrameCapacity.statement": [
+  "Quot.sound",
+  "propext"
+ ]
+}

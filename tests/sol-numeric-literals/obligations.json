@@ -1,0 +1,67 @@
+[
+  {
+    "id": "inventory",
+    "status": "done"
+  },
+  {
+    "id": "scanner-correspondence",
+    "status": "done"
+  },
+  {
+    "id": "erasure-and-values",
+    "status": "done"
+  },
+  {
+    "id": "token-classification",
+    "status": "done"
+  },
+  {
+    "id": "refusal-families",
+    "status": "done"
+  },
+  {
+    "id": "backfill",
+    "status": "done"
+  },
+  {
+    "id": "constructor-controls",
+    "status": "done"
+  },
+  {
+    "id": "compiler-fixtures",
+    "status": "done"
+  },
+  {
+    "id": "trust-inventory",
+    "status": "done",
+    "evidence": "Archived VM-reported inventory: 991 kernel signatures and 808 theorem axiom sets match exact pins when required evidence is supplied. Owned builds are matching-cache replays, not fresh evidence generation."
+  },
+  {
+    "id": "independent-reviews",
+    "status": "done"
+  },
+  {
+    "id": "target-import-closure",
+    "status": "done",
+    "evidence": "h55-owned-build: all42 Numeric modules in49 cached jobs pass; Constants5 modules in133 cached jobs pass separately; Lean-j1/resources/source pins checked."
+  },
+  {
+    "id": "static-gates",
+    "status": "blocked",
+    "evidence": "4095 roots complete and KeySort0errors;34 joint module-map rows (33Numeric+1Constants) remain proposed, not applied; final shared gates remain open."
+  },
+  {
+    "id": "coordinator-registration",
+    "status": "blocked",
+    "evidence": "All42Numeric root imports present. Exact33Numeric missing map rows included with Constants.Controls in tracked tests/sol-numeric-literals/registration.module-map.patch; expanded Constants proposal is VM-only H44 payload data; coordinator-only application."
+  },
+  {
+    "id": "full-runtime-gate",
+    "status": "blocked"
+  },
+  {
+    "id": "immutable-handoff",
+    "status": "pending",
+    "evidence": "This unaffected checkpoint receives a sealed handoff; final original assignment handoff still requires registration/final runtime gates. Old seals/cache packs preserved."
+  }
+]

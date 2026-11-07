@@ -1,0 +1,54 @@
+{
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.actual_unmasked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.corrupted_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.different_pipelines": [],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.short_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.source_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.stale_rhs_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.Controls.unmasked_differs": [],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean:Solidity.Backend.Passes.AssignmentMultiplicationPass.reached_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

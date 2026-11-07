@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/SourceRhsAssignment.lean:Solidity.Backend.MemoryOps.rhs_assign_late_bounds_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRhsAssignment.lean:Solidity.Backend.MemoryOps.rhs_assign_success_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRhsAssignment.lean:Solidity.Backend.MemoryOps.source_assign_rhs_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRhsAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.assign_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

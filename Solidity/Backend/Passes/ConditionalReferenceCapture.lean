@@ -13,16 +13,23 @@ def program (name : Var) (condition : Val C Γ .bool)
   .cons (.ite condition (arm dst yes hm) (arm dst no hm))
     (.cons (.declMem R name (some (.alias (.var dst hm))) rfl hm) .nil)
 def branchFrag (F : Frag Γ) : Frag Γ := (F.restrict Γ).meet (F.restrict Γ)
-def compiled {b : Nat} {F : Frag Γ} (name : Var) (condition : Val C Γ .bool)
+def compiledProgram {b : Nat} {F : Frag Γ} (name : Var) (condition : Val C Γ .bool)
     (cc : CompiledVal b F condition) (dst yes no : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) :
-    Compilation b F (program (C := C) name condition dst yes no hm) :=
-  .memory ⟨(branchFrag F).push (.mem R) .ok,
+    CompiledProg b F (program (C := C) name condition dst yes no hm) :=
+  ⟨(branchFrag F).push (.mem R) .ok,
     conditionalCode cc.code (aliasLocalCode b dst yes ++ []) (aliasLocalCode b dst no ++ []) ++
       (declareAliasCode b dst ++ []),
     .cons (.ite condition (arm dst yes hm) (arm dst no hm) _ _ _ cc.cert
       (.cons (.rebind F dst yes hm) (.nil _)) (.cons (.rebind F dst no hm) (.nil _)))
       (.cons (.declareAlias _ name dst hm) (.nil _))⟩
+
+
+def compiled {b : Nat} {F : Frag Γ} (name : Var) (condition : Val C Γ .bool)
+    (cc : CompiledVal b F condition) (dst yes no : Idx Γ (.mem R))
+    (hm : (Ty.ref R).mapFree = true) :
+    Compilation b F (program (C := C) name condition dst yes no hm) :=
+  .memory (compiledProgram name condition cc dst yes no hm)
 
 theorem source (name : Var) (condition : Val C Γ .bool)
     (dst yes no : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
@@ -112,3 +119,10 @@ end Solidity.Backend.Passes.ConditionalReferenceCapture
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Backend.Passes.ConditionalReferenceCapture.execution
+
+/-- info: 'Solidity.Backend.Passes.ConditionalReferenceCapture.compiledProgram' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.Passes.ConditionalReferenceCapture.compiledProgram
+/-- info: 'Solidity.Backend.Passes.ConditionalReferenceCapture.compiled' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.Passes.ConditionalReferenceCapture.compiled

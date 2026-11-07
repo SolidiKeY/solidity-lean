@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/StaticStorageTransport.lean:Solidity.ExecS.static_tryOk_storage_only": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

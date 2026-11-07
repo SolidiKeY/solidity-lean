@@ -54,7 +54,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (returns : List Solidity
         have sub : (Solidity.Source.EM.sub (Γ := []) locals
           (Solidity.Source.evalE glob frame fuel condition)).run (Solidity.Source.L0 env,world) =
           (.error halt,(Solidity.Source.L0 env,nextWorld)) := by
-          have actualRun : Solidity.Source.evalE glob frame fuel condition (locals,world) =
+          have actualRun : Solidity.Source.evalE (plan := none) glob frame fuel condition (locals,world) =
             (.error halt,(nextLocals,nextWorld)) := actual
           simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
         simp only [Solidity.Yul.LocalBoolIfElse.run,expression,Solidity.Yul.LocalBoolItems.project]
@@ -69,7 +69,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (returns : List Solidity
             have sub : (Solidity.Source.EM.sub (Γ := []) locals
               (Solidity.Source.evalE glob frame fuel condition)).run (Solidity.Source.L0 env,world) =
               (.ok (.val (.bool value),nextLocals),(Solidity.Source.L0 env,nextWorld)) := by
-              have actualRun : Solidity.Source.evalE glob frame fuel condition (locals,world) =
+              have actualRun : Solidity.Source.evalE (plan := none) glob frame fuel condition (locals,world) =
                 (.ok (.val (.bool value)),(nextLocals,nextWorld)) := actual
               simp only [Solidity.Source.EM.sub,ExceptT.run,ExceptT.mk,actualRun]
             cases value with
@@ -105,7 +105,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (returns : List Solidity
                   simp only [Solidity.Yul.LocalBoolItems.project,decoded,Option.map_some]
                   rw [Solidity.Source.Hoare.run_bind,child]
                   dsimp only []
-                  rw [Solidity.Source.Out.close,Solidity.Yul.LocalBoolIf.restore_self] <;> rfl
+                  rw [Solidity.Source.Out.close,Solidity.Yul.RawSequence.restore_self] <;> rfl
             | true =>
               simp only [Solidity.Yul.LocalBoolIfElse.run,expression,Solidity.Yul.LocalBoolControl.truth_clean]
               rw [Solidity.Source.execS,Solidity.Source.Hoare.run_bind,sub]
@@ -138,7 +138,7 @@ theorem source_agrees : ∀ (env : Solidity.Source.Env) (returns : List Solidity
                   simp only [Solidity.Yul.LocalBoolItems.project,decoded,Option.map_some]
                   rw [Solidity.Source.Hoare.run_bind,child]
                   dsimp only []
-                  rw [Solidity.Source.Out.close,Solidity.Yul.LocalBoolIf.restore_self] <;> rfl
+                  rw [Solidity.Source.Out.close,Solidity.Yul.RawSequence.restore_self] <;> rfl
           | memRef impossible _ => cases impossible
           | storRef impossible _ => cases impossible
           | cdRef impossible _ => cases impossible

@@ -1,0 +1,68 @@
+{
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.sequence_outside_frame": [
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.source_length_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.source_word_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.transport_exists": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.transport_extend": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.transport_patch_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.transport_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.transport_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.TransportControls.colliding_observations_rejected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.TransportControls.failure_presence_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.TransportControls.source_length_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.TransportControls.source_save_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.TransportControls.source_word_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/TransportControls.lean:Solidity.Storage.Representation.TransportControls.unbounded_offsets_rejected": [
+  "Quot.sound",
+  "propext"
+ ]
+}

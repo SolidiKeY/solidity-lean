@@ -1,0 +1,21 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFrames.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFrames.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.represented_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFrames.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.represented_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotFrames.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotFrames.symbolic_outside": [
+  "Quot.sound",
+  "propext"
+ ]
+}

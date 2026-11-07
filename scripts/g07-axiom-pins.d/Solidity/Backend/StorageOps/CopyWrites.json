@@ -1,0 +1,53 @@
+{
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.generated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.numeric_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.numericCopy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.outside_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.prefixWrites": [],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.query_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.queryWrites": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.slot_query_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.slotWrites": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.updates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyWrites.lean:Solidity.Backend.StorageOps.CopyWrites.zeros": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

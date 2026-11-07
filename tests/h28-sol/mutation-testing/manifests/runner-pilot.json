@@ -1,0 +1,234 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "Runner pilot only. Not exhaustive nine-family coverage or assignment acceptance.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.draft.json",
+  "inventory_sha256": "0006d4d8945b6fc2e6d06c822a6c9a66823ebacc9a2de1174bcd70e863dd0a12",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/cache-bootstrap/manifest.json",
+  "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec",
+  "cache_root": "/workspace/h28-runtime/prepared-base-6f3eedf0",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "guard.require-success-false",
+      "kind": "mutant",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = false",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.lean",
+      "oracle_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "witness_sha256": "521891721ea8598866a1932044ec7e7ff41809197aa0585f30bd80cb9f840d40",
+      "oracle_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "witness_declarations": [
+        "H28.GuardTruePolarityKill.source_link",
+        "H28.GuardTruePolarityKill.input_inhabited",
+        "H28.GuardTruePolarityKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle_signature_sha256": {
+        "H28.GuardBaseline.source_link": "2a65b102ddc355819a7e3be5f255f5a0078d545bd0e8afa426b88041fff90d27",
+        "H28.GuardBaseline.input_inhabited": "ed90a0ef257bef0d9705f24e0468ac94f67ed49a36523d31f7844e9b3e727057",
+        "H28.GuardBaseline.successful_run": "1e43b746258ad01c1012136999ef5cfca6a4be7eed01a6c1d3f54beb54f32a0b"
+      },
+      "witness_signature_sha256": {
+        "H28.GuardTruePolarityKill.source_link": "922c0374bc06dcc1f4e74be3b533f5bffe77f9a017b15255e1a51871623c93d4",
+        "H28.GuardTruePolarityKill.input_inhabited": "5d5afaa7cc00d3d093427948e62657f83875b5cabff5acc7713ddb2166762a44",
+        "H28.GuardTruePolarityKill.checked_kill": "0aa5d8641933c78016afa557b57df43d836700211263f5cc5134ac4cbb17c311"
+      },
+      "mutant_sha256": "d0b0142e976c987ebf6a79ebfbe57543ce93167fc710c3ed6282b9879b97ba56"
+    },
+    {
+      "id": "guard.require-revert-true",
+      "kind": "negative-control",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true \u27f9 \u27e8[ ]\u27e9 ; \"Reverts\": se = false",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true \u27f9 \u27e8[ ]\u27e9 ; \"Reverts\": se = true",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardFalseBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/GuardFalsePolarityKill.lean",
+      "oracle_sha256": "7bb5e129a4f46e189a1f0dfc4daf984a356cdb5caff0adafd9b0cec4cd5c593e",
+      "witness_sha256": "b16424fb02d3fc64319689a214a535fed821729d1194b185d5e6c996f0760f69",
+      "oracle_declarations": [
+        "H28.GuardFalseBaseline.source_link",
+        "H28.GuardFalseBaseline.input_inhabited",
+        "H28.GuardFalseBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.GuardFalsePolarityKill.source_link",
+        "H28.GuardFalsePolarityKill.input_inhabited",
+        "H28.GuardFalsePolarityKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle_signature_sha256": {
+        "H28.GuardFalseBaseline.source_link": "e3f32934062236629a82a399eef9ac3eb7ea3c87f9d36d34d51874de9f0fe8ed",
+        "H28.GuardFalseBaseline.input_inhabited": "9786b7db5b47c46a32fc45878d62d155f8b8c4b8a4149344480fc02c41917d64",
+        "H28.GuardFalseBaseline.reverting_run": "3b03886ce25b681c3fe792aef991e653c069a4e5eb2f9309863520192e6407fe"
+      },
+      "witness_signature_sha256": {
+        "H28.GuardFalsePolarityKill.source_link": "4bb036641b1167628726d98d78aa87275703e748b32e583749dff14e00fb7813",
+        "H28.GuardFalsePolarityKill.input_inhabited": "d35d7e85d3978765627800ff1ee29f2daface70da07da813ae29675e481e34c4",
+        "H28.GuardFalsePolarityKill.checked_kill": "bd20867742fa477e99f066fc692d53363f128ae4dba7accfd3ed3537a207eaf0"
+      },
+      "mutant_sha256": "c4b2b6d70eb0208ee65a60bfa99a14949d2b8e6779a4a6fdf468c4f71ab3ff5b"
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    },
+    {
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "oracle_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "oracle_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "oracle_signature_sha256": {
+        "H28.GuardBaseline.source_link": "2a65b102ddc355819a7e3be5f255f5a0078d545bd0e8afa426b88041fff90d27",
+        "H28.GuardBaseline.input_inhabited": "ed90a0ef257bef0d9705f24e0468ac94f67ed49a36523d31f7844e9b3e727057",
+        "H28.GuardBaseline.successful_run": "1e43b746258ad01c1012136999ef5cfca6a4be7eed01a6c1d3f54beb54f32a0b"
+      },
+      "id": "control.guard-label-equivalent",
+      "kind": "equivalent-control",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\"",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"holds\"",
+      "equivalence": "tests/h28-sol/mutation-testing/oracles/GuardEquivalent.lean",
+      "equivalence_sha256": "e438c64b429a282756b24e32894588214f8e2990622d97b1e675fbce072cd32f",
+      "equivalence_declarations": [
+        "H28.GuardEquivalent.source_link_all",
+        "H28.GuardEquivalent.equivalence_all",
+        "H28.GuardEquivalent.input_inhabited"
+      ],
+      "equivalence_signature_sha256": {
+        "H28.GuardEquivalent.source_link_all": "5922a460a1dde3cc04ab600a7c20f04475c4be0cb3b3e6f6b8eb27edad121ff3",
+        "H28.GuardEquivalent.equivalence_all": "5a990f688a2acfabf81ba92e6114e629c2cb03c8012d3802ab503a15d5344035",
+        "H28.GuardEquivalent.input_inhabited": "55cb241043381ee61eb9a27be8d14f00b40ce672f124946f888b1e9221915160"
+      },
+      "mutant_sha256": "3d8bc1d218b54b50e6e384c7e32572c616f6f9be455822bb32a4b75568cc3f07"
+    },
+    {
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "oracle_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "oracle_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "oracle_signature_sha256": {
+        "H28.GuardBaseline.source_link": "2a65b102ddc355819a7e3be5f255f5a0078d545bd0e8afa426b88041fff90d27",
+        "H28.GuardBaseline.input_inhabited": "ed90a0ef257bef0d9705f24e0468ac94f67ed49a36523d31f7844e9b3e727057",
+        "H28.GuardBaseline.successful_run": "1e43b746258ad01c1012136999ef5cfca6a4be7eed01a6c1d3f54beb54f32a0b"
+      },
+      "id": "control.guard-invalid-syntax",
+      "kind": "invalid-control",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = )",
+      "mutant_sha256": "5236f24540b4e561b32dbc34158ea92c8b8678c64ca69962f4da6d80539874c7"
+    },
+    {
+      "id": "control.guard-weak-oracle-survivor",
+      "kind": "runner-survivor-control",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = true",
+      "new": "  | requireSimple :\n      dl{ \u27e8[ require(se); ]\u27e9 \u21dd \"Holds\": se = false",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/WeakGuardOracle.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.lean",
+      "oracle_sha256": "b02e252f2826ba8851155b473d64b0a4a5ee03f6d385a1e69f3dc53dc2f0f9b1",
+      "witness_sha256": "521891721ea8598866a1932044ec7e7ff41809197aa0585f30bd80cb9f840d40",
+      "oracle_declarations": [
+        "H28.WeakGuardOracle.source_link",
+        "H28.WeakGuardOracle.input_inhabited",
+        "H28.WeakGuardOracle.successful_run"
+      ],
+      "witness_declarations": [
+        "H28.GuardTruePolarityKill.source_link",
+        "H28.GuardTruePolarityKill.input_inhabited",
+        "H28.GuardTruePolarityKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.requireSimple",
+      "family": "guard-polarity",
+      "oracle_signature_sha256": {
+        "H28.WeakGuardOracle.source_link": "925ef0c84d6862444ec24b95cfa4ce349bab146aa505be0ff1be2ff317b24608",
+        "H28.WeakGuardOracle.input_inhabited": "39b4e9b2cc9c4133689f648a2e0a7c77927dea6bb0cf54589bc279c25457f88f",
+        "H28.WeakGuardOracle.successful_run": "e69cef49f860cd5d412e9e765dea1daa75f8b7fb3212a9683ca6f75b46f33265"
+      },
+      "witness_signature_sha256": {
+        "H28.GuardTruePolarityKill.source_link": "922c0374bc06dcc1f4e74be3b533f5bffe77f9a017b15255e1a51871623c93d4",
+        "H28.GuardTruePolarityKill.input_inhabited": "5d5afaa7cc00d3d093427948e62657f83875b5cabff5acc7713ddb2166762a44",
+        "H28.GuardTruePolarityKill.checked_kill": "0aa5d8641933c78016afa557b57df43d836700211263f5cc5134ac4cbb17c311"
+      },
+      "mutant_sha256": "d0b0142e976c987ebf6a79ebfbe57543ce93167fc710c3ed6282b9879b97ba56",
+      "control_of": "guard.require-success-false",
+      "regression": "tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean",
+      "regression_sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01",
+      "regression_declarations": [
+        "H28.GuardBaseline.source_link",
+        "H28.GuardBaseline.input_inhabited",
+        "H28.GuardBaseline.successful_run"
+      ],
+      "regression_signature_sha256": {
+        "H28.GuardBaseline.source_link": "2a65b102ddc355819a7e3be5f255f5a0078d545bd0e8afa426b88041fff90d27",
+        "H28.GuardBaseline.input_inhabited": "ed90a0ef257bef0d9705f24e0468ac94f67ed49a36523d31f7844e9b3e727057",
+        "H28.GuardBaseline.successful_run": "1e43b746258ad01c1012136999ef5cfca6a4be7eed01a6c1d3f54beb54f32a0b"
+      }
+    }
+  ]
+}

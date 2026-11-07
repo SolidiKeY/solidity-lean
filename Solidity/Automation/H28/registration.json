@@ -1,0 +1,44 @@
+{
+  "status": "Already centrally integrated; compact scripts and smoke fixtures are self-contained",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "root": "Solidity.lean",
+  "area": "Automation.H28",
+  "modules": [
+    {
+      "module": "Solidity.Automation.H28.Context",
+      "kind": "opt-in tactic context",
+      "declarations": [
+        "codegenContext",
+        "codegenContext_restore_options",
+        "codegenContext_limits"
+      ],
+      "module_map_row": "Boolean-only Core.Context transformation and universal cached-context preservation lemmas."
+    },
+    {
+      "module": "Solidity.Automation.H28.Prove",
+      "kind": "opt-in tactic front end",
+      "declarations": [
+        "tacticSolH28Prove",
+        "sol_h28_prove [steps] elaborator"
+      ],
+      "module_map_row": "Original sol_prove delegation under codegenContext; existing owner imports required."
+    },
+    {
+      "module": "Solidity.Automation.H28.Chain",
+      "kind": "opt-in tactic front end",
+      "declarations": [
+        "tacticSolH28Chain",
+        "sol_h28_chain elaborator"
+      ],
+      "module_map_row": "Original sol_chain delegation under codegenContext; existing chain owner imports required."
+    }
+  ],
+  "trust_boundary": "No new axioms, sorry, admit, unsafe or native_decide; every returned owner proof remains kernel checked. Context preservation lemmas do not prove arbitrary owner semantics or compiler correctness.",
+  "published_integration": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "historical_integration_obligations": [
+    "Add these modules through central generated-root registration",
+    "Add corresponding area module-map rows centrally",
+    "Rerun unchanged orphan/root and full repository gates after integration"
+  ],
+  "compact_controls": "tests/h28-sol/automation-benchmark/README.md"
+}

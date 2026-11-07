@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "original_work_queue_verbatim": "Lean migration directory Solidity/Theory/ ONLY. (1) Census imports/API compatibility at pinned base, measure CLEAN old v4.24.0 build wall/RSS under fixed resources. (2) Use IDENTICAL official leanprover/lean4:v4.35.0 toolchain build across all migration VMs/gate; record release archive sha256 + lean/lake versions. Adapt this directory preserving exact types/semantics/proof budgets. Dependencies outside scope are owner migration requests; wait or backfill fixtures. (3) Build all assigned modules on new toolchain, clean before/after wall/RSS comparison same settings; any regression escalates, >10% STOP. (4) Supply reviewable migration patch/bundle and frozen-interface hashes, cross-directory dependency report to migrate-root-gate. Private lean-toolchain override only for testing; final lean-toolchain edit belongs root migration lane. This is a separate migration overlay on codex branches, not a handoff of live producer ownership. No pushes/merges/master changes or freeze announcements from directory lanes.",
+  "original_backfill_queue_verbatim": "Use scanner/census, negative controls, isolated fixture proofs and reproduction/timing tooling within this exact scope while blocked. Account for all original declarations/cases, no padding. Continuous cleanup takes only newly unclaimed audit candidates via coordinator/registry; never steal scope.",
+  "original_additional_backfill_authorization": "Backfill: within-scope additional witness/case coverage, deterministic acceptance and measurements; no scope expansion.",
+  "work_items": [
+    {
+      "number": 1,
+      "original_text": "(1) Census imports/API compatibility at pinned base, measure CLEAN old v4.24.0 build wall/RSS under fixed resources. ",
+      "status": "done"
+    },
+    {
+      "number": 2,
+      "original_text": "(2) Use IDENTICAL official leanprover/lean4:v4.35.0 toolchain build across all migration VMs/gate; record release archive sha256 + lean/lake versions. Adapt this directory preserving exact types/semantics/proof budgets. Dependencies outside scope are owner migration requests; wait or backfill fixtures. ",
+      "status": "blocked"
+    },
+    {
+      "number": 3,
+      "original_text": "(3) Build all assigned modules on new toolchain, clean before/after wall/RSS comparison same settings; any regression escalates, >10% STOP. ",
+      "status": "blocked"
+    },
+    {
+      "number": 4,
+      "original_text": "(4) Supply reviewable migration patch/bundle and frozen-interface hashes, cross-directory dependency report to migrate-root-gate. Private lean-toolchain override only for testing; final lean-toolchain edit belongs root migration lane. This is a separate migration overlay on codex branches, not a handoff of live producer ownership. No pushes/merges/master changes or freeze announcements from directory lanes.",
+      "status": "partial"
+    }
+  ],
+  "backfill_items": [
+    {
+      "item": "scanner/import/source census and negative controls",
+      "status": "done",
+      "evidence": "/workspace/scratch/migrate-theory/evidence/census.json"
+    },
+    {
+      "item": "old checked-environment declarations/types/axiom inventory and deterministic extraction",
+      "status": "done",
+      "evidence": "/workspace/scratch/migrate-theory/evidence/old-api-inventory.json",
+      "boundary": "25 modules/2264 declarations, includes generated/private names; explicit public visibility and complete new counterpart remain unavailable"
+    },
+    {
+      "item": "five finite character-boundary proofs on old/new toolchains",
+      "status": "done",
+      "evidence": "/workspace/scratch/migrate-theory/evidence/acceptance.json"
+    },
+    {
+      "item": "four legacy API intentional failure controls",
+      "status": "done",
+      "evidence": "/workspace/scratch/migrate-theory/evidence/acceptance.json",
+      "classification": "old compilation success/new expected compilation failure; not a contradiction theorem"
+    },
+    {
+      "item": "reproduction/resource/timing driver and owner dependency report",
+      "status": "done",
+      "evidence": "/workspace/scratch/migrate-theory/evidence/dependency-report.json"
+    },
+    {
+      "item": "optional positive-suffix proof experiment",
+      "status": "unproved-not-accepted",
+      "evidence": "/workspace/scratch/migrate-theory/evidence/StringApiWitness.original-unproved.lean",
+      "action": "Preserve exact statement/failure; optional survivor decision under retained scope, not an accepted proof or intentional contradiction"
+    },
+    {
+      "item": "new public API/visibility/shim consolidation and exact old/new type/axiom comparisons",
+      "status": "pending",
+      "action": "H78 all original public generated declarations, no blanket exclusion; use existing exports first; no new worker run authorized by retirement"
+    },
+    {
+      "item": "complete clean before/after timing and full affected/checker validation",
+      "status": "pending",
+      "action": "Only successor after explicit root performance disposition and required reviewed dependencies; no unchanged STOP rerun"
+    }
+  ],
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "DEP-SYNTAX-RAW-435: /workspace/solidity-lean/Solidity/Syntax/Raw.lean repair/validation remains pending; accepted relay alone does not resolve dependency."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "DEP-HASH-COLLISIONBOUND-435: /workspace/solidity-lean/Solidity/Hash/CollisionBound.lean partial owner patch received and SHA verified, dry-run applies; no application/Lean acceptance; full affected gates/diagnostic pins and H78 generated API coverage pending."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "PERF-KEYSORT-WALL-435/PERF-PREFIX-RSS-435: disposition of held runs and incomplete +33.238921% KeySort prefix pending. No full-build regression inferred or full timing delta available; do not rerun unchanged STOP."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78-COMPLETE-PUBLIC-INVENTORY: consolidate complete old/new original public generated names, visibility, universes, binder order and kinds; every actual shim needs name/old_signature/new_signature/shim_signature. This lane implemented no shims."
+    },
+    {
+      "lane": "COORD",
+      "item": "H82 retirement pause capability: available goal API lacks PAUSED; successor/coordinator must preserve authorized pause through trusted control; no goal reset or automatic worker continuation."
+    },
+    {
+      "lane": "COORD",
+      "item": "H71 push permission and detailed H80/H81 policy texts are not supplied locally. No push inferred; successor must consult authoritative current rules before applicable operations."
+    },
+    {
+      "lane": "COORD",
+      "item": "DELIVER160530-1: staged input not delivered in this VM; provenance-only host path /home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392-HANDOFF.md; expected SHA256 9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392; bytes 17276. Static review only, no new run/application/acceptance."
+    },
+    {
+      "lane": "COORD",
+      "item": "DELIVER160530-2: staged input not delivered in this VM; provenance-only host path /home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c-HANDOFF.md; expected SHA256 dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c; bytes 15154. Static review only, no new run/application/acceptance."
+    },
+    {
+      "lane": "COORD",
+      "item": "DELIVER160530-3: staged input not delivered in this VM; provenance-only host path /home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72-source-full.patch; expected SHA256 c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72; bytes 75555. Static review only, no new run/application/acceptance."
+    }
+  ],
+  "implemented_shims": [],
+  "retirement_override": "Resolved: KEEP RETIREMENT/HANDOFF. Generic broadcasts/tickets do not revoke stop. Worker finishes preservation and stops; coordinator will pause the existing goal after final head report and idle turn. No new implementation/goal/reset.",
+  "root_owner_requests_provenance": {
+    "reported_head": "16d7e371a1e013f492784b596397cf500dbd7543",
+    "expected_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+    "actual_inline_file_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+    "matches": true,
+    "requirements_path_is_cross_vm_provenance": "/workspace/solidity-lean-migrate-root-gate/scripts/h62/item6/migrate-root-gate/h78-public-api-requirements.json",
+    "implemented_shims": []
+  },
+  "permission_wait_cleanup": "No exact-file agreement is retained as a wait for H82 statement-preserving proof/additive/import/doc/split edits. Hash wait concerns unvalidated partial input/H78 completeness, not proof-only permission. Raw depended-on definition-body/interface changes still require owner. Retirement authorizes neither new implementation nor unchanged timing STOP reruns.",
+  "resolved_questions": [
+    {
+      "id": "Q-H82-RETIRE",
+      "resolution": "KEEP RETIREMENT AND HANDOFF; no human decision needed",
+      "source": "explicit coordinator H82 resolution in original thread"
+    }
+  ]
+}

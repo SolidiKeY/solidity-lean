@@ -1,0 +1,48 @@
+COMMAND ["docker", "--host=unix:///var/run/docker.sock", "run", "--rm", "--name", "ucast-99307", "--memory=12g", "--memory-swap=12g", "--network=none", "--mount", "type=bind,src=/workspace/solidity-lean-ucast-1104,dst=/workspace/solidity-lean-ucast-1104", "--mount", "type=bind,src=/workspace/solidity-lean/.lake,dst=/workspace/solidity-lean/.lake", "--mount", "type=bind,src=/home/agent/sol-qn-tools,dst=/tools,readonly", "-w", "/workspace/solidity-lean-ucast-1104", "-e", "LEAN_NUM_THREADS=1", "-e", "LEAN_PATH=/workspace/solidity-lean/.lake/build/lib/lean", "debian:trixie-slim", "/tools/lean-4.24.0-linux/bin/lean", "-j1", "--tstack=131072", "tests/primitive-packets-1104/UnsignedCast/Audit.lean"]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.zero_wrap' depends on axioms: [propext]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.power_wrap' depends on axioms: [propext]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.negative_one_mod' depends on axioms: [propext, Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.maximum_wrap' depends on axioms: [propext, Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.power_source_range' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.not_zero_width' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.UnsignedCast.not_nonbyte_width' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.UnsignedCast.not_narrowing_256' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.UnsignedCast.compile_selection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.generated_code' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.machine_run' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.Controls.represented' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.Controls.executions' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.Controls.protected_observations' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.Controls.wrong_saved_tail' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.UnsignedCast.Controls.wrong_uint8_unmasked' does not depend on any axioms
+'Solidity.Backend.PrimitivePackets.UnsignedCast.source_run' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.wrapped' depends on axioms: [propext]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.value_run' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.source_both_pipelines' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.source_timeout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'Solidity.Backend.PrimitivePackets.UnsignedCast.transport' depends on axioms: [propext, Classical.choice, Quot.sound]
+tests/primitive-packets-1104/UnsignedCast/Audit.lean:30:5: error: unexpected token 'prefix'; expected '(', ':=', 'rec', '|', identifier or term
+tests/primitive-packets-1104/UnsignedCast/Audit.lean:28:0: error: don't know how to synthesize placeholder
+context:
+case m
+⊢ Type
+tests/primitive-packets-1104/UnsignedCast/Audit.lean:30:12: error: unexpected token ':='; expected ':'
+EXIT 1
+SECONDS 3.002
+MINIMUM_AVAILABLE_BYTES 5286813696

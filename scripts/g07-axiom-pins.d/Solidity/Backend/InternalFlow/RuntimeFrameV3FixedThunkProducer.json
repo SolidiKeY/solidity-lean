@@ -1,0 +1,66 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.admitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.coverage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.make": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.of_call": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.RevertingInput": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.SuccessfulInput": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.Witness.bare_revert_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.Witness.insufficient_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.Witness.literal_revert_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.Witness.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.Witness.return_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.Witness.reverting_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FixedThunkProducer.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3FixedThunkProducer.Witness.successful_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

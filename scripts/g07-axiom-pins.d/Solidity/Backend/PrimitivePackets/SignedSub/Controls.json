@@ -1,0 +1,98 @@
+{
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.actual_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.both_source_max_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.both_source_pipelines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.checked_overflow_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.equal_operands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.max_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.min_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.negative_left": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.negative_right": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.no_horizon_promotion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.nonempty_frame": [],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.retained_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.source_negative_left": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.source_negative_right": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.unwrapped_result_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/SignedSub/Controls.lean:Solidity.Backend.PrimitivePackets.SignedSub.Controls.wrong_sign_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

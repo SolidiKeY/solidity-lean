@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceNestedByteValues.lean:Solidity.Lowering.StorageOps.SourceNestedByteValues.capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValues.lean:Solidity.Lowering.StorageOps.SourceNestedByteValues.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

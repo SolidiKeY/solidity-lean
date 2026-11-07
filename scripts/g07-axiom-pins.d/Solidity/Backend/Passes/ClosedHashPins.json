@@ -1,0 +1,115 @@
+{
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.bool_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.boolean_application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.booleanInvocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.capacity_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.noncanonical_bool": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.ordered_memory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.signed_application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.signed_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.signed_reference_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValueControls.signedInvocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValues.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValues.bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValues.prefix_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ClosedValues.represented_word": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.bytes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.combined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.hash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.input": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.ordered_bytes": [],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.source_path_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.stale_refused": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ClosedHashPins.lean:Solidity.Backend.Passes.ReachedHash.target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

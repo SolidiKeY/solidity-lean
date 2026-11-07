@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/StorageOps/TargetFixedSnapshot.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.after_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshot.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.after_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshot.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.offsets_fit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshot.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.offsets_range": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshot.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshot.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.run_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshot.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.store_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

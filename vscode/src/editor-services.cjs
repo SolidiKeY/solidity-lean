@@ -1,5 +1,8 @@
 'use strict';
-const {join}=require('node:path');
+const {join,resolve,sep}=require('node:path');
+const {createHash}=require('node:crypto');
+const {summarize,issueURL}=require('./status-summary.cjs');
+const model=require('./model.cjs');
 
 function install(vscode,context,servers,reportError){
   const selector={scheme:'file',pattern:'**/*.sol'};
@@ -57,34 +60,76 @@ function install(vscode,context,servers,reportError){
   const icons=new Map();
   for(const state of ['proved','pending','running','error'])icons.set(state,vscode.window.createTextEditorDecorationType({
     gutterIconPath:vscode.Uri.file(join(__dirname,'../media',state+'.svg')),gutterIconSize:'contain'}));
-  const states=new Map();
+  const states=new Map(),pickerEpochs=new Map();let activeRevision=0,lifecycleRevision=0;
+  const touch=uri=>{const key=uri.toString();pickerEpochs.set(key,(pickerEpochs.get(key)||0)+1);lifecycleRevision++;};
+  let disposed=false;
+  const document=uri=>vscode.workspace.textDocuments.find(doc=>!doc.isClosed&&doc.uri.toString()===uri);
+  const current=doc=>{const value=states.get(doc.uri.toString());return !doc.isClosed&&value?.document===doc&&value.params.version===doc.version&&value.text===doc.getText()?value.params:null;};
   const draw=editor=>{
-    const state=states.get(editor.document.uri.toString());
+    const state=current(editor.document);
     const enabled=vscode.workspace.getConfiguration('solidityLean',editor.document.uri).get('displayGutterStatus',true);
     for(const [kind,type]of icons){
-      const ranges=!enabled||state?.version!==editor.document.version?[]:(state.functions||[]).filter(f=>{
-        const status=f.status==='refuted'?'error':['ready','pending','unsupported','notRun'].includes(f.status)?'pending':f.status;
+      const ranges=!enabled||!state?[]:(state.functions||[]).filter(f=>{
+        const status=f.status==='refuted'?'error':['ready','pending','unsupported','notRun','queued','stale','cancelled','skip','skipped','internal','excluded','unknown'].includes(f.status)?'pending':f.status;
         return status===kind;
-      }).map(f=>({range:range(f.range),hoverMessage:f.status}));
+      }).map(f=>({range:range(f.range),hoverMessage:model.status(f)}));
       editor.setDecorations(type,ranges);
     }
   };
+  const identities=new Map(),versionBar=vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right,10);
   const statusBar=vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left,10);
-  statusBar.command='solidityLean.verify';
-  const status=params=>{
-    states.set(params.uri,params);
-    const active=vscode.window.activeTextEditor;
-    if(active?.document.uri.toString()===params.uri&&active.document.version===params.version){
-      statusBar.text=['queued','compiling','running'].includes(params.state)?'$(sync~spin) Solidity Lean':`$(beaker) Solidity Lean: ${params.state}`;
-      statusBar.tooltip='Solidity verification';statusBar.show();
-    }
+  statusBar.command='solidityLean.openStatusBarMenu';
+  const render=()=>{
+    if(disposed)return;
+    const active=vscode.window.activeTextEditor,state=active&&current(active.document),identity=active&&identities.get(active.document.uri.toString());
+    if(identity&&!active.document.isClosed&&active.document.uri.scheme==='file'&&active.document.uri.fsPath.toLowerCase().endsWith('.sol')){
+      versionBar.text=identity.serverInfo.version;versionBar.tooltip=`${identity.serverInfo.name}: ${identity.serverInfo.version}\nNode.js: ${identity.runtimeInfo?.version||'unknown'}\nExtension: ${require('../package.json').version}`;versionBar.show();
+    }else versionBar.hide();
+    if(state){
+      const summary=summarize(state,active.document);statusBar.text=summary.text;statusBar.tooltip=summary.tooltip+'\nClick for actions';statusBar.show();
+    }else statusBar.hide();
     vscode.window.visibleTextEditors.forEach(draw);
   };
-  servers.on('status',status);
-  providers.push(statusBar,...icons.values(),vscode.window.onDidChangeVisibleTextEditors(editors=>editors.forEach(draw)),
-    vscode.window.onDidChangeActiveTextEditor(editor=>{if(editor&&states.has(editor.document.uri.toString()))status(states.get(editor.document.uri.toString()));else statusBar.hide();}),
-    {dispose(){servers.removeListener('status',status);states.clear();}});
+  const status=params=>{
+    const doc=document(params.uri);
+    // Closed, foreign and obsolete notifications must never replace current state.
+    if(disposed||!doc||doc.version!==params.version||!Number.isInteger(params.version))return;
+    if(params.sourceHash!==undefined&&params.sourceHash!==createHash('sha256').update(doc.getText()).digest('hex'))return;
+    if(params.functions!==undefined&&(!Array.isArray(params.functions)||params.functions.some(row=>!row||!model.validRange(row.range)||typeof row.status!=='string')))return;
+    states.set(params.uri,{params:structuredClone(params),document:doc,text:doc.getText()});render();
+  };
+  const clear=uri=>{touch(uri);states.delete(uri.toString());render();};
+  const clearIdentity=uri=>{touch(uri);identities.delete(uri.toString());render();};
+  const identity=params=>{if(disposed)return;for(const uri of params.uris||[])if(document(uri))identities.set(uri,params);render();};
+  const failed=error=>{if(disposed||[-32800,-32801].includes(error.code)||error.code==='CANCELLED')return;for(const uri of error.uris||identities.keys())identities.delete(uri);render();};
+  servers.on('status',status);servers.on('identity',identity);servers.on('serverError',failed);
+  providers.push(statusBar,versionBar,...icons.values(),
+    vscode.commands.registerCommand('solidityLean.openStatusBarMenu',async()=>{
+      const owner=vscode.window.activeTextEditor?.document,version=owner?.version,text=owner?.getText(),epoch=owner?pickerEpochs.get(owner.uri.toString()):lifecycleRevision,active=activeRevision,identitySnapshot=owner&&identities.get(owner.uri.toString());
+      const actions=[{label:'Restart Solidity Lean',description:'Restart the language servers',command:'solidityLean.restartServer'},
+        {label:'Show verification output',description:'Open the Solidity Lean output channel',command:'solidityLean.showOutput'}];
+      if(owner&&current(owner)&&summarize(current(owner),owner).help)actions.unshift({label:'Help with a proof',description:'Open project proof guide: docs/calculus.md',proofHelp:'guide'},{label:'Proof documentation index',description:'Open project documentation: docs/README.md',proofHelp:'index'});
+      const link=issueURL(identitySnapshot,owner&&current(owner));if(link)actions.push({label:'Report verification issue',description:'Open an issue draft with server and extension versions; no source attached',uri:link,reportIssue:true});
+      const selected=await vscode.window.showQuickPick(actions,{matchOnDescription:true,placeHolder:'Pick an action'});
+      if(disposed||!actions.includes(selected)||!vscode.workspace.isTrusted)return;
+      if(vscode.window.activeTextEditor?.document!==owner||activeRevision!==active)return;
+      if(owner?(owner.isClosed||owner.version!==version||owner.getText()!==text||pickerEpochs.get(owner.uri.toString())!==epoch):lifecycleRevision!==epoch)return;
+      if(selected.proofHelp){
+        const state=owner&&current(owner);if(!state||!summarize(state,owner).help)return;
+        const cfg=vscode.workspace.getConfiguration('solidityLean',owner.uri),folder=vscode.workspace.getWorkspaceFolder(owner.uri)?.uri.fsPath,configured=cfg.get('backendPath','');let destination;
+        try{if(!configured&&!folder)throw Error('Missing backend configuration');const fs=require('node:fs'),root=fs.realpathSync(resolve(folder||'.',configured||'.')),index=fs.realpathSync(join(root,'docs/README.md')),guide=fs.realpathSync(join(root,'docs/calculus.md'));if(![index,guide].every(file=>file.startsWith(root+sep)&&fs.statSync(file).isFile()))throw Error('Documentation escapes configured repository');destination=selected.proofHelp==='guide'?guide:index;}
+        catch(cause){reportError(new Error('Project proof documentation is unavailable. Set solidityLean.backendPath to a complete repository containing docs/README.md and docs/calculus.md.',{cause}));return;}
+        await vscode.commands.executeCommand('vscode.open',vscode.Uri.file(destination));return;
+      }
+      const destination=selected.reportIssue?issueURL(owner&&identities.get(owner.uri.toString()),owner&&current(owner)):selected.uri;
+      if(destination)await vscode.env.openExternal(vscode.Uri.parse(destination));else await vscode.commands.executeCommand(selected.command);
+    }),
+    vscode.window.onDidChangeVisibleTextEditors(render),vscode.window.onDidChangeActiveTextEditor(()=>{activeRevision++;render();}),
+    vscode.workspace.onDidChangeConfiguration(event=>{if(event.affectsConfiguration('solidityLean.displayGutterStatus'))render();}),
+    vscode.workspace.onDidChangeTextDocument(event=>{if(event.contentChanges.length)clear(event.document.uri);}),
+    vscode.workspace.onDidCloseTextDocument(doc=>{clear(doc.uri);clearIdentity(doc.uri);pickerEpochs.delete(doc.uri.toString());}),
+    {dispose(){disposed=true;servers.removeListener('status',status);servers.removeListener('identity',identity);servers.removeListener('serverError',failed);states.clear();identities.clear();pickerEpochs.clear();}});
   context.subscriptions.push(...providers);
-  return {clear(uri){states.delete(uri.toString());if(vscode.window.activeTextEditor?.document.uri.toString()===uri.toString())statusBar.hide();vscode.window.visibleTextEditors.filter(e=>e.document.uri.toString()===uri.toString()).forEach(draw);}};
+  return {clear,clearIdentity};
 }
 module.exports={install};

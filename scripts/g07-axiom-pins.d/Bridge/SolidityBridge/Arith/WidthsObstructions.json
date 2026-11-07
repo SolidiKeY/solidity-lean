@@ -1,0 +1,54 @@
+{
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.actual_literal_shift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.actual_signed_shift_refusal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.inhabited_counterexample": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.literal_shift_counterexample": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.literal_shift_premises": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.narrow_modulo_control": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.negative_literal_control": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.not_old_synth_bin_literal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.not_old_synth_binary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.signed_cast_control": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.signed_shift_counterexample": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.signed_shift_premises": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsObstructions.lean:Solidity.Bridge.Arith.WidthsObstructions.unsigned_shift_257": [
+  "Quot.sound",
+  "propext"
+ ]
+}

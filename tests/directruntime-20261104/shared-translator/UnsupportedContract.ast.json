@@ -1,0 +1,38 @@
+{
+ "header": {
+  "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+  "sourceSha256": "ab91ae5b9e4cf3161c7c468c33416bdc96244a044f366e57d3b411c491025cb0",
+  "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+  "source": "tests/directruntime-20261104/shared-translator/UnsupportedContract.sol",
+  "provenanceVersion": 1,
+  "compilerFile": "soljson-v0.8.34+commit.80d5c536.js",
+  "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+  "validationStage": "analysis",
+  "settings": {
+   "viaIR": false,
+   "evmVersion": "osaka",
+   "optimizer": {
+    "enabled": false,
+    "runs": 200
+   },
+   "libraries": {},
+   "remappings": [],
+   "outputSelection": {
+    "*": {
+     "": [
+      "ast"
+     ]
+    }
+   }
+  },
+  "acceptedPragmas": [
+   [
+    "solidity",
+    "^",
+    "0.8",
+    ".0"
+   ]
+  ]
+ },
+ "ast": {"id":14,"nodeType":"SourceUnit","nodes":[{"literals":["solidity","^","0.8",".0"],"nodeType":"PragmaDirective","src":"32:23:0","line":2},{"canonicalName":"UnsupportedContract","contractKind":"contract","id":13,"name":"UnsupportedContract","nodeType":"ContractDefinition","nodes":[{"canonicalName":"UnsupportedContract.UnsupportedSibling","id":4,"members":[{"constant":false,"id":3,"mutability":"mutable","name":"value","nodeType":"VariableDeclaration","src":"119:13:0","line":4,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint256","nodeType":"ElementaryTypeName","src":"119:7:0","line":4,"typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"name":"UnsupportedSibling","nodeType":"StructDefinition","src":"91:44:0","line":4,"visibility":"public"},{"body":{"nodeType":"Block","src":"173:17:0","line":5,"statements":[{"expression":{"arguments":[{"kind":"bool","nodeType":"Literal","src":"182:4:0","line":5,"typeDescriptions":{"typeString":"bool"},"value":"true"}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"src":"175:6:0","line":5,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","src":"175:12:0","line":5,"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"175:12:0","line":5}]},"functionSelector":"c9ae24d6","id":12,"kind":"function","name":"supported","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"158:2:0","line":5},"returnParameters":{"nodeType":"ParameterList","parameters":[],"src":"173:0:0","line":5},"src":"140:50:0","line":5,"stateMutability":"pure","visibility":"public"}],"src":"56:136:0","line":3}],"src":"32:161:0","line":2}
+}

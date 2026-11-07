@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/StorageOps/Controls.lean:Solidity.Backend.StorageOps.Controls.recursive_read_witness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/Controls.lean:Solidity.Backend.StorageOps.copyArray_mapping_slot": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/Controls.lean:Solidity.Backend.StorageOps.copyAt_readback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/Controls.lean:Solidity.Backend.StorageOps.generated_writes_commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/Controls.lean:Solidity.Backend.StorageOps.push_fresh_default": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/Controls.lean:Solidity.Backend.StorageOps.traverse_eq_overlay": [
+  "Quot.sound",
+  "propext"
+ ]
+}

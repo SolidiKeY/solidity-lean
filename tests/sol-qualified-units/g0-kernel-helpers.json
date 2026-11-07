@@ -1,0 +1,1731 @@
+{
+  "base": "11da8811639de8fa16f5befe446ed476a3439581",
+  "syntax_sha256": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+  "helpers": [
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Relation.lean",
+      "definition": "memberCountSyntax",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "definition": "basePathsSyntax",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "definition": "bodyDeclsSyntax",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean",
+      "definition": "rootReferences",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+      "definition": "expressionPathAny",
+      "eliminator": "Syn.rec",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+      "definition": "expressionPathAnyM",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+      "definition": "references",
+      "eliminator": "Syn.rec",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+      "definition": "referencesM",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "definition": "types",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "definition": "partsSyntax",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureHiding.lean",
+      "definition": "externalSyntax",
+      "eliminator": "Syn.casesOn",
+      "constructors": 112
+    }
+  ],
+  "twins": [
+    {
+      "kernel": "expressionPathAny",
+      "implementation": "expressionPathAnyM",
+      "theorem": "Solidity.Frontend.QualifiedUnits.expressionPathAny_eq_M"
+    },
+    {
+      "kernel": "references",
+      "implementation": "referencesM",
+      "theorem": "Solidity.Frontend.QualifiedUnits.references_eq_M"
+    }
+  ],
+  "preserved_theorem_statements": [
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "inherited_overloads",
+      "sha256": "d73d47680fde884570ab451dc080edd136a081a8b6eb73557d617be09433e56a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "cross_unit_nominal_overloads",
+      "sha256": "ae58b38cce648b79cdeed246d20e4adb737aa0f1daf401cd971351a59392a38b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "same_owner_duplicates_preserved",
+      "sha256": "bc3f6645b429353ddd5a3f027ff2bd949873ebb8e262c463e111782b3e735a10"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "external_location_override",
+      "sha256": "7f7627b261d5e9673b881a31697b71611dd89677d8fc3fd834da7c8d7e0e5993"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "storage_memory_overloads",
+      "sha256": "6bff1f52b16bfff82630541497326a9b4022f233be90e194de8bdea69e925090"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "unresolved_first_owner_refused",
+      "sha256": "ff65742320aa77b559b9cd3912fa0978ffea0ce8932eb9c063397897b9bd23b0"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "missing_root_refused",
+      "sha256": "a9720d3b80fe26c88b69efae3272005824230cd5aa9f65ea0a672e4771139445"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "noncontainer_root_refused",
+      "sha256": "6cce3ffa49dcd56e6ad92f7c4245f47ceb5881ffa3ef913b24e5a2bd9213fd76"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "missing_base_refused",
+      "sha256": "2303450752c91529f9874f87ef44aec1c0f93dc7d45a69d6a0ce89b3f907def0"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "inheritance_cycle_refused",
+      "sha256": "71ec0c758db0f96994736aa8116edf832a660e15960e8b5cdbdda151af500adc"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "diamond_owner_order",
+      "sha256": "854b8564ef58135141d8ec9c174f31d20f0c132204330b938e74f499d157aeeb"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "diamond_original_override",
+      "sha256": "f424c201ceac6af047096daf16f4ca0b960889d633dea94268c1f36ecfd2831b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "ambiguous_written_base_refused",
+      "sha256": "6c19a4acc50120d75b01ec734faad9e38ccbc08ec247337f8ae13ffdcc61a03d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean",
+      "name": "empty_name_collection",
+      "sha256": "354fbf69b3e12949633bdc54c082b8e709fbdcd3e89e3dfffef5f01ffb8a3ec2"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_nil",
+      "sha256": "8b3758f47ae607b2961f953f3ba920e122f4ee6f51569244bd9bfa9063b26eff"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_cons",
+      "sha256": "3dda85ee3fc0cbc651a840da3ec2a806f937412e78f03317fd3ab54211ecd92a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_none",
+      "sha256": "c525ba7165801a3fb04feff10f60ab09e90715c6874cd02f5d54e7f649c6a4cd"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_some",
+      "sha256": "40aa80ab10692bd49ded7ed4b4dbbfcb9afefbcb132d9128cb69f50e1b795af5"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_unit",
+      "sha256": "36d9bb879fd65b101f2338c05ef23215f352b2f903680895373bfd4b8262fc10"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_pragma",
+      "sha256": "f895143825a37f714a29809a1c1e75e6695fc306692d29729a9b8ca3146acfb7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_importPath",
+      "sha256": "5d7ef09615f3094b30a849e24540a34fe88295e11144fd5e3025147718e9e78f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_importSymbols",
+      "sha256": "2f2908634f3234110a58abdbe49f56bf670db7ec851edad49f1246856bf5a9ac"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_importStar",
+      "sha256": "3c2172aba8b9860d4a1af3a0378c2d4eda5441025c11080af752d2e52393c6bf"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_importAlias",
+      "sha256": "388a76650d96cf08cf190bc1afbb18a6c4dc4c82d7aade438fb83e6e547b19db"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_contract",
+      "sha256": "7315cfc68f95d3bf4b52067e4f970735674544b82d26d1d2b9603e448274f3b7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_interface",
+      "sha256": "de032a1cb7a8c2435b5b279436ad072e6c12759a8c49701c07d4311bf02be60d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_library",
+      "sha256": "867dc86e5e018facf790ac51c9a1427de2bd15c0f7f8522a072333be3cb3e10b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_topPart",
+      "sha256": "a7f0e5e52e624a091d650399098a4ccee0c6fee0a4c0f06d700b52b4dbde382f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_inherit",
+      "sha256": "8ba0d5aebeb39eed631a03ee36e73ced19998ae3dead822aa2bffe3565eafcd7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_constructor",
+      "sha256": "94339373be838f366798dd2105cecbdad3d224c814061687efecac234d7c4dcc"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_function",
+      "sha256": "e6e684b5897ae252a71018d22ee6ebafbc514a711d22d4f3c39289fe0fd43189"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_modifier",
+      "sha256": "6daed38deef3ff7c8b2dd568470be215f104616f05e0f917578b0e91bacfab6f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_fallback",
+      "sha256": "c3ab800bfbe126d93f4ca7398b1f5bf7541f0b41dbc7323e4ebb6e553a67d7df"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_fbNoParams",
+      "sha256": "6ed4969eb1ce89953930036e803cfb5e703c7b501b5b6624d464205e0c93fb0d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_fbParams",
+      "sha256": "687b4f2e1c23a957c43e3fde212512aa47455de65ddd610f8c660f08b41b4435"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_receive",
+      "sha256": "488941ea8e9a7b80c7281ce40105a6147dec7eaf740e47a2d187a56bb921fa7d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_struct",
+      "sha256": "4c756f3d76b393b9b5d3da5a856b2571aab2b6a0bf9536d52bd0d8630bb0610c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_structMember",
+      "sha256": "81d8315e1a9dbb2302a9e3252a3dd69fd5bba629019aa0d9809842bacbd63d0d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_enum",
+      "sha256": "492e7b13367b40501bc4dcc85a88fce397bd4843d0fd93cc34bb345347138c38"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_udvt",
+      "sha256": "b4e6f231ff677ab504b71a4ef337ae6d4861a69069e7588e494004f48244d385"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_stateVar",
+      "sha256": "ce212378c4f204bf93c589ce532b732a9d17712e75cbfffd3a973fadedb7c6b9"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_constant",
+      "sha256": "839802b68ae3209becfc6757791011ac3744e6370474ebdb931d20aeaad3da2f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_event",
+      "sha256": "3a461325c600642eed733dea7ba4bc197026bdb45a41d501bdc23b8f59374f7a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_eventParam",
+      "sha256": "256b4ec0e79c32b54403bdc24ad06bd0b8649bedb394dc921809dfef4bed83d1"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_error",
+      "sha256": "a6c03a5d96158f6149d276cdf091d9bf13930de11dd58dc2bfcd08d65314af2d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_errorParam",
+      "sha256": "167294254b07507d57fedfb18f378682942cc89bc31669bdf0c4036490849c0e"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_usingPart",
+      "sha256": "21b81c3d573c5b2af39a621a971fab2cf4f441b4e28a474e46880a90ac0dd09f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_usingPath",
+      "sha256": "cb0543d6350210e45c0fbe74125629c8419ae6328044f6c5b65667e979c938ed"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_usingAliases",
+      "sha256": "f7e2e6c380a4206637d0d86e0f1150eddcd658d9716b73f6bac1cbea5070f231"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_usingAlias",
+      "sha256": "d4acfffb35eea959464b1c6c610519bd1c564aedf54524cf06ae1f3842ccaf4b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_positional",
+      "sha256": "6ae186da9b3b2d70e97cf1b8586a1dc8b076fc1c09f4cd0ac5839096955c27a1"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_named",
+      "sha256": "8e07a6afdcb26096503293644b82da2a402434bf6655e1793897e3eb2070631b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_namedArg",
+      "sha256": "ce85576472f160d6097d6621d29662964c6628beffe3f00a7d41698d3d829149"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_modInv",
+      "sha256": "57895e0d835e6a3fd4d9c74504c426a06b6c5336fb9462f87164c1f842978f6b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_param",
+      "sha256": "6838c1349ac2437dea90086123fe62404d9d7f0ff7c061e85cb1a200df9f1f7d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_elem",
+      "sha256": "698f8e6be97676f7ba320f0b6e7f1a1173ae034492c2552fdf2d3915b46132aa"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_fnType",
+      "sha256": "393d43b895866166db12da3d069e6c7af22839eba0a8eaf03b3dcd27be12bd21"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_mapping",
+      "sha256": "5857e13ee260b19aefdf8bb9e296d07b2fda4ffd79136c17c8c253037a03c0ef"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_userType",
+      "sha256": "88bce46a4e292902af1d852072bc661ca9b3148b34dd35f44754bfe09a1c9c22"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_array",
+      "sha256": "7e4f443fb73c88dbe6c52ab52425d5262e8cbcb160afd02a659c7ec53803cf1f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_varDecl",
+      "sha256": "9b94e7cd336c59d373f3254b7d9ebabd64301823609f4bf2f92e8a64c30c9577"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_index",
+      "sha256": "93ca70624650be125ebd869b13230dd31cf4ab893a02c4538f650f93de143076"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_slice",
+      "sha256": "778e96acff869bc7944608dbe65309d90330603739ba9da32c796a13da0f6179"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_member",
+      "sha256": "1b6efa827a91775d656e529a511d0c78a4d6e7144ad6df7d037cf5ec82264c1d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_callOptions",
+      "sha256": "b9e4b06862523873c69fa09ccafbe924c04dc8ee1f05f0b96f950bf1f91df9b0"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_call",
+      "sha256": "53004915beba69b677dde4f89b45080eded44fa19454004fd80001cfbb35ed0f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_payableConv",
+      "sha256": "d4dada800887bad47bb0279bc26c66f7004e7b72a87e45ca60a9f23958724b16"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_metaType",
+      "sha256": "05f9e91da3d0bd365d321419897752857b823b74a59919a37e3dbd77f3be19a2"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_unaryPrefix",
+      "sha256": "0aa41ac73e42d3e7d93fbbb2dd2200e1cfeeb8d1a19b3a5dd190c44270caa009"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_unarySuffix",
+      "sha256": "6f24aa26e34df62f82c4c1e7e9d39132cdc896035109b32723016f0b44decb26"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_exp",
+      "sha256": "a158965246e4c6c55cb23f53076e6ca5080cf059f8e8e6ad642d08485cd2cac3"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_mulDivMod",
+      "sha256": "3069348e60a9309f455a977c51231ff5b5f724c639f4b09ab96f9ce2e8ce96f5"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_addSub",
+      "sha256": "c767730d71b14901828e75a8e6f3892bb3d80dff79d5ebbf741c94f4fe78d417"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_shift",
+      "sha256": "9b71bf7eafb4614860b09a842ceb9d66a2197e2d401ac2735b6c956b0ea2443e"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_bitAnd",
+      "sha256": "c078312ef501707a1ac5604a85249a73d86426dedf6aa3be1400d3d415c8d7c2"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_bitXor",
+      "sha256": "f5beab0b401864b320a778639d8ebaed9b4f30d46049726f5d444c2241ea36fa"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_bitOr",
+      "sha256": "6c85eb2a40e11da728c9d284543edd955ce8e31b918d23bfcf818165088bb862"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_order",
+      "sha256": "93120c33a56232a73eec5d9feb35549cdd3c2728b24775d505382ecd9cd8bf83"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_equality",
+      "sha256": "7c27b8363f1b28ecc903e9379f0f4f693ac6d1c25a206e233cbb25c8f1577327"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_and",
+      "sha256": "9c619bc056beba3a384055b221649f57016169db16d1044257b67c9181c2652f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_or",
+      "sha256": "76ee12248556459b920604cd951fe520eabb84b4d8c085b1c69135d92d1a7781"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_cond",
+      "sha256": "00ee8e23cec1bf03f40ed451925b89a97060f50d05fb093057c241e77b570095"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_assign",
+      "sha256": "a1788fb8b76c94f9559231bbaf1a47b7c131267bdf872afa940f6a094105d3e1"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_new",
+      "sha256": "8bc2e470ba29ba6f1bcf8e88082f077f092565d765e20f6b862898191ac8d840"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_tuple",
+      "sha256": "3857e7ac1a44d551b6be5aab1df1f91b1d764438b6696ee0216c015684289f23"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_inlineArray",
+      "sha256": "f6e5581cf1f21e1c8dd981855d0338ea4efa3a08621a65736a02d7a49b490894"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_ident",
+      "sha256": "fb015e76458bc485909733de5035436dc7635959ccb65b3a7f0f6f7d85685947"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_lit",
+      "sha256": "950025caf88d01089f807405e69c7f8e2844a3f4f3ccadf0b94a787ad12e92bc"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_litUnit",
+      "sha256": "e63db997979e1e2be6e73e7f1e436c5b090e74db2ef3e82c4cd1908efa815403"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_elemType",
+      "sha256": "fae6d9c6e1c531722a46e7f249bc31bd0cdc31a408aafd50cde3588279621615"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_declVar",
+      "sha256": "9ebe46c8a6811008f6cadcfc27685577b058dedf1201a0bbb7256dcbb7c6a51c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_declTuple",
+      "sha256": "a17ef709b0f3fdd660aa49062d1a956c03a1723e7bbec1899fd49d7474de1483"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_exprStmt",
+      "sha256": "f5c9f6c874aaf230e6510b9691de409c2951df1dbb405863b9d66c1099126b05"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_blockStmt",
+      "sha256": "4f0af4ab367173f54acecf1bc03557112517b33e868ee66cb7ee2192814f419b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_simpleStmt",
+      "sha256": "c93ddd9d811ecf42e01a8686f3ac8a97b1b7628e3d2fd269f77d8fe54b950cf5"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_ifStmt",
+      "sha256": "e9f695f175c4756f04c28fcc1485b4859d4b9612fc170b370e444d4cfa925cf0"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_forStmt",
+      "sha256": "891ac4ca3a4660cb4446c66daf78643f6a5ee22848fbcff5fe68e271888f08e7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_whileStmt",
+      "sha256": "445ff0214230f40e2e671e4b77d8eed4a9b71f6ff7f47a4c2f5f86f2b6ad8f56"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_doWhile",
+      "sha256": "7d6e6d7f7adb547dadaeb32f8d9bda9244712d0f22e10db34bf643b2430171bd"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_continueStmt",
+      "sha256": "fa6a53ce8769f48f7398449a03c8887ccd6ebbb71adda76b0344e3b63984b2e9"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_breakStmt",
+      "sha256": "2d9e608fd8bb50ac1081286a073526e85e05516c6ea013691723a3277e8f49cf"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_tryStmt",
+      "sha256": "82a15939ddbcfed63ce38d4d7cd6ee3b56c30367de8e103abcb78a951a454b60"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_catchPlain",
+      "sha256": "6520681476d956a61565496d7802226321b7c28ceac3d58192afba135c6c078b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_catchSig",
+      "sha256": "303ad4b06efbf1ddb458c384c6f42f56c1f2c92eebb15f3baabcaf244ef39065"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_returnStmt",
+      "sha256": "9d80f8f54c17d23224e1439f5bea1e39e6d081152d0a7933ef69a88640167046"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_emit",
+      "sha256": "554fc07c5fc697063ba74fb8e401a807d219f8bb13f41c6f0281653adbaae3ca"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_revert",
+      "sha256": "abf6d49f1b3bc5e64dbcbe4deabd88027171b22ec077108d32c1c793f780d6b1"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_assembly",
+      "sha256": "9e54adfa206d81b76b143a1ab37be0e3819acab89b19858740157eff1cc4a6df"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_block",
+      "sha256": "eb66f39603661e793d8e8fd4f852b4a23a0b71d7fd8a56f674ecca1dda4d6ba5"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_stmtItem",
+      "sha256": "20286f5d04f7ef3763b16aca2896286ece8f6b9ce8b7c0d27077671e6213a0de"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_uncheckedItem",
+      "sha256": "8248c0983cfc02ed785922b1cf039ef935ede47d811322a1ca478807d5e1cc96"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulBlock",
+      "sha256": "b3bef89fa95d4df06a7091c8bfba1749f375e2d4f8a8254d613c339b1dc03bfb"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulLet",
+      "sha256": "731429cdef20954920e65e0802dfe82d840b9c9ccac71a9b5e89d0390cf72507"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulAssign",
+      "sha256": "83fbd62d58f0d1e54f78bbe96296b62eee42ae901a212d6d0a7abb19c21d0a29"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulExprStmt",
+      "sha256": "ed7ac8dc702f9b7fb9c83b616a36585d4fdddcc03e4fe24855cc9d7fc61ec05d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulIf",
+      "sha256": "a08c3dcaad9ddded9a1e59ea8e3cc61dcb993c250d935bc2b56c2718c34cc98e"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulFor",
+      "sha256": "d390ee613782f2d660851381cf5bddc743129f666b0658f45b4980b9451f7249"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulSwitch",
+      "sha256": "2bf6c65ecc119b6436067a507e85514cebbe29dab9552747cea48fa941e03005"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulCase",
+      "sha256": "30165c4e0acc3ccece0d1376e781c45be1bc6851e03ab0e0943e0d02601b7ea7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulLeave",
+      "sha256": "e0a3fe04b9bd88ef031f64cf7087ffb4886fd49692c93a061ee57c61a9a0c5d4"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulBreak",
+      "sha256": "ab22b632075c5b83692c4babd97e76358ab4171dedf5708ab74e146394420e30"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulContinue",
+      "sha256": "7d6ba358a8427519633829a8d561f6aa0a396ffce1d9095cd40c8c84db27583a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulFun",
+      "sha256": "e2e622d9ddbda162657a8b116c369d4a6a89805ecd1443a60e249d30b34a8b29"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulPath",
+      "sha256": "5afa1e88cb525b9ec403da32408c1cbd77fe7dac1286120be347bd1f20f199a3"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulCall",
+      "sha256": "984c00cb1eab2c2fe217688f46687ffa62ebe5b37afc7b3cf95ac4abc05589ab"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean",
+      "name": "fixture_yulLit",
+      "sha256": "ecb86fb72b305d4a3926668bd800160feaf2af0c8875d4a033c0f96649ea7341"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureGap.lean",
+      "name": "current_overload_gap",
+      "sha256": "ad4bbcaf5d2bd93e1736bd998eebb1ba6b5da85429545a9436eae359a61c4c5a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureGap.lean",
+      "name": "base_overload_exists",
+      "sha256": "3e61345a4b1849390daec2d9c095f376e98b7fc6b24d0074e791fa437c715f0a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "eligible_iff",
+      "sha256": "9009d48d0add018c437022485a31be581eaec20e299ca55186e56ae366428619"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "safeOwners_iff",
+      "sha256": "4aacca5c96c8e3fc01663ef45696ef5be3d0cd7673b244468ee49c3e589637d6"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "mem_candidates",
+      "sha256": "d66fc604ced12f5e665ad4d75ec50f44aa91a947a496cad9e0c7bf8ca8a50cdb"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "Member.nearest_exists",
+      "sha256": "a17e32ae0ca3b90235e0263e17f4d9bea362ef029bacc7493293f4586d30a56a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "Member.decl_exists",
+      "sha256": "55de09e2019e98f145aa02d21ea29730aede2c3f191f629ae2a72a1cae9fa7fd"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "Admits.prefix_unique",
+      "sha256": "c325a8e42c065de93a4961a45ec978a7a7bd1bcbe03e2b99db06921e51b38035"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "Admits.coherent",
+      "sha256": "520e2dbf2bd978a7fc8530d1e9fcca60c1a3f8fff8692cb3c9cecc668ce9fe19"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "local_shadows",
+      "sha256": "fa2f1315032955e3ba3204bfcf0efe143582ff9fd15db0ad95a2d15979404f05"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "mem_namespaceCandidates",
+      "sha256": "c2c05e3e24e68f48951c57b78bc1ac0d5e965e54e0a93b050364c569438125ad"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "mem_headCandidates",
+      "sha256": "4a5f71a80422e6509561e9b7351a0eec49845238d705e9bd9715dbdb438cb2e2"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "checkSuffix_iff",
+      "sha256": "8e8238381bc83af63499290bfe4433b91cab4c21c552cfc2cf218c83d6c8dc0a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "resolve_iff",
+      "sha256": "928926037d8f6c1014ebcb9db1181a0978ef753731973f12aff28b4f47fb76d7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "resolve_noClash",
+      "sha256": "fc533743c20540ede119c0f8220c567f8294a00e5eb8991bad0bfce6d758209f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "NamespaceStep.decl_exists",
+      "sha256": "9f9f2406276ecc4e4f7f8e260541cabeab41b6f888183f35eb14dcd3ae9cf081"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "Head.decl_exists",
+      "sha256": "3b413239e7d1faf2b6d9434900101d68aa9533431c28b5b2c092b42ee60494da"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "Admits.decl_exists",
+      "sha256": "0020458a0f23e7cbe47ee8dc1011ae530d7a047ee3ec1eb8db972c66ba83b731"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean",
+      "name": "resolve_identity",
+      "sha256": "2c175cdc3c501f9d8229482fc736cae1e033e8b349c62c265bb08c57a21eb569"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "multi_hop_0",
+      "sha256": "622fb984b0628ca4689ab0b491453e8d25f971040288b82b381237b8882823cd"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "missing_symbol_0",
+      "sha256": "a6afc6fcfd0d5a839544530ed248e5272c03f68072caeb986a95e796758f4e50"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "ambiguous_namespace_0",
+      "sha256": "49feed529de66f9efdf4296b104cb4b4fc085ed46f45759bb821ecd78769ed8c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "same_spelling_units_0",
+      "sha256": "d0681d53582c739774b8545ac6fc539cef85a359df2789aac906009ebb40dbf7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "same_spelling_units_1",
+      "sha256": "c7680be1373e6403e938677ac0a666b9e321c3adeb556f27c1cfe0775378f839"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "symbol_namespace_alias_0",
+      "sha256": "27ea30de8c636f99210a61208757b2dec5af3e127fa9be88868694511c23210a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "transitive_all_0",
+      "sha256": "52529dd1af8a36ed04bd291fe695352e9bd3eba5562226ee42c3cd2fb4963880"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "diamond_identity_0",
+      "sha256": "65c17c53e04537995ef053570dd3b3d60e74c1deeb8413da18960df9f6fa0f53"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "cyclic_namespace_0",
+      "sha256": "33145799f6df3e4950d0c77597e2767fe35b5e325df584f7c4017f743c77a31b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "private_base_fallback_0",
+      "sha256": "db2eb177c40435ab72ddd1901829ce52c0681d49967ad4125bd580f3c6c6cca9"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "visible_base_shadow_0",
+      "sha256": "9e66a8fc59c5bb9a37854a2b23b5835e588ece0695f5334a56e95318c0261f80"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "local_shadow_0",
+      "sha256": "1697be0a3f2159dd23d1356d1804dccdf324db1f6c55fece9d72b53e3ea8f5bc"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "inherited_type_0",
+      "sha256": "506a5da16262cbe409d1ec35f7fd7f29465be1f0032e3c15212d3194b9a0300c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "inherited_type_1",
+      "sha256": "42a14149e30c025be0dba199dfa1e50297ac8bc5323d1f1c58e96efc5fd4553e"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "ambiguous_base_0",
+      "sha256": "bd49dfea47e551dbbd36840ac99120ed37439e5919997916430f4e41a47d534b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "inherited_overload_gap_0",
+      "sha256": "844e3533d0657bc1509f58c80a67f5be7955796678f614b060d75f4f4cb7b80c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "qualified_parameter_overload_gap_0",
+      "sha256": "d441373e34f99bb8bb481ee96cfb308fec053d8cd51ed2f6884d7eb84c791de4"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "failed_signature_no_global_fallback",
+      "sha256": "f8c6eb4f2f8e5e4c1b879df72273368def1647fefbda1f4cc5209f3a316a42f1"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "own_private_still_shadows",
+      "sha256": "487a170c5f7983f941c272be684e5ff6f6a752759f44d14520729af1cada4f4b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "visible_nonoverload_still_shadows",
+      "sha256": "bed17f75d1fbf481ece90a6708b7d64cd6cb2e90fd5c4e9283d9737d3868d921"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "private_base_global_fallback",
+      "sha256": "02153731e7156ee3b9b6e3d6397e3d0c9f00b873ca853f9fd3c34f4415ffbdcc"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "diamond_override_identity",
+      "sha256": "14544dbf5533bf539ecaee248c6e0602fcde1be5b70566105ae566537f846498"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "external_location_override",
+      "sha256": "691255610cbe8e97a98444aed59f1df98b252f081d2b8bc9a511fd2ae09bb223"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "foreign_scope_refused",
+      "sha256": "ba6373cb7acf78ad68757c2222de68f110cc42196b931b494bc7f99c91794c2b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "visible_intermediate_barrier_refused",
+      "sha256": "b0d7ef60563a417ae35ec9b4b0197c1f69aaad36947e6dfa056fe757a847cf22"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "qualified_barrier_refused",
+      "sha256": "441e6b72160cda6fbc7a781db626f1f744d63cc49d326c28a56e0286b07e911c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean",
+      "name": "getter_override_identity",
+      "sha256": "b4c86a6eb6935b8f2e003e834e5cbc7e366d7d369e07d14b79d806740e476073"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "TypeKey.eq_of_same",
+      "sha256": "703fdab860988314b406ff95551e95f5ddbe6550e44383e5290a6ffc309de251"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "TypeKey.eq_of_sameList",
+      "sha256": "5be148fa1ee35eb6708fb1c169b5e5f758fddb1f3e1bd2aec5774083de899752"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "TypeKey.same_refl",
+      "sha256": "9587caf59f4ce75c89078aa9f9bae42ddd117f9d6bb4b6c94a49edf8be3b9499"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "TypeKey.sameList_refl",
+      "sha256": "72d8051a0894848c4b2ce008bb2b594e8cf8275db22589d699a40b33c505c428"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "nominal_origin",
+      "sha256": "89f1595db675df52331d99436fdb0d65420ad49b6ad8fde5b98243c4910946f4"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "preserves_identity",
+      "sha256": "dc1f1f07185cf6baf82d9f621fa1a8f453c43192a43a075ba1cc53e0c56884c6"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "normalize_injective",
+      "sha256": "a14ee50c4207d8784c07bac0171aa976835cba7e3860608eedba7f3220e09752"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "original_declaration",
+      "sha256": "7e8681f1550574ae82ae66385cb20b6bd6610a47eb1f856bf29e3e3d99991ce1"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "nominal_identity",
+      "sha256": "0849c3a3c661da76d0f98c8ae37384704fa71eb7b2ecde8a9a59f6615637e294"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "enumeration_identity",
+      "sha256": "e4d7bfea546bc12e0d6b5ca4309425955387d900f76fcd6ee7d8ec2a06e27596"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "sameParams_true_iff",
+      "sha256": "20711e7faa3ea08f3e306108bb78a2bce064f8a1ba6173f09891dcd56c34bb1e"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "sameParams_false_iff",
+      "sha256": "31fcc85c95c13c91909e52f9100bb675e5fd7a6de9221286a1ac92e050b46198"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean",
+      "name": "sameParams_none_iff",
+      "sha256": "da233bd3e1cb40a9931897b797f77da7b485ca44690ecde2635bfd834ca0af59"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/UnitPaths.lean",
+      "name": "uniqueSymbol_iff",
+      "sha256": "caf3fd128102c60ddbfff7b086257757cd802f39545a23621bdcc957fa28bc1a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/UnitPaths.lean",
+      "name": "unitTail_iff",
+      "sha256": "a1dd3eefd3875eb4223b26d10b9bbfdca63545441169ad30c119143605e77a4d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/UnitPaths.lean",
+      "name": "unitBase_iff",
+      "sha256": "095ff5b2ac655cd72ebe505b318de3eecca244e317c8134ba287c956b52b4707"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/UnitPaths.lean",
+      "name": "UnitRoute.decl_exists",
+      "sha256": "40562ceeee4ee633856bc6a7bad178f530dc650f68fa9c90c78ba9548c68126c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean",
+      "name": "member_chain",
+      "sha256": "91bd888345e497627e8ede008a1d1666a64f4bca895844ef3e04854b421050d5"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean",
+      "name": "member_chain_references",
+      "sha256": "8babcf1828e08a8ef0b4104764f09eaa9ac40f46052eb89f744877472306dd71"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean",
+      "name": "nonpath_receiver",
+      "sha256": "570d0498858b7ebbe946efa78b1978348993ebb0264f7a89765c5748f596ac9d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean",
+      "name": "mapping_key_path",
+      "sha256": "7c4d557120538fc4ae723e3785c001ed2ed3f67d489d2426f37b9a6666ba07e3"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean",
+      "name": "mapping_key_elementary",
+      "sha256": "1be20ecd883a7f55237b9949f21071083e777b30db93218225cc258d2389aedb"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean",
+      "name": "symbol_namespace_alias",
+      "sha256": "ae0c11aa11806d5b714b03525addd54845f10cf2ccdec61666e252f9464a187b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean",
+      "name": "transitive_all",
+      "sha256": "51f02d7b6c518d22f013a5fd906d3dbda593653cfeb5178528b81563a3177701"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Relation.lean",
+      "name": "Through.append",
+      "sha256": "ee51a1bb94563d9da9c2b8496dab1e8a800580b11de01632ec3ba391aa946183"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Relation.lean",
+      "name": "Step.decl_exists",
+      "sha256": "392db53a0f0bc783381416d83a5367fa9f560788d1ca34f67a7ef9dd5391a638"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "bodyDecls_length",
+      "sha256": "3aa4414b292a6502d101abb7f204c503181cce2b3d19b5ef685dbdae931bdded"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "no_container_layout",
+      "sha256": "20088fb185062e34d9e436d98b92bdfcadfb7663386af774ee194dbc9f8a0fe1"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "empty_layout",
+      "sha256": "e78ad3e7c77d1706e529ffd2e4ed0e5e7559efcf5b54b497c3fa777b534891c0"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "OwnerLayout.append",
+      "sha256": "0876127358ed580b88810ccda4a577a5728108b19c1d6f3ba2a1b6b64cf0e849"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "part_no_container",
+      "sha256": "a06342e068acb07d1fde4a9bec24f1f759a74f67901035d5fe6d08d1da5fdc3b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "parts_no_container",
+      "sha256": "8e348553ef5fca4cd0b7a0ced3d052b141bf86c53ba1b9e44e918dccd7908fc8"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "container_layout",
+      "sha256": "e6a7fb5288c7e99bd3a59707dfc3fd94b0fc33fe75adf7c5f5e71bfd0888f460"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "top_layout",
+      "sha256": "2fd66d367c11c5ff5a779bdf7a6d9ca33d76b3cd21b628d1caae5ebfe48a8d61"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "tops_layout",
+      "sha256": "39e8d2f7c96c9044b5660c05a99e950a6efb062fbabd84da327e98ca2ab56686"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "source_layout",
+      "sha256": "c7e2bee7bf06910d2dd6593b29a74e56de043481eb1d133bd9eeed35e3a84c80"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Layout.lean",
+      "name": "Member.in_owner_body",
+      "sha256": "96e6b43544b8aa965f7440b26f57d6c6d612e7d3ffb3c6b377475d44585ac707"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean",
+      "name": "references_eq",
+      "sha256": "87a3980e9cef5f23646abf84d9f9f634b9d981d8018433b1d47eb0ca72c1b347"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean",
+      "name": "references_sub",
+      "sha256": "65619fa981b68b7489d996432eb8dbfcd940a4a9f1ed1d64e57abf95640764f4"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean",
+      "name": "append_paths_subset",
+      "sha256": "01f85c00bc7758fd9302a8b3f9a28fa3f3522d3025f38907c6f99c9683045be7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean",
+      "name": "paths_sub_references",
+      "sha256": "f092701f5595cb7c043d7c2d525cee845dc3c6ded57397a9be55045ba8e3ac3b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean",
+      "name": "expressionPath_in_references",
+      "sha256": "71ff11e1b8e9b25c8c94fdde90d0001cc98ee0a6512011cf93d04fbff35961ea"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean",
+      "name": "expressionPath_in_references_of_sub",
+      "sha256": "35279be40fbe5021e0e7b740656e544821b4e90c192e490e45509af9cc5a1f6d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Specification.lean",
+      "name": "Admits.prefix_unique",
+      "sha256": "c325a8e42c065de93a4961a45ec978a7a7bd1bcbe03e2b99db06921e51b38035"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Specification.lean",
+      "name": "Admits.coherent",
+      "sha256": "520e2dbf2bd978a7fc8530d1e9fcca60c1a3f8fff8692cb3c9cecc668ce9fe19"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Specification.lean",
+      "name": "local_shadows",
+      "sha256": "fa2f1315032955e3ba3204bfcf0efe143582ff9fd15db0ad95a2d15979404f05"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "base_identity",
+      "sha256": "64b7086fa282b68553a8c06082584c3627d57dea3431038baf742dbde58b5090"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "derived_identity",
+      "sha256": "04dba41e4353d9be25d7e90c0a7d36fb7be823c3a8b762605169929d29d6b397"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "inherited_distinct_parameters",
+      "sha256": "ac20e9e01311f8bc1222603f34e5f30ec7bae9f298045a18e14aaefdcc3db2ff"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "two_units_same_spelling",
+      "sha256": "d4810f833cfb7aa78abb0144c3b786cbc996795ca96501e69c70bf8fc67947d3"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "aliases_same_parameters",
+      "sha256": "f4d1e2079109000d335547983ac79995a56710bd165c58f15f7245c303823a68"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "aliases_distinct_declarations",
+      "sha256": "b6467c35dd78f3a39af62b906bba510d6ea8b6a4148b18b33725a450dc0b72dc"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "multihop_type_identity",
+      "sha256": "9a64e30986d6531f332a1415192dcf8bf7d0c3c02fc624624a76481c95624957"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "cyclic_alias_type_identity",
+      "sha256": "ca619c23d15db1a196351719e996dd87e4324393c0a417d516565af8525863e4"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "diamond_type_identity",
+      "sha256": "b963d021a913ee95bdc72c1ff3802fb94d81de0d89427f7974b3f7b4d2d2ea6a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "missing_type_refused",
+      "sha256": "26a59c65cccdc3372c3bcb6b3c76e0f02f08b86c91eddb6f50ad4598a4356578"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "ambiguous_type_refused",
+      "sha256": "4b1e2876dc8c2b12905b3ac8faa3614595e128ac3e354e3e7c1f8a777f9ac00b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "unresolved_is_not_distinct",
+      "sha256": "57dffd8fec60596e4c35cd7dd81f303f3d484b5db684d46236cd754018c1e8da"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "missing_declaration_refused",
+      "sha256": "eced7120fb53ddf2c74479fafe4e760e80009636f9ab8f3f113479424df42a90"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "first_original_owner",
+      "sha256": "3d1654dd180315b711da1fafec93e3a28a70e898f407108418b26611cfd10d3b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "second_original_owner",
+      "sha256": "dd9ce9b688579b8641ffd327a3c131884779900405eb6eced9a572d35384d007"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "storage_memory_distinct",
+      "sha256": "eb0c8de4ecb9fb406b7958b9eeb1882d31b3a7cd66c7f4f0438eea435086689b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "external_calldata_public_memory_hides",
+      "sha256": "14ecc90102326b0ba5976f230e6880aa20db9458d43236c19e1066ec1dda7c3e"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "public_memory_calldata_distinct",
+      "sha256": "7bcb5b380bab7e0b0675bda6954b1f1c198071f1fc7dabc67e01fe9744708e35"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "internal_memory_calldata_distinct",
+      "sha256": "75e9b62170aee5a848dd58f502ff130cb149e37a3dee03d2c119bd27a70c891e"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "internal_storage_memory_distinct",
+      "sha256": "4e405b5cf65433af3b869aa662b84358165098ec4e5e648e40d349872418c8bc"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean",
+      "name": "hiding_unresolved_refused",
+      "sha256": "ddf5ab6b6285171a0c75dea77135268150eb559bd8f2a66c2ef859faf9f9fadd"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureHiding.lean",
+      "name": "externalKey_nominal_identity",
+      "sha256": "d93bc82fe84eb287653f601b8a9b1c7473d1078d8de42077611dbccc498de69c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureHiding.lean",
+      "name": "externalKey_all_nominal_identity",
+      "sha256": "ade47375b26eed5357a3cab068394f64eb3f2ea4d7907c7d02b61b92e487a3de"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureHiding.lean",
+      "name": "hides_none_iff",
+      "sha256": "bd953e3e0a234f8394a639350fb80a0558f03fe732d653e336948488f01c07f7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureHiding.lean",
+      "name": "hides_originals",
+      "sha256": "11f1a64aba18a5b7f065262e0a578a12101e7cad4220d9fc36cc2e70c726c166"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "multi_hop",
+      "sha256": "1bf9b351f4cb56494024bea47c89f8bb70e50f1e95a0aec5479ca5aeb2f124af"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "missing_symbol",
+      "sha256": "531d3856c29ed65dcf8392b8bb949a2c426d803ac66cd99bf3e88ea2ff793336"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "ambiguous_namespace",
+      "sha256": "5cc5297372ed8afd093699152de79cfcc4297f05d43b29605575b3b5b3d13922"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "left_identity",
+      "sha256": "e31a390ddbb153b6f122043b84f1f4e4f6cbb7d4e00cc853f77ac46d92ef8e18"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "right_identity",
+      "sha256": "400ecccc51c8e10efd66275fe66f3ef3f8228a57fb76929ca681acb9f36b6c06"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "symbol_namespace_alias",
+      "sha256": "0b44996658881023c49d045db70b25311d62586a860e498a1e456ad297938e28"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "transitive_all",
+      "sha256": "7cc2ae88e99093d517147651ba09f5109a19f302281df456ea1c54c5c9bbc0e8"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "diamond_identity",
+      "sha256": "26827248a1ac6192c5ba96af53c092c47fb61d8fb54a001d02d097db411a8df4"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "cyclic_namespace",
+      "sha256": "fb045ef0d628a0b058fdfa667d40132027f35fe73521ced3a9f7215138d81e03"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "private_base_fallback",
+      "sha256": "54bc200b0bbd0ac24e3672aa27bccc676ccf317c954099546ba0a7dac94de3a2"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "visible_base_shadow",
+      "sha256": "34315c03afccce30cbfd4edff53dd556f59f9bbef7b5a322c71f624701037267"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "local_shadow",
+      "sha256": "ecf04834c2755fc4ede85ad74cdc9016f279cf0c47eee4da2b9ba768d328c15f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "qualified_base_identity",
+      "sha256": "868aee7ae20734ad8ea3bd1f04e3408ab6067a54f86b8c2d62b5cf1b336cdb53"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "inherited_struct_identity",
+      "sha256": "9254f1764006c11bd2f954bc1e2219b32ded5830fbf9b2552c61be343e8abf37"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "ambiguous_base",
+      "sha256": "002ecf77727fb26a7532e9d6c09b98c7bc5515d81b3557b83d531804d8f9cff3"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "qualified_base_query",
+      "sha256": "fad283ef22865037325bde082ea933c91c06c1a88641cc578af725f2d8948c33"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "inherited_overload_query_gap",
+      "sha256": "9f7db9dad1b29de1f845bd38cbcb19c6bf9152fa6429bb696e41e283ea2c7c29"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean",
+      "name": "qualified_overload_query_gap",
+      "sha256": "ac7998e0b8045d78f905db1809341bd4b79bd3d1eb7c929a9687d52936c1d071"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Lookup.lean",
+      "name": "mem_members",
+      "sha256": "579471f074851e959ac9e68933101e9159627ca7a3215919c0b51853928364e4"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Lookup.lean",
+      "name": "mem_step",
+      "sha256": "a1436ccb182c756418c1d9800927d202298ad3f74d7abf7b3a0fc13c4994daf3"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Lookup.lean",
+      "name": "mem_through",
+      "sha256": "06172a063b098f02bc2764a88cb79fb413e8c0f9e639813305e75e2c6b92d38f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Lookup.lean",
+      "name": "mem_lookup",
+      "sha256": "f6c2231cf2e73cd4462fb077711624c4d3500c249d9bddf92a6d9063802de9c6"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/TypePaths.lean",
+      "name": "tail_iff",
+      "sha256": "6690cb9673c4a8ce2a0e3f7a2db10f01a4c276925b810dea133c46003ca211ac"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/TypePaths.lean",
+      "name": "lookup_iff",
+      "sha256": "e499e455a8441b80d33519a57fa7f13416035ab8a2ac2be88e667bcc81b9ddb8"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "accepted_hops",
+      "sha256": "61619f1a49d4af51bd431d96ee821fa6f733948e1bac33f5a46e0ab061d168d2"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "refused_missing",
+      "sha256": "b92034acce6378b21be13a310bd9f40c16cb04a722dea67f428f35d5f03470a6"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "local_shadow",
+      "sha256": "fcb95f8eb7dcf9576b613de0936d5763005a3378754783c129e5f444c251f0c6"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "cycle_accepted",
+      "sha256": "61ed90a82f28e32fabd4bf8410d7eb53fd708d82041280bd435808673045bf4b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "diamond_accepted",
+      "sha256": "ce67688c10dcc494268a25e853d8e128954c664b0e73d6cfc0fc326618271f72"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "inherited_type",
+      "sha256": "fffe3bb67eafe05ca478dda2ffe3edd58e04e67dbc4a01e58368424741c95aa0"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "private_base_global_fallback",
+      "sha256": "c7bb6ae87ee28f074138149489b04b35ef6939b62ed276ad113f5d8c2bf97a72"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "own_private_shadows",
+      "sha256": "e9f9610548200290e114a2fe0f627a61a828a307c456cc9feff01bbacaf8e872"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "visible_base_shadows",
+      "sha256": "b216ad0ec2600956c54824222325035bfcf8d23d2228f25d368542d65ab205fa"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "ambiguous_base_not_followed",
+      "sha256": "c011724ca4cf9666f22dbe0712a65420a38d0d5c53c52208fde80ffc36cab990"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "ambiguous_base_member_refused",
+      "sha256": "e915c7590b54cfae2862ffd1dfaf30e7518c3f8b9d1486030a9e917668449f44"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "ambiguous_namespace_refused",
+      "sha256": "384559ebdd08087d88b91e94761537e93bf7d65652e6151ea14f55c05be46d8d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "left_identity",
+      "sha256": "c8e33165f7c680eb796d29c74029ef47f0e90d57c31ce734946ed7475c358cab"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "right_identity",
+      "sha256": "2ac1b694455a9870f3e01421b6694648ef7456b23ee736096a0aada2e3410d2c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "foreign_scope_refused",
+      "sha256": "19d3b00c0242f93b33eb5478daae2c0407deb291d6bb700e98918c14162633c3"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "missing_scope_refused",
+      "sha256": "e8e7345e82a98762d2915590e289a0643946f11cb836f99ac01295787de40ec0"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/CheckedControls.lean",
+      "name": "noncontainer_scope_refused",
+      "sha256": "1828a6913324025ff8a0648129a512c1b1673ff4e6513cf59642e07d70b28118"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "visible_iff",
+      "sha256": "dda04b2eacd5bd78c84979efb5b3ecb66680bd704f5849630c9ed17911ae1d9c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "mem_visibleMembers",
+      "sha256": "31c20e24575fa21635ab087df566f4191af425ba057be8640346fce0fc352cea"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "mem_declIds",
+      "sha256": "fed88ebd8ce09278ab9e5846bc001bea20c8b0947dfc8f3219d543192e75bead"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "mem_baseTargets",
+      "sha256": "5bb5ebdcc0339ae50f15ab2dd1dbf864ed14086551cb8744fbd7c8a8a99ef525"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "Through.decl_exists",
+      "sha256": "905552dee179f0bd7ae8325da77512428e2a02186fcc98da850ff8c21b9031be"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "Qualified.decl_exists",
+      "sha256": "39c0ef466a8b8f5770fa6df052b040b46bb52f59fc0cc6c12433dd0a5de514ef"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "decl_mem_universe",
+      "sha256": "2ed70bf5280292522b862b2b8c7b93081e8c65c950a81edcc7fe1b1bd5c7230c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "mem_baseSucc",
+      "sha256": "40dcd42d3aa9358857c08ac3f64ea862232fe3d4259eb17465b2926d275606f6"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "baseSucc_closed",
+      "sha256": "cbf1ee3b12606b9d886e141baad38df7719b70042651693f4f2c8b774bad4472"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "InheritedFrom.reach",
+      "sha256": "458a159615ab002b82c9642b7c0bcc8d2bcf91d53bb0c28dcacce0fbe97e2aab"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "inherited_of_reach",
+      "sha256": "b9f826ff0343ed4f74a8d73b0f80bfaea6b990acedbcf5ab8d629a229008ae2b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Inheritance.lean",
+      "name": "mem_inheritedMembers",
+      "sha256": "7363756fa96708e8e0505bcb3d41110fd09a198d7fc7c26be1d555f4a5bd2348"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "unhidden_iff",
+      "sha256": "c8d3c9f03f15dbb9b74b426cd8c7e21319be206ecce62060332a3f1852fdb30f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "mem_select",
+      "sha256": "6c1f568ac3f5bb78bd391e67fa96c449c9ec50d76271c91656b2c03a391caff8"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "mem_walk",
+      "sha256": "471e32ea4628f7370661fd4d7fae87fdece1ac8c5dd9417a20143e93248ee847"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "WalkMember.owner",
+      "sha256": "b83a6e352517dc96fc08493975c2ba95587a9028e448bf2f92e9328675090711"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "collect_iff",
+      "sha256": "47ac1967df2c91c4bd4ce95a11e40c3833ab4eeb096731cef44b95197ca80871"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "collect_identity",
+      "sha256": "f20364ddb7233fabb82fe7508bdbd91f71d8ccf3f0f6f35beb1fbdf262c0937d"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "ready_iff",
+      "sha256": "81301c82b9a322ccbfe96ae2e4ddee1672399dfe5805bfd5f832f8edc6af2b9c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "unhidden_total",
+      "sha256": "10a6009a3387ec4723a1e739084b279e21716cca5b23b704abdb2815f30f0ed9"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "select_total",
+      "sha256": "445ec3f378120fb9a4d0e0d6d0e12b1f9212795887d9544fdc2161b3fed5661b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "walk_total",
+      "sha256": "3cd247892d6f27fa5ed49d248b08a54bce811417d0437e28211275c7b55121e9"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "collected_iff",
+      "sha256": "35cd477025402b555ad7ec5c068106b3ac7df8b730837c6931da4cb64f925e98"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean",
+      "name": "collect_normalizes",
+      "sha256": "3abc742f11288f95f1f41c38f5efc93d0230d609f7c21fc823f0c30957ecebeb"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "mem_namespaceCandidates",
+      "sha256": "c2c05e3e24e68f48951c57b78bc1ac0d5e965e54e0a93b050364c569438125ad"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "inherited_empty_iff",
+      "sha256": "bb642e55f81c5685520de466988126f44686c2ffe8055c6a7b90e88a0004137f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "mem_headCandidates",
+      "sha256": "4a5f71a80422e6509561e9b7351a0eec49845238d705e9bd9715dbdb438cb2e2"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "compatible_iff",
+      "sha256": "a3acd71f76ff4ceb9cf50d214a62238d86eb47171852b584d2e4d992015b0c3c"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "noClash_iff",
+      "sha256": "3f16b438a6e3e5d8c8e6e9eab792e393a95072a6e802fc42c33a767d4bc02d4a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "checkSuffix_iff",
+      "sha256": "8e8238381bc83af63499290bfe4433b91cab4c21c552cfc2cf218c83d6c8dc0a"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "resolve_iff",
+      "sha256": "928926037d8f6c1014ebcb9db1181a0978ef753731973f12aff28b4f47fb76d7"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "resolve_noClash",
+      "sha256": "fc533743c20540ede119c0f8220c567f8294a00e5eb8991bad0bfce6d758209f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "InheritedFrom.decl_exists",
+      "sha256": "0b268ad86f570b38d7c6f0a3ffe445c8c11f53fa8c38cad74703f41c58657112"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "NamespaceStep.decl_exists",
+      "sha256": "9f9f2406276ecc4e4f7f8e260541cabeab41b6f888183f35eb14dcd3ae9cf081"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "Head.decl_exists",
+      "sha256": "3b413239e7d1faf2b6d9434900101d68aa9533431c28b5b2c092b42ee60494da"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "Admits.decl_exists",
+      "sha256": "0020458a0f23e7cbe47ee8dc1011ae530d7a047ee3ec1eb8db972c66ba83b731"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Checked.lean",
+      "name": "resolve_identity",
+      "sha256": "2c175cdc3c501f9d8229482fc736cae1e033e8b349c62c265bb08c57a21eb569"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Controls.lean",
+      "name": "multi_hop",
+      "sha256": "6220116d921c7f3744dd16b432c02d2f5daedac69433792b5a6d004865edeb86"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Controls.lean",
+      "name": "missing_symbol",
+      "sha256": "3f6f6a5b8ae607a19dadacbf41dcdd9b33a6f7761d7f8cdfc21ad3f13db0a24b"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Controls.lean",
+      "name": "cycle_path",
+      "sha256": "30d218bfddd82fb40994edff760fa4eb283b8f21f7c0afcd71186c32c274ef98"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Controls.lean",
+      "name": "diamond_identity",
+      "sha256": "c26a7cf4e2355890843a34d8b4baed7261b42dde1092e7b729707147d79b0823"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Controls.lean",
+      "name": "first_owner_left",
+      "sha256": "5247f184489cfb7e37fda7ff5b7e147dacce93d4c8f14f955b7f34312bdf560f"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Controls.lean",
+      "name": "first_owner_not_right",
+      "sha256": "279a5f6e3d60f4d782666324af6804d0a7b36f0845ffdeed1c64c9a8d3fdf8b5"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Controls.lean",
+      "name": "second_owner_right",
+      "sha256": "dc8d28084edbdaa96c1be5d23abad278684d57eb750404fccf4a34a73398ce87"
+    },
+    {
+      "file": "Solidity/Frontend/QualifiedUnits/Controls.lean",
+      "name": "second_owner_not_left",
+      "sha256": "202d432c6672a9fd24d5d29c0b4cc97c9947f812ec4ef3c95007b897194c1af1"
+    }
+  ]
+}

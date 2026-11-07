@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintSliceNative.lean:Solidity.Backend.MemoryOps.source_guarded_uint_slice_native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceNative.lean:Solidity.Backend.MemoryOps.source_uint_slice_raw_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSliceNative.lean:Solidity.Backend.MemoryOps.source_uint_slice_raw_native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

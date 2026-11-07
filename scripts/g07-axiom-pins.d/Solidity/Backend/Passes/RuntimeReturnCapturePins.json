@@ -1,0 +1,53 @@
+{
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.failure_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.failure_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.instantiated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.insufficient_private_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.suffix_instructions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.wrong_capture": [],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeReturnCapturePins.lean:Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.wrong_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

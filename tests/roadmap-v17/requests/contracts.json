@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "module": "Solidity.Roadmap.Contracts",
+  "declarations": [
+    {
+      "name": "Solidity.Roadmap.Cert.refines",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Roadmap.RefinesUnder.completes",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Roadmap.RefinesUnder.diverges",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Roadmap.RefinesUnder.safety",
+      "kind": "theorem"
+    },
+    {
+      "name": "Solidity.Roadmap.RefinesUnder",
+      "kind": "definition"
+    }
+  ]
+}

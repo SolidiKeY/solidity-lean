@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "requester": "solidity-h62-5-20261106/statement-graph",
+  "requesterHead": "372e46284787e57e294d7c549f325f82f24ccfb2",
+  "hashOwnerTicketHead": "78c110f83dc1a30700acd1b5bd34b19f61da6ccd",
+  "hashOverlaySourceHead": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+  "hashOverlaySha256": "3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff",
+  "hashOverlayIdentity": "identical-to-previously-validated-partial-overlay",
+  "hashOwnerLimitations": [
+    "full migration gates pending",
+    "Syntax.Raw pending"
+  ],
+  "destinations": [
+    "solidity-h55-sol-20261106/g49-final-theorem",
+    "solidity-h62-6-20261106/migrate-roadmap"
+  ],
+  "coordinatorReportedCurrentOwnerDeliveryPending": [],
+  "deliveryAcceptanceAuthority": "host relay journals; not independently inspected by this VM",
+  "ownerAgreementEstablishedByRelay": false,
+  "newProofValidationEstablishedByRelay": false,
+  "contracts": {
+    "file": "Solidity/Roadmap/Contracts.lean",
+    "line": 1104,
+    "theorem": "Solidity.Roadmap.PublicCorrectness.transfer",
+    "ownerRoute": "solidity-h62-6-20261106/migrate-roadmap",
+    "status": "pending-input",
+    "requiredFix": "exact-statement and original-trust preserving",
+    "guardRelaxation": "excluded by H64"
+  },
+  "g49": {
+    "ownerRoute": "solidity-h55-sol-20261106/g49-final-theorem",
+    "artifact": "h64-shapes.json",
+    "status": "source-located-awaiting-elaboration",
+    "declarationInventory": "Static exact-master source inventory verified; no fresh elaborated type export",
+    "sourceCommit": "706e36825929d6d0084dc08b88de9349abcd25aa",
+    "sourceInventorySha256": "af4f1a69410a9df1f408d2e2d9d9b82b39f926ce48c6bb601c16092514ed733e",
+    "currentCoordinatorRoute": "Claude move6-20261106/g49-final via coordinator",
+    "freshLeanRun": false,
+    "premisesDischarged": 0
+  },
+  "pendingIds": [
+    "G49.01",
+    "G49.02",
+    "G49.03",
+    "G50.01",
+    "G50.02"
+  ],
+  "routingQuestion": {
+    "id": "Q-H70-CONTRACTS",
+    "status": "resolved-by-coordinator-wait-disposition"
+  },
+  "constraints": [
+    "same original goal and branch",
+    "original budgets unchanged",
+    "no original-file edit permission",
+    "metadata is not discharged proof",
+    "relay is not owner agreement or validation"
+  ],
+  "latestCoordinatorDisposition": {
+    "requesterHead": "21ef7578244301459a7b76b887a7af908cd384e0",
+    "productionInventory": "staged for Claude g49-final-theorem forwarding; no stale Codex owner contact",
+    "consolidatedCompatibilityRoute": "solidity-h62-6-20261106/migrate-root-gate",
+    "requiredInputs": [
+      "Solidity/Roadmap/Contracts.lean:1104 exact-statement/empty-guard repair",
+      "Syntax.Raw compatibility"
+    ],
+    "retiredMembers": "do not ping; coordinator exact cumulative source artifacts awaited",
+    "freshThreadCreated": false,
+    "H86": "unavailable raw evidence is a regeneration limitation, not invented verification",
+    "H90": "new controls name the guarded regression in generated docstrings",
+    "ownerAgreementOrValidationInferred": false
+  }
+}

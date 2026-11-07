@@ -1,0 +1,37 @@
+{
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.capture_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.execution_unchanged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.prefix_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteValuesControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteValuesControls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

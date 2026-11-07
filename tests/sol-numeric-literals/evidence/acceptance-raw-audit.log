@@ -1,0 +1,7 @@
+word table: 98 fixed words, 439 prefix proofs, 30 serial modules
+paired fixtures: 42 typed Lean rows, all spellings covered
+solc fixtures: 42 exact results, 18 accepted; 0.8.38+commit.1835d247.Emscripten.clang
+differential: 42 paired spellings, 18 exact accepted values, 5 explicit stage differences
+acceptance negative controls: 5 inventory mutations and forged completion state rejected
+implementation acceptance: 42 modules, 652 authored declarations, 991 kernel declarations, 32 inhabited constructors, 68 scanner controls, 42 paired fixtures
+open assignment obligations: target-import-closure, static-gates, coordinator-registration, full-runtime-gate, immutable-handoff

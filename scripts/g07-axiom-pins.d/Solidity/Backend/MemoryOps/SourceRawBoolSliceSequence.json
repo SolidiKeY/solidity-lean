@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceRawBoolSliceSequence.lean:Solidity.Backend.MemoryOps.raw_bool_values_first_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolSliceSequence.lean:Solidity.Backend.MemoryOps.source_bool_slice_raw_late_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

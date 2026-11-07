@@ -193,95 +193,642 @@ not another emitted execution. Independent finder and skeptic reviews found no
 proof or premise defect. These close the routine statements, not public Source,
 ABI, world or resource/session adequacy.
 
+## Reference-call sequencing
+
+The following completed components consume the published memory/tuple return
+producer with its original `Form`, full `Entry`, `NoAliasPromotion`, actual
+intrinsic call outcome and exact frame/allocation premises.
+
+- [ReferenceCallReadback](../../Solidity/Backend/Passes/ReferenceCallReadback.lean)
+  derives the receiving capture/update Input from the actual returned map and
+  full representation. Map and operand words precede every saved tail. Exact
+  cost, allocator growth, cursor and private-frame words are retained. The
+  mixed tuple client allocates a default object, returns the old array alias,
+  captures 7, updates the old scalar to 9 and reads back 7; stale-map and frame
+  refusals are checked.
+- [ReferenceCallCaptureFailure](../../Solidity/Backend/Passes/ReferenceCallCaptureFailure.lean)
+  retains the actual successful call prefix before a failed returned-alias
+  read. It derives each tailed capture Input and joined target revert iff the
+  operand ordinarily reverts. No post-failure state or map is supplied. The
+  next free physical cell contains pointer 128 before declaration, then 7
+  after successful capture; no zero-initialization premise is assumed.
+- [ReferenceCallArgumentFailure](../../Solidity/Backend/Passes/ReferenceCallArgumentFailure.lean)
+  and [Prefix](../../Solidity/Backend/Passes/ReferenceCallArgumentPrefix.lean)
+  use one emitted tuple call: runtime index zero succeeds with reached cost
+  one, while index two fails in its first argument with cost zero despite a
+  true static allocation flag. Actual save execution, full representation,
+  zero prefix allocator growth and arbitrary saved tails are proved. The
+  heap cursor stays 130 while the private save pointer advances to 22.
+
+The controls retain complete ordered selected-cell vectors and full stacks.
+They are intrinsic/symbolic-word results, not independent Source, recursive
+call, approved-profile, public ABI or session-resource adequacy.
+
+## Source assignment arithmetic
+
+[AssignmentSubtractionPass](../../Solidity/Backend/Passes/AssignmentSubtractionPass.lean)
+connects the independent V07 Source clause for `(i = a) - i` to actual compiled
+capture-prefix and subtraction execution. Original Source/target reads,
+integer and result ranges, `fuel + 4`, frame, Input and value certificates
+remain explicit. A canonical machine, selected map and word precede every
+saved tail; full prefix MappedOutput and joined code execution are derived.
+
+For `a = 9`, `i = 7`, both Source and emitted code give legacy 2 versus via-IR
+0, while retaining `i = 9` and the old array, allocator and sentinel. Reversed
+operand code actually reverts; stale RHS, frame and saved-tail corruption are
+rejected. This is local integer/result correspondence and physical target
+preservation, not a global Source-heap/world relation, general overflow or
+narrow wrapping theorem. No P8 producer is assumed.
+
+## Unchecked unsigned addition
+
+[SourceAdditionValue](../../Solidity/Backend/Passes/SourceAdditionValue.lean)
+consumes the published V07 addition transport and an actual `CompiledVal`.
+Valid widths, Source integer-local alignment, operand ranges and reads, the
+explicit unchecked frame, `fuel + 3` and full target `StateRepr` remain premises.
+It derives independent Source/intrinsic results and their value relation, then
+chooses one representing word before every saved tail. Successful emitted code
+preserves every non-stack machine component.
+
+[Controls](../../Solidity/Backend/Passes/SourceAdditionValueControls.lean) use
+actual accepted code: uint8 `255 + 1` gives 0, the same code on `1 + 1` gives 2,
+and emitted unmasked full-word addition gives 256 on the first input. All six
+fixture cells and the full stack are observed; wrong unmasked value and saved
+tail controls discriminate the results. Exact standard-only axiom guards are
+in [Pins](../../Solidity/Backend/Passes/SourceAdditionValuePins.lean). Independent
+finder/skeptic reviews requested the nonzero and actual unmasked controls;
+both were added. This is a local arithmetic/value application, not effectful
+assignment sequencing, general Source heap/world or byte-level EVM adequacy.
+
+## Effectful assignment and unchecked addition
+
+[AssignmentAdditionPass](../../Solidity/Backend/Passes/AssignmentAdditionPass.lean)
+extends the local-value application to `(i = a) + i` using the published Source
+assignment transport and actual captured operand order. It retains valid
+widths, initial integer-local alignment/reads/ranges, unchecked frame and fuel,
+original compiled-prefix Input and actual operand certificate. The theorem
+derives post-assignment local alignment and chooses the canonical machine,
+selected address map and result word before all saved tails. Each tail retains
+the full reached MappedOutput, prefix execution, operand execution and joined
+execution. No wrapped result-range premise is required.
+
+[Controls](../../Solidity/Backend/Passes/AssignmentAdditionControls.lean) inhabit
+both pipelines with `a = 255`, `i = 1`: legacy returns 0, via-IR returns 254,
+and both retain `i = 255`, all eleven fixture cells, old array, allocator,
+sentinel and full saved stack. Stale RHS, insufficient frame and corrupted
+tail are refused. The difference comes from assignment/capture effects, not
+from swapping commutative addition operands. Exact guards are in
+[Pins](../../Solidity/Backend/Passes/AssignmentAdditionPins.lean). Independent
+finder and skeptic reviews found no defect. This remains local Source integer
+alignment plus intrinsic/physical execution, not Source heap/world or public
+resource/session adequacy.
+
+## Effectful assignment and unchecked multiplication
+
+[AssignmentMultiplicationPass](../../Solidity/Backend/Passes/AssignmentMultiplicationPass.lean)
+uses the published V07 multiplication transport with the actual assignment
+capture prefix and compiled operand. It retains the original width/range,
+Source-local alignment, unchecked frame/fuel and full compiler Input premises.
+It derives post-assignment alignment and full reached MappedOutput, choosing
+the machine, map and word before all saved tails and joining both actual runs.
+Existing arithmetic and compiler producers supply the soundness arguments.
+
+[Controls](../../Solidity/Backend/Passes/AssignmentMultiplicationControls.lean)
+use `a = 255`, `i = 1`: legacy gives 255 while via-IR wraps `255 * 255` to 1.
+All eleven existing fixture cells and the full saved stack are preserved.
+The same reached via-IR prefix followed by actual accepted unmasked multiplication
+gives 65025, distinguishing omitted narrowing. Stale RHS, frame and saved-tail
+controls remain explicit. [Pins](../../Solidity/Backend/Passes/AssignmentMultiplicationPins.lean)
+guard the actual standard axiom sets. Independent finder and skeptic reviews
+found no defect. This is local numeric/effect correspondence and physical
+intrinsic execution, not public Source heap/world, checked-overflow, ABI or
+resource/session adequacy. H22 external-call construction is untouched.
+
+## Memory scope exit and local-slot reuse
+
+[MemoryScopeBoundary](../../Solidity/Backend/Passes/MemoryScopeBoundary.lean)
+adds physical transport beyond structural block compilation: the existing
+block certificate keeps its exact emitted code, allocation cost and original
+Input. Scope exit restricts the actual output fragment and drops only typed
+locals, retaining the full heap relation, selected map, old-reference identities
+and allocator growth. The canonical machine and map precede every saved tail.
+Exact intrinsic `THalt` reflection keeps revert, panic and divergence distinct;
+target observation transport is equality of the actual code. Here source
+means intrinsic `Prog.run`, not independent `Solidity.Source` semantics.
+
+[Controls](../../Solidity/Backend/Passes/MemoryScopeControls.lean) drop two
+capture locals, then derive a fresh declaration's Input at the actual shortened
+context. Both actual maps precede all tails; full prefix and final MappedOutput,
+joined intrinsic execution and emitted execution are retained. The declaration
+reuses cell 4; all twelve listed cells and the full saved stack are observed.
+Accepted code for the wrong extended context writes cell 6 instead; that raw
+code contrast is not a valid typed joined program. Cell 5 retains its old 255,
+so scope exit does not claim physical erasure. A reached revert follows the
+actual successful capture prefix, with no post-failure state invented.
+
+[Allocation](../../Solidity/Backend/Passes/MemoryScopeAllocation.lean) independently
+inhabits positive cost: an accepted zero-length array allocation consumes one
+cell and transports actual selected allocator ownership from cursor 64 to 65
+across all tails, despite dropping its reference binder. No heap deallocation
+is inferred. [Pins](../../Solidity/Backend/Passes/MemoryScopePins.lean) guard the
+observed standard axiom sets. Independent finder and skeptic source reviews
+found no defect. Public Source/world/ABI/session adequacy remains open; H22
+external-call construction is untouched.
+
+## Expanded-call scope and old-alias consumption
+
+[MemoryCallScopeBoundary](../../Solidity/Backend/Passes/MemoryCallScopeBoundary.lean)
+transports the separate `Memory.Calls.Program` branch through the published
+block/sequence constructors. It retains the original push-free witness, exact
+reached cost and maximum of the private call need and caller context length.
+Original and scoped Inputs are equivalent; the full output heap/map/allocator
+relation survives dropping the extra caller locals. Checked projection lemmas
+keep large concrete certificates from being unfolded during client proofs.
+
+[Controls](../../Solidity/Backend/Passes/MemoryCallScopeControls.lean) consume an
+actual allocating memory-return call, drop its return/capture locals, and derive
+an old-alias consumer Input from the same reached map. All three actual maps
+and machines precede saved tails; all three MappedOutputs and both intrinsic
+source/code associations are retained. The private-frame underestimate remains
+refused. [Observations](../../Solidity/Backend/Passes/MemoryCallScopeObservations.lean)
+include all four heap objects, both elements of the owned array, caller/private
+cells, sentinel, allocator and two saved stack words: 11 intrinsic fields and
+18 target words (two stack plus 16 selected memory words). Correct code updates
+the old object to 8 while retaining the dropped object's 33; raw code compiled
+for the old extended context changes that 33 to 42. It is not a valid typed
+joined consumer. Skipped suffix and corrupted-tail observations are refused.
+
+[Failures](../../Solidity/Backend/Passes/MemoryCallScopeFailures.lean) retain the
+actual successful allocation prefix and scoped failing-stage Input. Argument
+failure costs 0; reached body failure costs 1. Both associations revert without
+requiring an Input or run for the typed unreachable suffix, and no failed-state
+map is invented. [Pins](../../Solidity/Backend/Passes/MemoryCallScopePins.lean)
+guard observed standard axiom sets. Independent finder and skeptic reviews
+found no defect. These are intrinsic/symbolic-word internal-call results;
+independent Source/world, public ABI/session and general recursion adequacy
+remain open. H22 external-call construction is untouched.
+
+## Public selection of the scoped call
+
+[CompilerCallScopeRecognition](../../Solidity/Backend/Passes/CompilerCallScopeRecognition.lean)
+uses the actual value returned by public `Compiler.compile` for the scoped-call
+fixture. Its exact acceptance equation and memoryCalls tag are checked. Fragment
+and private-frame projections are checked, as is reached allocation cost 6 at
+the stated intrinsic entry state. The Input equivalence varies level, frame,
+map and machine at that fixed state; it is not an all-state cost theorem.
+A generic output adapter accounts for all eleven constructors and preserves
+the complete memoryCalls fragment, heap, old-map and reached-cost relations.
+
+The consumer is reindexed only by the proved fragment equality. Physical links
+then derive its Input from the actual returned certificate, retaining all three
+selected maps before tails, full outputs and both emitted-code associations.
+[Controls](../../Solidity/Backend/Passes/CompilerCallScopeControls.lean) execute
+the public selector's actual code and check the complete original 18-word
+vector, skipped consumer, corrupted tail and private-frame refusal.
+[Pins](../../Solidity/Backend/Passes/CompilerCallScopePins.lean) guard observed
+standard axiom sets. Independent finder and skeptic source reviews found no
+defect. Equality with the earlier manually packaged complete certificate was
+not proved and is not a premise. This proves recognition of the middle scoped
+stage, not public recognition of the whole three-stage join or independent
+Source/world/ABI adequacy. H22 external-call construction is untouched.
+
+## Whole scoped-call fixture recognition
+
+[CompilerWholeScope](../../Solidity/Backend/Passes/CompilerWholeScope.lean)
+closes the preceding fixture's middle-only recognition limit: public
+`Compiler.compile` accepts the entire fixed allocation/scoped-call/consumer
+program from the empty intrinsic context. The actual returned certificate's
+private frame and reached allocation cost 8 supply its initial Input. Actual
+execution and full MappedOutput share a selected map before all tails; exact
+allocator ownership advances from 256 to 264 and all four objects remain.
+
+A generic compiler-code association lemma follows typed syntax equality.
+It is kept separate from execution correctness; the physical result follows
+from independent intrinsic program execution and the actual certificate.
+[Controls](../../Solidity/Backend/Passes/CompilerWholeScopeControls.lean) check
+the complete original 18-word vector, corrupted tail and private-frame refusal.
+A separately typed, publicly accepted unscoped program returns the different
+context and changes the owned value from 33 to 42. It is not another association
+of the scoped program. [Pins](../../Solidity/Backend/Passes/CompilerWholeScopePins.lean)
+guard observed standard axiom sets. Independent finder and skeptic source
+reviews found no defect. This is one inhabited intrinsic program family;
+general compiler coverage, independent Source/world and bytecode adequacy
+remain open. H22 external-call construction is untouched.
+
+## Whole scoped-call failure recognition
+
+[CompilerScopedFailure](../../Solidity/Backend/Passes/CompilerScopedFailure.lean)
+uses the actual public compiler results for the complete allocation/scoped-call/
+unreachable-consumer programs. Argument and body failures are inhabited by the
+existing independent intrinsic runs, with exact reached costs 2 and 3. The
+unreachable allocating suffix remains in the program and contributes no reached
+cost. Original initial representation, private frame and allocator premises
+supply Input. Typed compiler transport proves ordinary target revert for every
+saved stack; source panic/divergence and target fault are separately excluded.
+No post-failure state/map or ABI bytes are inferred. These fixed fixtures extend
+the existing reached-prefix certificates rather than proving general Source or
+compiler coverage. [Pins](../../Solidity/Backend/Passes/CompilerScopedFailurePins.lean)
+retain exact observed standard-only axiom sets.
+
+## Effectful conditional-expression consumer
+
+[EffectfulConditionalAssignment](../../Solidity/Backend/Passes/EffectfulConditionalAssignment.lean)
+consumes V07's published `ConditionalAssignments.transport` and the same intrinsic
+assignment/capture/conditional program. Initial heterogeneous context alignment,
+Boolean reflection, all six slot mappings, the actual memory compilation Input
+and the result-value certificate remain explicit. Independent Source execution
+and the full caller post-relation compose with emitted execution, full
+MappedOutput and result readback. The machine, selected map and result word are
+chosen before all saved tails. No P8 producer or desired final relation is assumed.
+
+[Controls](../../Solidity/Backend/Passes/EffectfulConditionalControls.lean)
+instantiate one emitted program for both runtime Booleans. The selected true arm
+overwrites the caller's original condition while the fresh snapshot stays true.
+Complete observations include all five original locals, both captures, allocator
+cursor, independent sentinels and stack. Actual compiled eager and recapture/
+re-evaluation suffixes produce different complete vectors. Joined readback,
+saved tails and insufficient-frame refusal are checked.
+[Exact axiom guards](../../Solidity/Backend/Passes/EffectfulConditionalPins.lean)
+use only observed standard axioms. These are kernel and symbolic-word results,
+not public admission, world/ABI or external compiler/EVM adequacy.
+
+The changed-tree checkpoint attempt stopped at its original 300-second bound
+while checking the pre-existing Source/Horizon dependency; later global gates
+were not reached. The exact published conditional producer and these consumer
+files pass separate serial per-file checks against their checked imports.
+The failed combined attempt remains a failure, not a substituted passing gate.
+
+## Context-correlated memory-reference capture
+
+[RelatedMemoryCapture](../../Solidity/Backend/Passes/RelatedMemoryCapture.lean)
+consumes V07's published `related_memory_capture`. Independent initial context
+alignment derives the selected Source-reference relation, both context-extension
+relations and exact caller recovery after dropping the temporary. The actual
+memory certificate's original Input supplies emitted execution and full
+MappedOutput with one selected map and machine before all tails. Pointer
+readback uses that selected map; identity with the original reference address
+follows from BaseExtends. It is not assumed as an output relation.
+
+[Controls](../../Solidity/Backend/Passes/RelatedMemoryCaptureControls.lean)
+inhabit the context relation with two live Source objects, two aliased old
+intrinsic locals and an independent reference. Complete eleven-cell observations
+retain all caller locals, the fresh capture, an independent cell, both array
+lengths and every element, plus saved stack words. Actual wrong-reference and
+skipped-capture runs differ; an incorrect initial reference relation is refused.
+[Guards](../../Solidity/Backend/Passes/RelatedMemoryCapturePins.lean) pin the
+observed standard axiom sets. The concrete client is nonallocating with base
+zero; it does not claim positive-base allocator growth. The general theorem
+retains the original branch allocator obligations. Extended Source locals
+classify the returned reference; no Source declaration execution, general heap
+content relation, admission/world or bytecode theorem follows.
+
+## Plain storage-alias capture
+
+[RelatedStorageCapture](../../Solidity/Backend/Passes/RelatedStorageCapture.lean)
+consumes the paired published `related_storage_capture` through the existing
+core compilation branch. The original `inFragP` certificate, plain `.ok` alias
+fragment fact and full core Input remain explicit. Initial Sim.aliases supplies
+the typed reference, symbolic Slot and PathSlot witness before all saved tails.
+The exact existing load/store code and its actual successful execution derive
+fresh-cell capture and appended pointer readback with full core MappedOutput.
+Core Sim is not upgraded to memory ownership.
+
+[Controls](../../Solidity/Backend/Passes/RelatedStorageCaptureControls.lean)
+inhabit two distinct typed storage roots, the independent Source-local context
+relation and original core representation. Public compiler option-code equality
+recognizes the actual instructions; it is not a claim of dependent certificate
+record equality. Complete selected-cell and stack observations distinguish real
+wrong-alias and skipped-capture runs, and symbolic `.slot` from numeric `.val`.
+[Exact guards](../../Solidity/Backend/Passes/RelatedStorageCapturePins.lean)
+retain the observed standard-only axiom sets. This bounded application covers
+plain aliases, not the separate fragile-alias case. It proves neither Source
+declaration execution nor general storage contents, hashing/layout, decoding,
+resource/session or world-to-bytecode adequacy.
+
+## H21/H22 published synchronization
+
+The lane rebased its twelve private checkpoints onto public
+`603eef898f3a4a058a59e8fa7331b77f8cf6ec05`, including H22's explicit external-call
+mode and invocation metadata. Existing pass source files were unchanged and
+construct no core ExtCall values; no static-mode or provenance interpretation
+is claimed. Pre-sync commits and their seals remain preserved separately.
+
+H21 roots are regenerated by `scripts/coord-tools/register.sh`; new rows live
+in the compiler-transport area map. Two unpublished, untracked V09 prototypes
+were reversibly relocated outside the production source tree, retaining bytes,
+inodes, sizes and timestamps. They remain private and were not resubmitted.
+No checker exclusion, language profile or proof premise changed.
+
+The cold post-sync import attempt stopped at the existing 300-second bound.
+Separate published MemoryCompile and Compiler prerequisites then passed under
+the same bound. The Source capture prerequisite, KeySort and the storage-capture
+closure with thirteen exact guards also passed on the rebased tree. The broader
+changed-module import attempt stopped at its unchanged 300-second bound and
+remains incomplete. Two further old untracked scratch drafts were preserved
+outside the production tree, resolving the orphan findings without an allow-list.
+A subsequent H21 touched-module gate passed on public base
+`f303d134583906548c2e4fa2f3de077c993038b1`, checking the changed owned modules
+and their reverse imports in 130.17 seconds. Earlier stops remain retained.
+These checks do not establish the final combined lane gates or discharge the
+remaining Source/world/resource producers.
+
+## Exact documentation comparison
+
+On public base `f303d134583906548c2e4fa2f3de077c993038b1`, the unchanged
+path checker produces exactly the same complete output for the public and
+lane trees: 46 ambiguity warnings, no missing paths, and default exit 0.
+Strict mode exits 1 in both trees with identical complete output; it remains
+a failed gate. The original frozen base has a different checker and its native
+run exits 1. These results do not establish same-checker equality against the
+frozen base, nor replace the pending combined validation or producer proofs.
+
+## Published admission companion synchronization
+
+The lane consumes public `059eb83d4e1d494f42c532513ffbcd3e65adaf75`.
+Its H24 declaration-graph admission companion requires both the original P8a
+producer and admissible-location graphs with actual Source refusals. It supplies
+no inhabitant; no V09 admission or full Source closure follows from this import.
+The preserved pass source is unchanged. The warm touched closure passed with
+405 jobs. The library checkpoint stopped at its unchanged 300-second bound;
+that incomplete check remains separate from the passing touched closure and
+the coordinator's published-tree validation. A duplicate owned map row was
+removed after independent review, retaining the published row.
+
+## Checked addition capture
+
+`CheckedAdditionCapture` consumes the published CheckedAdd compiler certificate to
+compile a fresh intrinsic uint256 local. It derives Source expression success or
+arithmetic panic independently of intrinsic declaration execution, retains the
+original memory Input and exact fresh-slot capacity, and chooses one captured
+word and original output map before all saved tails. Successful runs expose the
+full MappedOutput and physical readback; failure has no invented final state.
+This is not Source declaration lowering or public ABI/session adequacy.
+
+Independent read-only finder and skeptic source reviews found no soundness
+defect and confirmed those boundaries. Focused failures and resource records
+are retained separately from successful theorem checks.
+
+## Reached checked-add overflow
+
+`CheckedAdditionReachedOverflow` selects the actual public memory compiler for
+two dependent checked-add captures. Under original representation, scalar reads
+and exact two-slot capacity, it derives the successful prefix and its full mapped
+output, then derives the suffix Input at that actual state and selected map.
+The canonical prefix machine and map precede all saved tails. Intrinsic joined
+execution and emitted joined code both revert only after the prefix succeeds.
+
+The inhabited MAX+0 then MAX+MAX case retains all 13 ordered local/heap cells and
+the saved tail. The observed physical capture is the machine consumed by the
+failing suffix. Typed early-doubling and insufficient-frame controls distinguish
+wrong ordering and missing room. Source declaration lowering and public ABI or
+session observations remain outside these internal terminal results. Independent
+read-only finder and skeptic source reviews found no soundness defect.
+
+## Successful dependent checked-add captures
+
+`CheckedAdditionSequenceSuccess` supplies the successful counterpart for the
+same public two-capture program. Both actual machines and selected maps precede
+all saved tails, and the second Input is derived from the first full mapped
+output. Original local reads, arithmetic bounds and two-slot capacity remain
+explicit. `guard_exact` combines success with reached overflow: after the first
+sum fits, intrinsic and selected-code reverts are equivalent to second-sum
+out-of-range, without an execution premise.
+
+The inhabited 7+9 then16+7 control executes both captures, observes all 14 cells
+and the saved tail, and reads the original capture16 after the new capture23.
+Skipped suffix, wrong recapture and corrupted-tail controls distinguish those
+observations. Both guard cases are instantiated. Independent read-only source
+reviews found no defect; these remain intrinsic/memory-compiler results rather
+than Source declaration, public ABI or resource/session adequacy.
+
+## Reached allocation cost of public memory joins
+
+`MemoryJoinCost.cost_join` proves the exact existing allocation-cell cost of
+an intrinsic join. A successful prefix contributes the suffix cost at its actual
+typed output; a failed prefix contributes no suffix cost. `public_join` adds
+that equation to the actual public compiler selection/code-concatenation result.
+`suffix_allocation_input` transports the joined budget through actual prefix
+growth at the selected map; generic frame and representation obligations stay
+explicit.
+
+Controls derive a four-cell allocating suffix's full Input after an actual
+five-cell allocation prefix, with inhabited positive allocator ownership,
+cursor16→21 and total cost9. The original ordered prefix vector is retained.
+A typed revert prefix has cost0 and an actual target revert before the accepted
+five-cell allocation suffix. Wrong-total and skipped-allocation controls reject
+charging an unreachable suffix. These are intrinsic allocation-cell laws, not
+public gas/session prefixes or full Source/bytecode adequacy. Independent
+read-only source reviews are recorded in the checkpoint handoff.
+
+## Executed allocating join
+
+`MemoryJoinedAllocation` completes the allocating suffix admitted by
+`MemoryJoinCost`. The actual intrinsic allocation output comes from the
+published `newArray_decl` theorem. Its reached full Input then supplies actual
+suffix execution. The public joined compiler retains both stage outputs and
+maps, the whole joined MappedOutput with the same final map, old-reference
+identity and exact nine-cell growth from cursor16 to25 for all saved tails.
+
+Controls select the whole public `Memory.compileProg` result and observe all
+16 ordered cells: old locals/aliases, old array headers/elements, independent
+zero cell, the fresh reference/header/zero elements and final cursor. Stale
+initial map, wrong reference/cursor and saved-tail corruption are rejected.
+These are inhabited intrinsic and abstract-Instr results; independent Source
+lowering, public gas/session/ABI and external EVM adequacy remain open.
+
+## Consume the actual new reference
+
+`AllocatedReferenceRead` consumes the new array from `MemoryJoinedAllocation`
+using its actual reached selected map and full representation. Both readers
+are selected by public `Memory.compileVal`: index2 of the new length3 array
+returns zero, while index2 of the old length2 alias reverts. Intrinsic prefix
+and value sequencing and actual emitted append executions are proved without
+an assumed read result or preservation conclusion. The word and map precede
+all saved tails; the full successful allocation output is retained before
+both the success and reached failure alternatives.
+
+Controls preserve all 16 allocation observations. A corrupt instruction suffix
+keeps the returned zero but deletes caller99, distinguishing full saved-tail
+preservation from top-word-only checking. These remain intrinsic/abstract-Instr
+results, not independent Source lowering, public ABI or gas/session adequacy.
+
+## Exact joined memory admission
+
+`MemoryJoinFrame` proves that the original static `frameNeedProg` of a join
+is the maximum of both stage demands, including nested scopes. Together with
+the reached allocation-cost law it gives an exact legacy-memory Input
+equivalence. The joined Input derives both the prefix Input and the per-run
+mapped boundary link; no link or desired preservation conclusion is assumed.
+`public_admission` retains actual public compiler selections, fragments/code,
+full representation, both frame bounds and original allocation capacity.
+
+Controls inhabit allocating public admission/execution at cursor25, reject a
+prefix-only frame, and demonstrate that sequential scopes reuse max3 private
+slots rather than sum5. An unreachable allocation costs0 but its static frame
+reservation remains required by the original Input. Its representation and
+allocation-budget fields are inhabited and the code actually reverts; the
+small static frame bound is the sole missing Input field. These laws concern the
+legacy memory branch; call/loop certificate-specific need/Room and public
+resource/session adequacy are not normalized or discharged.
+
+## Three-stage admission without assumed physical links
+
+`MemoryTripleAdmission.links` derives the prefix Input and both dependent
+mapped links from one original joined Input for P.join(Q.joinR). The actual
+Q+R Input is first transported through P's reached state/map; its prefix Input
+and binary link then supply Q and R. `public_admission` selects the actual
+inner and whole public compiler outputs, retaining fragments/code, three
+static frame bounds and one reached total allocation budget. It assumes no
+physical link or future-run budget family.
+
+An inhabited five-cell then four-cell allocation followed by fresh-array
+length capture retains three actual maps/machines before all saved tails,
+both intrinsic/code associations and all three mapped outputs. The complete
+17-cell vector captures3 while retaining old objects and cursor25. Frame6 is
+rejected; frame7 is used. A typed third-stage bounds failure is proved for
+all saved tails via the admitted whole Input, without raw fault-tail transport.
+Legacy memory scope and pending Source/world/public-resource boundaries remain.
+
+## Public joined output retains the actual suffix map
+
+`MemoryJoinedOutput.compose` composes two full legacy-memory mapped outputs
+into the joined certificate's full output, retaining the suffix's actual
+selected map. The actual successful first intrinsic result supplies the
+heap extension and the reached cost evaluation point. The public wrapper
+selects the join through `Memory.compileProg`; no preservation equality or
+new map is assumed.
+
+`MemoryJoinedOutputControls.public_shared` applies this law twice to the
+real five-cell allocation, four-cell allocation and fresh-length capture.
+The actual publicly selected whole program retains full mapped output with
+one final map before all saved tails. Existing complete 17-cell observations,
+wrong-alias, frame and failure controls remain unchanged. `public_failure`
+also retains whole public recognition for the reached typed bounds failure.
+Four exact standard-only axiom guards accompany the application. These
+remain intrinsic/abstract-Instr results; Source/world/public ABI, resource
+and external EVM adequacy and mandatory combined validation remain open.
+
+## Exact public memory association transport
+
+`MemoryAssociation` transports the original full Input and full mapped
+output between both intrinsic associations. Public compiler selections fix
+both fragments and emitted code. Output transport retains the same actual
+selected map and reached cost, including failure-prefix costs; it neither
+infers machine equality from representation nor applies raw fault-tail
+transport. Terminal equality is equality of the actual selected code on
+one unchanged entry machine.
+
+Controls retain both actual public whole selections for allocation,
+allocation and fresh-array capture, one final map before all saved tails,
+full mapped outputs on both sides and the original frame6 rejection.
+Both public selections also retain the reached typed bounds failure. All
+previous complete ordered observations are unchanged. Seven exact
+standard-only guards accompany these legacy-memory results; public
+Source/world/session/ABI and external EVM adequacy remain open.
+
+## Machine SAR (H39, 2026-11-05)
+
+The memory machine had no `SAR`, and `Evm.sTail .shr` emitted nothing.
+[Machine](../../Solidity/Evm/Machine.lean) now has `Instr.sar` (count on
+top) with `sarWord`: floor division of the signed reading by `2^n`, and the
+sign fill `-1`/`0` from count `256`. [Layout](../../Solidity/Evm/Layout.lean)
+emits `sarCode = DUP1 PUSH 0 SGT ISZERO MUL SAR` as `sTail .shr`: the count is
+clamped to `0` when negative, because the source reads a negative `int` count
+by its `toNat`, as the Scalar endpoint's `signedShiftPrefix` does. Besides
+`Instr.step` and `ToString` in `Machine.lean`, the two other exhaustive `Instr` matches (`Evm/Sim.lean`'s `step_mem`, and
+`Backend/InternalFlow/RuntimeFrameCodeEquality.instruction`) gain the new arm.
+
+[MachineSar](../../Solidity/Backend/Passes/MachineSar.lean) proves the first three
+results for every pair of words or intrinsic operands and every stack tail;
+the last two are single concrete controls:
+
+- `Evm.sarCode_run`: the exact machine run, `sarWord (sarClamp n) a`;
+- `sarCode_simT`: `Evm.tail_simT` at `.shr` and `int` (never a revert);
+- `machine_agrees_intShr`: the same source result `r` from `BinOp.evalT`, the
+  machine word `sword r`, the Scalar `intShr.code` run yielding
+  `encodeValue .int r`, and equal numeric words;
+- `raw_sar_differs` (negative control): unclamped `SAR` on count `-1` and
+  value `8` saturates to `0` where the source keeps `8`;
+- `saturated_fill` (positive witness): `-7 >> 256` is `-1` on the machine.
+
+`MachineSarPins` pins their axioms (`propext`, `Classical.choice`,
+`Quot.sound`; `shr_int_inFrag` uses none). First-round review fixes
+(finder/skeptic, read-only): docstrings of the two controls and this section's
+scope wording were made exact; no defect found.
+
+### Signed shift in the compiler fragment (user decision Q2, 2026-11-05)
+
+`binInFrag .shr` is now `p != .bool`, so `int >> int` is admitted and
+`compileVal` emits `binTail .int .shr = sarCode`. The machine lemmas moved to
+[Signed](../../Solidity/Evm/Signed.lean) (`sarClamp`, `sarCode_run`, `sarShr`,
+`sarShr_range`, `sarWord_clamp`, `sar_tail`, `sgn_sword`), and
+`SimLemmas.stail_simT` gains the `.shr` case from `sar_tail`, so
+`Evm.tail_simT`, and through it the memory compiler theorems, cover signed
+shifts. `MachineSar.sarCode_simT` is now that fragment theorem at `.shr`;
+`shr_int_inFrag` records the admission. Other bitwise operators and `<<` stay
+`uint`-only. `>>=` has no compound form (`hasCompoundAssign`), so
+`compound_frag` is unchanged. solc requires an unsigned shift count; the
+model's `int` count reads a negative value as `0` (`arithInt .shr`), and
+`sarCode` preserves that existing source semantics rather than solc's typing.
+
+Second-round reviews (finder/skeptic, read-only) found no proof or soundness
+defect in this change or the TF repair. They confirmed stale wording elsewhere:
+this lane's module-map row was fixed. Proposed for their owners, not edited
+here: R12 in [G04 restrictions](roadmap-g04-restrictions.md) should drop `>>`
+(signed `&`, `|`, `^` stay uint-only); the generated
+[G03 ledger](roadmap-g03-ledger.md) lines calling signed `>>` refused by the
+compiler should be regenerated; the `Evm/Signed.lean` row of
+[evm-compiler](../module-map/evm-compiler.md) can mention the SAR lemmas.
+
+## Lane-module registration (G25 packet integration, 2026-11-05)
+
+The moved lane head had 87 `Backend/Passes` modules (including the G25
+signed division/remainder/subtraction, shift and unsigned-width captures)
+outside the generated root and without module-map rows. They are now
+registered by `scripts/coord-tools/register.sh`, have rows in
+[compiler-transport](../module-map/compiler-transport.md), and their 533
+axiom pins are recorded in `scripts/g07-axiom-pins.json` (additions only).
+This puts them in the default `Solidity` build.
+
+## Moved-lane handoff (Claude VM, 2026-11-05)
+
+Branch `cloud/moved2-20261105/v09-compiler-passes`: `origin/cloud/v09-move`
+(504c2d17) merged with origin/master (b86ae456), then `origin/cloud/v09-tf-move`
+(1b7b365f), then the registration, machine SAR, pins and these notes.
+Lean 4.24.0 (toolchain `leanprover/lean4:v4.24.0`), 4 cores, 15 GiB RAM.
+
+Gates (cold cache, one build at a time):
+
+- `gate.sh checkpoint` at the final source commit: build-touched, library
+  (`lake build Solidity`, 3802 jobs), trust, orphans, layers, roots and
+  axiom-pins pass; doc-paths fails with exactly the two findings below.
+- `gate.sh full`: the Lean build in `run-lean.sh` completes (4148 jobs,
+  including `SolidityExamples` and `SolkeyTestSuite`); automatic-strict passes.
+  `run-lean.sh`'s final SolKey sort check, `check-testsuite.sh` and
+  `check-corpus.sh` fail only because the VM's sibling `../solkey` is at
+  `69e251f`, not the pin `473da894`. Against a worktree at the pin, all three pass
+  (`solkeycheck: OK`, `check-testsuite: ok`, `check-corpus: ok`).
+- TF-gate: `test_cases.py` (15) and `test_targets.py` (8) pass in the merged
+  tree; `accept_repaired.py --head 1b7b365f…` passes all 33 cases at its frozen
+  head. `test_contract.py` is bound to that exact head and is not run elsewhere.
+- doc-paths (user decision Q1): `tests/terra-20261103/gate/test_cases.py` cites two
+  deliberately absent fixture modules (A and MissingFixture under Solidity/).
+  `check-doc-paths.sh` exempts exactly those two names when cited from that file
+  only; a global allowlist would defeat the fixture's own missing-reference
+  negative control. The repair (04bac54e) and re-freeze (b880a894) sit on a line
+  rooted at the frozen head 1b7b365f, because the acceptor binds `HEAD^` to the
+  source commit and limits `diff BASE..source` to owned paths. Its ownership rule
+  now admits exactly `scripts/check-doc-paths.sh`. `accept_repaired.py --head
+  b880a894…` passes 33/33, and the line is merged here with identical bytes.
+
 ## Open
 
-General source/world/backend composition remains open. Some concrete intrinsic whole programs are accepted, as proved
-by `FreshBooleanCompilation.public_whole`; this is not general source closure.
-Remaining G25/G26 obligations stay explicit; G31 is owned by VY4.
-
-### Reference-call capture and readback
-
-`Backend/Passes/ReferenceCallReadback.lean` consumes the published memory/tuple
-return producer with its original `Form`, `Entry`, `NoAliasPromotion` and actual
-intrinsic call success. `execution` derives the receiving capture/update Input
-from the actual returned full representation. Returned map and operand words
-precede the saved-tail quantifier; the result retains BaseExtends, exact call-cost
-allocator growth, full suffix MappedOutput, cursor and every protected private-frame
-word. `call_revert` absorbs an unreachable suffix without a suffix Input.
-
-The controls instantiate a real mixed tuple call: default allocation costs one
-word, the returned reference aliases the old array, capture saves 7, and the
-old scalar becomes 9 before readback returns 7. All five final locals, both heap
-objects, fourteen selected target cells, allocator cursor and full saved stack
-are observed. The original map cannot represent the newly allocated default
-object; frame 15 cannot admit private pointer 16; argument index 2 reaches body
-revert. Wrong recapture is an inequality of reached cells, not execution of an
-alternative compiler. These are intrinsic/symbolic execution results, not
-independent Source evaluation, frontend correspondence, external EVM validation,
-public ABI or session/resource adequacy.
-
-Separate read-only finder and skeptic reviews found no confirmed defect.
-Thirteen generated guards pin the actual standard-only axiom reports.
-
-### Reached capture failure after a reference return
-
-`Backend/Passes/ReferenceCallCaptureFailure.lean` retains the actual successful
-memory/tuple call output, selected address map, full representation, exact
-allocation cost, cursor and private frame before every saved tail. It derives
-the receiving capture Input at each tailed machine and proves joined emitted
-revert iff the reached operand ordinarily reverts. The intrinsic joined
-call/capture program also reverts when that operand does. No post-failure state
-or map is constructed.
-
-The controls return the old array alias after default allocation, then actually
-read index one of its length-one array during capture. Both intrinsic and target
-joined executions revert; a local receiver read still returns seven at that same
-reached representation. All fourteen selected prefix cells and the full saved
-stack are observed. The next physical local slot contains the old pointer 128
-before declaration, not zero; `wrong_zero_capture_cell` refutes the false zero
-assumption from an unvalidated draft. The earlier post-capture vector, whose
-same cell contains seven, is unchanged. No failed-machine observation, Source
-frontend correspondence or public resource/session claim follows. Separate
-read-only finder and skeptic source reviews found no confirmed defect.
-
-### Runtime argument failure before return allocation
-
-`Backend/Passes/ReferenceCallArgumentFailure.lean` uses one checked tuple call
-for both runtime cases. Its first primitive argument reads the old array at the
-caller index. Index zero succeeds and reaches default return allocation with
-exact cost one; index two fails in that argument with exact reached cost zero,
-even though the emitted program's static allocation flag is true. Original
-Entry, frame and capacity predicates remain intact. The emitted first-value
-prefix precedes its parameter store and the return/body suffix. The successful
-return retains the old array alias and the distinctive primitive seven.
-
-`Backend/Passes/ReferenceCallArgumentPrefix.lean` consumes the published context
-capture certificate to derive actual save execution, full caller representation
-and zero allocator growth. The argument then reverts under that reached
-representation for every saved tail and arbitrary unreachable suffix. All
-fourteen selected prefix cells and the complete stack are observed; the heap
-cursor remains 130 while the private save pointer advances to 22. A successful
-branch of the same emitted call refutes an always-revert claim. These are
-intrinsic/symbolic-word results, not independent Source or public ABI/resource
-adequacy. Separate read-only finder and skeptic reviews found no confirmed defect.
-
-### Independent Source arithmetic effects and emitted captures
-
-`Backend/Passes/AssignmentSubtractionPass.lean` consumes the published V07
-`assignment_subtraction_transport` for `(i = a) - i`. It retains original
-Source/target reads, integer ranges, result-range guard, frame and `fuel + 4`
-quantification, actual accepted memory-prefix certificate/Input and compiled
-subtraction value. It derives the reached value through the existing arithmetic
-proof, then retains full prefix MappedOutput and actual joined code execution
-with one canonical machine, selected map and result word before every saved tail.
-No P8 producer or desired-preservation premise is introduced.
-
-The controls align Source locals `a = 9`, `i = 7` with a represented target
-containing an independent old array. Both Source and emitted code yield legacy
-result two versus via-IR zero, while both retain `i = 9`. All eleven selected
-target cells, the allocator, old array, sentinel and full saved stack remain
-observed. Executing the reversed operand code after the actual legacy prefix
-reverts; stale RHS, corrupted tail and insufficient frame are rejected. This is
-a local integer/result correspondence plus physical target preservation, not a
-global Source-heap/world relation or general overflow/wrapping/ABI adequacy.
-Separate independent finder and skeptic source reviews found no confirmed defect.
+General source/world/backend composition remains open. Concrete intrinsic
+whole-program acceptance, such as `FreshBooleanCompilation.public_whole`,
+is not general Source closure. G24 requires the actual Source/Lowering/world
+and full public Cert producers. G24.01 also retains the abstract slot/root/hash/
+data/offset interface and state/decode export; G24.03 remains unfrozen under C7; these adapters do not authorize its final
+interface freeze. G25/G26 retain their stated scalar, general
+source-admission and execution prerequisites. G31 belongs to VY4. ABI entry
+premises do not close G24.03 by themselves. Whole-lane completion still
+requires the original combined validation and producer obligations.

@@ -1,0 +1,22 @@
+{
+ "Solidity/Examples/LinearDecision.lean:Solidity.Linear.AFml.countermodel_check": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/LinearDecision.lean:Solidity.Linear.AFml.countermodelValues_check": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/LinearDecision.lean:Solidity.Linear.AFml.decide_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/LinearDecision.lean:Solidity.Linear.AFml.holds_nImp": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

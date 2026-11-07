@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.cons": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.inline": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.no_args": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.ternary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ArityShapes.lean:Solidity.Yul.Compilation.ArityShapes.unary": [
+  "Quot.sound",
+  "propext"
+ ]
+}

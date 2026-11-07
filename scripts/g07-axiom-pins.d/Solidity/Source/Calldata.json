@@ -1,0 +1,47 @@
+{
+ "Solidity/Source/Calldata.lean:Solidity.Source.cdStaticToMem_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.cdToMem_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.cdToMem_static_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.decodeArg_entry_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.decodeArgs_entry_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.evalE_cdIndex_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.evalE_cdLength_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.evalE_cdSlice_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/Calldata.lean:Solidity.Source.readLoc_cd_ok": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

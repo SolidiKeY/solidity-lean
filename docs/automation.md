@@ -3,8 +3,9 @@
 The milestones towards a closer that decides a fragment and a symbolic
 execution of polynomial size.  M0–M5 and M8's A1/A3 are built; M6 is the
 gate in force and the user's decisions; M7 is the decision theorem, its 33
-features and what is still open; M7-next is the plan waiting for the
-user's go.  Labels (M*n*, features *n*, plan steps *n*, decisions c … e3″)
+features and what is still open; M7-next is in progress (the user lifted
+its hold on 2026-11-06; `DecisionTheorem'` modulo the decidable residue is
+merged, 41f8b61be).  Labels (M*n*, features *n*, plan steps *n*, decisions c … e3″)
 are cited by Lean docstrings: keep them.
 
 ## M0 · The leaves of a type (`Theory/Typed/Leaves.lean`)
@@ -946,13 +947,184 @@ the coverage theorem checks (see the aggregate milestone continuation).
 The completed managed-cloud Group 07 run checked the unchanged exact verdict
 pin in 2,262 s; this is not a controlled comparison with the historical timing.
 The 300 s budget of the gate covers TestSuite modules only.
-## M7-next · A checkpoint of the theorem (not started)
+## M7-next · A checkpoint of the theorem (in progress)
+
+**`DecisionTheorem'` and `Fml.Residue` (lane `m7-decision`, 2026-11-06).**
+The user chose a route-refusal residue (Q1, recorded in
+[the m7-next handoff](feature-work/m7-next.md)).
+`Calculus/DecisionResidue.lean` defines `Fml.Residue`, the leaves every
+route of `decideGoal` refuses, each refusal named (`RouteRefusal`) and
+computed from the route's own front end (the hash route's refusal is each
+hash try's own verdict, since a try runs `decideLeaf` on its swapped leaf);
+it is decidable, kernel-evaluable and exact (`residue_iff_unknown`). `DecisionTheorem'` proves that on every
+in-target leaf off the residue `decideGoal` proves it (valid under the goal's
+own hash premise) or refutes it (a certified state). **Totality off the
+residue holds by definition: this is not a completeness result**, and it
+says nothing about which in-target leaves are answered.
+`decisionTheorem_iff_residue_disjoint` restates the unchanged
+`DecisionTheorem` as "the residue meets no in-target leaf"; the milestone
+policy that later rounds only shrink the residue is not enforced by the code. VA1's source classes that are decidable from
+the leaf are attached to residue leaves as labels (`Fml.residueReasons`); they
+are not residue tests, and no class is proved to lie in the residue. Fixtures, witness and negative controls:
+`Examples/DecisionResidue.lean`.
+
 
 The ledger-quantifier lane implements feature 33; repository-wide validation
-is recorded in its handoff. This does not
+is recorded in its handoff. That lane (not the `m7-decision` lane above) does not
 execute the broader checkpoint proposal below, introduce a `Residue`, or
-change `inTarget`, exclusions, `Waivers` or `DecisionTheorem`. The remaining
-checkpoint work still needs its own authorization.
+change `inTarget`, exclusions, `Waivers` or `DecisionTheorem`. The broader checkpoint is authorized by the exact AQ1/AQ2 receipt in
+`docs/solidity-scope.md`; its theorem and remaining work are incomplete.
+
+**VA1 independent performance progress (2026-11-01):** the hash regression
+facade now imports coherent modules listed in `docs/module-map.md`. Every
+module passed bounded per-file MCP and its affected target under the unchanged
+300 s limit; the largest observed check was 54.88 s. The original public
+fixtures, all 15 guarded evaluations and expected messages, coverage conclusions
+and hash premises remain. The observer is `noinline`; exact family facts and
+existing coverage routes avoid repeated kernel computation. Full timing/resource
+evidence and failures are in [the VA1 handoff](feature-work/after-roadmap-va1.md).
+The main Decision file now has 13 serial sections plus its compatibility facade;
+all passed per-file MCP/build below 300 s (largest 109.00 s). All 56 original
+guarded commands remain; one hash-coverage proof is factored through exact
+existing stages. The unchanged DecisionArrays replay consumer passed in
+38.23/36.11 s. The meaningful residue/forward bridge, overall milestone/full
+gates and remaining AU02 work are open. The human answered VA1-Q1 on 2026-11-01: "Authorize the certified boundary
+revision" (exact receipt in `docs/solidity-scope.md`). Only that false
+unconditional inclusion requirement is revised; both predicate definitions
+remain unchanged, with the original requirement/counterexample retained. This is not
+`milestone-m7-next` eligibility or permission to publish.
+
+The kernel gap census in `Examples/DecisionGapCensus.lean` reuses three
+inhabited existing memory fixtures: each is in target. The given-heap parameter
+now has certified coverage/proved from an all-heap source certificate; the
+nonliteral RHS now has certified coverage/refutation through the compound-field
+route, with an existential returned-state theorem and a separately constructed
+countermodel. The reversed equation has certified coverage and an exact
+returned-state refutation described below. This
+census is not a Residue definition or bridge proof. Integrated memory,
+ledger-quantifier and written-memory sources replayed successfully on the VA1 VM.
+A first precise supported-family boundary is now kernel-proved in
+`Calculus/DecisionCoefficientBoundary.lean`: for every contract, waiver setting
+and closed typed uint coefficient `c`, the family `∀ uint x; c*x = x+x` is
+in target exactly when `c.isLitV` holds. Literal 2/3 and folded `(1+1)` controls
+separate coverage, admission and proved/refuted semantics, and the retained
+counterexample is linked by exact equality. This is not the unrestricted
+program-free inclusion; other shapes and the broader M4 source characterization
+remain open, as do Residue/DecisionTheorem-prime/AU02/full gates.
+The initial VA1 `Examples/DecisionArrayGaps.lean` census reproduced seven
+admitted, noncovered unknown array shapes, with six semantic validity proofs
+and one explicit false fixed-array countermodel. Subsequent fixed-array
+integration certifies the fixed positive/negative pair; the other five shapes
+remain global unknowns. Standalone key/field source certificates do not yet
+change those global verdicts. The full gate currently stops at the required host reserve in the
+unchanged frontend TypeExamples module; ownership question VA1-Q2 is pending,
+while independent VA1 proof work continues.
+DecisionArrays is now also a compatibility facade over separate fixture/coverage
+and exact replay modules. All 26 declarations and the guarded output remain;
+the final replay profile passed in 37.18 s with interpretation about 50 ms.
+This preserves the earlier normalized replay speed repair and all budgets.
+An intrinsic uint source-grammar increment now constructs actual numeric
+`toL`/`toLT` and both-polarity `toLS` outputs without a coverage/verdict
+premise, with pushed-local, partial-arithmetic and certified verdict controls.
+For one positive uint binder over an equation in this grammar, the next
+`Calculus/DecisionUIntPrefix.lean` increment proves actual normalization,
+source reduction and `leafOf?` success. The source fact describes the body
+before preparation. Later numeric logical/normalization increments discharge
+prepared grammar, parameter closure and actual source-derived bounds for the
+stated one-prefix QFUIntLinear family of weight at most 511. Broader prefixes
+and the exhaustive Residue/target bridge remain open; this grammar's complement
+is not Residue. The ground numeric leaf interface separately discharges
+zero-prefix exact tests and conditional leaf coverage. The subsequent
+`Calculus/DecisionNumericGroundSource.lean` proof discharges actual closed
+source discovery/normalization for QFUIntLinear formulas of source weight≤511,
+with all-waiver target membership, hash freedom and actual certified verdicts.
+This supported family does not establish exhaustive Residue or broader M4 coverage.
+A separate `Calculus/DecisionSourceInstance.lean` increment recognizes actual
+intrinsic bounded literal instances using existing `Fml.instLit` substitution,
+then lifts certificates through original universal prefixes. Concrete clients
+certify all five remaining array source fixtures, including arrays of structs
+and arrays whose leaf translation refuses. The literal/bound are supplied
+classification parameters; global decision/coverage integration remains open,
+and all original unknown pins are preserved. This is no compiler replacement
+or finite-sample promotion.
+`Calculus/DecisionNumericFlatten.lean` independently proves actual read-free
+Num/UIntQF flattening from structural depth/shared nodes, with exact remainder
+and no 511-node premise. A 517-node partial optional body traverses with zero remainder
+while its unchanged exactBounded test remains false. This closes that restricted
+traversal proof obligation; later arithmetic compiler totality, path/read
+realization and global removal of the 511-node cap remain open.
+`Calculus/DecisionNumericStages.lean` composes these actual source and traversal
+certificates under unchanged 2048-step normalization/source bounds (one step
+reserved for a positive uint binder). The original 517-node source reaches its
+real numeric body and node-derived flattening; original global observations
+remain unchanged. No supplied intermediate producer equations or later compiler
+completeness are assumed.
+`Examples/DecisionHaltingOrGaps.lean` separates already-covered partial
+Boolean lowering from the actual open APF guard-floor case. A nested halting
+`||` guard in a negative two-key mapping block has certified target/unknown/
+noncoverage, with a valid positive claim and false companion countermodel.
+Its illustrative collapsed-key guard changes from true to halt; this is not
+an actual collector/Setting proof or a refutation of `GuardP.floors`. The
+AU02 guard-floor repair remains open.
+`Calculus/DecisionLeafPreparation.lean` next proves that actual uint-prefix
+translation yields the existing Num grammar with only its permitted bound
+atom and no environment input. Elimination and simplification preserve those
+predicates. Numeric sequencing can add nodes, as the controls demonstrate.
+The next `Calculus/DecisionNumericFormula.lean` proof composes actual source
+translation, polarity reduction and normalization into a prepared one-uint-
+prefix body with certified source grammar, only its permitted atom and lifting
+weight two. The actual existing liftedExact check passes for this source
+family, and full frozen admission holds for every waiver setting. Separate
+node/cut bounds, Covered and the exhaustive Residue/target bridge remain open.
+The source-size increment in `Calculus/DecisionNumericBounds.lean` bounds the
+actual prepared body by `7*(a.size+b.size)+13`, using existing intrinsic sizes
+and proved elimination/simplification identities. Source sum at most 71 is
+sufficient for the unchanged 511 body cap, not necessary or a new limit.
+A 517-node control is not Covered or hashCovered yet is actually proved;
+a larger literal source folds to 27 nodes and stays Covered. These preserve
+why neither a size threshold nor noncoverage defines Residue/unknown.
+Separate cut/lift/resource and exhaustive coverage/fuel obligations stay open.
+
+`Calculus/DecisionArrayReasons.lean` supplies four separately named source
+reason classes: arrays below mapping keys, arrays below fields, structure fields
+at array elements, and nested array reads. Generalized intrinsic constructor
+inspection and actual source literal-chain evidence determine membership at
+supplied bounds/literals; coverage and verdicts are never consulted. These
+classes cover valid literal-instance chains with those immediate path shapes,
+not arbitrary/negative array goals or all array gaps. Five existing unknown
+pins inhabit them; covered direct fixed roots remain outside these classifiers.
+The exhaustive Residue union, negative companions and global array integration
+remain open. H6 resolves VA1-Q2: the human answered "VA1 splits it", authorizing
+a performance-only TypeExamples split with statements/observations/budgets intact.
+
+`Calculus/DecisionSourceChain.lean` completes the existing source literal-chain
+parser's recognition theorem and constructive decidability at supplied bounds
+and literals. Its actual result produces an existing exact declaration-reduction
+certificate through the checked AllLeft/substitution proof. Five original array
+sources reach this preparation stage; the false fixed-array model excludes a
+hit for every parameter pair. Parameter discovery and global normalizer/decision
+integration remain open, and original coverage/verdict observations are unchanged.
+
+`Calculus/DecisionNumericCompiler.lean` derives the unchanged arithmetic
+compiler's operand-depth premises from numeric syntax and a computable maximum
+equation-operand depth. It reaches the actual cut/read-layout/compiler producer
+with a budget derived from structural leaf nodes, independently of aggregate
+511-node admission. Concrete517-node optional-failure and original source
+clients compile; strict-false encoding and shallow nonlinear rejection remain
+separate controls. The positive prefix is retained and its body is compiled.
+No compiler fuel, global coverage/default/verdict, storage-read reconstruction
+or complete Decision theorem is changed or claimed by this read-free stage.
+
+`Calculus/DecisionHaltingOrReason.lean` supplies an independently decidable
+exact nested partial-OR source class, parameterized by actual typed roots and
+literals. Its complete source equation does not inspect coverage or verdicts.
+`Calculus/DecisionHaltingOrBoundary.lean` proves all-waiver target admission, actual
+prepared-guard recognition and failure of the left-definedness test required
+by APF OR. Clients link this to the guard extracted from the actual complete
+leaf, retain valid and false unknown members, and check an accepted total
+sibling. This is one reason component, not the exhaustive Residue union or
+a global unknown theorem; it is not a counterexample to `GuardP.floors`.
+
 
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
@@ -1020,6 +1192,265 @@ guards stay in `TypeExamples.lean`. This is not part of the M7-next steps
 above and closes none of them. Timings:
 [va1-h6-type-split.md](feature-work/va1-h6-type-split.md).
 
+
+VA1 independent AU01/AU02 proof components (2026-11-01):
+`Calculus/DecisionNumericTraversal.lean` proves the actual public source
+reducer accepts bounded numeric logical bodies and returns their precise
+both-polarity leaf certificate. The existing 2048-step prefix route is unchanged;
+source weight supplies a sufficient traversal bound. Smaller-fuel success and
+insufficient-fuel refusal controls distinguish this bound from minimality or a
+verdict test. General program-normalizer traversal remains a separate obligation.
+
+`Calculus/DecisionNumericLogic.lean` extends numeric preparation facts to
+quantifier-free logical combinations. A compositional original-source weight
+counts optional equality copies and connectives, deriving the unchanged
+511-node exact tests. The conditional integration interface still requires the
+actual source-to-leaf equation; inhabited clients discharge it and prove exact
+proved/refuted results. General normalization/source traversal and the global
+Residue theorem remain open. Numeric shape alone never waives parameter closure.
+
+`Calculus/DecisionUIntShape.lean` gives a computable syntax recognizer exactly
+equivalent to the existing intrinsic `UIntLinear` grammar and a constructive
+Decidable instance. Accepted source syntax feeds the existing bounded numeric
+coverage/certificate bridge. Rejection denotes only absence of that grammar;
+it is neither a verdict test nor a Residue or unknown classification. The global
+Residue census and target/hash completeness bridge remain open.
+
+`Calculus/DecisionBoundedUInt.lean` proves exact finite instantiation of a
+literal-bounded uint universal with any quantifier-free body. Its pointwise
+preparation verifies actual guard equality and checks a formula-derived estimate
+against the unchanged 511-node limit before allocating samples. This is a
+per-expansion bound; original whole-result checks remain required. Actual frozen
+fixed-array leaves prepare quantifier-free, but the pipeline is not hooked yet:
+fixedBlock/fixedBad remain target/unknown with Covered=false in the recorded probe.
+
+`Calculus/DecisionFixedArrayPair.lean` reconstructs two arrays at diverging
+intrinsic prefixes, deriving both actual saves and both indexed read equations
+plus a disjoint frame. Each array retains its own typed elements, length and
+breakpoints. Missing-prefix and overlapping-prefix controls preserve the precise
+boundary. Arbitrary families, overlapping nested prefixes and decision-pipeline
+integration remain open; no source predicate or verdict is changed.
+
+`Calculus/DecisionFixedArrayPath.lean` reconstructs one fixed array below
+an arbitrary intrinsic path, with save existence from actual prefix presence,
+optional indexed lookup agreement (explicit length breakpoint), and a frame for
+diverging paths. Its controls exercise nested arrays and mapping keys, changed
+reads, absent prefixes and missing-length failure. This is an independent AU02
+proof component; simultaneous prefixes and decision-pipeline integration remain
+open, with source predicates and verdicts unchanged.
+
+`Calculus/DecisionNegativeInstantiation.lean` proves one-way negative-chain
+instantiation using existing guarded LFml.inst, with a concrete fixed-array
+client and an explicit counterexample to equivalence. It changes no decision
+route, coverage predicate or old unknown. Exact reconstruction/pipeline and
+global Residue/theorem obligations remain open. The committed parallel numeric
+interface and immutable source/bundle/checksum paths are recorded in the
+[VA1 handoff](feature-work/after-roadmap-va1.md); consumers need not await the
+whole lane. Combined concrete-tree/full validation remains required.
+
+
+
+VA1 bounded-array increment (2026-11-01): ArrayBlock now preserves exact old
+quantifier-free/guarded-parser preparations and tries kernel-equivalent bounded
+uint instances on unsupported bodies. The original fixedBlock/fixedBad gap pins
+are now Covered with kernel-certified proved/refuted results and existing
+validity/countermodel controls; the five keyed/field/struct/nested-array pins
+remain unknown. Original replay templates and all budgets remain unchanged.
+Per-file MCP, affected377-job consumer build and16 public axiom reports pass;
+raw earlier failures are retained. This is not general fixed-array completeness,
+Residue/DecisionTheorem-prime, full AU02 or final runtime/full-gate completion.
+Exact premises, resource/timing and open queues are in the VA1 handoff.
+
+
+
+VA1 numeric normalization bridge (2026-11-01): the real program normalizer now
+has a proved separate depth/shared-budget invariant for QFUIntLinear bodies.
+It retains smart truth simplifications and returns an equivalent body with the
+same grammar and no larger source weight. A positive uint prefix of source body
+weight≤511 now derives actual Covered/nonunknown/certified results with no
+supplied leaf or normalizer equation, under unchanged2048 traversal/511-node
+budgets and exact hash interfaces. Positive/refuted, syntax-collapse and shared-
+budget refusal controls pass, as do27 public axiom reports and the bounded import
+closure. This is a supported-family bridge; global Residue/DecisionTheorem-prime,
+broader AU02 and full gates remain open. See the VA1 handoff for exact signatures,
+failures, resource evidence and concrete parallel-interface limits.
+
+
+
+VA1 exact source-reason component (2026-11-01): a typed reversed fresh-struct
+field/literal class is now recognized soundly and completely, with a constructive
+Decidable instance and one-line causal reason. It queries no coverage/verdict
+function. A generic refutation reuses the existing child heap and exact hash-free
+interface; concrete literals/types, supported/other-gap refusals, producer-state
+equality and unchanged global unknown pins are checked. This is one reason
+component; global Residue/exhaustiveness and pipeline integration remain open.
+A map-bearing control is target-admitted despite the existing map-free guard;
+no target exclusion or premise was added. Exact limits/evidence are in the VA1
+handoff.
+
+
+
+VA1 second exact source reason (2026-11-01): nonliteral uint-linear RHSs of
+map-free fresh-field equations now have a sound/complete typed classifier and
+constructive Decidable instance, separate from reversal. The actual buried-RHS
+fixture has an ordinary/hash-premised countermodel at the unchanged producer
+child heap; original globalunknown remains. Partial-RHS controls preserve halting
+semantics. This proof-layer component reaches Decision through arithmetic modules,
+so direct production import would cycle; no integration or global Residue claim.
+The lower-level reversed-field Answer is now consumed by the certified fallback. Exact limits
+and passing bounded checks are in the VA1 handoff.
+
+
+VA1 reversed-field pipeline (2026-11-01): DecisionMemoryExtension preserves the
+original producer's complete Answer/state transformer on success, lazily using
+the exact reversed source witness on its miss; the array cut stays first.
+DecisionMemoryCoverage proves actual routing, all-waiver target admission,
+Covered and certified returned refutation for every closed member of this exact
+source family. The original fixture separately proves exact returned-state
+equality with its existing child heap before parent allocation. UInt/Bool clients
+pass; buried, given-heap and mapping unknowns remain. Only the assigned reversed
+verdict changes after observed improvement and matching certificates. Covered,
+inTarget, Waivers and DecisionTheorem declarations are byte-identical; Covered
+behavior intentionally expands through memCovered. The affected376-job closure
+and warm MCP pass unchanged limits; full Residue/bridge/AU02/full gates remain
+open. Raw failures, resources and precise limits are in the VA1 handoff.
+
+
+VA1 given-heap literal-read pipeline (2026-11-01): the exact constructive
+classifier for one box-bound dynamic uint array with repeated direct literal
+reads now supplies real Covered/proved results for every closed member, with
+validity over every heap/binder value under the unchanged hash reading. The old
+finite countermodel remains first and its exact state is preserved; no positive
+one-heap check is promoted to validity. Original/another-index positives improve
+unknown→proved; parameter/alias negatives retain their candidate refutations.
+Computed-index, buried and mapping targets remain unknown/noncovered. Actual
+defined/out-of-bounds/unset observations and the 517-node uncovered-but-proved
+control remain unchanged. All edited-file MCPs and complete affected targets
+pass; 68 public declarations have standard-only axiom reports. Full Residue,
+other AU02 children and final/full gates remain open, including held VA1-Q2.
+Exact commands, actual failures, source hashes/resources and reviews are in the
+VA1 handoff.
+
+
+VA1 compound dependency prerequisite (2026-11-01): the existing UIntLinear
+predicate/hash fact and typed recognizer now live in DecisionUIntSyntax and
+DecisionUIntRecognizer below Decision. The three blocks move verbatim once;
+public names/types and the generated Decidable instance remain. Original
+Grammar/Shape modules retain translation/coverage compatibility APIs. The
+compound source reason now imports the lower recognizer, removing its Decision
+cycle without duplicating arithmetic or changing classifications/budgets.
+Compatibility/affected gates and27 public type/axiom checks pass. The later
+certificate and pipeline checkpoints below discharge the closed compound route;
+this prerequisite alone is not broader memory completion.
+
+
+VA1 compound countermodel certificate (2026-11-01): optional Theory denotation
+of the existing UIntLinear grammar is now proved state-independent in a
+memory-only context, including partial expressions. Every closed nonliteral-UInt
+fresh-field source member has a typed refuted Answer at the existing producer
+child heap before parent allocation, handling both some RHS and none without
+halting/default premises. Concrete some1/some5/none readings, exact state reuse,
+ordinary/hash countermodels and targets pass kernel checks. This certificate
+checkpoint left global verdicts unknown; the subsequent integration below
+consumes its Answer. No broader memory or full Residue completion is claimed.
+
+
+VA1 compound pipeline (2026-11-02): DecisionCompoundExtension preserves every
+successful original/reversed struct Answer exactly, then lazily uses the closed
+nonliteral-UInt fresh-field certificate. The real cut-first memory route consumes
+this helper; existing completeness signatures remain. DecisionCompoundCoverage
+proves source-derived preparation, all-waiver target admission, Covered, global
+non-unknown and actual returned-state holdsH refutation for every closed member.
+No coverage/verdict premise is supplied by the client. Original buried0+1,
+another2+3 and partial0-1 now return certified refutations, with optional
+some1/some5/none controls retained. Constructed-state equality remains a separate
+control; the generic returned-state theorem is existential. Mapping/computed-key
+unknowns, given-heap proved results and old exact countermodels remain.
+The391-job affected build, ten final per-file diagnostics and54 public axiom
+checks pass under unchanged300s per-module guards and hard12GiB/no-swap bounds.
+Four frozen direct declarations and exact hash premises remain unchanged;
+memCovered intentionally recognizes the new certified class. Global Residue/
+DecisionTheorem-prime, wider memory and full gates remain open.
+
+
+VA1 formula-work normalization (2026-11-02): Fml.normalizationWork counts real
+formula visits separately from arithmetic source size. The existing actual
+normalizer is proved to consume exactly this shared node work on QFUIntLinear
+inputs, visiting both children before smart truth collapse. Public by_work/
+at_work and positive-prefix theorems construct real normalization certificates
+at formula-derived budgets without a supplied normalizer equation. Tests retain
+5-versus4 truth-collapse refusal, counts3/9/11 and the extra prefix visit, plus
+existing proved/refuted/unknown controls. Generalized indexed recursion follows
+G0. A subsequent exact-consumption theorem now also proves necessity: public
+normalization succeeds iff computed work fits its shared initial budget, for
+this grammar. Generic below-work refusal and all-budget5/9/11 threshold clients
+are kernel-checked. This is exact public shared budget, not independent minimal
+depth. Runtime2048 and the later511-node cut remain unchanged; the broader runtime
+fuel/cut obligation and global Residue theorem are still open.
+
+
+VA1 source-budget reason (2026-11-04): DecisionNormalizationResidue defines
+an independently decidable class of two uint prefixes with QFUIntLinear bodies
+whose computed work exceeds the unchanged2048 normalizer budget. A typed
+recognizer and the exact-work theorem certify actual normalization failure.
+The2049/1025-visit clients use both uint locals; the smaller source normalizes
+but remains unknown, demonstrating that this class is not an unknown test.
+Small target controls have kernel-certified proved/refuted results under the
+existing hash premise. Global Residue/DecisionTheorem-prime, the exhaustive
+coverage bridge and whole-formula511-node derivation remain open.
+
+
+VA1 typed-prefix storage bridge (2026-11-02): DecisionFixedArrayStorage lifts
+existing optional fixedFloorAtPath reconstruction into actual Storage.set.
+Generic word/presence transport includes undefined/out-of-range paths, with
+the length breakpoint explicit; diverging paths and other roots are framed.
+Inhabited keyed/nested storage controls preserve non-default siblings/sentinel
+and show absence and missing-length refusal boundaries. This is not collector
+integration. Actual pipeline tracing shows keyed/field cases pass prep/cut with
+zero reads but fail arithmetic Src/flattening; struct/nested-array cases stop
+at leafOf?. Their distinct unknown pins remain unchanged.
+
+
+VA1 mapping-bearing reversal reason (2026-11-02): DecisionMappingFieldReason
+exactly recognizes a literal-left/primitive-field-right equality under a fresh
+struct binder whose actual syntactic mapFree guard is false. Complete typed
+source equality, operand comparisons and field lookup yield witness iff and
+constructive decidability, independent of coverage/verdict. Hash freedom and
+specific existing boundAnswer refusal are proved; the high boundary proves
+all-waiver target admission. Two literal sources remain globally unknown, with
+map-free and distinct-shape negative controls. No semantic contains-mapping
+equivalence or mapping-child realization is assumed. This is a meaningful reason
+component, not global Residue exhaustiveness or a new target exclusion.
+
+
+VA1 bounded-instance certificates (2026-11-02): DecisionBoundedInstance proves
+that the actual literal-bounded universal implies its in-range literal instance
+for arbitrary quantifier-free typed bodies and partial observations. Its exact
+recognizer/constructive membership decision is parameterized by the supplied
+literal; no exhaustive literal search or coverage test is used. The source
+transport reverses actual prefix/prenex/conditional/elimination certificates,
+with the existing hash-free premise explicit. Real keyed/field source outputs
+are witnessed; fixed-below-key refuses this exact syntax. Covered/unknown pins
+remain unchanged. Strict LFml.eq and existing LFml.optEq have separate controls:
+two failed strict operands do not satisfy equality, while optional equality has
+an inhabited antecedent and genuine mismatched-result countermodel. Existing
+self-comparison lemmas move verbatim below the facade for this low API. The
+22-module affected closure and28 public axiom reports pass; collector/decision
+integration and global Residue remain open.
+
+
+VA1 formula-derived literal search (2026-11-02): DecisionBoundedInstanceSearch
+finds a literal from the actual guard bound after checking the existing
+boundedUIntEstimate≤511 before allocating samples. Each hit carries the exact
+instance witness and universal validity proof; no finite-state result is promoted.
+Schema completeness retains that original estimate premise. Actual keyed/field
+source hits select nonfirst literal1; optional mismatch, fixed source, zero and
+maximum-uint bounds refuse. Valid-but-refused controls separate refusal from
+invalidity. Existing hash-free premise and global unknown/Covered pins remain
+unchanged. This supplies ready source certificates; decision integration and
+the full global Residue/bridge remain open.
+
+
 ## Guarded symmetric cancellation
 
 One closer shape, outside M0–M8.
@@ -1049,3 +1480,70 @@ records the deviation.
   overflowing and false cases. False cases may be `refuted` or `pending`,
   never `proved`. `externalValue == proved` is a hard gate; do not relax it to
   `pending`.
+
+
+
+M7-next source discovery progress: finite uint parameters are now collected from
+the actual source-chain skeleton, with computed parser witnesses, constructive
+membership and pointwise preparation proofs. Completeness explicitly retains
+instance-value candidate membership; bound occurrence is derived. Five original
+array fixtures and covered/false/unused-binder controls pass focused checks. Their
+global verdict pins remain unchanged, and the global Residue/bridge and full gates
+remain open. See [VA1 handoff](feature-work/after-roadmap-va1.md).
+
+
+M7-next computed source route: the five original array literal-instance fixtures
+now have actual kernel-certified coverage and proved public verdicts. The new lazy
+answer preserves previous certificates/counterstates; its source filter is complete
+for the genuine parser family. Hash freedom and no-allocation routing remain explicit.
+This is the finite recognized subclass, not global Residue/DecisionTheorem-prime or
+general array completeness. Narrow actual fixture modules remove unnecessary numeric
+and memory regression dependencies. Full/rebase gates remain open; see the
+[VA1 handoff](feature-work/after-roadmap-va1.md).
+
+VA1's source allocation boundary (2026-11-02) now derives
+`SourceUIntLiteralChain.noAlloc` from the actual substitution equation and
+universal-prefix syntax. `sourceUIntLiteralDiscovery_covered` therefore needs
+only genuine finite source discovery; `sourceUIntLiteralDiscovery_proved`
+still requires the unchanged separate `hasHash = false` premise. The five
+original assigned sources, their inhabited antecedent and false fixed-array
+countermodel are checked clients. Fresh-allocation formulas are outside this
+source family; no global verdict is asserted for that negative control.
+This does not establish target membership, the exhaustive Residue/DecisionTheorem-prime
+bridge or the wider Q1 program-free boundary. The rebased Decision import
+closure passes; full-lane gates remain open. See the VA1 handoff.
+
+The AU01 reason census additionally names a decidable nonliteral linear-index
+given-heap reflexive-read family. Recognition reuses the intrinsic uint
+evidence producer and memory address views; it checks the complete source
+equation rather than a coverage or unknown result. Global theory validity,
+hash freedom, closed-source admission under every waiver setting and
+disjointness from the original literal-only family are kernel proved.
+The AU02 computed-source extension now consults this all-heap certificate only
+after every old answer misses. Closed members gain actual memory coverage and
+proved global verdicts; the assigned computed-index pin and its in-bounds and
+checked-subtraction companions improve with exact certificates. Old literal
+answers, returned negative candidate states, read-definedness observations and
+source refusals remain unchanged. General memory/prefix/fixed-array coverage
+and the exhaustive Residue/DecisionTheorem-prime bridge remain open.
+
+
+AU02 fixed given-heap progress (2026-11-02): a separate exact source class now
+handles a box-bound fixed uint array with identical direct reads at a UIntLinear
+index (literal or computed). Its intrinsic length and both full operands are
+checked. All-heap validity and hash freedom supply real coverage/proved results,
+after every old answer and exact counterstate has been preserved. Literal,
+computed, partial, out-of-bounds and intrinsic zero-length controls are certified;
+real fixed-object unequal reads and halted program equality remain false controls.
+The dynamic source classifiers and their fixed-binder refusals are unchanged.
+This closes the reproduced fixed given-heap reflexive-read gap, not general fixed
+arrays, prefixes or the exhaustive Residue theorem. See the VA1 handoff.
+
+M7-next numeric resource converse: `Calculus/DecisionNumericFuel.lean` proves
+that successful numeric term/formula flattening consumes exactly the structural
+node count. For the existing `LFml.UIntQF P E` grammar, at every budget and
+starting index, `flattenFormulaAt?` succeeds exactly when the formula's nodes
+fit. `Examples/DecisionNumericFuel.lean` certifies adjacent511/512-node cases,
+quantifier refusal and error-sequence traversal. This characterizes the existing
+flattener stage; whole-source preparation, coverage and the global511-node
+pipeline bound remain separate obligations. No production limit changed.

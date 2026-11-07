@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefix.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefix.prepared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

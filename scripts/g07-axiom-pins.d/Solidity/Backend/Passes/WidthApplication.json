@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.bytes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.mask_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.mask_encoding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.operation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.prefix_safe": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.source_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/WidthApplication.lean:Solidity.Backend.Passes.WidthApplication.target_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,2 @@
+COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 -o .lake/build/lib/lean/SolidityBridge/PrecompileAgreement/Header.olean SolidityBridge/PrecompileAgreement/Header.lean
+EXIT=0 SECONDS=2.521 PEAK_RSS=391675904 MIN_AVAILABLE=17074929664 RESOURCE_STOP=False

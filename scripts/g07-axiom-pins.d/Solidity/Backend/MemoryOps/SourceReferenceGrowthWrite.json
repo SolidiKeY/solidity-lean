@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceGrowthWrite.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.alloc_redirect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

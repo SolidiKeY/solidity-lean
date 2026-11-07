@@ -1,0 +1,66 @@
+{
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Admission.rejects": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_admission_sloppy": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_nonVacuous_emptySource": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_alteredCompiler": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_erasingCompiler": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_hashRevertCompiler": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_linkBlindCompiler": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_loopToSucceed": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_revertCompiler": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.not_publicCorrectness_sloppyCompiler": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toy_publicCorrectness": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toy_publicCorrectness_loopReverts": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toyEvm_approved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toyFixed_keccak": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toySource_approved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Controls.toySource_nonVacuous": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.Fixed.Sane.rootSlots_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.HashPremise.not_of_rootSlots": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.PublicCorrectness.observedBySource": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.PublicCorrectness.observes": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.PublicCorrectness.rejects": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.SourceSpec.NonVacuous.admits": [],
+ "Solidity/Roadmap/Controls.lean:Solidity.Roadmap.SourceSpec.not_nonVacuous_of_no_parse": []
+}

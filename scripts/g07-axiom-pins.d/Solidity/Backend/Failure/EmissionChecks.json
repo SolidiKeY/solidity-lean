@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/Failure/EmissionChecks.lean:Solidity.Backend.Failure.digits_fold": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/EmissionChecks.lean:Solidity.Backend.Failure.empty_vector": [
+  "propext"
+ ],
+ "Solidity/Backend/Failure/EmissionChecks.lean:Solidity.Backend.Failure.negative_controls": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/EmissionChecks.lean:Solidity.Backend.Failure.panic_length": [
+  "propext"
+ ],
+ "Solidity/Backend/Failure/EmissionChecks.lean:Solidity.Backend.Failure.read_digits": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/EmissionChecks.lean:Solidity.Backend.Failure.reason_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/EmissionChecks.lean:Solidity.Backend.Failure.writes_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/EmissionChecks.lean:Solidity.Backend.Failure.writes_decompose": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+H35 independent finder, read-only, no Lean/builds/writes:
+Verified archive SHA256 against receipt, all fifteen unique members/internal checksums, nine artifacts and three module mappings. No cache-integrity or false-transfer finding. Sampler recognizes plain and full-path executable names. Archive is a three-module packet, not dependency closure or delivery receipt.
+
+H35 independent skeptic, read-only, no Lean/builds/writes:
+Verified all fifteen members, checksums, mapping/metadata correspondence and current module source hashes. No completion/shipping overclaim. Asked that receipt preflight exit/blocker be derived from recorded evidence rather than hardcoded. Fixed: prepare-cache.py now validates saved preflight head and log SHA256, and copies that record into the receipt. Follow-up verified exact matching record/log and unchanged archive SHA256 fd0e904d5670b29959105e6777854f7f0eeceba2702c2cd33fa58454e81b4433. No further findings.
+
+Delivery remains incomplete; no destination receipt. H35 is blocked, not complete.

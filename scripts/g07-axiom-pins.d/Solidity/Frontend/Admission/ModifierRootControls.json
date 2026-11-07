@@ -1,0 +1,7 @@
+{
+ "Solidity/Frontend/Admission/ModifierRootControls.lean:Solidity.Frontend.Admission.ModifierRootControls.selector_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

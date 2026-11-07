@@ -34,4 +34,23 @@ admission can issue its precise refusal; static checking is not admission. -/
 theorem represented_gas : (inferExpr empty (.yulCall "gas" .nil)).map (·.1) = some 1 := by decide +kernel
 theorem gas_admission_refused : Builtin.checkTier .C .gas = .error (.compilerDependent "gas") := rfl
 
+/- The fixed intrinsic environment is essential to packed-result uniqueness. -/
+def singleReturnEnv : ExprEnv [⟨1, 1⟩] [] 0 := ⟨[], [("split", ⟨⟨1, 1⟩, .here⟩)], []⟩
+#guard (inferExpr fnEnv «split»).map (·.1) = some 2
+#guard (inferExpr singleReturnEnv «split»).map (·.1) = some 1
+
+/-- info: 'Solidity.Yul.ExprD.result_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ExprD.result_unique
+/-- info: 'Solidity.Yul.ArgsD.result_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ArgsD.result_unique
+
+/-- info: 'Solidity.Yul.ExprD.term_result_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ExprD.term_result_unique
+/-- info: 'Solidity.Yul.ArgsD.terms_result_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ArgsD.terms_result_unique
+
 end Solidity.Yul.Checks.Expressions

@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface_path": "Solidity/Backend/Passes/Sequence.lean",
+  "interface_sha256": "4dbf3e95f90fc85bb49b1d4707e363ea4b5657f115846e9b61100b47d56572b3",
+  "witness_module": "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean",
+  "covered_premise_bundles": [
+    {
+      "name": "Solidity.Backend.Passes.compilation_sequence_success",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Sequence.lean",
+      "line": 37,
+      "character_span": [
+        1695,
+        2505
+      ],
+      "signature": "theorem compilation_sequence_success\n    (left : Compilation b F P) (right : Compilation b left.frag Q)\n    {base nextBase : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (hi : left.Input L frame base \u03c3 m)\n    (link : BoundaryLink left right L frame base nextBase \u03c3 m)\n    (hp : Evm.Prog.pays P = false) (hq : Evm.Prog.pays Q = false)\n    {o : Solidity.Out C \u03c3.H \u0394} (hs : P.run \u03c3 = .ok o)\n    {o' : Solidity.Out C o.st.H \u039e} (hs' : Q.run o.st = .ok o') :\n    \u2203 m' m'',\n      (P.join Q).run \u03c3 = .ok \u27e8o'.st, o.ext.trans o'.ext\u27e9 \u2227\n      run left.code m = .ok m' 0 \u2227\n      run (left.code ++ right.code) m = .ok m'' 0 \u2227\n      m''.stack = m.stack \u2227\n      left.Rep (L + Evm.Prog.pushes P) frame base \u03c3 m o.st m' \u2227\n      right.Rep ((L + Evm.Prog.pushes P) + Evm.Prog.pushes Q)\n        frame nextBase o.st m' o'.st m''",
+      "signature_sha256": "20290fce2087de27621256d7525481dc1807980458207bd0ba3248a50a9e7125",
+      "source_sha256": "4dbf3e95f90fc85bb49b1d4707e363ea4b5657f115846e9b61100b47d56572b3",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditSequence.premises",
+      "witness_status": "kernel_checked_concrete_core_empty_suffix_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_sequence_revert_iff",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Sequence.lean",
+      "line": 65,
+      "character_span": [
+        3075,
+        3546
+      ],
+      "signature": "theorem compilation_sequence_revert_iff\n    (left : Compilation b F P) (right : Compilation b left.frag Q)\n    {base nextBase : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (hi : left.Input L frame base \u03c3 m)\n    (link : BoundaryLink left right L frame base nextBase \u03c3 m)\n    (hp : Evm.Prog.pays P = false) (hq : Evm.Prog.pays Q = false) :\n    run (left.code ++ right.code) m = .revert \u2194\n      TerminalFailure P \u03c3 \u2228\n        \u2203 o, P.run \u03c3 = .ok o \u2227 TerminalFailure Q o.st",
+      "signature_sha256": "f54dc0a717d25abdeded6a866301ed2c42e1ceb4654b7fc19756c1101689c103",
+      "source_sha256": "4dbf3e95f90fc85bb49b1d4707e363ea4b5657f115846e9b61100b47d56572b3",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditSequence.premises",
+      "witness_status": "kernel_checked_concrete_core_empty_suffix_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.typed_sequencing_assoc",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Sequence.lean",
+      "line": 94,
+      "character_span": [
+        4369,
+        5253
+      ],
+      "signature": "theorem typed_sequencing_assoc : {\u0393 \u0394 \u039e \u03a9 : Ctx} \u2192\n    (P : Prog C \u0393 \u0394) \u2192 (Q : Prog C \u0394 \u039e) \u2192 (R : Prog C \u039e \u03a9) \u2192\n      (P.join Q).join R = P.join (Q.join R)\n  | _, _, _, _, .nil, Q, R => rfl\n  | _, _, _, _, .cons stmt P, Q, R => by\n    change Prog.cons stmt ((P.join Q).join R) = Prog.cons stmt (P.join (Q.join R))\n    rw [typed_sequencing_assoc P Q R]\n\n/-- Both source sequencing and emitted-code sequencing associate. Every\nstage retains its actual context and branch-indexed compilation result. -/\ntheorem compilation_sequence_associative {\u03a9 : Ctx} {R : Prog C \u039e \u03a9}\n    (left : Compilation b F P) (middle : Compilation b left.frag Q)\n    (right : Compilation b middle.frag R) (\u03c3 : State C \u0393) (m : Machine) :\n    ((P.join Q).join R).run \u03c3 = (P.join (Q.join R)).run \u03c3 \u2227\n      run ((left.code ++ middle.code) ++ right.code) m =\n        run (left.code ++ (middle.code ++ right.code)) m",
+      "signature_sha256": "7b89187bff3c4a0a8bdcb1db5b5f6be28b737168c6fe74e4c0d22b5aa24ad772",
+      "source_sha256": "4dbf3e95f90fc85bb49b1d4707e363ea4b5657f115846e9b61100b47d56572b3",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditSequence.typed_association",
+      "witness_status": "kernel_checked_concrete_core_empty_suffix_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "signature_extraction_limit": "Legacy frozen census signature/span includes equation bodies and the following theorem; preserved for provenance, not a clean telescope. See independently pinned audited_telescope.",
+      "audited_telescope": "theorem typed_sequencing_assoc : {\u0393 \u0394 \u039e \u03a9 : Ctx} \u2192\n    (P : Prog C \u0393 \u0394) \u2192 (Q : Prog C \u0394 \u039e) \u2192 (R : Prog C \u039e \u03a9) \u2192\n      (P.join Q).join R = P.join (Q.join R)",
+      "audited_telescope_sha256": "82b523a68b7a1881f4e614f2bbf8b3c31ab301ba5fe2835f556da983913a0c40",
+      "audited_telescope_span": [
+        4369,
+        4524
+      ],
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_sequence_associative",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Sequence.lean",
+      "line": 104,
+      "character_span": [
+        4869,
+        5253
+      ],
+      "signature": "theorem compilation_sequence_associative {\u03a9 : Ctx} {R : Prog C \u039e \u03a9}\n    (left : Compilation b F P) (middle : Compilation b left.frag Q)\n    (right : Compilation b middle.frag R) (\u03c3 : State C \u0393) (m : Machine) :\n    ((P.join Q).join R).run \u03c3 = (P.join (Q.join R)).run \u03c3 \u2227\n      run ((left.code ++ middle.code) ++ right.code) m =\n        run (left.code ++ (middle.code ++ right.code)) m",
+      "signature_sha256": "f7699e418263134324b6233c726757b9101c441769d1eaec3be8568ccf5d0531",
+      "source_sha256": "4dbf3e95f90fc85bb49b1d4707e363ea4b5657f115846e9b61100b47d56572b3",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditSequence.associations",
+      "witness_status": "kernel_checked_concrete_core_empty_suffix_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    }
+  ],
+  "scope": "Actual checked nontrivial store followed by checked empty suffix, same populated input and correlated source/output/Rep; association uses these actual programs and compilation results. Success instance of failure equivalence does not witness its failing alternatives. Other branches/nonempty suffixes/resource/gas/fork/general sequencing remain open.",
+  "join": "Nineteen distinct supplemental interface rows across these maps. None belongs to the original179-file/1259-row selection; all1259 selected rows remain uncovered by these fixtures. Prior subtraction counts withdrawn.",
+  "signature_accounting_limit": "The raw frozen typed_sequencing_assoc census signature is over-extracted. It is retained unchanged and explicitly qualified; its auxiliary telescope pins only the actual declaration header. No global extractor repair or clean full-census claim.",
+  "original_census_accounting": {
+    "selected_files": 179,
+    "selected_rows": 1259,
+    "covered_selected_rows_by_this_map": 0,
+    "remaining_selected_rows": 1259,
+    "classification": "supplemental interfaces, not selected census members"
+  }
+}

@@ -1,0 +1,8 @@
+{
+ "Solidity/Backend/StorageOps/FixedSnapshotRoot.lean:Solidity.Backend.StorageOps.FixedSnapshotRoot.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedSnapshotRoot.lean:Solidity.Backend.StorageOps.FixedSnapshotRoot.queries": []
+}

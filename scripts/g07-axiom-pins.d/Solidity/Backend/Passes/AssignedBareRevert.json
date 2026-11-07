@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/AssignedBareRevert.lean:Solidity.Backend.Passes.AssignedBareRevert.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

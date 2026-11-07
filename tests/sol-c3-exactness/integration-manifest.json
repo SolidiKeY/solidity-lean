@@ -1,0 +1,42 @@
+{
+  "published_master": "e6849d3bdf516099d20c33d3581d523449764018",
+  "owned_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "repository": "/workspace/solidity-lean",
+  "published_c3_modules": [
+    "Solidity/Frontend/C3Exactness/Admission.lean",
+    "Solidity/Frontend/C3Exactness/Audit.lean",
+    "Solidity/Frontend/C3Exactness/Controls.lean",
+    "Solidity/Frontend/C3Exactness/GraphControls.lean",
+    "Solidity/Frontend/C3Exactness/Identity.lean",
+    "Solidity/Frontend/C3Exactness/Linearization.lean",
+    "Solidity/Frontend/C3Exactness/OrderObstruction.lean",
+    "Solidity/Frontend/C3Exactness/Renaming.lean",
+    "Solidity/Frontend/C3Exactness/Trace.lean"
+  ],
+  "remaining_new_modules": [],
+  "changed_published_modules": [],
+  "already_identical_to_published": [
+    "Solidity/Frontend/C3Exactness/Admission.lean",
+    "Solidity/Frontend/C3Exactness/Audit.lean",
+    "Solidity/Frontend/C3Exactness/Controls.lean",
+    "Solidity/Frontend/C3Exactness/GraphControls.lean",
+    "Solidity/Frontend/C3Exactness/Identity.lean",
+    "Solidity/Frontend/C3Exactness/Linearization.lean",
+    "Solidity/Frontend/C3Exactness/OrderObstruction.lean",
+    "Solidity/Frontend/C3Exactness/Renaming.lean",
+    "Solidity/Frontend/C3Exactness/Trace.lean"
+  ],
+  "all_six_producer_pins_byte_identical": true,
+  "boundary": "All nine C3 modules already integrated. Requested rebase completed, old head/ref and334 exact historical files retained externally. Fresh owned/axiom/control/fixture/corpus/KeySort gates pass; shared-inventory479outside-lane rows and historical full-driver runtime remain blocked.",
+  "proof_checkpoint_head": "a7f4755cc1bd375052622aec6a966b6a1c21e427",
+  "proof_checkpoint_scope_patch": "/workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/integration-89373e34-to-a7f4755c.patch",
+  "proof_checkpoint_scope_patch_sha256": "16e300b4c637913fdebe2252cbd30dbdaec1c289cd062081eb319c53886c2a4a",
+  "patch_boundary": "Original base remains6f3. New remaining-integration.patch uses e684 through committed head; no integrated proof fragments replayed. Historical proof checkpoint pointers remain historical, not new-head ancestry claims.",
+  "previous_publication_manifest": "evidence/published-master-b419.json",
+  "adopted_upstream": "e6849d3bdf516099d20c33d3581d523449764018",
+  "adoption_merge": null,
+  "previous_adopted_upstream": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "rebase_target": "e6849d3bdf516099d20c33d3581d523449764018",
+  "previous_owned_head": "a005a47075e23d123a7c5c71ed47d05bba2c885c",
+  "preserved_backup_ref": "codex/solidity-sol2-20261104/c3-exactness-pre-e684"
+}

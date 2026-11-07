@@ -1,0 +1,26 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-solkey",
+  "write_scope": [
+    "tests/h62/item6/migrate-solkey/**",
+    "scripts/h62/item6/migrate-solkey/**",
+    "docs/feature-work/h62-6-migrate-solkey.md",
+    "Solidity/Solkey/ComputedRevert.lean",
+    "Solidity/Solkey/Constructors.lean",
+    "Solidity/Solkey/QuantifiedDiamond.lean",
+    "Solidity/Solkey/ScopedFlip.lean",
+    "Solidity/Solkey/TestSuite.lean"
+  ],
+  "outside_originals": "READ ONLY; migration overlay does not transfer live producer ownership",
+  "forbidden": [
+    "generated roots",
+    "central module maps",
+    "axiom pins",
+    "final lean-toolchain edit",
+    "master push",
+    "merge",
+    "PR",
+    "scope expansion"
+  ],
+  "h82": "retirement only; no new proof implementation; later owner routing is existing evidence only"
+}

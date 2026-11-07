@@ -1,0 +1,14 @@
+Captured decisive output excerpt from the actual restoration attempt:
+Working directory: /workspace/solidity-lean/Bridge
+Command: source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; ulimit -v 12582912; lake env .lake/packages/mathlib/.lake/build/bin/cache get Mathlib.Data.Nat.Log
+Exit: 1
+info: auto: checking out revision '36d85bf6372f1a35fb5487325d1ef965b33c6296'
+Using cache (Azure) from origin: leanprover-community/mathlib4
+Attempting to download 334 file(s) from leanprover-community/mathlib4 cache
+/workspace/.setup/cache/mathlib/e36fcd819ba723c8.ltar.part: Transfer failed (error code: 0): CONNECT tunnel failed, response 403
+334 download(s) failed
+Downloaded: 0 file(s) [attempted 334/334 = 100%], 334 failed
+
+No retry/bypass after proxy denial. Host cache transfer/checksum manifest is
+required, or supported network configuration correction. Full 898-key request
+was computed locally without downloading/rebuilding Mathlib.

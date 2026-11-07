@@ -1,0 +1,102 @@
+{
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.assignment_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.assignmentLowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.Certificates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.checkStep": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.emit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.execute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.mixedLowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.mixedSelected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.prefixed_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.prefixedLowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.selectCode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.selectStep": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.Slice": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/OccurrenceSelectionControls.lean:SolidityBridge.Yul.OccurrenceSelection.Step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

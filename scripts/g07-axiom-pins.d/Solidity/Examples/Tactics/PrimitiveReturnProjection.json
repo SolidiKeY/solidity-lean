@@ -1,0 +1,38 @@
+{
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.canonical_int_bind": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.canonical_int_discard": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.empty_rejected_before_discard": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.incomplete_suffix_still_ignored": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.integer_is_not_a_zero_return_signature": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.invalid_bool_rejected_even_if_discarded": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.nil_decoder_unchanged": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.one_byte_rejected_before_discard": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.signed_then_bool_kept": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.wrong_caller_type_has_no_projection": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.zero_return_accepts_empty": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean:Solidity.Examples.Tactics.PrimitiveReturnConsumer.zero_return_ignores_extra_bytes": [
+  "propext"
+ ]
+}

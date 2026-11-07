@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.every_completed_normal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.from_any_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.from_ten": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.short_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForCompletionControls.lean:SolidityBridge.Yul.ScopedForCompletion.Controls.wrong_order_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

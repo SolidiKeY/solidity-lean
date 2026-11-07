@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/ArrayReduction.lean:Solidity.Decide.arrayReduction?_isSome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/ArrayReduction.lean:Solidity.Decide.ArrayReduction.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

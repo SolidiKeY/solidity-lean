@@ -1,0 +1,28 @@
+{
+  "area": "actual function constructor, returns, capture/record and frozen fuel",
+  "source": "Solidity/Frontend/TypeGrammarH28/ParserFunctions.lean",
+  "sha256": "a9cf3f1d2cb40f0bc583166b933b5eeb84b2d01c675816af0aa014ff8a59a1c6",
+  "theorems": 32,
+  "audit": "h28-type-cc387451857c.json",
+  "axioms": {
+    "empty": 7,
+    "propext": 25
+  },
+  "finder": {
+    "agent": "/root/inventory_finder",
+    "mode": "read-only; no Lean server",
+    "verdict": "accepted checkpoint",
+    "result": "All32 statements/snapshot preservation/source/trust accepted; no semantic finding"
+  },
+  "skeptic": {
+    "agent": "/root/inventory_skeptic",
+    "mode": "read-only; no Lean server",
+    "verdict": "accepted checkpoint only",
+    "result": "All386 currenthash/statement records accepted;32statements unchanged throughrepairs; no remainingfinding"
+  },
+  "fresh_mcp": [
+    "mcp-fresh-functions-ParserFunctions.json",
+    "mcp-fresh-functions-AxiomAudit.json"
+  ],
+  "pending": "Static atom support/global exactness and final full-project gates"
+}

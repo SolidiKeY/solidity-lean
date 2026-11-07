@@ -45,8 +45,8 @@ theorem source_frame :
     (final.ex.world.accounts thisC).storage = (sB.ex.world.accounts thisC).storage :=
   origin.storage _ _ raw runtime
 
-theorem balance_changes : (final.ex.world.accounts thisC).balance.val = 5 ∧
-    (sB.ex.world.accounts thisC).balance.val = 0 := by decide +kernel
+theorem balance_changes : (final.ex.world.accounts thisC).balance = 5 ∧
+    (sB.ex.world.accounts thisC).balance = 0 := by decide +kernel
 
 /-- A nonempty typed primitive storage projection using the actual range
 checker. This selected-field representation is explicit, not inferred ABI or

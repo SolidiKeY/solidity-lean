@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean:Solidity.Backend.MemoryOps.source_uint_fixed_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.write_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.write_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedWrite.lean:Solidity.Backend.MemoryOps.SourceUintFixedAt.write_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

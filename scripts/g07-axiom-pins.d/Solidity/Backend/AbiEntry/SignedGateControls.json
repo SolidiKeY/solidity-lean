@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.malformed_word_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.raw_dirty_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.raw_negative_value": [
+  "Quot.sound"
+ ],
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.signed256_all_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.signed257_all_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.signed8_edges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.wide_bound_not_truncated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedGateControls.lean:Solidity.Backend.AbiEntry.SignedGateControls.zero_and_one_width": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

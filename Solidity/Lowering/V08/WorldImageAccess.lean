@@ -125,6 +125,52 @@ theorem timestamp_frame {Γ : Source.RCtx} (clock : WorldImage.TimeAligned g tar
 /-- info: 'Solidity.Lowering.V08.WorldImageAccess.timestamp_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms timestamp_frame
+/-- A real journaled balance replacement leaves the account image's code and
+persistent/transient store observations unchanged. This says nothing about
+Image.funds or the whole Source state: the journal and balance really change. -/
+theorem account_balance (owner : Roadmap.Address) (amount : Source.Monetary.Balance)
+    (address : ContractWorld.Address) :
+    WorldImage.AccountImage g kindOf relation
+      {source with ex := source.ex.apply (.account owner (fun account => account.withBalance amount))}
+      target address ↔ WorldImage.AccountImage g kindOf relation source target address := by
+  unfold WorldImage.AccountImage
+  by_cases same : EnvironmentProjection.lowerAddress address = owner
+  · subst owner
+    simp only [Source.ExecState.apply, Source.World.set_get, Source.Account.withBalance]
+  · simp only [Source.ExecState.apply, Source.World.set_other source.ex.world same]
+
+/-- Success is supplied by the actual transfer Option equation, not a desired
+image equation. Same-owner success and both distinct-owner journal updates
+preserve exactly the code/store component; funds remain a separate obligation. -/
+theorem account_transfer (sender recipient : Roadmap.Address) (amount : Roadmap.Word)
+    (after : Source.ExecState E.layout E.lay E.lay)
+    (paid : source.ex.transfer sender recipient amount = some after)
+    (address : ContractWorld.Address) :
+    WorldImage.AccountImage g kindOf relation {source with ex := after} target address ↔
+      WorldImage.AccountImage g kindOf relation source target address := by
+  unfold Source.ExecState.transfer Source.ExecState.transferNat at paid
+  dsimp only at paid
+  split at paid
+  · split at paid
+    · cases (Option.some.inj paid)
+      rfl
+    · cases paid
+  · split at paid
+    · cases (Option.some.inj paid)
+      exact (account_balance
+        (source := {source with ex := source.ex.apply (.account sender (fun account =>
+          account.withBalance ((source.ex.world.accounts sender).balance - amount.val)))})
+        recipient ((source.ex.world.accounts recipient).balance + amount.val) address).trans
+        (account_balance sender _ address)
+    · cases paid
+
+/-- info: 'Solidity.Lowering.V08.WorldImageAccess.account_balance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms account_balance
+/-- info: 'Solidity.Lowering.V08.WorldImageAccess.account_transfer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms account_transfer
+
 end Solidity.Lowering.V08.WorldImageAccess
 
 

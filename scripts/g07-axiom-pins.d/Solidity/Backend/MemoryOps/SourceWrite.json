@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.capture_singleton_elems": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.source_bool_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.source_bool_write_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

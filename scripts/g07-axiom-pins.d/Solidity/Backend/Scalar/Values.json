@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Scalar/Values.lean:Solidity.Backend.Scalar.ClosedCertificate.binary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Values.lean:Solidity.Backend.Scalar.ClosedCertificate.unary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Values.lean:Solidity.Backend.Scalar.negatedTrue_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Values.lean:Solidity.Backend.Scalar.negatedTrue_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

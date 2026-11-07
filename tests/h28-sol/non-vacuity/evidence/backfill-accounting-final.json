@@ -1,0 +1,75 @@
+{
+  "git_head": "e6849d3bdf516099d20c33d3581d523449764018",
+  "git_branch": "codex/solidity-h28-sol-20261104/non-vacuity",
+  "env_overrides": {},
+  "cache_reclaims": [],
+  "wrapper_command": [
+    "python3",
+    "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/measure.py",
+    "/workspace/solidity-lean/tests/h28-sol/non-vacuity/evidence/backfill-accounting-final.rusage.json",
+    "tests/h28-sol/non-vacuity/runtime/accounting"
+  ],
+  "rusage": {
+    "command": [
+      "tests/h28-sol/non-vacuity/runtime/accounting"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 22.23807402899547,
+    "children_user_seconds": 16.027966,
+    "children_system_seconds": 6.331919,
+    "children_max_rss_kib": 23736,
+    "children_major_faults": 0,
+    "children_minor_faults": 4648095
+  },
+  "rusage_file": "tests/h28-sol/non-vacuity/evidence/backfill-accounting-final.rusage.json",
+  "rusage_sha256": "1d20760dcf4c8951765761b31c6e398323bb31bd8d00bef8463bcdb0c53d8a2f",
+  "runner_sha256": "82d93eda9d261faa5450c45fa29ea000781f554db2667e6579a016f2d7c39809",
+  "initial_memory_events": {
+    "low": 0,
+    "high": 0,
+    "max": 0,
+    "oom": 0,
+    "oom_kill": 0,
+    "oom_group_kill": 0
+  },
+  "final_memory_events": {
+    "low": 0,
+    "high": 0,
+    "max": 0,
+    "oom": 0,
+    "oom_kill": 0,
+    "oom_group_kill": 0
+  },
+  "headroom_method": "estimated min(host MemAvailable, cgroup max-current+max(0,inactive_file-dirty-writeback))",
+  "initial_vm_headroom": {
+    "limit": 17179869184,
+    "current": 9069666304,
+    "inactive_file": 3404021760,
+    "file_dirty": 1044480,
+    "file_writeback": 0,
+    "reclaimable_file_estimate": 3402977280,
+    "host_available": 17898848256,
+    "cgroup_available": 11513180160,
+    "available": 11513180160
+  },
+  "minimum_vm_available_bytes": 11479564288,
+  "input_sha256": {
+    "tests/h28-sol/non-vacuity/runtime/measure.py": "f1620c519d318b39e1d43dc0396c387ec9423e7e79c6841396e908e724892bfa",
+    "tests/h28-sol/non-vacuity/runtime/workers.py": "3d790417a36f117c1e4bcbbf4eb230655d083059cabb9a65a40a7ca39ac3d775"
+  },
+  "log_sha256": "414b7fcfa6925ef69503a0c5c43f88d5dc28c9e194a27432387849f39a3cbfa4",
+  "command": [
+    "tests/h28-sol/non-vacuity/runtime/accounting"
+  ],
+  "container": "h28-non-vacuity-runtime",
+  "exit": 0,
+  "elapsed_seconds": 22.573286810002173,
+  "sampled_peak_aggregate_rss_bytes": 41463808,
+  "cgroup_memory_peak_bytes": 11908792320,
+  "limits": [
+    "12884901888",
+    "0"
+  ],
+  "stop": null,
+  "worker_snapshots": []
+}

@@ -1,0 +1,28 @@
+{
+  "status": "blocked",
+  "mode": "preflight only; no delivery claimed",
+  "command": [
+    "bash",
+    "scripts/coord-tools/ship-cache.sh",
+    "--dry-run",
+    "/workspace/solidity-lean"
+  ],
+  "environment_overrides": {
+    "SHIP_ALLOW_HEAD": "1",
+    "LAKE_CACHE_DIR": "/root/.cache/lake",
+    "SHIP_STATE": "/workspace/scratch/h28-runtime/h35-e7cf5143/shipment-state"
+  },
+  "exit": 1,
+  "seconds": 12.06513322200044,
+  "evidence": "/workspace/scratch/h28-runtime/h35-e7cf5143/ship-cache-preflight.log",
+  "transport_present": false,
+  "lane_config_present": false,
+  "export_archive": "/workspace/scratch/h28-h35-cache-e7cf5143/owned-lake-cache.tar.gz",
+  "export_sha256": "648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862",
+  "export_bytes": 6045725,
+  "modules": 24,
+  "artifact_files": 72,
+  "mapping_rows": 24,
+  "archive_verified": true,
+  "delivery": "NOT shipped: default coordinator poll-state/catalog/VMEXEC transport absent; no receiver configured"
+}

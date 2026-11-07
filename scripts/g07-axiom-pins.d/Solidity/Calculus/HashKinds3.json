@@ -1,0 +1,17 @@
+{
+ "Solidity/Calculus/HashKinds3.lean:Solidity.Fml.tk3_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/HashKinds3.lean:Solidity.Fml.tk3_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/HashKinds3.lean:Solidity.Fml.tk3_validH": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

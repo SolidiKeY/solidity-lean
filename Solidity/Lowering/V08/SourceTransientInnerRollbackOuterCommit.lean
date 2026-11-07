@@ -125,8 +125,8 @@ theorem all_retained (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
     ⟨rfl,rfl,rfl,rfl,rfl⟩,⟨rfl,rfl,rfl,rfl,rfl⟩⟩
 
 theorem complete_populated_vector (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
-    ((outerCommitted pipeline bytes).ex.world.accounts sender).balance.val = 93 ∧
-    ((outerCommitted pipeline bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((outerCommitted pipeline bytes).ex.world.accounts sender).balance = 93 ∧
+    ((outerCommitted pipeline bytes).ex.world.accounts self).balance = 7 ∧
     ((outerCommitted pipeline bytes).ex.world.accounts self).code = some 0 ∧
     ((outerCommitted pipeline bytes).ex.world.accounts self).nonce = 1 ∧
     ((outerCommitted pipeline bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧

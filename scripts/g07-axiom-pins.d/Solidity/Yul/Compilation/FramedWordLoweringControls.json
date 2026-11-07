@@ -1,0 +1,52 @@
+{
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.caller_operand_rescue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.dirty_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.exact_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.failure_after_push": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.pending_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.statement_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.statement_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.statementCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedWordLoweringControls.lean:Solidity.Yul.Compilation.FramedWordLowering.Controls.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

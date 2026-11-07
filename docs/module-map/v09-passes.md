@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/v09-passes.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # V09 compiler-pass components
 
 | Modules | Purpose |

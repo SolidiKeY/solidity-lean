@@ -3,9 +3,10 @@
 Partial checkpoint of roadmap item V15 (EVM agreement), producer P10: single
 fetched EVM steps over Backend-emitted code, checked against the pinned
 EvmYul reference (`Bridge/vendor/EvmYul`). All modules live in
-`Bridge/SolidityBridge/RoadmapV15/P10/`; nothing in the core changed. Every
-theorem is proved; there is no `sorry`, no new axiom, and the printed axiom
-sets are subsets of `propext`, `Classical.choice`, `Quot.sound`.
+`Bridge/SolidityBridge/RoadmapV15/P10/`; nothing in the core changed. Checked registered producer and control theorems have no `sorry` or new axiom; their
+printed axiom sets are subsets of `propext`, `Classical.choice`, `Quot.sound`.
+Source-only control proposals, where explicitly identified below, remain
+unverified and are not registered.
 
 ## Sites
 
@@ -68,8 +69,11 @@ and error-order negatives.
 - The reference accepts the truncated raw PUSH2 `[0x61, 0x01]` (value 1),
   which `Backend.decode` refuses; the PUSH laws cover complete emitted payloads.
 - `valid` (the jump-destination array) is an input, not a scanner certificate.
-- RETURNDATACOPY uses the reference byte-memory operation; no physical
-  padding (`PaddingCorrect`) witness is supplied.
+- RETURNDATACOPY uses the reference byte-memory operation. The published
+  [padding interface](../../Bridge/SolidityBridge/ExternalEvm/PaddingInterface.lean)
+  supplies `paddingCorrect_bounded` under explicit host-width bounds and
+  `paddingCorrect32` for the H7 logical zeroes body. Native allocation/extern
+  correctness remains separate; this is not a physical allocator witness.
 - Open: compiler/source origin of sites, G45.03 execution meaning, Osaka
   agreement, resource abstraction, and source/ABI/world/account/transaction/
   trace closure; the full per-opcode rows remain open.
@@ -1193,3 +1197,972 @@ reviews found no defect.
 The final PUSH/JUMP cycle, arbitrary repeated nonzero iterations, compiler
 origin, scanner/D_J correctness, Osaka approval, account/world/transaction
 and complete resource/trace correspondence remain separate obligations.
+
+## Backedge and finite-cycle consumers
+
+| Modules | Native result and exact premises |
+|---|---|
+| [LinkedBackedgePush.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean), [controls](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean) | Nonzero operand, arbitrary seed/tail and supplied array; `tail.length + 2 ≤ 1024`, gas ≥ 22, fuel `fuel + 8`: seven fetched steps reach PC 71 with zero above the original ordered tail; debit 22. |
+| [LinkedCycle.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycle.lean), [controls](../../Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycleControls.lean) | Same nonzero/seed/capacity premises, certified linked array, gas ≥ 30, fuel `fuel + 9`: eight fetched steps return to PC 0 with the original tail; debit 30. JUMP0 membership is derived from the existing linked certificate. |
+
+Both consumers derive emitted code/state alignment and the actual charged
+step/`X` continuation. They retain complete native state, memory, active words,
+return data and return buffer; instruction count increases by seven/eight.
+Construction-level frame/debit laws acquire execution meaning through the
+corresponding prefix theorem. Controls retain independent complete expected
+States, signed/nonzero values, both permissions, legal capacity boundaries,
+ordered code/stack/buffer/account observations and real gas/fuel failures.
+Thirty gas completes one cycle and then refuses the next JUMPDEST charge;
+there is no termination, invariant or repeated/infinite execution claim.
+
+Independent reviews corrected confounded negatives: the PUSH test now changes
+only the operand at gas 22; the cycle test retains the certified array, gas 30,
+fuel 9 and spill and derives the zero-path terminal State at PC 73, gas 11,
+count 48 with cleared return data. Missing JUMP0 membership is tested separately.
+These sources have now passed focused target checks against the published H7
+reference baseline, including their populated controls. No source/compiler, Osaka,
+account/world, resource-abstraction or transaction/trace closure follows.
+
+## Invocation environment consumers
+
+[InvocationEnvironment.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean)
+generalizes earlier fixed-PC/exact-gas native coverage to arbitrary Backend
+sites, gas ≥ 2, one available stack slot and explicit fuel. ADDRESS reads code
+owner, CALLER reads execution source (distinct from ORIGIN's transaction sender),
+and CALLVALUE reads the exact native value word under either permission flag.
+It derives emitted decode, ordered driver checks, whole-State charged steps and
+`X` continuation. Its three producer laws have been revalidated against the published H7 baseline. This is neither first opcode coverage nor
+source-frame/CALL/world or full-row correspondence.
+
+[InvocationEnvironmentControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean)
+now has seven checked and registered controls. They retain distinct owner 7,
+caller 11 and origin 19, value 37, independent complete expected States,
+ordered observations, legal stack capacity and gas/fuel/overflow ordering.
+Private proof glue establishes concrete gas/PC arithmetic and rewrites symbolic
+stack length before the overflow check, avoiding deep list reduction without
+changing statements, expected values or proof budgets. Independent reviews
+confirmed those boundaries. The initial failed controls and cold dependency
+closure timeout remain failures; subsequent focused H7 checks are separate
+passing evidence. No source-frame/CALL/world or full-row correspondence follows.
+The delegated universal environment-fact packet remains separate and open.
+
+A read-only metadata review found an unqualified “checked” label in the new
+module-map row. It was qualified to separate prior evidence from then-pending H7 validation.
+The subsequent focused H7 checks now discharge that validation for these modules.
+
+The H7 documentation correction also separates its published bounded logical
+padding proof from the still-separate native allocation/extern boundary. V15
+does not reimplement or claim completion of the transferred memory bridge.
+
+The invocation controls were repaired after actual diagnostics identified three
+whole-State equality goals and a recursion limit in full-stack reduction. The
+repairs preserve all seven public statements and the original expected records;
+no heartbeat, recursion, resource, fuel or test bound was increased. The native
+CALL/RETURNDATA laws still do not construct `WorldCalls.FetchedPremises`: its
+source Step, same invocation identity, raw outcome and execution relations must
+come from concrete source/world/compiler producers, not an arbitrary relation.
+
+The subsequent registered-root checkpoint did not complete: a process monitor
+refused the closure after the focused checks and KeySort had passed. This is a
+failed closure gate, separate from the passing per-file checks and the four
+focused backedge/cycle module targets: LinkedBackedgePush,
+LinkedBackedgePushControls, LinkedCycle and LinkedCycleControls. Full import and cumulative validation remain open.
+
+## Header time and own balance
+
+[HeaderEnvironment.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironment.lean)
+proves fetched TIMESTAMP and SELFBALANCE at arbitrary Backend sites, with exact
+costs 2 and 5, sufficient gas, one available stack slot and explicit fuel.
+The actual decoder, charged driver checks, whole native State and `X`
+continuation are derived. TIMESTAMP converts the header Nat modulo the native
+256-bit word size. SELFBALANCE reads the code owner's actual account-map entry,
+returning zero for an absent entry. No independent balance oracle, warmth,
+permission, source frame or desired execution is supplied as a premise.
+
+[HeaderEnvironmentControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironmentControls.lean)
+retains independently stated complete result States and ordered code, stack,
+memory, buffers, calldata, accounts and substate. Controls distinguish owner
+balance 29 from another account's 41, call value 37 and remaining gas 4. They
+cover both permissions, empty and maximal legal input stacks, real overflow,
+gas and fuel failures, and a header `2^256 + 513` observed as word 513. The
+oversized header and absent-account cases are explicitly raw-reference
+behaviors, not source/consensus or driver-origin reachability witnesses.
+
+Earlier private environment-production work already covers fixed-entry reads
+with exact opcode charges. This increment generalizes those native clauses to
+arbitrary emitted sites and adequate gas; it adds no source profile or first
+opcode/full-row claim. Independent finder and skeptic reviews found no defect
+in the statements, complete observations or proof boundaries. The new focused
+module checks do not discharge the failed registered Bridge closure or the
+remaining source/compiler/Osaka/account/world/resource/transaction obligations.
+
+## Native metadata and source-slice refusals
+
+[BlockMetadata.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadata.lean)
+proves charged fetched COINBASE, NUMBER, PREVRANDAO, GASLIMIT and BASEFEE
+observations from explicitly Backend-encoded sites. Each reads the actual
+pinned header field, costs 2, preserves the complete native State except its
+specified gas/PC/count/stack update, and has an `X` continuation. Adequate gas,
+stack capacity and fuel remain explicit. The supplied destination array is
+arbitrary because these operations do not branch; no global scanner or later
+jump correctness is inferred. PREVRANDAO reads the supplied word only, without
+any randomness-generation or cryptographic interpretation claim.
+
+These native reads are **not** new source support. The same module proves that
+all five remain refused by the existing six-opcode `Backend.Environment`
+slice: `admittedOp` is false and its local `step` returns `none` for every frame
+and tail. This neither changes nor independently characterizes the broader
+source parser/profile. No compiler emission, source/world origin or Osaka
+approval follows from constructing the explicit Backend opcode sites.
+
+[BlockMetadataControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadataControls.lean)
+checks five independent complete expected States, both permission flags, a
+noncanonical supplied array, empty/maximal legal stacks, overflow and gas/fuel
+ordering. Values distinguish beneficiary 23 from owner 7, block number 257 from
+time 513, randomness word 43 from difficulty 13, fee 59 from gas price 61 and
+call value 37, and gas limit 30000000 from remaining gas 7. A raw header number
+`2^256 + 513` becomes word 513 without asserting consensus/source reachability.
+Complete ordered code/stack/buffer/account observations and all five local
+source-slice refusals remain explicit. Independent finder and skeptic reviews
+found no defect. Full opcode rows, registered-root validation, WorldCalls and
+source/compiler/account/transaction composition remain open.
+
+
+### Fetched signed-negation body
+
+[NegationBody.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean)
+connects the actual G25 selected signed-negation body (`PUSH32 0; SUB`) to
+two fetched reference steps. For arbitrary typed signed operands, surrounding
+Backend code, seed State and spill, `negation_body_execution` derives the Scalar
+word result, exact two-step output and continuation equality. Post-PUSH PC fit,
+peak stack capacity (`spill.length + 2 ≤ 1024`), gas at least six and explicit
+fuel remain premises. Code, intermediate alignment, gas debit and retained
+State/memory/return buffers are proved separately; no execution or decoder
+agreement is assumed as an input.
+
+[NegationBodyControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean)
+checks independent complete expected States for positive, negative, zero,
+minimum and maximum signed inputs, empty/full legal spills, wrong gas/fuel,
+and ordered code/stack/buffer/account observations. The minimum wraps in the
+native body while the existing Scalar guard returns the overflow payload and
+the source evaluator fails. Native execution of that guard and panic path is
+not proved here. Independent finder and skeptic reviews found no defect.
+This body sequence establishes no compiler/frame origin, Osaka approval or
+account/world/transaction closure; full opcode obligations remain open.
+
+
+### Typed source result of the negation body
+
+[NegationSourceConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean)
+derives the negative operand's intrinsic range for every non-minimum signed
+input, calculates the actual `UnOp.evalT` result, and relates its encoding to
+the fetched body's output stack and continuation. The input's range is not a
+source-success or execution hypothesis. The necessary non-minimum branch is
+explicit; minimum source failure is proved separately. Original PC, capacity,
+gas and fuel premises stay visible. This proves a result-value connection for
+an explicitly constructed native body input, without compiler/frame origin or
+execution of the checked guard/panic path.
+
+[NegationSourceControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean)
+provides signed, zero and maximum typed values, an ordered populated native
+client, and the minimum's simultaneous source failure/native body success.
+Finder and skeptic reviews prompted a direct populated application of the new
+combined producer; this was added while retaining the expected observations.
+Independent read-only reviews cover the branch boundary
+and absence of a desired-execution premise. Broader correspondence remains open.
+
+
+### General fetched equality consumer
+
+[EqualityConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean)
+generalizes earlier fixed-entry EQ coverage to arbitrary emitted instruction
+sites, supplied destination arrays, words and caller tails. The consumer proves
+representation equality from the actual word constructors, then discharges the
+actual decoder, cost-three gate, binary dispatcher and continuation clauses.
+Input capacity and gas/fuel remain explicit. `selected_equality_agreement`
+consumes the published `Scalar.scalarEq` certificate for each intrinsic primitive
+type; source evaluation is not supplied as an oracle. Existing raw word bridges
+and the Scalar certificate remain read-only.
+
+[EqualityControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean)
+checks independent full expected States, a directly applied typed signed client,
+equal versus high-bit-distinct words, zero/max words, empty/maximal legal tails,
+and gas/fuel/arity refusals. Ordered code, stack, return buffers, calldata,
+accounts and substate are retained. Boundary words are constructed with
+`BitVec.ofNat`; symbolic list lengths avoid larger recursion budgets. Finder and
+skeptic reviews found no semantic defect. This is reference-model instruction
+transport, not compiler/frame origin, Osaka approval or closure of a full opcode
+row. The full G46/G47 obligations remain open.
+
+
+### Fetched negation overflow test
+
+[NegationTest.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationTest.lean)
+composes the actual G25 test (`DUP1; PUSH32 minimumInt; EQ`) through three
+fetched steps and X continuation. For arbitrary typed signed operands, seed
+State, surrounding Backend code and caller tails, the producer derives each
+code/state alignment and the remaining gas, with gas at least nine, peak
+`tail.length + 3 ≤ 1024`, explicit PC fit and fuel. The destination array is
+explicitly empty. The flag equation is extracted from the existing typed
+Scalar test theorem, without an execution, decode or caller-frame premise.
+Gas debit and retained State/memory/return buffers are separate consequences.
+
+[NegationTestControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/NegationTestControls.lean)
+checks independent complete States for ordinary/zero inputs and the minimum's
+true overflow flag. The legal boundary starts with 1022 words and peaks at
+1024; the overflow control starts legally with 1023, passes DUP1, then refuses
+PUSH32's attempted 1025-word peak. A general modular refusal law avoids reducing
+a large concrete spill. Gas eight and fuel three remain failures. Ordered
+39-byte code, operand/tail, buffers, calldata and accounts are observed.
+Independent finder and skeptic reviews prompted precise capacity wording;
+no semantic defect was found. Conditional branching, panic execution,
+compiler/frame origin, Osaka approval and full G46/G47 closure remain open.
+
+
+### Fetched typed inequality
+
+[InequalityConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InequalityConsumer.lean)
+composes the existing fetched EQ and ISZERO consumers for the actual
+`Scalar.scalarNe` two-instruction encoding. It derives the intermediate full
+State, code/PC alignment and remaining gas, then consumes the published typed
+certificate for every intrinsic primitive type. The resource premises retain
+gas at least six, initial `tail.length + 2 ≤ 1024`, post-EQ PC fit and explicit
+fuel. Supplied destination arrays are arbitrary for these two nonbranching
+instructions; no scanner or subsequent-jump correctness is asserted. Gas debit
+and State/memory/return-buffer preservation are separate consequences.
+
+[InequalityControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/InequalityControls.lean)
+applies the combined typed producer directly to Boolean, signed and unsigned
+clients, with independent complete expected States. High-bit-distinct words,
+negative equality, zero/max words, empty/maximal legal tails, gas five, fuel two
+and ordered code/stack/buffer/account observations are explicit controls.
+Finder and skeptic reviews found no semantic defect. Raw primitive agreement
+and the Scalar source certificate are prior work; this new fetched composition
+does not prove compiler/frame origin, Osaka approval or close a full opcode row.
+
+
+### General fetched unsigned order
+
+[UnsignedOrderConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderConsumer.lean)
+extends prior fixed-entry LT/GT coverage to arbitrary emitted sites, words,
+caller tails, gas and supplied destination arrays. Actual unsigned word order,
+code decoding, cost-three charged gates and native dispatch are derived, then
+the published `Scalar.uintLt` and `Scalar.uintGt` certificates connect the same
+typed operands and optional Boolean results. PC fit, input capacity, gas and
+fuel remain explicit. Array independence is local to these nonbranching
+instructions; no scanner or later jump claim follows.
+
+[UnsignedOrderControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderControls.lean)
+applies both typed producers directly and compares complete independent
+expected States. The word encoding of minus one is unsigned-greater than zero,
+while the existing signed comparator gives the opposite order. Reversed
+operands, high-bit/max/zero words, a legal 1024-word input, gas/fuel/arity
+refusals and ordered code/stack/buffer/account observations are controls.
+Independent finder and skeptic reviews cover premises, non-vacuity and prior
+coverage. Existing raw word bridges and source certificates remain read-only;
+compiler/frame origin, Osaka approval and full opcode correspondence stay open.
+
+
+### Fetched unsigned non-strict order
+
+[UnsignedNonStrictConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictConsumer.lean)
+composes actual GT/ISZERO for unsigned less-or-equal and LT/ISZERO for unsigned
+greater-or-equal, using the prior general strict-order and ISZERO consumers.
+The existing `Scalar.uintLe` and `Scalar.uintGe` certificates connect the same
+typed operands to the two fetched steps. Intermediate complete State, code/PC
+alignment and remaining gas are derived. Gas at least six, initial capacity,
+post-comparison PC fit and fuel stay explicit. Any supplied destination array
+is instruction-local; scanner and later-jump adequacy do not follow. Exact gas
+debit and retained State/memory/return buffers are separate consequences.
+
+[UnsignedNonStrictControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictControls.lean)
+applies both combined typed producers directly with independent complete
+expected States. Equality must return true in both sequences, unlike strict
+order; maximum/zero distinguish directions. Empty/full legal input stacks,
+high-bit words, gas five, fuel two and ordered code/stack/buffer/account
+observations remain controls. Finder and skeptic reviews cover actual premises
+and non-vacuity. Existing primitive semantics and source certificates remain
+prior work; source/compiler/frame origin, Osaka approval and full opcode rows
+remain open.
+
+
+### Fetched signed greater-or-equal
+
+[SignedGeConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/SignedGeConsumer.lean)
+adds general fetched SLT and the actual SLT/ISZERO sequence of `Scalar.intGe`.
+The reserved signed-word bridge and existing `Scalar.intLt`/`Scalar.intGe`
+certificates are consumed read-only. Actual `toInt` interpretation, decoder,
+charged gates, intermediate complete State, code/PC alignment and remaining
+gas are derived. The single step requires gas at least three; the sequence
+requires six. Initial capacity, PC fit and fuel remain explicit. Arbitrary
+supplied arrays are instruction-local, not scanner or later-jump adequacy.
+Exact sequence gas debit and retained State/buffers are separate consequences.
+
+[SignedGeControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/SignedGeControls.lean)
+applies both typed producers directly, checking negative-versus-positive,
+unsigned contrast, minimum/maximum, equality and reversed directions with
+complete independent expected States. Empty/full legal inputs, gas/fuel/arity
+refusals and ordered code/stack/buffer/account observations are controls.
+Lean caught a copied unsigned predicate in the initial typed SLT draft; it was
+corrected to signed `toInt` before commit and the failure retained. Finder and
+skeptic reviews found no substantive defect; a mistaken LT docstring was fixed
+to SLT. Existing signed-less-or-equal work is unchanged. Compiler/frame origin,
+Osaka approval and full opcode/world correspondence remain open.
+
+
+### Charged fetched metadata constants
+
+[MetadataPushConsumer.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushConsumer.lean)
+consumes the published `Backend.Environment.constant` emitter for every bounded
+width from zero through 32. Actual emitted bytes, decoded payload and native
+word agree with the typed uint result of the existing metadata PUSH slice.
+PUSH0's zero value follows its intrinsic bound; its actual cost is two, while
+positive widths cost three. The decoder, width-dependent charged gate and
+dispatch are discharged, yielding the complete native State and X continuation
+under explicit starting-PC, gas, fuel and push-capacity bounds. Full input
+stack refusal is proved against the same gate after its gas check.
+
+Prior private `MetadataReference` reader and supplied-opcode selector/ABI/function
+laws, published `PushDecoderAgreement`, `ReferenceReader` and PUSH32 consumers
+remain prior coverage. The new contribution is arbitrary-width emitted,
+charged fetched execution and refusal, not first metadata encoding semantics.
+Pure payload reading does not supply `Memory.PaddingCorrect`, an allocator,
+scanner correctness, source declaration resolution or Osaka/driver adequacy.
+
+[MetadataPushControls.lean](../../Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushControls.lean)
+checks independent complete States for PUSH0, a nonzero byte, a numeric selector,
+ABI-left-aligned selector and full-width boundary value. Empty/maximal legal
+stacks, full-stack refusal, exact differing costs, gas/fuel failures and wrong
+endian/length/order observations are retained. Memory, return buffers, calldata
+and accounts are observed. Independent finder and skeptic reviews found no
+substantive defect and requested the explicit prior-coverage distinction above.
+Compiler/frame origin and full G46/G47 correspondence remain open.
+
+## Balance warmth and ledger preservation
+
+`BalanceWarmTransport` derives account warmth, account-map and repeated-read
+preservation from the actual pinned BALANCE evaluator. The charged fetched
+consumer requires the actual cost to fit the supplied gas, stack capacity and
+positive fuel. It preserves the typed funds observation, memory and return bytes.
+The probe stack is explicit; keys with the same actual low160 address share its
+warm cost. Later instruction supply and compiler/world provenance remain open.
+
+`BalanceWarmControls` compares the complete resulting state after reading account
+13 with balance 73, including nonempty memory, calldata, return buffers, logs and
+both storage maps. Gas drops from 2700 to 100. Probes at 13 and its high-bit alias
+cost 100; account 14 and the returned balance word 73 cost 2600. Low gas, exhausted
+fuel and reordered spill values have negative controls. These reference-model
+laws leave full Osaka, source/frame, account execution and transaction adequacy
+obligations open.
+
+Review identified evaluator-only coverage of the new API. Direct populated
+clients now instantiate both the charged fetched/frame law and the low160 alias
+law, alongside the independent complete-state and returned-word-cold controls.
+
+## Code-owner balance view
+
+`SelfBalanceTransport` derives the G31 view's self address and funds from the
+actual native code owner and account map. The bounded-address word roundtrip
+justifies the source account lookup. The source slice composes with the existing
+charged fetched SELFBALANCE theorem under its gas, stack and fuel bounds; the
+native state, memory and return buffers are preserved apart from the documented
+machine updates. Source/world entry provenance remains open.
+
+`SelfBalanceControls` directly consumes this API and the existing independent
+expected record. Native owner 7 has balance 29; stack top 11 names balance 41,
+while a deliberately mismatched candidate frame supplies 999. The canonical
+view returns 29. Gas drops from 9 to 4 and PC advances from 3 to 4, preserving the
+complete ordered spill and populated buffers. A maximum-160-bit-address client
+exercises the roundtrip law. Existing native fetched/absent-account controls are
+reused; this does not establish full Osaka, source or account-world adequacy.
+
+Review strengthened the wrong-balance control to keep the identical tail and
+length, isolating 29 versus 41 rather than a stack-size difference.
+
+## Five-key environment selection
+
+`EnvironmentSelection` derives a complete G31 observation view from the native
+caller source, payment word, timestamp modulo 256 bits, code-owner balance and
+code-owner address. Its bounded-address observation lemma preserves low160
+identity. The finite selection composes the existing charged fetched producers
+for all five admitted `EnvKey` constructors: SELFBALANCE costs 5; the others cost
+2. Gas, stack and fuel bounds remain explicit. Complete native state, memory and
+return buffers are retained apart from the actual machine updates.
+
+The intrinsic-expression consequence takes the existing `Environment.Represents`
+relation as a typed premise. It neither proves the original source-frame origin
+nor constructs a compiler/world correspondence. `EnvironmentSelectionControls`
+inhabits this premise using the published represented-state fixture and directly
+consumes the combined law for every key and both permissions. Independent
+expected records use owner 7, caller 11, origin 19, value 37, balance 29 and an
+oversized native timestamp whose word is 260. Exact ordered stacks, code, buffers
+and accounts are observed; wrong origin/address, reordered spill and stale frame
+balance are negative controls. The oversized header is a reference-model test,
+not a consensus-admission witness. Full G46/G47 obligations remain open.
+
+Independent finder and skeptic source reviews found no semantic or premise
+weakening; the explicit representation and source-origin boundary is retained.
+
+Review corrected the two new index rows into the existing P10 table with actual
+module paths; theorem statements and premises were unchanged.
+
+## Environment failure classification
+
+`EnvironmentGuards` classifies the actual charged gate and counted fetched step
+for every admitted `EnvKey`, arbitrary native state and both permissions. The
+memory charge is zero, total instruction cost is 2 or 5, and insufficient gas
+precedes push-capacity refusal. Success consumes the existing fetched producer.
+The actual `X` gas/stack refusals are derived from its original unfolding.
+
+Short fuel has two distinct meanings: the counted prefix rejects fuel 0 or 1
+before gate evaluation, whereas actual `X 1` checks gas and stack before its
+zero-fuel instruction step. The law records this distinction rather than
+asserting equivalence outside the positive-fuel continuation domain.
+
+`EnvironmentGuardControls` instantiates all keys and both permission flags. A
+legal 1024-word input is rejected for overflow at adequate gas, while low gas
+wins when both checks would fail; a 1023-word input successfully pushes to 1024.
+The complete independent expected States retain distinct ordered spill values,
+code, accounts, memory, calldata and return bytes. An identical-length reordered
+tail is rejected. These reference-model errors return no State; no account or
+transaction rollback theorem follows. Source/frame, Osaka approval and all full
+opcode-row obligations remain open. Separate read-only finder and skeptic
+reviews confirmed the fuel distinction and populated boundary coverage.
+
+## Binary numeric gate correspondence
+
+`BinaryGuards` classifies the actual charged gate for twenty existing binary
+numeric instructions: ADD, MUL, SUB, DIV, SDIV, MOD, SMOD, SIGNEXTEND, LT, GT,
+SLT, SGT, EQ, AND, OR, XOR, BYTE, SHL, SHR and SAR. This finite consumer set does
+not change source admission. The cost is the actual pinned `C'`; zero memory
+expansion and two-input/one-output arities discharge the remaining local checks.
+Gas refusal precedes underflow, which precedes output-capacity refusal. Legal
+input stacks with at least two and at most 1024 words cannot overflow these
+instructions. Actual fetched-prefix and `X` error transport retain the checks,
+and the counted-versus-`X` one-fuel distinction remains explicit.
+
+`BinaryGuardControls` supplies an exact ordered twenty-row result/cost inventory
+for operands 11 and 2 and spill [258, 513], with direct full native-State clients
+under both permission flags. The results include zero comparisons, BYTE and
+right shifts and a nonzero SHL. Exact code, memory, calldata, accounts and return
+bytes are observed; an identical-length swapped spill is rejected. These are
+bounded kernel-checked reference examples, not a general scalar/source proof.
+
+Both independent reviewers requested missing overflow and short-fuel branch
+clients. The added controls derive raw 1026-word overflow and actual `X 1`
+underflow/overflow from the classifiers, plus legal gas/stack fuel exhaustion.
+The 1026-word fixture is outside the admitted input profile: consuming two and
+pushing one produces 1025 words. It is separate from the legal 1024-word gate
+client, and is not evidence for reachable source execution. No rollback State,
+compiler origin, Osaka approval or full opcode-row closure follows.
+
+## Published Source signed remainder
+
+`PublishedRemainder` consumes the published primitive packet's actual pure
+Source-local evaluation and existing signed word encoding. For in-range int256
+operands and a nonzero divisor it derives the Source remainder and the charged,
+fetched native SMOD body from the same typed values. Initial Source local reads,
+the original gas/stack bounds and separate Source/native fuel remain explicit;
+no desired evaluation or simulation is a premise. The native input is constructed
+from the values, so physical operand loading, entry/frame identity, selected
+whole-code execution and bytecode guard execution remain open.
+
+Zero division is handled separately: the Source expression returns the original
+division panic bytes while the raw SMOD body succeeds with zero. This is an
+explicit missing guard boundary, not correspondence for a failing compiler path
+or an exclusion from the source profile. Minimum modulo minus one succeeds with
+zero in both checked modes; no signed-division overflow exclusion is introduced.
+
+`PublishedRemainderControls` reuses the published Source fixture read-only and
+instantiates the new body API for both pipelines, checked modes and native
+permission flags. Negative dividend/divisor, maximum and minimum values, exact
+ordered spills, complete native states and zero panic/raw-success controls are
+checked. Source and native contexts are separately populated; these tests do not
+establish invocation or world provenance. All full G46/G47 obligations stay open.
+
+Independent finder and skeptic reviews cleared the source and cache-setup route.
+Per-file checks use the exact Lake-generated import setup after a successful
+focused target build; metadata identity and artifact availability alone are not
+semantic validation. No Source implementation, physical memory/storage adapter,
+Core ExtCall, package pin or proof budget was changed.
+
+### Published signed division consumer
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedDivision.lean` connects the published Source-local signed-division packet to the existing charged fetched SDIV consumer. The ordinary result retains nonzero and minimum/-1 exclusions; separate laws show Source division-by-zero panic versus raw zero, and checked overflow panic versus unchecked minimum wrap. Source and native inputs are separately constructed; physical operand loading, reached compiler guards and frame origin remain obligations.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedDivisionControls.lean` supplies both pipeline clients, negative truncation toward zero, minimum/maximum boundaries, and populated full native-state observations with wrong-rounding and reordered-tail negatives. These are kernel reference-model consequences, not fresh external execution or full Osaka/compiler correspondence. Independent finder/skeptic review covers the statements, premises and controls.
+
+### Published unsigned bitwise consumer
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwise.lean` combines the published unsigned Source-local bitwise packet with the charged fetched AND/OR/XOR consumers. Legal byte-width ranges, supported operations, gas, stack capacity and separate Source/native fuels remain explicit. Clean-word reading preserves the original natural value; no dirty-word widening is inferred. Source and native contexts are constructed separately, leaving physical loads, compiler-prefix origin and whole-program correspondence open.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwiseControls.lean` applies the producer for both pipelines and checked modes, with all three opcodes, an 8-bit boundary, dirty-range and short-horizon negatives, complete expected native States, and wrong-opcode-result/reordered-tail controls. These kernel model results supply no fresh external EVM tests or full opcode-row closure. Separate read-only finder/skeptic reviews found no defects.
+
+### Published signed comparison consumer
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedOrder.lean` connects the published comparison packet's actual Source-local int256 reads to charged fetched SLT and SLT/ISZERO execution. The greater-or-equal result follows the existing signed word encoding and negated less-than flag, with exact six-unit gas debit and preservation of account/state, memory and return buffers. Typed read origins, code-fit, stack capacity and separate fuels remain explicit; physical input loading and reached compiler-prefix origin remain open.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedOrderControls.lean` gives both-pipeline/mode clients, negative and equal operands, minimum-int boundaries, short-horizon refusals and complete populated native records with wrong-result/reordered-tail and signed-versus-unsigned distinctions. An initial whole-transition automation attempt for the minimum control hit the unchanged heartbeat limit; applying the checked generic client avoids that expansion without altering its statement. Independent finder/skeptic review found that the first clients exercised only the new Source projection; the corrected clients now consume the new native driver and X conclusions through independent full-State equalities. These kernel model results do not close full opcode or compiler/Osaka correspondence.
+
+### Published unsigned comparison consumer
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedUnsignedOrder.lean` connects actual published uint256 Source-local LT/GT evaluation to charged fetched native bodies. Word/result transport consumes the existing typed Scalar comparison certificates; it does not duplicate numeric semantics. Typed read origins, valid destinations, stack capacity, gas and separate fuels remain explicit. Source and native contexts are separately constructed, leaving physical input loading and compiler-prefix/frame/world origin open.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedUnsignedOrderControls.lean` directly consumes the new Source, driver and X conclusions through independent full-State shapes. Both pipelines and checked modes, zero/top-bit/maximum/equal operands, short horizons and complete populated records retain ordered tails and buffers. Wrong Boolean/order and signed-versus-unsigned controls distinguish incorrect interpretations. Separate finder/skeptic reviews cover the source and premises. These are kernel reference-model consequences, not full opcode/compiler/Osaka closure or fresh external tests.
+
+### Published unchecked shift consumer
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean` transports the published unchecked Source-local shift result from the existing finite word to Scalar's BitVec representation, then consumes actual emitted SWAP1/SHL and SWAP1/SHR execution. All 256 count bits are retained, including saturation at 256 and above. Source typed reads, code-fit, stack capacity, gas and separate fuels remain explicit; the original published Source frame has checked mode set to false. No checked-mode extension, physical operand loading or compiler-prefix/frame/world origin follows.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean` directly consumes Source, Scalar, driver and X results through independent populated native records. Nonzero results, counts zero/255/256/maximum, wrong operand order, reordered tails and masked-count negatives retain full ordered observations. Explicit kernel word equations avoid the numeral-unification/recursion failure of an initial concrete-control attempt, with all budgets unchanged. Independent finder/skeptic reviews found no defects; full opcode/compiler/Osaka correspondence remains open.
+
+### Published checked addition and raw ADD boundary
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAdd.lean` combines the published checked Source-local addition packet with actual charged raw ADD execution. A fitting sum agrees with the Source integer result. Overflow remains an explicit different outcome: Source arithmetic panic and native wrapping success. This preserves the failing Source cases rather than treating the fitting-sum premise as whole-profile coverage; it supplies no compiler guard or emitted-panic correspondence. Typed local reads and native resource premises remain explicit, with physical loading and reached compiler/frame/world origin still open.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAddControls.lean` directly consumes Source, driver and X results through independent full-State shapes. Nonzero and maximum-fit clients, maximum-plus-one Source panic/native zero, exact 36-byte panic data, and wrong-width/reordered-tail controls retain complete ordered observations. Independent finder/skeptic reviews found no defects. These kernel body results are not fresh external EVM tests or full opcode/compiler/Osaka closure.
+
+### Published multiplication and Source word observation
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedMultiply.lean` proves actual Source integer-word encoding agrees with the native BitVec representation, including unsigned wrapping. It connects the published unchecked uint256 local multiplication result and its `Source.Val.word` observation to charged fetched MUL. Typed initial local reads, stack capacity, gas and separate fuels remain explicit. This does not establish checked/narrow multiplication, physical input loading or compiler-prefix/frame/world origin.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedMultiplyControls.lean` directly consumes Source outcome, canonical word observation, driver and X conclusions through independent complete native records. Both pipelines, nonzero and zero results, a 256-bit overflow product yielding zero, maximum-word squared yielding one, negative-word encoding and ordered-tail/wrong-result negatives are checked. Independent finder/skeptic reviews found no defects. These kernel body results do not close full opcode/compiler/Osaka correspondence or supply fresh external tests.
+
+### Actual Source word bytes and PUSH32
+
+`Bridge/SolidityBridge/RoadmapV15/P10/SourceWordBytes.lean` connects actual `Source.wordBytes` to the existing backend encoder using exact length and value. Its eight producer laws retain complete ordered 32-byte observations, integer two's-complement encoding, typed readback with the original range clause, byte injectivity, the pure pinned reference reader, and actual emitted PUSH32 payload/execution. No allocator, memory-padding, physical-frame/source-origin or whole Osaka adequacy conclusion follows.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/SourceWordBytesControls.lean` checks nonzero ordered bytes, signed and narrow readback, out-of-range rejection, endian/length negatives and actual fetched PUSH32 through driver and X. Complete observations retain stack and caller tail, code, PC, gas, execution length, memory, return buffers, calldata and account maps. A shortened list can share the numeric reader value while failing the exact length clause. The focused build and both per-file checks pass with unchanged budgets; thirteen headline reports use only the standard three axioms. Earlier failures remain separate evidence. These checks supply no full-lane validation or fresh external compiler/EVM test.
+
+### Published unchecked signed subtraction
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSub.lean` connects published actual unchecked int256 Source-local subtraction to charged fetched SUB. The canonical Source result word equals the native difference for all signed operands, including wrapping in both overflow directions. Initial typed local reads and operand ranges, native stack capacity, gas and separate Source/native fuel bounds remain explicit. The proof derives Source evaluation and native execution; it assumes neither desired run. Full native state, memory and both return buffers retain their justified frames. Physical operand loading, compiler-prefix origin, checked-mode guards, world and Osaka adequacy remain open.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSubControls.lean` consumes Source outcome, canonical word, driver and X conclusions for both pipelines and either permission flag. Negative nonzero subtraction, minimum-minus-one and maximum-minus-negative-one, zero/reversed-operand checks, exact gas/stack/fuel failures and independent populated complete state observations pass focused kernel checks. All nine headline axiom reports use only standard axioms. Independent finder/skeptic review found no source defect; no fresh external EVM/compiler tests or full opcode-row closure is claimed.
+
+### Arbitrary PUSH payload and Scalar-tail transport
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PushFamily.lean` consumes the existing all-width charged metadata PUSH theorem. It derives a bounded value and exact re-encoding for every intrinsic payload, preserving leading zeroes, then proves the typed-tail/native-state equality for arbitrary Scalar words. The combined law derives Scalar execution, counted fetched execution and X continuation with explicit PC fit, gas, capacity and fuel. Prior metadata/decoder execution is reused; no second resource gate or machine is introduced. PUSH0 retains cost two and all positive widths cost three. Source/compiler/physical origin and full Osaka/resource adequacy remain open.
+
+`Bridge/SolidityBridge/RoadmapV15/P10/PushFamilyControls.lean` checks raw widths zero, one, three, thirty-one and thirty-two, including leading-zero payloads with equal numeric value but distinct length and PC. Independent populated expected records preserve complete ordered stacks, code, memory, return buffers, calldata and account observations. Cost, endian/order and gas/fuel negatives remain explicit. The focused build and both per-file checks subsequently passed with eleven standard-only headline axiom reports. Earlier process-observation refusal remains failed evidence; full combined-tree validation remains pending. Independent finder/skeptic source review found no defect. No full opcode row, source/physical correspondence or external EVM test is closed by this transport.
+
+### Additional dependency contracts
+
+`Solidity/Backend/Selection/FramedLoweringInterface.lean` adds `FramedLoweringCertificate.reflect`: given its certificate and an actual successful IR run from the represented stack, the final nonstack frame and zero skip are recovered with a `StructuredExec` output. The declaration supplies no certificate instance and no fetched-EVM correspondence. Those obligations remain explicit in machine composition.
+
+`Solidity/Lowering/V07/P12NextInterface.lean` provides request-specific condition and reference-capture contracts. Its success/revert fields are pending obligations; initial alignment inhabitation is not an execution witness or approved-source admission. `Solidity/Backend/MemoryCopies/SourceInterface.lean` is a compatibility import, not a new concrete producer. `Solidity/Backend/AbiEntry/CalldataWordInterface.lean` declares zero-padded window/load clauses without an instance; physical calldata transport remains with the access-bridge owner.
+
+`Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveCall.lean` proves a native typed-caller result from actual argument evaluation and the explicit recursion bound. This does not provide a target recursive-call compiler, profile instance or EVM call/world correspondence. None of these dependencies closes the pending physical, admission, resource, transaction or trace obligations.
+
+### Concrete arithmetic instruction certificates
+
+`Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean` consumes the concrete `SolidityBridge.Yul.ArithmeticSelection` ADD/MUL certificates read only. It derives actual IR instruction execution, Scalar execution of the certificate's exact code, and charged fetched reference execution/X continuation for the same numeric operands. The IR stack representation, native capacity, gas and fuel bounds remain explicit. Each model preserves its own complete nonstack frame; no cross-model account-world, physical operand origin or Source/Yul admission relation is inferred. Arbitrary supplied valid-jump arrays are retained.
+
+The three producer laws and eight populated controls in `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean` pass the focused build and per-file checks with standard axioms only (the IR-frame control uses none). Controls include modular ADD/MUL boundaries, complete ordered native observations, independent populated IR frames, insufficient gas/fuel, underflow and a concrete call-value mismatch showing that numeric agreement does not imply world alignment. Earlier failed checks remain failed evidence; the optional cleaned-proof proposal remains unvalidated. Separate read-only finder/skeptic reviews inspect the actual source and boundaries. General lowering, driver/resource, account/call/transaction/trace and Osaka adequacy remain open. Concrete certificate consumption does not close either full opcode row.
+
+### Arithmetic selection refusal
+
+`Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean` consumes the same published concrete ADD/MUL certificates for arbitrary represented stacks shorter than two words. With explicit adequate reference gas, it proves IR fault, Scalar refusal and actual fetched-driver `StackUnderflow`; no desired execution is assumed. A nonzero singleton client retains an arbitrary static flag and nonempty supplied jump table. Separate gas-before-underflow, fuel-before-execution and empty-stack controls preserve the real failure order. Exceptional results carry no final state, so these laws infer no rollback, source/world or Osaka adequacy. The focused kernel check passes with standard axioms only; no full opcode row closes.
+
+The sibling native refusal laws use the published `Assembly.X_unfold` equality to prove actual `EVM.X (fuel+1)` underflow. The explicit fuel-boundary control distinguishes native X at fuel one (which reaches the refusal gate) from `driverSteps 1 1` (which refuses with `OutOfFuel`). No driver/native fuel-policy equality is inferred.
+
+Independent read-only finder and skeptic reviews found no remaining issue after native-X refusal and the distinct fuel-boundary control were made explicit. Seven public laws have standard-only axiom reports.
+
+### Concrete arithmetic sequence
+
+`Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionSequence.lean` composes the published ADD/MUL selection certificates for arbitrary word operands, arbitrary represented IR frames and a spill bounded by `tail.length+3≤1024`. The populated native input has twelve gas units. Its actual first result is proved equal to the second fetched site; the two-step driver and native continuation derive `(a+b)*c`, gas twelve to nine to four, and PCs three to four to five. The complete expected record preserves the input world, memory, return buffers and other fields outside stack/PC/gas/execLength. No execution or frame-origin result is assumed.
+
+Controls distinguish result fifty from twenty-two, preserve the ordered spill, exercise modular wrap and retain gas/fuel failures. The encoded prefix before the entry PC is not claimed executed. The sequence theorem leaves the final STOP as a native continuation; its terminal transport is provided by the separate STOP consumer below. Source/physical/account origin, whole-program resources and Osaka adequacy remain open. Focused build and per-file checks report standard axioms only. Independent read-only finder/skeptic reviews found no semantic or ownership issue; diagnostic-directed unfolding and linter cleanup preserve the statements.
+
+### Terminal STOP after arithmetic
+
+`Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionStop.lean` proves actual `EVM.X` success for the ADD/MUL sequence followed by its encoded STOP. The decoder law establishes `some (STOP, none)` at the final PC, so the proof does not rely on the decoder fallback. Existing driver-gate definitions and `Assembly.X_stop` supply the terminal execution without an assumed run. Original operand, capacity and populated-frame bounds are retained.
+
+The complete terminal state has ordered result stack fifty, two hundred fifty-eight, five hundred thirteen; PC five; four gas units; and execution length forty-four. The pinned STOP policy clears `returnData`, retains the separate populated `H_return` buffer, and produces empty success bytes. Controls reject reversed spill order, PC increment and stale return data; a positive-dispatcher/zero-instruction-fuel check proves the STOP fuel boundary. Five public laws pass focused build/per-file checks with standard axioms only. Prefix execution, Source/physical/world origin, arbitrary accounts/callees, transactions and full Osaka/resource adequacy remain open.
+
+Independent read-only finder/skeptic reviews confirmed the explicit decoded STOP, zero-cost gas framing and complete buffer/fuel observations without remaining proof or ownership findings.
+
+### Charged return-data-size observation
+
+`Bridge/SolidityBridge/RoadmapV15/P10/ReturnSizeObservation.lean` consumes the concrete frozen fetched API for RETURNDATASIZE. It derives the actual gas-before-capacity gate, successful charged driver step and native continuation, preserving each complete expected state. The pushed word is the size of `returnData` modulo the reference word size; it does not observe `H_return`, calldata or physical memory. Gas and stack capacity remain explicit premises; no decoder or execution result is assumed.
+
+Populated controls separate return-data size three from `H_return` size two and calldata size four, retain complete ordered bytes and stack tails, and exercise empty return data and the legal 1023-to-1024 stack boundary. A legal 1024-word input refuses the additional push; inadequate gas wins before that overflow, and fuel refusal remains separate. Seven public laws pass targeted build/per-file checks with standard axioms only. The initial broad gate split exceeded the unchanged proof budget and was replaced by two explicit case splits. Call-result origin, source admission, physical allocation/copying and full world/Osaka/resource correspondence remain open; memory/storage bridges remain with their owner.
+
+Independent read-only finder/skeptic reviews confirmed the seven laws, distinct populated buffers, legal-capacity controls and actual failure ordering without remaining proof or ownership findings.
+
+### Bounded validation lifecycle
+
+The validation monitor now handles an executable-link disappearance after a process was already bound. It accepts terminal retirement only through the existing bounded pidfd check, unchanged snapshot arguments and matching birth/command/terminal identity. Unknown, live, reused and permission-error observations still refuse execution. Independent finder/skeptic reviews and lifecycle controls cover the change; real-pidfd probes simulate the metadata error rather than claiming to reproduce the original kernel race. The original failed build receipt remains failed evidence, and runtime tests do not establish proof or lane completion.
+
+### Thread-group terminal-readiness regression
+
+A controlled native lifecycle regression exits a process leader while its worker remains alive. Actual process observations show `Zl`, zero RSS and two tasks. The unchanged terminal verifier refuses the group after its fifty-millisecond poll; after worker release and real group exit, pidfd readiness permits retirement. Explicit startup, observation and cleanup deadlines bound the test. Independent finder/skeptic reviews confirmed this behavior after the initial deadline finding was fixed.
+
+This reproduces the lifecycle class and preserves the fail-closed guard. The surviving thread and exact cause in the earlier Lean failure remain unobserved, and no supported safe runtime repair has been established. The failed four-target gate remains failed; its wait budget, toolchain and allocator configuration remain unchanged.
+
+The remaining world bridge requires concrete producer evidence. `Solidity/Backend/WorldCalls/Premises.lean` leaves `Returndata` unconstrained and allows an empty `Step`; the legacy CALL in `Solidity/Evm/Machine.lean` models payment acceptance without recipient execution. These declarations supply neither actual account execution nor transaction correspondence. Native/source representation, approved coverage and inhabited call/returndata transport remain explicit dependencies.
+
+
+## Published stack selection to fetched families
+
+`StackSelectionAgreement` consumes the published `Selection.dupCertificate` and
+`swapCertificate` and the existing fetched stack-family laws. For all sixteen
+legal indices it derives actual one-based IR selection, the exact Scalar code
+run, the charged fetched step and native continuation. Gas, legal capacity,
+operand depth and initial numeric stack correspondence remain explicit. Each
+model retains its own complete frame; physical compiler-input origin and whole
+Source/Osaka/world/resource adequacy are not supplied.
+
+`StackSelectionControls` instantiates both families at every depth with distinct
+nonzero operands, nonuniform leading words, caller spill and populated native
+accounts/buffers. Independent whole-State expected records, complete ordered
+SWAP16 observations, wrong index partners and IR-versus-charged-gas/fuel
+separation are checked. Existing primitive adapters and failure controls are
+reused unchanged. No full opcode obligation is closed.
+
+
+## Selected POP correspondence
+
+The stack-selection consumer also derives the actual public POP certificate,
+legacy IR result, scalar run, charged fetched step and native continuation.
+Initial numeric stack correspondence, legal input capacity and at least two gas
+units remain explicit. Complete IR and native frames are preserved separately.
+
+The POP client reuses the existing populated fetched-POP fixture with arbitrary
+legal caller tail and discarded word. The head-discard law compares actual full
+fetched outcomes after rewriting through successful execution, rather than
+unfolding the driver directly. Matched numeric inputs distinguish IR success
+from native insufficient gas/fuel; empty-stack cases retain gas-before-arity and
+fuel-before-both observations. This adds no Source input-origin, whole-program
+resource, account/world or Osaka adequacy claim and closes no full opcode row.
+
+
+## Selected subtraction correspondence
+
+The instruction-selection consumer connects the published subtraction certificate
+to the actual charged fetched SUB step and native continuation. Numeric initial
+stack correspondence, legal capacity, gas and fuel remain explicit. IR and native
+frames are preserved separately; no Source-origin or cross-model world frame is
+inferred. Controls retain a populated full-state client, modular `3 - 5`
+wraparound, reversed-operand and caller-tail-order negatives, and exact
+insufficient-gas, empty-stack and fuel-first refusals. This closes no complete
+opcode row or general Osaka/driver/resource obligation.
+
+
+## Selected exponentiation correspondence
+
+The actual arithmetic selector chooses the published EXP certificate. The
+consumer connects its IR and scalar results to charged fetched execution with
+the exact exponent-byte cost on the same input. A separate uniform consequence
+discharges that cost bound using the existing intrinsic 256-bit exponent bound;
+at least 1610 initial gas units remain explicit, alongside capacity and numeric
+input correspondence. Each model retains its own complete frame.
+
+Populated clients cover `7^3 = 343`, `0^0 = 1`, exact 60/10 gas exhaustion,
+the 255/256 exponent-byte cost boundary (60/110), wrong operand/tail order and
+insufficient gas/fuel. The new axiom reports are exact guarded expectations.
+This establishes no Solidity exponent guard, source-loading or whole-program
+resource relation, and closes no full opcode or Osaka adequacy obligation.
+
+
+## Selected unsigned quotient and remainder
+
+The consumer connects the actual unsigned instruction selector's DIV/MOD
+certificates to scalar execution and charged fetched steps with native
+continuations. Numeric initial-stack correspondence, legal capacity and at least
+five gas units remain explicit. IR and native complete frames stay separate.
+Zero divisors produce the raw target's zero word; this is not a Solidity checked
+arithmetic or panic-guard correspondence claim.
+
+Populated controls cover quotient/remainder `17 / 5 = 3`, `17 % 5 = 2`, zero
+divisors, the unsigned high-bit case `2^255 / 2 = 2^254`, distinct operand/tail
+orders and complete ordered native observations. Gas-before-stack and
+fuel-before-execution failures remain explicit, including insufficient gas with
+a zero divisor. Nine new axiom reports have exact guarded expectations. These
+laws close no full opcode, Source-origin, world or Osaka adequacy obligation.
+
+
+## Selected logical shift correspondence
+
+The actual unsigned instruction selector's SHL/SHR certificates now connect IR
+and scalar execution to one charged fetched instruction and native continuation.
+Count precedes value in this IR input; it remains a full 256-bit word. The result
+saturates to zero at counts of at least 256. Initial numeric correspondence,
+legal capacity, gas and fuel remain explicit; no physical loading or Source
+argument-order adequacy is inferred from the numeric input relation.
+
+Populated controls retain both permission flags, complete native observations,
+count 255 and high-bit logical right shift, count 256 and maximum-word saturation,
+zero-count identity, wrong operand/tail order and a counterexample to reducing
+the count modulo 256. Low-gas empty-stack cases prove gas-before-arity priority;
+fuel failure remains separate. Eight new axiom reports have exact guarded
+expectations. These consumers preserve each model's own complete frame and close
+no full opcode, world, whole-program resource or Osaka adequacy obligation.
+
+
+## Selected equality and zero-test correspondence
+
+The actual bitwise/comparison selector's EQ/ISZERO certificates connect numeric
+IR and scalar execution to charged fetched steps and native continuations.
+Inputs remain full words; results use the existing canonical flag encoding.
+Numeric initial-stack correspondence, legal capacity, gas and fuel stay explicit.
+Arbitrary numeric ISZERO inputs do not extend Source Boolean admission.
+
+Populated clients distinguish `1` from `257` despite their equal low byte, true
+full-word equality, zero from the nonzero word `256`, incorrect flag/tail outputs
+and exact gas/stack/fuel priority. Both opcodes include simultaneous low-gas and
+empty-stack refusals. Complete native records retain ordered code, stack, buffers,
+calldata, accounts and initial accounts; each model preserves its own frame.
+Eight new axiom reports have exact guarded expectations. No full opcode,
+Source-origin, physical, world or Osaka adequacy obligation is closed.
+
+### Selected unsigned order
+
+The instruction-selection agreement now connects the published LT/GT certificates to the charged fetched step and its continuation. The input stack representation, numeric capacity, gas and fuel bounds remain explicit; account state, memory and both return-byte fields are preserved separately from the IR frame. Controls distinguish equal-low-byte words, equality and unsigned high-bit ordering, preserve the complete populated stack and state, and check gas-before-arity and fuel priority. This is primitive agreement, not Source, account-call or full Osaka adequacy.
+
+### Selected AND and OR
+
+The published numeric AND/OR certificates now compose with the charged fetched reference steps, with explicit stack representation, capacity, gas and fuel premises. Populated controls cover mixed-bit words, equal low bytes, a high bit beyond byte width, complete separate model frames and gas-before-arity/fuel priority. A review caught and corrected a calldata-byte transcription in the new observation statement; the original fixture was preserved. These are primitive consumers, not physical input, Source, account-world or full Osaka adequacy.
+
+### Selected XOR
+
+The published numeric XOR certificate now composes with the charged fetched reference law. Stack representation, capacity, gas and fuel remain explicit. Full-word controls distinguish equal low bytes, cancellation and high-bit identity, preserve the populated separate frames, and check wrong results, tail order and gas-before-arity/fuel priority. This supplies primitive selection agreement, not physical input origin, Source or account-world adequacy.
+
+### Selected bitwise NOT
+
+The numeric NOT certificate now composes with the charged fetched reference law, retaining explicit stack representation, capacity, gas and fuel premises. Controls cover zero, the maximum word and the complement of256; they distinguish full-word complement from Boolean negation, preserve complete separate frames and check wrong results, ordered tails and gas-before-arity/fuel priority. No physical input origin, Source, account-world or full Osaka adequacy follows.
+
+### Selected signed LT
+
+The numeric SLT certificate now composes with the charged fetched reference theorem, retaining explicit stack representation, capacity, gas and fuel premises. Controls distinguish signed from unsigned order using negative one and the minimum signed word, check equality and reversed operands, preserve populated separate frames, and establish gas-before-arity and fuel priority. This is raw numeric selection agreement; checked Source behavior, physical input origin and account-world adequacy remain separate.
+
+### Selected signed GT
+
+The numeric SGT certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Negative-one, minimum-signed-word, equality and reversed-operand controls distinguish signed order, preserve the populated separate frames and reject wrong result/tail observations while retaining gas-before-arity and fuel priority. This proves a primitive selection leaf, not checked Source behavior, physical input origin or account-world adequacy.
+
+### Selected signed division
+
+The SDIV certificate now composes with the charged fetched reference theorem, retaining explicit numeric representation, capacity, gas and fuel premises. Controls cover truncation toward zero with both divisor signs, raw zero-divisor success and minimum-word division by negative one; populated observations reject floor rounding and tail permutation and retain gas-before-arity/fuel priority. These are raw primitive outcomes, not checked Source failure policy, physical input origin or account-world adequacy.
+
+### Selected signed remainder
+
+The SMOD certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Sign-combination, zero-divisor and minimum-word boundary controls preserve the dividend's remainder sign, populated separate frames and gas-before-arity/fuel priority; wrong Euclidean results and permuted tails are rejected. These are raw primitive facts, not checked Source failure policy, physical input origin or account-world adequacy.
+
+### Signed division and remainder refusals
+
+General SDIV/SMOD short-stack consumers derive certificate refusal and actual fetched/native stack-underflow from explicit numeric representation, short-stack and adequate-gas premises. Populated singleton controls check gas-before-underflow and distinguish the driver's fuel policy from native gate refusal at one fuel. The exceptional result carries no final state, so no rollback, account-world or source-failure correspondence follows.
+
+### Unsigned division and remainder refusals
+
+DIV/MOD short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked signed cases by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. An exceptional result supplies no final state, rollback or account-world conclusion.
+
+### Unary numeric refusals
+
+NOT/ISZERO empty-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. Populated surrounding states witness the empty-operand case. Controls retain gas-before-underflow and distinguish native and driver fuel policy; exceptions supply no final-state, rollback or account-world conclusion.
+
+### Logical-shift refusals
+
+SHL/SHR short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Binary bitwise refusals
+
+AND/OR/XOR short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls and twelve priority observations retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Comparison refusals
+
+LT/GT/EQ/SLT/SGT short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls and twenty priority observations retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Subtraction refusal
+
+The SUB short-stack consumer connects actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### POP refusal
+
+The POP empty-stack consumer connects actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. Its gate proof uses the actual two-gas cost and one-operand arity. Populated surrounding states witness the empty-operand case; controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Indexed DUP refusals
+
+DUP1 through DUP16 short-stack consumers connect the actual indexed certificates with the charged gate, fetched driver and native execution under explicit representation, depth and adequate-gas premises. Existing opcode facts are reused read-only. Populated boundary controls show DUP16 refusing fifteen words while DUP15 succeeds on the same input; all-depth controls retain gas-before-underflow and native/driver fuel distinctions. A uniform opcode-fact proof replaces finite case expansion without changing the claims. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Indexed SWAP refusal
+
+`InstructionSelectionRefusal` proves insufficient-stack refusal for all sixteen SWAP depths against IR, selected Scalar code, the fetched driver and native reference execution. The clauses retain the input representation, three-gas admission and distinct driver/native fuel indices. Controls distinguish SWAP15 success from SWAP16 refusal on sixteen populated words, gas-before-stack ordering, permission flags and insufficient driver fuel. The populated observation retains account, memory, calldata and return-byte fields. These instruction-local results do not establish source frame origin, CALL/world composition or complete opcode-row adequacy.
+
+`IndexedRefusalWitnessV1.producer` packages the kernel-checked DUP and SWAP shortage theorems into the unchanged `IndexedRefusalInterfaceV1.Producer` fields. Focused checks of the witness and `InstructionSelectionRefusal` pass with guarded standard-only axiom reports. The contract is instruction-local: source frame origin, successful execution and full opcode-row adequacy remain open.
+
+
+## CALL/RETURNDATA correspondence validation (move6)
+
+This validates the fetched CALL/RETURNDATA relation that
+[G42](g42-world-call-consumers.md) names as the P10 input of
+`WorldCalls.FetchedPremises.Returndata`. The general law and the single-step
+controls go through the frozen `FrozenV1.api` CALL field and the pinned
+reference `EVM.call`; the frozen API is unchanged.
+
+`CallReturndataLaw` holds for every CALL site and fuel. `calleeRun` is the
+exact `Θ` invocation `EVM.call` makes, with every input pinned: callee code
+`toExecute .EVM σ t`, substate with `t` accessed, source, origin, recipient,
+`Ccallgas` gas, gas price, values, the input window read with padding,
+depth + 1, header and permission. `entered` is the entry condition (enough
+caller balance, depth below 1024).
+
+| Law | Statement |
+|---|---|
+| `call_returnData` | A non-erroring `EVM.call` result has the return buffer of `calleeRun` when `entered` holds, and an empty buffer when it fails. |
+| `fetched_call_returnData` | Lifted through `FrozenV1.api.charged.checked_call`: a non-erroring fetched CALL step exposes the actual gate, the seven popped operands and positive call fuel, and its buffer is given by `call_returnData` on the state `EVM.call` receives. |
+
+The conclusion is stated without reference to the caller's previous buffer;
+nothing rules out a callee output equal to it. `Θ` stays unevaluated.
+
+`CallReturndata` evaluates populated cases in the kernel. The caller has
+memory `[0xaa, 0xbb]` and a stale buffer `[0xcc, 0xdd]`; callee 31 is absent or
+has the one-byte body INVALID.
+
+| Control | Observation |
+|---|---|
+| `absent_call` | flag 1, stale buffer cleared, memory unchanged. |
+| `invalid_call` | flag 0, stale buffer still cleared. |
+| `absent_then_size` | the following RETURNDATASIZE pushes 0, not the stale size 2 (direct driver evaluation, not through the frozen API). |
+| `outcome_needs_callee` | two states that agree on environment, PC, stack, gas, memory, stale buffer and the caller's nonce and balance push different CALL flags. |
+
+Nonempty output is not exercised; `call_returnData` only constrains it. Kernel
+evaluation of callee instructions is the limit: a three-instruction callee
+peaked above 14 GB and was killed, beyond the 8 GiB module budget, and the
+identity precompile does not reduce in the kernel.
+
+Verdict for the G42 adapter: post-CALL return data is the output of the
+callee's `Θ` run, a function of callee code, world and the caller's input
+window. Flag dependence alone is expressible in the core through its free
+`Machine.accepts` oracle, but the core `Evm.Machine` has no return buffer and no
+code map, and its `CALL` is a two-operand payment
+(`Solidity.Evm.External.call_arity_mismatch`). A `FetchedPremises.Returndata`
+instance from `FrozenV1.API` therefore needs a callee/world execution producer
+(V13 WorldCalls steps) and a core-to-reference CALL representation. Neither is
+supplied or assumed here. Gas values, `Site` origin, resource, Osaka and
+transaction adequacy are not asserted.
+
+Read-only finder and skeptic reviews found that the first version of the law
+left most `Θ` inputs existential, its empty branch unguarded, and the docs
+overstated buffer replacement, nonempty output and the flag control. The law
+now pins every input and guards the empty branch, and the wording above is
+corrected.
+
+### G49 `p10_execution_bridge` status (move6)
+
+[`bridge-requests.json`](../../tests/h55/g49-final-theorem/bridge-requests.json)
+routes the P10 family to V15 as `p10_execution_bridge : (x : NativeContext_opcode)
+→ Approved_opcode x → BridgeGoal …` over `G49Final.PassCorrect`
+(`Solidity/Roadmap/G49Final/BridgeGoal.lean`). It is not delivered. Its two
+endpoints do not exist in the repository: there is no concrete pinned-Osaka
+`EvmSpec` (`Solidity/Roadmap/Evm.lean` defines no EVM; only the toy controls in
+`Solidity/Yul/Composition/CorrectnessControls.lean` instantiate `Execution`), and no
+canonical assembly-session `Lang` on the same loaded `Artifact`. The concrete
+assembly `SourceSpec` and session semantics are VY1 inputs, and the unified
+log/emit `Event` extension is a VY4 input
+([assembly correctness instances](assembly-correctness-instances.md)). An
+`EvmSpec` instance over the vendored EvmYul would further need the G06 session,
+failure-point and hash-preimage observations. The Codex lane's four missing
+obligations (endpoints, observation equations and approved coverage, fixed
+environment map and independent resource bound, two-sided failure/prefix
+transport) therefore all remain open. No placeholder `BridgeGoal`, assumed
+certificate or narrowed domain is introduced. `FrozenV1.API` and the
+CALL/RETURNDATA laws above are the existing local evidence that `Local_opcode`
+must retain.
+
+### Core `CALLIN` against the reference CALL (move6, H106)
+
+`CallInAgreement` relates the version-2 core law `Evm.callIn_returndata`
+(`Solidity/Evm/MachineV2.lean`) to `CallReturndataLaw.call_returnData`. Both
+leave the callee's output after an entered call and an empty buffer otherwise.
+
+| Theorem | Statement |
+|---|---|
+| `callIn_agrees` | Case alignment. If the reference `EVM.call` does not error, the two entry tests coincide (`hbal`), depth is below 1024, and, when the call is entered, the core oracle `reply a v input` equals the output of the exact `Θ` run (`hreply`), then the core `CALLIN` buffer equals the reference buffer byte for byte. In the entered branch the equality is `hreply` itself; the theorem contributes the alignment of the entered and not-entered branches and the empty case. |
+| `reference_depth_limit` | At depth 1024 a non-erroring reference CALL leaves an empty buffer. |
+| `core_ignores_depth` | A covered core `CALLIN` leaves `reply a v input`; the core has no depth to test. |
+| `depth_disagreement` | At reference depth 1024, with a covered core value (`v ≤ bal self`) and a nonempty reply, the core buffer differs from the buffer of every non-erroring reference CALL. |
+
+Differences, stated explicitly:
+
+- **Depth.** The core has none (`depth_disagreement`).
+- **Gas and world.** The reference output reads the forwarded `Ccallgas` gas, depth + 1, account map, substate and header; the core `reply` reads only callee, value and input. `hreply` is a premise about one `Θ` run, used only when the call is entered; no uniformity across states is proved or assumed.
+- **Operands.** `hbal` relates only the entry tests (core `bal self` against `v`, reference `codeOwner` balance against `value`). Core value, callee and input bytes (`readBytes` of whole cells) are not tied to the reference `value`, `t`/`recipient` or `readWithPadding` window; that correspondence is carried by `hreply` alone. The theorems hold for every `EVM.call` use (CALL, CALLCODE, DELEGATECALL, STATICCALL).
+- **Not compared.** The pushed success flag (core `accepts`, reference `x`), post-call balances (the core pays nothing on a self-call, the reference moves value inside `Θ`), the core ghost journal `calls`, and gas.
+- **Errors.** The reference call's own errors are excluded by its `.ok` hypothesis. `callInStep` never errors; `InstrV2.callIn` faults when `readBytes` fails, outside these theorems since `input` is given.
+
+Item 1 (EVM agreement over P1) beyond this instruction is not done. The P1
+language `RuntimeFrameP1LangV2` targets core `InstrV2` code, and no encoder
+covers `InstrV2`. The assembler for the frozen `Evm.Instr`
+(`Bridge/SolidityBridge/ExternalEvm/Assembly/CodeLayout.lean`, with execution
+proofs in `ExternalEvm/Assembly/`) covers push, pop, jump, jumpi and loop, the
+relative jumps as PUSH32/JUMP pairs; `ExternalEvm/StorageMacros.lean` lowers a
+storage subset. Fixed-cell MLOAD/MSTORE, CALL and the version-2 data
+instructions (`CALLIN`, `RETURNDATASIZE`, `RETURNDATACOPY`, data `REVERT`,
+`RETURN`) have no lowering; the arity obstructions in
+`ExternalEvm/Obstructions.lean` rule out single-opcode matches for them. A
+whole-frame P1 EVM agreement needs those lowerings and their execution
+correspondence; the world-call part also still waits on V13's WorldCalls step
+producers.
+
+Finder and skeptic reviews of this section found that `callIn_agrees` is mostly
+case alignment, that operands, flag, balances and journal were uncompared but
+unmentioned, that the depth claim lacked a theorem and its balance condition,
+and that the encoder paragraph ignored the frozen-`Instr` assembler. Fixed
+above: `depth_disagreement` added, `hreply` weakened to entered calls, the
+wording corrected.
+
+
+## H121c: frozen V15 ownership transfer (2026-11-07)
+
+Human H121c transfers the full p10_execution_bridge from the frozen Claude V15
+lane to solidity-h62-3-20261106/g52-differential on its existing isolated branch.
+Exact implementation90153461127d8d0f1f188021e79bc1ccb256e1e5 is integrated after
+published master1ab348cf7e2c59a462235fd5656c70a90a5e6874. Remote tip0db48c0a48a8aef8dd6dc6ccbeababf409d67c2d
+is the later result receipt; the supplied implementation pin is retained.
+The former V15 provider wait/staged notice is superseded. No frozen-Claude
+follow-up or general paused-queue resume occurs. This is adoption, not delivery.
+
+Remaining inputs from other lanes:
+
+| Lane | Required input |
+|---|---|
+| VY1 | Concrete admitted assembly SourceSpec/frontend and raw session semantics |
+| VY4 | Unified log/emit Event observations and raw world/frame coupling |
+| VY2 | Physical allocation/layout/MemOK and representation refinement |
+| VY3 | Concrete lowering/compilation/opcode/pass certificates |
+| V13 | Actual callee/world WorldCalls execution producers for the entered Theta run |
+| executable-bytecode | P10 body/signature application and exact emitted-code/PC/Site source-origin binding |
+| V14/V11/PAR | Original execution/bytecode, memory/resource and ABI-entry dependencies |
+
+Missing canonical same-Artifact assembly-session Lang and pinned Osaka EvmSpec
+remain owned construction/integration work, using those actual inputs. The G06
+session/failure-point/hash-preimage observations, independent Approved_opcode
+coverage, fixed uniform environment map, executable resource bound and complete
+two-sided failure/prefix transports are not supplied by the local laws.
+All15public residuals remain open. No assumed certificate or favourable-call,
+gate-success or implemented-fragment domain is accepted as the full bridge.
+
+The existing CodeLayout encoder covers frozen Instr push/pop/jump/jumpi/loop;
+separate storage macros do not turn it into a general InstrV2 encoder. Fixed-cell
+MLOAD/MSTORE, CALL/CALLIN, RETURNDATASIZE/COPY, data REVERT/RETURN still require
+macro lowering and execution correspondence. This adoption does not reassign
+all lowering ownership; executable-bytecode retains body/signature application.
+Existing arity obstructions and depth_disagreement remain intact. In particular,
+callIn_agrees depends on the exact entered-call Theta reply and does not prove
+operand, flag, balance, journal or gas agreement. The CLZ/INVALID discrepancy
+also remains a gap, not an approved Osaka exclusion.
+
+Existing H68 signatures/domains/local statements are unchanged. Imported
+CallInAgreement/CallReturndataLaw/CallReturndata and FrozenInterface match the
+exact frozen source bytes. No manual proof, axiom, pin or budget edit, fresh Lean
+run, runtime gate, producer closure or final acceptance is claimed. The full
+p10_execution_bridge has no delivered complete producing files/head yet.
+Read-only finder/skeptic adoption reviews inspect these dependencies and limits;
+no Lean/server/build/native EVM or old-lane contact. Detailed source fingerprints
+and ownership metadata are in the existing bridge-requests.json P10 family.
+
+Owner-boundary clarification from finder review: V13 supplies the actual
+callee/world execution producer. The separately missing core/reference CALL
+operand/state representation is owned bridge integration with the real provider
+inputs, not an inferred additional V13 assignment. Flag/balance/journal/gas
+correspondence remains unproved. No dependency owner is assigned by proximity.

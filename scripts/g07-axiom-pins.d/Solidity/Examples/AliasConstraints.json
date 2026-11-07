@@ -1,0 +1,22 @@
+{
+ "Solidity/Examples/AliasConstraints.lean:Solidity.Decide.AliasEncoding.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/AliasConstraints.lean:Solidity.Decide.SymbolicRead.constraints_realized_holds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/AliasConstraints.lean:Solidity.Examples.AliasConstraints.sourceCounterstate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/AliasConstraints.lean:Solidity.Examples.AliasConstraints.subset_consistent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

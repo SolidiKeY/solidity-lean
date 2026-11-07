@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/Preconditions.lean:Solidity.Fml.PreconditionsImpossible.not_possible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Preconditions.lean:Solidity.Fml.PreconditionsImpossible.valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

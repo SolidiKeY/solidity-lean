@@ -1,0 +1,24 @@
+{
+ "Solidity/Backend/Passes/SourceAdditionValuePins.lean:Solidity.Backend.Passes.SourceAdditionValue.Controls.actual_nonzero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceAdditionValuePins.lean:Solidity.Backend.Passes.SourceAdditionValue.Controls.actual_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceAdditionValuePins.lean:Solidity.Backend.Passes.SourceAdditionValue.Controls.actual_unmasked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceAdditionValuePins.lean:Solidity.Backend.Passes.SourceAdditionValue.Controls.complete_observations": [],
+ "Solidity/Backend/Passes/SourceAdditionValuePins.lean:Solidity.Backend.Passes.SourceAdditionValue.Controls.saved_tail_wrong": [],
+ "Solidity/Backend/Passes/SourceAdditionValuePins.lean:Solidity.Backend.Passes.SourceAdditionValue.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

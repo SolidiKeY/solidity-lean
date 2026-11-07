@@ -1,0 +1,3 @@
+CWD: /workspace/solidity-lean/Bridge
+COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 -o .lake/build/lib/lean/SolidityBridge/PrecompileAgreement/Gas.olean SolidityBridge/PrecompileAgreement/Gas.lean
+EXIT=0 SECONDS=8.035 PEAK_RSS=391360512 MIN_AVAILABLE=16946454528 RESOURCE_STOP=False

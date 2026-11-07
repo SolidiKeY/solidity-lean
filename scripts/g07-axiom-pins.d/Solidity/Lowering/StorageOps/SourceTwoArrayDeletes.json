@@ -1,0 +1,52 @@
+{
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.array_readLen_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.first_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.second_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.second_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.source_first_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.source_headers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.source_index_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.source_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeletes.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeletes.source_second_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

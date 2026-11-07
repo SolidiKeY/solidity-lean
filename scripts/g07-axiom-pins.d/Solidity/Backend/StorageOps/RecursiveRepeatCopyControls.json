@@ -1,0 +1,34 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopyControls.captured_overlap": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopyControls.changed_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopyControls.fixed_and_absent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopyControls.malformed": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopyControls.ordered_states": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopyControls.slots_and_aliases": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopyControls.varying_runtime_depth": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveRepeatCopyControls.lean:Solidity.Backend.StorageOps.RecursiveRepeatCopyControls.wrong_reread": [
+  "Quot.sound",
+  "propext"
+ ]
+}

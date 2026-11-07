@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/CopyLifecycle.lean:Solidity.Backend.StorageOps.CopyLifecycle.copy_pop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyLifecycle.lean:Solidity.Backend.StorageOps.CopyLifecycle.copy_pop_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyLifecycle.lean:Solidity.Backend.StorageOps.CopyLifecycle.copy_push": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyLifecycle.lean:Solidity.Backend.StorageOps.CopyLifecycle.copy_push_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

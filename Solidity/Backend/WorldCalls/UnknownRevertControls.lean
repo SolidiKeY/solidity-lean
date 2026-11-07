@@ -32,7 +32,7 @@ and observable nonempty credit: no endpoint frame is supplied as a premise. -/
 theorem observations :
 Solidity.Backend.WorldCalls.UnknownRevertControls.result.1 = .ok (.revert [1, 0, 255]) ∧
  Solidity.Source.SemanticsExamples.readX Solidity.Backend.WorldCalls.UnknownRevertControls.result.2 = some 4 ∧
- (Solidity.Backend.WorldCalls.UnknownRevertControls.result.2.ex.world.accounts Solidity.Source.SemanticsExamples.thisC).balance.val = 0 ∧
+ (Solidity.Backend.WorldCalls.UnknownRevertControls.result.2.ex.world.accounts Solidity.Source.SemanticsExamples.thisC).balance = 0 ∧
  Solidity.Backend.WorldCalls.UnknownRevertControls.result.2.events.contains (.credit Solidity.Source.SemanticsExamples.thisC (Solidity.Source.SemanticsExamples.word 5)) = true := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;> rfl
 

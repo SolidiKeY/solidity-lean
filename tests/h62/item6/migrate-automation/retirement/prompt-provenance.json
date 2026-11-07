@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "Complete original user assignment and supplied original goal_objective transcribed from this same thread; no original prompt file was exposed on VM.",
+  "assignment_file": "original-assignment.txt",
+  "assignment_sha256": "dd0b1e40993da66af6d78676b703be6e688a4b6117d39e55967f8756cff5e3e0",
+  "reported_launcher_rendered_prompt_sha256": "7294bc15d06d1d7f26375312c69c6686837fdff6cfdef407b7610d15234f370a",
+  "launcher_byte_identity": "UNVERIFIED: the launcher rendered-byte stream is not exposed. The complete visible assignment text is preserved; its transcription hash is not claimed equal to the launcher rendered hash.",
+  "vm_environment_id": "ccarenv_b64_Y2NhcmVudl9lYjUyZGYwZTA0YTg4MTkxOGVmMWEzOTIwMWU5NzE3Mw",
+  "original_goal_id": "not exposed; no replacement goal created",
+  "original_repository": "/workspace/solidity-lean"
+}

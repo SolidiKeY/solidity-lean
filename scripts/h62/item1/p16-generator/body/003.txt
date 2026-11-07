@@ -1,0 +1,6 @@
+/-! RawCheckedInitializedForPost.adapter composes actual same-context checked
+initializer/body producers with supported Boolean condition/post expressions.
+Its concrete Source.execS forLoop law preserves checked/coherent premises,
+initializer control/error frames and actual post-iteration observations.
+Context-growing declarations and general assembly admission remain separate.
+Combination/refusal witnesses are in Solidity.Yul.Checks.RawCheckedInitializedForPost. -/

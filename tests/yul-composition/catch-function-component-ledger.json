@@ -1,0 +1,442 @@
+{
+  "scope": "Actual existing scoped function definitions over completed RAW catch result; no initializer on real path",
+  "fullCoverage": false,
+  "facts": [
+    "all_horizon_rebase",
+    "source_preserved",
+    "nonword_preserved",
+    "completed_from_unique",
+    "raw_from",
+    "completes",
+    "exact_words",
+    "normal_return",
+    "caller_source_retained",
+    "nonword_retained",
+    "raw_not_clean",
+    "no_clean_resume",
+    "all_completed",
+    "wrong_callee",
+    "missing_leave",
+    "raw_reset_control",
+    "heap_alias",
+    "coupled_journals",
+    "restored_word",
+    "exact_failure",
+    "failure_window",
+    "wrong_argument_arity",
+    "wrong_result_arity",
+    "zero_horizon"
+  ],
+  "sourceHashes": {
+    "Solidity/Yul/Composition/CatchFunctionPhysical.lean": "88dbcb57d55dcadc3f1c0525aa2c8b53735e2b628c6e7c7eecae56bb37bdf6d0",
+    "tests/yul-composition/CatchFunctionDriver.lean": "f20655916ca42bb94362bcf0cc388ef6f4cbd0987907e4463f6aca77e96794cd"
+  },
+  "parentRawCatchLedgerSha256": "ef5627a3d1786d1df573e731a202b7ac78715809625c502427c57bc88ae8b9dd",
+  "obligations": [
+    {
+      "id": "Y01",
+      "owner": "VY1",
+      "obligation": "Intrinsic scoped Yul AST; Osaka admission and canonical rethrow instance",
+      "dependencies": [
+        "S00"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y01.02",
+      "owner": "VY1",
+      "obligation": "Checked Yul parsing over G08-G11 lexer",
+      "dependencies": [
+        "Y01",
+        "G08",
+        "G09",
+        "G10",
+        "G11"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y02",
+      "owner": "VY1",
+      "obligation": "Scope/arity/literal/external-reference typing; checker soundness and completeness",
+      "dependencies": [
+        "Y01",
+        "S01"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y03",
+      "owner": "VY1",
+      "obligation": "Word/control/function semantics; horizon and dirty-bit embedding",
+      "dependencies": [
+        "Y02",
+        "S02",
+        "S03",
+        "V04"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y04",
+      "owner": "VY2",
+      "obligation": "Packing/residual persistent/transient views, decode/encode, rollback and reset",
+      "dependencies": [
+        "Y03",
+        "S04",
+        "G27.01",
+        "G27.02",
+        "G27.03",
+        "G27.04",
+        "G27.05"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y05",
+      "owner": "VY2",
+      "obligation": "Byte memory, MemOK preservation and allocation refinement; G01 YQ3 amendment",
+      "dependencies": [
+        "Y03",
+        "S04",
+        "V04b",
+        "G32"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y06",
+      "owner": "VY2",
+      "obligation": "Calldata copy/load/hash and universally quantified environment inputs",
+      "dependencies": [
+        "Y05",
+        "S04.04"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y07.01",
+      "owner": "VY4",
+      "obligation": "Raw call/staticcall/returndata/create/create2 correctness",
+      "dependencies": [
+        "Y06",
+        "G22",
+        "G42",
+        "V13"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y07.02",
+      "owner": "VY4",
+      "obligation": "Delegatecall/EIP-6780/logs and Solidity emit; G01 YQ6 amendment",
+      "dependencies": [
+        "Y07.01",
+        "G42",
+        "V13"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y08.01",
+      "owner": "VY3",
+      "obligation": "Concrete compiler stack/frame relation against G24 and Y04/Y05",
+      "dependencies": [
+        "Y04",
+        "Y05",
+        "Y06",
+        "G24",
+        "G27",
+        "G32",
+        "V12"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y08.02",
+      "owner": "VY3",
+      "obligation": "Actual opcode and bytecode correspondence through G45/G46/Bridge",
+      "dependencies": [
+        "Y08.01",
+        "G45",
+        "G46",
+        "V15"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y09.01",
+      "owner": "VY1",
+      "obligation": "Sound word/control calculus; printed rules and Lean-only map rows",
+      "dependencies": [
+        "Y03",
+        "G51.interface"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y09.02",
+      "owner": "VY2",
+      "obligation": "Sound physical/input calculus; update laws and printed rules",
+      "dependencies": [
+        "Y04",
+        "Y05",
+        "Y06",
+        "G51.interface"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y09.03",
+      "owner": "VY4",
+      "obligation": "Sound world-effect calculus and log observations",
+      "dependencies": [
+        "Y07.01",
+        "Y07.02",
+        "G51.interface"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G48",
+      "owner": "V16",
+      "obligation": "Concrete accepted source coverage and lowering; no residual assembly restriction",
+      "dependencies": [
+        "Y01",
+        "Y02",
+        "Y03",
+        "Y04",
+        "Y05",
+        "Y06",
+        "Y07.01",
+        "Y07.02",
+        "Y08.01"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G49.01",
+      "owner": "V16",
+      "obligation": "Every assembly constructor compiled with actual pass certificates",
+      "dependencies": [
+        "G48",
+        "Y08.01"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G49.02",
+      "owner": "V16",
+      "obligation": "Runtime source-to-bytes simulation in both pipelines",
+      "dependencies": [
+        "G49.01",
+        "Y08.02"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G49.03",
+      "owner": "V16",
+      "obligation": "Nonvacuity, failure preservation and resource-indexed progress",
+      "dependencies": [
+        "G49.02"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G50.01",
+      "owner": "V16",
+      "obligation": "Constructor/initcode/runtime installation and failure observations",
+      "dependencies": [
+        "G49.02",
+        "Y07.01"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G50.02",
+      "owner": "V16",
+      "obligation": "Reachable transaction/world composition and adversarial quantification",
+      "dependencies": [
+        "G50.01",
+        "Y07.02"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G51.01",
+      "owner": "V16",
+      "obligation": "Affected calculus soundness",
+      "dependencies": [
+        "Y09.01",
+        "Y09.02",
+        "Y09.03"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G51.02",
+      "owner": "V16",
+      "obligation": "Box/diamond/spec/callback/loop transfer",
+      "dependencies": [
+        "G49.03",
+        "G50.02",
+        "G51.01"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "G51.interface",
+      "owner": "V16",
+      "obligation": "Actual G51 rule/specification interface contracts consumed by Y09; distinct from completed G51.01 theorem",
+      "dependencies": [
+        "V16"
+      ],
+      "status": "pending",
+      "proof": null
+    },
+    {
+      "id": "Y10",
+      "owner": "VY5",
+      "obligation": "Concrete joint assembly composition and import closure",
+      "dependencies": [
+        "G48",
+        "G49.01",
+        "G49.02",
+        "G49.03",
+        "G50.01",
+        "G50.02",
+        "G51.01",
+        "G51.02",
+        "Y08.02",
+        "Y07.02"
+      ],
+      "status": "pending",
+      "proof": null
+    }
+  ],
+  "combinations": [
+    {
+      "id": "loops",
+      "constructors": [
+        "assembly",
+        "forStmt",
+        "whileStmt",
+        "doWhile",
+        "breakStmt",
+        "continueStmt"
+      ],
+      "dependencies": [
+        "Y03",
+        "Y09.01",
+        "G49.03",
+        "G51.02"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "loops"
+    },
+    {
+      "id": "modifiers",
+      "constructors": [
+        "assembly",
+        "modifier",
+        "modInv"
+      ],
+      "dependencies": [
+        "Y03",
+        "G48",
+        "G49.01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "modifiers"
+    },
+    {
+      "id": "try-catch",
+      "constructors": [
+        "assembly",
+        "tryStmt",
+        "catchPlain",
+        "catchSig"
+      ],
+      "dependencies": [
+        "Y07.01",
+        "Y07.02",
+        "G49.02"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "try-catch"
+    },
+    {
+      "id": "unchecked",
+      "constructors": [
+        "assembly",
+        "uncheckedItem"
+      ],
+      "dependencies": [
+        "Y03",
+        "Y09.01",
+        "G48"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "unchecked"
+    },
+    {
+      "id": "constructors",
+      "constructors": [
+        "assembly",
+        "constructor",
+        "new"
+      ],
+      "dependencies": [
+        "Y07.01",
+        "G50.01"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "constructors"
+    },
+    {
+      "id": "libraries",
+      "constructors": [
+        "assembly",
+        "library",
+        "call"
+      ],
+      "dependencies": [
+        "Y08.01",
+        "Y07.02",
+        "G48"
+      ],
+      "status": "pending",
+      "proof": null,
+      "fixture": "libraries"
+    }
+  ],
+  "missing": "General Source try/catch selection, byte binding, raw ordinary operators/function/session hooks, physical-world/G01/compiler/V16 adequacy"
+}

@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/Aggregates/G18StorageValues.lean:Solidity.Backend.Aggregates.int_cell_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18StorageValues.lean:Solidity.Backend.Aggregates.int_cell_write_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18StorageValues.lean:Solidity.Backend.Aggregates.save_isSome_eq_find": [
+  "Quot.sound",
+  "propext"
+ ]
+}

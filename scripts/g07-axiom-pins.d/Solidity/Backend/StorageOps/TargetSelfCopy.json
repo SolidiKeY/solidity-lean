@@ -1,0 +1,23 @@
+{
+ "Solidity/Backend/StorageOps/TargetSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.nested_after_self": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.nested_prefix_self": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.primitive_after_self": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.primitive_prefix_self": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSelfCopy.lean:Solidity.Backend.StorageOps.SourceSelfCopy.run_self": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

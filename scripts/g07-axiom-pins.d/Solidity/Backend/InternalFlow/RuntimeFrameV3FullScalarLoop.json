@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoop.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.iter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoop.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.returned_succ": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoop.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.run_of_stopped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoop.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.turn_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FullScalarLoop.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FullScalarLoop.turn_more": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

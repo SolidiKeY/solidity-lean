@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/TargetArrayRead.lean:Solidity.Backend.StorageOps.TargetArrayRead.complete_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRead.lean:Solidity.Backend.StorageOps.TargetArrayRead.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRead.lean:Solidity.Backend.StorageOps.TargetArrayRead.live_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRead.lean:Solidity.Backend.StorageOps.TargetArrayRead.live_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRead.lean:Solidity.Backend.StorageOps.TargetArrayRead.represented_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRead.lean:Solidity.Backend.StorageOps.TargetArrayRead.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

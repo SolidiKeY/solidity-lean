@@ -1,0 +1,20 @@
+import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
+const require=createRequire(import.meta.url);
+const file=process.argv[2];
+const hash=createHash('sha256').update(readFileSync(file)).digest('hex');
+if(hash!=='6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390') throw Error('compiler hash mismatch');
+const solc=require(file);
+const version=solc.cwrap('solidity_version','string',[])();
+if(version!=='0.8.38+commit.1835d247.Emscripten.clang') throw Error(version);
+const compile=solc.cwrap('solidity_compile','string',['string','number','number']);
+const rows=JSON.parse(readFileSync(process.argv[3],'utf8'));
+const out=rows.map(row=>{
+ const source=readFileSync(new URL(row.file, 'file://'+process.argv[3]),'utf8');
+ const input={language:'Solidity',sources:{'Case.sol':{content:source}},settings:{outputSelection:{'*':{'':['ast']}}}};
+ const result=JSON.parse(compile(JSON.stringify(input),0,0));
+ const errors=(result.errors??[]).filter(e=>e.severity==='error').map(e=>({code:e.errorCode??null,type:e.type,message:e.message}));
+ return {id:row.id,accepted:errors.length===0,errors,sourceSha256:createHash('sha256').update(source).digest('hex')};
+});
+process.stdout.write(JSON.stringify({version,compilerSha256:hash,rows:out},null,2)+'\n');

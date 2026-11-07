@@ -1,0 +1,52 @@
+{
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.alias_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.default_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.default_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.empty_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.empty_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.first_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.first_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.head_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.later_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/MultiSwitchCompilationControls.lean:Solidity.Yul.Compilation.MultiSwitchCompilation.Controls.later_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

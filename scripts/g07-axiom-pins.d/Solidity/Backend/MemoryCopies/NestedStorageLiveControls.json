@@ -1,0 +1,31 @@
+{
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.actual_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.arbitrary_values": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.certificate_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.many_empty_children_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.shadow_counts": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.size_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStorageLiveControls.lean:Solidity.Backend.MemoryCopies.NestedStorageLiveControls.wrong_shallow_demand": [
+  "propext"
+ ]
+}
