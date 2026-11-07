@@ -23,24 +23,6 @@ readback alone cannot detect an A-to-B-to-A concurrent replacement.
 This is an elaborator input binding, not a theorem of compiler correctness. -/
 syntax "solc_import_origins_v1 " str " hash " num " as " ident : command
 
-elab_rules : command
-  | `(solc_import_origins_v1 $path:str hash $expected:num as $N:ident) => do
-    let file := System.FilePath.mk (← getFileName)
-    let input := (file.parent.getD ".") / path.getString
-    let before ← IO.FS.readBinFile input
-    unless (fnv1a64 before).toNat == expected.getNat do throwError "fixture input hash mismatch"
-    let some text := String.fromUTF8? before | throwError "fixture is not UTF-8"
-    let fixture ← ofExcept (Json.parse text)
-    let declaration := N.getId ++ `report ++ `fixtureSha256V1
-    if (← getEnv).contains N.getId || (← getEnv).contains declaration then
-      throwError "origin companion requires a new import namespace"
-    elabCommand (← `(solc_import $path hash $expected as $N testing))
-    unless before == (← IO.FS.readBinFile input) do throwError "fixture changed during import"
-    let digest := Hashes.sha256Nat (fixture.compress.toUTF8.data.toList.map UInt8.toNat)
-    liftCoreM <| addAndCompile <| .defnDecl {
-      name := declaration, levelParams := [], type := mkConst ``Nat,
-      value := toExpr digest, hints := .abbrev, safety := .safe }
-
 /-- The original row is retained verbatim beside independently derived origins. -/
 structure ImportRowOriginsV1 where
   legacy : ImportRow
@@ -173,5 +155,91 @@ def CanonicalClauseV1.forget {input : CanonicalImportInputV1} {row : ImportRow}
 theorem canonicalClauseV1_forget {input : CanonicalImportInputV1} {row : ImportRow}
     (clause : CanonicalClauseV1 input row) : clause.forget = .ok clause.contract :=
   clause.contractEquation
+
+
+/-- The pre-import context exists only in the elaborating process. Imported
+modules cannot silently reconstruct it using a later environment. -/
+private structure CapturedCanonicalImportV1 where
+  fixture : Json
+  input : CanonicalImportInputV1
+
+private initialize capturedCanonicalImportsV1 :
+    EnvExtension (NameMap CapturedCanonicalImportV1) ←
+  registerEnvExtension (pure {}) (asyncMode := .local)
+
+/-- A clause read through the actual opt-in importer capture and table row.
+It is not a source-span or failed-clause certificate. -/
+structure ImportedCanonicalClauseV1 where
+  input : CanonicalImportInputV1
+  row : ImportRow
+  clause : CanonicalClauseV1 input row
+
+/-- No caller-supplied reader context is accepted. A missing process-local
+capture, foreign fixture or missing table row is unavailable, not reconstructed. -/
+def importedCanonicalClauseV1? (N : Lean.Name) (rowIndex functionIndex clauseIndex : Nat)
+    (fixture : Json) : CommandElabM (Option ImportedCanonicalClauseV1) := do
+  let some captured := (capturedCanonicalImportsV1.getState (← getEnv)).find? N
+    | return none
+  unless captured.fixture.compress == fixture.compress do return none
+  let rows ← reportRows N
+  let some row := rows[rowIndex]? | return none
+  let some clause ← ofExcept (canonicalClauseV1? captured.input row functionIndex clauseIndex)
+    | return none
+  pure (some ⟨captured.input, row, clause⟩)
+
+/-- The exact retained candidate beside a clause from its actual captured
+import context. This still does not establish that the selected clause failed. -/
+structure RetainedCanonicalClauseV1 where
+  input : CanonicalImportInputV1
+  retained : RetainedCounterexampleMetadataV1
+  clause : CanonicalClauseV1 input retained.row.legacy
+
+/-- Joining the existing candidate ingress does not perform another search.
+Source bytes, proof goal and namespace continue through their original checks. -/
+def retainedCanonicalClauseV1? (N : Lean.Name) (rowIndex functionIndex clauseIndex : Nat)
+    (fixture : Json) (sourceName : String) (bytes : ByteArray) (report : Json) :
+    CommandElabM (Option RetainedCanonicalClauseV1) := do
+  let some captured := (capturedCanonicalImportsV1.getState (← getEnv)).find? N
+    | return none
+  unless captured.fixture.compress == fixture.compress do return none
+  let some retained ← retainedCounterexampleMetadataV1? N rowIndex fixture sourceName bytes report
+    | return none
+  let some clause ← ofExcept (canonicalClauseV1? captured.input retained.row.legacy
+      functionIndex clauseIndex) | return none
+  pure (some ⟨captured.input, retained, clause⟩)
+
+theorem retainedCanonicalClauseV1_forget (metadata : RetainedCanonicalClauseV1) :
+    metadata.retained.forget = metadata.retained.candidate.original := rfl
+
+elab_rules : command
+  | `(solc_import_origins_v1 $path:str hash $expected:num as $N:ident) => do
+    let file := System.FilePath.mk (← getFileName)
+    let input := (file.parent.getD ".") / path.getString
+    let before ← IO.FS.readBinFile input
+    unless (fnv1a64 before).toNat == expected.getNat do throwError "fixture input hash mismatch"
+    let some text := String.fromUTF8? before | throwError "fixture is not UTF-8"
+    let fixture ← ofExcept (Json.parse text)
+    let declaration := N.getId ++ `report ++ `fixtureSha256V1
+    if (← getEnv).contains N.getId || (← getEnv).contains declaration then
+      throwError "origin companion requires a new import namespace"
+    let compilation ← ofExcept (Source.readCompilationUnit fixture)
+    let compilerCode ← ofExcept (Source.readCompilerCode fixture compilation.primary compilation.provenance)
+    let env ← getEnv
+    let sourceNames := (J.nodes (.arr compilation.asts.toArray)).filterMap (J.str? · "name")
+      |>.flatMap (·.splitOn ".") |>.eraseDups
+    let context : CanonicalImportInputV1 := {
+      ast := compilation.primary, name := N.getId.getString!, ren := [], testing := true,
+      entrypoints := false, env := env, sourceNames := sourceNames,
+      provenance := compilation.provenance, compilerCode := compilerCode,
+      namedErrorSourceOrder := compilation.provenance.pipeline == some .viaIR,
+      compilationUnits := if compilation.provenance.sources.isEmpty then [] else compilation.asts }
+    elabCommand (← `(solc_import $path hash $expected as $N testing))
+    unless before == (← IO.FS.readBinFile input) do throwError "fixture changed during import"
+    let digest := Hashes.sha256Nat (fixture.compress.toUTF8.data.toList.map UInt8.toNat)
+    liftCoreM <| addAndCompile <| .defnDecl {
+      name := declaration, levelParams := [], type := mkConst ``Nat,
+      value := toExpr digest, hints := .abbrev, safety := .safe }
+    modifyEnv fun env => capturedCanonicalImportsV1.modifyState env
+      (·.insert N.getId ⟨fixture, context⟩)
 
 end Solidity.Frontend
