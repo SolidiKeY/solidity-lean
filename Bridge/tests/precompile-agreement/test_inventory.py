@@ -107,7 +107,7 @@ class InventoryControls(unittest.TestCase):
 class EvidenceControls(unittest.TestCase):
     def setUp(self):
         self.data = json.loads(checker.INVENTORY.read_text())
-        self.receipt = json.loads((checker.TESTS/"evidence/kernel-receipt.json").read_text())
+        self.receipt = json.loads((checker.EVIDENCE_DIR/"kernel-receipt.json").read_text())
 
     def test_complete_receipt(self):
         self.assertEqual(checker.evidence_errors(self.data, self.receipt), [])
@@ -129,34 +129,34 @@ class EvidenceControls(unittest.TestCase):
         self.assertTrue(checker.evidence_errors(self.data, self.receipt))
 
     def test_log_swap_rejected_even_with_updated_hash(self):
-        log=(checker.TESTS/"evidence/Gas-kernel.log").read_text()
+        log=(checker.EVIDENCE_DIR/"Gas-kernel.log").read_text()
         self.assertTrue(checker.kernel_log_errors("Identity-kernel.log", log))
 
     def test_kernel_failure_footer_rejected(self):
-        log=(checker.TESTS/"evidence/Identity-kernel.log").read_text().replace("EXIT=0", "EXIT=1")
+        log=(checker.EVIDENCE_DIR/"Identity-kernel.log").read_text().replace("EXIT=0", "EXIT=1")
         self.assertTrue(checker.kernel_log_errors("Identity-kernel.log", log))
 
     def test_late_failure_or_duplicate_kernel_footer_rejected(self):
-        log=(checker.TESTS/"evidence/Identity-kernel.log").read_text()
+        log=(checker.EVIDENCE_DIR/"Identity-kernel.log").read_text()
         for extra in ("EXIT=1 SECONDS=1.000 PEAK_RSS=100 MIN_AVAILABLE=9999999999 RESOURCE_STOP=False\n",
                       "EXIT=0 SECONDS=1.000 PEAK_RSS=100 MIN_AVAILABLE=9999999999 RESOURCE_STOP=False\n"):
             self.assertTrue(checker.kernel_log_errors("Identity-kernel.log",log+"\n"+extra))
 
     def test_wrong_input_working_directory_rejected(self):
-        build=(checker.TESTS/"evidence/pinned-input-build.log").read_text()
+        build=(checker.EVIDENCE_DIR/"pinned-input-build.log").read_text()
         wrong=build.replace("CWD="+str(ROOT)+" ","CWD=/tmp/unrelated ").replace("-o "+str(ROOT)+"/.lake/","-o /tmp/unrelated/.lake/")
         self.assertTrue(checker.input_build_errors(self.data,wrong))
 
     def test_input_build_all_headers_removed_rejected(self):
         import re
-        build=(checker.TESTS/"evidence/pinned-input-build.log").read_text()
+        build=(checker.EVIDENCE_DIR/"pinned-input-build.log").read_text()
         stripped=re.sub(r"^\d+/45 SHA256=.*\n", "", build, flags=re.M)
         self.assertEqual(stripped.count("EXIT=0 "),45)
         self.assertTrue(checker.input_build_errors(self.data,stripped))
 
     def test_input_build_omission_rejected(self):
         import re
-        build=(checker.TESTS/"evidence/pinned-input-build.log").read_text()
+        build=(checker.EVIDENCE_DIR/"pinned-input-build.log").read_text()
         blocks=re.split(r"(?=^\d+/45 SHA256=)",build,flags=re.M)
         blocks=[b for b in blocks if b]
         self.assertEqual(len(blocks),45)
@@ -165,7 +165,7 @@ class EvidenceControls(unittest.TestCase):
 
     def test_input_build_duplicate_rejected_with_45_successes(self):
         import re
-        build=(checker.TESTS/"evidence/pinned-input-build.log").read_text()
+        build=(checker.EVIDENCE_DIR/"pinned-input-build.log").read_text()
         blocks=[b for b in re.split(r"(?=^\d+/45 SHA256=)",build,flags=re.M) if b]
         victim=next(i for i,b in enumerate(blocks) if b.splitlines()[0].endswith("Solidity/Precompiles/PointEval.lean"))
         blocks[victim]=blocks[victim-1]
