@@ -24,5 +24,7 @@ remain under the authorized tests prefix until area-owner-approved registration:
 | CheckedEntryAudit | HeadlineAudit, read-only Backend.Payments.EntrySuccess | Actual checked-entry admission/storage-write success and four excluded outputs for one intrinsic fixture |
 | CoreContractAudit | HeadlineAudit, read-only Backend.Payments.EntrySuccess | General supported-core admission/success contract with stack/state guarantees and four nonvacuous trivial-candidate refutations |
 
+| MemoryPremiseAudit | JointWitness, Solidity.Evm.MemoryCompileExamples | Five exact joint premise packages for memory compilation, program simulation, frame monotonicity, pushes and allocation cost |
+
 The metadata inspector imports Lean only as an external tool. It is not part
 of the dependency-free intrinsic core.
