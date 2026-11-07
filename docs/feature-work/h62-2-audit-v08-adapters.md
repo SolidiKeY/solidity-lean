@@ -441,3 +441,13 @@ This is neither an all-kind kernel census nor semantic declaration classificatio
 `generate_mapped_census.py` reuses the existing collector body for one to four explicitly selected files from the frozen audit snapshot. It checks the snapshot hash against the frozen Git blob and checks each selected current import against those same bytes before materializing a diagnostic. Duplicate, unmapped, stale and redirected inputs are refused. Generated files stay in the existing owned diagnostic directory, use exclusive creation, and can be pinned by output SHA256. No new collector implementation or lexical acceptance predicate was introduced. The old calldata renderer's default output remains byte-identical (`82c3ee64…`).
 
 Seven mapped-generator tests and five original calldata-generator tests passed in normal and optimized Python. The actual FailureResources diagnostic was materialized off Git and a repeated write was refused without changing its bytes. Finder and skeptic reported no findings. This is preparation only: no Lean check or new kernel inventory is claimed, and selected-file checks do not validate transitive imports. Disk remains below the retained reserve, so the approved per-file gate was not started. Exact bindings and evidence are indexed in `tests/h62/item2/audit-v08-adapters/mapped-census-generator-manifest.json`.
+## H44 packaging correction (2026-11-07)
+
+The 178990-byte scope JSON is preserved byte-for-byte off-tree at
+/workspace/h62-audit-v08-adapters-evidence/retirement/scope-manifest.json.
+The committed retirement/scope-manifest.sha256 records its absolute path, size
+and digest. Original assignment and queues remain committed. No theorem, gate,
+budget or scope-content changes. Prior exports remain preserved. Branch arrival
+head cf354e514bf0b0327f89fa2c60a799a5d04b776d already merged origin/master;
+that history is preserved. The review patch isolates this correction from it.
+Packaging only: retirement pause remains; no proof continuation or push.

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "split_parent": "575d277f7d16f1a30c947711fd69a75004fe4797",
+  "original_pinned_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "purpose": "H44 bulk preservation only. Copied-definition fixtures are historical diagnostics, not canonical validation. H112 real-module fixtures are Acceptance.lean and Interfaces.lean.",
+  "files": {
+    "tests/h62/item6/migrate-optimizer/Generic.lean": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/Generic.lean",
+      "bytes": 9854,
+      "sha256": "c762df3ce32e090de3a9126affe87d42bd59a058d5c514f1e715a20103ed145f"
+    },
+    "tests/h62/item6/migrate-optimizer/Isolated.lean": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/Isolated.lean",
+      "bytes": 12179,
+      "sha256": "64e279bd29ced93f847034c59700faad3687d5cd74ebde53f8bcd88579645a72"
+    },
+    "tests/h62/item6/migrate-optimizer/census.json": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/census.json",
+      "bytes": 11409,
+      "sha256": "4f87c2c03c7727217b64a93e0adce70ae8436012c952173e7a84ac88eaf4e7d3"
+    },
+    "tests/h62/item6/migrate-optimizer/interface-hashes.json": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/interface-hashes.json",
+      "bytes": 29383,
+      "sha256": "e3fbecac8b8cadeef2f1177883584782fee30d1d92ba2df20ed2572612a4e73a"
+    },
+    "tests/h62/item6/migrate-optimizer/measurements.json": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/measurements.json",
+      "bytes": 8819,
+      "sha256": "64e526172220719dc3449a575bba2047e286f975f51420d723d673cbd6b07823"
+    },
+    "tests/h62/item6/migrate-optimizer/generic-manifest.json": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/generic-manifest.json",
+      "bytes": 603,
+      "sha256": "c45a0b377d0cdc5d7814acc5af3a195bf7fcafb14c57946bb54d5002f1e77bb1"
+    },
+    "tests/h62/item6/migrate-optimizer/isolated-manifest.json": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/isolated-manifest.json",
+      "bytes": 764,
+      "sha256": "a7c71cf3819ee67abc751d08f9dc69dc3254872f36fa3acb239c8b40f6bf1bde"
+    }
+  },
+  "archive": {
+    "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/bulk.tar.gz",
+    "bytes": 12749,
+    "sha256": "7869fa0ffb7eb8ba2760a4ed285d0cd3f6813e8fa7f7a60d54a21721a70339cf",
+    "deterministic_generator": "python3 scripts/h62/item6/migrate-optimizer/bulk.py --pack <new-absolute-output-path>"
+  },
+  "derived_output_directory": "/workspace/migrate-optimizer-evidence/h44-split-20261107/derived",
+  "hold": "STOP_GT_10_PERCENT unchanged; retirement/full validation holds retained."
+}
