@@ -1662,3 +1662,44 @@ existing generic-v08 documentation citation failure remains owner-pending.
 Next independent work remains the other original joint inputs and full owned
 H121 Source/callee execution, selected compiler/world binding and physical-frame
 producer. External transport/G42.04 and historical artifact waits are unchanged.
+
+
+### Joint funded journal inputs (2026-11-07)
+
+JournalWitnesses applies the unchanged StaticJournal.transfer_history,
+History.storage and credit_history interfaces to one explicit nonempty Bool
+storage environment. A funded amount-three transfer between distinct accounts
+changes balances 9/1 to 6/4. The same successful transfer equation supplies the
+history premise; that same history and true mode supply storage preservation.
+The actual Source credit run succeeds with nonempty typed locals and changes
+the receiver balance to four. An actual stored true field survives. Controls
+reject whole-world equality and replacement of that cell by false.
+
+History is an algebraic journal certificate. It neither authorizes a nonzero
+static CALL nor supplies arbitrary Source-call execution, compiler/world binding
+or physical-frame correspondence. These joint inputs also do not establish
+cross-version semantics of the changed monetary representation. No original
+statement, dependent definition, premise, exclusion, budget or axiom is edited.
+
+The same additive module passes the isolated frozen/current gates. All three
+original raw kernel types match, and the eight theorem axiom sets match the
+existing propext/Classical.choice/Quot.sound set. Exact admitted read-parent
+objects are reused with source/import/object/log/tool validation; only missing
+dependencies and the new witness/probe may compile. Historical tools remain
+hash-matched data, not executable fallbacks. Commands, versions, measurements
+and provenance remain private evidence under H145. The Premises performance
+STOP is unchanged, and there is no runtime or whole-assignment pass.
+
+The existing exact-accounting collector admits only these three rows. All792
+original identities remain: 73 joint, 413 ordinary pending (including the three
+private identity gaps), 3 target-failure joint, 45 intentional impossibility,
+256 no-input and 2 frozen-v1 refutation/migration results. The other789 rows
+are unchanged. Existing type/transport/unloaded/private refusals remain open.
+Independent read-only finder and skeptic found no remaining issue in the
+joint premises, controls, exact receipt pair or complete ledger comparison;
+neither used Lean servers, execution or writes.
+
+The full owned H121 Source/callee/selected compiler-world/physical-frame
+producer, external transports/G42.04 and inherited cleanup queues remain
+unfinished. Next independent work is the remaining original joint inputs and
+that producer. No new scope question or goal change.

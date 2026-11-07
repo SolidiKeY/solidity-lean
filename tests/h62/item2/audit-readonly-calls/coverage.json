@@ -961,6 +961,45 @@
       "frozen_receipt_sha256": "e92e8cba6614e154fe465f3f7f53886c55bbbbb661daac2e3bb32daf05e2466c",
       "current_receipt_sha256": "18a9c21dcef161171aff285ea39a60a7369d63c365d2601280517797addc9b78",
       "proof_boundary": "Joint Source boundary inputs and actual extReturn/applyOp runs only; supplied outcomes do not establish callee execution or compiler/world/native-frame/gas/fork adequacy."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.StaticJournal.transfer_history",
+      "signature_sha256": "518f140621f6230edeabf53101ec221fd2ba551cb0780df2f95581aabef56750",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JournalWitnesses.transfer_joint",
+      "global_premises": "No assumed compiler/callee/runtime-frame record. Explicit nonempty persistent Bool environment, Source state and inhabited nonempty Bool locals.",
+      "per_input": "Distinct sender0/receiver1, amount3, balances9/1→6/4, actual transfer success and same algebraic History at mode=true; actual credit run and checked true persistent cell.",
+      "evidence": "Private coordination archive: journal-witnesses/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: journal-witnesses/SHA256SUMS",
+      "frozen_receipt_sha256": "e536654922e09fea080522b372b992ca1b2f01d95b2832287718350764de2f39",
+      "current_receipt_sha256": "d71f05671d9197a7f97543903b7dc56b540152c3985e314ce80e0c7e1a192918",
+      "proof_boundary": "Joint original History premises and actual primitive Source transfer/credit runs only. History is algebraic, not nonzero static-call authorization, general execution linkage, compiler/world/native-frame/gas/fork or cross-version semantic equivalence."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.StaticJournal.History.storage",
+      "signature_sha256": "45c79bdde14546ea35a72f30e2ec4b25f0547850a72f768a35f0a5d1e5235329",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JournalWitnesses.storage_joint",
+      "global_premises": "No assumed compiler/callee/runtime-frame record. Explicit nonempty persistent Bool environment, Source state and inhabited nonempty Bool locals.",
+      "per_input": "Distinct sender0/receiver1, amount3, balances9/1→6/4, actual transfer success and same algebraic History at mode=true; actual credit run and checked true persistent cell.",
+      "evidence": "Private coordination archive: journal-witnesses/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: journal-witnesses/SHA256SUMS",
+      "frozen_receipt_sha256": "e536654922e09fea080522b372b992ca1b2f01d95b2832287718350764de2f39",
+      "current_receipt_sha256": "d71f05671d9197a7f97543903b7dc56b540152c3985e314ce80e0c7e1a192918",
+      "proof_boundary": "Joint original History premises and actual primitive Source transfer/credit runs only. History is algebraic, not nonzero static-call authorization, general execution linkage, compiler/world/native-frame/gas/fork or cross-version semantic equivalence."
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.StaticJournal.credit_history",
+      "signature_sha256": "3efed85e021b2ca5fac7707018646443403905186fba7388555ff6f55a654e8c",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.JournalWitnesses.credit_joint",
+      "global_premises": "No assumed compiler/callee/runtime-frame record. Explicit nonempty persistent Bool environment, Source state and inhabited nonempty Bool locals.",
+      "per_input": "Distinct sender0/receiver1, amount3, balances9/1→6/4, actual transfer success and same algebraic History at mode=true; actual credit run and checked true persistent cell.",
+      "evidence": "Private coordination archive: journal-witnesses/validated/{frozen,current}-accepted/receipt.json",
+      "evidence_manifest": "Private coordination archive: journal-witnesses/SHA256SUMS",
+      "frozen_receipt_sha256": "e536654922e09fea080522b372b992ca1b2f01d95b2832287718350764de2f39",
+      "current_receipt_sha256": "d71f05671d9197a7f97543903b7dc56b540152c3985e314ce80e0c7e1a192918",
+      "proof_boundary": "Joint original History premises and actual primitive Source transfer/credit runs only. History is algebraic, not nonzero static-call authorization, general execution linkage, compiler/world/native-frame/gas/fork or cross-version semantic equivalence."
     }
   ]
 }
