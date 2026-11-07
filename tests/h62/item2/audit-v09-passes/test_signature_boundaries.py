@@ -162,7 +162,8 @@ class HeaderBoundaries(unittest.TestCase):
                     ('loop-call',9,0,'Solidity.Backend.Passes.AuditLoopCall.joint'),
                     ('loop-reframed-failure',17,2,'Solidity.Backend.Passes.AuditLoopReframedFailure.joint'),
                     ('compiler-call-scope',4,0,'Solidity.Backend.Passes.AuditCompilerCallScope.joint'),
-                    ('reference-call-readback',10,0,'Solidity.Backend.Passes.AuditReferenceCallReadback.joint')]
+                    ('reference-call-readback',10,0,'Solidity.Backend.Passes.AuditReferenceCallReadback.joint'),
+                    ('reference-call-capture-failure',6,0,'Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
@@ -252,7 +253,7 @@ class HeaderBoundaries(unittest.TestCase):
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(489,770))
+        self.assertEqual((len(seen),1259-len(seen)),(495,764))
 
 
 

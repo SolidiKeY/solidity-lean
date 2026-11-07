@@ -1322,3 +1322,19 @@ The historical negative is superseded only by the explicitly authorized live
 acceptance transition, not silently re-proved, renamed or counted unchanged.
 Adoption waits for exact replacement bytes/signature and owner validation.
 Selected489/1259,770open remain unchanged; no acceptance credit is transferred.
+
+
+Reference-call capture-failure checkpoint: six original
+`ReferenceCallCaptureFailureControls` rows have exact frozen signature accounting
+and checked aliases in `ReferenceCallCaptureFailureWitness.lean`. Its joint
+retains actual Entry/frame64, lo/pointer16, cursor20 and NoAliasPromotion flags,
+the successful tuple call and returned map, paid growth1 and footprint, followed
+by captureInput at the failing alias read. The original all-tail source/target
+revert transport, complete returned observations, nonzero free capture cell and
+successful alternate local read retain their full types. No failure-output
+machine or zero-initialization premise is added. Selected495/1259,764open;
+application/selector definitions and supplemental rows add no credit. Seven
+axiom reports are guarded. Evidence is external at
+`/workspace/vy3-evidence/reference-call-capture-failure-20261107`. No native
+ByteWorld/emission, ABI/gas or full Source/G24 adequacy is inferred. Existing
+transition-intake/producer waits, STOPs and original acceptance obligations remain.
