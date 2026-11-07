@@ -1,0 +1,43 @@
+{
+  "guardedRegression": "Native-browser must receive the exact original44d environment archive, never substitute historical native-browser c3c9ce43 evidence or infer transport from metadata",
+  "producerLane": "solidity-directruntime-20261104/shared-translator",
+  "historicalProducerHead": "44d89439afd8fe7aca251cd5693b5b7ea36cf603",
+  "consumerLane": "solidity-directruntime-20261104/native-browser",
+  "consumerHeadAsReported": "5a8f1e77a294342a52132f67c8189cf6623659dd",
+  "authenticatedManifest": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/environment-manifest.json",
+    "gitCommit": "44d89439afd8fe7aca251cd5693b5b7ea36cf603",
+    "sha256": "8ee027cf3c84e2162d98a07cf38e07706076be85948483e8a9d5e35cbeb5f6b5",
+    "workingBytesEqualGitBlob": true
+  },
+  "original": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/environment-evidence.tar.zst",
+    "sha256": "d8a141a7703e95cc81f7aa0741ed12a5073739b1cb7d4363354211ca3cb16060",
+    "bytes": 65713
+  },
+  "stagedCopy": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/environment-handoff/original-environment-evidence.tar.zst",
+    "sha256": "d8a141a7703e95cc81f7aa0741ed12a5073739b1cb7d4363354211ca3cb16060",
+    "bytes": 65713,
+    "byteIdentical": true
+  },
+  "archiveChecks": {
+    "safeUniqueRegularMembers": 56,
+    "internalChecksums": 55,
+    "exactChecksumMemberSet": true,
+    "TranslateEqualsHistoricalGitBytes": true,
+    "sourceHashEqualsHistoricalSourceGitBytes": true,
+    "originalAstSha256": "4b57bac4071f9d3962d9814e20d87faf1edb4a7c3c89669738ada399cd9e86a4"
+  },
+  "courier": "Approved coordinator/host channel must pull the staged copy unchanged. Existing H71 original-data-delivery request remains the same; no duplicate ticket, model shipment or push.",
+  "status": "Local original and staged bytes authenticated; host pull, consumer delivery and inspection unconfirmed.",
+  "limits": [
+    "This is original44d evidence, not native-browser c3c9ce43 environment evidence.",
+    "No extraction, Lean/build/runtime execution, current freshness, source preservation, STOP release or whole-goal acceptance.",
+    "ReadBounds production authority, native-cost and browser-startup STOPs, four storage diamonds and original queues remain open."
+  ],
+  "reviews": {
+    "finder": "Read-only no blocker; exact bytes, publication ancestry and unchanged allowlists verified. No Lean/server/build/writes.",
+    "skeptic": "Read-only independently verified original/staged byte equality and historical Git-manifest hash; local custody only, no delivery claim. No blocker; no Lean/server/build/writes."
+  }
+}
