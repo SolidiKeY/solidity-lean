@@ -47,6 +47,13 @@ class InspectorProtocol(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'count mismatch'):
             decode(self.log([row],[done]), self.pins)
 
+    def test_loaded_module_with_zero_constants(self):
+        done = dict(self.done, counts={'Example.Module':0})
+        self.assertEqual(decode(self.log(rows=[], done=[done]), self.pins), [])
+        with self.assertRaisesRegex(ValueError, 'count mismatch'):
+            decode(self.log(rows=[], done=[dict(done, counts={})]), self.pins)
+
+
 
 class ExecutionBinding(unittest.TestCase):
     def test_receipt_and_binding_controls(self):

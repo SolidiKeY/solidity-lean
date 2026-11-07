@@ -370,3 +370,44 @@ open. Exact artifacts are in /workspace/sol-numeric-literals-v07-elaborated-subs
 Independent read-only finder and skeptic reviews passed after the binding fixes;
 the final finder recheck also accepted resource-policy enforcement. Neither
 reviewer used Lean/server or changed files.
+
+
+## Sharded unchanged-source telescope export
+
+After fetching and merging master dee876457, the exact frozen scope partitions
+into 140 byte-unchanged modules / 808 candidates and 22 drifted modules / 160
+candidates. No selected import closure reaches the known Source/Horizon STOP.
+The drifted files are explicitly retained as open reconciliation work; byte
+drift alone establishes neither statement drift, weakening nor equivalence.
+
+A monolithic 140-module inspection was stopped by the existing headroom guard:
+exit 137 in 502.213s, minimum observed headroom 4,286,111,744 bytes. It is not a
+passing export and was not rerun unchanged. The stopped container was replaced
+locally with identical limits on the same VM/branch/goal. Disjoint smaller
+shards reused the unchanged generic Lean template and execution/resource policy.
+Thirteen successful shards, including the earlier five-module and graph/read
+subsets, now cover all 140 unchanged-source modules and all 808 unique source
+candidate identities exactly once. Their raw exports include 3,607 constants;
+2,799 other constants, including generated helpers, projections and data
+declarations, are kept distinct from those source theorems.
+The source theorem telescopes contain 5,823 binders, of which Lean marks 1,376
+as proofs. Non-proof binders are not assumed inhabited or semantically data-only.
+
+aggregate_elaborated_shards.py revalidates every saved report through the strict
+reader, then checks disjoint modules, source identities and the complete frozen
+module partition. Import-only modules with zero constants require explicit zero
+completion counts; omitted or unexpected module counts still fail. Nine reader
+and five partition tests pass, including duplicate, missing, unknown and newly
+drifted module controls. Actual Lean 4.24.0 / Lake 5.0.0-src+797c613 and KeySort
+were refreshed under the same writer lock and resource guard. This is not a
+whole runtime gate or comparable timing experiment.
+
+Both independent read-only finder and skeptic reviews passed after strict
+revalidation, without Lean/server use. A small sharded-telescopes.json pins the
+off-Git aggregate, source-drift inventory, 13 receipts/probes/logs and preserved
+failed run at /workspace/sol-numeric-literals-v07-shards. Original pending ledger
+statuses are unchanged. Live type export does not prove original semantic
+fidelity, public interface membership, global contract or per-input feasibility,
+compiler success, gas/fork coverage, original 4.35 migration or full acceptance.
+The remaining 160 drifted candidates and every uncovered proof obligation stay
+in scope. No production statement, definition, budget, axiom or exclusion changed.

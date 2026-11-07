@@ -33,7 +33,8 @@ def decode(log, pins):
         if record['manifest_sha256'] != pins['manifest_sha256']:
             raise ValueError('manifest fingerprint mismatch')
     counts = Counter(r['module'] for r in rows)
-    if set(counts) != set(pins['modules']) or dict(counts) != done[0]['counts']:
+    observed = {module: counts[module] for module in pins['modules']}
+    if not set(counts) <= set(pins['modules']) or observed != done[0]['counts']:
         raise ValueError('module completion count mismatch')
     return rows
 

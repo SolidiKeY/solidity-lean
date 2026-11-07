@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "boundary": "Successful live unchanged-source shards; not original semantic fidelity, interface membership, feasibility or full acceptance.",
+  "frozen_modules": 162,
+  "frozen_candidates": 968,
+  "unchanged_source_modules": 140,
+  "matched_source_theorems": 808,
+  "binder_count": 5823,
+  "proof_binder_count": 1376,
+  "exported_constants": 3607,
+  "successful_shards": 13,
+  "drifted_modules": 22,
+  "drifted_candidates": 160,
+  "external_directory": "/workspace/sol-numeric-literals-v07-shards",
+  "aggregate_sha256": "281ece65abf71b569a28863ce0c135df9129dca316b24a06ca15df50db5c6305",
+  "plan_sha256": "8987431348d5705157ae002f3e8da3a9caca62eb3ba95f5e4b64e0c5ed2e9676",
+  "artifact_index_sha256": "234add53ae7a2b19abf18179efb888ea4eac56eb8b0647c14227cd8effe17465",
+  "monolithic_failed_receipt_sha256": "a4bd5ecd4817cd36fced086481e90855683299001f9aabe8666e18563739a14c",
+  "runtime_prerequisite_sha256": "e27a62f2212415fc5e02d77465a2a8c22c5fcd533b67cc391644b379ca40fd44",
+  "tool_sha256": {
+    "aggregate_elaborated_shards.py": "2c1f23e3dccf5bbdbddaefa3d7dc31869f3e5471aa5bd0e932e8c748b18c459d",
+    "read_elaborated_subset.py": "7d6a090b486b5d89fc33af98a1b5b67f7cc65d55534a0859ffaf2a4164d4edb7",
+    "test_aggregate_shards.py": "67eedc8a140567ee269a77c915278f5fd3e970091dca61bafe2ed00b83ab1f6f",
+    "test_elaborated_subset.py": "985351368342cd61300b74809153af5ba54bf133bf5bd7069ff81fd710f0d61d"
+  },
+  "limitations": [
+    "Original pending ledger unchanged; source-byte equality is not old/new semantic fidelity.",
+    "Source theorem export is not public interface classification or simultaneous feasibility.",
+    "22 drifted modules remain open, not waived or accepted exclusions.",
+    "Original4.35 and full affected gates remain incomplete; monolithic resourceSTOP retained."
+  ]
+}
