@@ -880,3 +880,12 @@ frame owners; V08 world-phase; compiler-family owners; V15 P10 via coordinator
 under H118; bare_prefix_bridge actual producer owner unresolved. No owner is
 inferred, no former-Claude follow-up, and no new/reset/completed goal. H110 permits
 continuation on this same original thread when fresh-thread machinery is absent.
+
+
+H70 downstream clarification received after this checkpoint: V17 release head
+ a2b8558db548751e414f71d1d3c7889f64cc0ee8 waits on our H121b full composed
+producer and arbitrary-contract/EEST executable binding. V17 is a consumer of
+those deliverables, not their provider; the generic V17 binding wait above is
+superseded. These are owned unfinished work. No complete producing files/head
+are available; conditional G49 framework and input exports do not satisfy them.
+This dependency notice changes no scope, paused-goal state or acceptance gate.
