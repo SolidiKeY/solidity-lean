@@ -1,0 +1,26 @@
+/-! Guard regression: a decoded or otherwise valid changed artifact must not be substituted for the artifact assembled from the certified block. These are reference empty-composition domain controls, not Source/runtime adequacy. -/
+theorem composition_altered_code_refused
+    {ir : List Solidity.Evm.Instr} {block : Solidity.Backend.Block}
+    {input output : Nat}
+    (certificate : Solidity.Backend.Selection.CompositionCertificate ir block input output)
+    (altered : Solidity.Backend.Assembled Empty)
+    (bad : altered.code ≠ certificate.assembled.code) :
+    Solidity.Backend.assemble 0 Solidity.Backend.LabelExec.emptyLink (block.expand 0).1 ≠
+      some altered := by
+  intro candidate
+  have same : certificate.assembled = altered :=
+    Option.some.inj (certificate.assembly.symm.trans candidate)
+  exact bad (congrArg (fun out : Solidity.Backend.Assembled Empty => out.code) same.symm)
+
+theorem empty_changed_assembly_refused :
+    Solidity.Backend.assemble 0 Solidity.Backend.LabelExec.emptyLink
+      ((Solidity.Backend.Block.code []).expand 0).1 ≠
+      some (⟨[Solidity.Backend.Selection.V2.Controls.zeroPush], []⟩ :
+        Solidity.Backend.Assembled Empty) :=
+  composition_altered_code_refused emptyComposition
+    ⟨[Solidity.Backend.Selection.V2.Controls.zeroPush], []⟩ (by
+      intro same
+      cases same)
+
+#print axioms composition_altered_code_refused
+#print axioms empty_changed_assembly_refused

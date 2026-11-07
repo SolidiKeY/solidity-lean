@@ -1,0 +1,44 @@
+{
+  "support_modules": [
+    "Solidity.Backend.Selection.InterfaceV2Controls",
+    "Solidity.Backend.Selection.LiteralSelection"
+  ],
+  "support_sources": [
+    "tests/h62/item2/audit-bytecode-selection/runtime-control-support.lean.txt",
+    "tests/h62/item2/audit-bytecode-selection/composition-field-support.lean.txt"
+  ],
+  "witnesses": {
+    "composition_lowering_joint_domain": {
+      "target": "Solidity.Backend.Selection.CompositionCertificate.lowering",
+      "proof": "\u27e8[],.code [],0,0,emptyComposition,True.intro\u27e9"
+    },
+    "composition_control_joint_domain": {
+      "target": "Solidity.Backend.Selection.CompositionCertificate.control",
+      "proof": "\u27e8[],.code [],0,0,emptyComposition,True.intro\u27e9"
+    },
+    "composition_assembly_joint_domain": {
+      "target": "Solidity.Backend.Selection.CompositionCertificate.assembly",
+      "proof": "\u27e8[],.code [],0,0,emptyComposition,True.intro\u27e9"
+    },
+    "composition_roundtrip_joint_domain": {
+      "target": "Solidity.Backend.Selection.CompositionCertificate.roundtrip",
+      "proof": "\u27e8[],.code [],0,0,emptyComposition,True.intro\u27e9"
+    },
+    "control_shape_joint_domain": {
+      "target": "Solidity.Backend.Selection.ControlCertificate.shape",
+      "proof": "\u27e8.code [],0,0,emptyControl,True.intro\u27e9"
+    },
+    "control_room_joint_domain": {
+      "target": "Solidity.Backend.Selection.ControlCertificate.room",
+      "proof": "\u27e8.code [],0,0,emptyControl,True.intro\u27e9"
+    },
+    "control_realize_joint_domain": {
+      "target": "Solidity.Backend.Selection.ControlCertificate.realize",
+      "proof": "\u27e8.code [],0,0,emptyControl,[],[],0,emptyComposition.assembled,emptyComposition.assembly,[],[],rfl,Solidity.Backend.Selection.StructuredExec.code rfl,True.intro\u27e9"
+    },
+    "lowering_success_joint_domain": {
+      "target": "Solidity.Backend.Selection.LoweringCertificate.success",
+      "proof": "by\n  let caller : Solidity.Evm.Machine := { Solidity.Evm.Machine.init with stack := Solidity.Backend.Selection.irStack [11,99] }\n  exact \u27e8[],.code [],emptyLowering,[11,99],[11,99],caller,rfl,True.intro\u27e9"
+    }
+  }
+}
