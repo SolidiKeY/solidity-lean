@@ -1312,3 +1312,65 @@ Evidence: /workspace/h62-audit-readonly-calls/compiler-consumer/; committed pins
 `tests/h62/item2/audit-readonly-calls/compiler-consumer.sha256`. Next:remaining
 original joint inputs and full RO Source/callee/native-frame producer under all
 holds. No new scope question, owner ticket, push or goal reset/completion.
+
+
+### Nonempty primitive field/read joint inputs (2026-11-07)
+
+Fetched and inspected master a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e; rebased the
+audit branch before this increment. The separate CheckedMul reuse change does
+not provide these clients. No production file, interface, dependent definition,
+axiom, exclusion or proof budget changed.
+
+`tests/h62/item2/audit-readonly-calls/PrimitiveReadWitnesses.lean` uses two actual
+declared Bool fields, nonempty Bool locals, one Source store and one intrinsic
+store. The head is written true; the tail reads its actual default false. The
+Fields constructor supplies declaration lookup, exact types, persistence and
+nonconstant metadata together. Rel is proved from the actual reads. The SAME
+inputs instantiate PrimitiveFields.read_value/total/unique/select and
+PrimitiveReads.read_of_read/read_head/target_read_head/target_expression. Tail
+selection and a negative head-only target control preserve distinct values.
+unique_joint checks the two simultaneous concrete relation premises; its
+reflexive equality conclusion is premise-satisfiability only. No Source program
+well-formedness/deployment, expression body or call/native-frame adequacy follows.
+
+The unchanged isolated checker supplies exact frozen/current type exports and
+axiom checks. A thin selection driver authenticates every admitted parent source
+and import, including modules outside the consumer overlap, before the existing
+cache verifier runs. Only the actual overlap is loaded; no arbitrary object
+fallback or held WorldCalls.Premises import. Frozen closure:52 modules,42 reused;
+current closure:57 modules,46 reused. Remaining nodes and the same fixture are
+compiled from captured bytes. This is authenticated executed-object reuse plus
+fresh extension checking, not a claim that all dependencies were freshly built.
+
+Final frozen PASS53.328s/800108544 bytes peak aggregate RSS; current
+PASS52.86s/801472512 bytes. Eight original raw kernel types match on each tree;
+all eleven audit axiom sets use standard propext/Classical.choice/Quot.sound
+or subsets. Repository per-file gate PASS95.17s,59 dependency jobs; actual
+Lean4.24.0 and Lake5.0.0-src+797c613, serial bounded -j1. KeySort passes separately.
+These are validation costs, not a before/after speed comparison or rebaseline.
+Historical Premises +80.254966536% STOP remains unchanged; no RUNTIME_GATE_PASS.
+
+Eight tooling controls pass: exact client inventory, cache-overlap authentication,
+source/pin substitution refusal, held import refusal, original identity retention,
+missing/duplicate/wrong type/client refusal and recredit/baseline refusal.
+Finder and skeptic caught a stale pre-initialization census, split admission
+hash/read and missing initial collector hash check; all three were fixed before
+acceptance. Both reviewed the final saved evidence without executing Lean,
+servers, tests or writes and found no remaining defect. Initial fixture
+elaboration and tooling-test failures remain in off-git evidence.
+
+The explicit committed admission pair and full verifier authorize exactly eight
+new coverage entries: joint witnesses57→65; ordinary pending429→421. All792
+identities and original fields remain;784 unrelated rows are unchanged. Other
+counts stay256 no-top-level-input,45 intentional impossibility,3 target-failure
+joint and2 frozen-v1 refutation/migration. The three private identity gaps remain
+pending. No definition-equivalence claim is made by raw type equality or separate
+frozen/current executions. Source/root_expression/caller-frame interfaces and
+our full H121 RO Source/callee/native-frame producer remain open, as do nineteen
+H19/H60 transports, G42.04 body binding, inherited queues and full acceptance.
+
+Evidence: /workspace/h62-audit-readonly-calls/primitive-reads/; proof pair under
+validated/, acceptance under accepted/. Committed pins:
+`tests/h62/item2/audit-readonly-calls/primitive-reads.sha256`. No new scope question
+or owner ticket. Next independent work: remaining original joint inputs and full
+RO execution/frame producer under the retained holds.
