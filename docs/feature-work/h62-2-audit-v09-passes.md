@@ -1353,3 +1353,19 @@ guarded: wrong_capture has no axioms; the other aliases and joint use the existi
 standard set. Evidence: `/workspace/vy3-evidence/runtime-return-capture-20261107`.
 No native ByteWorld/emission, ABI/gas or full Source/G24 adequacy is inferred.
 Existing transition/producer waits, STOPs and final acceptance obligations remain.
+
+
+Runtime void-capture checkpoint: eleven original `RuntimeVoidCaptureControls`
+rows have exact frozen signature accounting and checked aliases in
+`RuntimeVoidCaptureWitness.lean`. The joint retains actual success/failure
+domains, Entry/frame16 lo/pointer8 cursor10, alias flags, source success/revert,
+before7/after37 evaluation and the correlated returned run, StateRepr,
+BaseExtends and captureInput. Original complete caller-alias/array payload,
+cursor/protected-word and saved-tail observations, body failure, premature
+capture, stale value and insufficient-frame refusal statements are unchanged.
+No entry/instantiated/application definition adds a row. Selected516/1259,743open;
+supplemental counts stay separate. Twelve reports are guarded, including the
+axiom-free stale_capture_refused. Evidence is external at
+`/workspace/vy3-evidence/runtime-void-capture-20261107`. No native ByteWorld,
+ABI/gas or full Source/G24 adequacy is inferred. Existing transition/producer
+waits, STOPs and original final acceptance obligations remain open.
