@@ -1,0 +1,29 @@
+{
+  "producer_head": "54c7286fa90f0adafd2c9c19deff521121acb96d",
+  "source_checkpoint": "1b3ab0676e24620af56e1408c1aabde9cb4bbdb7",
+  "delivered_sha256": {
+    "DeclarationGraphAdmissionV2.lean": "5d7dd0735be9b75060550f0d6db14774b267bd7ad0fca486ecb6e52efe283e2e",
+    "PRODUCER-PACKET.md": "e17e85270d0f22f550d5e3b1a019d9c128a31ac3932e12b4fe1117cd419ac735",
+    "metadata.json": "ad0b351d1a21f68a008aff4c64a4348f75fc6b9cd094116a48ef3fefa97567fe"
+  },
+  "intake": "Verified exact source-reference delivery; no integration or local kernel acceptance.",
+  "h57_boundary": {
+    "v1": "LocationGraphInterface.SourceRefusesNonAdmissible quantifies actual Source.StmtD; frozen LibraryPremises.Inputs.admission requires DeclarationGraphAdmission.Producer.",
+    "v2": "Separately named SourceRefusesNonAdmissible quantifies Source.V2.StmtD with the same environment, local declaration, explicit location and initializer indices.",
+    "preserved": "EnvAdmission/Admission/Producer retain original LocationDeclarationGraph and acceptedSource/artifact/location/base indices.",
+    "transport": "from_v1_graphs reuses graphs only; it is not a typing derivation conversion or v2-to-v1 refusal transport.",
+    "pair_map": "tests/h62/item2/audit-v10-storage/h24-v2-version-pairs.json is referenced by producer, not included in this source-reference delivery or locally verified.",
+    "consumer": "Any v2 consumer requires its own separately paired contract/reproof. No v2 value inserted into frozen v1 fields."
+  },
+  "still_missing": [
+    "Actual library-containing Source.Env/Source.SrcProg and accepted-source/artifact binding.",
+    "Actual graph premises for that program.",
+    "Source origin/session/lifecycle and S03-PANIC41.",
+    "An inhabitant of frozen v1 LibraryPremises.Inputs."
+  ],
+  "evidence_limits": [
+    "Producer kernel/axiom/control results are relayed reports, not local reruns.",
+    "No full Source/P8 adequacy or production P1/G42.04 acceptance.",
+    "Original 300s local/VM limits and performance STOPs unchanged; H134600s applies to CI only."
+  ]
+}
