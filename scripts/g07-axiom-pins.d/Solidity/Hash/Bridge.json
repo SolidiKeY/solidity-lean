@@ -1,4 +1,7 @@
 {
+ "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.premise_dedup": [
+  "propext"
+ ],
  "Solidity/Hash/Bridge.lean:Solidity.Hash.Bridge.premise_unit_rootFree": [
   "Quot.sound",
   "propext"

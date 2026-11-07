@@ -370,3 +370,15 @@ corpus, full-runner and timing validation are being resumed rather than
 stopping at registration or discarding any saved proof work. The immutable
 previous handoff remains at /tmp/e4-handoff; continuation evidence and a new
 sealed handoff will use distinct directories.
+
+## Backfill statements
+
+The additional backfill lemmas preserve the existing declarations:
+HashPremise depends only on membership of each actual query list; deduplication
+and repeating either whole list therefore preserve the premise exactly.
+The sampled-oracle failure classifier is unchanged by deduplicating the two
+actual lists. Collision-only run failures have the existing q(q-1) numerator;
+region-only run failures have q(q-1)(2L-1)+2qRL. Their bounds use the same
+finite-domain strategy and actual-list inclusion relations as the combined
+bound, dropping only the unrelated event from the conclusion. No existing
+premise, observation or definition is weakened.

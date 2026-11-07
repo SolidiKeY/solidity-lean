@@ -105,9 +105,34 @@ theorem constantHash_collision (F : Fixed) :
     cases h
   · rfl
 
+/-- Only membership, not order or multiplicity, determines the premise. -/
+theorem premise_congr {F : Fixed} {xs xs' ys ys' : List Bytes}
+    (hx : ∀ b, b ∈ xs ↔ b ∈ xs') (hy : ∀ b, b ∈ ys ↔ b ∈ ys') :
+    HashPremise F xs ys ↔ HashPremise F xs' ys' :=
+  ⟨fun h => ⟨(collisionFree_congr hx).mp h.1, (regionsDisjoint_congr hy).mp h.2⟩,
+    fun h => ⟨(collisionFree_congr hx).mpr h.1, (regionsDisjoint_congr hy).mpr h.2⟩⟩
+
+/-- Deduplicating the actual collision and slot lists keeps exactly the
+same guard; it does not excuse any colliding distinct pair. -/
+theorem premise_dedup (F : Fixed) (xs ys : List Bytes) :
+    HashPremise F (dedup xs) (dedup ys) ↔ HashPremise F xs ys :=
+  premise_congr (fun _ => mem_dedup) (fun _ => mem_dedup)
+
+/-- Repeating an entire transcript gives the same premise. -/
+theorem premise_repeat (F : Fixed) (xs ys : List Bytes) :
+    HashPremise F (xs ++ xs) (ys ++ ys) ↔ HashPremise F xs ys :=
+  premise_congr
+    (fun _ => ⟨fun h => (List.mem_append.mp h).elim id id,
+      fun h => List.mem_append_left _ h⟩)
+    (fun _ => ⟨fun h => (List.mem_append.mp h).elim id id,
+      fun h => List.mem_append_left _ h⟩)
+
 end Solidity.Hash.Bridge
 
 /-- info: 'Solidity.Hash.Bridge.premise_unit_rootFree' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.Bridge.premise_unit_rootFree
 /-- info: 'Solidity.Hash.Bridge.transfer_prefix' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Hash.Bridge.transfer_prefix
+
+/-- info: 'Solidity.Hash.Bridge.premise_dedup' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Hash.Bridge.premise_dedup

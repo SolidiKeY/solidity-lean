@@ -214,6 +214,75 @@ theorem run_premise_le (F : Fixed) {s : List Nat → Bytes} {dom : List Bytes}
   apply scale_count_le hsub
   exact keccak_combined_le hs F.regionLen hroots q
 
+/-- Deduplication preserves the actual failure event pointwise, hence
+also its count over the same sampled oracle domain. -/
+theorem runPremiseFails_dedup (F : Fixed) (dom : List Bytes)
+    (xs ys : List Nat → List Bytes) (g : List Nat) :
+    runPremiseFails F dom (fun h => dedup (xs h)) (fun h => dedup (ys h)) g =
+      runPremiseFails F dom xs ys g := by
+  simp only [runPremiseFails, Bridge.premise_dedup]
+
+/-- The actual collision-only event. -/
+def runCollisionFails (F : Fixed) (dom : List Bytes)
+    (xs : List Nat → List Bytes) (g : List Nat) : Bool :=
+  decide (¬ CollisionFree (oracleFixed F dom g).hash (xs g))
+
+/-- Collision-only actual-run bound, without a region-clearance assumption. -/
+theorem run_collision_le (F : Fixed) {s : List Nat → Bytes} {dom : List Bytes}
+    (hs : ∀ t, s t ∈ dom) (q : Nat) (xs : List Nat → List Bytes)
+    (hx : ∀ g ∈ tuples (2 ^ 256) dom.length, ∀ b ∈ xs g,
+      b ∈ eagerQueries s (oracleOf dom g) q) :
+    2 ^ (256 + 1) * (tuples (2 ^ 256) dom.length).countP (runCollisionFails F dom xs) ≤
+      q * (q - 1) * (2 ^ 256) ^ dom.length := by
+  have hsub : (tuples (2 ^ 256) dom.length).countP (runCollisionFails F dom xs) ≤
+      (tuples (2 ^ 256) dom.length).countP (eagerCollides s dom q) := by
+    apply countP_le_of_imp
+    intro g hg hbad
+    simp only [runCollisionFails, decide_eq_true_eq] at hbad
+    apply decide_eq_true
+    intro hgood
+    have hp : HashPremise (oracleFixed F dom g) (xs g) [] :=
+      (oracleFixed_premise_iff F dom hg (xs g) []).mpr
+        ⟨hgood.mono (hx g hg), RegionsDisjoint.nil⟩
+    exact hbad hp.1
+  apply scale_count_le hsub
+  have h := keccak_eager_collision_prob_le hs q
+  rw [Nat.pow_mul] at h
+  exact h
+
+/-- The actual region-only event. -/
+def runRegionsFail (F : Fixed) (dom : List Bytes)
+    (ys : List Nat → List Bytes) (g : List Nat) : Bool :=
+  decide (¬ RegionsDisjoint (2 ^ 256) F.regionLen
+    (fun b => ((oracleFixed F dom g).hash b).val) (List.range F.rootSlots) (ys g))
+
+/-- Region-only actual-run bound. The root-hit contribution remains present
+at q=1, as required by the corrected controls. -/
+theorem run_regions_le (F : Fixed) {s : List Nat → Bytes} {dom : List Bytes}
+    (hs : ∀ t, s t ∈ dom) (hroots : ∀ r ∈ List.range F.rootSlots, r < 2 ^ 256)
+    (q : Nat) (ys : List Nat → List Bytes)
+    (hy : ∀ g ∈ tuples (2 ^ 256) dom.length, ∀ b ∈ ys g,
+      b ∈ eagerQueries s (oracleOf dom g) q) :
+    2 ^ (256 + 1) * (tuples (2 ^ 256) dom.length).countP (runRegionsFail F dom ys) ≤
+      (q * (q - 1) * (2 * F.regionLen - 1) +
+        2 * q * (List.range F.rootSlots).length * F.regionLen) * (2 ^ 256) ^ dom.length := by
+  have hsub : (tuples (2 ^ 256) dom.length).countP (runRegionsFail F dom ys) ≤
+      (tuples (2 ^ 256) dom.length).countP
+        (eagerRegionsFail s dom (2 ^ 256) F.regionLen (List.range F.rootSlots) q) := by
+    apply countP_le_of_imp
+    intro g hg hbad
+    simp only [runRegionsFail, decide_eq_true_eq] at hbad
+    apply decide_eq_true
+    intro hgood
+    have hp : HashPremise (oracleFixed F dom g) [] (ys g) :=
+      (oracleFixed_premise_iff F dom hg [] (ys g)).mpr
+        ⟨CollisionFree.nil, hgood.mono (hy g hg)⟩
+    exact hbad hp.2
+  apply scale_count_le hsub
+  have h := keccak_eager_region_prob_le hs F.regionLen hroots q
+  rw [Nat.pow_mul] at h
+  exact h
+
 end Solidity.Hash.CollisionBridge
 
 /-- info: 'Solidity.Hash.CollisionBridge.two_mul_combined_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -222,3 +291,8 @@ end Solidity.Hash.CollisionBridge
 #guard_msgs in #print axioms Solidity.Hash.CollisionBridge.run_premise_le
 /-- info: 'Solidity.Hash.CollisionBridge.stopped_collision_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.CollisionBridge.stopped_collision_le
+
+/-- info: 'Solidity.Hash.CollisionBridge.run_collision_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CollisionBridge.run_collision_le
+/-- info: 'Solidity.Hash.CollisionBridge.run_regions_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Hash.CollisionBridge.run_regions_le
