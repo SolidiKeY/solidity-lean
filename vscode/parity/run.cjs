@@ -134,11 +134,11 @@ async function launch(config,options) {
         keybindingTask=(async()=>{let client;try{
           if(request.runId!==config.runId)throw Error('Foreign keybinding request');
           client=await renderer.connect(debugPort);
-          const base=options.suite==='custom-import-actions'?join(config.dir,request.cancel?'cancel-action':'build-action'):config.dir;
+          const base=options.suite==='custom-import-actions'?join(config.dir,request.refusal==='syntax'?'invalid-json-action':request.refusal==='options'?'unsupported-option-action':request.cancel?'cancel-action':'build-action'):config.dir;
           mkdirSync(base,{recursive:true});const menuDirectory=join(base,'context-menu');mkdirSync(menuDirectory,{recursive:true});
           const contextMenu=await renderer.contextSubmenu(client,menuDirectory,config.target==='dafny'?{label:'Dafny',expected:'Build with Custom Arguments'}:undefined);
           const promptDirectory=join(base,'custom-prompt');mkdirSync(promptDirectory,{recursive:true});
-          const observation={...await renderer.buildKeybinding(client,{custom:options.suite!=='commands',input:request.customInput,cancel:request.cancel===true,directory:promptDirectory}),contextMenu};
+          const observation={...await renderer.buildKeybinding(client,{custom:options.suite!=='commands',input:request.customInput,cancel:request.cancel===true,dismissOnSubmit:request.refusal==='syntax'||request.refusal==='options',directory:promptDirectory}),contextMenu};
           atomicJson(join(config.dir,'keybinding-reply.json'),{runId:config.runId,requestId:request.requestId,observation});
         }catch(error){atomicJson(join(config.dir,'keybinding-reply.json'),{runId:config.runId,requestId:request.requestId,error:error.message});}finally{client?.close();keybindingBusy=false;}})();
       }
