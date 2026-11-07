@@ -11,10 +11,10 @@
       "Coordinator integration: retain blocked status until an authorized integrator registers the exact committed modules and supplies full validation receipts.",
       "Isolated validation authorization: permit generated-root registration only in a separate owned validation worktree, preserve delivery-branch roots/maps/trust inventories, and run the full gates against identical lane-source hashes."
     ],
-    "state": "Central registration of all24 modules observed; the old15-missing-import question is superseded. Registered full-gate acceptance remains pending; no isolated-worktree authorization or waiver inferred.",
+    "state": "Central registration of all26 modules observed; the old15-missing-import question is superseded. Registered full-gate acceptance remains pending; no isolated-worktree authorization or waiver inferred.",
     "historical_question": true,
     "registration_evidence": {
-      "published_master": "e8247d9277190b71488387dac594e82b2b191942",
+      "published_master": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
       "command": "bash scripts/coord-tools/register.sh --check",
       "exit": 0
     }

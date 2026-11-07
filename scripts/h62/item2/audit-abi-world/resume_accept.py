@@ -11,7 +11,7 @@ from prepare_resume_config import INTEGRATION
 import census
 from resume_sources import snapshot
 root=Path(__file__).resolve().parents[4]
-p=argparse.ArgumentParser();p.add_argument("--evidence",type=Path,required=True);args=p.parse_args();e=args.evidence
+p=argparse.ArgumentParser();p.add_argument("--evidence",type=Path,required=True);p.add_argument("--frozen-evidence",type=Path);args=p.parse_args();e=args.evidence
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 folder=root/"tests/h62/item2/audit-abi-world/H62AbiWorld"
 local={str(p.relative_to(root)):sha(p) for p in sorted(folder.glob("*.lean"))}
@@ -65,13 +65,15 @@ expected_success={"return_total","supported_nonempty","reject_all_fails","always
 assert {i["message"].split("'")[1].removeprefix("H62.AbiWorld.Success.") for i in success if "axioms" in i["message"]}==expected_success
 encoded=[json.loads(i["message"][12:]) for i in reports["RuntimeVectors"]["items"] if i["message"].startswith("H62_VECTORS=")]
 assert len(encoded)==1
-snapshot=Path("/workspace/audit-abi-world-evidence/checkpoints/retirement-final")
+snapshot=args.frozen_evidence or e.parent/"checkpoints/retirement-final"
 manifest_path="tests/h62/item2/audit-abi-world/evidence.sha256"
 frozen_manifest=subprocess.check_output(["git","show",INTEGRATION+":"+manifest_path],cwd=root)
 assert (root/manifest_path).read_bytes()==frozen_manifest,"Archived manifest changed"
 manifest=dict((line.split("  ",1)[1],line.split("  ",1)[0]) for line in frozen_manifest.decode().splitlines() if "  " in line and not line.startswith("#"))
 for name in ("runtime-vectors.json","reference-replay.json"):
- path=snapshot/name;assert sha(path)==manifest[str(path)]
+ path=snapshot/name
+ keys=[key for key in manifest if Path(key).parts[-3:]==("checkpoints","retirement-final",name)]
+ assert len(keys)==1 and sha(path)==manifest[keys[0]]
 assert encoded[0]==json.loads((snapshot/"runtime-vectors.json").read_text())
 external=json.loads((snapshot/"reference-replay.json").read_text());assert external["status"]=="pass"
 assert external["runnerSha256"]==sha(root/"scripts/h62/item2/audit-abi-world/replay.mjs")
