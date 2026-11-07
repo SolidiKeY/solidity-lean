@@ -2677,3 +2677,25 @@ Independent read-only finder and skeptic checked roles, hashes and history
 preservation without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/yul-followup-evidence.sha256`. This non-atomic observation
 does not establish current runtime acceptance.
+
+## Trust-audit fixture observations
+
+`trust_fixture_controls.py` records two previously unreferenced isolated audit
+fixtures with source, feature document and harness hashes. Fixture exercises a
+propext-dependent theorem and allowed-axiom audit loop; FixtureAddon supplies an
+isolated imported witness. The historical harness copies fixture inputs and writes
+isolated oleans and logs for positive and negative controls. Current invocation,
+paths and outcomes remain unresolved; these fixtures are not the project-wide
+axiom audit.
+
+At `6fdb6d08f294983acb3a730fa7b3485c113c0a5e`, the refreshed static index has
+834 candidates, 640 with supplied current references and 194 without; thirteen
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, harness effects, hashes and history preservation without Lean or
+a server. Evidence hashes are in `tests/h55/module-times/trust-fixture-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
+
+H127 assigns H109 runner remediation to native-browser
+(`solidity-directruntime-20261104`); five-module A/B evidence is to be handed
+over when requested. H93 and the quiet-window requirement remain in force.
