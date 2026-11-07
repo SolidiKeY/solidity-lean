@@ -154,7 +154,8 @@ class HeaderBoundaries(unittest.TestCase):
                     ('allocated-reference-read',21,16,'Solidity.Backend.Passes.AuditJoinedAllocation.AllocatedRead.joint'),
                     ('positive-allocation-failure',10,0,'Solidity.Backend.Passes.AuditPositiveAllocationFailure.joint'),
                     ('preserved-allocator',10,1,'Solidity.Backend.Passes.AuditPreservedAllocator.joint'),
-                    ('heap-boundary',14,3,'Solidity.Backend.Passes.AuditHeapBoundary.joint')]
+                    ('heap-boundary',14,3,'Solidity.Backend.Passes.AuditHeapBoundary.joint'),
+                    ('reframed',11,0,'Solidity.Backend.Passes.AuditReframed.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
@@ -215,12 +216,15 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertEqual(set(mapping['checked_private_names']),{'first_some','second_some','third_some'})
                 self.assertEqual(mapping['private_axioms'],['propext','Classical.choice','Quot.sound'])
                 self.assertEqual(len(mapping['intentional_refutations']),1)
+            if stem == 'reframed':
+                self.assertEqual(mapping['auxiliary_definition_credit'],0)
+                self.assertNotIn('words',{r['name'].rsplit('.',1)[-1] for r in mapping['rows']})
             self.assertEqual(len(keys),total)
             self.assertEqual(sum(r['kind']=='private-exact-kernel-signature' for r in mapping['rows']),private_count)
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(395,864))
+        self.assertEqual((len(seen),1259-len(seen)),(406,853))
 
 
 
