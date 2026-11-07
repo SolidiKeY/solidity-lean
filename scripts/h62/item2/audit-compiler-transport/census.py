@@ -51,23 +51,35 @@ def mask(text):
 
 def signature_end(clean, start):
     depth = 0
+    type_matches = []
     i = start
     while i < len(clean):
         c = clean[i]
         if c in '({[': depth += 1
         elif c in ')}]': depth -= 1
         if depth == 0 and clean[i:i+2] == ':=': return i
+        # At depth zero, offside match arms can still belong to the result
+        # type. An equation body starts only after leaving those matches.
+        line_start = clean.rfind('\n', 0, i) + 1
+        if depth == 0 and clean[i:i+5] == 'match' and (i == 0 or not (clean[i-1].isalnum() or clean[i-1] in "_.'")) and (i+5 == len(clean) or not (clean[i+5].isalnum() or clean[i+5] == '_')):
+            line = clean[line_start:i]
+            type_matches.append(len(line)-len(line.lstrip()))
+        if depth == 0 and c == '|' and not clean[line_start:i].strip():
+            indent = i-line_start
+            while type_matches and indent < type_matches[-1]:
+                type_matches.pop()
+            if not type_matches: return i
         i += 1
     raise ValueError('missing top-level :=')
 
 
 def declarations(source, module):
     clean = mask(source)
-    command = re.compile(r'(?m)^\s*(?:@\[[^\n]*?\]\s*)*(?:(private|protected)\s+)?(namespace|section|end|theorem)\b(?:[ \t]+([^\s(:{]+))?')
+    command = re.compile(r'(?m)^\s*(?:@\[[^\n]*?\]\s*)*(?:(private|protected)\s+)?(namespace|section|mutual|end|theorem)\b(?:[ \t]+([^\s(:{]+))?')
     scopes, rows = [], []
     for match in command.finditer(clean):
         visibility, kind, name = match.groups()
-        if kind in ('namespace', 'section'):
+        if kind in ('namespace', 'section', 'mutual'):
             scopes.append((kind, name or ''))
         elif kind == 'end':
             if not scopes: raise ValueError(f'{module}: unpaired end at {match.start()}')
@@ -77,7 +89,8 @@ def declarations(source, module):
             begin = clean.index('theorem', match.start(), match.end())
             end = signature_end(clean, match.end())
             namespace = '.'.join(n for k, n in scopes if k == 'namespace')
-            fq = f'{namespace}.{name}' if namespace else name
+            fq = (name[len('_root_.'):] if name.startswith('_root_.') else
+                  f'{namespace}.{name}' if namespace else name)
             raw = source[begin:end].rstrip()
             conclusion_false = bool(re.search(r':\s*False\s*$', clean[begin:end]))
             owner_key = ('V12' if '/InternalFlow/' in module else
