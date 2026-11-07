@@ -8,6 +8,50 @@ to “committed evidence” in older milestones describe those earlier revisions
 Current checker inputs, executable fixtures and checksum constants remain here;
 evidence records are no longer code-branch inputs.
 
+## H151 historical gaps and current waits
+
+H151 supersedes historical instructions below to wait for unrecoverable artifacts.
+The following exact retired-member deliveries are **UNVERIFIABLE**: drift-reports
+`faca44dc415dfbdab9b9ea6b0664f1e755abaa57`, artifact-fixtures
+`9cc85b14fa3f611e183379c257b10b19e1aa5325`, and runtime-fixtures
+`f8975f25b12a5e9723b00ec794b261708280092c`. Their cumulative source artifacts and
+original runtime captures were unavailable after coordinator and lane lookup.
+Authenticated assignment metadata and reported results do not establish their
+source integration, gate passes or delivery. Those original claims remain
+unproven; these missing historical artifacts are documented gaps, not waits.
+Previously archived evidence that is available remains available; this designation
+applies only to the missing deliveries and captures.
+
+Missing original H70 overlay captures are likewise **UNVERIFIABLE**, not an
+artifact-recovery wait. The historical CollisionBound fixture still requires its
+exact pinned base and must refuse a different source blob. Fresh reproduction
+from recoverable pinned inputs can establish a new result with its own source
+identity; it cannot authenticate a lost capture. No fresh reproduction or repaired
+overlay acceptance is claimed here, and no guard is relaxed.
+
+Fresh evidence may be generated from available code and authenticated assignments
+where scope and active holds permit. It must identify its actual source revision
+and current checker, rather than relabeling historical results. Evidence belongs
+in the H145 private archive. Missing final heads cannot be treated as merged or
+replaced by a nearby snapshot. This gap classification does not complete the
+retired queues or the original statement-graph assignment.
+
+Remaining active waits are typed G49 Source/runtime inputs from
+`solidity-h62-3-20261106/g52-differential`, identification and typed inputs from
+the unresolved Bridge producer, explicit Contracts empty-guard and Raw
+compatibility/axiom acceptance, and coordinator runtime/pin-registration
+confirmation. H146/H147 shared refresh and warming belong to the host merge
+wrapper; no success is inferred. Existing timing STOPs, the pin pause, H58 audit HOLD,
+statements, dependent definitions, interfaces, budgets, axioms and exclusions
+remain unchanged. Historical wait lists below describe their earlier checkpoints.
+
+A fresh limited reproduction on source `316571df66984bb4597810ad44ef686eceea87a4`
+passed all 30 supplied fixture cases for each of the three available drift tools,
+with two byte-identical output runs per case. This is 90 external fixture controls,
+not the frozen acceptance entrypoint, complete pinned corpus, coordinator rerun,
+Lean validation or a before/after timing gate. Source and fixture hashes are
+recorded privately; none of these fresh results authenticates a missing capture.
+
 Owner: `solidity-h62-5-20261106/statement-graph`. Base:
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Branch:
 `codex/solidity-h62-5-20261106/statement-graph`.
