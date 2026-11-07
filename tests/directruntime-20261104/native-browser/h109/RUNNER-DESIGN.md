@@ -308,3 +308,23 @@ match the earlier pinned kernel observation; a changed ancestor cannot become
 a new unchecked baseline. Subsequent samples compare every registered group's
 constraints. This remains bounded observation, with the existing hidden-ancestor,
 inter-sample and unresolved-cleanup limitations.
+
+## Offline journal structure intake
+
+`offline-journal.py PATH --sha256 EXTERNAL_PIN` inspects a bounded canonical
+lifecycle record through nofollow ancestor/file descriptors. It checks the
+external byte pin, unaliased regular-file identity and existing lifecycle
+schema/hash chain/transitions. It reads no lease token, executes no recorded
+facts and writes no live-store files. Its output labels only the last recorded
+state and structural validity; all fact, lease, cleanup, resource, measurement
+and barrier acceptance fields remain false. A SHA256 supplied by an untrusted
+record is not authentication. The caller must obtain its pin separately and
+bind the reviewed inspector/dependency sources; this component does not attest
+its own execution environment or hostile same-UID writers.
+
+The saved failed-probe record can be inspected without interpreting its
+`cleanup-unresolved` state as recovery. Empty/deactivated kernel observations,
+Docker ownership and durable cleanup remain separate missing verification
+layers. Neither this inspector nor the cgroup diagnostic clears the existing
+reservation. The full sealed-input controller/worker, recovery/acceptance
+verifier and five-module A/B remain unfinished.
