@@ -9,7 +9,9 @@
 //   `Quot.sound` (a pin that records `sorryAx` or a new axiom still passes
 //   `#guard_msgs`, so the build alone does not catch it);
 // - a recorded pin may not disappear and its axiom set may not grow;
-// - a new pin, or one whose set shrank, is reported until `--write` records it.
+// - a new pin, or one whose set shrank, is reported until `--write` records it,
+//   except exact H112 historical changes in the SHA-pinned shrink-only baseline.
+//   Baseline matching never suppresses any error above.
 //
 // Usage: node scripts/check-axiom-pins.mjs [--write]
 // Exit 0 = inventory matches, 1 = drift or a non-standard axiom.
@@ -17,6 +19,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSy
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { blankLean } from "./check-trust.mjs";
+import { loadDriftBaseline, changeKey } from "./axiom-pin-drift-baseline.mjs";
 
 export const STANDARD = ["propext", "Classical.choice", "Quot.sound"];
 const INVENTORY = "scripts/g07-axiom-pins.json";
@@ -49,22 +52,28 @@ export function pins(text) {
 
 // Compare the found pins with the recorded inventory.
 export function compare(found, recorded) {
-  const errors = [], notes = [];
+  const errors = [], notes = [], changes = [];
   for (const [key, { name, target, axioms, file }] of found) {
     if (axioms === null) { errors.push(`${file}: pin of ${name} prints no axiom line`); continue; }
     if (target && name !== target && !name.endsWith("." + target)) errors.push(`${file}: pin of ${target} prints ${name}`);
     const extra = axioms.filter((a) => !STANDARD.includes(a));
     if (extra.length) errors.push(`${file}: ${name} depends on non-standard axioms ${extra.join(", ")}`);
     const old = recorded[key];
-    if (!old) notes.push(`new pin ${name} [${axioms.join(", ")}]`);
+    if (!old) {
+      notes.push(`new pin ${name} [${axioms.join(", ")}]`);
+      changes.push({ key, kind: "new", recorded: null, axioms: [...axioms].sort() });
+    }
     else {
       const grown = axioms.filter((a) => !old.includes(a));
       if (grown.length) errors.push(`${file}: ${name} gained ${grown.join(", ")} (recorded [${old.join(", ")}])`);
-      else if (axioms.length < old.length) notes.push(`pin ${name} shrank to [${axioms.join(", ")}]`);
+      else if (axioms.length < old.length) {
+        notes.push(`pin ${name} shrank to [${axioms.join(", ")}]`);
+        changes.push({ key, kind: "shrunk", recorded: [...old].sort(), axioms: [...axioms].sort() });
+      }
     }
   }
   for (const key of Object.keys(recorded)) if (!found.has(key)) errors.push(`recorded pin ${key} is gone`);
-  return { errors, notes };
+  return { errors, notes, changes };
 }
 
 // The inventory is generated from one fragment per Lean file,
@@ -120,11 +129,15 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     writeFragments(root, obj);
   }
   const recorded = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {};
-  const { errors, notes } = compare(found, recorded);
+  const { errors, notes, changes } = compare(found, recorded);
+  let allowed = new Set();
+  try { allowed = loadDriftBaseline(root, STANDARD); }
+  catch (error) { errors.push(`pin drift baseline: ${error.message}`); }
+  const pending = changes.map((change,index) => ({change,note:notes[index]})).filter(({change})=>!allowed.has(changeKey(change)));
   for (const e of errors) console.log(`ERROR  ${e}`);
-  for (const n of notes) console.log(`NOTE   ${n}`);
+  for (const {note} of pending) console.log(`NOTE   ${note}`);
   const counts = {};
   for (const { axioms } of found.values()) { const k = `[${(axioms ?? ["?"]).join(", ")}]`; counts[k] = (counts[k] ?? 0) + 1; }
-  console.log(`axiom-pins: ${found.size} pinned theorems ${JSON.stringify(counts)}, ${errors.length} errors, ${notes.length} unrecorded changes`);
-  process.exit(errors.length || notes.length ? 1 : 0);
+  console.log(`axiom-pins: ${found.size} pinned theorems ${JSON.stringify(counts)}, ${errors.length} errors, ${pending.length} unrecorded changes, ${changes.length-pending.length} baselined changes`);
+  process.exit(errors.length || pending.length ? 1 : 0);
 }
