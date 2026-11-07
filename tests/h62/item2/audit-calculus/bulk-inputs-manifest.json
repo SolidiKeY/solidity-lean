@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/rewrite-law-roles-v43/semantic-roles-reviewed.json",
-    "bytes": 1504709,
-    "sha256": "df9372a52fe8558b4608ee23dfc715db69dd0df7f0529d570b98af1d926fe867"
+    "path": "/workspace/h62-successor-bulk/term-agreement-roles-v44/semantic-roles-reviewed.json",
+    "bytes": 1522567,
+    "sha256": "f2769601fd9f96d6b3e6ad8be4075b87f713870e1aded6867de6bee5cc8824ff"
   }
 }
