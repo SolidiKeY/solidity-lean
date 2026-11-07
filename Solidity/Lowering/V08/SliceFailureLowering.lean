@@ -54,7 +54,7 @@ theorem accepted {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
         (stop.val-start.val))), (caller loc offset length start stop older,state)) := by
   rw [run]
   simp only [sliceR, Bool.false_eq_true, ↓reduceIte, if_neg (Nat.not_lt.mpr ordered), if_neg (Nat.not_lt.mpr bounded)]
-  cases τ <;> rfl
+  rfl
 
 theorem reversed {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
     (τ : STy) (allowed : τ.sliceable = true) (loc : τ.loc? = some .calldata)
@@ -116,7 +116,7 @@ theorem accepted_toEnd {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
   rw [run]
   simp only [sliceR, ↓reduceIte, if_neg (Nat.not_lt.mpr bounded),
     Nat.lt_irrefl]
-  cases τ <;> rfl
+  rfl
 
 /-- Actual subsequent bytes observation, not a target byte-memory encoder.
 Slice acceptance does not validate that the logical reference is in input. -/
