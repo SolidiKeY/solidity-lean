@@ -1,1 +1,6 @@
 /artifacts/
+
+# H44: future raw evidence captures remain on the VM, outside Git.
+/evidence/*.log
+/evidence/*.tsv
+/evidence/*.stderr
