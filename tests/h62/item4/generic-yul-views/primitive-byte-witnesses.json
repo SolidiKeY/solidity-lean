@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "source_module": "Solidity/Yul/Views/Bytes.lean",
+  "proof_module": "tests/h62/item2/audit-yul/DefaultWitnessControls.lean",
+  "boundary": "Eight explicit primitive-byte imported theorem telescopes; no global census, per-input validity or execution adequacy.",
+  "statements": [
+    {
+      "source": "Solidity.Yul.Views.find_saveByte",
+      "proof": "Solidity.Yul.Views.H62.save_byte_joint",
+      "frozen_signature_sha256": "9e6344318a9363ffb5a01f49ee98715ad7c5d52baec9ca7077755cf0926fbd66"
+    },
+    {
+      "source": "Solidity.Yul.Views.find_saveByte_other",
+      "proof": "Solidity.Yul.Views.H62.save_byte_other_joint",
+      "frozen_signature_sha256": "2a4c3ecd98cfbefab7340071116da0d1eb10cdb0871f21a9e2355e6602182e00"
+    },
+    {
+      "source": "Solidity.Yul.Views.find_copyBytes",
+      "proof": "Solidity.Yul.Views.H62.copy_byte_joint",
+      "frozen_signature_sha256": "b32855d1d0b65f8d3d61cf9de027d64146d705338dd010dfab059a04b7b7ea6a"
+    },
+    {
+      "source": "Solidity.Yul.Views.copyBytes_outside",
+      "proof": "Solidity.Yul.Views.H62.copy_outside_joint",
+      "frozen_signature_sha256": "75c088da6e0384eacdfa5d2e09118b9279347a72c0c02d488366d4c743ded1f3"
+    },
+    {
+      "source": "Solidity.Yul.Views.copyBytes_zero",
+      "proof": "Solidity.Yul.Views.H62.copy_zero_joint",
+      "frozen_signature_sha256": "130246c2f7a55411cc817091f803b7f6d1fe4ea3ff96c1c88ec6f83ca0782a40"
+    },
+    {
+      "source": "Solidity.Yul.Views.mcopy_self",
+      "proof": "Solidity.Yul.Views.H62.word_window_joint",
+      "frozen_signature_sha256": "93018e632269e64c16c6f21fbfdc723f7c0d7807a52589f2e3dfe66930366afe"
+    },
+    {
+      "source": "Solidity.Yul.Views.find_mstore",
+      "proof": "Solidity.Yul.Views.H62.store_byte_joint",
+      "frozen_signature_sha256": "cb1add19106f18660fb46e823236fe3df53fb82d0746e6a530661b758cd41977"
+    },
+    {
+      "source": "Solidity.Yul.Views.mstore_outside",
+      "proof": "Solidity.Yul.Views.H62.store_outside_joint",
+      "frozen_signature_sha256": "df503b8abcb4d34bba6b78e7c3e958386d136ad021deb1ad0e4a69a2a9749d2c"
+    }
+  ]
+}
