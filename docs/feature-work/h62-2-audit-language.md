@@ -570,3 +570,13 @@ the missing packet. Preserve the original strict checksum refusal in the census
 checker. Existing checked witnesses retain only their individually recorded
 scope; full interface coverage, simultaneous witnesses and final acceptance remain
 open. Evidence belongs in the private coordination repository under H145.
+
+Fresh H151 recovery is available through
+`scripts/h62/item2/audit-language/source_only.py`. It reuses the original frozen
+Git scanner and map areas, yielding 389 files and 4,146 conservative source
+candidates. It assigns no historical owners, certifies no witnesses and asserts
+no historical replay. Deterministic reproduction and output-refusal controls
+passed. Both independent read-only reviews accepted these boundaries; a dangling
+symlink refusal and exclusive output creation address the skeptic's robustness
+suggestion. This is source recovery, not elaborated interface coverage or final
+acceptance. Bulk output and validation evidence remain private under H145.
