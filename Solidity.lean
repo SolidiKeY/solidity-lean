@@ -383,7 +383,11 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1V2Lift
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReadAtBridge
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReadAtBridgeControls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceAgreement
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceBridge
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceBridgeControls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceControls
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindAgreement
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindExecutionControls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls
 import Solidity.Backend.InternalFlow.RuntimeFrameReference
@@ -3256,6 +3260,10 @@ import Solidity.Lowering.P8.ScalarSchemaControls
 import Solidity.Lowering.P8.ShapeSchema
 import Solidity.Lowering.P8.ShapeSchemaControls
 import Solidity.Lowering.P8.SourceAllSettings
+import Solidity.Lowering.P8.SourceAstCompoundTypes
+import Solidity.Lowering.P8.SourceAstExpressions
+import Solidity.Lowering.P8.SourceAstParameters
+import Solidity.Lowering.P8.SourceAstTypes
 import Solidity.Lowering.P8.SourceMetadata
 import Solidity.Lowering.P8.SourceMetadataControls
 import Solidity.Lowering.P8.SourceMetadataObligations
@@ -4879,6 +4887,8 @@ import Solidity.Yul.Compilation.OpenExpressions
 import Solidity.Yul.Compilation.OpenStatements
 import Solidity.Yul.Compilation.P20InterfaceV1
 import Solidity.Yul.Compilation.P20InterfaceV1Controls
+import Solidity.Yul.Compilation.P20InterfaceV2
+import Solidity.Yul.Compilation.P20InterfaceV2Controls
 import Solidity.Yul.Compilation.PhysicalCombination
 import Solidity.Yul.Compilation.PhysicalHash
 import Solidity.Yul.Compilation.PhysicalHashControls

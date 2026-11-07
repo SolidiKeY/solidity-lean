@@ -54,6 +54,11 @@ def parse_axioms(log):
     return result
 
 
+def observed_counts(axioms, receipt):
+    return {'joint_inputs':sum(PREFIX+n in axioms for n in NAMES if n.endswith('_inputs')),
+            'theorems':len(axioms),'parent_objects':len(receipt['artifacts'])}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--parent', type=Path, required=True)
@@ -117,7 +122,8 @@ def main():
               'head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
               'full_goal_acceptance':False}
     (out/'receipt.json').write_text(json.dumps(result,indent=2)+'\n')
-    print('CALLBACK_BOUNDARIES_PASS joint_inputs=3 theorems=8 parent_objects=80')
+    counts=observed_counts(axioms,receipt)
+    print('CALLBACK_BOUNDARIES_PASS '+' '.join(k+'='+str(v) for k,v in counts.items()))
 
 
 if __name__=='__main__':main()

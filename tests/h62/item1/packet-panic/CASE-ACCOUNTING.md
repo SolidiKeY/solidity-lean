@@ -114,7 +114,7 @@ The original census matches only unmodified line-start headers and omitted priva
 
 ## Same-line attribute candidate scan
 
-`attributed_header_scan.py` examines the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
+The earlier version of `attributed_header_scan.py` examined the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. At that earlier checkpoint, the raw textual scan found zero candidates for that narrow pattern. That earlier scanner did not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates did not show that attributed declarations were absent. Its then-current synthetic fixture included both matching examples and a deliberate block-comment false positive. The later expanded scanner is described below. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
 
 ## SignedSub Controls
 
@@ -134,4 +134,24 @@ The original census matches only unmodified line-start headers and omitted priva
 
 ## Panic occurrence navigation
 
-`panic_occurrence_windows.py` scans current-tree PrimitivePackets raw text and maps every `panicData` regex hit to a regenerated lexical source window where one exists. The current output has 42 raw matches and zero unmapped; source window files are base-pinned but other scanned files are not independently base-verified by this tool. Raw regex also matches comments, strings and `panicData` with an apostrophe suffix, and a containing window may include unrelated unscanned declarations. This is navigation, not Lean declaration attribution, semantic case completeness, proof or ownership clearance.
+`panic_occurrence_windows.py` scans current-tree PrimitivePackets raw text and maps every `panicData` regex hit to a regenerated lexical source window where one exists. At the earlier pre-registration snapshot the output had 42 raw matches and zero unmapped; source window files are base-pinned but other scanned files are not independently base-verified by this tool. Raw regex also matches comments, strings and `panicData` with an apostrophe suffix, and a containing window may include unrelated unscanned declarations. This is navigation, not Lean declaration attribution, semantic case completeness, proof or ownership clearance.
+
+## Fail-closed panic occurrence follow-up
+
+`panic_occurrence_windows.py` emits its JSON and exits 2 for zero raw matches or 3 for any unmapped match. Upstream registered the canonical `PanicBytes.lean` helper after the original 48-file census; its three headers receive separate navigation windows only after checking its bytes against registration commit `e9b89d553234b52e4ba9b38092ff691138c147c8`. The current scan has 45 raw matches, three supplemental helper windows and zero unmapped. The original 474-header ledger denominator is unchanged. Raw regex and lexical window limitations continue to apply; this is not semantic attribution or Lean proof.
+
+## Masked panic lexical hints
+
+The prior census comment/string/attribute mask was moved without changing its function body into `lexical_mask.py` and reused by the occurrence mapper. Every raw hit remains in output with a heuristic `lexical_candidate` flag; comments, strings, attributes and common identifier suffix/prefix cases are masked or rejected as candidates. On the current tree, 45 raw hits are all flagged candidates and zero are unmapped. Columns are one-based Python Unicode code-point offsets, not necessarily byte or UTF-16 offsets. The mask is not Lean name resolution: quoted identifiers, unusual syntax and conservative suffix rules may misclassify or miss cases, and current-tree files outside the pinned window set remain unverified. No semantic, ownership or proof claim follows.
+
+## Expanded attribute candidate follow-up
+
+The attribute scanner now uses the shared offset-preserving mask with attribute masking disabled, then recognizes certain nested, multiple and multiline attributes before `theorem`, `lemma`, `def` and `abbrev` headers. It reports the declaration token location and whether the original census covers that exact file, line, kind and name. The original mask default remains unchanged. The 48 pinned files yield zero candidates in this heuristic scan. Comments and strings are masked, but unsupported modifiers, quoted identifiers, syntax contexts and line-ending behavior may still cause misses or false positives; columns are Unicode code-point offsets. Synthetic tests cover nested and multiple attributes, multiline modifiers, masked comments and strings, malformed attributes and location alignment. This is not Lean parsing, semantic completeness or a proof.
+
+## Raw strings and interpolation safety
+
+The shared lexical mask now handles Lean raw strings with zero or more hash delimiters, preserving character positions and LF offsets, and rejects unterminated raw strings. It conservatively fails on an exclamation mark followed by a string or comment rather than silently masking possible interpolation terms. This can reject ordinary non-interpolation text and does not recognize all Lean syntax; it is not a Lean parser. Tests cover nested delimiters, Unicode and quoted macro spellings, comment-separated cases and masked contexts. The current pinned-tree occurrence output remains byte-identical to the earlier snapshot.
+
+## LF-aligned occurrence lines
+
+The panic occurrence scanner now splits raw and masked text only on LF, preserving alignment when CR, form-feed or Unicode separators appear inside a masked comment. Synthetic controls cover those separators and CRLF. Other source-window and header generators still use Python `splitlines()`, which has broader line-separator behavior; independent review found none of the differing separators in the current 48 pinned files or registered helper, but other inputs may map differently or fail closed. LF line numbers and Unicode code-point columns are lexical conventions, not a Lean position or semantic guarantee.
