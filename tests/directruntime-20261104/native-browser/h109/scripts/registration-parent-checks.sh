@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fixed local validation: writer lease, exact resource admission and 300s deadline.
 set -euo pipefail
-exec python3 tests/directruntime-20261104/native-browser/validation-admission.py registration-parent
+exec python3 -B tests/directruntime-20261104/native-browser/validation-admission.py registration-parent
 # FIXED-ADMITTED-RECIPE
 #!/usr/bin/env bash
 set -euo pipefail

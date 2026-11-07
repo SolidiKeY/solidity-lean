@@ -20,6 +20,12 @@ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 
 
 class AdmissionControls(unittest.TestCase):
+    def test_entry_import_caches_disabled_before_admission(self):
+        self.assertTrue(m.sys.dont_write_bytecode)
+        self.assertEqual(os.environ.get("PYTHONDONTWRITEBYTECODE"),"1")
+        for rel in m.ENTRIES.values():
+            self.assertIn("exec python3 -B ",(m.ROOT/rel).read_text())
+
     def test_real_entry_refuses_without_scope_before_mutations(self):
         for rel in m.ENTRIES.values():
             with tempfile.TemporaryDirectory() as tmp:

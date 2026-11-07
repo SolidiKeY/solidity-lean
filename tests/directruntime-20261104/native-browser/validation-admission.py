@@ -4,6 +4,8 @@ Only the two tracked recipes below are admitted. Resource checks are local
 kernel observations, not H127 whole-job provenance or cleanup acceptance.
 The 300-second local invocation maximum includes writer-lease waiting.
 """
+import sys
+sys.dont_write_bytecode = True
 import argparse
 import fcntl
 import importlib.util
@@ -12,6 +14,7 @@ from pathlib import Path
 import subprocess
 import time
 
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 ROOT = Path(__file__).resolve().parents[3]
 LOCK = Path("/tmp/solidity-lean-feature-groups-20261025/writer.lock")
 CGROUP = Path("/sys/fs/cgroup")

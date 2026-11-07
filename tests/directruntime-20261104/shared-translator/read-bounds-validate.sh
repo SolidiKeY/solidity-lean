@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fixed local validation: writer lease, exact resource admission and 300s deadline.
 set -euo pipefail
-exec python3 tests/directruntime-20261104/native-browser/validation-admission.py read-bounds
+exec python3 -B tests/directruntime-20261104/native-browser/validation-admission.py read-bounds
 # FIXED-ADMITTED-RECIPE
 #!/usr/bin/env bash
 # Guards H126 source, kernel equality, exact bounds and existing runtime controls.
