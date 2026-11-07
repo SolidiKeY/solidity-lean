@@ -1334,3 +1334,45 @@ before this metadata work; the explicit publication pin advances without any
 allowlist change. No Lean/production source or frozen validation contract changes.
 All performance/stack holds, production-owner authority, four storage diamonds,
 Q-H90-DYNAMIC-VALIDATION and original full acceptance obligations remain open.
+
+
+### Observable dynamic-reference model backfill
+
+DynamicBytesModelControls.lean addresses the held candidate review's
+bare-declaration limitation without installing that candidate or changing any
+frozen expectation. Six existing intrinsic Raw-program cases run from explicit
+State.init, fuel128, in both constructed modalities: default bytes length0,
+default string-to-bytes length0, their wrong-length1 assertions, and same-kind
+empty alias reads. All12finite executions match:8normal and4assertion panics.
+These observable length checks go beyond termination-only declarations. Empty
+alias reads do not distinguish alias identity from copying. Finite execution
+does not prove either modal formula or source/default-memory adequacy.
+
+Four existing encodeCallArg checks admit same-marker bytes/string arguments and
+refuse cross-marker arguments. Their contexts are supplied explicitly; this is
+ABI argument compatibility testing, not declaration-to-context propagation,
+assignment typing or ABI/source transport proof. The prior general marker-row
+equation remains unchanged. No AST/compiler fixture or new translator is used.
+
+Initial diagnostics caught a numeral helper declared Int rather than Nat and
+Lean.Name constructors used where this repository's Solidity.Name is String.
+Both corrections are local to the test; failed diagnostics are retained. Final
+MCP reports zero errors9.5899s. The final new-model/legacy-refusal/KeySort gate
+and185input/78fixture/5,692profile/static checks pass7.4837s under unchanged
+12GiB/no-swap/threads1/-j1. Child maximumRSS1,082,720KiB, cgrouppeak212,951,040bytes,
+minimum outer available11,102,654,464bytes. No pre-work equivalent exists for
+this new additive test; no performance acceptance or STOP release is claimed.
+
+Dynamic-bytes-model-manifest.json pins source/model inputs, exact observations
+and the15member off-Git H44 evidence archive32c5f7e8ed7e30ef68ec4103e76917c0bb2a187643af7664080b3a4e375718ce
+(13,282bytes). Outer size/hash, exact member set and all member hashes verify.
+The model source input pins describe this bounded sample, not universal machine
+closure. This isolated test adds no production root registration or public API.
+Finder and skeptic read-only reviews found no checkpoint blocker; neither used
+Lean/server/builds/writes.
+
+Production source, interfaces, theorem statements, axioms, exclusions and budgets
+remain unchanged. Dynamic admission and Q-H90-DYNAMIC-VALIDATION remain open;
+this backfill does not authorize the previously rejected verifier/audit update.
+Original courier, migration, stack/cost/startup, storage-diamond and final gates
+remain separate dependencies.
