@@ -93,7 +93,48 @@ def stateFunctionChecks : Except String Unit := do
   | .some (.block (.cons (.stmtItem (.returnStmt (.some (.ident "flag")))) .nil)) => pure ()
   | _ => throw "function body was discarded or rewritten"
 
+/-- Guard top-level category, abstract flag, ordered children and propagated refusal.
+Pragma literals remain tokens; these checks assert no compiler or Source validity. -/
+def topChecks : Except String Unit := do
+  let member := Json.mkObj [("nodeType", .str "VariableDeclaration"), ("name", .str "flag"),
+    ("typeName", Json.mkObj [("nodeType", .str "ElementaryTypeName"), ("name", .str "bool")])]
+  let child (name : String) := Json.mkObj [("nodeType", .str "StructDefinition"),
+    ("name", .str name), ("members", .arr #[member])]
+  let topNode (category : String) (abstract : Bool) (nodes : Array Json) := Json.mkObj [
+    ("nodeType", .str "ContractDefinition"), ("name", .str "Owner"),
+    ("contractKind", .str category), ("abstract", .bool abstract), ("nodes", .arr nodes)]
+  let checkParts (parts : Syn (.list (.part false))) : Except String Unit :=
+    match parts with
+    | .cons (.struct "First" (.structMember (.elem .bool) "flag") .nil)
+        (.cons (.struct "Second" (.structMember (.elem .bool) "flag") .nil) .nil) => .ok ()
+    | _ => .error "top-level declaration order changed"
+  for (category, abstract) in [("library", false), ("contract", true), ("interface", false)] do
+    let converted ← top 8 (topNode category abstract #[child "First", child "Second"])
+    match category, converted with
+    | "library", .library "Owner" parts => checkParts parts
+    | "contract", .contract true "Owner" .none .nil parts => checkParts parts
+    | "interface", .interface "Owner" .nil parts => checkParts parts
+    | _, _ => throw "top-level category or abstract flag changed"
+  match top 8 (topNode "library" true #[]) with
+  | .error "abstract library is not syntax" => pure ()
+  | _ => throw "abstract library refusal changed"
+  match top 8 (topNode "unknown" false #[]) with
+  | .error "contract kind required" => pure ()
+  | _ => throw "unknown contract category refusal changed"
+  match top 8 (topNode "contract" false #[Json.mkObj [("nodeType", .str "Unsupported")]]) with
+  | .error "declaration conversion not implemented" => pure ()
+  | _ => throw "failed declaration was dropped"
+  let tokens := ["solidity", ">=", "0.8.0"]
+  let pragmaNode := Json.mkObj [("nodeType", .str "PragmaDirective"),
+    ("literals", toJson tokens)]
+  match ← top 8 pragmaNode with
+  | .pragma actual => unless actual == tokens do throw "pragma tokens changed"
+  | _ => throw "pragma category changed"
+
 #eval do
+  match topChecks with
+  | .ok () => pure ()
+  | .error why => throw (IO.userError why)
   match stateFunctionChecks with
   | .ok () => pure ()
   | .error why => throw (IO.userError why)

@@ -1477,3 +1477,35 @@ is added. The 19-signature transport evidence request is still outstanding.
 Coverage stays 72 mapped of 3281 conservative rows, 3209 uncovered. Original and
 consolidated work/backfill/proof queues, Y04 physical and separate 4.35 waits,
 all STOPs and required final gates remain open. No semantic producer is claimed.
+
+### C262 — ordered top-level declaration correspondence
+
+A generic bind_ok_iff_each law retains every ordered child conversion and the
+fallible container finish. The existing declaration module instantiates it in
+top_ok_iff_each for library, contract and interface headers, including the
+existing abstract-library refusal and unknown-kind error. pragma_exact retains
+the complete literal-token list. All three guards use propext and Quot.sound.
+No reader, existing statement, dependent definition body, protected Source,
+frozen interface, budget, exclusion or axiom declaration changed. The initial
+implicit-finish application failed elaboration; an explicit finish and
+non-generalizing header match passed. The failed receipt remains off Git.
+
+Existing controls now guard two ordered struct children through all three
+container kinds, the contract abstract flag, abstract-library and unknown-kind
+refusals, failed-child propagation, and pragma token retention. Both actual
+LibraryTry pipeline inputs still resolve the same eight declarations. These
+checks establish syntax conversion only; no compiler acceptance, typed program,
+Source Env/SrcProg, origin, H24 admission or lifecycle adequacy follows.
+C262 lane history records independent read-only finder/skeptic review; neither
+runs Lean, its server or builds.
+
+Next independent work includes remaining leaf/type conversion correspondence
+and artifact-binding obligations within the supported domain. Actual H121b
+Source-origin/lifecycle/P8 aggregate-lifecycle and S03-PANIC41 remain local duties.
+H125 vy1-words owns pending protected library-try/Error(string memory) support
+and the H57 environment-aware typing repair; retain the historical C246 manual
+full-elaboration failure until that actual support lands. No duplicate issue or
+Source case copy. The 19-signature H19/H60 transport evidence remains requested.
+Original/consolidated proof, backfill, coverage and final gates remain open:
+72 mapped of 3281 conservative rows, 3209 uncovered. Y04 physical and separate
+4.35 trust/timing waits, all prior STOPs and strict inventory failures remain.

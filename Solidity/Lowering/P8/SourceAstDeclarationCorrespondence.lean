@@ -137,6 +137,51 @@ theorem function_exact (fuel : Nat) (node rawArgs rawResults rawBody : Json)
 /-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.function_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms function_exact
 
+/-- Preserve literal pragma tokens without interpreting compiler acceptance. -/
+theorem pragma_exact (fuel : Nat) (node : Json) (tokens : List String)
+    (kind : node.getObjValAs? String "nodeType" = .ok "PragmaDirective")
+    (literals : node.getObjValAs? (List String) "literals" = .ok tokens) :
+    SourceAstUnit.top fuel node = .ok (.pragma tokens) := by
+  rw [SourceAstUnit.top]
+  simp only [kind, literals, ok_bind]
+  rfl
+
+/-- Successful containers retain every child, with the original kind/abstract checks. -/
+theorem top_ok_iff_each (fuel : Nat) (node : Json) (children : Array Json)
+    (name category : String) (abstract : Bool) (out : Syn .top)
+    (kind : node.getObjValAs? String "nodeType" = .ok "ContractDefinition")
+    (bases : SourceAstUnit.absentOrEmpty node "baseContracts" = .ok ())
+    (layout : SourceAstUnit.absentOrEmpty node "storageLayout" = .ok ())
+    (nameField : node.getObjValAs? String "name" = .ok name)
+    (fields : node.getObjValAs? (Array Json) "nodes" = .ok children)
+    (abstractField : SourceAstUnit.optionalBool node "abstract" = .ok abstract)
+    (categoryField : node.getObjValAs? String "contractKind" = .ok category) :
+    SourceAstUnit.top fuel node = .ok out ↔
+      ∃ parts, Each (fun child part => SourceAstUnit.part fuel child = .ok part)
+        children.toList parts ∧
+        (match (generalizing := false) category with
+          | "library" => do
+              unless !abstract do throw "abstract library is not syntax"
+              pure (Syn.library name (syntaxList parts))
+          | "contract" => pure (Syn.contract abstract name .none .nil (syntaxList parts))
+          | "interface" => pure (Syn.interface name .nil (syntaxList parts))
+          | _ => throw "contract kind required") = (Except.ok out : Except String (Syn .top)) := by
+  rw [SourceAstUnit.top]
+  simp only [kind, bases, layout, nameField, fields, abstractField, categoryField, ok_bind]
+  simpa only using bind_ok_iff_each (SourceAstUnit.part fuel)
+    (fun parts => match (generalizing := false) category with
+      | "library" => do
+          unless !abstract do throw "abstract library is not syntax"
+          pure (Syn.library name (syntaxList parts))
+      | "contract" => pure (Syn.contract abstract name .none .nil (syntaxList parts))
+      | "interface" => pure (Syn.interface name .nil (syntaxList parts))
+      | _ => throw "contract kind required") children.toList out
+
+/-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.pragma_exact' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pragma_exact
+/-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.top_ok_iff_each' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms top_ok_iff_each
+
 /-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.member_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms member_exact
 /-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.struct_ok_iff_each' depends on axioms: [propext, Quot.sound] -/
