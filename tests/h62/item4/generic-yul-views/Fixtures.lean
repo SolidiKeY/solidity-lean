@@ -77,6 +77,40 @@ theorem byte_unchanged_joint :
     (byteObjectFacts unaligned).header,
     (fun i hi => ((byteObjectFacts unaligned).payload i hi).symm), True.intro⟩
 
+/-- One shared premise witness for header, payload-list and idempotence laws.
+It reuses the existing fixture rather than adding cases or memory carriers. -/
+theorem byte_object_joint :
+    ∃ (bs : List UInt8) (_hl : bs.length < 2 ^ 256) (_m : ByteView) (_base : Nat), True :=
+  ⟨unaligned.bytes, unaligned.length_bound, unaligned.residual, unaligned.base, True.intro⟩
+
+/-- Both intrinsically typed decoder laws share this complete telescope. -/
+theorem byte_decoder_joint :
+    ∃ (_D : Source.Layout) (bs : List UInt8) (_hl : bs.length < 2 ^ 256)
+      (_m : ByteView) (_base : Nat), True :=
+  ⟨layout, unaligned.bytes, unaligned.length_bound, unaligned.residual,
+    unaligned.base, True.intro⟩
+
+/-- Residual feasibility is witnessed outside the same nonempty object's region,
+not by assuming an independently inhabited disjunction. -/
+theorem byte_residual_joint :
+    ∃ (bs : List UInt8) (_hl : bs.length < 2 ^ 256) (_m : ByteView) (base a : Nat)
+      (_outside : a < base ∨ base + 32 + bs.length ≤ a), True :=
+  ⟨unaligned.bytes, unaligned.length_bound, unaligned.residual, unaligned.base,
+    128, Or.inl (by decide), True.intro⟩
+
+/-- A real intrinsic ObjectByte constructor jointly witnesses the source read,
+its byte list, offset and value. This does not establish physical execution. -/
+theorem byte_source_payload_joint :
+    ∃ (D : Source.Layout) (bs : List UInt8) (_hl : bs.length < 2 ^ 256)
+      (_m : ByteView) (_base off : Nat) (v : UInt8)
+      (_read : ObjectByte (Source.Data.bytes (D := D) (l := .memory) bs) off v), True :=
+  ⟨layout, unaligned.bytes, unaligned.length_bound, unaligned.residual, unaligned.base,
+    33, 0xbb, ObjectByte.bytes unaligned.bytes ⟨1, by decide⟩, True.intro⟩
+
+#print axioms byte_object_joint
+#print axioms byte_decoder_joint
+#print axioms byte_residual_joint
+#print axioms byte_source_payload_joint
 #print axioms byte_unchanged_joint
 #print axioms byte_payload_joint
 #print axioms unaligned_images_distinct
