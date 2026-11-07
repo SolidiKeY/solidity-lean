@@ -1622,3 +1622,19 @@ spans. This establishes only those historical blob contents: parser
 completeness, Lean resolution, source context, ownership, safe movement and
 multiplicity preservation remain unproved. No pins moved and no Lean, server
 or build ran.
+
+## Changed standalone candidates revisited
+
+`changed_candidate_controls.py` records the two changed candidates from the
+`9cf44aa56e9c8c5bbf0fd18a511edaa21dfe4c02` drift snapshot, verifying their
+current source hashes. The unregistered LocationFixture proves symbolic
+location relations while explicitly showing possible word-level aliasing; it
+does not establish concrete hash injectivity. JointWitness checks supplied
+complete dependent tuples and has guarded rejection and positive controls;
+those expected-success guards are not witnesses for impossible inputs.
+
+Historical isolated checks and tool imports are source references, not
+current invocation or complete migration acceptance. Inputs, drivers and
+outcomes remain unresolved. Independent read-only finder and skeptic reviewed
+both files without Lean, server or builds. The artifact is a subset, and no
+production timing or runtime acceptance is inferred.
