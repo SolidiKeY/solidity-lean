@@ -899,6 +899,10 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/P9/DefaultRecognizerCompleteness.lean` | Monotonic and existential fuel completeness for the finite-default component only; common fuel for finite lists. |
 | `Lowering/P9/DefaultRecognizerControls.lean` | Nested fixed-array and actual struct-layout acceptance, insufficient-fuel controls, larger/shared fuel. |
 
+| `Lowering/P9/BodyRecognizerCompleteness.lean` | Existing readiness certificates imply their Boolean body checks; no new syntax admitted. |
+| `Lowering/P9/CatalogueRecognizerCompleteness.lean` | Entry/catalogue fuel monotonicity and relative completeness up to existential recognizer fuel, with original converse premises. |
+| `Lowering/P9/CatalogueCompletenessControls.lean` | Reference/unchecked and existing elaborated-unit controls, checked calls, inadequate-fuel distinction and all-fuel refusal. |
+
 ### P8 Producer merge (H57, H60)
 
 | Module | Purpose |
