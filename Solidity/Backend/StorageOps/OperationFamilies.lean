@@ -86,6 +86,26 @@ def modifyMany {K : Type} [DecidableEq K] {n : Nat} {G : Schema n} {E : TypeGrap
   | [], slots => some slots
   | key :: keys, slots => (modifySlot slots key (effect key)).bind (modifyMany effect keys)
 
+/-- Concatenation executes the original partial scheduler through its actual
+intermediate slots; keys are neither reordered nor deduplicated. -/
+theorem modifyMany_append {K : Type} [DecidableEq K] {n : Nat} {G : Schema n}
+    {E : TypeGraph.Ty n} (effect : K → Value G E → Option (Value G E))
+    (left right : List K) (slots : K → Slot G E) :
+    modifyMany effect (left ++ right) slots =
+      (modifyMany effect left slots).bind (modifyMany effect right) := by
+  induction left generalizing slots with
+  | nil => rfl
+  | cons key keys ih =>
+    change (modifySlot slots key (effect key)).bind (modifyMany effect (keys ++ right)) =
+      ((modifySlot slots key (effect key)).bind (modifyMany effect keys)).bind
+        (modifyMany effect right)
+    cases step : modifySlot slots key (effect key) with
+    | none => rfl
+    | some next => exact ih next
+
+/-- info: 'Solidity.Backend.StorageOps.modifyMany_append' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms modifyMany_append
+
 /-- One partial operation commutes with an entire family that never addresses
 its key. Internal repetitions and failures of the other family are allowed. -/
 theorem modifySlot_many_commute {K : Type} [DecidableEq K] {n : Nat} {G : Schema n}

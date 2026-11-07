@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "b1d5051e6082afe206ea370e11e5afc78903e988efa5160a9dee8bb3fca7f269",
+  "kind": "data-inhabitance",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetRetainedCycle.lean:72:run_pop_regrow_pop",
+      "theorem": "Solidity.Backend.StorageOps.TargetRetainedCycle.run_pop_regrow_pop",
+      "signature": "theorem run_pop_regrow_pop (machine : Evm.Machine) (slot : Evm.Slot) :\n Evm.run (popRegrowPop slot) machine =\n if machine.store slot = 0 then .revert else .ok (TargetNestedPop.after machine slot) 0",
+      "signature_sha256": "df8c42e6f245b0ca821771df34261b2f241ed75b2ef523ed6b18dc21c4ffab37",
+      "witness": "H62.StorageAudit.TargetReuseWitnesses.cycle_inputs",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}
