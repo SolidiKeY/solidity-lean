@@ -12,8 +12,8 @@ Original base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 Branch: `codex/solidity-h62-2-20261106/audit-evm-compiler`.
 Repository: `/workspace/audit-evm-compiler`; old clean checkout
 `/workspace/solidity-lean` preserved.
-Authorized origin/master fast-forward: `d7a1cbdf597826add5af3533fdaf6b8d91e28f66`,
-containing the saved checkpoint `17ba931f5e6edb86955b7bd1cc6514631a695a02`.
+Authorized origin/master rebase: `8a710f9d44df144d4c9855aeccca56585a422122`,
+containing the saved checkpoint `905a52b3e5d892f6564e7c2520f61f6619a9a3ae`.
 The original branch, VM and history are preserved. The original 160 source files
 and 321-file dependency closure remain unchanged since the preceding integration.
 Original/live captures remain separate, with three pending raw-type differences
@@ -37,11 +37,11 @@ master mutation, generated-root/map/axiom-pin edit or new goal was performed.
    and kernel expression. Producer owner master is established for 37 Opcode/
    Jumpdest records by G45.05 and their headers; 1,793 owners remain unresolved.
    The 570 snapshot write-owner candidates and migration overlays are separate.
-2. Joint hypotheses remain partial: 345 unique exact-signature links comprise
-   56 joint witnesses, 52 H69 intentional impossibilities and 237 closed equality
-   statements. The remaining 1,485 rows await classification or witnesses. The
-   committed 65-link manual ledger is combined with a separately manifested
-   235-link closed-equality ledger; both require exact-once reconciliation.
+2. Joint hypotheses remain partial: 350 unique exact-signature links comprise
+   61 joint witnesses, 52 H69 intentional impossibilities and 237 closed equality
+   statements. The remaining 1,480 rows await classification or witnesses. The
+   committed base ledger and all additional manifested ledgers require
+   exact-once reconciliation.
    JumpdestAudit adds exactly one full-telescope witness for each of its 19
    authored declarations. Boundary, lookup and size proof hypotheses use coherent
    actual inputs. No global producer structure is required by these statements.
@@ -553,3 +553,46 @@ Current layers, fragments and documentation paths pass; documentation reports
 140 ambiguity warnings. Strict whole-map identity remains failed after eight
 coordinator additions. The original-scope rescan and all eighteen proof checks
 pass. Full root/library checks and the three owner type tickets remain pending.
+
+
+## Populated memory-program premise checkpoint
+
+[MemoryPremiseAudit](../../tests/h62/item2/audit-evm-compiler/MemoryPremiseAudit.lean)
+jointly supplies every original binder of five previously pending statements:
+`Solidity.Evm.Memory.compile_correct`, `Solidity.Evm.Memory.ProgFrag.correct`,
+`Solidity.Evm.Memory.ProgFrag.length_mono`,
+`Solidity.Evm.Memory.ProgFrag.pushes_zero` and
+`Solidity.Evm.Memory.allocationCostProg_zero`.
+
+All five use the unchanged nonempty `Memory.CompileExamples.writeAndRead`
+program and populated two-array state, including two references aliasing one
+array. The correctness packages supply its actual compiler result/certificate,
+`StateRepr 1 0 4`, frame capacity and zero-cost `AllocationInput` together.
+No `GrowingResult` conclusion supplies a premise. The allocation-cost package
+includes the checked `hasAllocation = false` hypothesis. These are exact
+premise-satisfiability results; conditional simulation does not imply total
+memory-backend success or Source adequacy.
+
+Deterministic enrollment adds exactly five unique links and rejects duplicate
+ledger enrollment. Current accounting is 350 of 1830: 61 joint packages,
+52 intentional impossibilities and 237 closed equalities; 1480 remain pending.
+The 16 original Compiler.lean packages remain unchanged, with the previously
+stated binder-only limits. Nineteen audit modules print 160 checked theorem
+names. The original 160 source files and frozen signatures are unchanged;
+producer ownership and the three raw-type tickets remain pending.
+
+The checkpoint uses serial bounded Lean 4.24.0 and unchanged budgets. Exact
+commands, resource receipts, independent finder/skeptic reviews and the
+reconciled census are authenticated by the compact evidence index. Full
+root/library gates remain pending; no RUNTIME_GATE_PASS is claimed. The entire
+original queue and remaining backfill are preserved in the handoff files.
+
+At this checkpoint the original-scope rescan passes all 160 files and 1830
+records; the current map has 24 added rows outside the assigned original
+scope. They remain unenrolled, and the unchanged strict whole-map identity
+gate fails. Earlier eight-row reports above describe earlier integrations.
+Layers and fragments pass; documentation paths pass with 140 ambiguity
+warnings. The current export is continuation-9-handoff under the evidence
+root, with the complete original assignment, queue, scope, cumulative owned
+patch, bundle and checksum manifest. Finder requested this current-map
+clarification; it is now explicit. Both independent source/data reviews pass.
