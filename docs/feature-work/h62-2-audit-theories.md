@@ -1,5 +1,12 @@
 # H62 item 2: audit-theories — continuing audit
 
+LATEST REBASE (coordinator2026-11-07): assigned branch safely rebased to
+7683091e7c35d265b3b76fdf2a93d0197ce9f556 after verifying all previous heads
+are ancestors. Frozen assignment reference remainsc6f550e281a7. Latest
+unchanged-file subset75; new Closer4 packets pass. Current layer checker
+passes under upstream107pinned allowances; original frozen-version question
+remains pending. Evidence: /workspace/h62-audit-theories-closer-20261107-evidence.
+
 RESUMPTION OVERRIDE (coordinator2026-11-07): explicitly rebaseline on
 origin/master and continue this original queue. This supersedes the historical
 retirement notices below. Same VM/branch/existing goal retained; no new goal.
@@ -792,3 +799,58 @@ full original assignment/queue copies, current proof/role/coverage manifests,
 all gate commands/results, questions/waits and SHA256SUMS. Prior retirement
 archive and every original evidence directory are preserved. No push, merge
 into master, PR, goal replacement or full-runtime PASS is claimed.
+
+## Rebased checkpoint: all four Mutability/Closer inputs
+
+Explicit coordinator merge/rebase instruction was verified against fetched
+origin/master7683091e7c35d265b3b76fdf2a93d0197ce9f556. The clean local
+bbb8c9b7179c8f4f87ab9c9befc7455302680be0 head and previous delivered
+f25a1dd1e were ancestors; git rebase origin/master preserved all work.
+rebase.json records commands/outputs and the new delivery base. The existing
+VM/branch/goal and original c6f550e281a7 frozen scope are unchanged.
+
+CloserWitnesses adds4 full joint packets for every explicit unchanged
+Theory/Mutability/Closer.lean statement. Ordinary modal and Spec packets
+correlate all μ/m/context/program/state/formula/output inputs and within,
+non-nonpayable, modal/Spec and actual-success premises. A real bool declaration
+changes the local environment and succeeds; modal facts are not fulfilled
+only by reverting. Transient packets use one named true bool cell and an
+actual read success with its observed value and preserved cells. View with
+static=false and nonpayable with static=true separately exercise both
+ReadOnlyCtx branches. The frame packet proves noPanic AND actual success.
+No impossible-input/H69 reclassification or new hypothesis on an original.
+
+The final6171374eb660 receipt passes exit0 in1.011s,666,873,856 sampled peak
+RSS, clean diagnostics and standard axioms only. One frame fixture and one
+private layout abbreviation are new. Earlier elaboration mistakes were fixed
+using the actual named-cell layout and removing a solved Spec proof step;
+failed logs are historical, never accepted. No proof budget, definition,
+statement, axiom, root/map/pin or exclusion changed. KeySort was freshly
+checked under the same serial resource bounds.
+
+The initial expanded subset correctly REFUSED the stale Outcome dependency
+fingerprint after rebasing: Source CalldataCopy/Eval/Horizon-related upstream
+changes required rebuilding. The dependency closure and Outcome were checked
+serially; fresh Outcome0ccdd38c54c6 passes1.004s. Only then did the current
+subset pass75 distinct joint records/certificates: Paths41+Mirror13+Bridge8+
+Outcome9+Closer4. All four refusal controls,13 Python tests, register and
+fragments checks pass. Both read-only reviewers independently recomputed
+75source/helper/transitive/artifact/log/axiom receipts and4signature packets:
+no residual findings and no reviewer Lean/server/build jobs.
+
+The changed upstream core-import-closure implementation was checked on this
+new base: layers now PASS901core/0elaborator/0parser/0newedges under107pinned
+allowances. This reports upstream policy, not a claim that this worker repaired
+physical edges or approved new exclusions; prior95allowance/12edge failure is
+retained historically. No worker allowance edit. Original frozen signature/
+definition fidelity Q-FROZEN-REBASE remains pending and full acceptance false.
+No RUNTIME_GATE_PASS/full final run claimed. Exact gates: closer-gates.json.
+
+Checkpoint handoff:4new joint theorems;81joint certificate names across
+versions,116audit proof declarations/21fixture definitions/7private abbreviations.
+Only75unchanged-file joints are validated together on the new base until all
+helper receipts are refreshed. Original witness/classification remainder:
+395public+3private+986originalgenerated=1,384, separate from fidelity/compiler/
+final-gate obligations. Continue original queue and independent backfill,
+fetching/logging/inspecting master before the next item. No new/reset goal,
+full-completion transition, push or master merge.

@@ -118,6 +118,12 @@ WITNESSES.update({
  'Solidity.Theory.Progress.Prog.runF_ends': ('OutcomeWitnesses', 'outcome_runF_joint_witness'),
  'Solidity.Theory.Progress.Stmt.runF_ends': ('OutcomeWitnesses', 'outcome_stmt_runF_joint_witness'),
 })
+WITNESSES.update({
+ 'Solidity.Theory.Mutability.holds_modal_readOnly': ('CloserWitnesses', 'closer_modal_joint_witness'),
+ 'Solidity.Theory.Mutability.Spec.box_readOnly': ('CloserWitnesses', 'closer_spec_joint_witness'),
+ 'Solidity.Theory.Mutability.Transient.holds_readOnly': ('CloserWitnesses', 'closer_transient_modal_joint_witness'),
+ 'Solidity.Theory.Mutability.Transient.holds_frame': ('CloserWitnesses', 'closer_transient_frame_joint_witness'),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),
