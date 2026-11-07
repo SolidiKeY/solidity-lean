@@ -22,7 +22,7 @@ async function run() {
   };
   const extension=vscode.extensions.getExtension(target==='dafny'?'dafny-lang.ide-vscode':'SolidiKeY.solidity-lean');
   assert.ok(extension,'target extension is installed');
-  const observation = observe(vscode,record,extension.extensionPath,config.recordProtocol?config.trace:null,config.workspace);
+  const observation = observe(vscode,record,extension.extensionPath,config.recordProtocol?config.trace:null,config.workspace,{captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
   const heartbeat = [];
   let last = performance.now();
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);

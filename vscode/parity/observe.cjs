@@ -8,7 +8,7 @@ const {sep}=require('node:path');
 const {createHash,randomUUID}=require('node:crypto');
 
 /** Observe calls on real VS Code objects. No mocked renderer or verifier. */
-function observe(vscode, record, extensionPath, tracePath,workspacePath) {
+function observe(vscode, record, extensionPath, tracePath,workspacePath,options={}) {
   const controllers = [], profiles = [], decorations = [], outputs=[], finalizers=[];
   function instrument(object, handlers) {
     return new Proxy(object, {get(target,key) {
@@ -79,6 +79,12 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
     const child=childProcess.spawn(...args);
     const owner={processSession:randomUUID(),processSequence:++processSequence,pid:child.pid,birth:require('../src/process-state.cjs').processState(child.pid)?.birth};
     record('process.spawn',{...owner,executable:args[0],args:args[1]||[],cwd:args[2]?.cwd});
+    if(options.captureServerArtifacts&&args[1]?.some(a=>a==='server'||typeof a==='string'&&a.endsWith('lsp-server.cjs'))){
+      const fs=require('node:fs'),path=require('node:path'),describe=file=>({file:fs.realpathSync(file),bytes:fs.statSync(file).size,sha256:createHash('sha256').update(fs.readFileSync(file)).digest('hex')});
+      try{const directory=path.dirname(args[0]),files=[args[0],...(args[1]||[]).filter(a=>typeof a==='string'&&path.isAbsolute(a)&&fs.existsSync(a)&&fs.statSync(a).isFile()),...fs.readdirSync(directory).filter(name=>/^Dafny.*\.dll$/.test(name)||name.endsWith('.runtimeconfig.json')).map(name=>path.join(directory,name))];
+        record('process.artifacts',{...owner,files:[...new Set(files)].map(file=>{const actual=describe(file),reference=options.artifactReferenceDirectory&&path.join(options.artifactReferenceDirectory,path.basename(file));return{...actual,...(reference&&fs.existsSync(reference)?{reference:describe(reference)}:{})};})});
+      }catch(error){record('process.artifacts.error',{...owner,message:diagnostic(error)});}
+    }
     child.once('error',error=>!restored&&record('process.error',{...owner,message:diagnostic(error)}));
     child.once('exit',(code,signal)=>!restored&&record('process.exit',{...owner,code,signal}));
     child.once('close',(code,signal)=>!restored&&record('process.close',{...owner,code,signal}));

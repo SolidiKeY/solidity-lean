@@ -26,6 +26,7 @@ function errors(o,runId,expectedOuterTimeoutMs){
   if(i&&c.configuration?.inspect?.workspaceValue!==(o.target==='dafny'?i+1:(i+1)*1000))e.push('missing explicit workspace configuration');
   if(c.source?.uri!==o.uri||c.source?.textHash!==digest(o.source||'')||!c.source?.session||c.source?.closed||!c.source?.trusted||!Number.isInteger(c.source?.version))e.push('wrong source ownership');
   if(!c.process?.processSession||!/^\d+$/.test(c.process.birth||'')||!Number.isInteger(c.process.pid)||c.process.processSession===previous)e.push('missing fresh actual process identity');previous=c.process?.processSession;
+  if(!Array.isArray(c.process?.artifacts)||!c.process.artifacts.length||c.process.artifacts.some(a=>!path.isAbsolute(a.file||'')||!Number.isSafeInteger(a.bytes)||a.bytes<1||!/^([a-f0-9]{64})$/.test(a.sha256||'')||a.reference&&(a.reference.sha256!==a.sha256||a.reference.bytes!==a.bytes)))e.push('missing actual server artifact identity');
   const launch=c.process?.args||[];
   if(o.target==='dafny'&&!launch.includes('--verification-time-limit:'+String(c.configuration?.effective)))e.push('missing actual Dafny launch argument');
   if(c.protocol?.some(r=>r.processSession!==c.process?.processSession||r.pid!==c.process?.pid||r.birth!==c.process?.birth))e.push('foreign protocol process identity');
@@ -62,6 +63,7 @@ async function run({vscode,config,api,events,until}){
    if(i){pending=query();await withinOperation(()=>cfg().update(setting,target==='dafny'?i+1:(i+1)*1000,vscode.ConfigurationTarget.Workspace),config.operationTimeoutMs,'finite setting update');await withinOperation(()=>vscode.commands.executeCommand(target==='dafny'?'dafny.restartServer':'solidityLean.restartServer'),config.operationTimeoutMs,'time-limit restart');}
    await until(()=>{const ps=serverProcesses(events,target),p=ps.at(-1)?.data;return p&&records(config.trace).some(r=>r.processSession===p.processSession&&r.message?.method==='textDocument/didOpen'&&r.message.params?.textDocument?.uri===uri.toString());},'actual current process open');
    const spawn=serverProcesses(events,target).at(-1),process={...spawn.data,spawnedMs:spawn.ms},protocol=records(config.trace).filter(r=>r.processSession===process.processSession);restart.finished=Date.now();
+   process.artifacts=events.find(e=>e.kind==='process.artifacts'&&e.data.processSession===process.processSession)?.data.files;
    const c={id:['native-default','finite-2','finite-3'][i],configuration:{effective:cfg().get(setting),inspect:inspect(),resource:target==='local'?uri.toString():null},source:binding(),process,protocol,restart,exited:events.slice(start).filter(e=>e.kind==='process.exit').map(e=>({...e.data,exitedMs:e.ms})),retired:events.slice(start).filter(e=>e.kind==='process.close').map(e=>({...e.data,closedMs:e.ms})),query:await query()};
    if(pending)c.queryAcrossConfiguration=await pending;
    if(!i&&target==='local'){
