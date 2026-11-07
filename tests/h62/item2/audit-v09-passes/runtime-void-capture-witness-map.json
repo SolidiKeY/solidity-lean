@@ -1,0 +1,78 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/RuntimeVoidCaptureControls.lean",
+  "interface_sha256": "972361704940398aab29376aeddd5d73988782f6a5f4726dabb119f23a196ec8",
+  "joint_witness": "Solidity.Backend.Passes.AuditRuntimeVoidCapture.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditRuntimeVoidCapture",
+  "checked_private_names": [],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.evaluated",
+      "signature_sha256": "8002fdb339b77d88563cac625d952fc27f7a3e62a419a1a4e1a9ad94b8d5af45",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.evaluated_before",
+      "signature_sha256": "c93e5ed8ad55828091b536f835ba9feb3fdf20b84be357f10b94d0e611c8cc94",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.ordered",
+      "signature_sha256": "680ae41270c16b4dd7861b4832e165326deb20366a58a9d5873cc1e32b3ed5a7",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.failure",
+      "signature_sha256": "670ef388643f4a7b163f888aa2edce70bb5ee33a0a78380e0aefc8719e463799",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.failure_source",
+      "signature_sha256": "33cc431d6b42661e4896cebe3f147e367c4187cc23af23388b34668fd33bd746",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.failure_tail",
+      "signature_sha256": "66ecbfba6ea0ed42fc1d3fc46959a77e9c9efec80c04235393687dc07ae9fa09",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.fragment",
+      "signature_sha256": "392c21de63733cd684c2859413be32ee2e61603837f5bbfcebae3972f3855e81",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.premature_capture",
+      "signature_sha256": "d371375dd212cd7a4f6a527429a86eb9b2f9b5a9e13815b684195b565e80515b",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.stale_capture_refused",
+      "signature_sha256": "8955fd5eaf20e4b196a3371ec185ad5b73207fb528f420dbd13f236c74c266bd",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.corrupt_tail_refused",
+      "signature_sha256": "39065b1f208e52411a640a8f91f0bdded0e99e8d63fccd27b27c8cdf688d6a99",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeVoidCapture.Controls.insufficient_private_frame",
+      "signature_sha256": "8c7a984147ad1c4a7da05c9d776d77c4578ed8d6a25f0df79a7f7cfe4536a805",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 516,
+  "aggregate_remaining": 743,
+  "auxiliary_definition_credit": 0,
+  "joint_contract": "actual-void-success-failure-domain-entry-flags-and-reached-mutated-heap-capture-input",
+  "limits": "Eleven original public controls. Actual domains/Entry frame16 lo/pointer8 cursor10, flags, source outcomes, before7/after37 and returned run/StateRepr/BaseExt/captureInput correlated. Original full memory/tail observations, wrong timing/value, body failure and frame refusal retained. No entry/instantiated/definition/supplemental credit; no native ByteWorld/emission, ABI/gas or full Source/G24 adequacy.",
+  "checked_axioms": {
+    "stale_capture_refused": [],
+    "joint_and_other_aliases": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/StatefulCaptureControls.lean",
+  "interface_sha256": "51fbd1ceb8d536f43a8d00bfd3dcc70a93048741dbee79c0c08bcd30d2372375",
+  "joint_witness": "Solidity.Backend.Passes.AuditStatefulCapture.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditStatefulCapture",
+  "checked_private_names": [],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.StatefulCaptureControls.capture_source",
+      "signature_sha256": "c4e09151ff3f7f08ce5d2fc579751d6234a0715d7a1d5b1f0cb52a395cd130ed",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.StatefulCaptureControls.declaration_source",
+      "signature_sha256": "865ff0a05a57e8621e118fd5eeabe459c15d22d9ac1b23f01416e94bae667122",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.StatefulCaptureControls.initial_input",
+      "signature_sha256": "3360350f522482fc4416ba4b2cbc1aaa55c0c84c335bbb8afd6a5b71ecc5b3fb",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.StatefulCaptureControls.reached_application",
+      "signature_sha256": "b76aeac9872fda8694d717e269ffe7409024c60d47368dfcf9ef1187e23822af",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.StatefulCaptureControls.ordered_capture",
+      "signature_sha256": "f9ee354132d605c19701e87d7f17b9931e9ebe6386608b5989a5ab73579de6d1",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.StatefulCaptureControls.ordered_without_capture",
+      "signature_sha256": "7642aaa860b259bf1540c1c239c16085169fa17e3ed58a7100fcbfe9811c6c7a",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 522,
+  "aggregate_remaining": 737,
+  "auxiliary_definition_credit": 0,
+  "joint_contract": "actual-capture-input-source-run-and-selected-map-derived-declaration-input",
+  "limits": "Six original public controls. Actual reached capture state/map supplies declaration Input via existing generic link, without assumed post-capture preservation. Original complete old/new local/alias/array observations and scalar numeric versus symbolic expression interfaces retained separately. No invocation/observer/definition/supplemental credit; no native ByteWorld/emission, ABI/gas or full Source/G24 adequacy.",
+  "checked_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}
