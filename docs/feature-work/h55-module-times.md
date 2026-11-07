@@ -1638,3 +1638,16 @@ current invocation or complete migration acceptance. Inputs, drivers and
 outcomes remain unresolved. Independent read-only finder and skeptic reviewed
 both files without Lean, server or builds. The artifact is a subset, and no
 production timing or runtime acceptance is inferred.
+
+## Upstream pin inventory integration
+
+Upstream `254c60df6a3467ff636c1fdac27c82083a169b2f` recorded the pending
+axiom pins and was merged without conflicts at
+`6d8b63b4f92ff2de68fb1a1fd95f5e917a1ea7c2`. At that merge head,
+`node scripts/check-axiom-pins.mjs` exited 0: 16,509 pinned theorems,
+zero policy errors, zero unrecorded changes and zero baselined changes.
+The earlier `pins-8cf.log` failure remains historical evidence, not the
+current result. The new log is checksum-bound by
+`tests/h55/module-times/pin-integration-evidence.sha256`. This static checker
+does not replace Lean guarded-print verification or the full proof gate, and
+does not authorize or perform H109 pin relocation.
