@@ -33,7 +33,9 @@ export function unitSpecificationSpans(source) {
       }
     } else if (source.startsWith('//',i)) {
       const end=source.indexOf('\n',i), stop=end<0?source.length:end;
-      if (source[i+2]==='/' && source.slice(i,stop).includes('@custom:key')) spans.push([i,stop]);
+      // A terminal CR is a line ending; indented solc documentation.src excludes it.
+      const documentationEnd=source[stop-1]==='\r'?stop-1:stop;
+      if (source[i+2]==='/' && source.slice(i,documentationEnd).includes('@custom:key')) spans.push([i,documentationEnd]);
       i=stop;
     } else if (source.startsWith('/*',i)) {
       const end=source.indexOf('*/',i+2), stop=end<0?source.length:end+2;
