@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "obligation": "callsite:src/extension.ts:21:24:createOutputChannel",
+  "sourceHead": "385d01e6e65a96c88004c5b09e224fb40cb02d1f",
+  "fileCount": 179,
+  "uncompressedBytes": 5861980,
+  "archive": {
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/evidence/bulk.tar.gz",
+    "bytes": 1056755,
+    "sha256": "b96df5ed78c970e042051c22a036ca0bd26301e1d375aece0030aecda8a00592"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/evidence/files.json",
+    "bytes": 41680,
+    "sha256": "4af11083988c1d1b95a8f16d040dfa43d65a9461985ae0f5221ea7d6e2c44016"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-output-lifecycle-evidence-manifest.json --restore",
+  "boundaries": [
+    "Actual paired native output APIs at981a and panel DOM/AX/PNG at385d, original pinned assets/deadlines; one retained channel and owned cleanup.",
+    "Exact local URI/API/session binding; upstream global readiness and issue URL differ. Native first API run includes normal-exit Error line, rendered run does not; neither is universalized.",
+    "Visible panel/channel plus full DOM-resident owned readiness; clipping/per-character visibility and screenshot ABA remain uncertified.",
+    "Injected controller/guard regressions are not native transport, kernel proof or paired row judgments. No complete row."
+  ]
+}
