@@ -1178,3 +1178,67 @@ kernel-name and witness/premise defaults from new producer rows. Both reviewers
 confirm the fix. Actual bounded current KeySort passes (2.020 seconds), using
 Lean4.24.0/Lake5.0.0-src+797c613, without a runtime-pass claim. No full repository
 or producer compiler kernel gate is substituted by this prerequisite.
+
+
+### SDK command surfaces for the published compiler producer (2026-11-07)
+
+Fetched master f5038bc02bc52ea08f5a3cec7de292aef424e7c8; it is already an
+ancestor of this branch. The legacy census remains unchanged. Its producer
+refusal arose from mutual-block ends; equation-style theorem bodies also lack
+its assumed := delimiter. No frozen792 headers, signatures, statuses or old
+refusals are rewritten to make the new producer pass.
+
+`tests/h62/item2/audit-readonly-calls/CommandSurface.lean` uses SDK syntax parsing
+in a safe helper command with an initialized Lean environment. It never imports,
+elaborates or executes inventoried project commands. It traverses declaration
+nodes and mutual command children, not proof/quotation subtrees, and separates
+parser declSig ranges from ordinary/equation bodies. Namespace/section variables,
+UTF-8 byte ranges, early exit, parser errors and mismatched scopes remain explicit.
+No unsafe initializer API, new theorem, axiom, sorry or budget change is used in
+the final source; no production module or generated root imports this tool.
+
+The live capture parsed four exact Git files at d38e44f7816bf01c23ec023d178488e07ebcb21b:
+PublicCompilerTotal28 theorem surfaces, its Controls19, P1RevertBridge6 and
+Evm.Compiler16, total69. All nine requested source headers are unique parser
+candidates. These are surface names/ranges/context, NOT elaborated signatures,
+private kernel identities, live ownership, compiler correctness or Source/native
+adequacy. Legacy lexical refusal is retained as historical evidence; SDK parsing
+refines only the surface facet. No original witness credit comes from parsing.
+
+Seven live controls cover mutual/equation headers and scoped variables; an
+available-Lean import with a run_cmd file marker that must never execute; a
+separate nonexistent project import that must not load; proof-command quotations;
+an unexecuted custom macro producing a parser refusal; early #exit preserving an
+unscanned-tail refusal; and mismatched namespace closure. The marker/import
+fixtures are separate so a missing import cannot mask an execution regression.
+Five external unit controls cover polluted SDK variables, precompile helper
+mutation/staging failure, UTF-8 and invalid ranges, partial/elaboration-claim
+refusal and explicit guards. Live guards also pass under Python optimization.
+
+Finder and skeptic found SDK override, transitive-tool sealing and helper-reread
+gaps. Fixes remove all dynamic Python project imports, strip Lean/Elan overrides,
+set private library/canonical SDK roots, check actual prefix before/after and
+stage one authenticated helper buffer with pre-child seals. Both reviewers
+confirm fixes and final saved evidence without executing Lean/server/tests or
+writing files. SDK/stdlib contents remain external tool inputs, not certified
+source. Initial unsupported-notation/prototype/kernel-refusal and fixture traces
+are saved separately; none is promoted to final acceptance.
+
+Final normal and optimized captures passed in3.525/3.527 seconds with
+658362368/656969728 bytes peak aggregate RSS. These are two live reproducibility
+checks, not a before/after speed baseline. Producer surfaces, nine requested
+candidates and original-ledger preservation reproduce byte-identically; fixture
+marker paths/ranges are deliberately run-specific. All792 original identities
+and root coverage remain byte-bound and unchanged:57joint,3target-failure joint,
+45intentional impossibility,256no-top-level-input,2V1refutation/migration and
+429ordinary pending, including three private gaps. Nineteen transports, full
+H121 producer, compiler consumer kernel validation, inherited queues and full
+acceptance remain open. Historical Premises +80.254966536% STOP is unchanged;
+no held producer proof was loaded/rerun and no RUNTIME_GATE_PASS is claimed.
+
+Artifacts: /workspace/h62-audit-readonly-calls/command-surface/; committed pins
+`tests/h62/item2/audit-readonly-calls/command-surface.sha256`. The deterministic
+`command_surface.py` runs only live parser capture, not saved-receipt promotion.
+Next independent work: actual compiler consumer kernel/type binding and remaining
+original inputs under the holds. No scope question, owner ticket, push or goal
+reset/completion.
