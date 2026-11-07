@@ -117,6 +117,24 @@
       "declaration_name": "Artifact",
       "adapter_kind": "selected_artifact",
       "boundary": "Instantiates Artifact.ofZero and exact Image using actual let-branch source/profile/code and both original execution laws. Original fuel/condition/arm/selection data retained; empty newer prefix and arbitrary caller frame preserved, no producer migration."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetControlCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetControl",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic Artifact.select/PreparationImage using the existing selected LetControl adapter. Exact selected payload and all raw producer data retained; actual source-feasible DUP17 refusal remains None without runtime-failure claims."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetScopeCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetScope",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic Artifact.select/PreparationImage using the existing selected LetScope adapter. Exact selected payload and all raw producer data retained; actual source-feasible DUP17 refusal remains None without runtime-failure claims."
     }
   ]
 }

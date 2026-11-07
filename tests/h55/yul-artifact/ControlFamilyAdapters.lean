@@ -1,5 +1,6 @@
 import Solidity.Yul.Compilation.ArtifactPreparation
 import Solidity.Yul.Compilation.LetBranchCompletionControls
+import Solidity.Yul.Compilation.LetControlCompilationControls
 import Solidity.Yul.Compilation.InitializedSequenceCompilationControls
 import Solidity.Yul.Compilation.LetControlCompletion
 import Solidity.Yul.Compilation.LetScopeCompletion
@@ -264,3 +265,98 @@ end Controls
 #print axioms Controls.refused_original
 #print axioms Controls.refused_source_completes
 end Solidity.Yul.Compilation.H55ControlFamilies.LetBranch
+
+/-! Raw stages reuse their already-existing selected adapters and generic
+selection/provenance laws. No additional semantic certificate type is needed. -/
+namespace Solidity.Yul.Compilation.H55ControlFamilies.LetControl
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def prepare (a : LetControlCompilation.Compiled fuel stmt) : Option (Artifact 0 stmt) :=
+  Artifact.select LetControlCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) a
+
+abbrev Preparation (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt))
+
+namespace RawControls
+theorem selected : prepare LetControlCompilation.Controls.artifact.compiled =
+    some (encode LetControlCompilation.Controls.artifact) :=
+  Artifact.select_some _ _ _ _ LetControlCompilation.Controls.artifact.lowered
+
+theorem effectful (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode LetControlCompilation.Controls.artifact).code
+      {m with stack := coreWord b :: caller} =
+      .ok {m with stack := coreWord (LetControlCompilation.Controls.update b) :: caller} 0 :=
+  LetControlCompilation.Controls.target_done b m caller
+
+def refused : LetControlCompilation.Compiled 3 LetBranchCompilation.Controls.beyondSource :=
+  (LetControlCompilation.compile 3 LetBranchCompilation.Controls.beyondSource).get (by rfl)
+theorem refused_code : refused.code = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage prepare refused).artifact = none :=
+  Artifact.select_none LetControlCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) refused refused_code
+theorem original_recovered :
+    Artifact.recoverPreparation (Artifact.toPreparationImage prepare refused) = refused :=
+  Artifact.preparation_source_roundtrip prepare refused
+theorem source_completes :
+    evalStmt 2 .nil True.intro LetBranchCompilation.Controls.beyondSource refused.profile
+      (sourceLocals (Vector.replicate 17 0)) =
+      some ⟨sourceLocals (Vector.replicate 17 0), .normal⟩ := rfl
+#guard (LetControlCompilation.compile 0 LetControlCompilation.Controls.source).isNone
+end RawControls
+
+#print axioms prepare
+#print axioms RawControls.selected
+#print axioms RawControls.effectful
+#print axioms RawControls.refused_code
+#print axioms RawControls.refused_preparation
+#print axioms RawControls.original_recovered
+#print axioms RawControls.source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.LetControl
+
+namespace Solidity.Yul.Compilation.H55ControlFamilies.LetScope
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def prepare (a : LetScopeCompilation.Compiled fuel stmt) : Option (Artifact 0 stmt) :=
+  Artifact.select LetScopeCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) a
+
+abbrev Preparation (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt))
+
+namespace RawControls
+theorem selected : prepare LetScopeCompilation.Controls.artifact.compiled =
+    some (encode LetScopeCompilation.Controls.artifact) :=
+  Artifact.select_some _ _ _ _ LetScopeCompilation.Controls.artifact.lowered
+
+theorem effectful (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode LetScopeCompilation.Controls.artifact).code
+      {m with stack := coreWord b :: caller} =
+      .ok {m with stack := coreWord ((~~~(~~~(b+SourceLoop.Controls.dirty)+3)+3)+3) :: caller} 0 :=
+  LetScopeCompilation.Controls.target_done b m caller
+
+def refused : LetScopeCompilation.Compiled 2 LetScopeCompilation.Controls.beyondSource :=
+  (LetScopeCompilation.compile 2 LetScopeCompilation.Controls.beyondSource).get (by rfl)
+theorem refused_code : refused.code = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage prepare refused).artifact = none :=
+  Artifact.select_none LetScopeCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) refused refused_code
+theorem original_recovered :
+    Artifact.recoverPreparation (Artifact.toPreparationImage prepare refused) = refused :=
+  Artifact.preparation_source_roundtrip prepare refused
+theorem source_completes : ∃ result,
+    evalStmt 3 .nil True.intro LetScopeCompilation.Controls.beyondSource refused.profile
+      (sourceLocals (Vector.replicate 17 0)) = some result := ⟨_, rfl⟩
+#guard (LetScopeCompilation.compile 0 LetScopeCompilation.Controls.source).isNone
+end RawControls
+
+#print axioms prepare
+#print axioms RawControls.selected
+#print axioms RawControls.effectful
+#print axioms RawControls.refused_code
+#print axioms RawControls.refused_preparation
+#print axioms RawControls.original_recovered
+#print axioms RawControls.source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.LetScope
