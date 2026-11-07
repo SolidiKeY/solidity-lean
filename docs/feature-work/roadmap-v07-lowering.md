@@ -1205,3 +1205,32 @@ open: `GraphPremises` derived from accepted Source, the VY5 Source repair
 (`SourceRefusal.envLocOK`), refusal for parameters, returns and tuples,
 P12 selection from admitted syntax and effectful reference paths, and
 P8-SPEC-LAW1 (all `P8a.Producer`-indexed results stay vacuous until then).
+
+### CP77: master merge and the H24 instance at the P8 model producer
+
+Merged master `fea090bf9` (V14 and VY5 `Env.mapFree`). VY5 changes implicit
+conversion only, not `Source.locOK`, so the CP75 refusal witnesses still
+hold. The module-map rows moved into `docs/module-map/v07-lowering.d/v07-lowering.md`
+(`fragments.sh --resolve`). Pin fragments for the four CP75/CP76 modules are
+recorded.
+
+`GraphAdmissionAssembly.admissionOfEmpty` and
+`declarationGraphProducerOfEmpty` give the H24 field to any producer whose
+accepted Sources all live in the empty environment. `empty_admitted` is
+derived from the actual producer and the decidable refusal check. The P8 model
+witness `P8.PlanWitness.planProducer` (branch
+`cloud/move5-20261106/p8-producer`, not on master) is such a producer, since
+`sourceOf` uses `emptyEnv`. Its instance
+`declarationGraphProducerOfEmpty planProducer (fun _ _ _ _ => rfl)` was
+elaborated in an uncommitted scratch module containing that branch's
+`PlanWitness.lean` over this head: no errors, and only the standard axioms.
+The instance belongs in the p8 lane, or here once that branch merges.
+
+Correction: `ResourceContractLaw1.nat_encodable_resource_impossible`
+excludes producers only over `Nat`-encodable resources. `planProducer` uses
+`PlanBound`, so the H24 record is not vacuous once that branch merges. It is
+still a model witness (G07's toy, empty Source), not real accepted Source.
+
+G18.06 remains blocked. V14's `v14-help-g18.md` marks G18.04/.05 as partial,
+and G18.02/.03 belong to V16, which is not on master. G16 and G17 are
+unchanged in this checkpoint.
