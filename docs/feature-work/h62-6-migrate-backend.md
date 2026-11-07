@@ -1,19 +1,23 @@
 # H62 item 6: Backend migration overlay
 
-Status: **partial, not complete; source adaptation blocked**. Repository: `/workspace/solidity-lean`.
-Branch: `codex/solidity-h62-6-20261106/migrate-backend`.
-Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
-The exported `FINAL.json` records the full checkpoint commit. No pushes,
-merges, default-branch edits, root registration, or toolchain cut-over occurred.
-The existing clean `work` branch was preserved. The base was fetched explicitly
-and verified as an ancestor of published `origin/master` before branch creation.
+Status: **partial; queue resumed by the coordinator's explicit lane-specific
+merge-and-continue instruction**. Repository `/workspace/solidity-lean`, branch
+`codex/solidity-h62-6-20261106/migrate-backend`.
+Frozen assignment base remains `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
+The previously retired head33dcda9f8b3b5d45e12f788b0f208ec9a6b24b28 was
+verified in published origin/master along with reported merge20e492ee9;
+this branch fast-forwarded to d96f2406d352de7e0b72ba6ac4ab29dc457582c6.
+No local default branch update or push occurred. Historical sections below
+retain their point-in-time limits; this section supersedes the retirement stop
+for this explicit new instruction. The original goal is not created or reset.
+The immutable old baseline worktree is separate and was not restarted.
 
 ## Queue state
 
 | Checkpoint | State and evidence |
 |---|---|
 | 1. Census and clean old baseline | Source census/backfill saved; complete clean baseline and elaborated API census remain pending. |
-| 2. Official toolchain and adaptation | Coordinator archive verified and official versions recorded; first frozen axiom-pin failure reproduced. Owned source adaptation awaits coordination. |
+| 2. Official toolchain and adaptation | Coordinator archive verified and official versions recorded; first frozen axiom-pin failure reproduced. Statement-preserving proof-only fixes have H82 standing permission; body/interface changes retain owner/H57 requirements. |
 | 3. All new modules and comparison | Blocked by checkpoint 2. No matched full-build timing delta or regression verdict exists. |
 | 4. Migration handoff | Tooling/backfill checkpoint and reproduction exported; full migration patch, elaborated frozen-interface hashes and gate acceptance remain pending. |
 
@@ -29,8 +33,11 @@ whole-file byte hashes, **not elaborated declaration/type compatibility hashes**
 Lexical declaration candidates are navigation aids, not completeness proofs.
 Compiler dependency output still needs independent reconciliation.
 
-All original Solidity sources, `lean-toolchain`, `lakefile.toml`, central maps,
-roots and axiom pins remain byte-for-byte unchanged against the base. Backend
+Before the authorized origin/master integration at retired head33dc, all
+original Solidity sources, `lean-toolchain`, `lakefile.toml`, central maps,
+roots and axiom pins were byte-identical to the base. Incoming published master
+changes are recorded separately below; no current-tree byte-identity claim is
+made against the old base. Backend
 baseline lexical counts are zero for `sorry`, `axiom` and `native_decide`.
 No new axiom/sorry/native-decision declarations, raised proof budgets, weakened
 statements, exclusions, observations, or premises were introduced. New Lean
@@ -216,6 +223,7 @@ Reproduction from the assigned checkout:
 
 ```sh
 python3 scripts/h62/item6/migrate-backend/reconcile_imports.py \
+  --source-root /workspace/migrate-backend-baseline \
   --census /workspace/migrate-backend-evidence/census-base.json \
   --artifacts /workspace/migrate-backend-baseline/.lake/build/lib/lean \
   --output /workspace/migrate-backend-evidence/import-reconciliation-progress.json
@@ -394,3 +402,62 @@ The goal API has no PAUSED transition: only complete|blocked. Actual goal pause
 could not be set, and no completion/reset/replacement is attempted. Worker
 implementation stops after the final schema-v1 handoff acknowledgement.
 No H71 push permission is available; no push occurs.
+
+## Explicit origin/master integration and independent continuation
+
+The coordinator specifically named this lane/head and instructed merging
+origin/master into the assigned branch and continuing. This is new explicit
+lane authorization, unlike the earlier generic broadcasts. The old retirement
+packet remains immutable historical evidence; no goal reset or replacement.
+
+Fetched master is d96f2406d352de7e0b72ba6ac4ab29dc457582c6, one cache-script
+commit after the reported20e492ee99a3fa8679aa526de0b6e731d85e4134. Both
+that reported commit and final retired33dc were verified ancestors before
+`git merge --ff-only origin/master`. No conflict, discard, push or default
+branch edit. Coordinator-reported touched/Bridge gates are not local migration
+or new-toolchain validation evidence.
+
+The immutable Git ledger from `resume_inventory.py` records original1919,
+present1932, unchanged original1917, changed original2 and incoming13 files.
+The two original file diffs were inspected: CopyPaths adds explicit axiom-output
+guards; PowerBounds sets Elab.async false to avoid retained concurrent tasks.
+Those incoming speed/resource changes are preserved. The13 new modules are
+incoming/read-only, not an inferred expansion of this lane's frozen assignment.
+Git blob identity and source inspection do not establish old/new public types,
+axiom fidelity, generated API completeness or semantic equivalence.
+
+`reconcile_imports.py --source-root` now binds the source census/check to the
+actual checkout rather than assuming the tooling checkout remains frozen.
+It requires an actual Git checkout root. Reproduction for the continuing old
+baseline uses --source-root /workspace/migrate-backend-baseline with the old
+census and that worktree's private build artifacts. The first resumed snapshot
+checked1115 of2497 import records with zero mismatch; missing artifacts remain
+pending. This is not artifact freshness or a compiler/type compatibility pass.
+
+H78 preparation now writes metadata schema2 with explicit `isPrivateName`
+classification and the protected flag. The common helper definitions were
+read in both official toolchain source trees. All private/generated constants
+remain included, including public internal-looking names such as _proof_2;
+no `Name.isInternal` exclusion is used. Legacy schema1 is refused rather than
+silently accepted as visibility evidence. Private/public naming classification
+is not complete Lean4.35 module-export accessibility; exported-context/import
+visibility, provenance, complete old/new signatures and real shims remain
+pending. Both template compiler checks also remain pending.22 Python controls
+pass; metadata controls are not proofs of project correctness.
+
+Only the original old baseline remains a Lean job (root20979/Lake21012,
+observer72074). No new Lean/MCP session was launched during it, no stopped
+module was restarted, and no production source was edited in this continuation.
+Per-file checks for the existing Linking/full83-op/Slice proposals stay next
+when the serial resource slot becomes available. Original frozen statements,
+axiom-free pin and proof budgets remain binding; all four formal checkpoints
+are unfinished. Current source/provenance evidence is under
+/workspace/migrate-backend-evidence/resume-d96f2406/.
+
+The full post-integration documentation gate initially found five non-existing
+references in imported notes and a synthetic test. Under H82's standing
+nonsemantic documentation permission, off-Git/proposed paths were quoted,
+and the synthetic path was composed without changing its runtime input.
+The unchanged full checker now passes with126 ambiguous references, all
+resolved. The four affected census tests pass. No checker exemption, placeholder
+module, registration, production proof or interface change was introduced.

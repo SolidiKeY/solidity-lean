@@ -1,0 +1,74 @@
+{
+  "guardedRegression": "Exact B original journal replay, mandatory positive Identity diamond and paired controls; no always-revert vacuity.",
+  "parentHead": "a48e6e754efca44b429c6ce317663f0efb9ec762",
+  "runtimeBuildHead": "0140eb13b2f122d421deb07a19575a6801b21dfc",
+  "runtimePolicy": "Revalidated prior fresh H81 binaries; all343 Lean source hashes and build/binary/bridge/closure identities checked; no new runtime build.",
+  "nativeSha256": "cc51c3f74936e174a36fd9fd1d6aa969db9b112483a1f9e7ec16590ee611bc69",
+  "wasmSha256": "6ae1d6db106102dc38725cb32cb1ba7996c537d1948b156d4acae1cd9139b563",
+  "originalJournalSha256": "ae658ff7ea04b163a9d3939f58fc4b30acc15cf4cbe5487ca4abf5baddbb7f1d",
+  "summary": {
+    "casesPerBackend": 84,
+    "exactJournalWireReconstruction": true,
+    "exactRequestObjectsEqual": 84,
+    "exactBackendResultObjectParity": true,
+    "statusCountsPerBackend": {
+      "proved": 64,
+      "refuted": 16,
+      "pending": 4
+    },
+    "concreteModelHaltExpectationsPerBackend": 72,
+    "mandatoryIdentityDiamondBothModesBothBackends": true,
+    "statusesEqualPriorNormalizedRun": true,
+    "noForbiddenLoadsOrAssetsObserved": true,
+    "executedHarnessSha256": "37be7c069490f13759e6789fc00b4b4d29a3ca5c98aeb007f955f2aea73a6dbc",
+    "committedHarnessSha256": "63a01fa7513c310db9ca4040146cb8ee8e9cbb0a99007b5fe87555e6a40c46b5",
+    "lineage": "Executed source archived; only report boundary wording changed after run to distinguish replayed original AST from fresh companion fixtures and revalidated prior H81 builds. No behavioral code change or timing rerun.",
+    "wireReconciliationCommand": [
+      "python3",
+      "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/reconcile-b-journal.py",
+      "--observations",
+      "/workspace/scratch/browser-chain/b-original-replay/controls",
+      "--output",
+      "/workspace/scratch/browser-chain/b-original-replay/wire-reconciliation.json"
+    ],
+    "boundary": "Exact original journal functional replay and observed backend parity; not source/compiler transport, universal machine correctness or new proof terms. Four storage diamond cases pending."
+  },
+  "gate": {
+    "command": [
+      "node",
+      "tests/directruntime-20261104/native-browser/h81-memory-controls.mjs"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 141.64568312400297,
+    "scope": {
+      "memoryMaxBytes": 12884901888,
+      "memorySwapMaxBytes": 0
+    },
+    "requiredOuterHeadroomBytes": 4294967296,
+    "minimumOuterHeadroomBytes": 10586615808,
+    "resourceStop": false,
+    "sampledContainerProcessRssPeakBytes": 1375313920,
+    "rssSamplingSeconds": 0.1,
+    "childRusageMaxRssKiB": 275992,
+    "cgroupPeakBytes": 979558400,
+    "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+  },
+  "archive": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-b-original-replay/evidence.tar.gz",
+    "sha256": "da15f10be44a77b18d488ab63312b40b8d0d9978ceb395cce3b446a73001a0ad",
+    "bytes": 83560,
+    "payloadFiles": 179,
+    "archiveMembers": 180
+  },
+  "limitations": [
+    "Four storage diamond cases remain pending.",
+    "13Cconstructs unsupported;browser invariant stack failure and native median/browser startup STOPs from original benchmark remain.",
+    "A H44 archive and reviewed runtime repairs/editor startup investigation remain dependencies.",
+    "No source/compiler preservation, universal machine correctness or new proof terms claimed; original whole assignment/final gates incomplete."
+  ],
+  "reviews": {
+    "finder": "Final read-only PASS with limits;84exact wires/objects,counts,archive180members,current source and report-only lineage verified. No Lean/server/build/rerun.",
+    "skeptic": "Final read-only PASS with limits;537822byte84wire journal reconstructed to exactSHA,bothbackendresultparity64/16/4 and archiveSHA independently checked. No Lean/server/build/rerun."
+  }
+}

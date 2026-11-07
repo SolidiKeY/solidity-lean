@@ -3,7 +3,7 @@
 
 Run the emitted program against source-checked imports. It records kernel type
 expressions and pretty types for named/generated theorems, structure projections,
-and all remaining constants, with predicate bodies, without proving new statements.
+and all remaining constants, with non-proof bodies, without proving new statements.
 The program imports Lean only in this external audit; the core is unchanged.
 """
 import argparse
@@ -73,8 +73,12 @@ run_cmd do
         let rangeJson := ranges.map fun r => Json.mkObj [
           ("start_line", toJson r.range.pos.line),
           ("end_line", toJson r.range.endPos.line),
-          ("selection_line", toJson r.selectionRange.pos.line)]
-        let body := if isTheorem then none else info.value? (allowOpaque := true)
+          ("selection_line", toJson r.selectionRange.pos.line),
+          ("selection_column", toJson r.selectionRange.pos.column),
+          ("selection_end_line", toJson r.selectionRange.endPos.line),
+          ("selection_end_column", toJson r.selectionRange.endPos.column),
+          ("position_units", toJson ("one-based lines; zero-based Unicode codepoint columns" : String))]
+        let body := if isTheorem || isProof then none else info.value? (allowOpaque := true)
         let record := Json.mkObj [
           ("manifest_sha256", toJson manifestFingerprint),
           ("name", toJson name.toString),
@@ -87,7 +91,7 @@ run_cmd do
           ("interface_or_premises_module", toJson isInterface),
           ("predicate_valued", toJson predicateValued),
           ("body_expr", toJson (body.map reprStr)),
-          ("body_status", toJson (if isTheorem then "proof body intentionally omitted" else if body.isSome then "available expression; not unfolded dependency closure" else "no available value")),
+          ("body_status", toJson (if isTheorem || isProof then "proof body intentionally omitted; declaration retained" else if body.isSome then "available expression; not unfolded dependency closure" else "no available value")),
           ("is_theorem", toJson isTheorem),
           ("is_projection", toJson isProjection),
           ("proof_type", toJson isProof),
@@ -110,6 +114,12 @@ def manifest_sha256(pins):
     return hashlib.sha256(json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
 
 
+def inspection_source(modules, fingerprint):
+    """Reconstruct the exact external inspector, not an acceptance certificate."""
+    imports = "".join("import " + module + "\n" for module in modules)
+    return "import Lean\n" + imports + TEMPLATE.replace("MODULES", ", ".join("`" + module for module in modules)).replace("FINGERPRINT", fingerprint)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--repo", type=Path, required=True)
@@ -129,10 +139,9 @@ def main():
         if data != original:
             raise ValueError("frozen source differs: " + path)
         pins[path] = hashlib.sha256(data).hexdigest()
-    imports = "".join("import " + module + "\n" for module in modules)
     pins_data = {"base": BASE, "modules": modules, "source_sha256": pins, "inspection_template_sha256": hashlib.sha256(TEMPLATE.encode()).hexdigest()}
     fingerprint = manifest_sha256(pins_data)
-    source = "import Lean\n" + imports + TEMPLATE.replace("MODULES", ", ".join("`" + module for module in modules)).replace("FINGERPRINT", fingerprint)
+    source = inspection_source(modules, fingerprint)
     args.output.write_text(source)
     args.output.with_suffix(".pins.json").write_text(json.dumps(dict(pins_data, manifest_sha256=fingerprint, inspection_sha256=hashlib.sha256(source.encode()).hexdigest()), indent=2) + "\n")
     print(json.dumps({"modules": len(modules), "inspection": str(args.output)}))

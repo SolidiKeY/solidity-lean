@@ -12,8 +12,10 @@ statement-fidelity census now cover all 177 frozen declarations across all 24
 mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
-semantic feasibility coverage. The success/runtime phase and matched after timings now also pass. Full normal
-repository validation remains unfinished. The later coordinator instruction explicitly
+semantic feasibility coverage. The success/runtime phase and matched after timings pass.
+The prior full Lean build passed on 2a43bf4f; the current 806a972a full build
+is pending. Final acceptance also awaits 85 standard-only G07 registrations
+(zero axiom errors) and two synthetic references in another audit checker. The later coordinator instruction explicitly
 reactivated this same worker and authorized merging origin/master and continuing.
 The retirement section below is historical; no goal was created or reset.
 
@@ -22,7 +24,7 @@ The retirement section below is historical; no goal was created or reset.
 | 1. Frozen signatures, ownership, premise classification | Complete source inventory; elaborated binders now also exported. |
 | 2. Simultaneous hypotheses | 177 exact-type packages pass complete Lean diagnostics and reviews. |
 | 3. Success/totality and behavioral controls | Seven formal theorems and ten provenance-bound external programs pass; proof/runtime boundary below. |
-| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Full final gate rerun remains required after checkpoint 3. |
+| 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Fresh 806 per-file census passes; current full build and owner metadata closure remain pending. |
 
 The accounting tool explicitly reports `witness_gate_complete=true` and
 `assignment_complete=false`. All original Solidity sources, generated roots,
@@ -453,3 +455,223 @@ The d96 full run reached all library/examples and TestSuite.Derived20 before a
 reserve stop at2088.577s, peak taskRSS9174859776bytes, noLeanerrors, noSwap,
 oneheavyjob, cleanuptrue. OpenLoops passed unchanged. The new706 full gate remains
 to run with retained artifacts; no failed attempt is counted as a pass.
+
+## Final validated handoff: G07 metadata blocker
+
+All original ABI audit implementation/proofs are complete:24 frozen modules,
+177 exactly-once statements,177 simultaneous witnesses/fidelity comparisons,
+439 binders, seven success theorems and10 external fixtures with exact current
+encoded-byte identity. Four map-drift files remain explicitly outside the frozen
+map, not silently counted. No original statement, definition, premise, exclusion,
+proof budget, axiom set or Source module was changed by this lane's continuation.
+
+The actual current ./run-lean.sh command passed at706 input identity,6546jobs,
+exit0 in274.931973s. Resource receipt: peak taskRSS5904257024bytes, minimum
+available9599537152bytes, maxoneheavyLeanjob, noSwap, verifiedcleanup. Earlier
+full5 reached6517/6542 before a reserve stop at6563.727s; that failure is retained.
+Cold-cache recovery changed residency only, not proof/source/budgets. Current
+Lean4.24.0 Release797c613 and Lake5.0.0-src+797c613 plus fresh passing KeySort are
+recorded; no theorem truth is inferred from runtime labels. Current run-lean
+policy does not run solkeycheck; that CLI is not silently reported as passed.
+
+Trust passes:6553sources,289 inventoried implementation/recoverysites,0findings.
+Reachability passes:6537reachable,0orphaned,0notallowed. Documentation paths now
+pass (128 ambiguous but resolving references are nonfatal). The five initial
+missing references were synthetic/unapplied/external paths. H82-authorized
+documentation-only fixes retain the intended proposed filenames/purpose and
+failed-experiment exclusion; the duplicate-map fixture now cites an existing
+module and its four tests still pass. No other proving-lane Source was edited.
+
+One required global metadata gate remains failed: check-axiom-pins reports
+16118pinned theorems,0nonstandard/growth/removal errors,99unrecorded changes.
+Every change is a new registration using only existing standard axioms; none
+is a new axiom or pin growth. All pin sources and central inventory are unchanged
+from706. The original assignment explicitly prohibits this worker editing
+central pins. The deterministic propose_pin_sync.mjs supplies the exact99-key
+owner delta, recorded centralSHA and repair options in the committed resumed
+axiom-pin-owner-ticket.json. No --write, pin-fragment or central inventory edit
+was performed. Owner: coordinator/G07 per-file fragment owners.
+
+Thus full assignment acceptance remains BLOCKED, not done. The original four
+audit checkpoints have no uncovered statement/proof obligations; final gate
+closure awaits owner registration of the already existing standard-only pins.
+No extra unclaimed audit candidate is assigned. All independent authorized
+backfill, portability work and reviews are complete. After a metadata-only owner
+repair, check the pin/fragments gates; preserve current proof receipts if source
+inputs stay identical. Any new source/config input requires appropriately fresh
+validation. No unsupported premise/exclusion is offered as a repair.
+
+## Re-baseline requested by coordinator (2026-11-07)
+
+The coordinator reported a37430cd merged at2a43bf4fc and requested another
+re-baseline/continuation. The assigned branch merged origin/master
+2a43bf4fcdaf24750265afc8f8be5b420d1d22b0 while preserving the later b08fa0ea
+full-build/handoff checkpoint. Mergeheadfcd012d856e25c33ce0bf8760744622b29fb2a21
+has both parents. The only conflict was the duplicate-row fixture using two
+different existing paths; upstream ABIEntry/Interface was retained, preserving
+the same assertion and four passing tests. No Lean conflict or proof edit.
+
+All24 frozen ABI files/map remain byte-identical. Current input pin covers7722
+Lean files; all9 audit files+KeySort pass fresh source/output/resource-bound
+diagnostics. Acceptance remains177/439/7/10. Three controls pass using an
+explicit H62_AUDIT_TEST_EVIDENCE location. Current same-identity matched timing
+1.611498644→1.609982393s (−0.094089499%, within10%) passes. Both independent
+read-only reviewers accepted ancestry, conflict choice, protected inputs, fresh
+receipts, ticket and timing; neither used Lean/server/builds or edited.
+
+The current global pin checker reports16151pins,0errors,110unrecorded additions.
+The new ticket PIN-2a43bf4f derives its base from the checked integration constant
+and contains110unique standard-only additions with matching centralSHA. No
+central pin update was made by this worker. Earlier full-build passes/99-entry
+tickets remain historical; they are not relabelled as current2a43 validation.
+The current full build remains to run after19 upstream validation-input changes.
+
+## Current full gate and final owner handoff (2026-11-07)
+
+The normal ./run-lean.sh passed on integration
+2a43bf4fcdaf24750265afc8f8be5b420d1d22b0, with 6555 jobs and exit 0,
+in 6935.474578 seconds. The resource receipt binds stdout SHA256
+0f741f0097ab7ff34d21865cb6f7660169c1afdf5253e02a9021e2cca040edc2.
+Peak task RSS was 8629575680 bytes; peak cgroup use 11469070336 bytes;
+minimum available memory 5710798848 bytes. One heavy Lean job, explicit -j1,
+LEAN_NUM_THREADS=1, no swap and verified cleanup satisfy the unchanged
+16 GiB hard cap, 12 GiB task RSS cap and 4 GiB reserve. No source, proof budget
+or configuration changed during the run. The prior 706 pass is historical.
+
+Actual Lean is 4.24.0 Release, commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake is 5.0.0-src+797c613.
+Fresh bounded per-file KeySort and all nine audit modules pass, with 177
+witnesses/fidelity comparisons, 439 binders and seven formal success theorems.
+Ten generated external fixtures remain byte-identical to authenticated archived
+observations. This does not claim a fresh EVM run, a formal gas/fork theorem
+or a general compiler correctness bridge. No new axiom, sorry, native trust
+shortcut or frozen statement edit. Matching timing delta is -0.094089499%,
+within the unchanged 10% limit.
+
+Fresh static gates: trust passes (6562 sources, 289 sites, zero findings),
+reachability passes (6546 reachable, zero orphans/not-allowed), documentation
+paths pass (131 ambiguous references all resolve). Global axiom metadata still
+fails: 16151 pins, zero errors, 110 unrecorded standard-only additions.
+PIN-2a43bf4f records every unique addition and the current central hash.
+The original explicit prohibition on central pin edits remains in force.
+Coordinator/G07 owners may register those existing pins and rerun the inventory
+gate, or retain the blocker pending their review. Neither option changes a
+theorem, premise, exclusion or axiom set. No vacuous or weakened mapped theorem
+was found, so there is no theorem-repair escalation.
+
+The four original implementation/proof checkpoints and independent backfill
+are complete; final checkpoint acceptance remains blocked only on the central
+metadata gate. No additional unclaimed audit candidate is assigned. Keep the
+original goal unfinished; do not create/reset it. No push, merge into master,
+PR or deployment was performed. Portable manifests use archive-relative paths;
+current committed index records the off-Git archive hash. Full original prompt,
+work/backfill queue and scope manifest remain committed in the parent handoff.
+
+Final independent finder and skeptic reviews verified the current full-build
+receipt and owner ticket without Lean/server/builds/edits. Both also verified
+all 1524 archive members; the skeptic checked all 402 resume-manifest entries
+and all 61 final-snapshot files. The packaging minor is closed: the current
+index hashes and blocked-versus-build-pass claims agree. No residual finding.
+
+## Coordinator-requested cross-lane cleanup (2026-11-07)
+
+The coordinator reported dd89c41fbb conflicting with master ba3c0f15 in three
+other-lane documentation files and explicitly requested dropping our edits.
+Fetched origin/master a0cdc0beca021d34e60c4a3ed40aa9559a11d88a; verified the
+reported ba3c0f1539c8b64ac0c6c89e729481d3d398ee83 is its ancestor. The shared
+merge base remains 2a43bf4fcdaf24750265afc8f8be5b420d1d22b0. No master merge
+or rebase was performed, preserving the validated Lean input identity.
+
+Restored exact merge-base bytes in docs/feature-work/h62-1-infer-helpers.md,
+docs/feature-work/h62-6-migrate-theory.md and
+tests/h62/item4/generic-structuredflow/registration.md. Each now has zero lane
+delta against the shared merge base, so the coordinator can retain each owner's
+master-side version. This withdraws all three of our documentation-path fixes.
+No Lean source, statement, definition, premise, exclusion, proof budget, axiom
+pin, root or toolchain input changed. The prior 6555-job full Lean build and
+per-file/KeySort receipts retain their original source identity; no Lean job
+or timing rerun was needed for this documentation-only correction.
+
+The current branch documentation-path check exits 1 with exactly four missing
+references, all in those restored other-lane files. This is an explicit known
+consequence of the requested withdrawal, not a newly repaired owner file.
+Earlier documentation-path PASS claims above describe the pre-cleanup tree.
+The coordinator's current owner versions are not overwritten or adjudicated.
+The original PIN-2a43bf4f metadata wait remains; overall assignment is not done.
+Final cleanup evidence, reviews, cumulative patch/bundle and exact new head are
+exported separately, preserving the earlier authenticated evidence archive.
+
+Independent read-only finder and skeptic reviews accepted this narrow cleanup:
+exact three-file base identity and zero lane delta, unchanged Lean/config/pins,
+four restored missing references and accurate superseding handoff. Neither
+used Lean/server/builds or edited files; no findings remain for this correction.
+
+## H44 reviewability split (2026-11-07)
+
+At coordinator request, the detailed 110-key owner ticket and the 1524-member
+portable checksum dump were removed from the Git tree without changing their
+bytes. They are preserved under
+/workspace/audit-abi-world-evidence/h44-split-20261107/bulk/.
+The small committed bulk-artifacts.sha256 records each absolute path, byte size
+and SHA256, plus the preserved proof archive. The existing portable index points
+to these external files; its archive and member-manifest hashes are unchanged.
+The portable verifier still checks every archive member with identical logic.
+The ticket generator now requires --output EXTERNAL_PATH in an existing external
+parent, rejects repository-resolving parents and never follows the final output
+symlink. The packer requires
+its per-member manifest outside Git, preventing bulk regeneration into the tree.
+No Lean statement/source, verification gate, proof budget, resource bound or
+central axiom inventory changed. Historical paths above describe prior exports.
+The previous proof/test boundaries and owner waits remain unchanged.
+
+Independent finder and skeptic reviews accepted the H44 split. Their generator
+path-check finding was fixed and verified with three symlink rejection controls
+that create no repository outputs. Both closed the finding; no residual issue.
+No Lean/server/builds or edits by reviewers. Bulk hashes and ticket bytes match.
+
+## Coordinator 806 re-baseline (2026-11-07)
+
+Fast-forwarded the assigned branch from c388d3209661b33ddd6d0fc6301039332d5085ee
+to exact published origin/master 806a972a4f1eefc367f7fe21078e56469447ce13, after
+verifying original-base and lane-head ancestry. No conflict, reset, push or goal
+creation. All24 frozen ABI modules and their map remain byte-identical. The
+canonical input snapshot now binds7966 Lean files. Only the owned integration
+constant changed; generated serial TOML is byte-identical, with unchanged
+-j1/LEAN_NUM_THREADS1 and 16GiBhard/12GiBRSS/4GiBreserve/noSwap bounds.
+
+All nine audit files plus KeySort pass fresh bounded per-file diagnostics.
+Acceptance177witnesses/fidelity,439binders,7formal success theorems and10identical
+externalencodedfixtures passes, along with3receipt controls and4scanner tests.
+Matched timing1.626682899 to1.649552630seconds (+1.405912057%,within10%) passes.
+Finder and skeptic independently verified ancestry, source/output/resource
+bindings, signatures and acceptance without Lean/server/builds/edits; no finding.
+
+Trust passes6628sources/289sites/0findings; reachability passes6612/0orphans.
+Documentation paths fail on exactly2synthetic A/B names in the other lane's
+check_scope.py; no cross-lane repair was made. Globalpins16675/0errors/85new
+standard-only registrations remain an owner metadata wait. Off-Git ticket
+PIN-806a972a contains all85unique previous=null entries and currentcentralSHA;
+the tiny committed bulk manifest authenticates its path,size,hash. H44 bulky
+files stay offGit; archive index/receipts from2a43 remain historical. Absolute
+VM paths require retrieval before off-VM verification, not assumed shared files.
+
+The new full build remains pending because281validation inputs changed,
+including Source evaluation/horizon modules. The prior6555-job pass is not
+relabelled as current. No statement, hypothesis, exclusion, proof budget,
+axiom set or observation changed. External gas/fork observations remain archived
+fixture reuse, not formal/general compiler proofs. No new unclaimed candidate
+is assigned; finish current validation before final owner handoff.
+
+### Generated documentation ordering repair
+
+The first current ./run-lean.sh attempt exited1 before starting Lean, after
+3.288084seconds: docs/README.md had one existing P8 row out of fragment order.
+The failure log and resource receipt remain immutable. Under H82's standing
+documentation-fix authorization, generated only docs/README.md using the
+repository's pure fragment renderer. Its line multiset is identical; exactly
+one row moved. All protected Lean roots, combined module maps and the central
+axiom inventory retain their hashes. No fragment, statement, source, proof
+budget, gate command or axiom changed. fragments --check now passes.
+Independent finder and skeptic verified the line multiset/protected hashes and
+retained failure, no findings; neither Lean/server/builds/edits. Current full
+retry remains pending; fragments PASS alone is not a full-build PASS.

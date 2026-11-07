@@ -1,0 +1,184 @@
+{
+  "evidence": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107",
+  "scope": "One existing selected local-require fixture; compares Out.isRevert, no gas/fork or full compiler adequacy.",
+  "initial_timing_stop": {
+    "baseline": 1.862,
+    "candidate": 2.165,
+    "ratio": 1.1627282491944146,
+    "stop_gt_10_percent": true,
+    "candidate_restored_sha256": "7f1cccacee8d974d15c920bec856a16efda78ae424207abf21f61e08b953a10d"
+  },
+  "changed_candidate_timing": {
+    "baseline": 1.968,
+    "candidate": 2.058,
+    "ratio": 1.045731707317073,
+    "stop_gt_10_percent": false
+  },
+  "files": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/baseline/console.log",
+      "bytes": 161,
+      "sha256": "735b65998842f8fcec4ba0674c4bd77d0e6d7dfcaaad03bb49bc4294fb26a798"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/baseline/gates/1.log",
+      "bytes": 42198,
+      "sha256": "800283229a895cc62b07f6a079dd067a289f6eec05d684aa0e01d5a806c200b0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/baseline/gates/HEAD",
+      "bytes": 41,
+      "sha256": "b7f686fb953460ba192caf74cb9d2c9ef17cecb8f0a7a1db5e25e552156b3ac7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/baseline/gates/gates.tsv",
+      "bytes": 248,
+      "sha256": "3736fb4127b6643a7aece6070382f3b48559d5562daef7abda6849147e456ea4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/baseline/results.json",
+      "bytes": 397,
+      "sha256": "9a85a0f832733a9df95dbbcd073ae37cacfd044f2ca07f09cd55269bb0fe04ed"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/candidate/console.log",
+      "bytes": 162,
+      "sha256": "3fbfc5ad28540ad2ba7cd65b7caf0dba31ff895d041d54a2e8af8418bf38c2d3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/candidate/gates/1.log",
+      "bytes": 42587,
+      "sha256": "aa0bdc7c4774a6b5993bf42007e2c89726f25f004ba383bdfc063b0e5e42409a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/candidate/gates/HEAD",
+      "bytes": 41,
+      "sha256": "b7f686fb953460ba192caf74cb9d2c9ef17cecb8f0a7a1db5e25e552156b3ac7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/candidate/gates/gates.tsv",
+      "bytes": 249,
+      "sha256": "2668cf46a1cef563aa74067f596def329a98c495068ce0d2553bd0cad0f28055"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/candidate/results.json",
+      "bytes": 397,
+      "sha256": "573c5831cc4e229b30db1fd5dd748e23110be380a8353442947a49692a741ba2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/console.log",
+      "bytes": 153,
+      "sha256": "43a28097dedb645eaaf98e1f6d032f8dba13046c281277c858da518be834a203"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/gates/1.log",
+      "bytes": 42904,
+      "sha256": "197c83e3dfb77129f91207d60f9d0c8eb32730fb584623bb4d183c5e464e78a5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/gates/HEAD",
+      "bytes": 41,
+      "sha256": "b7f686fb953460ba192caf74cb9d2c9ef17cecb8f0a7a1db5e25e552156b3ac7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/gates/gates.tsv",
+      "bytes": 240,
+      "sha256": "7a049d0bedae9df500f05c777eb147e2201a1896c775b5d90183553a1819f960"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/legacy-preservation.json",
+      "bytes": 145,
+      "sha256": "997703a50459ae39ab2d568069c599a9d5830bf1034014a776df1b5b10520cd2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-baseline/console.log",
+      "bytes": 169,
+      "sha256": "f08d4dc34e21b4bb71645be1233fd64b939feb25d84aeb051e69f17b091e3d0a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-baseline/gates/1.log",
+      "bytes": 42198,
+      "sha256": "800283229a895cc62b07f6a079dd067a289f6eec05d684aa0e01d5a806c200b0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-baseline/gates/HEAD",
+      "bytes": 41,
+      "sha256": "b7f686fb953460ba192caf74cb9d2c9ef17cecb8f0a7a1db5e25e552156b3ac7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-baseline/gates/gates.tsv",
+      "bytes": 256,
+      "sha256": "d118f79c45805662a0846f9bf54ed98990d4d579684e3ffba6a17b48774fc283"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-baseline/results.json",
+      "bytes": 397,
+      "sha256": "a782ade67fb33ce78dd21cdd9f7ac9bd8dfd4bd3e3ce117ef45fe11f45918d41"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-candidate/console.log",
+      "bytes": 170,
+      "sha256": "7ccb761882b8b8ff55674d06c384865975ad1e022523b75bd65560580c01f849"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-candidate/gates/1.log",
+      "bytes": 42322,
+      "sha256": "5a9444df60bc2255a5251e2d7264c8c55bec12e4db8c42c5183ab93273e4c609"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-candidate/gates/HEAD",
+      "bytes": 41,
+      "sha256": "b7f686fb953460ba192caf74cb9d2c9ef17cecb8f0a7a1db5e25e552156b3ac7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-candidate/gates/gates.tsv",
+      "bytes": 257,
+      "sha256": "7cd57ed6e98c2fa7d12876475b2198858dc0c3a22758467a5f649929284d63f5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-candidate/results.json",
+      "bytes": 397,
+      "sha256": "3825ac5cbad6cfc66d2e469a3299d9ef01120578159e7d36b993f76f1129a4e7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/reduced-timing.json",
+      "bytes": 107,
+      "sha256": "d031cf253ab77bdae23aef1cb442da62e0973089063f5a3640362b1d3cf03883"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/results.json",
+      "bytes": 399,
+      "sha256": "ace5f2b2edbc94abb96b2630c445e384b652412a439c87821ee4206c8935cb5a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/revert-observation/console.log",
+      "bytes": 171,
+      "sha256": "46b1c047830086c45b79b4a81bcfe5335102a4685f31aeb9e1314dbcdee784a5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/revert-observation/gates/1.log",
+      "bytes": 42587,
+      "sha256": "aa0bdc7c4774a6b5993bf42007e2c89726f25f004ba383bdfc063b0e5e42409a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/revert-observation/gates/HEAD",
+      "bytes": 41,
+      "sha256": "b7f686fb953460ba192caf74cb9d2c9ef17cecb8f0a7a1db5e25e552156b3ac7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/revert-observation/gates/gates.tsv",
+      "bytes": 258,
+      "sha256": "d1a22871c40634d8040319a783a8f9652379174248cef1be4a4bb1757e3c6ff8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/revert-observation/results.json",
+      "bytes": 397,
+      "sha256": "fdd6b0262530ab321fafd6881f86845e001dbc363dece85c307c9001b30ae067"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/input-blind-contract-20261107/timing.json",
+      "bytes": 206,
+      "sha256": "700cf21de6009523484d3a40b4e75e6f43115d2f7ab70a03665b7d73344be301"
+    }
+  ]
+}

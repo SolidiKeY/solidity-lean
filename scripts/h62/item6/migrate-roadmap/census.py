@@ -14,9 +14,15 @@ def graph(root):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.SourceGraph(root)
+def assigned_paths(root):
+    """Freeze the original15-file assignment; newly merged producers are not ours."""
+    names = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", BASE, "--", "Solidity/Roadmap/"], cwd=root).decode().splitlines()
+    return sorted(root/name for name in names if name.endswith(".lean"))
+
 def census(root):
     g = graph(root)
-    paths = sorted((root/"Solidity/Roadmap").rglob("*.lean"))
+    paths = assigned_paths(root)
+    unassigned = sorted(str(p.relative_to(root)) for p in (root/"Solidity/Roadmap").rglob("*.lean") if p not in set(paths))
     targets = [str(p.relative_to(root).with_suffix("")).replace("/", ".") for p in paths]
     closure = g.closure(targets)
     rows = []
@@ -34,6 +40,7 @@ def census(root):
     owned=set(targets)
     edges=[dict(consumer=m,dependency=d) for m in targets for d in g.imports(m) if d not in owned]
     return dict(base=BASE, targets=targets, modules=rows, closure=closure,
+                unassigned_directory_files=unassigned,
                 external_local_modules=[m for m in closure if m not in owned], boundary_edges=edges,
                 reader_sha256=digest((root/"scripts/v08-build-graph.py").read_bytes()),
                 note="Lexical commands are navigation aids, not an elaborated declaration census; whole-source hashes freeze all content.")

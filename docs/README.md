@@ -77,6 +77,7 @@ history is in git.
 | [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 | [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 | [feature-work/h28-mutation-testing.md](feature-work/h28-mutation-testing.md) | H28 semantic rule mutation testing: whole-family census, toStep proof oracle, checked kill witnesses and score. |
+| [feature-work/p8-producer-merge.md](feature-work/p8-producer-merge.md) | H57/H60 P8/P8b Producer merge: inventory, merged interface, inhabited frozen P8a Producer, controls and migration notes. |
 | [feature-work/source-s04-funds.md](feature-work/source-s04-funds.md) | S04.04: actual request-boundary sender-funds validation, invalid-drop laws, measured current Source release and remaining H19 boundary. |
 | [feature-work/vy5-composition.md](feature-work/vy5-composition.md) | VY5: scoped composition proofs, actual Source catch binding and explicit remaining full-lane obligations. |
 
