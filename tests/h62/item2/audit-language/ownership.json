@@ -3855,7 +3855,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "ae1a1d56010b847204dd809138039ad898c74ce5",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-automation-20261031__va2-sharing-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-automation-20261031__va2-sharing-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3865,7 +3865,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "5b3446c835a362dbd12e40314849f763136df17d",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__memory-loops-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__memory-loops-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3875,7 +3875,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "f93e1e981f0eeed1e51b132bea669f92d74955e9",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__memory-reference-arrays-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__memory-reference-arrays-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3885,7 +3885,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "b0737a2fa38a29364150e08f5a01c1e04266a66e",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__evm-byte-memory-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__evm-byte-memory-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3895,7 +3895,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "92cbaeabcceb3061f1e712b4e777af2479c17cac",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__evm-storage-slots-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__evm-storage-slots-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3905,7 +3905,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "7bb843729b9c9dacb3ad70dd439e553c004612f2",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__evm-control-flow-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-compiler10-20261028__evm-control-flow-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3915,7 +3915,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "b7801b00474e88aa3211524cba2da4c9152fec3e",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__kint-two-anchors-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__kint-two-anchors-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3925,7 +3925,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "ab832d8db0b94acee2b493841e6f19c31403e3a8",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__quant-ledger-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__quant-ledger-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3935,7 +3935,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "71bd4626e1153221e003e15a611cb7e5ec99b117",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__memory-negative-block-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__memory-negative-block-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3945,7 +3945,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "c44a02c058c64d6d6adbcc7740268a6d687c7faa",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__memory-parameter-witness-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__memory-parameter-witness-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3955,7 +3955,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "06a8d16b89e18747ccb0500810a0b189963bf434",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__memory-struct-witness-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__memory-struct-witness-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3965,7 +3965,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "5e7f5c741336eae4e39e1a87ae04c9912b6ce299",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__written-memory-hash-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__written-memory-hash-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3975,7 +3975,7 @@
    "status": "retired",
    "writeScope": "",
    "head": "20bbb1071e12d6e0765c885434df3defc7477b92",
-   "evidence": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__diamond-payments-retirement.json",
+   "evidence": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/receipts/solidity-next10-20261028__diamond-payments-retirement.json",
    "notes": "Delivery ancestry verified; no original assigned work remains. Backend goal/executor limitations in receipt."
   },
   {
@@ -3984,7 +3984,7 @@
    "ownerKey": "solidity-copy-recovery-20261030/memory-storage-copy",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -3993,7 +3993,7 @@
    "ownerKey": "solidity-compiler10-20261028/readonly-external",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -4002,7 +4002,7 @@
    "ownerKey": "solidity-v07-v11-20261030/v08-world-lowering",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -4011,7 +4011,7 @@
    "ownerKey": "solidity-v07-v11-20261030/v10-storage-operations",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -4020,7 +4020,7 @@
    "ownerKey": "solidity-v12-v17-20261031/v13-abi-world",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -4029,7 +4029,7 @@
    "ownerKey": "solidity-v12-v17-20261031/v14-payments-bytecode",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -4038,7 +4038,7 @@
    "ownerKey": "solidity-v12-v17-20261031/v17-validation-release",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -4047,7 +4047,7 @@
    "ownerKey": "solidity-h28-terra-20261104/proof-cleanup",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -4056,7 +4056,7 @@
    "ownerKey": "solidity-h28-terra-20261104/drift-reports",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {
@@ -4065,7 +4065,7 @@
    "ownerKey": "solidity-h28-terra-20261104/timing-tools",
    "status": "queued-cap-and-prerequisites",
    "writeScope": "",
-   "bundleRef": "/home/guilherme/.local/state/cloudvm-coord/triage-20261104/bundles.json",
+   "bundleRef": "$XDG_STATE_HOME/cloudvm-coord/triage-20261104/bundles.json",
    "notes": "Continuation bundle; original write scopes/exclusions and goal retained. No admission at conservative in-flight count 26."
   },
   {

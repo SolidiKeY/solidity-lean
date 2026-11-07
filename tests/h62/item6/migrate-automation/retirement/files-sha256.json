@@ -3,15 +3,15 @@
   "files": [
     {
       "path": "tests/h62/item6/migrate-automation/retirement/coordinator-inputs-manifest.json",
-      "sha256": "907305fa351a3356261c07fe89d87b54eb8808e6975a4704406475c936638387"
+      "sha256": "b105d72bfb53cb931881be21e09a6695125f2ecc530482a1da619e34ebcd6900"
     },
     {
       "path": "tests/h62/item6/migrate-automation/retirement/h70-h78-owner-ticket.json",
-      "sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5"
+      "sha256": "9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10"
     },
     {
       "path": "tests/h62/item6/migrate-automation/retirement/h70-ticket-provenance.json",
-      "sha256": "f24e88b427fc8cd26c584798424d12e3021ed008baab07f7b1dbf0f45ee5fb71"
+      "sha256": "7aed93b433bcf54ce47aa4fa9df2bbff33689aa493ce8c955231201b31bd65bb"
     },
     {
       "path": "tests/h62/item6/migrate-automation/retirement/original-assignment.txt",

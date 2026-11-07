@@ -1281,19 +1281,19 @@
     },
     "combined-command.sh.txt": {
       "path": "tests/upstream/cloud-integration-20261028/combined-command.sh.txt",
-      "sha256": "bcbc021ae94e318d6e4aabe4bbf031a219575ba2c337b13fb695213dc54889d4"
+      "sha256": "cbc02a0e51e446fa7b5b836df8bf1fcb8fb50b8e36a550b0109a0b7420a66374"
     },
     "final-source-command.sh.txt": {
       "path": "tests/upstream/cloud-integration-20261028/final-source-command.sh.txt",
-      "sha256": "e61e1790d4d8fae85539746954b212f8378f7b895531ed4bd46c3d1aac58a7bd"
+      "sha256": "541ad62912ab1dec4ea1c7ff63a7d1ce262a55bac777781753cd821a4ef4d02c"
     },
     "default-cli-stack-command.sh.txt": {
       "path": "tests/upstream/cloud-integration-20261028/default-cli-stack-command.sh.txt",
-      "sha256": "7afd4b489ce48e1fce9629757e584808fd29b39540c669f4fb76edf3dfec246b"
+      "sha256": "7e1ea5a79b6f61220f4b3f4ba37cd332b81c38e6d4ea082c5185254c92b4dfe1"
     },
     "post-build-command.sh.txt": {
       "path": "tests/upstream/cloud-integration-20261028/post-build-command.sh.txt",
-      "sha256": "036f2f0e0dadd60db63668ea53c16908569615bf7729f83567737f4dc677c49d"
+      "sha256": "661fee536c63929ebce34c3e268719057f01bb68a95ff6f77b6b3594d93ec211"
     },
     "canonical-cache-check.log": {
       "path": "tests/upstream/cloud-integration-20261028/canonical-cache-check.log.gz",

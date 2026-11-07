@@ -719,7 +719,7 @@
     "Solidity/Examples/Verify.lean"
   ],
   "assigned_original_lean_count": 354,
-  "snapshot_sha256": "7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce",
+  "snapshot_sha256": "49fa4e0ef45307428a026b414efc6a99efcbf4911dd23e9574e806be54dbfefe",
   "snapshot_source": "/workspace/h62-coordinator-inputs/ownership.json",
   "later_policy": "H82 standing agreements supersede exact-file agreement for listed statement-preserving changes; H82 retirement forbids this worker from resuming implementation."
 }

@@ -66,7 +66,7 @@
       "expected_sha256": "9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392",
       "id": "DELIVER160530-1",
       "recipient": "COORD",
-      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392-HANDOFF.md"
+      "source_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392-HANDOFF.md"
     },
     {
       "action": "Deliver this new staged file for static review; no H76 redelivery, Lean rerun or acceptance requested.",
@@ -74,7 +74,7 @@
       "expected_sha256": "dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c",
       "id": "DELIVER160530-2",
       "recipient": "COORD",
-      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c-HANDOFF.md"
+      "source_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c-HANDOFF.md"
     },
     {
       "action": "Deliver this new staged file for static review; no H76 redelivery, Lean rerun or acceptance requested.",
@@ -82,7 +82,7 @@
       "expected_sha256": "c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72",
       "id": "DELIVER160530-3",
       "recipient": "COORD",
-      "source_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72-source-full.patch"
+      "source_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72-source-full.patch"
     }
   ],
   "requirements": "/workspace/solidity-lean-migrate-root-gate/scripts/h62/item6/migrate-root-gate/h78-public-api-requirements.json",

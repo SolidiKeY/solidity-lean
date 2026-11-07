@@ -15,8 +15,8 @@ MANDATORY HANDOFF CONTENTS: include the complete original frozen rendered prompt
 
 H70 owner-ticket evidence received during retirement:
 - requester solidity-h62-6-20261106/migrate-root-gate, head16d7e371a1e013f492784b596397cf500dbd7543
-- reported filename749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5-owner-requests.json
-- reported SHA256749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5; source file not delivered to this VM, so no local verification claimed.
+- reported filename9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10-owner-requests.json
+- reported SHA2569d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10; source file not delivered to this VM, so no local verification claimed.
 - H78-COMPLETE-PUBLIC-INVENTORY requires every original public generated declaration (noConfusion, recOn, casesOn, matchers and others), old/new visibility/signature provenance and actual shim name/old_signature/new_signature/shim_signature records. No blanket generated exclusion. No new command or source permission implied.
 - H70 requester disposition for932d41dcdb2ae92566202c69e79b53e33443daf4: Relayed current tickets/handoffs to solidity-h62-6-20261106/migrate-syntax. Wait: migrate-syntax Solidity/Syntax/Raw.lean accepted compatibility prerequisite; then original49-module/8068-declaration interface parity and complete comparison, retaining333-module old baseline.
 - Other reported tickets concern migrate-source, migrate-roadmap, migrate-sortcheck, migrate-hash and coordinator deliveries; no takeover by this retired TestSuite lane.
