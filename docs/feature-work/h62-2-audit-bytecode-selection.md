@@ -1172,3 +1172,49 @@ trust/reachability, roots/fragments, documentation paths and whitespace checks
 pass. Existing28unrecorded scoped global pins remain for coordinator integration;
 this checkpoint changed no tracked Lean/inventory/layer inputs. Layer policy
 is the published107allowance version, not a new semantic theorem.
+
+
+## Forty public gate-contract hypothesis domains
+
+Master254c60df was fetched/inspected and already adopted; no producer duplication.
+The existing renderer and one fixture add BoolBinding nine public methods and
+three certificate fields, twelve new domains and forty total across four
+families/eight frozen producer leaves. Same shared elaborator byte pin and
+frozen c6f550 source equality checks; lexical exactly-once testing covers only
+this explicit public-method/field subset, not private helpers, definitions,
+general discovery, owners or full census. No original interface or implementation
+was changed. No new compiler framework or production module was added.
+
+BoolBinding domains retain the refined compilation result context and selected
+artifact. decoded_and_bound uses the SAME full36-zero-byte input, size36,
+word0 in cell7 and size36 in cell8, with represented/full/valid facts jointly
+proved. Other short/rejection domains use the empty input and zero-size frame.
+No decoded payload is assumed. The macro removes only conclusions, so these
+prove exact premise feasibility, not original outcomes or Source/native adequacy.
+Existing actual-success/refusal proofs remain separate and preserved.
+
+Check1 rejected one overly broad propext guard annotation: the validated-word
+domain uses no axioms. Only that expected-output comment was corrected; proof,
+type and allowed standard axiom set unchanged. Failed source/manifest/log stay
+retained. Final check2 passes14.661s,emptydiagnostics,40guards (4noaxioms,
+15propext-only,21standardtrio) plus2classifierrefusals, both monitorsPASS.
+No module here>60s; old61.994s head receipt retained. Original generic epoch/
+deadline01:11:01.069665→05:11:01.069665UTC copied unchanged; no reset,
+prerequisite build, PowerBounds retry, heartbeat or trust-policy change.
+No RUNTIME_GATE_PASS or paired-performance result follows.
+
+Trusted reviewed fixture is not a regex sandbox. Generated proof/manifest/
+native receipt stay offGit and hash-bound; explicit kernel checking is required
+beyond72Python tests or the six-file verifier roster. No new global pin/root/map
+registration or metadata/ledger acceptance. Full703/190core/37Bridge, private/
+inherited/type/source joins, global owners/witness ledger, Source/native,
+selector/gas/fork, Bridge/package/performance and producer waits remain open.
+No uncovered inventory counts or whole-goal status were promoted.
+Evidence: /workspace/parallel-20261103/executable-bytecode/exact-bool-binding-domains/.
+
+Final independent finder/skeptic reviews pass. Pure import receipt rechecking
+confirms238 frozen source/product bindings with original terminalRED retained.
+All72 tests, trust/reachability, roots/fragments, documentation and whitespace
+checks pass. Existing28scoped global pin registrations remain coordinator work;
+no tracked Lean/inventory/layer input changed. Published107allowance layer
+policy and historic failures are preserved, without semantic/full-gate claims.

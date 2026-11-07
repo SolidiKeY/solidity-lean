@@ -267,3 +267,103 @@ theorem single_certificate_entry_rejection_domain :
 
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.single_certificate_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms single_certificate_entry_rejection_domain
+
+private def fullSize : Fin W := wmod 36
+private def fullMachine : Machine :=
+  {Machine.init with mem := fun address => if address = 8 then .val fullSize else .val sampleWord}
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.admitted := by
+  exact ⟨sampleContract, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_admitted_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.selected := by
+  exact ⟨sampleContract, 7, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_selected_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_code_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.code := by
+  exact ⟨sampleContract, 7, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_code_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_code_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.run_program := by
+  exact ⟨sampleContract, 7, sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_run_program_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.executed := by
+  exact ⟨sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_executed_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_entry_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.entry_rejection := by
+  exact ⟨sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, sampleInput, 0, sampleMachine, sampleWord, rfl, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_entry_rejection_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_validated_word_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.validated_word := by
+  exact ⟨sampleWord, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_validated_word_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms binding_validated_word_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_decoded_and_bound_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.decoded_and_bound := by
+  exact ⟨sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, fullInput, 0, fullMachine, fullSize, rfl, rfl, by decide, by decide, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_decoded_and_bound_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_decoded_and_bound_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_short_before_word_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BoolBinding.short_before_word := by
+  exact ⟨sampleContract, 7, sampleLabel, sampleMachine, sampleWord, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_short_before_word_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_short_before_word_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BoolBindingCertificate.selected := by
+  exact ⟨BoolBinding.program, BoolBinding.certificate, sampleContract, 7, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_certificate_selected_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BoolBindingCertificate.executed := by
+  exact ⟨BoolBinding.program, BoolBinding.certificate, sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, sampleMachine, sampleWord, sampleWord, rfl, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_certificate_executed_domain
+
+/-- Every original binder is retained; only the conclusion becomes True. -/
+theorem binding_certificate_entry_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BoolBindingCertificate.entry_rejection := by
+  exact ⟨BoolBinding.program, BoolBinding.certificate, sampleContract, 7, sampleLabel, BoolBinding.compiled sampleContract 7 sampleLabel, BoolBinding.selected sampleContract 7 sampleLabel, sampleInput, 0, sampleMachine, sampleWord, rfl, rfl, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_certificate_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms binding_certificate_entry_rejection_domain

@@ -22,7 +22,7 @@ class ExactDomainTests(unittest.TestCase):
         self.assertEqual(rendered.count(fragment), 1)
         self.assertEqual(target.sha(fragment.encode()), target.MACRO_SHA256)
         self.assertIn("Only the original conclusion is replaced by True", rendered)
-        self.assertEqual(rendered.count("hypotheses_of%"), 31)  # elaborator, twenty-eight proofs, two refusal probes
+        self.assertEqual(rendered.count("hypotheses_of%"), 43)  # elaborator, forty proofs, two refusal probes
 
     def test_rendered_program_keeps_classifier_refusal_controls(self):
         program=target.render(self.macro,self.fixture)
@@ -33,7 +33,7 @@ class ExactDomainTests(unittest.TestCase):
 
     def test_public_gate_methods_and_certificate_fields_accounted_once(self):
         expected=set()
-        for gate in ("HeadGate","WordGate","SingleWordGate"):
+        for gate in ("HeadGate","WordGate","SingleWordGate","BoolBinding"):
             source=(ROOT / ("Solidity/Backend/AbiEntry/"+gate+".lean")).read_text()
             expected.update("Solidity.Backend.AbiEntry."+gate+"."+name
                             for name in re.findall(r"(?m)^theorem (\w+)",source))
@@ -42,7 +42,7 @@ class ExactDomainTests(unittest.TestCase):
                             for name in re.findall(r"(?m)^  (\w+) : ∀",interface))
         self.assertEqual(set(target.TARGETS.values()),expected)
         self.assertEqual(len(target.TARGETS),len(expected))
-        self.assertEqual(len(expected),28)
+        self.assertEqual(len(expected),40)
 
     def test_macro_drift_and_duplicate_boundaries_are_refused(self):
         for value in (self.macro.replace("explicitDomain info.type", "mkConst ``True"),
