@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/try-condition-roles-v36/semantic-roles-reviewed.json",
-    "bytes": 1413305,
-    "sha256": "7c43b3eebb5da736bedf3f6321847a24c64f7cffe670a874311ee5d91859c5bd"
+    "path": "/workspace/h62-successor-bulk/clean-tail-boundary-roles-v37/semantic-roles-reviewed.json",
+    "bytes": 1429926,
+    "sha256": "630e36512a2c046adcd1f9c8397d24ad203b33edcb1e2521b1785a9e5d621c5a"
   }
 }
