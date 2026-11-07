@@ -632,3 +632,28 @@ Independent finder and skeptic reviewed the replay without Lean. This checks
 repeatability for these runs, not complete coverage, signature equivalence or
 live ownership. Reports and timing records are outside Git in the
 notation-context evidence directory.
+
+## Declaration modifier accounting
+
+The scanner now recognizes `public`, `meta` and `nonrec` along with its
+previous declaration modifiers, including modifiers split across lines and
+following attributes. It retains visibility and all recognized modifier
+spelling in candidate keys. Body candidates with different modifiers retain
+an explicit differing-statement rejection, in addition to the unresolved
+signature and ownership reasons. Attribute-associated declaration
+indentation uses the prefix line so an indented closing attribute line does
+not itself make the declaration appear nested. This is lexical recognition;
+the scanner can still overaccept invalid modifier orders and does not account
+for macro-generated declarations or all Lean syntax.
+
+Independent finder and skeptic reviews without Lean identified the missing
+modifiers and the multiline case and rechecked the final controls. The Python
+suite passed 41 tests. Two intermediate test runs failed while correcting the
+attribute-prefix indentation and are not passing evidence. A matched bounded
+whole-tree pair took 113.383 seconds before and 109.784 seconds after
+(-3.17%). Both used the same 7,273 inputs, recognized 122,960 declarations
+and reported no file errors or unmatched globs. Statement-group counts changed
+from 4,481 to 4,412 as modifier distinctions were retained; body-group
+counts stayed 5,516. Counts do not establish group membership or signature
+semantics. Reports and controls are outside Git under
+`/workspace/h62-duplication-scanner-evidence/declaration-modifiers/`.

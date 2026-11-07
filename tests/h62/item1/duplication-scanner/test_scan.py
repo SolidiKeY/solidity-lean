@@ -105,6 +105,42 @@ class ScannerControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unterminated attribute"):
             scanner.scan(root / "E.lean", root, b"@[foo [bar]\ndef hidden := 0\n")
 
+    def test_lean_declaration_modifiers_and_candidate_distinctions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = ("def before : Nat := 0\n"
+                      "public theorem first : True := by trivial\n"
+                      "meta def second : Nat := 0\n"
+                      "nonrec def third : Nat := 0\n"
+                      "@[foo,\n bar] public protected meta unsafe nonrec def combined : Nat := 0\n"
+                      "private def hidden : Nat := 0\n"
+                      "def visible : Nat := 0\n")
+            path = root / "A.lean"
+            path.write_text(source)
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            rows = {r["name"]: r for r in data["inventory"]}
+            self.assertEqual(set(rows), {"before", "first", "second", "third", "combined", "hidden", "visible"})
+            self.assertEqual(rows["first"]["qualifiers"], ["public"])
+            self.assertEqual(rows["second"]["qualifiers"], ["meta"])
+            self.assertEqual(rows["third"]["qualifiers"], ["nonrec"])
+            self.assertEqual(rows["combined"]["qualifiers"], ["meta", "nonrec", "protected", "public", "unsafe"])
+            self.assertEqual(rows["combined"]["line"], 6)
+            body = next(g for g in data["body_candidates"] if {"second", "third", "hidden", "visible"}.issubset({m["name"] for m in g["members"]}))
+            self.assertIn("different-or-unsupported-statements", body["reject_reasons"])
+            self.assertIn("intrinsic-signature-unresolved", body["reject_reasons"])
+            self.assertFalse(any({"second", "third"}.issubset({m["name"] for m in g["members"]}) for g in data["candidates"]))
+            parsed = scanner.scan(path, root)
+            self.assertEqual(parsed[0]["body"], ["0"])
+            split = ("def before : Nat := 0\npublic\n  def one : Nat := 0\n"
+                     "@[foo]\nprivate\n  nonrec\n  def two : Nat := 0\n")
+            split_rows = scanner.scan(path, root, split.encode())
+            self.assertEqual([r["name"] for r in split_rows], ["before", "one", "two"])
+            self.assertEqual(split_rows[1]["qualifiers"], ["public"])
+            self.assertEqual(split_rows[2]["qualifiers"], ["nonrec", "private"])
+            self.assertEqual(split_rows[1]["line"], 3)
+            self.assertEqual(split_rows[2]["line"], 7)
+            self.assertEqual(split_rows[0]["body"], ["0"])
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))

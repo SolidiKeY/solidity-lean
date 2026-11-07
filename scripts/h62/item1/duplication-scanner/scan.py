@@ -11,7 +11,7 @@ import re
 import stat
 from pathlib import Path
 
-DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
+DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t\r\n]+|public[ \t\r\n]+|protected[ \t\r\n]+|meta[ \t\r\n]+|noncomputable[ \t\r\n]+|local[ \t\r\n]+|partial[ \t\r\n]+|nonrec[ \t\r\n]+|unsafe[ \t\r\n]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t\r\n]+([^\s(:{\[]+))?")
 ID_FIRST = r"A-Za-z_\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03b1-\u03ba\u03bc-\u03c9\u03ca-\u03fb\u1f00-\u1ffe\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u017f"
 ID_REST = ID_FIRST + r"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
 IDENT = "[" + ID_FIRST + "][" + ID_REST + "]*"
@@ -230,7 +230,7 @@ def scan(path, root, source=None):
         if index >= 0:
             prefix_start, prefix_end = attribute_spans[index]
             between = skeleton[prefix_end:match.start(1)]
-            if re.fullmatch(r"\s*(?:(?:private|protected|noncomputable|local|partial|unsafe)\s+)*", between):
+            if re.fullmatch(r"\s*(?:(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\s+)*", between):
                 start = min(start, prefix_start)
         declaration_starts.append(start)
     context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
@@ -244,9 +244,11 @@ def scan(path, root, source=None):
         context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []
     relative_path = path.relative_to(root).as_posix()
+    start_by_keyword = {match.start(1): start for match, start in zip(matches, declaration_starts)}
     def indent(m):
-        line_start = text.rfind("\n", 0, m.start(1)) + 1
-        prefix = re.match(r"[ \t]*", text[line_start:m.start(1)]).group()
+        start = start_by_keyword[m.start(1)]
+        line_start = text.rfind("\n", 0, start) + 1
+        prefix = re.match(r"[ \t]*", text[line_start:]).group()
         return len(prefix.expandtabs(8))
     for i, match in enumerate(matches):
         end = declaration_starts[i+1] if i+1 < len(matches) else len(text)
@@ -259,7 +261,7 @@ def scan(path, root, source=None):
             command_inside = len(prefix.expandtabs(8)) > indent(match)
             content = content[:command.start()]
             content_skeleton = content_skeleton[:command.start()]
-        qualifiers = sorted(re.findall(r"\b(?:partial|unsafe|noncomputable)\b", skeleton[match.start():match.start(1)]))
+        qualifiers = sorted(re.findall(r"\b(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\b", skeleton[match.start():match.start(1)]))
         context = digest([span for start, span in context_spans if start < match.start()])
         unsupported = match.group(1) in {"structure", "inductive", "class", "axiom", "constant"}
         parts = None if unsupported else split_declaration(content, skeleton=content_skeleton)
