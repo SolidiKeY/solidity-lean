@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.local_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.local_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.memoryLocal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.slot_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.storageLocal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

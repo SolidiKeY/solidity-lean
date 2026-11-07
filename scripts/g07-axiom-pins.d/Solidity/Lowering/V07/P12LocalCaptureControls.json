@@ -1,0 +1,72 @@
+{
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_faithful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_memory_faithful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_nonnull": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memory_binding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memory_faithful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memory_nonnull": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memory_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memoryProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.same_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storage_binding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storage_faithful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storage_nonnull": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storage_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storageProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

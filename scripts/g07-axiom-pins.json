@@ -49791,6 +49791,66 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.chain_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.chain_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.env_admission_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.env_admission_of_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.graph_of_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.graph_of_produce": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_graphs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_excludes_mapping": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_graph": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_not_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/GraphAdmissionAssembly.lean:Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_produces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.ConditionalAssignments.branch_run": [
   "Classical.choice",
   "Quot.sound",
@@ -51625,6 +51685,101 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_faithful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_memory_faithful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_nonnull": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memory_binding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memory_faithful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memory_nonnull": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memory_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.memoryProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.same_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storage_binding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storage_faithful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storage_nonnull": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storage_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptureControls.lean:Solidity.Lowering.V07.P12LocalCaptureControls.storageProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.local_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.local_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.memoryLocal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.slot_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12LocalCaptures.lean:Solidity.Lowering.V07.P12LocalCaptures.storageLocal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/P12MemoryCaptureControls.lean:Solidity.Lowering.V07.P12MemoryCaptureControls.alias_client": [
   "Classical.choice",
   "Quot.sound",
@@ -52369,6 +52524,71 @@
   "propext"
  ],
  "Solidity/Lowering/V07/SignedNegationEffects.lean:Solidity.Lowering.V07.SignedNegationEffects.source_assignment_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.decl_inversion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.envLocOK_conservative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.envLocOK_eq_patch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.envLocOK_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.envLocOK_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.mapping_env_not_nameable_free": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.mapping_env_repair_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.not_refuses_of_mapping_struct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.plain_env_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.refuses_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.refuses_of_decls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.refuses_of_mapping_free": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SourceRefusal.lean:Solidity.Lowering.V07.SourceRefusal.tys_maps_free": [
   "Classical.choice",
   "Quot.sound",
   "propext"
