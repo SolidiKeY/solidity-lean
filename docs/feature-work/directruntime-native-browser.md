@@ -781,3 +781,51 @@ passes. No Lean/productionruntime source or proof budget changed,so no new
 Lean/axiom/cache gate is claimed. Existing stack,cost,startup andfour storage
 holds remain;no stopped timing benchmark was rerun. Independent finder/skeptic
 review covers these limits. Bulk ASTs/logs remain off Git with per-file hashes.
+
+
+## Authenticated environment source and published guard theorem
+
+The delivered source archive and ticket match their recorded hashes. All eight
+frontier snapshots and all twelve source/control/manifest entries were verified.
+Seven published frontier files match the snapshots byte for byte. Translate
+contains the delivered definitions plus a 37-line standalone guard theorem;
+removing only that theorem and its docstring reproduces the delivered hash.
+The published proof remains in place. This does not establish full file or
+binary equivalence, source preservation, or ABI adequacy.
+
+Fresh native and real Chromium runs use source build
+4d7285b80e89741e9da8cb49ce7ab8b62a828a72. The sixteen environment requests match:
+eight proved, four refuted and four unsupported per backend, plus two positive
+guards. Compiler function IDs select each request and match each reply.
+Unsupported block.number and tx.origin retain their exact diagnostics; wrong
+value/time assertions refute. Eight box annotations erase to the exact producer
+source. Fifteen metadata foils, three supported keys, two unsupported siblings
+and base-first error priority pass. The helper has no axioms; its published
+guard theorem uses propext and Quot.sound. These are decoder/model observations,
+not compiler identity or world adequacy proofs.
+
+Thirteen per-file diagnostics and the retained decoder/model controls pass.
+Address, fixed-byte, C, A, B and all 83 functional observations match their
+recorded expectations on native and browser. Identity diamond succeeds in both
+compiler modes; four storage-diamond cases remain pending. Native negatives
+and browser UI checks pass. Browser negatives remain 13/14, failing on the known
+invariant stack overflow. The candidate-exclusion check initially rejected a
+stale private output path; correcting that path passed. Both receipts remain.
+Executable inventories and observed absence of forbidden loads have their
+recorded finite scope. Every existing timing/build-cost STOP remains open;
+no stopped benchmark was rerun and RUNTIME_GATE_PASS remains pending.
+
+After validation, the branch fast-forwarded to published master
+3a5b9de412b84a13777b6fbf8c8f310e10b3448e. All 343 compiled runtime sources and
+checked repository build inputs are unchanged. The original source-build and
+binary identities remain explicit in the
+[results manifest](../../tests/directruntime-20261104/native-browser/environment/results-manifest.json).
+
+The original producer AST and evidence archive remain undelivered. A fresh
+independent compilation of the authenticated source with the producer arguments
+reproduces the expected AST hash exactly; this is content reproduction, not a
+producer transport receipt. Bulk evidence, binaries and the verified 32-artifact
+incremental cache stay off Git with hashes and indexes. Cache delivery remains
+coordinator-pending; no ship-cache or release-cache coherence claim is made.
+The local registration proposal covers the standalone MetadataControls driver;
+no generated root was edited.
