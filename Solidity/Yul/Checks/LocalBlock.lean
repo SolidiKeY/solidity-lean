@@ -7,6 +7,11 @@ import Solidity.Yul.RawBoundary
 import Solidity.Yul.LocalBlock
 import Solidity.Yul.Checks.LocalWordView
 import Solidity.Source.Semantics
+/-! Kernel controls for local-block raw words and scope boundaries.
+The selected-local Source readback regression is guarded here: a dirty unsupported
+neighbor must not block a supported read, cleanup must not rewrite raw bits,
+and fuel exhaustion remains distinct from readback refusal. The empty-program
+Source fixture below executes local reads only, not crypto or call agreement. -/
 namespace Solidity.Yul.Checks.LocalBlock
 open Solidity.Source
 def env : Solidity.Source.Env := ⟨[]⟩
@@ -990,5 +995,107 @@ theorem sparseRefusalWithCompletion : (∀ fuel, Solidity.Yul.Checks.LocalBlock.
 /-- info: 'Solidity.Yul.Checks.LocalBlock.sparseRefusalWithCompletion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.sparseRefusalWithCompletion
+
+/-- A concrete inhabited Source global for local-read controls only. No hash,
+callee, storage or compiler correctness premise is asserted by this fixture. -/
+def readbackGlob (pipeline : DirtyReadback.Pipeline) : Solidity.Source.Glob env :=
+  { prog :=
+      { body := fun _ => none
+        consts := fun _ => none
+        inits := fun _ => []
+        ctor := fun _ => none
+        ctorLocals := fun _ => []
+        baseArgs := fun _ => []
+        contracts := [] }
+    pipeline := pipeline
+    fixed :=
+      { evm :=
+          { keccak := fun _ => 0
+            keccak_lt := fun _ => by decide
+            precompile := fun _ _ => none
+            precompileGas := fun _ _ => 0 }
+        ledger := fun initial _ => initial
+        regionLen := 1
+        rootSlots := 0 }
+    balance0 := fun _ => word 0
+    hasCode := fun _ _ => false
+    callee := fun _ => .answer (.success [])
+    timestamp := word 0 }
+
+def readbackFrame : Solidity.Source.Fr :=
+  { this := ⟨0, by decide⟩, sender := ⟨0, by decide⟩, value := word 0,
+    static := false, contract := "" }
+
+def readbackSmallIndex : Solidity.Source.Idx ctx.tys (.int IntTy.u8) :=
+  .there (.there .here)
+def readbackByteIndex : Solidity.Source.Idx ctx.tys (.fixedBytes 1 (by decide)) :=
+  .there (.there (.there (.there .here)))
+def readback255 : Solidity.Source.Val env.layout (.int IntTy.u8) := .int 255 (by decide)
+def selectedReadState : RawFrame.State ctx :=
+  RawFrame.write (RawFrame.write rawInitial small (word 511)) byte (word 5)
+
+/-- Selected-local readback regression: readbackSelectedLazy. -/
+theorem readbackSelectedLazy :
+ ∀ (pipeline : Solidity.Yul.DirtyReadback.Pipeline), Solidity.Yul.DirtyReadback.frame pipeline Solidity.Yul.Checks.LocalBlock.selectedReadState = none ∧ Solidity.Yul.DirtyReadback.readAt pipeline Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.readbackSmallIndex = some Solidity.Yul.Checks.LocalBlock.readback255 := by
+  intro pipeline; cases pipeline <;> constructor <;> rfl
+
+/-- Selected-local readback regression: readbackSourceLocal. -/
+theorem readbackSourceLocal :
+ ∀ (pipeline : Solidity.Yul.DirtyReadback.Pipeline), Solidity.Yul.DirtyReadback.evalLocal (Solidity.Yul.Checks.LocalBlock.readbackGlob pipeline) Solidity.Yul.Checks.LocalBlock.readbackFrame 1 Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.readbackSmallIndex = some ((.ok (.val Solidity.Yul.Checks.LocalBlock.readback255), (Solidity.Yul.Checks.LocalBlock.locals.set Solidity.Yul.Checks.LocalBlock.readbackSmallIndex Solidity.Yul.Checks.LocalBlock.readback255, Solidity.Yul.Checks.LocalBlock.initial.2)), Solidity.Yul.Checks.LocalBlock.selectedReadState) := by
+  intro pipeline; cases pipeline <;> rfl
+
+/-- Selected-local readback regression: readbackSourceTimeout. -/
+theorem readbackSourceTimeout :
+ ∀ (pipeline : Solidity.Yul.DirtyReadback.Pipeline), Solidity.Yul.DirtyReadback.evalLocal (Solidity.Yul.Checks.LocalBlock.readbackGlob pipeline) Solidity.Yul.Checks.LocalBlock.readbackFrame 0 Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.readbackSmallIndex = some ((.error .timeout, (Solidity.Yul.Checks.LocalBlock.locals.set Solidity.Yul.Checks.LocalBlock.readbackSmallIndex Solidity.Yul.Checks.LocalBlock.readback255, Solidity.Yul.Checks.LocalBlock.initial.2)), Solidity.Yul.Checks.LocalBlock.selectedReadState) := by
+  intro pipeline; cases pipeline <;> rfl
+
+/-- Selected-local readback regression: readbackSourceRefusal. -/
+theorem readbackSourceRefusal :
+ ∀ (pipeline : Solidity.Yul.DirtyReadback.Pipeline), Solidity.Yul.DirtyReadback.evalLocal (Solidity.Yul.Checks.LocalBlock.readbackGlob pipeline) Solidity.Yul.Checks.LocalBlock.readbackFrame 1 Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.readbackByteIndex = none := by
+  intro pipeline; cases pipeline <;> rfl
+
+/-- Selected-local readback regression: readbackSourceRaw. -/
+theorem readbackSourceRaw :
+ ∀ (pipeline : Solidity.Yul.DirtyReadback.Pipeline), (Solidity.Yul.DirtyReadback.evalLocal (Solidity.Yul.Checks.LocalBlock.readbackGlob pipeline) Solidity.Yul.Checks.LocalBlock.readbackFrame 1 Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.readbackSmallIndex).map Prod.snd = some Solidity.Yul.Checks.LocalBlock.selectedReadState := by
+  intro pipeline; cases pipeline <;> rfl
+
+/-- Selected-local readback regression: readbackRawWords. -/
+theorem readbackRawWords :
+ (Solidity.Yul.RawFrame.view Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.small).val = 511 ∧ (Solidity.Yul.RawFrame.view Solidity.Yul.Checks.LocalBlock.selectedReadState Solidity.Yul.Checks.LocalBlock.byte).val = 5 := by
+  decide
+
+/-- info: 'Solidity.Yul.DirtyReadback.locals_get_set' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.locals_get_set
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_refused
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_zero
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_success
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_raw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_raw
+/-- info: 'Solidity.Yul.Checks.LocalBlock.readbackSelectedLazy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.readbackSelectedLazy
+/-- info: 'Solidity.Yul.Checks.LocalBlock.readbackSourceLocal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.readbackSourceLocal
+/-- info: 'Solidity.Yul.Checks.LocalBlock.readbackSourceTimeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.readbackSourceTimeout
+/-- info: 'Solidity.Yul.Checks.LocalBlock.readbackSourceRefusal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.readbackSourceRefusal
+/-- info: 'Solidity.Yul.Checks.LocalBlock.readbackSourceRaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.readbackSourceRaw
+/-- info: 'Solidity.Yul.Checks.LocalBlock.readbackRawWords' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.readbackRawWords
 
 end Solidity.Yul.Checks.LocalBlock

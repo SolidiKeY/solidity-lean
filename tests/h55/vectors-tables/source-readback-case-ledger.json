@@ -1,0 +1,46 @@
+{
+  "scope": "Explicit selected-local read boundary only; not all Source expressions/statements, raw-copy propagation or all Raw cases.",
+  "definitions": [
+    "Solidity.Yul.DirtyReadback.readAt",
+    "Solidity.Yul.DirtyReadback.evalLocal"
+  ],
+  "cases": [
+    {
+      "decode": "none",
+      "fuel": "any",
+      "result": "outer none; no fabricated Source halt",
+      "theorem": "evalLocal_refused"
+    },
+    {
+      "decode": "some value",
+      "fuel": "zero",
+      "result": "actual Source timeout with prepared Source state and original RawFrame.State",
+      "theorem": "evalLocal_zero"
+    },
+    {
+      "decode": "some value",
+      "fuel": "successor",
+      "result": "actual Source RVal.val value with prepared Source state and original RawFrame.State",
+      "theorem": "evalLocal_success"
+    }
+  ],
+  "index_cases": [
+    "here",
+    "there; induction on typed index"
+  ],
+  "raw_preservation": "evalLocal_raw retains the complete original RawFrame.State",
+  "controls": [
+    "readbackSelectedLazy",
+    "readbackSourceLocal",
+    "readbackSourceTimeout",
+    "readbackSourceRefusal",
+    "readbackSourceRaw",
+    "readbackRawWords"
+  ],
+  "pipelines": "Both constructors, using the actual Source global pipeline.",
+  "limitations": [
+    "Unsupported address, fixed bytes and enum dirty words remain refused by the published decoder.",
+    "No representation rewrite; H58 HOLD unchanged.",
+    "Fixture global is inhabited only for local-read controls, not a crypto/call correctness witness."
+  ]
+}

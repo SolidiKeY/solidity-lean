@@ -23,8 +23,10 @@ word. A later assembly read of the local, or of a Solidity copy of it
 `u8_asm_reread`). This readback drops the raw bits, so it agrees with solc
 exactly when no later assembly block reads the local (or a copy) before it
 is rewritten; the raw frame (`RawFrame.State`) keeps every bit for that
-case. The readback is the boundary declaration: no Source semantics calls it
-yet. (Unchecked narrow arithmetic results are a separate, recorded pipeline
+case. The explicit `evalLocal` boundary below invokes actual Source local
+read evaluation on a prepared view and retains the original raw frame. The
+ordinary Source evaluator does not automatically consult raw frames; arbitrary
+Source code and raw-word propagation through copies are not integrated here. (Unchecked narrow arithmetic results are a separate, recorded pipeline
 difference, H3: `u8_unchecked_add_widen`.)
 
 Source values stay intrinsic and no assembly write cleans. Any other type a
@@ -135,6 +137,30 @@ def frame {ctx : Solidity.Source.Ctx} (pipeline : Pipeline) (state : RawFrame.St
     Option (Locals ctx.env.layout ctx.tys × Solidity.Source.St ctx.env) :=
   (readbackFrom pipeline ctx.tys (RawFrame.materialize state).1 state.clean).map (·, state.world)
 
+/-- Clean only the selected intrinsic local against its existing backup.
+An unrelated dirty unsupported local cannot refuse this selected read. -/
+def readAt {ctx : Solidity.Source.Ctx} {ty : STy} (pipeline : Pipeline)
+    (state : RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty) :
+    Option (Solidity.Source.Val ctx.env.layout ty) :=
+  readLocal pipeline (LocalValues.get (RawFrame.materialize state).1 index)
+    (state.clean.get index)
+
+/-- Explicit Source local-read integration. The decoder follows the actual
+Source global pipeline. A successful decode invokes the real evaluator with the
+same global/frame/fuel/resource plan on a selected-local clean view. The full
+Source result/state and the original authoritative raw frame are both returned.
+None is an unsupported readback, distinct from a Source timeout. This is not an
+integration of arbitrary Source expressions/statements or raw-copy propagation. -/
+def evalLocal {ctx : Solidity.Source.Ctx} {ty : STy}
+    (G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+    (state : RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+    (plan : Solidity.Source.FailureExecution.RuntimePlan := none) :
+    Option ((Solidity.Source.R (Solidity.Source.RVal ctx.env.layout ty) ×
+      Solidity.Source.EMState ctx.env ctx.tys) × RawFrame.State ctx) :=
+  (readAt G.pipeline state index).map fun value =>
+    ((Solidity.Source.evalE G F fuel (.local index) plan).run
+      (state.clean.set index value, state.world), state)
+
 /-! ## Laws -/
 
 /-- An integer word reads back wrapped into its type. -/
@@ -196,5 +222,68 @@ theorem cleanWord_u8_key {D : Solidity.Source.Layout} (pipeline : Pipeline) (w :
     ((cleanWord (D := D) pipeline (.int Solidity.Source.IntTy.u8) w).map Solidity.Source.Val.key) =
       some (some (Solidity.Source.IntTy.u8.wrap (w.val : Int))) := by
   cases pipeline <;> rfl
+
+/-- The actual intrinsic Source local selected by a typed index reads back
+the value prepared at that index, for every local type and position. -/
+theorem locals_get_set :
+ ∀ (D : Solidity.Source.Layout) (types : Solidity.Source.RCtx) (ty : Solidity.Source.STy)
+ (index : Solidity.Source.Idx types ty) (locals : Solidity.Source.Locals D types)
+ (value : Solidity.Source.Val D ty), (locals.set index value).get index = value := by
+  intro D types ty index
+  induction index with
+  | here => intro locals value; cases locals; rfl
+  | there previous ih =>
+    intro locals value
+    cases locals with
+    | cons head tail => exact ih tail value
+
+
+/-- An unsupported selected readback remains none, rather than a fabricated Source halt. -/
+theorem evalLocal_refused :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+ (G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+ (plan : Solidity.Source.FailureExecution.RuntimePlan), Solidity.Yul.DirtyReadback.readAt G.pipeline state index = none → Solidity.Yul.DirtyReadback.evalLocal G F fuel state index plan = none := by
+  intros ctx ty G F fuel state index plan refused
+  unfold Solidity.Yul.DirtyReadback.evalLocal
+  rw [refused]
+  rfl
+
+/-- Zero fuel preserves the actual Source timeout and prepared Source state, distinct from unsupported readback. -/
+theorem evalLocal_zero :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+ (G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr)
+ (state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+ (plan : Solidity.Source.FailureExecution.RuntimePlan), Solidity.Yul.DirtyReadback.evalLocal G F 0 state index plan =
+ (Solidity.Yul.DirtyReadback.readAt G.pipeline state index).map (fun value =>
+ ((.error .timeout, (state.clean.set index value, state.world)), state)) := by
+  intros; rfl
+
+/-- A decoded selected local is read by actual Source evaluation at every positive horizon, with the full Source state and original raw frame. -/
+theorem evalLocal_success :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+ (G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+ (plan : Solidity.Source.FailureExecution.RuntimePlan), ∀ (value : Solidity.Source.Val ctx.env.layout ty),
+ Solidity.Yul.DirtyReadback.readAt G.pipeline state index = some value → Solidity.Yul.DirtyReadback.evalLocal G F (fuel+1) state index plan =
+ some ((.ok (.val value), (state.clean.set index value, state.world)), state) := by
+  intros ctx ty G F fuel state index plan value decoded
+  unfold Solidity.Yul.DirtyReadback.evalLocal
+  rw [decoded]
+  change some (((Except.ok (Solidity.Source.RVal.val ((state.clean.set index value).get index)) :
+      Solidity.Source.R (Solidity.Source.RVal ctx.env.layout ty)),
+    (state.clean.set index value, state.world)), state) = _
+  rw [Solidity.Yul.DirtyReadback.locals_get_set]
+
+/-- The explicit Source read never rewrites the authoritative raw frame, including dirty bits and overlay metadata. -/
+theorem evalLocal_raw :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+ (G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+ (plan : Solidity.Source.FailureExecution.RuntimePlan), (Solidity.Yul.DirtyReadback.evalLocal G F fuel state index plan).map Prod.snd = (Solidity.Yul.DirtyReadback.readAt G.pipeline state index).map (fun _ => state) := by
+  intros ctx ty G F fuel state index plan
+  unfold Solidity.Yul.DirtyReadback.evalLocal
+  rw [Option.map_map]
+  rfl
 
 end Solidity.Yul.DirtyReadback

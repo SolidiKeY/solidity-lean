@@ -348,3 +348,33 @@ and intrinsically impossible leave. An arbitrary halt covers every halt value
 parametrically; the impossible branch claims no joint inhabitant. This ledger
 does not count all Raw files as covered. These are existing clean-backup
 projections, not H109 dirty-readback or general Source execution semantics.
+
+## Selected-local Source read boundary (H121)
+
+DirtyReadback now exposes an additive selected typed local read and an explicit
+boundary that invokes actual Source.evalE with the same global, frame, fuel and
+runtime plan. It uses the global pipeline and prepares only the selected local;
+an unrelated dirty unsupported neighbor does not block the read. The full Source
+result and prepared Source state are returned alongside the untouched original
+RawFrame.State. Unsupported decoding is outer none; zero fuel is an actual
+Source timeout. No decoder body, Source core or state representation changed.
+
+The source-readback-case-ledger.json in tests/h55/vectors-tables accounts for
+decode refusal, decoded zero fuel and decoded successor fuel; the typed-index
+helper covers here and there. It does not claim all Raw or Source cases.
+Six existing LocalBlock controls check both pipelines, raw 511 cleaned to u8 255,
+a dirty fixed-bytes neighbor, timeout/refusal separation and raw 511/5 retention.
+The inhabited empty-program fixture is solely a local-read control.
+
+Read-only finder and skeptic both passed the core and all six controls without
+Lean servers. MCP reported zero errors; affected LocalBlock, existing decoder
+controls and P16 built successfully. Scoped axiom checks show the index lemma
+uses no axioms; the other ten new lemmas/controls use only propext,
+Classical.choice and Quot.sound. The bounded check exited zero in 90.44 seconds,
+with no swap or OOM; this is not a before/after speed comparison or full gate.
+Earlier fixture syntax and proof-attempt failures remain in the evidence logs.
+
+Ordinary Source evaluation still does not consult raw frames automatically.
+General expression/statement integration and raw-copy propagation remain open
+H121 work; address/bytesN/enum dirty decoding remains refused. Full inherited
+Raw/table/generator acceptance, affected whole-lane gates and timing remain open.
