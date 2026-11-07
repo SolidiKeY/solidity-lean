@@ -1039,3 +1039,23 @@ remaining queue and evidence retrieval are in
 [the binding handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-binding-handoff.md).
 All original checkpoints remain partial; no model statements, budgets, axioms,
 interfaces, exclusions or shims changed.
+
+
+## Selected old metadata coverage ledger
+
+At coordinator rebaseline `658d1b1d14c68a031c137f576764ec7e9e7a6359`, the prior
+checkpoint was verified patch-equivalent before the authorized rebase. The new
+`metadata-coverage.py` rebuilds the original source-bound plan and re-seals
+actual saved observations, rejecting duplicates, fixtures outside the corpus,
+stale records and input drift. It records ten unique original modules observed
+and 1764 explicitly pending, in exact original order. The complete zero-query
+plan and finite fixture evidence remain separate.
+
+All 93 Python tests pass in 26.406 seconds. Reversing actual observation arguments
+produces byte-identical output. Independent finder and skeptic verified all
+3970 input hashes and counts without findings or Lean/server/writes. This is
+selected old metadata coverage, not generic attribute, public API, proof or
+performance acceptance. No new Lean execution, model change or timing STOP retry.
+Full original scope, remaining queue and fresh-thread retrieval are recorded in
+[the coverage handoff](../../tests/h62/item6/migrate-yul/handoff/nov7-metadata-coverage-handoff.md).
+All original checkpoints remain partial; the existing goal remains unfinished.
