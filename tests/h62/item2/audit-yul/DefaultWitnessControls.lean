@@ -1,4 +1,5 @@
 import tests.h62.item2.«audit-yul».DefaultWitnesses
+import Solidity.Yul.Views.WordMemory
 import Solidity.Yul.Words
 import Solidity.Yul.Checks.ClosedFunctions
 set_option h62.auditOutput "/workspace/h62-audit-yul-evidence/h69-default-controls.jsonl"
@@ -39,3 +40,46 @@ run_cmd do
   if (← getEnv).contains `H62.AuditYul.Controls.hidden_must_not_exist then
     throwError "let/alias premise was omitted from joint witness"
 #print axioms H62.AuditYul.Controls.hidden_joint
+
+namespace Solidity.Yul.Views.H62
+/-- Word-window audit inputs use the existing residual view at a real unaligned
+base and a nonempty 32-byte window; these are premise witnesses, not execution
+or arbitrary-input admission theorems. -/
+theorem word_window_joint : ∃ (_m : ByteView) (_a _n : Nat), True :=
+  ⟨(fun _ => 0), 129, 32, True.intro⟩
+
+theorem word_read_congr_joint :
+    ∃ (m m' : ByteView) (a n : Nat)
+      (_h : ∀ i, i < n → m (a + i) = m' (a + i)), True :=
+  ⟨(fun _ => 0), (fun _ => 0), 129, 32,
+    (fun _ _ => rfl), True.intro⟩
+
+theorem word_load_congr_joint :
+    ∃ (m m' : ByteView) (a : Nat)
+      (_h : ∀ i : Fin 32, m (a + i.val) = m' (a + i.val)), True :=
+  ⟨(fun _ => 0), (fun _ => 0), 129,
+    (fun _ => rfl), True.intro⟩
+
+theorem word_prefix_joint :
+    ∃ (_m : ByteView) (_a : Nat) (_w : Roadmap.Word) (n : Nat) (_hn : n ≤ 32), True :=
+  ⟨(fun _ => 0), 129, 2, 32, Nat.le_refl 32, True.intro⟩
+
+theorem word_store_joint :
+    ∃ (_m : ByteView) (_a : Nat) (_w : Roadmap.Word), True :=
+  ⟨(fun _ => 0), 129, 2, True.intro⟩
+
+theorem word_div_joint :
+    ∃ (_m : ByteView) (_a n k : Nat) (_hk : k ≤ n), True :=
+  ⟨(fun _ => 0), 129, 32, 16, by decide, True.intro⟩
+
+theorem word_byte_joint : ∃ (_m : ByteView) (_a : Nat) (_i : Fin 32), True :=
+  ⟨(fun _ => 0), 129, ⟨31, by decide⟩, True.intro⟩
+
+theorem word_writeback_joint : ∃ (_m : ByteView) (_a : Nat), True :=
+  ⟨(fun _ => 0), 129, True.intro⟩
+
+#print axioms word_read_congr_joint
+#print axioms word_load_congr_joint
+#print axioms word_prefix_joint
+#print axioms word_div_joint
+end Solidity.Yul.Views.H62
