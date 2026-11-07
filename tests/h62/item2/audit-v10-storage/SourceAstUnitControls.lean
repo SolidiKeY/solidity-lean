@@ -1,9 +1,11 @@
 import tests.h62.item2.«audit-v10-storage».SourceAstUnitResolutionControls
 import Solidity.Source.Elaborate
 
-/-! REQUIRED full elaboration acceptance; currently FAILS for both actual
-caller bodies. The unchanged Source inference lacks these library Error(string)
-try forms. Do not weaken to library-only or conversion-only success. -/
+/-! Manual full-unit elaboration probe: no automated gate invokes this file.
+It currently raises an error for both actual caller bodies because Source
+inference lacks these library Error(string) try forms. The full acceptance
+obligation remains open; do not substitute library-only or conversion-only
+success. This is not an expected-failure test counted as a passing gate. -/
 namespace H62.StorageAudit.SourceAstUnitControls
 open Lean Solidity.Source
 

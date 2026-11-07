@@ -1,0 +1,2625 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-2-20261106",
+  "slug": "audit-calculus",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-2-20261106/audit-calculus",
+  "repository_original_vm": "/workspace/solidity-lean",
+  "handoff_to": "solidity-h28-sol-20261104/automation-benchmark",
+  "original_exclusive_write_scope": [
+    "tests/h62/item2/audit-calculus/**",
+    "scripts/h62/item2/audit-calculus/**",
+    "docs/feature-work/h62-2-audit-calculus.md"
+  ],
+  "original_areas": [
+    "calculus",
+    "try-evidence"
+  ],
+  "originals_outside_scope": "read only under original assignment",
+  "h82_standing_authorization": "statement-preserving proof/additive/module/import/doc edits need no exact-file agreement; existing statement/dependent definition/interface/budget/axiom/exclusion changes require owner; frozen H57 pair",
+  "retirement": "worker stopped by user; no implementation continuation; successor integrates after final stopped/head acknowledgement",
+  "module_maps": [
+    {
+      "path": "docs/module-map/calculus.md",
+      "sha256": "568849f987bcf16fabaafb1cfaa3ca186d4eb455369cf870c42187d16e37f8c4"
+    },
+    {
+      "path": "docs/module-map/try-evidence.md",
+      "sha256": "eca2c5aabff86c168a453c1e594b6823537f05ba2e0742ed4281b5506b0195ea"
+    }
+  ],
+  "mapped_sources": [
+    {
+      "path": "Solidity/Backend/Creation/Artifact.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "4dfdb7c95f914dd06ef0ec6b603c46d41eda4674e0a303225252740b93bdb947"
+    },
+    {
+      "path": "Solidity/Backend/Creation/ArtifactChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "b9f2c5ef9b34b585f95ed79f943dadc99f227ac2bb69bf62c40beb49fb3b9a11"
+    },
+    {
+      "path": "Solidity/Backend/Creation/ArtifactLaws.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "8de115ddc75498a107c500f50879c0f63d0a91050089487029eb96826d5d6e02"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Constructor.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "434d0b4a160f3b02bf4395e511cf8fa676967de1120a760a9fddb7c50c34b1d4"
+    },
+    {
+      "path": "Solidity/Backend/Creation/ConstructorChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "183168e7bded7cb080447e854dfe997c33dc81f5cf2a5692e2a240da30c3b6e5"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Execution.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "9e2ab984d9e9116700aeb309e266aa3cae50292f8ce04b80e6f55581953f6f04"
+    },
+    {
+      "path": "Solidity/Backend/Creation/ExecutionChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "e3aa6fe293ac427b8107fca7a682d6b2aca5432dd17461b66cfee645863d4adc"
+    },
+    {
+      "path": "Solidity/Backend/Creation/ImmutableChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "16ccd8f143b9f94f5c15b19bb424ed7f5fce8db9ce03baa3cdb736fb9d796837"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Immutables.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "2b745504f75a569db0d939d8c54af75ec3f89a96b4c1ec396e509caa450c6ebb"
+    },
+    {
+      "path": "Solidity/Backend/Creation/LawChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "cd4e544470c350fa0fc526a4f5498a36213cdc5528f339477036deab32cafb38"
+    },
+    {
+      "path": "Solidity/Backend/Creation/LinkLayout.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "c16ef26f257c3d88d43a92c831effae269f28acea0be75bda997cc703515302e"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Linking.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "305e79d2d699cd388cc20e39fe96818f45f80f2b6d00797aabc413bdd9a5dd58"
+    },
+    {
+      "path": "Solidity/Backend/Creation/LinkingChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "304b8cec65743eba088b167b43421cb9d123120cd119da5f3c135514f1c97e8d"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Placement.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "4a41a50ae3deafa27059c96fb277f7a6d36e6da0c5110e5cc1424764c3e18a06"
+    },
+    {
+      "path": "Solidity/Backend/Creation/PlacementChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "ed4d267034970c7deb40b7cd943ad98bdf13862bd4602d68d16e11f68ffe3b34"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Provenance.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "085b28025c6e30ef583ce3b61fff795d3c528d36731959b7091f6e725eb1aeee"
+    },
+    {
+      "path": "Solidity/Backend/Creation/Regions.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "9abf380330ebbe9bd76558814872671c31bd5c6ff90ccab449ce3c6541d41568"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Checkpoint.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "7533e75520bf7206942bff11daa62418cb81db4788ddbb83bd262267574cd32a"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Composition.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "509abe32afd75622f4ca02ee63f1afde4b55836d3629cc021fc17b5efe69b0b0"
+    },
+    {
+      "path": "Solidity/Backend/Failure/CompositionChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "a1fb4889a723b8b5d3ac0fd61539de0327014127cabf9a6a83158bcfe73689b8"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Correct.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "52e4f2d3776a7f72ff3a4645d3fff9794b279f007a669ea3863fccbe70bc76ca"
+    },
+    {
+      "path": "Solidity/Backend/Failure/EmissionChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "a28d7d5833d67ffe04f7b3cbc1b4be7ca2ef6493be3c40b55ff2a47561b212fa"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Emit.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "5b32a1d20200713327d72e9f2bbe87b24ea9c5b2cfe11f8636db16a875abe178"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Gap.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "e92a32172461995e37a59adb253ab6403bdbb2e2d4f59f97799161ac91c969a7"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Immediate.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "6dc688194c21604bd8ee05fa3262047d99f94741ca6a3a30cb5937e0223615b0"
+    },
+    {
+      "path": "Solidity/Backend/Failure/ObservationChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "56a3d2ba47c32c204aba3dfb30fe75c1446b94ca04ebd5faf9f36293a9a54ba3"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Observe.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "85f0682412e098b3fa939abbb5b007d32fb42197ad1324d585487dc770e220d7"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Slice.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "9d1158c792b99054bf55ab6d11096a85163bef7826e5d6f7bdae25cda1a40241"
+    },
+    {
+      "path": "Solidity/Backend/Failure/SliceChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "e287983cd2886ab0425185ab649a4670e2f6ecc055e2a886d217a2cd859d4c5a"
+    },
+    {
+      "path": "Solidity/Backend/Failure/Unwind.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "b2c7b603c3b381a689971d27db0c1ba55ab54bb10462bc6abf0abf1ae123d580"
+    },
+    {
+      "path": "Solidity/Backend/Failure/UnwindChecks.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "604bc744ff81f51f9d051007ba7a961395d1f2706a6e00504d3cf349a1578c0f"
+    },
+    {
+      "path": "Solidity/Calculus/AllLeft.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "37d1bfec5307bb289d04084777f5247562d52f6f39fa89353784e9377cbd9163"
+    },
+    {
+      "path": "Solidity/Calculus/AnonLocalCapture.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e98fe1ced5c6929e84f5bb192cddbfc10d6d6dcd4187fd896a4690878ef81c08"
+    },
+    {
+      "path": "Solidity/Calculus/Arms.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6a07403c61d7c44ede0da0fc3902f041023112a0287dba981b2edfc67d86f6ec"
+    },
+    {
+      "path": "Solidity/Calculus/Assumptions.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "98f64d789a27136d780d08d5737e86025f3521ac0c5c8972f7c02c408575ca8c"
+    },
+    {
+      "path": "Solidity/Calculus/Blocks.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "8d679c16c1f10cc04ddbdfe0c1f19ec46410c18a7cc8d6aaf9363f48582a6719"
+    },
+    {
+      "path": "Solidity/Calculus/Budget.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "fbc4569f8e359086c160139d912c34d835c54d306baabad6658b54bbb3e406b4"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionBase.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "f8d9353d7c552a1d957882219af6eb5b77f35cc6229c8611a7ac48b4f16726b5"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionEmit.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b31cad1e0b87f57622514efc4fafd2493338714cfc375190699f58c26ba94a79"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionGraph.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "39e1f4546ed33d0bbe15f98946d1d4ecce216bcead2597e51bee0d37847783ac"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionLeaf.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "936628cab275753ee915e02e3ac5484c32b51c73c4581938ab9a27bb8964bdec"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionLeafMetrics.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "bb3268fe8e30a365462674f7c0d248f052ed3f813fbc873698f60cd17c2e3ed9"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionOperationalBase.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "16a0ef87acf6dabe8f009f3143470c0167f21b6cb5dde1820b31e83375c16130"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionPlan.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "c2dffda6ec2a3e097d63e6854d315f71c4cc5b9fad77d6109711b02527be26d0"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionSearch.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a6a6a67b243fdc8acaf610a9f9898e12f7360865424d9ffb0e8ec555439a13a6"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionTable.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b4aa10c78a6bc2668d171233b72a5d74f1729ac793f3991933edfff00477aabe"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionTermPower.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "191d621f8961859132ee67a3fb98746ab51548ed3952d56030c0c9b6bff7c54e"
+    },
+    {
+      "path": "Solidity/Calculus/CallFunctionTransform.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "efd58bbadaa3b7e3951f7fdbad610b1247f1f013378dd5f819ad2b8dab5deb2b"
+    },
+    {
+      "path": "Solidity/Calculus/CallResultCapture.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a8aebe5ae2964153e6925254c659d15c56ff5afd2ef7cefbbd03792a794b70d1"
+    },
+    {
+      "path": "Solidity/Calculus/CallResultRestore.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "52564eb3f3d6be48046df1e7c0f0dc80e668e8908bbb112e95de461ed3d69d17"
+    },
+    {
+      "path": "Solidity/Calculus/CallSummary.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "90d665e058d1a0679d87a6a462d786da588e27a7a94269a46926351eeb1f626b"
+    },
+    {
+      "path": "Solidity/Calculus/Callback.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "4be4448a6a830ee42396bc81ea0f5c79a34ac4fbebdb8856660991f697ca46c8"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackDerive.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9764575b6f5357f6b494fb6a7a0b2830efd86ac34c8479c8eea3b5a51c2c320e"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackFrameMem.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "af4cf083f78664c38ed09a0421e8bbfe0ddf432b0c070f68f6f28479dd35d6ef"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackHolds.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b330820257e664c3222d03e910171e96b147a2743035cf9372dcdcc8cb67b717"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackRules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackSound.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "676b28823c633de539e0a81546512b974b6df83680fcf49d1fe2b5b40fa2f741"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackSound/Calls.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "fb0abff761fa859f496f134e196a0ef29c474c2ea0f3a056b50417b8c54eb0dd"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackSound/Payments.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6f7767828463620ebd40a59ec90ed25a6d2266d14806c12ae408343034cc42bd"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackSound/Rules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ee3a67b93a3cb3ee437b000619601791f1ce2d3cf4a24e3a4cea48482aac4aaa"
+    },
+    {
+      "path": "Solidity/Calculus/CallerModel.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "84f25603c30e4793f0418304270289bd535ff4720e34a32ea827ab87167a1a97"
+    },
+    {
+      "path": "Solidity/Calculus/CallerModelRun.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "340fc094f70efc69196b6b615f807c6312f9c075a2a7fa72e368e894b20d8028"
+    },
+    {
+      "path": "Solidity/Calculus/CallerModelValid.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9d05e4344523a0cbe39d3a4129d60474638affac6d7d6922ec355e15cdbb079a"
+    },
+    {
+      "path": "Solidity/Calculus/CapturePayments.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1e3918d4d736f8e04ddb521ac2df8870b8caf8484c607aac5170b76becf7c145"
+    },
+    {
+      "path": "Solidity/Calculus/ChainGen.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "dddd8240efd6c1cac837dcdb95e0426b5a157da07d767ade733cbcf6d7bf76ac"
+    },
+    {
+      "path": "Solidity/Calculus/ChainKit.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "065619ca03f051a360e42ba944b90baac63d9a886d6b53799b06641699cb64c7"
+    },
+    {
+      "path": "Solidity/Calculus/ChainRules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9e2fe153585ee05fe055d1ea85476ea477a70d2c5ebe4f1a7d0f9626aa7b0acd"
+    },
+    {
+      "path": "Solidity/Calculus/Chains.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9728bcd42cc203874b3f00e460576f45f6f10d59bbd13a9631fcde5bb7a01b7b"
+    },
+    {
+      "path": "Solidity/Calculus/Chains/Elab.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a7497be4e105ba027f30ab4dbadb8e674694dd0e4d80f1a7d72e4a0087333161"
+    },
+    {
+      "path": "Solidity/Calculus/Chains/Proofs.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9fc95d0d99ba187c040c7a00d21394191df567cd0fde2cc12da5186b2a1b3d9e"
+    },
+    {
+      "path": "Solidity/Calculus/Chains/Strategy.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a09fb131f30dffabeff461419601a2ab642147e303f32ab82abab3239c732a3a"
+    },
+    {
+      "path": "Solidity/Calculus/CleanTailBoundary.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b118c7b799c2e280ce8ebb079d6cf9e359743287811eaa21388faf8dcec39f2e"
+    },
+    {
+      "path": "Solidity/Calculus/Close.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a4a33ab654a5196f6be2f9c64039b287a018dc42f3fdf56856faf7ed3818465d"
+    },
+    {
+      "path": "Solidity/Calculus/CloseAll.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "85b57fa9c68357f7d3f3291a2d6219f0c19c9308d4d7a612e4eb9155a3c5580b"
+    },
+    {
+      "path": "Solidity/Calculus/CloseFrame.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ea5a8da29e7b781552b0debfc3a4628e6de57d5e4523c2f2fa634eb84a64447c"
+    },
+    {
+      "path": "Solidity/Calculus/CloseLemmas.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ffe4b59874fbaaadecefec09b464406f61da658ad6bc8a9974604d6242157407"
+    },
+    {
+      "path": "Solidity/Calculus/CloseNonlin.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ced1d68ce75aa98cc9e89332e4a6d2765515c437a23e510e25cc6ed6b80776ab"
+    },
+    {
+      "path": "Solidity/Calculus/CloseScoped.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "12fd75283fa287d7c91fad7d128876a7cf8431ad32d48afe1428eac67c80a090"
+    },
+    {
+      "path": "Solidity/Calculus/CloseScoped/Leaf.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "bebeff267a5f8cc2462b725d0c3fe34f246d2b37938ede0fe684e9b58c46c8aa"
+    },
+    {
+      "path": "Solidity/Calculus/CloseScoped/Steps.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "2ba5abf99d95e404c08e512330339783a71298292198d8a17096229339fee447"
+    },
+    {
+      "path": "Solidity/Calculus/CloseTests.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ea867a6c0d58409f74725ffbb32f59fc214ce6ef54733a029e88c54c3524c329"
+    },
+    {
+      "path": "Solidity/Calculus/Closer.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "58b6a8407058360c1792ae64f78171900877fe3b0005748e0cec0c43bc13cb92"
+    },
+    {
+      "path": "Solidity/Calculus/Closer/Bytes.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6c426017cc1ee6ee46ad36039949eb9aa918816841338a804658627f18521a42"
+    },
+    {
+      "path": "Solidity/Calculus/Closer/Facts.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1bb7fd715f39317f3ab8089c7394b4da4a8c911aa7bb08efb4c6c72fc82a7490"
+    },
+    {
+      "path": "Solidity/Calculus/Closer/Leaf.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a3eb0bea15f9bf8833c5a7e42835de3b3e836719d774e4b72d2093a022e58505"
+    },
+    {
+      "path": "Solidity/Calculus/Closer/Normal.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "4ac256566f97a1c16209599ee28f915377bc8da070ca8aafeacc0975bd1a2354"
+    },
+    {
+      "path": "Solidity/Calculus/Closers.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "92820e63eb62377e15269d9fae366a8003174e8c7b15ea0d3cf5b503891f9b89"
+    },
+    {
+      "path": "Solidity/Calculus/Completeness.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "62bfbba037e71f406b613c8e3d810063c99a1f1987644559124fc8f0c5e6c86a"
+    },
+    {
+      "path": "Solidity/Calculus/ContractWorld.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "569e03c187666c16b765e2c21663db5a236d6ef8db78f7049796a58b1949728f"
+    },
+    {
+      "path": "Solidity/Calculus/Correct.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "801d1b570c0319cd9f659481630230f5c2cc13c9137ef5b95affb279e2baf051"
+    },
+    {
+      "path": "Solidity/Calculus/CorrectCallback.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "923dfd401f1d61591c26eda2901cf01de4d6a24c65c73eb80152c2377dbd649a"
+    },
+    {
+      "path": "Solidity/Calculus/DataIn.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "92c829bb5f0771e258862bf598f4d80d17c1e8cb33d3eaf6c3be2bfb6b26e45d"
+    },
+    {
+      "path": "Solidity/Calculus/Decide.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "eee2e6616999db1060a649ab13430fd7924d9437d73d4132197697b61cc5a4be"
+    },
+    {
+      "path": "Solidity/Calculus/DecideCleanTail.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "7ea353f68699c9bd0b13fc95cf61398afb9c8e1ce5022533a27e8858f6192400"
+    },
+    {
+      "path": "Solidity/Calculus/DecideComplete.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ac4d099a477983963ba188773bbb7fdf85a081a3637d7094f4256d53dbe8bdb4"
+    },
+    {
+      "path": "Solidity/Calculus/DecideEval.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "eed8ef622ec601e148676ed5e04aa7e79d99c62a305109a849743c0f54d85738"
+    },
+    {
+      "path": "Solidity/Calculus/DecideEval/Memory.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "5ac5ee8ad225730b22d5639c8badfb0709165300583e041e29798a8e46f5bac0"
+    },
+    {
+      "path": "Solidity/Calculus/DecideEval/Readers.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "528adb9f84433ba0e0b06d7627dd2f4a5c8085c5a9f37f2b41a9355731aabad0"
+    },
+    {
+      "path": "Solidity/Calculus/DecideEval/Storages.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "cb4a3b21de65c9f28f1e4c71f885e3a4901eb691c66806e7becf7d8028070444"
+    },
+    {
+      "path": "Solidity/Calculus/DecideLang.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "56375afa5a71a8b4dcc212e72eeedf848f29a1e322cad97f3048893b70028e8d"
+    },
+    {
+      "path": "Solidity/Calculus/DecideScoped.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9707d789129a2a926691953354c91a9db39683e257f1d5200dea861c623dc073"
+    },
+    {
+      "path": "Solidity/Calculus/DecideTyped.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "7eb25e6c6bdef4829b47932016a2114f3bc18a34ba8763be9f1afbecfd7087b7"
+    },
+    {
+      "path": "Solidity/Calculus/DecisionUIntConstant.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "176ee50a15d6368fdd318f2be02234b7f3cf2d977c9d834e057a1d65a2e0350e"
+    },
+    {
+      "path": "Solidity/Calculus/DecisionUIntSyntax.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "01e545b7c64c72b82744c652bf9a43dfb03b7e232f2bef1bff759b62211b846b"
+    },
+    {
+      "path": "Solidity/Calculus/Delab.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "fdfea6c6bb420315c036bd308493d9216454bbb2462f691df486b1b8f96137e5"
+    },
+    {
+      "path": "Solidity/Calculus/DelabErase.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6495a5d8bac27afa1f1503c1f914e01a49c66a8a9892cbec4f724fa04aa3d37c"
+    },
+    {
+      "path": "Solidity/Calculus/DelabLean.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e694d34af93264a70d8e808af0df110ba89b6313c99a0d6c057ed4189985e7eb"
+    },
+    {
+      "path": "Solidity/Calculus/DelabRules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6137a1b4b859ff1252da217ab1d3e9065d65d653f692836144f760670d0d637a"
+    },
+    {
+      "path": "Solidity/Calculus/Deploy.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1f5bd6ae45ee0eaca39abab399d4005546ff3affcd00c6b73e55f62923423283"
+    },
+    {
+      "path": "Solidity/Calculus/Derive.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b31be74909e36692252e85982905bf2c8451d4e8a69ca58a0cf9309cd801f485"
+    },
+    {
+      "path": "Solidity/Calculus/Elementary.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "7fb4104b3cee26bf61bf7a5703474b0020ba0f297f0da281587fc8e88fb77aec"
+    },
+    {
+      "path": "Solidity/Calculus/ElimFacts.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "cc76e119f2b54e6f0e09ffa39d757c70be1d17755f74ada84227115eee9597da"
+    },
+    {
+      "path": "Solidity/Calculus/ElimWriteFree.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a5758d15bdcbc71bcd75170a226a3987b2293f844b10da13732ac1b3504accb1"
+    },
+    {
+      "path": "Solidity/Calculus/EvalEqs.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "8281afaea89a172f857edccd4320a2ec03f30d0ccd6178bd165cc2afd01a83c7"
+    },
+    {
+      "path": "Solidity/Calculus/ExpandLaws.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "0e7f76b87045fdbd65999d6858992b2a331e0e6f1616327ee700f67fa566b3fa"
+    },
+    {
+      "path": "Solidity/Calculus/FirstOrder.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "5c8cd291e08f69f3078bd7fab3e18dea5841c03b17d5b25140cdd6745409c234"
+    },
+    {
+      "path": "Solidity/Calculus/Fml.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1327bb1fe336e9eca4b761b1ebdf8c59c1b00dabbfc4cb5b9b0dfe78f94385f1"
+    },
+    {
+      "path": "Solidity/Calculus/FunContract.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "8109cfe9b101fceb9a59fc1d82f38e17cb2569be074726cf7ce2357347f905ce"
+    },
+    {
+      "path": "Solidity/Calculus/Graft.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "da9c7bc7b16f5e041f1362a919b277952360fece2d39998ccf70417acf85de1f"
+    },
+    {
+      "path": "Solidity/Calculus/Hyp.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9f9cbfe8045669576874d5ba2ce546b7f5ae01b6bedf1c696a8c8b7a1462f55b"
+    },
+    {
+      "path": "Solidity/Calculus/JoinSequence.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "cc80898729c66130d66f79d85a83b2a0347eb751c13a42ec87ccdb504bcc66ac"
+    },
+    {
+      "path": "Solidity/Calculus/JoinSequenceSize.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1ec26b8c86d74a222aadce700a759ac20b298b8caa4399b8491959b20c34b9d0"
+    },
+    {
+      "path": "Solidity/Calculus/KeyTaclets.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "45c00a01e81f9bcba148cb2702c11ade936d324888ccff3c18dd7145641221e2"
+    },
+    {
+      "path": "Solidity/Calculus/Lands.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b623cc6b3d79911c47302977a822ebe64017c06127a209a4e4b3ee1ca75f1c62"
+    },
+    {
+      "path": "Solidity/Calculus/LastLine.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "155f7e2b2923318aa239b33d6e95518f35dd95db3e88dc0d641f92eb3aa4baaa"
+    },
+    {
+      "path": "Solidity/Calculus/LeafDerive.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9c3f77974943430e2f4844e292b312d9dd82099c538277113e53878aac91d454"
+    },
+    {
+      "path": "Solidity/Calculus/LeafShare.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "75b21d773ecd95f5cb2bcfaebf710d939ee8f9270f3ee3dd53fb6c48cd0d3405"
+    },
+    {
+      "path": "Solidity/Calculus/LeafSplit.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "80f4ec7f6e7edaa65052e72d8c736f4d7c3696772f0497d621a671e34aad9d48"
+    },
+    {
+      "path": "Solidity/Calculus/Lifetime.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "bfaacf503f6bf636e622d732afbb32ac43d26ce82ce9f20f5ad38c28d4764ee1"
+    },
+    {
+      "path": "Solidity/Calculus/Logic.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "2ea371b5a0825522f4387a36ed10ae2d651b8de0b12bab6c34e2318ce5dd4b8b"
+    },
+    {
+      "path": "Solidity/Calculus/Lower.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "7984f90e4d065aa67a3150390bc2dd22301e1c2cedda89f7bf69f2c1d75ed3ef"
+    },
+    {
+      "path": "Solidity/Calculus/LowerRun.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "5c49c3a0efa22bf2feadf9598430e601d49eaee7409df179b2bd51ba03eaefea"
+    },
+    {
+      "path": "Solidity/Calculus/MemContract.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "5e8f6699fcc62692170d4754d0d9ea1bd172fb3a94c23a7ffd87dbc2adf66d08"
+    },
+    {
+      "path": "Solidity/Calculus/MemRead.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b11927c668f84758c21e33619912163d04137ea9e370c296cd4e6471145b5656"
+    },
+    {
+      "path": "Solidity/Calculus/MemRead/Laws.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "54eaa261085e3a6d2d163c80291c329c6ec98cdb32e5dbcd721ad1587ef9664e"
+    },
+    {
+      "path": "Solidity/Calculus/MemRead/Ok.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "343ed5ebb7848cffeab31e9b10aa7d6a7f01697051547906127783b7015ef0e3"
+    },
+    {
+      "path": "Solidity/Calculus/MemRead/Pass.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9e1063e9d92bffa922150b71b12c1963ed331e321f0540dfd4cc7599d78efe62"
+    },
+    {
+      "path": "Solidity/Calculus/MemRead/Spine.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a369b5470f0471513c16f55acf4862cf838649b68b155c6654f31b7f25711f46"
+    },
+    {
+      "path": "Solidity/Calculus/Merge.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "28351bcd8b238e67943da8e035355b87d1bea5baab7ed8d5e76e2c61935430aa"
+    },
+    {
+      "path": "Solidity/Calculus/NamedTerm.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "8069cd0ac8dc2add53e3363226f946046974451b6837a60990c8e7678e49dc84"
+    },
+    {
+      "path": "Solidity/Calculus/Notation.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "77ca3593f9c0042d2c6e7903ff786cb23a55b2fcb3a98c9c4bd74ca2068bde2f"
+    },
+    {
+      "path": "Solidity/Calculus/NotationResolve.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "237d675e34c60b55771c985fc999e13ee9f9a5b455b68955ef9c99da1e08ffc3"
+    },
+    {
+      "path": "Solidity/Calculus/PaymentClose.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "86b7e981084b9663010cd5b60a99bfec30d903b69c987ad7d07e28e7800540aa"
+    },
+    {
+      "path": "Solidity/Calculus/PaymentConditions.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "13578fd4ce2844575442f18e1ac3873f2c0160e958bb71cc792787a21bcd1c33"
+    },
+    {
+      "path": "Solidity/Calculus/PaymentWitness.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "213e590c93ff9654ff5d2936e007e28eb4147a8f9d6fbdd8c5bdd7efd524b465"
+    },
+    {
+      "path": "Solidity/Calculus/PremiseSound.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "4aed9036c674074ecbdd6e3d7f9b646909448181b845ba6f315be1425a6e58b7"
+    },
+    {
+      "path": "Solidity/Calculus/PrimitiveReturnTransport.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "cac4cb3973de663a1a970ee2391a3b99b2df8c83c64fe21db9dab87c7d49d761"
+    },
+    {
+      "path": "Solidity/Calculus/Print.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b59b0b13d286cb1d7bb19586403b31148ebf06006255829b82f089f63ed06718"
+    },
+    {
+      "path": "Solidity/Calculus/PrintStmt.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "7492e30373af3ea7a73270922d93a47f9fa184ff0f59bce5d19490ecb0a10d13"
+    },
+    {
+      "path": "Solidity/Calculus/PrintTerm.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "d126aef81df787b4a81445923fe3e9892d2b19003c3a21db495375f4d58d2d2d"
+    },
+    {
+      "path": "Solidity/Calculus/PrintedRules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b629737a89eae44379a9da495fe2966a0dae896ff811c4578adf5d3cb6ff4ea3"
+    },
+    {
+      "path": "Solidity/Calculus/Problem.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "0d6c00b28cd8fce8f5b58ac47839d12e7b42d12e849a62787f6b0e799773b516"
+    },
+    {
+      "path": "Solidity/Calculus/ProofTree.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "bb44981bce61032546178f083f1e5226b4416e5ab1db4de84a39c7152e2aa514"
+    },
+    {
+      "path": "Solidity/Calculus/ProveChunked.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "17128105fccbd7813f582a0635a9186b6e0bf5ced1ef9b3192693ab5a91aae2c"
+    },
+    {
+      "path": "Solidity/Calculus/Proves.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "23118f07095903f55b1f1f2961a361d6968fa1d57f18f9ebcb1d9c8b8c514808"
+    },
+    {
+      "path": "Solidity/Calculus/ProvesDerive.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "23db4a41a415a7d344229c28b7a5b7c3c62f90bf2919beca0b8d0ce7fe904675"
+    },
+    {
+      "path": "Solidity/Calculus/ProvesSound.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "0553ab3c69d9c30b7acc36ca17000b3172210f36f769ad6d3ec753ded52e9625"
+    },
+    {
+      "path": "Solidity/Calculus/Quote.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "bd3e8f491d4258d0eb93859ed1a57eb10c4b045bc56b7345bb3173a204faeeb5"
+    },
+    {
+      "path": "Solidity/Calculus/ReadBounds.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "f773647a7146f7359480e09ff895546a856325667b49aa00dfaae8593c405af5"
+    },
+    {
+      "path": "Solidity/Calculus/ReadWrite.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "fadc45d5d8799f08018f77541390df7350c1e870569b5bad254e7bbb060d2969"
+    },
+    {
+      "path": "Solidity/Calculus/Recursion.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6c97132fe71132d23fd626d8c5f62dd1a00637b6f704b0a7a66f566d1f5200d2"
+    },
+    {
+      "path": "Solidity/Calculus/RecursionCallback.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "7f0c909b2433a060d50d4e4d14e7c4277fca912266051f1ae074b9101da5b0aa"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteChainGen.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "79493586d7e7e6e422e2a32ea93eab303c3fc4875e0a18b66f1d90b5b33862ce"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteChains.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ef0f2db2cfdae453255553888ff7e5b14f8eae3d5f0b2c2933ad80085d80f5f9"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteLaws.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "662555db2c1cf45d9a9a3f09348f7caf89ac44db1ea93a430c7719398ff71609"
+    },
+    {
+      "path": "Solidity/Calculus/RewritePast.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "3809f79b14327c5c1a45710dd8d8250441827cd175b88b7a8b9d940b2c4cd5e5"
+    },
+    {
+      "path": "Solidity/Calculus/RewritePast/Apply.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "548d93019fb1a3c1d7b0eee54e4cc1fc7d4deb423d32b2dd6f73bc43bd3a8534"
+    },
+    {
+      "path": "Solidity/Calculus/RewritePast/Merge.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "55f712249593eabd295fe2a3a594318b883b9ab9be53586c872074a236d58a23"
+    },
+    {
+      "path": "Solidity/Calculus/RewritePast/Scope.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "041496f1058dfedcfa73b99bd175c7d87750d79a607a952505f5e6efcf7c2fcc"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteScoped.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "bf23e66fc4ac75f1f8f5dcace36f514002377a28fce934551e37b31b7d532dfe"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteSyntax.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "2b40343055aad0a7e35f5c6c1350491f7258422eb58755e4a00b3988d6d5fdd5"
+    },
+    {
+      "path": "Solidity/Calculus/Rigid.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "82cae49cf7b19a6bd7b0591a4963b8ef7aae3891d6a82dd077e45ef66ba7356a"
+    },
+    {
+      "path": "Solidity/Calculus/RuleExists.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "995aaf3f47070b2595d33924148b115e503335712ccccb2c044bc6647c749a77"
+    },
+    {
+      "path": "Solidity/Calculus/RuleKit.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "753e4ceba0f97a497e4e29bcf0e7c9502aaf03f81fcb3057fb67a5c6d0681047"
+    },
+    {
+      "path": "Solidity/Calculus/RuleShapes.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949"
+    },
+    {
+      "path": "Solidity/Calculus/RuleSyntax.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "18e91abcdf9af69b9d1630c8bcde81b5201f632e5698c306a20cf5e524f09695"
+    },
+    {
+      "path": "Solidity/Calculus/RuleSyntax/Grammar.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "c664960e0939567b227ab68988d0888f87d0bf90e44f23ef92d2112c3ef7112e"
+    },
+    {
+      "path": "Solidity/Calculus/RuleSyntax/Print.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1656c905099219e20e7b8a96d31bd12c423160322dfca122458bf08262376cca"
+    },
+    {
+      "path": "Solidity/Calculus/RuleSyntax/Schemas.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "8a0a45b5395daee294d89566fd07478f12cde60e1d7368afb6d46e07060eea41"
+    },
+    {
+      "path": "Solidity/Calculus/Rules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207"
+    },
+    {
+      "path": "Solidity/Calculus/RunFrameMem.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6ffbeb4da97e152d3d27a2476bf040d42a28d55eba989d598e60dddd4e4f345c"
+    },
+    {
+      "path": "Solidity/Calculus/RunFrameOwn.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e063b3bf82df7c5f54d6adc52fa4fda37e9e9bcc9bc837f3ce9377c3ca2fc14e"
+    },
+    {
+      "path": "Solidity/Calculus/SeqRewrite.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e5d117f9de069be0611fdd6f931e3d5992ae759d17ccb67becf895e929061093"
+    },
+    {
+      "path": "Solidity/Calculus/SequentNotation.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "93515a4237135a6a9ac589e4609e01617d9b706f5e81849156cfc2993f35820f"
+    },
+    {
+      "path": "Solidity/Calculus/Sequents.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "2fb9b426ffcc884ba8b78264fedbde1e280b2f175c86e3b0bb759630309c678c"
+    },
+    {
+      "path": "Solidity/Calculus/Shift.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "907888bf49ae2347938ae251b0a3ba38dfe12d0502e54159cf9f52d26ee1991f"
+    },
+    {
+      "path": "Solidity/Calculus/SolSpec.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ffa7e4be91161eb3d31fc5735434c9d79b39633080aca2b039b4ac20817755cc"
+    },
+    {
+      "path": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "3bc1a168b9476e28fb43f4a1294c109fda3fef0de10c12255006f3077dcf8030"
+    },
+    {
+      "path": "Solidity/Calculus/SolkeyFragment.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ce621cd11d5ac9d9e0e3641db46540c5bca37c0a119cf2ad8519ff6957765faa"
+    },
+    {
+      "path": "Solidity/Calculus/SolkeyProves.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6286b4579c2c4ac522edd664c635c9b39beafbe2f88a5f64416b6af8bd4b369a"
+    },
+    {
+      "path": "Solidity/Calculus/Sound.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "519cc7e419d16c630473f89c11614f9c10401d07592f25ba20bef8ae5a9e2911"
+    },
+    {
+      "path": "Solidity/Calculus/Sound/ExternalTryWitness.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "ba366dd89aff9ff921266f0c71ac903b61d8def4e41af6b35ccd733a5d0377e7"
+    },
+    {
+      "path": "Solidity/Calculus/Sound/JoinSequence.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "c8cb72221f1ea69c5f43b66479576d71422a178b6c96d8c7bbef57fb9cca0af0"
+    },
+    {
+      "path": "Solidity/Calculus/Sound/TryConditions.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "1547b7b62884bf84dd953bd9d8d94e6e0de6ff722f6dbc590470b6b23b781321"
+    },
+    {
+      "path": "Solidity/Calculus/SoundArms.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "edb90ee6c37c3e6b0e6d81eb971b1a6423c82cf76ee715134010d776fad5a3fc"
+    },
+    {
+      "path": "Solidity/Calculus/SoundCalls.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "93705fca69b7aefeffcfc3678fe300a9c56c631cfc3ed639921d22ec6597be58"
+    },
+    {
+      "path": "Solidity/Calculus/SoundCapture.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "cf24cafb908dbcc271e5a068c0caed85a655e9fed9125b42fba5fab3c7ef3637"
+    },
+    {
+      "path": "Solidity/Calculus/SoundCatch.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b555c44a75b0b3fb7c5e559577c6dee8c4d6e34949f130480ef56e59aebdbd1a"
+    },
+    {
+      "path": "Solidity/Calculus/SoundControl.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "87672f352de9ec85a6d0c6589f6c3bd7b18b6cd1bfedd8ebd1c2e673185bd8ff"
+    },
+    {
+      "path": "Solidity/Calculus/SoundKit.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "f960bcdcf7336501295267ede02c840515939a081e695c86dee85808192037d6"
+    },
+    {
+      "path": "Solidity/Calculus/SoundLocal.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "da75621dc7ea275af7d5b560b2be392a6d0c20f0b9010774d2a47bc91f08c4f3"
+    },
+    {
+      "path": "Solidity/Calculus/SoundLoops.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "7939b045980e4f52e37f6ad1f0aa386661e83fbd2b06d7560a1f152e8ec150f6"
+    },
+    {
+      "path": "Solidity/Calculus/SoundMem.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "266029acadef24064930a76e35cae62327b8c349dddb1ea2afda4800a010eab9"
+    },
+    {
+      "path": "Solidity/Calculus/SoundStep.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "44af31acf55715beb6cce124f0b80890793763f2654864dec196c07f8a1b4e3e"
+    },
+    {
+      "path": "Solidity/Calculus/SoundStore.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6482b926be149041f32079095b5bad6c3859a633b7f3ea4d6c708a7bc16df9ef"
+    },
+    {
+      "path": "Solidity/Calculus/SoundSummary.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "9c34de9d1d0f1d567eafe6d919a0f816abb9aa4f1b425b25fab27729720ccd1f"
+    },
+    {
+      "path": "Solidity/Calculus/Spec.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "fe862ca098bec3150836b0959bed518369c17d7be58828c897c18d005bebf852"
+    },
+    {
+      "path": "Solidity/Calculus/StateFacts.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "538a2f047312bf0e52d95a1f7ff8528a0a4ee0df3b3594af22f97a375de5828a"
+    },
+    {
+      "path": "Solidity/Calculus/StatePartsScoped.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "5295370399777e876977269973a36a01512c9efb918475e2fe6a2966ef8fee0a"
+    },
+    {
+      "path": "Solidity/Calculus/StaticStorageTransport.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "dbfa164bb200b95d8bc6b951bc56dfd387f581da5adcb884eaee937c0a486801"
+    },
+    {
+      "path": "Solidity/Calculus/Step.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "13894e747d90e0d5c1fe21bf6bf66f4a616f8a2b36bf5ccacacb6eb59483c37d"
+    },
+    {
+      "path": "Solidity/Calculus/StepFragment.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ac8bb62d84aff1f4668b996f5c02236accae8a0f60aaaa4a63917f541c986788"
+    },
+    {
+      "path": "Solidity/Calculus/StmtSound.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ff66c6a0f12b79df3d97c2129872af5400ace11f24e897944b50a485839d390a"
+    },
+    {
+      "path": "Solidity/Calculus/StorageOnlyHavoc.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "7fe51346bd9e598be2b554c3c97d35234edb3801a02998c0e13b7a63c1e2e47f"
+    },
+    {
+      "path": "Solidity/Calculus/Surface.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a88604e250b9affac4f4f3b0f295f760a2fb338159367ac435abf7591f44342f"
+    },
+    {
+      "path": "Solidity/Calculus/SurfaceNotation.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1eb45e5d7655a78125ea52a93499dbfa949fc0156ceb0531a4fab907a22d505b"
+    },
+    {
+      "path": "Solidity/Calculus/SurfaceRevert.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "194416b4363350844e74f80e6f4a4ec04818648c2f9728e6490d229fc45447d0"
+    },
+    {
+      "path": "Solidity/Calculus/SurfaceSpec.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "c293fafbabdaec3208cc677a271f33dcc2591b9f202756b54679cdcbf6a91fc9"
+    },
+    {
+      "path": "Solidity/Calculus/Symex.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1f4e6a8852bdadbb4752e6fc03d7d5367720c58cbe674a5878215a9da3192fdc"
+    },
+    {
+      "path": "Solidity/Calculus/SymexFragment.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "8f087e1ebe29055209632e63483cc4143dcf1e97322d4880c192ac3a386a2121"
+    },
+    {
+      "path": "Solidity/Calculus/SyntaxSize.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "012ca70547d657dce56baaa86599c032f7f888d4c86336cbcb62bf760b8d999a"
+    },
+    {
+      "path": "Solidity/Calculus/Taclet.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "12fcaacc1a031e4453c71f775f00ec00bbe42435daf14a65931476f5bb285130"
+    },
+    {
+      "path": "Solidity/Calculus/TacticSyntax.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "db47b2de230d187301da0fe65b7400531c73b36516918d123fe9dfe96f5c82e0"
+    },
+    {
+      "path": "Solidity/Calculus/TailMode.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "edc9e596791bba2153a77b0c60259670b94f821ca529f0c4701a54efe1de9461"
+    },
+    {
+      "path": "Solidity/Calculus/TargetProfile.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "070447d18e42c669b4af522daf4ffd559baf2e461f7a4cfed0bad80b9613f9f7"
+    },
+    {
+      "path": "Solidity/Calculus/TermAgree.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "eb73a9dabd89711c02572659093b4f4a468d52f859c6c0d26c203f36696cc168"
+    },
+    {
+      "path": "Solidity/Calculus/TermEq.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "be3efe8604eeaaae8fb9422d6ad5d7cffe55839fd2ec9b6428bd521498679fb0"
+    },
+    {
+      "path": "Solidity/Calculus/TermEval.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "c254b7420b1157544fbc8d1581673887b90cde8206ee2ea9035f3c6f6e2ea201"
+    },
+    {
+      "path": "Solidity/Calculus/TermLaws.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "4e9f85934ad7358eb77b438fa443e1ef764d6132ec89f7659e0c63764f74c76f"
+    },
+    {
+      "path": "Solidity/Calculus/TermLaws/Fresh.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "dce8d91c1611d7e9561e338db8bd516030e15743f71c8eb46ab166d827e050c2"
+    },
+    {
+      "path": "Solidity/Calculus/TermLaws/Reads.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a198c40df67e60ce3b3e723093e7633423d29c4e5c640a39c9448df1f7dd2694"
+    },
+    {
+      "path": "Solidity/Calculus/TermLaws/Storage.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b2346ac71e5a0f380ea264c53326d9c25c7cadd4d3d94225c50517f52fede3bb"
+    },
+    {
+      "path": "Solidity/Calculus/TermLib.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "2e80d73da56ef0ecca56211510bb889a984a66b0579b660f3ba4503569f95a7b"
+    },
+    {
+      "path": "Solidity/Calculus/TermLib/Rules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "f4a4ae4095724aabed3e5b044da451efbd1251a5bdf6c9e48ed7fd5107720043"
+    },
+    {
+      "path": "Solidity/Calculus/TermSize.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e9eb6ef1897d793cb028f32022358e24fa96a08f80afc31abf1430018df64975"
+    },
+    {
+      "path": "Solidity/Calculus/TermWk.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "74f89643d25bcc23f809ceb088decbfc42d161f91642e9eb9bb01e6e29c1f0a9"
+    },
+    {
+      "path": "Solidity/Calculus/TreeData.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "d7d96ac88eaed9b58e10d18e551a9fc28b189245d3466a0b86ce38f1d8759577"
+    },
+    {
+      "path": "Solidity/Calculus/UpdRuleScoped.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e7f5557f89916c889e054f1df85b90f6c1b58d8a5a177426d91ef88893b2f5b0"
+    },
+    {
+      "path": "Solidity/Calculus/UpdateRules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6df902f7cc8e5cfbf20ad75568ef74ba39fff4985a3eb8da9b1568d19f2bcd7b"
+    },
+    {
+      "path": "Solidity/Calculus/WalkSyntax.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e6ad46612a4b399e1bc83949364bed62c449bf833b257682fa7eff1fca0a7714"
+    },
+    {
+      "path": "Solidity/Calculus/WkOver.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b17b1d294b95ad1a058ef61c76e6d96789eeb3099ae4012046dd165323d7f408"
+    },
+    {
+      "path": "Solidity/Counterexamples/DiamondTry.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "951eae97e8f58c4ef5d5dcc7a758aa674729787b1c7b084e766d3226552c0ce5"
+    },
+    {
+      "path": "Solidity/Evm/MemoryCopyBound.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "031402dd5986b889bca3335c65264fc7b651e65f87c529454ea67832e55770fa"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedCompile.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "00a551c07477479aec3c7ec967c967344e82aee2f0b10d7ed3ea08351abc512a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedCopyExamples.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "123cab516116d95bf3638ba27b88c97a74c9ad60c23b5af8018bfdd9df2ae4c3"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedMixedCopy.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "c40e7efb160b55e6f3e073f418a8c8210cf49f2af89a0e3b5d3138cec52704b0"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedMixedExamples.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "c745fba38fc259aee9864c13c2c5221d9f044d96b9ac2072e6de69a498e2eac2"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedShapeCode.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "b108d8585863d787c740762d108797c99904bb41e07dfd706a7f92989a01428a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedShapeLaws.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "d5773b097480642be1bb41746919ad548d308fb1d7d86bf9e1ae617aff6b3c40"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedShapeSource.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "68d27020cefcdd629fde2fc671bc3abf89065287858c7647b5b3569057f4af2f"
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedStorageCopy.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "377df4f8b65df3addaa768ef95714076d9db8756c54c2bd733dac3b7dab92ab3"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageConstructionCompile.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "2097cf49bd5eb70b78c02c7584aac41db37e3bf0981bbbc0631a54b2e8d87fb2"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageCopyCode.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "961266b2b06af6e21119536261e6f3855e9d7c1a3d24b079ddc484ea6e0d252a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageCopyExamples.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "976814a9959817dd9d50243320eb1676bcf503a1e92f2ab0d2a259d72079e05a"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageCopyLaws.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "5e62bd860d5990286a8d05af1f60deb92640f5aa1b7b33fca186d9a208a5d8df"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageCopyLoop.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "aab1c00c17db0a19d319b2fe48ba943e5ac6e11854c128023984047b3a510317"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageCopySource.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "d73e3c43b1f9659911f8ed35216e6e50a15f246a4f90a983537b917bf89a50e9"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageLifecycleExamples.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "6e60050d93858318f37425feff5906a8017d83e0d76948601595a5ba8eb53eb1"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageObjectCopy.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "ec1508066aef5c808bf0781ec1ac1d9bff6a78efbe0b9ded9884cfa1b7c97e7e"
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageStructCopy.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "9057f4cd43a306c32850183390c80aa1f3fcf38ebf710aca7d31c7f79d5ed8ef"
+    },
+    {
+      "path": "Solidity/Evm/TryByteCapture.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "16b9f64acce59632274d774810ef825101da334f6b107ed03ec6cf0201836fcb"
+    },
+    {
+      "path": "Solidity/Evm/TryByteImage.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "bcf9bc3576dcc08cad4be80c997a324e5d2f1a0f5e82600044304823f242ba81"
+    },
+    {
+      "path": "Solidity/Evm/TryPanicCarrier.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "8ef5fd8c93c688829a0a06a128343f0d3d1048a85faef7316131d9f3d8244e93"
+    },
+    {
+      "path": "Solidity/Evm/TryPanicProducer.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "666ae4f78fc43a3d224fd687c3b61a56282641d8fdfdfef28ee6e9e3ffc81df4"
+    },
+    {
+      "path": "Solidity/Evm/TryPanicSourceDeterminism.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "89b1311de4d81790bf1af6337932ae71aa0e650d7f4d9d2b18a74dfb29b8a26e"
+    },
+    {
+      "path": "Solidity/Evm/TryPanicSourceFrame.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "62b1feec44b610c91471e0440fca606e23f6d8071fd4ffb6931947d96d5294cb"
+    },
+    {
+      "path": "Solidity/Evm/TryPanicSourcePlan.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "697f55f13a134703492a0e19a0fcf562943fab5a0347df2a907ff3f12beb6565"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/AnonLocalCapture.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6236d2245a235a66f47cb94e64a5ed055421efba30d696caf8289d51fbe967c2"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionBase.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "b07fe57a55036e040265f3c9d1ed5046a0385eedc2ea49be5f159e1b6a9a32d5"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionEmit.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "93e411df80251a137a276c9eead642e3689e3cd754179c40763d3a7bf1bb70f0"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionLeaf.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "c1fee5a7f0fda68140957cb055035e08b03490c32c6ee23996befb846d4578e9"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionOperationalBase.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "aca929333d29fb8f2c7014139ad3dd3db64085763346958a066476f1b6c34d07"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionPlan.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "0aed721d4978321724d7e622593338e7e892a73bdbe6b21f05c5f34b5fbd1899"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionSearch.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "2c7f19ced226fb6a333f25f2ed0e1b9b4eb60c3d37b3f2ef48f055d6dcb3ec49"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionTable.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "5e1f6252078345b5cb6892653a3625f21b027eab71d808ef5df39cd61b75de4c"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionTermPower.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "fe2d2ea2a1f9f35743c1aadcfd15384bca9936fc3339ccfcfd495ce031a7795e"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallFunctionTransform.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "5b40fe69131c5b01d63aa7dbf6a8e4cdd0e570bd29d3130c57a8cf3f58ea28f4"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallResultCapture.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "45c7e5986a121f1b3a69aafdd766551c94b08b8741ff429f6d76a44ec86bc622"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallResultRestore.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "75de10b7959549417ecb67ccf4d468858b67bf3b57d405179c99ce6479205243"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CleanTail.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "28a74fd16f79ad2a114e5d67ed2d20c4d651e925b4061f29aac9a2247036b1f7"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CreationTrySource.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "05cd564eef18c185934aa92331154e2d4ccbe2ce3d1188741fa7cde1db97a94d"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CreationTrySourceIR.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "b9648ccab1eccd51f25b9948e764f6a702848b7d828463439510e160adbdc16f"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/EntryReturn.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "05d918d4ff920ad4f3b1b5821c1262fd5064fad6f293bc5384bea0e63653e26a"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/EntryReturnFlow.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "bd4aa55c4128871a8a7bbcb74603972b8684ec220396b2dac8d87aa196e45829"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/EntryReturnFlowIR.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "2443ab193f6ce297f806c78eddc114f67c93fbe57b85275466c54ba967d6d56e"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/EntryReturnFunction.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "4cba09ed0562f458cb177ae0736e8a80c75cec3d61a47e47402e570e2c6c7be6"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/EntryReturnMetadata.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "ba9f6569fc3bc9ac8322bff64381ce7a1515b800e24eaad5f845c2e4765d9ff5"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ExternalReturnBytes.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a7f369fbef17abd65bec5d0a2c3f519d4f8471b30b60d6f8bb7aa33fd1e766bc"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ExternalTryFormula.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "2b1aefdb56dd391ac078b57a87c17e013013ec456269af8ddfa55811c2398fd9"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ExternalTryUniversal.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "0a0b9de3ff3890ce73480d8b2cefdb14c970b62b197160d7718e21b768e03dc9"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ExternalTryWitness.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "0fd2c6ead4f959bcf6599e3fbf5af3cb3606ec40f144ae928090139d10a501a8"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/JoinIntervals.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e5e9ee5aa85534bbfb7a90bdbb6173d4a1e7b344415c73b9971e444a564c3ca1"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/JoinSequence.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "5dd293ef79148e9ae185066b233da39ec60cd856a2395bcb0930e6283f46610e"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/JoinSigned.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "831a54c1b74be1739a53a36c303045d811a37d6146a3889d280ef91f0dc4134b"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/JoinWalk.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "4b143dc91d7d546b99432833c6c1cea6fc21ee9a119794c8e9eb5d2e7c731e42"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/LibraryTryControls.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "19d2874e21e27aa4849908afce80b25c21bb38fd0fa2a0be862a94014e624c3f"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/LibraryTrySource.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "864a58a227acc35be0bcb0546a02efb8c9eda06622864e02960bed38ac18ddd5"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/LibraryTrySourceIR.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "c040a583752b99e6482ff01a9e878f8a42c0f9a89131373986bce2cdb1de8993"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PaymentConditions.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "bbbf812d03c5b64f784fda58a0e135f3683c352d8323d6cf1c4d1c884a758b1d"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PaymentCorpus.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "e92bbbf4c6c4bc952a67ffabe221075518ce24e84358d41fcd934495d7abf47c"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PaymentRules.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "6bf6e0ce00b0af9c3834d283ed5e574b8da292f3f39469c4d9d6d18932c61e35"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PaymentSource.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "2bd8e372086d4234dc789c2482bf5708565fc93b7dd34a30313866358005913d"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PaymentWitness.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "3c8b7143d26e29952ddf034d41d8435cab64996fe3d41744d54ea668a6d93f1a"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PrimitiveReturnProjection.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "010cbecbe6f7149f3f5a4a00816c21f808344b4ed8ed8efb5c6f612234024a6f"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/TryConditions.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "bfb88d6054cc9d3920486a926f4c65fd081896d00faa7cdb647e61e659e22c2b"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/TryPanicCarrier.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "35a8910e9e34ef477b7e9dbf7c411e42460d7c91c2c8e9bc4967c7e785dbd4c5"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/TryPanicProducer.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "ca4d6448c82da446974c03a640728d05172b4e57da2c1994225f3bc20e3ffb71"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/TryPanicSourceDeterminism.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "4c7cfc2f25337ed9e053be86cfb275dedb0252dcc85de1792bd1f47c04ff7af2"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/TryPanicSourcePlan.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "9cd7401e5518b67eaea820bb8aa5ba56e49816c375fde88965627e3e42af43d5"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/TryPanicSourceWhole.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "b513b59849eb35af59ca4ba37bb93a661fa82b15d31f4ddd95332fef6937a4a1"
+    },
+    {
+      "path": "Solidity/Frontend/CreationTryImport.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "925115a1854cdb06aff3c9b32297b17122f0514b84c4abe11bc7613e78cf0d9e"
+    },
+    {
+      "path": "Solidity/Frontend/LibraryTryImport.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "5f82b18a564b87ab2d29f05f8a78baf99f4574e79da42db887bf80bd6ff43119"
+    },
+    {
+      "path": "Solidity/Frontend/PaymentImport.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "8e1120898268cde3d810e64cd280b8438cbc5ac20e84707883052577e9a5c9ca"
+    },
+    {
+      "path": "Solidity/Frontend/PaymentPlan.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "030cdd6a99ffca8483ca0de92b24650cd33c485f214295e5624da1938ab56a3e"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/TryPanicSourceCaller.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "3f8ba1840af3ddb19f6790fcfbbc9d2a0e59cc2adc0417511e6feedcc6cdde99"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/TryPanicSourceData.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "9c66fb86e2405e084cce619adcfc9d13a22d6c53f48333c2cf1957c119c061cd"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/TryPanicSourcePlan.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "5e5a585510736b165d68f075bb3c46f3dcc2b12ac718e47d92aef7abd41ac6ba"
+    },
+    {
+      "path": "Solidity/Semantics/Callback.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "8277e068b13e2cd9a17e252a7721a9ee8d6824ae7ee78bcadd761ffc0520f02c"
+    },
+    {
+      "path": "Solidity/Semantics/CallbackCapture.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1b2fea24989d7d353d38deb99c727cc31d131e69723f53ecd611945384c45d28"
+    },
+    {
+      "path": "Solidity/Semantics/CallbackFrame.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "d19054aeb8974ce8f5a98ce92e980ebaf7ce7ae019ed9a3f63a2d10acadd8232"
+    },
+    {
+      "path": "Solidity/Semantics/CallbackUnwk.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ca1e3974cd7ca45de2ace5da297bdd8448917150d9c2748de5c4579c22a21936"
+    },
+    {
+      "path": "Solidity/Semantics/CallbackWk.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ee4a691f441ca285a1a185d3f8b15c5fbba970ed2ac1ecb879a1e51971eb1577"
+    },
+    {
+      "path": "Solidity/Semantics/ContractWorldCertificates.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "66db990b890b04773f01e6eced951584fcdc75c5d8583ff076ab83214233a4d7"
+    },
+    {
+      "path": "Solidity/Semantics/CreationTryFrame.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "e813b13eeb9e2ab3134de2fa8e5f3294db13ec153af383b1c8b8360f3532f95f"
+    },
+    {
+      "path": "Solidity/Semantics/CtxEquiv/RevertFml.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "55a58812babeaa348ba716dc7e1a73d4691365f13f7a7334844af7c635a4a470"
+    },
+    {
+      "path": "Solidity/Semantics/DeferredCorrespondence.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "ef1aacb0a4b8216a40891cd3b483dad3fec9250d8542d70ebef40a1ddefcac54"
+    },
+    {
+      "path": "Solidity/Semantics/EntryReturn.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "54d509a64a1cae2b44a8d4bbb99ce7ec00fe352f1d742245f60f88427b4d2231"
+    },
+    {
+      "path": "Solidity/Semantics/ExternalReturnBytes.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "71ff993587eb3e2dad1f339949a4dbaace7229310b731841ad3ef5a3193df2b8"
+    },
+    {
+      "path": "Solidity/Semantics/ExternalTryWitness.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "c67d6cd415e8e3006e383e93a6e6b6f22d22b6bbbb15159dc016a88dde16827e"
+    },
+    {
+      "path": "Solidity/Semantics/LibraryTryFrame.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "4ac1544e54f9cd52628283fac73c64cf4d8dd799a75e158f35f4819b0a67cb85"
+    },
+    {
+      "path": "Solidity/Semantics/NoPanic.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "a08845384cb4ee03338d7cee214bc2514acec30e16d08bb9225bcaa8e670e5cf"
+    },
+    {
+      "path": "Solidity/Semantics/PaymentWorld.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "2abdb370c0dd297f91d9b42961e7d7ae6b49bdc58b741e14c34783babbd612d1"
+    },
+    {
+      "path": "Solidity/Semantics/PrimitiveReturnProjection.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "4376c6cd4d84e1f130bcbf4bcb2231a22ef05890c3ca509ce8c375b846a3ba3e"
+    },
+    {
+      "path": "Solidity/Semantics/TryConditions.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "ff9cad2325ce1384f67463aa0dbdd8606e762c44d7937a7637c24c019bc2121d"
+    },
+    {
+      "path": "Solidity/Semantics/TryCreateConditions.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "333d1cd0b154e31badedeb1eeb6d2a52d604d3e4988c33aecaa97134ed892a48"
+    },
+    {
+      "path": "Solidity/Signature.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "f87769d741153c151bd2d27aa43be9ba0a380f846f614ee5b00ef0e2581b5d1d"
+    },
+    {
+      "path": "Solidity/Storage/Representation/ArrayControls.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "0215eb95c64613b7e706bc60f3d3a6215bf2389c0e68324578421d96f4ba5eb0"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Arrays.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "af83a60da9650d5ab9c48b70b66311a2817fa363ed06f150e74820d3c5035e69"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Controls.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "d32eb3ce6619e516af6af06a00a84758e5820765cd762fcda82d033bfad22d19"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Frames.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "fbf77ac1d7e493da88668c578d9a725f7461779b4994c3117e533bce1a400166"
+    },
+    {
+      "path": "Solidity/Storage/Representation/GraphCompatibility.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "984b9e196895a5f5c2df7783d105f7b0255684d33d20e0b746a660875b9f409b"
+    },
+    {
+      "path": "Solidity/Storage/Representation/GraphControls.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "093c2991ed77c70e3eb4a8b4449fe6aa311007e2772d766aa00ebcd0b8cd61e5"
+    },
+    {
+      "path": "Solidity/Storage/Representation/GraphFrames.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "e0865b11e7ad91979a044921f2ec60e7ad1e7448e5904d4797b9360cb55d37ae"
+    },
+    {
+      "path": "Solidity/Storage/Representation/GraphLayout.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "a097db53da4efc5660ef192a8f6e15738dc75e8b68308c66010041dc5f757072"
+    },
+    {
+      "path": "Solidity/Storage/Representation/GraphRepresentation.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "f2eeaf409afe958962696094f8ed140e7359e39cbf3fb8a591c31468354488a3"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Members.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "f2909d7f82a7a87cd4c62f9b68f817e51a53d2f0b9da010c0c06ee34c1188bc9"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Model.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "74e2e9575a8affb6fdc3bee5fd6ce2528ada8066246f7ee8b21a9c84789cc62f"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Reads.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "b47886e3ba6c8c7ad4d178deb9df56d0ec365eefd2a0ecec5f5491d9fe231245"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Transport.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "19ee18f47ea5720f47e3e335494ee2f2dca08e2c20856682240d06267a8131d4"
+    },
+    {
+      "path": "Solidity/Storage/Representation/TransportControls.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "322c229165fea38a0f6b92b48e288ac94d20d55deed1c8ec869166f93e41b590"
+    },
+    {
+      "path": "Solidity/Storage/Representation/UpdateControls.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "74d406a08843cb63f06a4b48b735f15e9ec4f64efca34892e31eb3b452d54947"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Updates.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "59644b0514f133d8a063c477e8651937637bedd5953eb6edad05cf71370d46c1"
+    },
+    {
+      "path": "Solidity/Storage/Representation/Words.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "75e5aa0d1359db9114b9dc7a6de6af1efa54fc546d1588e7dfb308ec3432c0f9"
+    },
+    {
+      "path": "Solidity/Syntax/Quote.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "1f6c9b771878d5fc94fcecd995dffb86fe5fc70f5a322afa4f6e1c6aa35a8f7d"
+    },
+    {
+      "path": "Solidity/Theory/Segs.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "57e4a32ca89346c6e840f90866f0cdfd8fc2765cb268e09f693e267a5cb0b673"
+    },
+    {
+      "path": "Solidity/Tools/CreationTryReplay.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "f09fe4a2d429ccf1b59702a20a273aaf95242b7f722c911dc00b0674a65a6a76"
+    },
+    {
+      "path": "Solidity/Tools/EntryReturn.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "97f462025ac14ae3961bbec2f1b571be495be4ac869e98b779a79765572b6b88"
+    },
+    {
+      "path": "Solidity/Tools/LibraryTryReplay.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "835ec2c87b6dcfaabf0537084038b4c8e661c38a88b77fe9dba9410f2d945f72"
+    },
+    {
+      "path": "Solidity/Tools/PaymentReplay.lean",
+      "areas": [
+        "try-evidence"
+      ],
+      "sha256": "0edf414d6e68803e91ecfce3f38d889479f077de16ba6d5715699fa1a13cf083"
+    },
+    {
+      "path": "Solidity/Tools/ProgramTrace.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "c14ac759b865129a9ec0cab62d955343575e7cd5f5af61686b69a66a0c5fa7fc"
+    },
+    {
+      "path": "Solidity/Typing/CleanTailRun.lean",
+      "areas": [
+        "calculus"
+      ],
+      "sha256": "2186b4ee3a4d9e9ec5a371e6fc7519e875ec70c2dfc657b19aa2cf3e1e0dac30"
+    }
+  ],
+  "source_declarations": 5283,
+  "generator_commands": [
+    {
+      "file": "Solidity/Calculus/RuleExists.lean",
+      "line": 577,
+      "command": "#replay_ruleExists",
+      "status": "generated declarations require kernel enumeration"
+    },
+    {
+      "file": "Solidity/Calculus/Taclet.lean",
+      "line": 669,
+      "command": "#replay_toStep Taclet",
+      "status": "generated declarations require kernel enumeration"
+    },
+    {
+      "file": "Solidity/Calculus/Taclet.lean",
+      "line": 877,
+      "command": "#replay_toStep LeanTaclet",
+      "status": "generated declarations require kernel enumeration"
+    }
+  ],
+  "source_census_archive_path": "evidence/source-census.json",
+  "source_census_sha256": "a2aa6d5e5837eac11ad80fc4eb59e4c3903e9d7f9d52e41bcbccb1e24dccc2da",
+  "full_acceptance_archive_path": "evidence/acceptance.json",
+  "full_acceptance_sha256": "ab86e1928f33f906f7da261e84f8105c98f353064fef06737e9d9ee9d1a92385",
+  "counts": {
+    "source_candidates": 5283,
+    "exact_kernel_matched_source_candidates": 5283,
+    "source_signatures_pending": 0,
+    "verified_source_joint_witnesses": 135,
+    "supporting_dependency_joint_witnesses": 1,
+    "source_candidates_uncovered": 5148,
+    "fresh_kernel_modules": 361,
+    "kernel_theorems_in_fresh_modules": 18633,
+    "additional_kernel_candidates_uncovered": 13350,
+    "writer_contacts_resolved_files": 253,
+    "writer_contacts_unresolved_files": 108,
+    "verified_source_input_bearing_witnesses": 123,
+    "verified_source_closed_telescope_checks": 12,
+    "distinct_witness_theorems": 126
+  },
+  "semantic_conclusion_audit": "pending, including closed checks",
+  "original_prompt_sha256": "ff6dd26e27fdac5a3a0a7538e2315d03bf20fa2e3ee903de9409c5f7a12c698e",
+  "original_prompt_provenance": "complete original first user assignment transcribed from this thread; launcher rendered-objective bytes not independently readable",
+  "coordinator_verified_objective_sha256": "4c70d03b6d031c0831674a2e7c833f1d3ddfe505cf6e3dceefe1cde26ef54268",
+  "prompt_hash_matches_coordinator_objective": false,
+  "portable_provenance_archive_path": "evidence/provenance/h62-coordinator-inputs",
+  "original_vm_paths": "provenance only; do not assume these paths exist on successor VM",
+  "unimplemented_draft_archive_path": "evidence/drafts/LifetimeWitnesses.lean.txt",
+  "unimplemented_draft_sha256": "3595f1628e9d848fa0938170ac4a43ccabfbc195623a44de890e7109de2023ec",
+  "waits": [
+    {
+      "lane": "coordinator / area producers",
+      "item": "Q-OWN-01: identify semantic routes and108 unresolved contacts; no H82 edit-approval wait"
+    },
+    {
+      "lane": "coordinator / toolchain authority",
+      "item": "Q-TC-01: clarify scope of Migration ONLY4.35 final gate;4.24 evidence historical, no4.35 pass"
+    },
+    {
+      "lane": "goal control",
+      "item": "PAUSED requested; no pause/get_goal API exposed; only complete/blocked stop outcomes available"
+    }
+  ],
+  "push": "not attempted: H71 permission unavailable; earlier explicit no-push restriction retained"
+}
