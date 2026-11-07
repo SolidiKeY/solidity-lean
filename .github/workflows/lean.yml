@@ -48,6 +48,7 @@ jobs:
           node --test scripts/check-axiom-pins.test.mjs tests/h62/item5/statement-graph/h112-tooling.test.mjs
           python3 -B tests/h62/item5/statement-graph/test_w0_tooling.py -v
           bash scripts/check-doc-paths.sh
+          python3 scripts/check-doc-navigation.py
           node scripts/check-axiom-pins.mjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
       # the printers or the tactic front ends, even transitively.
