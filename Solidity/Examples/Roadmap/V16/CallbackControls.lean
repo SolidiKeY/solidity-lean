@@ -1,4 +1,4 @@
-import Solidity.Roadmap.V16.CallbackConsumers
+import Solidity.Examples.Roadmap.V16.CallbackConsumers
 
 /-! Inhabited consumers and negatives over existing typed callback executions. -/
 namespace Solidity.Roadmap.V16.CallbackControls

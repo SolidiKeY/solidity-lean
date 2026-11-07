@@ -1,4 +1,4 @@
-import Solidity.Roadmap.V16.ConstructionConsumer
+import Solidity.Examples.Roadmap.V16.ConstructionConsumer
 /-! Actual published compiler/specification consumers. Panic guards, payment
 refusal and divergence remain distinct. Excluding exhaustion is not termination. -/
 namespace Solidity.Roadmap.V16

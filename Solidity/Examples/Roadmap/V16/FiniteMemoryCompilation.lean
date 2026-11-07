@@ -1,5 +1,5 @@
-import Solidity.Roadmap.V16.FiniteHeapConsumer
-import Solidity.Roadmap.V16.ConstructionCompilation
+import Solidity.Examples.Roadmap.V16.FiniteHeapConsumer
+import Solidity.Examples.Roadmap.V16.ConstructionCompilation
 
 /-! Actual compilation-function algebra. These statements do not assume a
 simulation and do not supply frontend/full-profile compilation coverage. -/

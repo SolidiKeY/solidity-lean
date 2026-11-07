@@ -1,4 +1,4 @@
-import Solidity.Roadmap.V16.ConstructionConsumer
+import Solidity.Examples.Roadmap.V16.ConstructionConsumer
 
 /-! Actual compilation-function algebra. These statements do not assume a
 simulation and do not supply frontend/full-profile compilation coverage. -/

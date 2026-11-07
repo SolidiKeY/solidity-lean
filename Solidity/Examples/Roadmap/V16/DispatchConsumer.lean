@@ -1,5 +1,5 @@
 import Solidity.Semantics.Dispatch
-import Solidity.Roadmap.V16.FiniteHeapConsumer
+import Solidity.Examples.Roadmap.V16.FiniteHeapConsumer
 
 /-! Consume actual intrinsic dispatch selection, not the unproved partial
 elaborator/Source links. Guard results and local dropping remain explicit. -/

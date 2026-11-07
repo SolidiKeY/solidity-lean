@@ -1,12 +1,12 @@
-import Solidity.Roadmap.V16.CalculusConsumer
-import Solidity.Roadmap.V16.FiniteMemoryCompilation
-import Solidity.Roadmap.V16.DispatchConsumer
-import Solidity.Roadmap.V16.AbiEntryConsumer
-import Solidity.Roadmap.V16.FiniteHeapConsumer
-import Solidity.Roadmap.V16.CompilerConsumer
-import Solidity.Roadmap.V16.ConstructionCompilation
-import Solidity.Roadmap.V16.ConstructionConsumer
-import Solidity.Roadmap.V16.MemoryLoopConsumer
+import Solidity.Examples.Roadmap.V16.CalculusConsumer
+import Solidity.Examples.Roadmap.V16.FiniteMemoryCompilation
+import Solidity.Examples.Roadmap.V16.DispatchConsumer
+import Solidity.Examples.Roadmap.V16.AbiEntryConsumer
+import Solidity.Examples.Roadmap.V16.FiniteHeapConsumer
+import Solidity.Examples.Roadmap.V16.CompilerConsumer
+import Solidity.Examples.Roadmap.V16.ConstructionCompilation
+import Solidity.Examples.Roadmap.V16.ConstructionConsumer
+import Solidity.Examples.Roadmap.V16.MemoryLoopConsumer
 import Solidity.Semantics.RunFuel
 import Solidity.Roadmap.V16.Transactions
 

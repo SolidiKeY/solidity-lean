@@ -1,4 +1,4 @@
-import Solidity.Roadmap.V16.MemoryCallConsumer
+import Solidity.Examples.Roadmap.V16.MemoryCallConsumer
 
 /-! Actual published loop/compiler specification consumers. Room is a reached
 prefix obligation; Cost is relational, never legacy allocationCost. Divergence
