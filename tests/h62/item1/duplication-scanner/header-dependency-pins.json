@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "guarded_regression": "Regex import guesses or inventory commands loading/executing held project code",
+  "probe_sha256": "54feef9989f7f19248eda9155b721a63476ccd095b01384d6edcb5527b384aba",
+  "fixture_contract_sha256": "fbbf557d615e7475e6993e5fd1d24586bd925560e3082c5d20a2954a8d587077",
+  "controls_sha256": "27be7cd760ef06c6f7f810832893de1f2bcf8e065f1c86f2623735681cf958d4"
+}
