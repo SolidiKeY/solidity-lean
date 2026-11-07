@@ -983,3 +983,26 @@ union merge; no bookkeeping content was edited directly. Original global gates,
 full acceptance, fidelity debt and timing STOPs remain open.
 All sixteen final axiom reports use only existing standard axioms. Final
 layer/trust/roots/fragments checks pass, with no new core edges or trust findings.
+
+
+The safe H121 split restores master Layout, SimLemmas and both original signed
+bitwise refusal declarations. The unmerged ABI totality/bridge quartet is parked
+with its exact source and history: its unrestricted binInFrag_of signature is
+refuted by signed band on master, kernel-checked without axioms. Q-HOLD-ABI asks
+for the already escalated implementation authority or a versioned contract; no
+ValOk restriction was silently introduced.
+
+ReferenceAgreement transports the actual selected reference plan to MachineV2
+while retaining all physical success fields and bare failure. The nested-default
+consumer covers every legal index and arbitrary V2 metadata. These remain native
+components, not the full P1 production session/profile/origin factory or G42.04.
+A separate rebinding consumer hit the whole-VM resource guard twice, including
+a proof-only optimization, and is parked unregistered. No failed-state rollback
+or passing rebinding proof is claimed.
+
+The bounded runner now immediately kills its owned, identity-matched descendants
+on resource stops and abnormal exits. Limits and proof budgets are unchanged.
+A tiny TERM-ignoring detached-process regression passes; the former cleanup
+fails its bound, and an injected fixture error still leaves no owned descendants.
+This repairs cleanup latency, not the rebinding proof's memory use. Original
+global failures, exact-byte fidelity debt and performance STOPs remain open.

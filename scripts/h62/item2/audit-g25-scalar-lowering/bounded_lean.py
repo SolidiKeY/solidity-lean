@@ -142,7 +142,22 @@ def signal_children(proc, sig):
             except ProcessLookupError: pass
 
 
-def terminate(proc):
+def terminate(proc, force=False):
+    if force:
+        # Resource/interrupt stops must not grant a growing workload a grace
+        # period in which it can consume the VM reserve. Preserve PID identity
+        # checks for detached descendants, then reap the owned process group.
+        signal_children(proc, signal.SIGKILL)
+        if proc.poll() is None:
+            try: os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError: pass
+            proc.wait()
+        signal_children(proc, signal.SIGKILL)
+        for pid in proc._audit_children:
+            if pid == proc.pid: continue
+            try: os.waitpid(pid, 0)
+            except ChildProcessError: pass
+        return
     signal_children(proc, signal.SIGTERM)
     if proc.poll() is None:
         try: proc.wait(timeout=.2)
@@ -293,6 +308,7 @@ def main():
             sampled_peak_rss_kib = 0
             sampled_peak_workload_rss_kib = 0
             stop_reason = None
+            abnormal = True
             try:
                 if INTERRUPTED is not None: raise SystemExit(128+INTERRUPTED)
                 while proc.poll() is None:
@@ -305,12 +321,12 @@ def main():
                     sampled_peak_workload_rss_kib = max(sampled_peak_workload_rss_kib, workload_rss)
                     if deadline_expired(start, time.monotonic()):
                         resource_stop = True; stop_reason = "per-file-timeout"
-                        terminate(proc)
+                        terminate(proc, force=True)
                         break
                     if available() < 4*1024**3 or workload_rss > 10*1024**2:
                         resource_stop = True
                         stop_reason = "reserve-or-workload-rss"
-                        terminate(proc)
+                        terminate(proc, force=True)
                         break
                     try: proc.wait(timeout=.1)
                     except subprocess.TimeoutExpired: pass
@@ -318,8 +334,9 @@ def main():
                 if INTERRUPTED is not None: raise SystemExit(128+INTERRUPTED)
                 if deadline_expired(start, time.monotonic()):
                     resource_stop = True; stop_reason = "per-file-timeout"
+                abnormal = False
             finally:
-                terminate(proc)
+                terminate(proc, force=abnormal or resource_stop or INTERRUPTED is not None)
         usage = resource.getrusage(resource.RUSAGE_CHILDREN)
         row = dict(module=module, command=cmd, exit=code, resource_stop=resource_stop,
                    cache_hit=False, fingerprint=expected,

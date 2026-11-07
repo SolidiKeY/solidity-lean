@@ -7,3 +7,5 @@
 | `Backend/InternalFlow/RuntimeFrameP1V2ValueAgreementControls.lean` | Public Composition.compileCall readAt family returns seven or reaches OOB failure on populated physical callers; checks export, saved stack, cursor, arbitrary V2 metadata and capture-arena capacity refusal. |
 | `Backend/InternalFlow/RuntimeFrameP1V2ReadAtBridge.lean` | Full conditional PassCorrect/BridgeGoal for the actual selected readAt family over canonical P1LangV2; original approved/physical domain agreement, all six V3 Local duties and exact producer-image binding retained. |
 | `Backend/InternalFlow/RuntimeFrameP1V2ReadAtBridgeControls.lean` | Actual positive/reverting approved inputs and nonempty-domain controls, both observed outcomes and retention of the full Local/reverting-entry duties. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceAgreement.lean` | Generic actual reference-plan V2 execution with unchanged physical success fields and bare-revert classification; not full session adequacy. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceControls.lean` | Selected finite nested-default reference call, all legal indices, exact graph snapshot and export/capacity refusals. |
