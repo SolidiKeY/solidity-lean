@@ -331,3 +331,36 @@ hypothesis coverage, nonvacuity, totality or full assignment acceptance.
 The fresh census, reproduction driver and checks are private H145 evidence;
 no census payload or receipt is committed here. Original measured timing/import
 STOPs, budgets, physical producer obligations and final gates remain unchanged.
+
+
+### H151: reconstruct frozen source scope without historical proof credit
+
+A separate fresh reconstruction reads the actual Git source tree at frozen base
+c6f550e281a7e5affa9a99bc2cdaed556dec00e4. The existing collector's lexical APIs
+scan its module map and local-Yul import closure in an isolated source snapshot;
+all selected file/map bytes are checked against that tree before and after.
+This does not run or weaken the collector's frozen parser/kernel acceptance,
+and does not recreate the missing historical h69 artifact.
+
+The reconstruction selects 1,960 files and records 21,385 lexical declarations:
+19,230 theorem candidates, 1,887 examples and 268 structures. There are no
+scanner failures or unmatched map patterns. Every original declaration ID is
+accounted for once. Two runs produce byte-identical compressed results;
+uncompressed SHA256 is
+5e78264fd1d24cf7b1b7e83775634c46e2d61035513c271db6b51eb9c8bb872b.
+
+Navigation joins to the preceding fresh inventory at source head
+88802c0bba963d42ace559fec7a46a376b8fa8b9 require equal declaration kind,
+source name, exact lexical signature hash and recorded section-variable text.
+There are 21,295 unique same-file candidates, 56 unique other-file candidates
+and 34 unmatched declarations. A same-file candidate is preferred when unique;
+these are navigation hints, not kernel-name reconciliation or semantic identity.
+Unmatched records require investigation and are not evidence of vacuity,
+statement weakening or authorized migration by themselves. Definition and
+import changes can invalidate semantics even when lexical headers match.
+
+All reconstructed records remain uncovered; every join explicitly grants no
+proof credit. Kernel records, credited witnesses and credited refutations are
+zero. Historical h69 remains UNVERIFIABLE. The driver, complete reconstruction,
+source identities and reproduction checks are private H145 evidence, not code
+branch data. Original proof/resource limits and timing/import STOPs remain.
