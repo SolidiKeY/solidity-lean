@@ -1164,3 +1164,67 @@ signature-binding paths. Independent finder and skeptic reviewed the replay
 without Lean. These runs demonstrate repeatability for this snapshot, not
 complete census, signature equivalence or live ownership. Full reports and
 timing records are outside Git in the alias-containment evidence directory.
+
+## Compound class declaration inventory
+
+The lexical inventory now preserves the compound kinds and actual declaration
+names for line-initial `class inductive` and `class abbrev` forms. Both remain
+explicitly rejected as unsupported declaration forms: no statement or body
+candidate is emitted for them. Controls cover ordinary classes, modifiers,
+attributes, split compound keywords and surrounding body boundaries. This
+does not enumerate constructors or establish complete Lean parser coverage;
+source-binding receipts must match the updated row identities and cannot be
+reused merely because a previous inventory existed.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 197 tests. A matched bounded full scan took
+116.686 seconds before and 113.712 seconds after (-2.55%). Both used the same
+7,321 inputs, recognized 123,559 declarations and reported no file errors or
+unmatched globs. No compound-form row was recognized in that selected project scan; the
+focused controls demonstrate the identity correction. Statement
+and body group counts remained 4,441 and 5,551 respectively, which does not
+prove equal membership or semantic equivalence. Evidence is outside Git
+under `/workspace/h62-duplication-scanner-evidence/compound-class/`.
+
+## Explicit universe declaration names
+
+The inventory now stops a declaration name before an explicit universe suffix
+such as `.{u}`, preserving qualified names. The suffix remains in the header
+and is conservatively rejected as unsupported binder syntax; no intrinsic
+signature or body equivalence is inferred. Controls cover attributes,
+modifiers, qualified names, multiple or multiline universes, malformed
+suffixes and surrounding declaration bodies. Source bindings must match the
+updated row identities and cannot reuse stale expected inventories.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 198 tests. A matched bounded scan took 113.712
+seconds before and 124.977 seconds after (+9.91%), within but close to the
+10% stop threshold. Both used the same 7,321 input hashes, recognized 123,559
+declarations and reported no errors or unmatched globs. The real selected
+line in CollisionBound changed from the name `EagerAdaptiveBound.` to
+`EagerAdaptiveBound`; both versions reject its unsupported binder syntax.
+Equal group counts do not prove equal memberships or semantics. This single
+measurement is not a Lean runtime gate. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/universe-names/`.
+
+### Universe-name report replay
+
+Two bounded scans with the same tree, scanner, selection, registry and
+caller-pinned previous report took 124.977 and 117.117 seconds and produced
+byte-identical reports, SHA256
+`55fbe28e339cbdb0e2c6e693fd0d58c1bd2cf0810e1ce8b7a4a886b49b540ea3`.
+Both selected 7,321 files and recognized 123,559 declarations, with no file
+errors, unmatched globs or reported aliases; all recognized owners remain
+unknown. Relative to the older caller-pinned report, 18 inputs were added,
+20 changed and none removed. The scanner and tree both changed from that
+baseline, so group deltas combine tool and input effects. The prior pin
+identifies bytes, not an authenticated producer.
+
+The first after time was +9.91% against the recorded 113.712-second before
+sample; the repeat was +2.99% against that same before sample. Both are
+reported separately and neither crossed the 10% stop threshold. The pair of
+matching reports demonstrates repeatability for these runs, not a robust
+performance bound, complete census, signature equivalence or live ownership.
+No opt-in fixture or project signature binding was invoked. Independent
+finder and skeptic reviewed the replay without Lean. Full reports and timings
+are outside Git in the universe-names evidence directory.
