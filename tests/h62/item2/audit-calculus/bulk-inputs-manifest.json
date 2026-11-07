@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/slice-controls-roles-v118/semantic-roles-reviewed.json",
-    "bytes": 4016859,
-    "sha256": "37a32b46486943286e393810b43e59a3a9142aa17d9868afc9b3c73aedcb33a1"
+    "path": "/workspace/h62-successor-bulk/observation-controls-roles-v119/semantic-roles-reviewed.json",
+    "bytes": 4050420,
+    "sha256": "d44dffddb82635a329240654e931a66b40ee83271dc339be03205f7dfb52a304"
   }
 }
