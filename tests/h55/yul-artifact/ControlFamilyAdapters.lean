@@ -454,3 +454,70 @@ end Controls
 #print axioms Controls.raw_model
 #print axioms Artifact.select_total
 end Solidity.Yul.Compilation.H55ControlFamilies.LetSequence
+
+namespace Solidity.Yul.Compilation.H55ControlFamilies.LoopControl
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel depth : Nat} {stmt : Stmt [] [] c n}
+
+def prepare (depth : Nat) (a : LoopControlCompilation.Compiled fuel stmt) :
+    Option (Artifact depth stmt) :=
+  Artifact.afterSelection (fun a : LoopControlCompilation.Compiled fuel stmt => a.emit depth) WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩) a
+
+abbrev Preparation (fuel depth : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt) depth)
+
+theorem selected (a : LoopControlCompilation.Artifact fuel stmt depth) :
+    prepare depth a.compiled = some (encode a) :=
+  Artifact.afterSelection_some _ _ _ a.compiled a.block a.code a.emitted a.selected
+
+theorem emission_none (a : LoopControlCompilation.Compiled fuel stmt)
+    (refused : a.emit depth = none) : prepare depth a = none :=
+  Artifact.afterSelection_first_none (fun a : LoopControlCompilation.Compiled fuel stmt => a.emit depth) WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩) a refused
+
+theorem selection_none (a : LoopControlCompilation.Compiled fuel stmt) (block : Backend.Block)
+    (emitted : a.emit depth = some block) (refused : WordControl.blockCode block = none) :
+    prepare depth a = none :=
+  Artifact.afterSelection_second_none (fun a : LoopControlCompilation.Compiled fuel stmt => a.emit depth) WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩)
+    a block emitted refused
+
+namespace RawControls
+theorem prepared : prepare 0 LoopControlCompilation.Controls.artifact.compiled =
+    some (encode LoopControlCompilation.Controls.artifact) := selected _
+
+theorem effectful (a b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode LoopControlCompilation.Controls.artifact).code
+      {m with stack := [coreWord a, coreWord b] ++ caller} =
+      .ok {m with stack := [coreWord 0, coreWord (~~~(~~~b+3)+3)] ++ caller} 0 :=
+  LoopControlCompilation.Controls.target_done a b m caller
+
+theorem refused_emission : LoopControlCompilation.Controls.artifact.compiled.emit 15 = none := rfl
+theorem refused_preparation :
+    (Artifact.toPreparationImage (prepare 15) LoopControlCompilation.Controls.artifact.compiled).artifact = none :=
+  emission_none _ refused_emission
+
+theorem refused_original : Artifact.recoverPreparation
+    (Artifact.toPreparationImage (prepare 15) LoopControlCompilation.Controls.artifact.compiled) =
+    LoopControlCompilation.Controls.artifact.compiled :=
+  Artifact.preparation_source_roundtrip (prepare 15) _
+
+theorem refused_source_completes (a b : Scalar.Word) :
+    evalStmt 12 .nil True.intro LoopControlCompilation.Controls.source
+      LoopControlCompilation.Controls.artifact.compiled.profile (sourceLocals #v[a,b]) =
+      some ⟨sourceLocals #v[0,~~~(~~~b+3)+3], .normal⟩ :=
+  LoopControlCompilation.Controls.source_done a b
+end RawControls
+
+#print axioms prepare
+#print axioms selected
+#print axioms emission_none
+#print axioms selection_none
+#print axioms RawControls.prepared
+#print axioms RawControls.effectful
+#print axioms RawControls.refused_emission
+#print axioms RawControls.refused_preparation
+#print axioms RawControls.refused_original
+#print axioms RawControls.refused_source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.LoopControl

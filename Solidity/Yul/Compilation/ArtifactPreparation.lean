@@ -56,6 +56,55 @@ theorem select_total {E A : Type} (selection : E → Option A)
     select selection certify original = some (ofTotalSelection selection certify total original) :=
   select_some selection certify original _ (Classical.choose_spec (total original))
 
+/-- Compose an actual emission with actual payload selection. Both phase
+proofs remain available to the existing semantic certificate constructor. -/
+def afterSelection {E A B : Type} (first : E → Option A) (second : A → Option B)
+    (certify : ∀ original payload, first original = some payload →
+      ∀ output, second payload = some output → Artifact depth stmt)
+    (original : E) : Option (Artifact depth stmt) :=
+  match emitted : first original with
+  | none => none
+  | some payload =>
+    select (fun _ : Unit => second payload)
+      (fun _ output selected => certify original payload emitted output selected) ()
+
+theorem afterSelection_first_none {E A B : Type} (first : E → Option A) (second : A → Option B)
+    (certify : ∀ original payload, first original = some payload →
+      ∀ output, second payload = some output → Artifact depth stmt)
+    (original : E) (refused : first original = none) :
+    afterSelection first second certify original = none := by
+  unfold afterSelection
+  split
+  next observed => rfl
+  next payload observed => cases observed.symm.trans refused
+
+theorem afterSelection_second_none {E A B : Type} (first : E → Option A) (second : A → Option B)
+    (certify : ∀ original payload, first original = some payload →
+      ∀ output, second payload = some output → Artifact depth stmt)
+    (original : E) (payload : A) (emitted : first original = some payload)
+    (refused : second payload = none) : afterSelection first second certify original = none := by
+  unfold afterSelection
+  split
+  next observed => cases observed.symm.trans emitted
+  next actual observed =>
+    have same : actual = payload := Option.some.inj (observed.symm.trans emitted)
+    subst actual
+    exact select_none _ _ () refused
+
+theorem afterSelection_some {E A B : Type} (first : E → Option A) (second : A → Option B)
+    (certify : ∀ original payload, first original = some payload →
+      ∀ output, second payload = some output → Artifact depth stmt)
+    (original : E) (payload : A) (output : B) (emitted : first original = some payload)
+    (selected : second payload = some output) :
+    afterSelection first second certify original = some (certify original payload emitted output selected) := by
+  unfold afterSelection
+  split
+  next observed => cases observed.symm.trans emitted
+  next actual observed =>
+    have same : actual = payload := Option.some.inj (observed.symm.trans emitted)
+    subst actual
+    exact select_some _ _ () output selected
+
 structure PreparationImage {E : Type} (encode : E → Option (Artifact depth stmt)) where
   original : E
   artifact : Option (Artifact depth stmt)
