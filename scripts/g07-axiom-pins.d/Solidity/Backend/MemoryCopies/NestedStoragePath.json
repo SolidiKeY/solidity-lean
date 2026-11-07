@@ -1,9 +1,4 @@
 {
- "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nestedStoragePath": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nested_storage_path_copy": [
   "Classical.choice",
   "Quot.sound",
@@ -29,6 +24,11 @@
   "propext"
  ],
  "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nested_storage_path_rebind_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedStoragePath.lean:Solidity.Backend.MemoryCopies.nestedStoragePath": [
   "Classical.choice",
   "Quot.sound",
   "propext"
