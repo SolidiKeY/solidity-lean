@@ -114,7 +114,7 @@ The original census matches only unmodified line-start headers and omitted priva
 
 ## Same-line attribute candidate scan
 
-The earlier version of `attributed_header_scan.py` examined the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
+The earlier version of `attributed_header_scan.py` examined the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. At that earlier checkpoint, the raw textual scan found zero candidates for that narrow pattern. That earlier scanner did not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates did not show that attributed declarations were absent. Its then-current synthetic fixture included both matching examples and a deliberate block-comment false positive. The later expanded scanner is described below. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
 
 ## SignedSub Controls
 
@@ -147,3 +147,11 @@ The prior census comment/string/attribute mask was moved without changing its fu
 ## Expanded attribute candidate follow-up
 
 The attribute scanner now uses the shared offset-preserving mask with attribute masking disabled, then recognizes certain nested, multiple and multiline attributes before `theorem`, `lemma`, `def` and `abbrev` headers. It reports the declaration token location and whether the original census covers that exact file, line, kind and name. The original mask default remains unchanged. The 48 pinned files yield zero candidates in this heuristic scan. Comments and strings are masked, but unsupported modifiers, quoted identifiers, syntax contexts and line-ending behavior may still cause misses or false positives; columns are Unicode code-point offsets. Synthetic tests cover nested and multiple attributes, multiline modifiers, masked comments and strings, malformed attributes and location alignment. This is not Lean parsing, semantic completeness or a proof.
+
+## Raw strings and interpolation safety
+
+The shared lexical mask now handles Lean raw strings with zero or more hash delimiters, preserving character positions and LF offsets, and rejects unterminated raw strings. It conservatively fails on an exclamation mark followed by a string or comment rather than silently masking possible interpolation terms. This can reject ordinary non-interpolation text and does not recognize all Lean syntax; it is not a Lean parser. Tests cover nested delimiters, Unicode and quoted macro spellings, comment-separated cases and masked contexts. The current pinned-tree occurrence output remains byte-identical to the earlier snapshot.
+
+## LF-aligned occurrence lines
+
+The panic occurrence scanner now splits raw and masked text only on LF, preserving alignment when CR, form-feed or Unicode separators appear inside a masked comment. Synthetic controls cover those separators and CRLF. Other source-window and header generators still use Python `splitlines()`, which has broader line-separator behavior; independent review found none of the differing separators in the current 48 pinned files or registered helper, but other inputs may map differently or fail closed. LF line numbers and Unicode code-point columns are lexical conventions, not a Lean position or semantic guarantee.
