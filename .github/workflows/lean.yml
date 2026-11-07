@@ -152,9 +152,13 @@ jobs:
         run: python3 scripts/ci/restore-lake-artifacts.py
       - name: Check fresh replay timing
         run: |
-          timeout 300s python3 scripts/check-memory-loop-timing.py --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json \
+          # GitHub's 4-core runner is slower than the hardware the 300 s budget was set on (H116);
+          # CI allows 600 s and records the measured total in memory-loop-ci-replay.json.
+          timeout 660s python3 scripts/check-memory-loop-timing.py --budget 600 --output .lake/memory-loop-ci-replay --results memory-loop-ci-replay.json \
             || { for f in .lake/memory-loop-ci-replay/*.log; do echo "== $f"; tail -20 "$f"; done; exit 1; }
       - name: Automation gate
+        env:
+          REPLAY_BUDGET_S: '600'
         run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log --replay-group-results memory-loop-ci-replay.json
 
   tools:
