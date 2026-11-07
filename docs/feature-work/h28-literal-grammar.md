@@ -278,3 +278,11 @@ and recorded a PASS there; `bulk-artifacts-h44.json` lists those off-git
 artifacts. The 2026-11-06 merge kept this branch's rewritten `audit.py`,
 which checks the committed `evidence/axioms.log` and scopes to the merge
 base, so those two flags are gone; that historical PASS stays in git history.
+
+### Codex conflict resolution (2026-11-07)
+
+Merged published master2a43bf4fcdaf24750265afc8f8be5b420d1d22b0 into the preserved ea1876 branch. The portable audit, all26 modules/219 theorem pins/255 kernel rows/71 scanner cases, and the published runtime-profile deletion are retained. No older24-module audit or VM-only profile is restored. VM serial configuration and logs stay outside git. The old scope question is historical; central registration is present, and no validation waiver is inferred.
+
+The completed immutable4492 build remains historical:6442-module original defaults/examples/native/TestSuite,exit0,3:10:03,RSS7864360KiB,0swaps. The subsequent full gate at ea1876 was stopped for this superseding merge request during run-lean; only its build-touched gate completed. It is not reported as a passing full gate. Both log sets are preserved at /workspace/scratch/h28-audit-5f145965 and /workspace/scratch/h28-current-e8247d92. Resolution evidence is /workspace/scratch/h28-resolve-2a43bf4f. Fresh resolved-head gates and reviews are recorded there; original proof versus finite compiler-observation boundaries remain unchanged.
+
+Resolved-tree VM gates:26-module serial build PASS15.80s,RSS1400336KiB; fresh portable audit PASS219 exact axiom sets/255 kernel rows/eight safe definitions; all four kernel control files and ProofSafety PASS; permitted KeySort PASS. ActualLean4.24.0/Lake5.0.0-src+797c613. Fresh pinned compiler gate PASS71cases times legacy/viaIR,3.08s,RSS226964KiB,0swaps. Cache pack26modules/78artifacts/26mappings verified for coordinator pull; no VMshipping or import claim. Both read-only reviews found no conflict-resolution blocker. Global docpaths still fails on four references outside H28; no passing whole-project/full-runtime gate is claimed. The user explicitly authorized pushing the resolved assigned branch; default-branch push/merge is not performed.

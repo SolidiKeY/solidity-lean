@@ -1,0 +1,16 @@
+{
+ "Solidity/Evm/MachineV2Controls.lean:Solidity.Evm.callIn_returndata": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Evm/MachineV2Controls.lean:Solidity.Evm.forget_run_lift": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Evm/MachineV2Controls.lean:Solidity.Evm.MachineV2Controls.joint_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
