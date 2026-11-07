@@ -4,7 +4,7 @@
   "slug": "audit-language",
   "status": "partial",
   "execution_state": "RESUMED_BY_USER_20261107",
-  "accepted_baseline": "05d2c25872c4bb963a0ca7f605905e6e1e99eedc",
+  "accepted_baseline": "df554535e9c8d308276a99ea23611c7d63ae5919",
   "original_frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "authorization": "Latest user scheduled-merge instruction explicitly re-baselines and continues original queue; H82 standing statement-preserving agreement applies. Retirement records retained as history, not current prohibition.",
   "original_environment": "ccarenv_b64_Y2NhcmVudl9hNTQ3YjYwNzYwNjA4MTkxOGJhYmM3MGZiMTJjYzk0Mw",
@@ -50,7 +50,8 @@
     "resume-20261107/static-gates.json",
     "gate-repair-20261107/after-gates.json",
     "gate-repair-20261107/witnesses/checks.json",
-    "gate-repair-20261107/timing.json"
+    "gate-repair-20261107/timing.json",
+    "merge-fixedpoint-20261107/check/checks.json"
   ],
   "review_evidence": "gate-repair-20261107/reviews.json",
   "timing_delta": {
@@ -96,9 +97,12 @@
   ],
   "questions": [],
   "original_scope_inputs": "tests/h62/item2/audit-language/retirement/: complete original rendered prompt, originalqueue and small H44scopepointer; full245627byte inventory remains offGit and in portable archive",
-  "increment_base": "683cab3cabe94700b2275f6f380c014e05c1e824",
+  "increment_base": "df554535e9c8d308276a99ea23611c7d63ae5919",
   "gate_repair_manifest": "tests/h62/item2/audit-language/gate-repair-manifest.json",
-  "current_action": "Latest coordinator build-touched FAIL repair; no new theorem/scope/budget changes",
+  "current_action": "Explicit user merge origin/master; resolve only FixedPoint cast proof; original queue remains unfinished",
   "gate_repair_evidence": "gate-repair-20261107/",
-  "coordinator_gate_rerun": "pending; local official4.35 success does not establish coordinator gate pass"
+  "coordinator_gate_rerun": "pending after merge resolution; no full-gate claim",
+  "merge_parent": "bdc5942ac81e4e6b733fc2a7ae7711df97a6c71e",
+  "merge_resolution": "tests/h62/item2/audit-language/merge-resolution.json",
+  "merge_evidence": "merge-fixedpoint-20261107/"
 }

@@ -10,6 +10,30 @@ inside this commit. This is an incomplete checkpoint, never completion of the
 four-checkpoint assignment. The existing goal must remain unfinished.
 
 
+## Requested master merge resolution on 2026-11-07
+
+Merged fetched master `df554535e9c8d308276a99ea23611c7d63ae5919` into the
+existing lane parent `bdc5942ac81e4e6b733fc2a7ae7711df97a6c71e`, as explicitly
+requested. The only conflict is the cast simplification in FixedPoint's
+`tmod_between`. Retaining the local `rfl` cast equality preserves the earlier
+portable gate repair; the complete resolved file equals its pre-merge lane bytes
+(SHA256 `bcfc09c015e3d03927ad142617d8741ede4b9621786a6021bdfe69d3010ce66d`).
+Every other upstream merge result is preserved. No new proof implementation,
+statement, computational definition, axiom, exclusion or budget change is made
+by this resolution. Existing upstream changes remain attributed to the merge.
+
+Fresh official v4.35 checks pass for KeySort and the resolved FixedPoint module,
+with explicit `-j1`, 8 GiB address-space cap, zero swap and 4 GiB reserve. Independent
+read-only finder and skeptic reviews confirm all 18,532 previously unconflicted
+index entries remain unchanged and no unresolved entries or markers remain.
+This establishes the focused resolution checks, not full build/runtime acceptance
+or a new timing comparison. The full audit remains partial; earlier waits persist.
+
+`merge-resolution.json` and the external evidence directory's
+`merge-fixedpoint-20261107/` record both parents, chosen blob, checks and reviews.
+No history is reset and no push or default-branch merge is performed. The new
+merge head is recorded by the exported handoff to avoid a self-reference in Git.
+
 ## Coordinator build-touched repair on 2026-11-07
 
 The failed coordinator head is `683cab3cabe94700b2275f6f380c014e05c1e824`.
