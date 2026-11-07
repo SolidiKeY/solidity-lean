@@ -38,9 +38,9 @@ for module,pattern,status in cases:
     classification+=' The defaulted hasArrayCopy=false hypothesis is supplied explicitly together with the backend guard; the inhabited fixture source reverts at its destination check.'
    marker='JOINT: '+original+' => '+proof
   elif module=='LoopSelectorAudit':
-   classification='Complete original data tuple uses typed nonempty loop/scoped-loop programs and real certificates from unchanged lower compilers, with backend selector proofs where required. Input and Room occur only in the iff conclusion; neither is asserted by this premise-satisfiability result.'
+   classification='Complete original data tuple uses typed nonempty loop/scoped-loop programs and real certificates from unchanged lower compilers, with backend selector proofs where required. Binder-level satisfiability only: Input and Room occur in the iff conclusion and are not shown satisfiable.'
    if original.endswith('.construction_rep'):
-    classification='Complete original compilation/backend/resource/entry/output data tuple; construction output is arbitrary typed logical data. Neither Rep truth nor source execution success follows. Existing closed construction fixture is reused unchanged.'
+    classification='Complete original compilation/backend/resource/entry/output data tuple; construction output is arbitrary typed logical data. Binder-level satisfiability only: Rep is not shown satisfiable and source execution success does not follow. Existing closed construction fixture is reused unchanged.'
    marker='JOINT: '+original+' => '+proof
   elif module=='RefutationAudit':
    reason=re.search(r'-- Intentional: ([^\n]+)\n$',text[:match.start()])

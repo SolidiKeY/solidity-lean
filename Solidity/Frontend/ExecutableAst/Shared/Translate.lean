@@ -137,13 +137,15 @@ def environmentMember? (base : Json) (member resultType : String) : Option EnvKe
   let expectedType := match key with | .msgSender => "address" | _ => "uint256"
   if resultType != expectedType then none else some key
 
-/-- A successful environment decoder selects an existing EnvKey map entry and
-has a negative builtin reference. This general guard inversion is not compiler
-identity authentication or a source/world adequacy theorem. -/
-theorem environmentMember?_guard (base : Json) (member resultType : String)
+/-- One shared inversion of every successful environment decode: existing map
+entry, negative builtin reference and selected result spelling. This guards
+metadata/type confusion, not compiler identity or source/world adequacy. -/
+theorem environmentMember?_guards (base : Json) (member resultType : String)
     (key : EnvKey) (success : environmentMember? base member resultType = some key) :
     (∃ root : String, (str base "name").toOption = some root ∧
-      EnvKey.ofParts root member = some key) ∧ (J.ref? base).any (· < 0) = true := by
+      EnvKey.ofParts root member = some key) ∧ (J.ref? base).any (· < 0) = true ∧
+      resultType = (fun selected : EnvKey =>
+        match selected with | .msgSender => "address" | _ => "uint256") key := by
   unfold environmentMember? at success
   split at success
   next => cases success
@@ -169,10 +171,58 @@ theorem environmentMember?_guard (base : Json) (member resultType : String)
           · rw [if_neg hresult] at success
             have same : mapped = key := Option.some.inj success
             subst mapped
-            refine ⟨⟨_, hroot, hmap⟩, ?_⟩
+            have validType : resultType = expectedType key := by
+              simpa only [bne_iff_ne, Decidable.not_not] using hresult
+            refine ⟨⟨_, hroot, hmap⟩, ?_, validType⟩
             cases hn : (J.ref? base).any (· < 0) with
             | false => exact False.elim (notnegative (by rw [hn]; rfl))
             | true => rfl
+
+/-- A successful environment decoder selects an existing EnvKey map entry and
+has a negative builtin reference. This general guard inversion is not compiler
+identity authentication or a source/world adequacy theorem. -/
+theorem environmentMember?_guard (base : Json) (member resultType : String)
+    (key : EnvKey) (success : environmentMember? base member resultType = some key) :
+    (∃ root : String, (str base "name").toOption = some root ∧
+      EnvKey.ofParts root member = some key) ∧ (J.ref? base).any (· < 0) = true := by
+  let guards := environmentMember?_guards base member resultType key success
+  exact ⟨guards.1, guards.2.1⟩
+
+/-- All explicit builtin metadata guards suffice for the existing decoder. This
+construction theorem guards accidental refusal of valid metadata; it does not
+authenticate compiler identities or establish source/world adequacy. -/
+theorem environmentMember?_of_metadata (base metadata : Json)
+    (root member magic resultType : String) (key : EnvKey)
+    (hkind : (node base).toOption = some "Identifier")
+    (hroot : (str base "name").toOption = some root)
+    (hkey : EnvKey.ofParts root member = some key)
+    (hmagic : (fun name : String => match name with
+      | "msg" => some "t_magic_message"
+      | "block" => some "t_magic_block"
+      | _ => none) root = some magic)
+    (hmetadata : (field base "typeDescriptions").toOption = some metadata)
+    (hidentifier : (str metadata "typeIdentifier").toOption = some magic)
+    (href : (J.ref? base).any (· < 0) = true)
+    (htype : resultType = (fun selected : EnvKey =>
+      match selected with | .msgSender => "address" | _ => "uint256") key) :
+    environmentMember? base member resultType = some key := by
+  dsimp only at hmagic
+  split at hmagic <;> simp only [Option.some.injEq, reduceCtorEq] at hmagic
+  all_goals try contradiction
+  all_goals subst magic
+  all_goals
+    simp only [environmentMember?, hkind, hroot, hkey, hmetadata, hidentifier,
+      href, htype, Option.bind_eq_bind, Option.bind_some, bne_self_eq_false,
+      Bool.false_eq_true, Bool.not_true, ↓reduceIte]
+
+/-- Successful environment decoding enforces the selected key's result type.
+This invariant guards metadata/result-type confusion for arbitrary JSON inputs;
+it is not a compiler type-soundness or source/world adequacy theorem. -/
+theorem environmentMember?_resultType (base : Json) (member resultType : String)
+    (key : EnvKey) (success : environmentMember? base member resultType = some key) :
+    resultType = (fun selected : EnvKey =>
+      match selected with | .msgSender => "address" | _ => "uint256") key := by
+  exact (environmentMember?_guards base member resultType key success).2.2
 
 def expressionStep (read : Json → Except String RawExpr) (j : Json) : Except String RawExpr := do
   let kind ← node j
