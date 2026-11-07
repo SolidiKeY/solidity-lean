@@ -2142,3 +2142,23 @@ removed since the previous snapshot. Independent read-only finder and skeptic
 checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/tools-migration-evidence.sha256`.
 This non-atomic static observation does not establish runtime acceptance.
+
+## Counterexample migration probe observations
+
+`counterexample_migration_controls.py` records three previously unreferenced
+counterexample migration probes with source hashes and the migration document
+hash. Two inspect selected imported interfaces and axioms; the third is an
+isolated negative model of the nonconflicting storage equations and pre-fix
+defaults, without changing either original inconsistency theorem premise. The
+document reports historical old probes for all three and new probes for only
+OverlapInterfaces and OverlapModel. Current invocation, inputs, effects and
+outcomes remain unresolved; this is supplied-subset evidence.
+
+At `1eb999d7d55ce9bae9492a54981a67b4f7c062b7`, the refreshed static index
+has 766 candidates, 538 with supplied current references and 228 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in
+`tests/h55/module-times/counterexample-migration-evidence.sha256`. This
+non-atomic observation does not establish current runtime acceptance.
