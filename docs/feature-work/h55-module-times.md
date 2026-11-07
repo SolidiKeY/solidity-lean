@@ -1804,3 +1804,18 @@ The index/worktree scan is non-atomic and does not authenticate ignored or
 generated inputs, index flags or runtime. Independent read-only finder and
 skeptic reviewed these boundaries without Lean, server or builds. No runtime
 acceptance is inferred.
+
+## Generic frontend standalone candidates
+
+`generic_frontend_controls.py` records three supplied source-hashed snapshot
+rows. Core proves a parameterized correspondence over existing intrinsic
+syntax; CoreControls supplies generic typed examples, not actual parser
+fixture coverage. FixtureTable contains 45 generated finite certificates
+and its source records the pending Token migration and lack of a passing check.
+
+The historical validation packet builds the CoreControls closure, not the
+generated table, and leaves parser and full timing gates open. Its bounded
+runner's virtual-memory limit is not an RSS cap or H55 attestation. Current
+inputs, invocation and outcomes remain unresolved. Independent read-only
+finder and skeptic reviewed these distinctions without Lean, server or
+builds. No runtime acceptance is inferred.
