@@ -54,9 +54,9 @@ theorem corrupted_tail : observe (run (code 1 .bitAnd) input) ≠
 
 theorem dirty_refusal : ¬ 256 < 2 ^ (unsigned ⟨0,by decide⟩).bits := by decide
 
-theorem signed_refusal :
-    (compileVal 1 (Frag.init _) (signedExpression C .bitAnd)).isNone = true :=
-  signed_refused C 1 .bitAnd (Or.inl rfl)
+theorem signed_acceptance :
+    (compileVal 1 (Frag.init _) (signedExpression C .bitAnd)).isSome = true :=
+  signed_accepted C 1 .bitAnd (Or.inl rfl)
 
 /-- info: 'Solidity.Backend.Passes.BitwiseValueContextControls.source_result' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -85,7 +85,7 @@ theorem signed_refusal :
 /-- info: 'Solidity.Backend.Passes.BitwiseValueContextControls.dirty_refusal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms dirty_refusal
-/-- info: 'Solidity.Backend.Passes.BitwiseValueContextControls.signed_refusal' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.Passes.BitwiseValueContextControls.signed_acceptance' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms signed_refusal
+#print axioms signed_acceptance
 end Solidity.Backend.Passes.BitwiseValueContextControls
