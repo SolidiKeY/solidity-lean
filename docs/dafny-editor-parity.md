@@ -2020,3 +2020,13 @@ context, not an isolated editorTextFocus proof. Untrusted-window and macOS
 coverage, raster/ABA guarantees, full action lifecycle and both independent row
 judgments remain missing. These menu rows stay partial. Evidence and failed
 launch receipts remain off branch under H145.
+
+
+### Authorized kernel-checking inventory entries
+
+The shared trust inventory now records exactly the two reviewed
+`CounterexampleMetadataV1` sites that force `debug.skipKernelTC=false`: the
+retained-certificate kernel check and the diagnostic command scope. The checker,
+axiom policy, kernel ceiling and exclusions are unchanged. The separately
+authorized total typed-source compiler refactor remains subject to exact
+interface/behavior preservation, kernel correspondence and finder/skeptic review.
