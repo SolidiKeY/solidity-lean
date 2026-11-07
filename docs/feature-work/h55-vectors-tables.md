@@ -378,3 +378,25 @@ Ordinary Source evaluation still does not consult raw frames automatically.
 General expression/statement integration and raw-copy propagation remain open
 H121 work; address/bytesN/enum dirty decoding remains refused. Full inherited
 Raw/table/generator acceptance, affected whole-lane gates and timing remain open.
+
+## Selected-read conservation
+
+After adopting master 7683091e7, three additive generic laws complete the
+selected-read boundary's conservation slice. Setting a typed local to its own
+value preserves the entire Source local environment (here/there induction).
+Outer admission equals selected decoding admission for every fuel and runtime
+plan: an admitted timeout remains distinct from unsupported decoding.
+If selected decoding returns the existing clean backup, evalLocal equals
+actual Source.evalE on the original complete Source state, with the original
+raw frame retained. This explicit premise is not replaced by a claim that
+all clean materialized frames decode definitionally.
+
+MCP and the focused 93-job build passed. The local-environment lemma is
+axiom-free; admission and compatibility use only the standard three axioms.
+No decoder, evaluator or state definition changed. This does not close general
+Source integration, raw-copy propagation or the whole Raw-family queue.
+
+Read-only finder and skeptic both passed these conservation laws without Lean
+servers or writes. The affected LocalBlock, existing decoder controls and P16
+build passed (201 jobs), including the exact standard-axiom pins. The bounded
+run took 94.40 seconds with no swap or OOM. It is not a before/after timing gate.

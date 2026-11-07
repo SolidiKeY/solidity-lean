@@ -286,4 +286,49 @@ theorem evalLocal_raw :
   rw [Option.map_map]
   rfl
 
+/-- Preparing a typed local with its existing value preserves the entire Source local environment. -/
+theorem locals_set_get :
+ ∀ (D : Solidity.Source.Layout) (types : Solidity.Source.RCtx) (ty : Solidity.Source.STy)
+(index : Solidity.Source.Idx types ty) (locals : Solidity.Source.Locals D types),
+locals.set index (locals.get index) = locals := by
+  intro D types ty index
+  induction index with
+  | here => intro locals; cases locals; rfl
+  | there previous ih =>
+    intro locals
+    cases locals with
+    | cons head tail => exact congrArg (Solidity.Source.Locals.cons head) (ih tail)
+
+/-- Readback admission depends only on the selected decoder, not Source fuel or runtime plan. A Source timeout is still an admitted result. -/
+theorem evalLocal_readable :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+(G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+(state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+(plan : Solidity.Source.FailureExecution.RuntimePlan),
+(Solidity.Yul.DirtyReadback.evalLocal G F fuel state index plan).isSome =
+(Solidity.Yul.DirtyReadback.readAt G.pipeline state index).isSome := by
+  intros
+  unfold Solidity.Yul.DirtyReadback.evalLocal
+  cases Solidity.Yul.DirtyReadback.readAt _ _ _ <;> rfl
+
+/-- Whenever selected decoding equals the existing backup, the explicit boundary
+agrees with ordinary Source local evaluation on the original complete Source state,
+at every fuel and runtime plan. This is a conditional compatibility theorem, not
+an assertion that all dirty values decode to their backups. -/
+theorem evalLocal_compatible :
+ ∀ (ctx : Solidity.Source.Ctx) (ty : Solidity.Source.STy)
+(G : Solidity.Source.Glob ctx.env) (F : Solidity.Source.Fr) (fuel : Nat)
+(state : Solidity.Yul.RawFrame.State ctx) (index : Solidity.Source.Idx ctx.tys ty)
+(plan : Solidity.Source.FailureExecution.RuntimePlan),
+Solidity.Yul.DirtyReadback.readAt G.pipeline state index = some (state.clean.get index) →
+Solidity.Yul.DirtyReadback.evalLocal G F fuel state index plan =
+some (((Solidity.Source.evalE G F fuel (.local index) plan).run
+(state.clean, state.world)), state) := by
+  intros ctx ty G F fuel state index plan decoded
+  unfold Solidity.Yul.DirtyReadback.evalLocal
+  rw [decoded]
+  change some (((Solidity.Source.evalE G F fuel (.local index) plan).run
+    (state.clean.set index (state.clean.get index), state.world)), state) = _
+  rw [Solidity.Yul.DirtyReadback.locals_set_get]
+
 end Solidity.Yul.DirtyReadback

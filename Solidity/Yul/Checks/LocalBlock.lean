@@ -1098,4 +1098,14 @@ theorem readbackRawWords :
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.readbackRawWords
 
+/-- info: 'Solidity.Yul.DirtyReadback.locals_set_get' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.locals_set_get
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_readable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_readable
+/-- info: 'Solidity.Yul.DirtyReadback.evalLocal_compatible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.DirtyReadback.evalLocal_compatible
+
 end Solidity.Yul.Checks.LocalBlock

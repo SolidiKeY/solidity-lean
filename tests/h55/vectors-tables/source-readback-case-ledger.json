@@ -42,5 +42,15 @@
     "Unsupported address, fixed bytes and enum dirty words remain refused by the published decoder.",
     "No representation rewrite; H58 HOLD unchanged.",
     "Fixture global is inhabited only for local-read controls, not a crypto/call correctness witness."
-  ]
+  ],
+  "conservation": {
+    "typed_index_cases": [
+      "here",
+      "there"
+    ],
+    "locals_set_get": "Preparing the selected local with its own value preserves the complete local environment.",
+    "evalLocal_readable": "For every fuel and runtime plan, outer admission equals selected decoder admission.",
+    "evalLocal_compatible": "Conditional on readAt returning the selected clean backup, the complete Source result/state equals actual Source.evalE on original clean/world, and the original raw frame is retained.",
+    "limitation": "No unconditional materialized-clean-frame decoding or general expression/statement agreement is asserted."
+  }
 }
