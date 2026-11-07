@@ -177,7 +177,7 @@ def certificate : Interface.SelectorMatchCertificate code where
 #guard_msgs (whitespace := lax) in #print axioms source_value
 /-- info: 'Solidity.Backend.AbiEntry.SelectorMatch.source_raw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_raw
-/-- info: 'Solidity.Backend.AbiEntry.SelectorMatch.short_no_match' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorMatch.short_no_match' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms short_no_match
 /-- info: 'Solidity.Backend.AbiEntry.SelectorMatch.frameCertificate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms frameCertificate

@@ -102,9 +102,9 @@ theorem boundary : SliceBounds 65 31 64 ∧ 31 + 32 < 65 ∧ ¬ SliceBounds 65 3
 #guard_msgs in #print axioms SliceBounds.index
 /-- info: 'Solidity.Backend.MemoryOps.SliceBounds.compose' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms SliceBounds.compose
-/-- info: 'Solidity.Backend.MemoryOps.sliceElems_length' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.sliceElems_length' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms sliceElems_length
-/-- info: 'Solidity.Backend.MemoryOps.sliceElems_read' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.MemoryOps.sliceElems_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms sliceElems_read
 
 end Solidity.Backend.MemoryOps

@@ -152,7 +152,7 @@ theorem single_calldata_entry (I : Input) (fuel : Nat) (s : Shape) (addr len : N
 #guard_msgs (whitespace := lax) in #print axioms blocked_not_rejected
 /-- info: 'Solidity.Backend.AbiEntry.EntryTransport.body_from_entry' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms body_from_entry
-/-- info: 'Solidity.Backend.AbiEntry.EntryTransport.verdict_of_values' does not depend on any axioms -/
+/-- info: 'Solidity.Backend.AbiEntry.EntryTransport.verdict_of_values' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms verdict_of_values
 /-- info: 'Solidity.Backend.AbiEntry.EntryTransport.single_calldata_entry' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms single_calldata_entry

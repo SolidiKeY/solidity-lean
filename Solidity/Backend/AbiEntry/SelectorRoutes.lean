@@ -125,7 +125,7 @@ def certificate : Interface.SelectorRoutesCertificate route where
   selected := fun C base table fallback => ⟨compiled C base table fallback,selected C base table fallback⟩
   executed := executed
 
-/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
@@ -135,12 +135,12 @@ def certificate : Interface.SelectorRoutesCertificate route where
 #guard_msgs (whitespace := lax) in #print axioms executed
 /-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.certificate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms certificate
-/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.condition_in' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.condition_in' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms condition_in
-/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.write_core' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.write_core' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms write_core
-/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.condition_code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.condition_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms condition_code
-/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.write_code' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.write_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms write_code
 end Solidity.Backend.AbiEntry.SelectorRoutes
