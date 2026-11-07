@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "guarded_regression": "Target identity overwritten by dependency path and frozen obligations silently dropped or promoted from historical observations.",
+  "source_sha256": {
+    "scripts/h62/item1/duplication-scanner/header_dependencies.py": "06ec6c60387f96cb0e78f6a8a2824030df04da6d26315a2e15f5ffe46bfedfc2",
+    "tests/h62/item1/duplication-scanner/test_header_dependencies.py": "9b867b5b4b32099850ff435e457462e1defeb65fd2faa2801f7ff8a2c584bc3e",
+    "scripts/h62/item2/audit-readonly-calls/obligation_dependencies.py": "40f2260be9f88dc6bf1b2c514fea14362e2ab2213021b9d0596270dbe7efe866",
+    "scripts/h62/item2/audit-readonly-calls/test_obligation_dependencies.py": "facdd81a85bcbc69ae3c8c6ec247a8c7d68b3de633d6dc1d6c5bab42ceb59c7e"
+  },
+  "frozen_census_sha256": "e07aa0fe5f1a94c292c6d9edc22eee478f45c560b1802fab5e7ac581da9a2ffb",
+  "header_inventory_sha256": "683f62a16831f95992b991790c284bd481983e8101c7f86d2d5632caa86b3655",
+  "ledger_sha256": "bab29f697f11fdfc48b9481325a85cbd24d9bfd9885a98f4aaf1cb4c00c5a721",
+  "tests": {
+    "scanner": 131,
+    "ledger": 9,
+    "live_header_controls": 8
+  },
+  "proof_boundary": "No new formal witness or runtime/model gate. Original792 remain,462 ordinary pending including3private removed helpers. Timing STOP retained."
+}

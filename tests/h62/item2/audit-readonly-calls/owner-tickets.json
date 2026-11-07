@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "delivery": "H70 confirms owner ticket relays accepted by RO, V13 and V15; relay.sh is host-only and is not a worker installation task.",
+  "blockers": [
+    {
+      "id": "FROZEN-DISPATCH-EMPTY",
+      "type": "FROZEN_STATEMENT_UNINHABITABLE",
+      "owner": "RO (compiler10/readonly-external)",
+      "declarations": [
+        "Solidity.Lowering.Readonly.SourceHistory.dispatch_getter_empty_succ",
+        "Solidity.Lowering.Readonly.SourceHistory.dispatch_special_empty_succ"
+      ],
+      "evidence": "ImpossibleDispatch.lean; proof-impossible-final.log",
+      "question_id": "Q-DISPATCH",
+      "question": "The two frozen dispatch cuts have contradictory hypotheses. How should their owner resolve the all-statements witness requirement while preserving this frozen audit?",
+      "options": [
+        "Owner prepares a separately versioned reachable dispatch partition and explicit contract migration; frozen audit remains blocked until authorized scope is supplied.",
+        "Keep the frozen signatures unchanged and retain the proven witness blocker; no all-witness completion claim."
+      ],
+      "question_resolved": true,
+      "status": "pending RO v2",
+      "resolution": "H69 human: RO owner publishes a new versioned interface (H57 versioned pairs), reachable dispatch split and explicit migration; consumers re-prove. Preserve frozen originals and refutations."
+    },
+    {
+      "id": "G42-NONEMPTY-TARGET-REVERT",
+      "type": "PUBLIC_SUCCESS_CONTRACT_MISSING",
+      "owner": "V13 (v12-v17/v13-abi-world)",
+      "dependencies": [
+        "V15/P10 outcome observation producer"
+      ],
+      "declarations": [
+        "Solidity.Backend.WorldCalls.ExternalCalls.fetched",
+        "Solidity.Backend.WorldCalls.ExternalCalls.declared_return",
+        "Solidity.Backend.WorldCalls.ExternalCalls.decoded"
+      ],
+      "evidence": "AlwaysRevert.lean; proof-always-revert-controls.log",
+      "question_id": "Q-SUCCESS",
+      "question": "The exact frozen external consumers admit a nonempty fetched target that reverts while Source decoding succeeds. Which owner repair should supply the required public compiler success contract?",
+      "options": [
+        "Add a separate supported-program compiler totality/success theorem with independently fixed Source/target outcome observations.",
+        "Publish a new producer interface version enforcing independent input coverage and fixed P10 outcome/returndata correspondence.",
+        "Retain these as conditional transport consumers and keep public compiler adequacy blocked pending genuine producer contracts."
+      ],
+      "question_resolved": true,
+      "status": "pending owner compiler-success theorem",
+      "resolution": "Coordinator: totality is a separate compiler-success theorem proved for the owner compiler on stated inputs; frozen interfaces stay unchanged.",
+      "responsible_lane": "V13 (v12-v17/v13-abi-world)",
+      "required_deliverable": "A separate theorem proving owner compiler success on supported stated inputs, excluding reject-all and always-revert behavior; no frozen-interface amendment."
+    },
+    {
+      "id": "SEMANTIC-CHECKING-PERFORMANCE-STOP",
+      "type": "PERFORMANCE_STOP",
+      "owner": "coordinator/runtime",
+      "status": "blocked; mandatory >10% stop",
+      "threshold_percent": 10,
+      "observed_delta_percent": 80.25496653564336,
+      "evidence": "/workspace/h62-audit-readonly-calls/continuation-semantic/evidence/performance-stop-context.json",
+      "action": "Investigate/restore comparable checking conditions; no threshold override, budget increase or repeat-to-green requested.",
+      "queued_work": "462 ordinary entries remain; not all are producer-blocked."
+    }
+  ],
+  "pending_items": [
+    {
+      "id": "RO-V2-MIGRATION",
+      "owner": "solidity-compiler10-20261028/readonly-external",
+      "status": "pending RO v2",
+      "deliverable": "H57 versioned reachable dispatch split, explicit migration, then consumer re-proofs; frozen originals unchanged"
+    },
+    {
+      "id": "V13-COMPILER-SUCCESS",
+      "owner": "solidity-v12-v17-20261031/v13-abi-world",
+      "dependencies": [
+        "solidity-v12-v17-20261031/v15-evm-agreement (P10 fixed outcomes)"
+      ],
+      "status": "pending separate owner theorem",
+      "deliverable": "Separate success/totality theorem for the owner compiler on stated supported inputs, excluding reject-all/always-revert; no frozen statement changes"
+    }
+  ],
+  "witness_rule": "For intentional negative controls/separation/refutations, a checked joint-impossibility proof is the audit result; ordinary interfaces still require joint witnesses; no frozen statement changes.",
+  "accepted_relays": [
+    "solidity-compiler10-20261028/readonly-external",
+    "solidity-v12-v17-20261031/v13-abi-world",
+    "solidity-v12-v17-20261031/v15-evm-agreement"
+  ],
+  "resolved_items": [
+    {
+      "id": "CALLBACK-HISTORY-INTENT",
+      "type": "JOINT_PREMISES_IMPOSSIBLE_PENDING_INTENT",
+      "owner": "solidity-v12-v17-20261031/v13-abi-world",
+      "dependencies": [
+        "solidity-compiler10-20261028/readonly-external"
+      ],
+      "declarations": [
+        "Solidity.Backend.WorldCalls.ClosedSourceControls.closed_callbacks",
+        "Solidity.Backend.WorldCalls.UnknownSourceControls.children",
+        "Solidity.Backend.WorldCalls.UnknownRevertControls.children"
+      ],
+      "status": "resolved: intentional no-callback specialization controls",
+      "evidence": "tests/h62/item2/audit-readonly-calls/HiddenClients.lean; continuation-semantic/evidence/hidden-clients.log",
+      "question_id": "Q-CALLBACK-INTENT",
+      "question_resolved": true,
+      "question": "The three fixed-strategy CallbackHistories declarations have checked callback-choice impossibility proofs. Are they intentional no-callback separation controls under H69, or ordinary producer obligations requiring reachable versions?",
+      "options": [
+        "Intentional no-callback separation controls: accept checked joint impossibility under H69, never as positive witnesses.",
+        "Ordinary producer obligations: retain pending status until owners publish reachable versions or fixtures."
+      ],
+      "delivery_status": "Coordinator relayed RO owner decision; no worker-to-Claude message.",
+      "decision_owner": "solidity-compiler10-20261028/readonly-external",
+      "resolution": "RO reports these are intentional no-callback specialization controls; accept checked callback-choice impossibility as the audit result under H69; never count them as positive callback witnesses. Statements remain unchanged.",
+      "resolved_wait": {
+        "lane": "solidity-compiler10-20261028/readonly-external",
+        "item": "Q-CALLBACK-INTENT"
+      }
+    }
+  ],
+  "current_waits": [
+    {
+      "lane": "claudecloud/move6-20261106/ro-v2",
+      "item": "Versioned reachable dispatch split, explicit migration and consumer re-proofs"
+    },
+    {
+      "lane": "claudecloud/move6-20261106/v13-abi",
+      "item": "Separate actual compiler-success theorem with V15/P10 fixed outcomes"
+    },
+    {
+      "lane": "coordinator/runtime",
+      "item": "Mandatory performance hold: +80.25496653564336%; retain failed evidence; no unchanged rerun"
+    }
+  ]
+}
