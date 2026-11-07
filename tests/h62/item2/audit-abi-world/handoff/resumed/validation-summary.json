@@ -1,9 +1,46 @@
 {
   "schema_version": 1,
-  "status": "blocked",
-  "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
+  "status": "partial",
+  "integration": "806a972a4f1eefc367f7fe21078e56469447ce13",
   "original_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "full_lean_build": {
+    "status": "pending",
+    "command": "./run-lean.sh",
+    "boundary": "281 changed upstream validation inputs; prior6555-job pass is historical."
+  },
+  "local_audit": {
+    "modules": 9,
+    "witnesses": 177,
+    "fidelity": 177,
+    "binders": 439,
+    "formal_success": 7,
+    "external_encoded_fixtures_identical": 10,
+    "new_axioms": 0,
+    "sorry": 0,
+    "frozen_statements_changed": 0,
+    "upstream_lean_paths": 7966
+  },
+  "static": {
+    "trust": "pass:6628sources/289sites/0findings",
+    "orphans": "pass:6612reachable/0orphaned/0notallowed",
+    "doc_paths": "fail:2synthetic A.lean/B.lean references in audit-evm-compiler/check_scope.py",
+    "axiom_pins": "fail:16675pins/0errors/85newstandard-only registrations"
+  },
+  "timing_delta_percent": 1.405912056692693,
+  "waits": [
+    {
+      "lane": "coordinator/G07 inventory owners",
+      "item": "PIN-806a972a: register exact85existing standard-only pins from externalticket authenticated by bulk-artifacts.sha256."
+    },
+    {
+      "lane": "audit-evm-compiler documentation checker owner",
+      "item": "Resolve synthetic A.lean/B.lean references in own check_scope.py; no worker edits to that lane."
+    }
+  ],
+  "questions": [],
+  "boundary": "Fresh nine-module+KeySort audit/acceptance177/439/7/10 passes on806. Fullbuildpending. Archived externalfixture observations reused for identicalbytes, no freshEVM or formal gas/world/generalcompiler bridge.",
+  "previous_full_lean_build": {
+    "integration": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
     "status": "pass",
     "command": "./run-lean.sh",
     "jobs": 6555,
@@ -18,35 +55,5 @@
     "output": "resume-20261107/full.log",
     "stdout_sha256": "0f741f0097ab7ff34d21865cb6f7660169c1afdf5253e02a9021e2cca040edc2"
   },
-  "local_audit": {
-    "modules": 9,
-    "witnesses": 177,
-    "fidelity": 177,
-    "binders": 439,
-    "formal_success": 7,
-    "external_encoded_fixtures_identical": 10,
-    "new_axioms": 0,
-    "sorry": 0,
-    "frozen_statements_changed": 0,
-    "upstream_lean_paths": 7722
-  },
-  "static": {
-    "trust": "pass:6562 sources,289 sites,0 findings",
-    "orphans": "pass:6546 reachable,0 orphaned,0 not allowed",
-    "doc_paths": "fail after coordinator-requested withdrawal:4 references in restored other-lane files; previous pass is historical",
-    "axiom_pins": "fail:16151 pins,110 new standard-only registrations,0 errors"
-  },
-  "timing_delta_percent": -0.09408949912913522,
-  "waits": [
-    {
-      "lane": "coordinator/G07 inventory owners",
-      "item": "PIN-2a43bf4f: record exact110 existing standard-only pins from the off-Git owner ticket authenticated by bulk-artifacts.sha256; no theorem/axiom/premise/exclusion edits."
-    },
-    {
-      "lane": "coordinator/other-lane documentation owners",
-      "item": "Retain owner master versions of the three reverted files at integration; branch doc-path check has4 restored missing references. No further worker edits requested."
-    }
-  ],
-  "questions": [],
-  "boundary": "Full Lean build and local ABI audit pass; final global metadata acceptance remains blocked. External gas/fork observations are reused for byte-identical fixtures, not formal gas/world proofs. Coordinator-requested documentation-only withdrawal leaves four branch-local missing references; Lean/config inputs remain unchanged."
+  "owner_ticket": "/workspace/audit-abi-world-evidence/resume-806-20261107/axiom-pin-owner-ticket.json"
 }
