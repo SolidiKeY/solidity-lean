@@ -1369,3 +1369,17 @@ axiom-free stale_capture_refused. Evidence is external at
 `/workspace/vy3-evidence/runtime-void-capture-20261107`. No native ByteWorld,
 ABI/gas or full Source/G24 adequacy is inferred. Existing transition/producer
 waits, STOPs and original final acceptance obligations remain open.
+
+
+Stateful capture checkpoint: six original `StatefulCaptureControls` rows have
+exact frozen signature accounting and checked aliases in `StatefulCaptureWitness.lean`.
+The joint retains initialInput and both actual source runs, obtains the reached
+capture map from original execution and derives declarationInput through the
+existing generic nonallocating memory link. No post-capture preservation equation
+is assumed. The full local/alias/header/array observations with and without
+capture retain their original statements; scalar numeric and symbolic expression
+execution remain separate interfaces. Selected522/1259,737open; invocation and
+observer definitions and supplemental rows add no credit. Seven axiom reports
+are guarded. Evidence: `/workspace/vy3-evidence/stateful-capture-20261107`.
+No native ByteWorld/emission, ABI/gas or full Source/G24 adequacy is inferred.
+Existing transition/producer waits, STOPs and original final obligations remain.
