@@ -533,3 +533,43 @@ Both static reviewers found a direct-proof signature extraction error; all
 entries were corrected and reauthenticated, and both final reviews passed.
 No Lean source changed. Prior source gate provenance is recorded separately
 from consumer acceptance; the handoff does not close VY2's whole waiting item.
+
+## H125/H57 environment-aware typing pair — draft under H16 timing hold
+
+Source/TypingV2.lean adds Source.envLocOK and a v2 statement/block judgment
+alongside byte-identical v1. A generic fold over actual v1 derivations checks
+only declVar/declInit, recursively through all control/item bodies; every other
+v1 premise is retained. The kernel-evaluated Boolean folds use generalized
+casesOn with explicit structural recursion (the initial indexed-match G0
+finding was fixed). No Lowering module is imported by Source.
+
+V2 declarations derive the unchanged locOK evidence from envLocOK. Projection
+retains an actual v1 derivation. The reverse bridge uses CompatibleAt, restricted
+to nameable types passing v1 location rules; mapping-free-nameable environments
+supply that premise, with an inhabited Boolean declaration control. The universal
+declaration_admissible theorem needs no compatibility premise and supplies the
+positive v2 H24 local-declaration obligation. The existing Loop memory witness
+and intentional negative v1 theorem remain valid; v2 refuses that memory
+declaration and admits a genuine initialized storage pointer.
+
+Controls and seven core standard-axiom pins passed. Finder and skeptic passed
+final code read-only without Lean; no budgets, maxHeartbeats, axiom sets or
+exclusions changed. All 21 existing statement cases and 3 item cases are in the
+case ledger. Tuple premises are deliberately unchanged. V1 is not retired and
+existing inference/elaboration still uses v1.
+
+H16 HOLD: three serial warm runs measured a sum of medians of 42.1964 seconds
+before and 46.0804 seconds after, including 1.2825 seconds for the new v2 module
+(+9.2046%). The five old Source files are byte-identical and the measurements do
+not establish causation. The mechanical 10% threshold was not exceeded, but
+H125's qualitative instruction to stop on noticeably slower checking applies:
+Source work stopped, no unchanged timing rerun or library implementation followed.
+This is a reviewable draft, not an accepted/passing Source checkpoint or merge
+request. Raw timing logs and the explicit H16-HOLD report are retained off Git.
+
+typing-v2-consumer-migration.json gives separate notes for V10 H24 first and the
+direct H24/P8 refusal consumers. Consumers must version/reprove their predicates;
+the positive v2 theorem must never be supplied to the false v1 predicate. Global
+frontend/physical/compiler adequacy, automatic migration and library try/Error
+support are not claimed. Coordinator approval is still required before any v1
+retirement. Do not merge this draft across the H16 hold.

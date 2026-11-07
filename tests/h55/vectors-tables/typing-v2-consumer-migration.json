@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "status": "DRAFT_H16_TIMING_HOLD_DO_NOT_MERGE",
+  "source_base": "fc060cb4b9ee49b744c6805e31638971a172facc",
+  "module": "Solidity/Source/TypingV2.lean",
+  "module_sha256": "ccfaee52e9891284f5e4bd71687fd9c09f8db9fd7af00df72bd0bd6c5f4b1de2",
+  "version_pair": {
+    "v1": "Source.StmtD/ItemsD in unchanged Source/Typing.lean",
+    "v2": "Source.V2.StmtD/ItemsD in additive Source/TypingV2.lean",
+    "v2_to_v1": "toV1 projections retain actual derivations",
+    "v1_to_v2": "ofV1 under CompatibleAt for actual nameable types; mapping_free_compatible and an inhabited Bool witness in controls",
+    "positive_H24": "Source.V2.declaration_admissible, no compatibility premise",
+    "retirement": "None. V1 retirement requires all consumer migrations and coordinator approval."
+  },
+  "timing_hold": {
+    "status": "H16_STOP",
+    "reason": "H125 requires stopping/reporting noticeably slower Source checking. Observed aggregate median increase is 9.2046%, including the new v2 module. The mechanical 10% threshold was not exceeded; that result is not qualitative H16 acceptance.",
+    "before_seconds": 42.19636442301271,
+    "after_seconds": 46.08038527399185,
+    "ratio": 1.092046338685541,
+    "new_module_seconds": 1.282541256994591,
+    "old_source_files": "All five frozen Source baseline files byte-identical; timing data alone does not establish causation.",
+    "action": "No further Source edits, Lean checks or unchanged timing reruns; preserve reviewable draft. Library try/Error checkpoint held pending H16 disposition."
+  },
+  "consumer_notes": [
+    {
+      "consumer": "V10 H24 first",
+      "to_lane": "solidity-v07-v11-20261030/v10-storage-operations",
+      "module": "Solidity/Lowering/V07/LocationGraphInterface.lean",
+      "migration": "Introduce/consume a versioned refusal predicate quantified over Source.V2.StmtD. Reprove from Source.V2.declaration_admissible; TypingV2Controls.h24_v2 checks the exact location-policy shape. Do not substitute it into the frozen v1 predicate."
+    },
+    {
+      "consumer": "H24 assembled admission",
+      "module": "Solidity/Lowering/V07/GraphAdmissionAssembly.lean",
+      "migration": "Version the Source-refusal component before admitting mapping-bearing environments; reprove all other graph/origin fields unchanged. Existing v1 EnvAdmission and its nameable-mapping-free characterization stay frozen."
+    },
+    {
+      "consumer": "H24 negative characterization",
+      "module": "Solidity/Lowering/V07/SourceRefusal.lean",
+      "migration": "Keep every v1 negative theorem and statement. Source.envLocOK is equivalent to the published envLocOK formula; new positive v2 declaration theorem is separate. Mapping-free-nameable environments derive CompatibleAt and lift actual derivations."
+    },
+    {
+      "consumer": "H24 negative witness",
+      "module": "Solidity/Lowering/V07/LocationGraphLaws.lean",
+      "migration": "Retain typed_local and refusal_missing as v1 facts. The exact same named Loop memory declaration is refused by v2; initialized storage declaration is inhabited in the new controls."
+    },
+    {
+      "consumer": "P8 conditional source refusal",
+      "module": "Solidity/Lowering/P8/ConditionalAssembly.lean",
+      "migration": "Preserve v1 field statements. A v2 consumer requires its own versioned contract and reproof; v2 typing does not supply P8 origin, compiler, session or lifecycle adequacy."
+    },
+    {
+      "consumer": "P8 graph/source distinction",
+      "module": "Solidity/Lowering/P8/DeclarationGraphControls.lean",
+      "migration": "Keep graph_without_source_refusal valid for v1. Add separately versioned v2 controls; do not rewrite the existing negative result."
+    },
+    {
+      "consumer": "P8 nameable constraints",
+      "module": "Solidity/Lowering/P8/DeclarationGraphConstraints.lean",
+      "migration": "Keep constraints derived from frozen v1 refusal. They cannot be transferred unchanged to a v2 refusal field; consumer must state and prove the versioned replacement."
+    }
+  ],
+  "inventory_limit": "These are direct H24 refusal/assembly consumers identified in the current tree, not a claimed census of every v1 typing user.",
+  "pending": "Library try/Error(string memory) remains a separate unimplemented Source checkpoint; no Source work continues across H16 hold."
+}

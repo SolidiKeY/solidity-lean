@@ -4302,6 +4302,7 @@ import Solidity.Source.TryExamples
 import Solidity.Source.Types
 import Solidity.Source.Typing
 import Solidity.Source.TypingExamples
+import Solidity.Source.TypingV2
 import Solidity.Source.Unique
 import Solidity.Source.Units
 import Solidity.Source.Upstream
