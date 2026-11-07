@@ -1,0 +1,52 @@
+{
+  "scope": "Complete21 local failure-slice roles across4files; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1396,
+    "pending": 3887,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/failure-local-roles-v107/evidence.tar.gz",
+      "bytes": 339919,
+      "sha256": "54b6d49274d2bbc2c8c7fda3f65a2b219019d066dac27103b46a0bf45fc31fb7"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/failure-local-roles-v107/inputs.json",
+      "bytes": 1312,
+      "sha256": "0d484ab7b007e4f96ef1c9d7d8d8f8f9a11c9ac6bdfce4e651cfbbe640b748e5"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/failure-local-roles-v107/gates.json",
+      "bytes": 2849,
+      "sha256": "6eae32d7edc3d31f4c15ca858d377bbb9eb3fe3574f53ffe7ce772477854b892"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/failure-local-roles-v107/reviews.md",
+      "bytes": 1277,
+      "sha256": "2b37b3694fe27ee877cb4404d6ed9f0c6c94fe64833d349e084172c3bfa4e56c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/failure-local-roles-v107/case-rosters.json",
+      "bytes": 1840,
+      "sha256": "b4d51a6e9a4b61fe463e16a515dc3bbbeb5b308d706a38af4dbd2791efe54548"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/failure-local-roles-v107/doc-master-repair-binding.json",
+      "bytes": 211,
+      "sha256": "14dba34745be5d479b7e7a81274ebc8d6bca63f41613f64ffa931343569c39a4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/failure-local-roles-v107/external-retention.json",
+      "bytes": 342142,
+      "sha256": "b855210b584c3cf3d32f3e0b18aad7f2c977c2b5a3fce1c91dcea654ba5fc801"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/failure-local-roles-v107/semantic-roles-reviewed.json",
+      "bytes": 3706343,
+      "sha256": "1a32524ccd37aaf3843fdb50e7aa79d94f5b2c8b3102e04fbdf26fc2c1560baf"
+    }
+  ]
+}
