@@ -4,6 +4,7 @@ stopped/truncated or forged native artifacts. Mutations are negative controls,
 not extra fixture passes; positive coverage uses only real captured runs.
 """
 import hashlib
+import gzip
 import importlib.util
 import json
 import os
@@ -21,7 +22,7 @@ SPEC.loader.exec_module(MODULE)
 
 class CoverageControls(unittest.TestCase):
     def test_real_disjoint_native_ranges(self):
-        result = MODULE.coverage(REPO, BULK, ['engine-x-pilot', 'engine-x-native-20-40', 'engine-x-native-40-60', 'engine-x-native-60-80'])
+        result = MODULE.coverage(REPO, BULK, ['review-fix-0-20', 'review-fix-20-40', 'review-fix-40-60', 'review-fix-60-80'])
         self.assertEqual(result['processed_unique_cases'], 80)
         self.assertEqual(result['counts'], {'payload_reference_match': 80})
         self.assertEqual(result['unprocessed_ranges'], [[80, 21124]])
@@ -29,8 +30,8 @@ class CoverageControls(unittest.TestCase):
         self.assertEqual(result['source_matches'], 0)
 
     def test_duplicate_overlap_and_binding_only_rejected(self):
-        for labels, error in [(['engine-x-pilot', 'engine-x-pilot'], 'duplicate'),
-                              (['engine-x-pilot', 'engine-x-pilot-replay'], 'overlapping'),
+        for labels, error in [(['review-fix-0-20', 'review-fix-0-20'], 'duplicate'),
+                              (['review-fix-0-20', 'review-fix-overlap'], 'overlapping'),
                               (['engine-x-bindings'], 'not a native')]:
             with self.subTest(labels=labels), self.assertRaisesRegex(ValueError, error):
                 MODULE.coverage(REPO, BULK, labels)
@@ -46,7 +47,33 @@ class CoverageControls(unittest.TestCase):
             rows[0]['allocation_binding'].update(pre_hash=key, allocation_path=entry['path'],
                                                  allocation_source_sha256=entry['source_sha256'],
                                                  allocation_record_sha256=entry['record_sha256'])
+        def fraction(field, block=False):
+            def mutate(summary, command, rows):
+                target = rows[0]['blocks'][0] if block else rows[0]['blocks'][0]['transactions'][0]
+                target[field] = int(target[field]) + 0.5
+            return mutate
         mutations = [
+            ('bool-row-index', lambda s,c,r:r[0].update(index=False), 'range identity'),
+            ('float-selected', lambda s,c,r:s.update(selected=20.0), 'summary count'),
+            ('float-status-count', lambda s,c,r:s['counts'].update(payload_reference_match=20.0), 'status count'),
+            ('malformed-log-list', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs={}), 'malformed native logs'),
+            ('malformed-log-address', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs=[dict(address='0x00',topics=[],data='0x')]), 'malformed native logs'),
+            ('malformed-log-topic', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs=[dict(address='0x'+'00'*20,topics=['0x00'],data='0x')]), 'malformed native logs'),
+            ('fraction-block-number', fraction('number', True), 'integer observation'),
+            ('fraction-block-gas', fraction('gas_used', True), 'integer observation'),
+            ('fraction-gas-limit', fraction('gas_limit'), 'integer observation'),
+            ('fraction-gas-spent', fraction('total_gas_spent'), 'integer observation'),
+            ('fraction-cumulative-gas', fraction('receipt_cumulative_gas_used'), 'integer observation'),
+            ('missing-external-guard', lambda s,c,r:c.pop('external_guard'), 'external resource guard'),
+            ('weakened-timeout', lambda s,c,r:c['external_guard'].update(timeout_seconds=301), 'external timeout'),
+            ('weakened-rss', lambda s,c,r:c['external_guard'].update(aggregate_rss_limit_bytes=13*1024**3), 'external resource guard settings'),
+            ('weakened-address-space', lambda s,c,r:c['external_guard'].update(address_space_hard_bytes=13*1024**3), 'external resource guard settings'),
+            ('weakened-reserve', lambda s,c,r:c['external_guard'].update(available_reserve_bytes=1024**3), 'external resource guard settings'),
+            ('swap-enabled', lambda s,c,r:c['external_guard'].update(swap_total_bytes=4096), 'external resource guard settings'),
+            ('missing-as-application', lambda s,c,r:c['external_guard'].update(rlimit_as_applied=False), 'external resource guard settings'),
+            ('wrong-external-runner', lambda s,c,r:c['external_guard'].update(runner_sha256='0'*64), 'external timeout/runner'),
+            ('bad-minimum-reserve', lambda s,c,r:c['external_guard'].update(minimum_available_bytes=1), 'external resource observations'),
+            ('coordinated-input-result', lambda s,c,r:r[0]['blocks'][0].update(state_root='0x'+'00'*32), 'pinned archive'),
             ('missing-stop', lambda s, c, r: c.pop('stopped'), 'stopped/incomplete'),
             ('stopped-job', lambda s, c, r: c.update(stopped='resource guard'), 'stopped/incomplete'),
             ('wrong-validator', lambda s, c, r: s.update(native_worker_sha256='0'*64), 'changed validator'),
@@ -61,7 +88,7 @@ class CoverageControls(unittest.TestCase):
             ('wrong-input-tx-hash', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(hash='0x'+'00'*32), 'pinned input'),
             ('wrong-input-tx-type', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(type=99), 'pinned input'),
             ('wrong-input-tx-limit', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(gas_limit='1'), 'pinned input'),
-            ('negative-tx-spent', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(total_gas_spent='-1'), 'pinned input limit'),
+            ('negative-tx-spent', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(total_gas_spent='-1'), 'integer observation'),
             ('overspent-tx', lambda s, c, r: r[0]['blocks'][0]['transactions'][0].update(total_gas_spent=str(int(r[0]['blocks'][0]['transactions'][0]['gas_limit'])+1)), 'pinned input limit'),
             ('empty-payload-evidence', lambda s, c, r: (r[0].update(blocks=[]), r[0]['binding'].update(payload_block_hashes=[])), 'pinned input'),
             ('wrong-input-payload-hash', lambda s, c, r: (r[0]['blocks'][0].update(hash='0x'+'00'*32), r[0]['binding'].update(payload_block_hashes=['0x'+'00'*32])), 'pinned input'),
@@ -75,16 +102,32 @@ class CoverageControls(unittest.TestCase):
                 root = Path(temporary)
                 (root/'evidence').mkdir()
                 (root/'reference').mkdir()
-                for p in ['engine-x-inputs.jsonl.gz', 'archive-inventory.jsonl.gz', 'engine-x-allocations.jsonl', 'engine-x-allocations-index.json', 'reference/package-lock.json', 'reference/package.json', 'reference/node_modules']:
+                (root/'upstream').mkdir()
+                for p in ['engine-x-inputs.jsonl.gz', 'archive-inventory.jsonl.gz', 'engine-x-allocations.jsonl', 'engine-x-allocations-index.json', 'reference/package-lock.json', 'reference/package.json', 'reference/node_modules', 'upstream/fixtures_develop-v5.3.0.tar.gz']:
                     (root/p).symlink_to(BULK/p)
                 for p in ['engine-x-export.json', 'archive-census.json']:
                     shutil.copyfile(BULK/'evidence'/p, root/'evidence'/p)
-                summary = json.loads((BULK/'evidence/engine-x-pilot-summary.json').read_text())
-                command = json.loads((BULK/'evidence/engine-x-pilot-command.json').read_text())
-                rows = [json.loads(line) for line in (BULK/'evidence/engine-x-pilot.jsonl').read_text().splitlines()]
+                summary = json.loads((BULK/'evidence/review-fix-0-20-summary.json').read_text())
+                command = json.loads((BULK/'evidence/review-fix-0-20-command.json').read_text())
+                rows = [json.loads(line) for line in (BULK/'evidence/review-fix-0-20.jsonl').read_text().splitlines()]
                 command['command'][3] = str(root)
                 command['command'][5] = 'negative-control'
                 mutate(summary, command, rows)
+                if name == 'coordinated-input-result':
+                    (root/'engine-x-inputs.jsonl.gz').unlink()
+                    with gzip.open(BULK/'engine-x-inputs.jsonl.gz', 'rt') as source, (root/'engine-x-inputs.jsonl.gz').open('wb') as raw:
+                        with gzip.GzipFile(filename='', fileobj=raw, mode='wb', mtime=0) as out:
+                            for line in source:
+                                record = json.loads(line)
+                                if record['index'] == 0:
+                                    record['fixture']['engineNewPayloads'][0]['params'][0]['stateRoot'] = rows[0]['blocks'][0]['state_root']
+                                out.write((json.dumps(record, sort_keys=True, separators=(',', ':'))+'\n').encode())
+                    receipt_path = root/'evidence/engine-x-export.json'
+                    receipt = json.loads(receipt_path.read_text())
+                    receipt['stream_sha256'] = MODULE.digest(root/'engine-x-inputs.jsonl.gz')
+                    receipt_path.write_text(json.dumps(receipt))
+                    summary['input_sha256'] = receipt['stream_sha256']
+                    summary['export_sha256'] = MODULE.digest(receipt_path)
                 data = ''.join(json.dumps(row)+'\n' for row in rows).encode()
                 summary['results_sha256'] = hashlib.sha256(data).hexdigest()
                 (root/'evidence/negative-control.jsonl').write_bytes(data)

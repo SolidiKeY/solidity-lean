@@ -6,6 +6,8 @@ import hashlib
 import io
 import json
 import tarfile
+import tempfile
+from functools import lru_cache
 from pathlib import Path
 from pipeline import EEST_SHA, file_sha
 
@@ -154,6 +156,60 @@ def export(root, kind="state_test"):
     receipt_temporary.write_text(json.dumps(receipt, indent=2)+"\n")
     receipt_temporary.replace(receipt_path)
     return receipt
+
+
+@lru_cache(maxsize=2)
+def _archive_engine_x_expectations(archive_name, archive_sha, generator_pins):
+    """Regenerate from verified upstream bytes, never a mutable receipt/cache file.
+
+    Guard coordinated input/result/receipt substitution. Reuse the existing
+    census/export algorithms and record their per-file source audit. The cache
+    is process-local immutable JSON, keyed by archive and generator hashes.
+    """
+    from archive_census import census
+    archive = Path(archive_name)
+    if archive_sha != EEST_SHA or file_sha(archive) != EEST_SHA:
+        raise ValueError("untrusted fixture archive")
+    with tempfile.TemporaryDirectory(prefix="engine-archive-verification-", dir=archive.parent.parent) as tmp:
+        root = Path(tmp)
+        (root/"upstream").mkdir(); (root/"evidence").mkdir()
+        (root/"upstream/fixtures_develop-v5.3.0.tar.gz").symlink_to(archive)
+        census(root)
+        generated = export(root, "blockchain_test_engine_x")
+        names = ["engine-x-inputs.jsonl.gz", "engine-x-allocations.jsonl",
+                 "engine-x-allocations-index.json", "archive-inventory.jsonl.gz",
+                 "evidence/archive-census.json"]
+        sources = {entry["path"]: entry["source_sha256"] for entry in
+                   json.loads((root/"engine-x-allocations-index.json").read_text()).values()}
+        with gzip.open(root/"engine-x-inputs.jsonl.gz", "rt") as stream:
+            for line in stream:
+                row = json.loads(line)
+                previous = sources.setdefault(row["path"], row["fixture_sha256"])
+                if previous != row["fixture_sha256"]:
+                    raise ValueError("inconsistent archive source audit")
+        proof = dict(algorithm="verify pinned archive SHA256; regenerate existing census and Engine-X export; compare exact stream/index hashes",
+                     archive_sha256=EEST_SHA, cases=generated["cases"],
+                     files={name: file_sha(root/name) for name in names},
+                     generator_sha256=dict(generator_pins), source_files=sources)
+    if file_sha(archive) != EEST_SHA:
+        raise ValueError("fixture archive changed during regeneration")
+    return json.dumps(proof, sort_keys=True)
+
+
+def verify_engine_x_inputs(root):
+    """Guard archive-unbound, mutually consistent input and result mutations."""
+    archive = (root/"upstream/fixtures_develop-v5.3.0.tar.gz").resolve()
+    actual = file_sha(archive)
+    if actual != EEST_SHA:
+        raise ValueError("untrusted fixture archive")
+    directory = Path(__file__).resolve().parent
+    pins = tuple((name, file_sha(directory/name)) for name in
+                 ("archive_census.py", "eest_export.py", "pipeline.py"))
+    proof = json.loads(_archive_engine_x_expectations(str(archive), actual, pins))
+    for name, expected in proof["files"].items():
+        if file_sha(root/name) != expected:
+            raise ValueError("input differs from pinned archive: " + name)
+    return proof
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(__doc__); p.add_argument("--bulk", type=Path, required=True); p.add_argument("--format", choices=list(FORMATS), default="state_test"); a = p.parse_args()

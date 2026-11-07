@@ -1569,3 +1569,28 @@ failures remain open. Current observations, exact commands, counts, limits,
 independent reviews and the next disjoint range are in the private evidence
 handoff; these external tests establish no new Lean theorem. The original
 persistent goal remains unfinished.
+
+
+## Coverage admission after the held trust-boundary review
+
+Earlier native milestone counts describe historical captured observations. They
+are not qualification under the current gate. Legacy wrappers and receipts
+without current external guard metadata are refused; metadata is not retrofitted.
+Fresh qualification requires re-execution with the current runner and explicit
+external timeout, address-space, RSS, reserve and no-swap settings.
+
+The verifier reuses the existing census/export algorithms to regenerate Engine-X
+inputs from the SHA-pinned upstream archive. It compares exact input, allocation,
+index, inventory and census bytes and supplies a per-file source audit. Mutually
+consistent mutable receipts cannot replace that archive binding. Process-local
+caches hold only immutable archive-derived expectations; current hashes are
+checked on every call, and native outcomes are never cached. This reuses existing
+interfaces rather than introducing a shared trusted-manifest premise.
+
+Conversion/validation failures fail the runner instead of becoming unsupported
+profiles. Numeric observations and identity/count metadata require canonical
+integer forms. Synthetic refusal controls add no fixture passes. The private
+fresh-checkpoint handoff records the changed gate, failed attempts, actual
+qualified prefix and next requalification range. Full Source/runtime agreement,
+Approved_i and all public obligations remain open; no Lean statement or proof
+budget is changed by these external-test checks.
