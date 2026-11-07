@@ -628,3 +628,31 @@ independent reviews and cache/seal evidence are recorded in the local
 ### Human H82 retirement and H44 packaging split
 
 Implementation remains stopped; the accepted successor is `solidity-v12-v17-20261031/v17-validation-release`. The reviewable retirement increment keeps the complete original rendered prompt, original work/backfill queue and human-readable handoff under `tests/h28-sol/non-vacuity/retirement-h82/`. `BULK-MANIFEST.json` authenticates an off-git archive of every original retirement file, including the full scope/open-queue data, drafts, unfinished patch and evidence records. The held head remains preserved on a backup ref and its earlier immutable seal. No theorem, gate, budget, scope or live implementation changes. The PAUSED tool transition was rejected by its enum; human STOP remains binding. No applicable H71 push grant was available, so no push occurs. The coordinator/successor integrates the split head after review.
+
+The assurance successor also retains its earlier preservation records and `H44-OFF-TREE.json`; the published archive manifest is additive provenance. This merge does not certify archive availability on the successor VM, accept unfinished drafts or close any original obligation.
+
+### H107 headline witness CI safety net
+
+The library CI job now runs `kernel.py --all --fresh` with serial threads after
+cache restoration. It elaborates every private H28 witness module, including
+Families' actual Main.compiler_correct, compiler_net and compiler_checked
+applications. Any dependency or elaboration failure fails the step. Witnesses
+and check.py are unchanged. Finder and skeptic accepted the wiring read-only.
+V2 headlines are not present in the inspected tree; include their witness
+applications when V14 publishes them, without dropping existing coverage.
+
+Local validation subsequently passed at reviewed CI commit
+`e04e0b8e6cc8b15a28d51922a697112e6d19ee6c`: all 26 modules freshly elaborated
+in the coordinator-authorized owned worktree `/workspace/v17-witness`, using
+serial Lean and the unchanged 12 GiB address-space cap. All witness source
+hashes match the original checkout. Earlier prerequisite/permission failures
+remain preserved. The master-cache seed fell back after temporary staging
+reached its reserve; the successful build used existing artifacts through an
+owned cache view at `/tmp/v17-witness-owned/cache`, with new outputs in owned
+temporary storage. The original root-owned build tree was not repaired.
+
+The coordinator-published lane branch was verified at that same reviewed CI
+commit. Workflow dispatch no longer waits on a VM token: the coordinator will
+dispatch the published branch and return its run URL. That reference remains
+pending. The H107 evidence manifest pins successful and failed raw logs off git.
+This suite pass does not close the whole non-vacuity or V17 release assignment.

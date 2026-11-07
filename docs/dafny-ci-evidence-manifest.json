@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceParent": "82204fb1577a62336129f52c8af8cc5d4e25b3f5",
+  "archive": {
+    "path": "/workspace/dafny-parity-ci-20261106/ci-evidence.tar.gz",
+    "bytes": 66185,
+    "sha256": "f19ae6527ece88ba5e5ee0da5ddc91fa50901e752197d571755527f721ff2a90"
+  },
+  "reviewMember": "REVIEWS.md",
+  "sourceMember": "SOURCE-DRAFT.json",
+  "boundary": "CI digest-only is not full inventory/parity evidence. Failures retained; final committed clean checkout and hosted runner not yet observed. Mandatory parity gate unchanged and missing-input exit1 retained.",
+  "followup": {
+    "sourceHead": "520a60802",
+    "archive": {
+      "path": "/workspace/dafny-parity-ci-20261106/ci-followup-evidence.tar.gz",
+      "bytes": 16839,
+      "sha256": "c408ec4aea1c83dd764ff3f5a324a5fcb6ff8fd39349cedb41f2cff60bb81f44"
+    },
+    "boundary": "391pass1fail9skip cleancheckout failure retained; portable sibling expectation repaired and focusedextensionpasses. New committed cleanfullrun/hostedCI pending."
+  },
+  "exactHeadValidation": {
+    "head": "bf8cda11719d5cd3c1ed22901c3d8971280779b6",
+    "archive": {
+      "path": "/workspace/dafny-parity-ci-20261106/ci-exact-head-evidence.tar.gz",
+      "bytes": 37725,
+      "sha256": "2b87864f6f6b7807f0478c451b9dcce293081cfa0757d970272006546f5c9e25"
+    },
+    "fullInputNode": {
+      "pass": 399,
+      "skip": 2,
+      "fail": 0
+    },
+    "freshNode": {
+      "pass": 392,
+      "skip": 9,
+      "fail": 0
+    },
+    "freshMode": "digest-only, strict missing-input gates exit1",
+    "parity": {
+      "exit": 1,
+      "passed": 0,
+      "rows": 486
+    },
+    "hostedGitHubRunner": "not observed"
+  }
+}

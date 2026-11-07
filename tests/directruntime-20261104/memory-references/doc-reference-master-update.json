@@ -1,0 +1,53 @@
+{
+  "guardedRegression": "Global documentation failures must reflect the current master merge rather than a stale four-reference report.",
+  "request": "Update existing documentation routing for the two new references only;preserve checker policy,source semantics and test regression purpose. Do not duplicate the three retained owner requests.",
+  "checkedHead": "68fd840058cbff27fbbab34834af6737d1fbf8b9",
+  "originMaster": "e8247d9277190b71488387dac594e82b2b191942",
+  "gate": "bash scripts/check-doc-paths.sh",
+  "exit": 1,
+  "newFailures": [
+    {
+      "file": "docs/feature-work/h62-1-infer-helpers.md",
+      "sha256": "05c8ba272e11ac4fdaa0e17db641060354d4e7f571b5148211ad61d8a5b27ab1",
+      "reference": "Solidity/Source/InferHelpers.lean"
+    },
+    {
+      "file": "scripts/h62/item2/audit-abi-world/test_census.py",
+      "sha256": "c176a73b104fdb27674b8cfaee39fc240cc60bfe9da116b80358f8a778be67f4",
+      "reference": "Backend/A.lean"
+    }
+  ],
+  "resolvedPriorFailures": [
+    {
+      "file": "tests/h62/item1/packet-panic/H71-CANDIDATE.md",
+      "reference": "Solidity/Backend/PrimitivePackets/PanicBytes.lean"
+    }
+  ],
+  "allCurrentFailures": [
+    {
+      "file": "docs/feature-work/h62-1-infer-helpers.md",
+      "sha256": "05c8ba272e11ac4fdaa0e17db641060354d4e7f571b5148211ad61d8a5b27ab1",
+      "reference": "Solidity/Source/InferHelpers.lean"
+    },
+    {
+      "file": "docs/feature-work/h62-6-migrate-theory.md",
+      "sha256": "366656f47682347b38728ab348ecaa5d3fcaf41b0de63398b57e2cdae7d6ad83",
+      "reference": "StringApiWitness.original-unproved.lean"
+    },
+    {
+      "file": "scripts/h62/item2/audit-abi-world/test_census.py",
+      "sha256": "c176a73b104fdb27674b8cfaee39fc240cc60bfe9da116b80358f8a778be67f4",
+      "reference": "Backend/A.lean"
+    },
+    {
+      "file": "tests/h62/item4/generic-structuredflow/registration.md",
+      "sha256": "9c4a839c56c39b29ba90335892eeb9713a3a133d91a7697b749358d7d55e8a21",
+      "reference": "Backend/StructuredFlow/GenericMapped.lean"
+    },
+    {
+      "file": "tests/h62/item4/generic-structuredflow/registration.md",
+      "sha256": "9c4a839c56c39b29ba90335892eeb9713a3a133d91a7697b749358d7d55e8a21",
+      "reference": "Solidity/Backend/StructuredFlow/GenericMapped.lean"
+    }
+  ]
+}
