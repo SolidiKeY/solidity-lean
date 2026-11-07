@@ -1,0 +1,116 @@
+{
+  "status": "NAME_RECONCILIATION_ONLY",
+  "summary": {
+    "status": "NAME_RECONCILIATION_ONLY",
+    "complete_interface_inventory": false,
+    "new_witnesses": 0,
+    "statement_fidelity_verified": 0,
+    "kernel_scope_total": 642,
+    "kernel_role_counts": {
+      "theorem": 436,
+      "other_declaration": 191,
+      "proof_definition": 7,
+      "structure_carrier": 2,
+      "predicate_definition": 6
+    },
+    "lexical_input_total": 7951,
+    "lexical_scope_total": 207,
+    "lexical_outside_scope": 7744,
+    "name_status_counts": {
+      "PUBLIC_NAME_CANDIDATE": 207
+    },
+    "boundary": "Name/provenance candidates only. No parsed-type equivalence, feasible joint premises, owner acceptance or current-source validation follows.",
+    "inputs": [
+      {
+        "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/census/census.json",
+        "bytes": 8189593,
+        "sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03"
+      },
+      {
+        "path": "/workspace/v08-world-lowering-evidence/observation-kernel-census-20261107/inventory.json",
+        "bytes": 7387358,
+        "sha256": "7ee4da89fc28a8121e00a2b44ac85347f475aa69190edeff22ca09f60d3854ca"
+      },
+      {
+        "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+        "bytes": 31717789,
+        "sha256": "2440a4983aee1f3e582cbf3961cdc12f68dbfbcefeb60f33317235675ac55a3a"
+      }
+    ],
+    "modules": [
+      "Solidity.Lowering.V08.AbiObservations",
+      "Solidity.Lowering.V08.CallableMetadata",
+      "Solidity.Lowering.V08.CallableReflection",
+      "Solidity.Lowering.V08.ConditionalCallable",
+      "Solidity.Lowering.V08.CryptoObservations",
+      "Solidity.Lowering.V08.DeclarationRoles",
+      "Solidity.Lowering.V08.InheritedMetadata",
+      "Solidity.Lowering.V08.IntegerCallable",
+      "Solidity.Lowering.V08.LocalCallableTransport",
+      "Solidity.Lowering.V08.PayableMetadata",
+      "Solidity.Lowering.V08.PureArgumentCallable",
+      "Solidity.Lowering.V08.ScalarCallableTransport",
+      "Solidity.Lowering.V08.SelectorObservations",
+      "Solidity.Lowering.V08.TupleCallable",
+      "Solidity.Lowering.V08.WordCastCallable",
+      "Solidity.Lowering.V08.WorldCatalogueTransport"
+    ],
+    "checked_head": "92d5a337d769baaaaf263832b8649fea73fc2df2",
+    "kernel_only_pending_count": 435
+  },
+  "operation_head_qualification": "Head records metadata invocation only; prior kernel snapshots retain their own checked sources/heads. No current-source or kernel revalidation is claimed.",
+  "reproduction_command": [
+    "python3",
+    "-B",
+    "/workspace/v08-world-lowering-evidence/v08-name-reconciliation-20261107/reproduce.py",
+    "/workspace/v08-world-lowering-published",
+    "<new-off-Git-output.json>"
+  ],
+  "complete_interface_inventory": false,
+  "new_witnesses": 0,
+  "statement_fidelity_verified": 0,
+  "limitations": [
+    "Exact public names/private normalization are name candidates only, not elaborated-type equivalence.",
+    "Kernel type digests check captured-string consistency, not independent kernel provenance.",
+    "Owner hints remain UNCONFIRMED; kernel-only generated/support records remain PENDING.",
+    "API/input pinning is not a complete Python import-closure attestation."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/v08-name-reconciliation-20261107/reconciliation.json",
+      "bytes": 500166,
+      "sha256": "1865e9c974a5caaf83284406b34970aa766ba52a8ac07fde37b6df7b47569acb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/v08-name-reconciliation-20261107/reproduce-config.json",
+      "bytes": 841,
+      "sha256": "3fdfbe71e6c24bf7e8fe1d99c77d5c8136da3cece37f8e1fa17d33669bc06fd9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/v08-name-reconciliation-20261107/reproduce.py",
+      "bytes": 1211,
+      "sha256": "455dab16d0432013f11b2cc999c02b84f2adcc961e1e213ba1715ea0f61e0d68"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/v08-name-reconciliation-20261107/reproduced-normal.json",
+      "bytes": 500166,
+      "sha256": "1865e9c974a5caaf83284406b34970aa766ba52a8ac07fde37b6df7b47569acb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/v08-name-reconciliation-20261107/reproduced-optimized.json",
+      "bytes": 500166,
+      "sha256": "1865e9c974a5caaf83284406b34970aa766ba52a8ac07fde37b6df7b47569acb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/v08-name-reconciliation-20261107/reproduction-validation.json",
+      "bytes": 179,
+      "sha256": "07159660a50fca04a9e4829d071eac4d50d429a71609fb20a9971f38bf438034"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/v08-name-reconciliation-20261107/summary.json",
+      "bytes": 2228,
+      "sha256": "5723a89d28dd1c07a961f3f5b87602b6c432fb81beb30696970b59b21896b4e1"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic verified all three input hashes, exact accounting, pending statuses and identical saved reproduction outputs; no findings, no reviewer scripts/tests/Lean."
+}
