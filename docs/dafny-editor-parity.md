@@ -1910,3 +1910,177 @@ The refreshed lake-cache archive is1992585807bytes, SHA2564d2131484c664a99e5a88f
 The unchanged annotated native F6 replay at8eaa868a2 exits0; both primary/dependency files equal the retained failing fixture byte-for-byte (primary SHA256c630876ec2dab68e8de973251e6841adbaaf86ed6af44a8cdb1690155cc5bc0b), actual two-unit compiler artifact is source-bound, and owned survivors remaining[]. This is compiler-only native UI evidence, not kernel/EVM/runtime equivalence. The compiled public accessor/equality check and independent comparison to the original private computation both pass; their transitive axiom sets are exactly the same standard propext/Classical.choice/Quot.sound set, not an axiom-free claim.
 
 The serial Import-dependent gate builds Import, Testing, CounterexampleMetadataV1 and other selected frontend dependents successfully, then remains FAIL at154s on a no-build prerequisite readback for Tools.DirectRuntime. Exact missing prerequisite is Frontend.ExecutableAst.Shared.Translate (source SHA25635d64218f2156a209f0d9873e7c55e9568de9e1393304ebe02faa50a2928fcd3); it is outside the Import-dependent edit scope and was not cold-built. No resource stop or survivor occurred. The H126 evidence manifest retains all actual successes/failures, scopes and cache receipts. All old489 row IDs/order and frozen270 persist; one additive original custom-build/adversarial CRLF admission scenario makes490 obligations, still partial until full evidence and both judges. OT-PERF-SLOW remains the prerequisite for the original Derived17 timed replay; no three answered questions are re-filed.
+
+
+### Handoffs — exact canonical clause ledger (2026-11-07)
+
+At ee6681e6247c6f31e59e6eeb19233648739a5544, `CounterexampleMetadataV1` gains additive `CanonicalImportInputV1`, `CanonicalClauseV1`, `canonicalClauseV1?`, and its forget theorem. The carrier forwards every H126 reader argument and retains exact contract/function/clause equations plus source ID, model name and source signature. It preserves reader errors and refuses unadmitted/synthetic/foreign rows and absent indices. All old declarations/signatures remain unchanged. This is not source-span or failed-postcondition attribution; valid different clause indices intentionally denote different clauses. Arbitrary input ownership and canonical-to-source/typed-failure correspondence remain required.
+
+The isolated module build exits0 under the existing12GiB/no-swap/12GiB-headroom/serial-j1 supervisor with no survivors. Real compiler fixture controls invoke the original opt-in importer and capture the pre-import environment; actual f0/sourceId11 yields `(ensures, \result == 1)`. Wrong source ID/name/signature, unadmitted/synthetic rows and missing function/clause ordinals refuse; reader errors remain exact. Initial wrong contract-name and hygienic quoted-name control failures are retained, as is the successful post-import-environment intermediate control. Per-file diagnostics report0errors but supervisor1 retains two retired helpers. No shutdown/full-gate success is inferred.
+
+Independent read-only finder/skeptic reviews find no concrete defect; skeptic's environment caveat prompted the stronger pre-import control. Constructor/duplicate-clause/normalization-sensitive coverage and actual retained failed candidate/span correspondence remain open. The [checksum-bound manifest](dafny-canonical-ledger-evidence-manifest.json) keeps bulk/control/log bytes off Git. No inventory status, row, judge prompt or budget changes:490 obligations and frozen270 remain unchanged. Final full/TestSuite/timed strict, positioned metadata, paired native lifecycle/performance/scaling/macOS and both original per-row judgments remain unfinished. H126 questions are answered; module-times OT-PERF-SLOW, unmatched Shared.Translate cache prerequisite and official solc0.8.38 HTTP403 remain waits, not waivers.
+
+
+### Handoffs — captured importer and retained candidate join (2026-11-07)
+
+At source21801f28b, the opt-in `solc_import_origins_v1` captures the actual pre-import Environment, fixed original options, admitted compilation/provenance/compiler code, source names and full normalization inputs in a private process-local environment extension. It still invokes the unchanged legacy importer and emits the original fixture pin; no legacy Import/proof/report declaration changes. New `importedCanonicalClauseV1?` and `retainedCanonicalClauseV1?` accept actual namespace/table indices and exact fixture rather than arbitrary reader contexts. The latter reuses the retained exact-goal candidate ingress without another search. `retainedCanonicalClauseV1_forget` preserves the original proof/report. Captures deliberately do not serialize; a real imported module with its retained theorem refuses reconstruction from a later Environment. Query cost/retention remains unbenchmarked.
+
+Actual admitted Origins.bad controls retain the same proof and candidate expressions, canonical ensures false and standard propext/Classical.choice/Quot.sound audit. Foreign AST/source/hash/certificate/function/ordinal controls and distinct duplicate indices remain. Additional pinned-compiler controls cover an explicit constructor and actual parameter shadowing: raw `\result == amount` becomes canonical `\result == amount_`; wrong spans and crossed constructor/function indices refuse. No selected clause is certified as the failing postcondition and no span is published. Raw origins, exact canonical data and typed aggregate failure remain distinct.
+
+Q-REL-CANONICAL-LEDGER-01 asks whether the producer may factor the local Contract.lean normalization into a shared ordinal-carrying companion with output/forget preservation, or leave that file untouched and continue a proof over its existing full computation. H126's final-reader wrapper alone exposes no local per-clause transformation ledger. No protected producer edit or assumed answer occurred. The three H126 questions remain answered, not re-filed.
+
+The separate owned MCP launcher translates the bridge's TERM to the pinned package's existing interrupt/finally path; shared bridge/package bytes are unchanged. Finder caught repeated TERM interrupting cleanup; skeptic/finder caught unbounded fixture close waits. The genuine before-repair control retains3pass1fail; final4controls pass with idempotent TERM,1000ms accepted closure, confirmed forced cleanup after deadline and exact Linux birth checks. Changed actual per-file diagnostics0errors/supervisor0/retired[] are distinct from injected tests and do not establish the old failure's historical cause. Previous diagnostic supervisor1 and all STOP/failure receipts are untouched. Module build and real controls pass under the unchanged12GiB/no-swap/12GiB-headroom/serial-j1 guard.
+
+The [H44 manifest](dafny-ingress-link-evidence-manifest.json) binds source/control/raw logs off Git. Read-only existing cache/index inspection finds no matching current Shared.Translate trace outputs in the verified pack; it does not resolve the source-matched dependency wait and repeats no failed --no-build or unrelated cold build. Remaining full proof/timed gates, OT-PERF-SLOW, browser+32.20percent STOP, positioned metadata, paired rendered/lifecycle/performance/scaling/macOS and both original per-row judges remain unfinished. All490 ordered rows/frozen270 are unchanged; no row or goal completed, no integration or goal mutation.
+
+
+### Handoffs — authorized shared normalization and ordinal companion (2026-11-07)
+
+Q-REL-CANONICAL-LEDGER-01 is answered by the incoming user authorization and recorded in dafny-human-decisions.json. Source e8c512eb8 extracts the original constant→enum resolution and parameter/return rewrite into one `normalizeFunctionSpecV1` implementation. `readContract` consumes its resolved/results projections with the original state, binding lists and callback; no duplicated implementation, signature/default/budget change or altered admission/error handling. `normalizeFunctionSpecV1_resolved` and `_results` are rfl equalities to the exact old local expressions. `FunctionSpecNormalizationV1.indexed` numbers all supplied clauses before filtering; its forget and length theorems preserve every original result/error. New proof axioms are only existing propext, and indexed_forget has none.
+
+Per-file diagnostics0errors/supervisor0 and targeted Contract→CounterexampleMetadataV1 rebuild0 use the unchanged12GiB/no-swap/12GiB-headroom/serial-j1 guard with no survivors. The legacy compiled-reader capture confirms helper-loaded=false; after rebuilding helper-loaded=true, all computational fields for Parity, Origins and BindingControls are byte-identical. ScopeScan's proposition field is omitted by proof irrelevance while every feature/diagnostic is retained. This is three-fixture regression evidence, not a whole-importer/compiler correctness theorem. Generic callback controls retain full ordinals, duplicate clauses, original rewrite errors, lexical fields and constant normalization. The initial missing-Repr serializer failure and ambiguous Except-pattern failure remain archived; neither was forced/admitted into a passing proof.
+
+Unchanged admitted retained-candidate/source-negative controls and constructor/shadowing/module-boundary controls pass again in new output directories; original receipts remain untouched. Raw amount versus canonical amount_ remains explicit. Independent read-only finder/skeptic find no equivalence defect and distinguish normalization ordinals from source spans or typed failed-postcondition indices. The [H44 manifest](dafny-normalization-helper-evidence-manifest.json) binds all raw controls/logs off Git.
+
+The local record is currently discarded by the old reader and is not yet transported through the private Import computation. Q-REL-LEDGER-TRANSPORT-01 asks whether those reader/forwarding bodies may be factored into shared internals and versioned ledger-returning companions with forget/equality preservation; H126's Import wrapper-only constraint is not silently expanded. No private Import body change, guessed source mapping, selected-clause failure claim or span publication occurred. All490 ordered rows/frozen270 are unchanged; full metadata/positioned traces, paired rendered/lifecycle/performance/scaling/macOS evidence, original paired row judges and final proof/timing gates remain unfinished. Existing timing/browser STOPs and resource/cache/compiler dependencies are retained; no unchanged stopped workload retried, integration or goal mutation.
+
+
+### Handoffs — native verification limit defaults/configuration (2026-11-07)
+
+The new focused existing-runner suite removes only its own inherited fixed overrides; all other profiles retain their explicitly configured values. Actual native defaults are local600000milliseconds and Dafny raw"20"seconds. No production default, positive-minimum,0/infinite policy, proof profile or budget changes. Finite settings2000/3000ms versus2/3seconds are recorded separately with raw effective/inspect values, source/hash/session, actual initialize/open/hover, process birth/session, exit/close order, and restored raw/API settings. Local automatic verification remains never; actual pre-cancelled service request refuses before a hover wire request. Cross-config queries are observed races, not full certified stale-result tests.
+
+Three bounded paired Linux captures retain every attempt. First source19fe708c1 run fails after VSCode MarkdownString getters become{} across JSON; sourcee7cafdb8c snapshots actual getters (never wire substitutes), and source9dd5b7dec adds actual live image hashes. Local then passes the partial observation validator; Dafny remains a nonpass: settings API2/3 but cached initial serverOptions launch --verification-time-limit:20 on every restart, and strict close-before-next-spawn fails. Pinned extension startClientAndWaitForVersion reuses this.client; no upstream patch or expectation rewrite was made. Close timing alone is not proof of old-process liveness. Both targets retire with remaining[] under original4GiB native/12GiB reserve/60s operation/300s process guards. No local proof, unlimited run, stopped browser benchmark or timed strict replay occurred.
+
+Finder/skeptic caught false acceptance of empty hover/wrong versions/foreign opens, missing or unenforced deadlines, late success, incomplete image coverage and trusted-reference wiring. Ten injected controls now pass, including actual aggregate wiring and overdue-clock/held-provider cases; first review failure remains. Final strict validator812016dcd revalidates already captured complete12Dafny/2local image facts against unchanged pinned source files, preserving the same four Dafny nonpasses. This supplemental offline context is not a new native run; original receipts remain untouched. The [H44 manifest](dafny-time-limit-evidence-manifest.json) restores raw API/LSP/DOM/AX/PNG/process/config/failure evidence at ignored repo-relative paths. Source/artifact, API/rendered, foreign verifier/kernel/EVM and unlimited/timed enforcement boundaries remain explicit.
+
+The original time-limit row becomes partial and one additive original lifecycle/adversarial scenario is appended; all prior490 IDs/order and frozen270 persist. No row completed or paired judge invented. Missing rendered-settings/macOS/full cancellation/stale/resource/proof-time enforcement/performance/scaling matrices and both original per-row judges remain. Q-REL-LEDGER-TRANSPORT-01 is now answered and recorded: shared reader/private forwarding and versioned ledger companions are authorized under exact preservation/no-copy/no-budget-change terms; further refactors on those terms are pre-approved and this family must not be re-filed. Implementation remains queued, with no Import body edit in this editor-only checkpoint. Original proof gates, OT-PERF-SLOW, Shared.Translate exact-source cache wait, optional compiler403 and browser+32.20percent STOP remain; goal/integration unchanged.
+
+
+### Handoffs — H71 storage certification owner intake (2026-11-07)
+
+The [owner response](dafny-storage-counterexample-owner-response.json) identifies the current source-search boundary without extending it. SourceCounterexample.lean matches the ticket's exact bcd3dd1b... API hash; refuteSource? refuses nonprimitive C.vars before enumeration and V1 delegates unchanged. Storage-array heap/alias/copy counterexample enumeration is outside that producer profile; none is not a validity proof, certificate or exclusion. No retained theorem/report is manufactured. The requester commit08f3769, consumer/ticket files and four exact fixtures are absent here, so exact-case imports/refusals were not independently reproduced. Authenticated bytes/bundle are a read-only prerequisite; no unauthorized fetch/publication or producer/scope/budget change occurred. Requester-reported four ordinary results remain pending (not independently reproduced locally); intrinsic negative controls are not substituted. The extractor may check an auxiliary values-equation proof but creates no new exact-goal refutation.
+
+
+H71 intake recovery: exact consumer08f3769 was subsequently fetched object-only from existing origin with all refs and FETCH_HEAD byte-identical. Consumer a2cb12e8... and ticket baff225e... hashes verify in the saved intake. The earlier commit-absence observation is historical/resolved; four exact JSON fixtures remain absent from that commit and examined bulk-source/history objects. Recovered consumer deliberately asserts candidate none and retained theorem absence, rather than persisting a successful refutation. It is not executed without its original inputs. The owner response is updated; primitive/profile/source proof boundaries remain unchanged and no exact-case diagnosis is invented.
+
+### Target-bound time-limit evidence validation (2026-11-07)
+
+The aggregate and native scenario validators now require the observation target to match the launcher target before applying target-specific checks. This closes the reviewed local-receipt-in-Dafny-result bypass without changing native outcomes, deadlines, image requirements or the parity gate. JSON-roundtrip controls cover both substitutions and matching-target positive cases. The new regression failed before repair; the focused suite then passed 11/11. Read-only ui_finder and ui_skeptic found no remaining concrete defect. Review and failure details: `/workspace/dafny-target-binding-20261107/REVIEWS.json`. These are regression/source reviews, not paired per-row judgments; full parity remains unfinished.
+
+### Actual admission-ledger transport (2026-11-07)
+
+The authorized shared reader now returns the existing `SolcContract` plus normalization rows captured at the original function site. Legacy `readContract` and admitted-reader signatures/defaults remain projection wrappers; kernel-checked forget equalities and a historical-source comparison cover the shared computation. Admission rewriting/scanning callbacks are forwarded once through the same private core. The opt-in importer records its actual pre-import environment, complete arguments, fixture bytes and exact result. Metadata consumers use that stored result rather than reconstructing context or rerunning normalization.
+
+New interfaces: `readContractWithNormalizationV1`, `FunctionNormalizationRowV1`, `readImportedContractWithNormalizationV1`, `ImportNormalizationContextV1`, `ImportedNormalizationCaptureV1`, `requestImportNormalizationV1`, `importedNormalizationCaptureV1?`, `CanonicalImportInputV1.ofAdmission`, and `importedCanonicalSourceClauseV1?`. The source carrier retains admission-dependent context, contract/owner equations, full raw/canonical-table equations and exact canonical-index→raw-ordinal→source lookup. Duplicate clause text never selects a source location. This is correspondence, not selected-postcondition failure. The retained proof candidate remains unchanged; no second search is used by metadata recovery and no failing span is published.
+
+Bounded real compiler/import controls link twelve clauses across the unchanged CRLF Origins fixture and additive pinned0.8.34 constructor/renamed-local/constant/duplicate fixture. Wrong spans, ordinals, source bytes/names, malformed AST and unsupported block-comment layouts refuse. Required exact clause multiplicities/refusals and negative coverage controls prevent silent scenario omission. Existing full-goal `bad` counterexamples are retained and axiom-audited, separately from source correspondence. New equality and retained-theorem axioms remain propext/Classical.choice/Quot.sound. Finder and skeptic found and repaired a carrier-linkage gap and optional-control-coverage gap; final read-only reviews found no concrete issue. They are not paired row judgments.
+
+The admission-ledger evidence is archived privately at `SolidiKeY/solidity-lean-coord@616b94a5446df63086036407104cc593cb74bc35`, under `evidence/solidity-dafny-20261105/dafny-parity/dafny-ledger-transport-20261107/` (H145). Initial failures remain archived. MCP bridge stop leaves helpers; explicit birth-owned cleanup records and retires them before supervisor completion, with no survivor-guard relaxation. Systemd aggregate scope remains absent; original bounded fallback/resource guards remain. Small targeted checks do not establish the full performance matrix. All491 obligations and frozen270 remain; whole parity, typed selected-failure attribution, rendered/native/macOS/performance/scaling matrices, final library/TestSuite/timed gates and both independent judges per row remain unfinished. No integration, goal mutation or stopped-workload replay.
+
+
+### Typed selected-postcondition foundation
+
+The authorized shared `specPiecesWithContextV1`, `specModalWithContextV1` and
+`specObligationWithContextV1` computations retain the actual typed post context,
+named output context and clause boundaries. Legacy entry points project the
+original results; each companion exposes a forget equality. Existing source
+admission, normalization, signatures and budgets remain unchanged.
+
+`Fml.retainedFailedPostSlotV1_of_true` connects a checked numeric post slot in
+the exact retained typed formula to a successful typed execution and a false
+clause at the same candidate. The split count is explicit; this is not a
+source-clause identity. Named-clause witnesses additionally require exact
+terminal-slot/context equality.
+
+Source span publication remains unavailable. `SpecExpr.fml` and other existing
+source compiler helpers are opaque partial definitions: native execution alone
+cannot supply their kernel equality. The experimental metadata diagnostic
+refuses at that boundary. Q-REL-PARTIAL-COMPILER-01 asks about a separately
+reviewed producer repair; it does not reopen the answered reader/context
+factoring authorizations. No located diagnostic, positioned trace, completed
+parity row or original final-gate pass follows from this foundation. New
+receipts and reviews are kept in the private evidence repository under H145.
+
+
+### Native contribution-menu lifecycle
+
+The existing runner now accepts a bounded `contribution-menus` suite. It opens
+native context menus with mouse input and captures the source editor, unrelated
+plaintext editor, untitled editor, source-tab context and restored source editor
+for each pinned target. It records ordered labels, raw disabled attributes,
+geometry, source/session ownership and before/after AX/DOM/PNG endpoints. It
+invokes no product build/run/test/verification/trace actions. Preparation keeps
+the original three-second deadline; failed captures retain their event audit.
+
+The paired Linux observation retains differences: local verification/status
+actions and grouping differ; Dafny offers Copy trace; Dafny's untitled submenu
+is visible while the local file-scheme guard suppresses it. No predicate was
+weakened to erase those differences. The tab phase observes a different native
+context, not an isolated editorTextFocus proof. Untrusted-window and macOS
+coverage, raster/ABA guarantees, full action lifecycle and both independent row
+judgments remain missing. These menu rows stay partial. Evidence and failed
+launch receipts remain off branch under H145.
+
+
+### Authorized kernel-checking inventory entries
+
+The shared trust inventory now records exactly the two reviewed
+`CounterexampleMetadataV1` sites that force `debug.skipKernelTC=false`: the
+retained-certificate kernel check and the diagnostic command scope. The checker,
+axiom policy, kernel ceiling and exclusions are unchanged. The separately
+authorized total typed-source compiler refactor remains subject to exact
+interface/behavior preservation, kernel correspondence and finder/skeptic review.
+
+
+### Total typed-source compiler prerequisite
+
+The authorized `SurfaceSpec` refactor replaces opaque partial recursion with
+structurally terminating recursion in `SpecExpr.memPath`, `path`, `term`,
+`termPair`, `read` and `fml`, including the generated `fml.iff` and `fml.cond`
+helpers. Operational branches, signatures, defaults, error order and admission
+conditions are unchanged; termination uses expression size, without fuel.
+`SpecExpr.fml_boolV1` now gives a kernel-checkable literal equation.
+
+The fixed compiler regression fixture is
+`vscode/parity/typed-spec-compiler-controls.lean`: 39 source expressions in
+three contexts cover sorting, binding, old-state use, membership and refusals.
+All 117 old/new operational observations match byte-for-byte. This finite
+comparison is not a universal theorem about the old opaque implementation.
+The separate closed-proof matrix checks 96 cases and retains 21 failures with
+an overall nonzero exit; a genuine literal proof presented at the wrong
+typed result is rejected. Native evaluation proposes data only; proof
+acceptance requires synchronous kernel checking and the standard axiom audit.
+
+Read-only finder and skeptic reviews found no changed branch, refusal, budget
+or kernel-check bypass. The targeted compiler build and per-file diagnostics
+are distinct from the dependent metadata build, which timed out at its
+unchanged 300-second bound. That failed attempt remains retained. Selected
+failed-clause/source correspondence, span publication, full dependent gates
+and all parity judgments remain unfinished. Detailed evidence stays off the
+code branch under H145.
+
+
+### Isolated compiler-equation control repair
+
+The control fixture now proves the existing parser, named-context lookup,
+unsigned-sort distinction, literal range, membership and missing old-state
+equations explicitly. All 39 expressions and three contexts, their order,
+expected observations and genuine wrong-literal rejection are unchanged.
+Helpers are generic over the intrinsic contract/context where applicable.
+The numeric patterns use the actual Nat-to-Int coercion emitted by the source
+compiler; lookup equations apply before dependent context names are rewritten.
+
+A second simplification pass had incorrectly rejected unchanged goals before
+the existing reflexivity fallback. It now leaves those goals for mandatory
+closure. Helper and generated declarations are checked synchronously with
+`debug.skipKernelTC=false`; closedness, the 100000 kernel ceiling and
+standard-only axiom audit remain enforced. No shared compiler, producer or
+trust-inventory declaration changes in this increment.
+
+Finder and skeptic found no soundness or budget issue; their wording finding
+was repaired to distinguish a missing old storage snapshot binding from a
+memory heap. Changed-family smoke checks pass; the complete matrix must be
+regenerated at the committed head, retaining the original 96/21 failed run.
+Compiler-output equations do not establish selected-clause failure at a
+retained candidate, source-span attribution, rendered parity or EVM behavior.
+Publication remains fail-closed and all original parity/final gates remain.

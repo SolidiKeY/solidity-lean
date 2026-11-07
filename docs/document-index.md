@@ -595,6 +595,7 @@ and open obligations. Test proposals remain proposals until applied.
 - [tests/directruntime-20261104/control-tuples/module-map-proposal.md](../tests/directruntime-20261104/control-tuples/module-map-proposal.md)
 - [tests/directruntime-20261104/native-browser/environment/scripts/README.md](../tests/directruntime-20261104/native-browser/environment/scripts/README.md)
 - [tests/directruntime-20261104/native-browser/h109/RUNNER-DESIGN.md](../tests/directruntime-20261104/native-browser/h109/RUNNER-DESIGN.md)
+- [tests/directruntime-20261104/native-browser/readbounds/README.md](../tests/directruntime-20261104/native-browser/readbounds/README.md)
 - [tests/editor-parity/README.md](../tests/editor-parity/README.md)
 - [tests/editor-parity/baseline.md](../tests/editor-parity/baseline.md)
 - [tests/editor-parity/compiler-project-baseline.md](../tests/editor-parity/compiler-project-baseline.md)

@@ -2,7 +2,7 @@
 
 ## External evidence and coordinator intake
 
-Current exact V123/V124 payload publication: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. The current manifest is private and the loader pins this commit. Earlier preparation/pending-publication wording below is historical and superseded for these exact payloads; unrelated bulk retrieval and semantic acceptance remain pending.
+Historical exact V123/V124 payload publication: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. Those manifests remain private; the current loader pin and exact packet are specified in tests/h62/item2/audit-calculus/BULK-INPUTS.md. Earlier preparation/pending-publication wording below is historical and superseded for these exact payloads; unrelated bulk retrieval and semantic acceptance remain pending.
 
 Under H145, lane evidence indexes are archived in the [private coordination repository](https://github.com/SolidiKeY/solidity-lean-coord/tree/de649e9c9648443622f3fc35b24999c15ecfb27a/evidence/solidity-h28-sol-20261104/automation-benchmark/h145-code-evidence). The archive preserves 110 removed index files byte-for-byte, the current classification dataset and frozen census, and the prior sealed handoff. The default checker now reads its checksum manifest and exact payloads from immutable private Git objects as documented in tests/h62/item2/audit-calculus/BULK-INPUTS.md; historical verifier fixtures remain intact. Other bulk bytes referenced by those indexes stay on the VM and are not claimed privately retrieved. Historical statements below about committed evidence manifests describe earlier checkpoints; their indexes now live in the private archive.
 
@@ -2056,3 +2056,51 @@ This is proof-side finite-plan interpretation, not a new source statement, admit
 ## H145 pinned private input route
 
 The held V123 and current V124 exact payloads and checksum manifests are published privately: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. The default loader uses this immutable private Git packet through tests/h62/item2/audit-calculus/BULK-INPUTS.md, without VM-local fallback. This transport repair adds no witness or proof acceptance.
+
+## Runtime array-copy roles (V127)
+
+Guarded regression: dynamic memory-to-storage copying must retain actual memory headers/payloads, word/range bounds, stale-tail cleanup and source representation rather than implying unconditional compiler or physical-EVM adequacy.
+
+Complete frozen-selected Solidity/Evm/MemoryStorageCopyCode.lean and Solidity/Evm/MemoryStorageCopyLaws.lean:14 named declarations including six private helpers/identities. Frozen/adopted-master signatures match; prior1603 rows and owner map unchanged;1617 reviewed/3666 pending of5283;3806 confirmed owners/1477 unresolved. Zero fresh joint witnesses; no semantic owner guessed.
+
+The two-loop code reads the source header from memory and the previous destination length from storage. Exact run success needs n<W, base+1+n<=W, the actual encoded header and every live payload word. The proof handles n=0 at the upper memory boundary without reading a wrapped payload. Copy and stale-tail clear precede replacing the length. Machine updates preserve original caller stack, all memory, balances and environment within this symbolic model.
+
+Private setup helpers retain their own exact bounds: enterCopy and replaceLength need n<W and the header equality; enterClear needs the header equality but no explicit n<W. Four-pop cleanup restores its supplied machine. Final header replacement consumes both temporary base/destination entries and restores the original machine stack.
+
+Store laws distinguish length n<W, live prefix i<n, discarded tail n<=i<old length, and the complement of the entire typed dynamic-array footprint. No unbounded zeroing or arbitrary finite frame is inferred. ReprV excludes slot words from represented primitive payloads. The actual heap snapshot is primitive elements with an empty tail; private strip/overlay identities remain primitive-only.
+
+The final representation theorem needs full ArrayRepr (space, actual header and per-element representation) jointly with heap length<L, then represents the snapshot overlaid on any supplied old destination. This is conditional symbolic execution/representation, not a producer of whole compiler success, gas/fork/world or physical storage adequacy.
+
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changed; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 109856958e6df7a445c12b518c7da2d60a1d74af evidence/solidity-h28-sol-20261104/automation-benchmark/. Historical checkpoint V127 pinned array-copy-inputs-v127 at this commit. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; exact historical reproduction is documented in tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Typed byte-capture roles (V128)
+
+Guarded regression: computed image snapshots materialized as ghost typed heap objects must not be promoted into original-source callee execution or physical EVM allocation. Preserve byte/length bounds, heap identities and exact weakening.
+
+Complete frozen-selected Solidity/Evm/TryByteCapture.lean:11 named signatures match frozen/adopted master. Prior1617 rows and owner map unchanged;1628 reviewed/3655 pending of5283;3806 confirmed owners/1477 unresolved. No semantic owner guessed; zero fresh joint witnesses.
+
+Typed UInt8 words roundtrip exactly and lie below256. The actual allocated bytesObj, read through the real HRef returned by the matching allocation, yields the original list under bs.length<2^256. Fresh identity equals the old heap length, old heap objects/alias identities are kept along prefix_append, and old locals are weakened along exactly that extension. Storage/net/transaction/self balance remain equal; heap and environment do change through allocation and weakening.
+
+bytesHalt sequences that existing capture with existing raw memory-revert semantics and returns the full typed THalt.ofData result, including empty normalization. snapshot_halt uses the actual computed FrameMem/ByteSpan snapshot, not desired bytes or a supplied halt equation, and retains the snapshot length bound. It is not the original-source callee run or a new admission/evaluation rule.
+
+Fresh capture cannot alias an old typed reference because old ids are below the old heap length. A boolean-array HRef in the extended heap cannot name the appended bytes object because its indexed heap type disagrees. Neither fact establishes physical memory-address separation outside this intrinsic model.
+
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changed; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 4f8722f12dae4f516332d892b025def2ca09fec9 evidence/solidity-h28-sol-20261104/automation-benchmark/. Historical checkpoint V128 pinned byte-capture-inputs-v128 at this commit. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; exact historical reproduction is documented in tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Finite byte-image roles (V129)
+
+Guarded regression: finite side-image representation capacity and carried frame labels must not become gas/fuel limits, admitted EVM operations or unproved invocation coherence. Empty slices perform no offset validation or read.
+
+Complete frozen-selected Solidity/Evm/TryByteImage.lean:nine named signatures match frozen/adopted master. Prior1628 rows and owner map unchanged;1637 reviewed/3646 pending of5283;3806 confirmed owners/1477 unresolved. No semantic owner guessed; zero fresh joint witnesses.
+
+FrameMem carries an actual intrinsic state and FrameKey, a ScalarFrame proof excluding typed memory locals, aligned capacity, bounded data, resident high-water bound and zero-above-resident property. FrameKey keeps invocation/depth/pipeline/declaration/self/sender/value fields, but this file proves no coherence between those labels and an actual call, compiler or state transaction. Heap indices are not reindexed by this side-image.
+
+WordSpan retains a natural offset+32<=capacity bound. store32 selects exactly that unaligned interval, grows the recorded resident high-water mark and preserves complete logical state/key. The byte-at and outside laws retain their exact interval membership/negation. overlap_last needs only membership in the second interval, not a separate first-interval overlap premise. Big-endian byte indexing within a store lies in0..31.
+
+expandZero preserves every old bounded cell, not just the resident prefix, and zeros new capacity. Reserving representation capacity does not grow the resident high-water mark. snapshot copies in increasing address order without physical expansion or gas simulation. ByteSpan permits length0 independently of offset; nonempty slices retain the full natural range bound. snapshot_get requires a strict index bound; snapshot_empty reads and validates no offset.
+
+No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes; no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. Exact H145 input publication: evidence: 2e12be5dd064c423ea37c77418d0efcd587d802a evidence/solidity-h28-sol-20261104/automation-benchmark/. Checkpoint V129 pinned byte-image-inputs-v129 at this commit. The current loader pin is identified in tests/h62/item2/audit-calculus/BULK-INPUTS.md; historical packet reproduction is documented in tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## Actual historical packet verification (V130)
+
+Historical V127 and V128 loader references are checkpoint-specific; the current pin remains in tests/h62/item2/audit-calculus/BULK-INPUTS.md. The exact immutable manifests/payloads and a portable Git object proof pack are published privately: evidence: da3782f4f3a8d69f3c1a64ae59407a746c38a0cb evidence/solidity-h28-sol-20261104/automation-benchmark/. Use tests/h62/item2/audit-calculus/PACKET-VERIFICATION.md for no-remote reproduction. Actual comparisons establish V127 to V128 adds11 and V128 to V129 adds9 with all prior records, owners, frozen scope and stated provenance unchanged. This is packet continuity, not new semantic/witness/kernel acceptance.

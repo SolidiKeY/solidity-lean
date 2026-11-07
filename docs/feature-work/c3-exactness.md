@@ -1,7 +1,8 @@
 # SOL-C3: exact C3, graph identities and finite public fuel
 
-The merge and graph proof layers are implemented and kernel checked on base
-`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. Branch:
+The merge and graph proof layers are implemented. The original worker reported
+kernel checks on base `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`; this does not
+certify historical runs whose supporting exports are unavailable (H151 below). Branch:
 `codex/solidity-sol2-20261104/c3-exactness`; repository:
 `/workspace/solidity-lean`. Compiler fixtures pass; full final gates remain open;
 this document does not declare the frozen assignment complete.
@@ -494,3 +495,39 @@ A clean checkout without successor artifacts runs without missing-file errors;
 it retains original source/scope/snapshot refusals, now including upstream
 Source/WellFormed.lean pin drift. No pin or gate was changed to force success.
 Current acceptance remains open. See tests/sol-c3-exactness/EVIDENCE-AUTHORITY-HANDOFF.md.
+
+
+## H151: historical gaps are UNVERIFIABLE, not waits
+
+This section supersedes historical artifact-retrieval/cache-delivery waits in
+this document and previous handoffs. Missing old exports do not justify an
+indefinite wait or a passing result. Original claims remain unproven:
+
+- **C3-RETIREMENT-RUNTIME — UNVERIFIABLE.** The retired worker's external
+  retirement runtime/seal payload is unavailable in this workspace. Its reported
+  execution captures, interruption measurements and complete seal verification
+  cannot be independently established from the authenticated report alone.
+- **C3-HISTORICAL-CACHE — UNVERIFIABLE.** The old H41 cache export and its
+  content/delivery/import claims are not verifiable here. Neither the reported
+  digest nor a new successful diagnostic proves that historical export/import.
+
+These are documented gaps, removed from active waits. No original result is
+claimed and no old export is relabeled fresh. Available Git objects, verified
+frozen-assignment/stopped-head metadata, and records already preserved in the
+private evidence archive are not classified as lost. The acknowledged retired
+worker stays stopped; there is no request to recreate its VM or old workspace.
+
+Fresh validation is separate: current-head per-file MCP Audit diagnostics and
+all nine pinned compiler fixtures were regenerated successfully under existing
+resource/observation boundaries. They establish those new limited observations,
+not historical timing, seal, cache or full-runtime claims. Compiler observations
+are not a kernel compiler-equivalence theorem. Neither result substitutes for
+the original acceptance checker, changes its pin, or proves constructor-body
+execution. Fresh receipts belong to the private evidence repository under H145.
+
+Current policy/source-pin validation and present-day host-managed full-runtime
+readiness remain live prerequisites, not historical-evidence waits. H146/H147
+host warming is not claimed complete. Full acceptance remains unproven; no
+RUNTIME_GATE_PASS. No gate, statement, premise, exclusion, budget, axiom or
+producer definition is changed by documenting these gaps. Existing mathematical
+and backfill obligations are retained; known timing STOPs were not rerun.

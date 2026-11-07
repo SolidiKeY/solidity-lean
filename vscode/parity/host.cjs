@@ -22,7 +22,7 @@ async function run() {
   };
   const extension=vscode.extensions.getExtension(target==='dafny'?'dafny-lang.ide-vscode':'SolidiKeY.solidity-lean');
   assert.ok(extension,'target extension is installed');
-  const observation = observe(vscode,record,extension.extensionPath,config.recordProtocol?config.trace:null,config.workspace);
+  const observation = observe(vscode,record,extension.extensionPath,config.recordProtocol?config.trace:null,config.workspace,{captureServerArtifacts:config.suite==='verification-time-limit',artifactReferenceDirectory:target==='dafny'?require('node:path').dirname(config.dafnyExecutable):undefined});
   const heartbeat = [];
   let last = performance.now();
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);
@@ -105,7 +105,11 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(config.suite==='testing-symbols'){
+    if(config.suite==='contribution-menus'){
+      await scenario('native-contribution-menus',()=>require('./menu-lifecycle.cjs').run({vscode,config,events,sessionFor}));
+    }else if(config.suite==='verification-time-limit'){
+      await scenario('native-verification-time-limit',()=>require('./verification-limit.cjs').run({vscode,config,api,events,until}));
+    }else if(config.suite==='testing-symbols'){
       await scenario('native-compiler-testing',()=>require('./hierarchy-lifecycle.cjs').runRendered({vscode,config,api,events,until}));
     }else if(config.suite==='trace-unavailable'){
       await scenario('native-trace-unavailable',()=>require('./trace-presentation.cjs').runUnavailable({vscode,config,events,record,api,sessionFor,until}));
