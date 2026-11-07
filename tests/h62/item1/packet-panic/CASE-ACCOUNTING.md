@@ -114,7 +114,7 @@ The original census matches only unmodified line-start headers and omitted priva
 
 ## Same-line attribute candidate scan
 
-`attributed_header_scan.py` examines the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
+The earlier version of `attributed_header_scan.py` examined the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
 
 ## SignedSub Controls
 
@@ -143,3 +143,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## Masked panic lexical hints
 
 The prior census comment/string/attribute mask was moved without changing its function body into `lexical_mask.py` and reused by the occurrence mapper. Every raw hit remains in output with a heuristic `lexical_candidate` flag; comments, strings, attributes and common identifier suffix/prefix cases are masked or rejected as candidates. On the current tree, 45 raw hits are all flagged candidates and zero are unmapped. Columns are one-based Python Unicode code-point offsets, not necessarily byte or UTF-16 offsets. The mask is not Lean name resolution: quoted identifiers, unusual syntax and conservative suffix rules may misclassify or miss cases, and current-tree files outside the pinned window set remain unverified. No semantic, ownership or proof claim follows.
+
+## Expanded attribute candidate follow-up
+
+The attribute scanner now uses the shared offset-preserving mask with attribute masking disabled, then recognizes certain nested, multiple and multiline attributes before `theorem`, `lemma`, `def` and `abbrev` headers. It reports the declaration token location and whether the original census covers that exact file, line, kind and name. The original mask default remains unchanged. The 48 pinned files yield zero candidates in this heuristic scan. Comments and strings are masked, but unsupported modifiers, quoted identifiers, syntax contexts and line-ending behavior may still cause misses or false positives; columns are Unicode code-point offsets. Synthetic tests cover nested and multiple attributes, multiline modifiers, masked comments and strings, malformed attributes and location alignment. This is not Lean parsing, semantic completeness or a proof.

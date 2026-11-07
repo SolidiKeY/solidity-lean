@@ -1,7 +1,7 @@
 """Shared offset-preserving lexical mask; not a Lean parser."""
 import re
 
-def mask_comments_and_strings(source):
+def mask_comments_and_strings(source, mask_attributes=True):
     """Mask nested comments, line comments, and strings without shifting lines."""
     chars = list(source)
     i, depth, string = 0, 0, False
@@ -57,6 +57,8 @@ def mask_comments_and_strings(source):
     if depth or string:
         raise ValueError("unterminated comment or string")
     masked = "".join(chars)
+    if not mask_attributes:
+        return masked
     i = 0
     while i < len(masked):
         if masked[i:i + 2] != "@[":
