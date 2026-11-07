@@ -2010,3 +2010,41 @@ SelectedHeapBoundaryWitness.lean. This distinct upstream documentation finding
 is retained RED for owner routing. All85 audit Python tests and generated
 roots/fragments/whitespace checks pass. No full Lean/Bridge gate was run or
 claimed; the merge does not release the original PowerBounds STOP.
+
+
+### Two-way source-candidate accounting (2026-11-07)
+
+The generic metadata helper now recomputes supplied source-candidate edges from
+module, original theorem/user name and Unicode selection position; it checks
+signature self-integrity and the supplied edge names/count/status. Both sides
+are retained, including zero-edge source candidates and all kernel records.
+Shared targets are ambiguous even when each source's one-sided lookup is unique.
+Signature self-integrity is not source authenticity or statement correspondence.
+
+Applied to the sealed 150-module report, all 1,046 source candidates remain
+one-to-one positional candidates among 3,262 kernel records. The 2,216 unmatched
+records include 922 original theorems and 422 private original theorems; 189
+matched records are private. Edge conservation and reversed-input deterministic
+reproduction pass. No new source identity, instantiated type, global-premise
+classification, simultaneous witness or original conclusion is established.
+All original unmatched statements and ownership obligations remain visible.
+
+Four new regression tests cover both unmatched sides, private records,
+shared-target and shared-source ambiguity, non-theorem refusal, ordered deterministic output, detached snapshots,
+forged/stale signature or position edges and duplicate identities. All 89 audit
+tests pass. Recipe/helper/test/input/output hashes and the actual graph remain
+under `/workspace/parallel-20261103/executable-bytecode/source-candidate-graph`.
+
+Fetched and fast-forwarded to published master48ff6a2eb before this checkpoint;
+roots/fragments regenerated. No producer/interface/statement/axiom/exclusion
+change, Lean/prerequisite workload or budget extension. The original PowerBounds
+STOP, 703-source/190-core/37-Bridge census and proof/Source/native/gas/fork/full
+validation obligations remain unchanged. The known SelectedHeapBoundaryWitness
+documentation failure is retained without an unchanged rerun. The parked nine
+WordValidation domains remain uncredited pending Q-WV-SCOPE-01.
+
+Independent read-only finder/skeptic reviews pass, including the final fourth
+test: both ambiguity directions and schema-valid non-theorem refusal are covered.
+No reviewer edits, builds or server use. Trust reports zero findings; orphans,
+roots/fragments and whitespace pass. The final doc-only/report boundaries do
+not waive the retained documentation RED or full Lean/Bridge obligations.
