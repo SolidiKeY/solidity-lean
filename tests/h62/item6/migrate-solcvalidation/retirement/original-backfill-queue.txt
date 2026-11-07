@@ -1,1 +1,0 @@
-Use scanner/census, negative controls, isolated fixture proofs and reproduction/timing tooling within this exact scope while blocked. Account for all original declarations/cases, no padding. Continuous cleanup takes only newly unclaimed audit candidates via coordinator/registry; never steal scope.
