@@ -299,3 +299,12 @@ component exposes no next-worker or force-reset operation. Any recovery needs
 its own reviewed protocol and cannot infer kernel drain from Docker command
 success or current path absence alone. Failure diagnostics retain the last
 kernel predicate facts when available; missing historical facts remain unknown.
+
+
+The reserve collector registers every distinct worker ancestor as well as the
+controller lineage and worker leaf. Shared directory identities retain both
+roles and keep their outer-reserve obligation. Each worker registration must
+match the earlier pinned kernel observation; a changed ancestor cannot become
+a new unchecked baseline. Subsequent samples compare every registered group's
+constraints. This remains bounded observation, with the existing hidden-ancestor,
+inter-sample and unresolved-cleanup limitations.

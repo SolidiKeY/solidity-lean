@@ -3,6 +3,7 @@ Diagnostic relink only; no historical request/benchmark execution or runtime edi
 """
 from pathlib import Path
 import hashlib,json,os,re,subprocess,sys
+if not __debug__:raise RuntimeError("provenance validation requires Python assertions enabled")
 root=Path.cwd();old=root/".lake/native-browser-readbounds-6513/direct";out=Path(os.environ.get("NATIVE_BROWSER_SYMBOL_OUTPUT",str(root/".lake/native-browser-readbounds-6513/symbols")));out.mkdir(exist_ok=False)
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 m=json.loads((old/"build.json").read_text());assert sha(old/"direct.wasm")==m["wasm"]=="74df321799685267fa17b6441c0eb1b06c6f5e9ab6959d9deedafa716c2999c5"

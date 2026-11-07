@@ -61,6 +61,7 @@ class Pin:
 class DummyMonitor:
     def check(self):pass
     def add(self,*args):pass
+    def add_worker_chain(self,*args):pass
     def stop(self):pass
     def finish(self):self.check()
     def summary(self):return {'synthetic':True}
@@ -176,6 +177,47 @@ class Controls(unittest.TestCase):
             with self.assertRaisesRegex(m.ProbeError,'constraints or identity'):guard.sample()
         guard.failure='retained fatal breach'
         with self.assertRaisesRegex(m.ProbeError,'retained fatal'):guard.check()
+
+    def ancestor_monitor_fixture(self):
+        import threading
+        from types import SimpleNamespace
+        temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
+        root=Path(temp.name);paths=['/','/controller','/docker','/docker/worker']
+        descriptors={};values={}
+        for path in paths:
+            directory=root/path.lstrip('/');directory.mkdir(parents=True,exist_ok=True)
+            fd=os.open(directory,os.O_RDONLY|os.O_DIRECTORY);self.addCleanup(os.close,fd)
+            descriptors[path]=fd;values[os.fstat(fd).st_ino]={'memoryMaxBytes':16*1024**3,'hierarchyRootProfile':False}
+        constraints=lambda fd,**kwargs:copy.deepcopy(values[os.fstat(fd).st_ino])
+        manager=patch.object(m.resources,'constraints',side_effect=constraints);manager.start();self.addCleanup(manager.stop)
+        manager=patch.object(m.resources,'optional_root_read',return_value=1024);manager.start();self.addCleanup(manager.stop)
+        guard=object.__new__(m.ReserveMonitor);guard.lock=threading.RLock();guard.entries=[];guard.samples=[];guard.failure=None;guard.minimum=None
+        guard.done=threading.Event();guard.thread=None;guard.initial={'synthetic':True};self.addCleanup(guard.stop)
+        for path in ('/','/controller'):guard.add(path,descriptors[path],False)
+        chain=[(p,descriptors[p]) for p in ('/','/docker','/docker/worker')]
+        rows=[{'path':p,'identity':m.resources._identity(fd),'constraints':constraints(fd)} for p,fd in chain]
+        return guard,SimpleNamespace(chain=chain,observation={'ancestors':rows}),values,descriptors
+
+    def test_worker_ancestor_outside_controller_lineage_is_monitored(self):
+        guard,pinned,values,descriptors=self.ancestor_monitor_fixture()
+        guard.add_worker_chain(pinned)
+        self.assertEqual(len(guard.entries),4)
+        root=next(e for e in guard.entries if e['path']=='/')
+        self.assertEqual(set(root['roles']),{'controller','worker-ancestor'})
+        guard.sample()
+        ancestor=values[os.fstat(descriptors['/docker']).st_ino]
+        ancestor['memoryMaxBytes']=8*1024**3
+        with patch.object(guard.done,'wait',side_effect=[False,True]):guard.collect()
+        with self.assertRaisesRegex(m.ProbeError,'constraints or identity'):guard.check()
+        self.assertIn('/docker',[e['path'] for e in guard.summary()['monitoredGroups']])
+
+    def test_worker_ancestor_drift_before_registration_is_not_rebased(self):
+        guard,pinned,values,descriptors=self.ancestor_monitor_fixture()
+        values[os.fstat(descriptors['/docker']).st_ino]['memoryMaxBytes']=8*1024**3
+        before=len(list(Path('/proc/self/fd').iterdir()))
+        with self.assertRaisesRegex(m.ProbeError,'before monitor registration'):guard.add_worker_chain(pinned)
+        self.assertEqual(len(list(Path('/proc/self/fd').iterdir())),before)
+        self.assertNotIn('/docker',[e['path'] for e in guard.entries])
 
     def test_transport_guard_triggers_and_child_reaper_refused(self):
         def breach():raise m.ProbeError('reserve breach')

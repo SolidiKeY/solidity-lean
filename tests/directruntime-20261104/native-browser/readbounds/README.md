@@ -37,3 +37,11 @@ Both WASM entry paths delegate to the tracked lock-owning builder. Proof and
 symbol gate scripts likewise invoke tracked implementations rather than `.lake`
 script copies. Toolchain, source, cache, bounded-resource and current binary
 identity obligations still apply; these repairs do not establish their freshness.
+
+
+The replay supervisor handles SIGTERM, SIGHUP and SIGINT before forking. A
+ready/acknowledgement handshake keeps the action idle until its process group
+is confirmed; interruption closes that acknowledgement before group cleanup.
+SIGKILL-safe control and containment of escaped descendants still require the
+full H127 container protocol. Symbol and selected-C provenance drivers reject
+optimized Python before creating outputs, keeping their validation checks active.

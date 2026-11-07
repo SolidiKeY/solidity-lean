@@ -6,6 +6,7 @@ compiler, Lean frontend or benchmark is executed.
 """
 from pathlib import Path
 import hashlib, json, re, subprocess, tarfile, types
+if not __debug__:raise RuntimeError("provenance validation requires Python assertions enabled")
 root = Path.cwd()
 base = root / '.lake/native-browser-readbounds-6513'
 out = Path('/workspace/scratch/browser-chain/readbounds-6513')

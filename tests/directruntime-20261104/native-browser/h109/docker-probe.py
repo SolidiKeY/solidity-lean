@@ -248,7 +248,7 @@ class ReserveMonitor:
             if len(chain)!=len(observation['ancestors']): raise ProbeError('outer hierarchy changed')
             for (path,fd),row in zip(chain,observation['ancestors']):
                 if path!=row['path'] or resources._identity(fd)!=row['identity']: raise ProbeError('outer identity changed')
-                self.add(path,fd,False)
+                self.add(path,fd,False,expected=row['constraints'],role='controller')
             self.sample();self.check()
         except BaseException:
             self.stop();raise
@@ -258,13 +258,31 @@ class ReserveMonitor:
         self.thread=threading.Thread(target=self.collect,name='h127-reserve-monitor',daemon=True)
         self.thread.start()
 
-    def add(self,path,fd,worker):
+    def add(self,path,fd,worker,expected=None,role=None):
         with self.lock:
             identity=resources._identity(fd);constraints=resources.constraints(fd,root=(path=='/'))
+            if expected is not None and constraints!=expected:
+                raise ProbeError('ancestor constraints changed before monitor registration')
+            role=role or ('worker-leaf' if worker else 'controller')
+            for entry in self.entries:
+                if entry['identity']==identity:
+                    if entry['path']!=path or entry['constraints']!=constraints or entry['worker']!=worker:
+                        raise ProbeError('monitored ancestor identity, role or constraints drifted')
+                    if role not in entry['roles']:entry['roles'].append(role)
+                    return
             duplicate=os.dup(fd)
             try:self.entries.append({'path':path,'fd':duplicate,'identity':identity,
-                'constraints':constraints,'worker':worker,'removed':False})
+                'constraints':constraints,'worker':worker,'roles':[role],'removed':False})
             except BaseException:os.close(duplicate);raise
+
+    def add_worker_chain(self,pinned):
+        rows=pinned.observation['ancestors']
+        if len(pinned.chain)!=len(rows):raise ProbeError('worker ancestor inventory changed')
+        for index,((path,fd),row) in enumerate(zip(pinned.chain,rows)):
+            if path!=row['path'] or resources._identity(fd)!=row['identity']:
+                raise ProbeError('worker ancestor identity changed before registration')
+            leaf=index==len(rows)-1
+            self.add(path,fd,leaf,expected=row['constraints'],role='worker-leaf' if leaf else 'worker-ancestor')
 
     def sample(self):
         with self.lock:
@@ -280,7 +298,7 @@ class ReserveMonitor:
                     raise ProbeError('monitored kernel constraints or identity changed')
                 current=resources.optional_root_read(fd,'memory.current',resources.number,constraints.get('hierarchyRootProfile',False))
                 maximum=constraints['memoryMaxBytes']
-                row={'path':entry['path'],'identity':entry['identity'],'memoryCurrentBytes':current,'memoryMaxBytes':maximum}
+                row={'path':entry['path'],'identity':entry['identity'],'memoryCurrentBytes':current,'memoryMaxBytes':maximum,'roles':entry.get('roles',[])}
                 if maximum is not None and current is not None and not entry['worker']:
                     row['availableBytes']=maximum-current;available.append(maximum-current)
                 rows.append(row)
@@ -321,6 +339,7 @@ class ReserveMonitor:
         with self.lock:return {'intervalSeconds':0.05,'minimumObservedOuterReserveBytes':self.minimum,
             'requiredOuterReserveBytes':RESERVE,'failure':self.failure,'samples':self.samples,
             'initialObservation':self.initial,
+            'monitoredGroups':[{'path':e['path'],'identity':e['identity'],'constraints':e['constraints'],'roles':list(e.get('roles',[]))} for e in self.entries],
             'boundary':'Visible pinned groups and bounded sampling only; hidden ancestors and between-sample pressure are not authenticated.'}
 
 
@@ -463,7 +482,7 @@ def probe(destination,image):
                 if not data['State']['Running'] or type(data['State']['Pid']) is not int or data['State']['Pid']<=0:
                     raise ProbeError('probe PID not running')
                 pinned=PinnedGroup(data['State']['Pid'],container,cpu)
-                monitor.add(pinned.before['path'],pinned.chain[-1][1],True)
+                monitor.add_worker_chain(pinned)
                 monitor.check()
                 result['kernelObservation']=pinned.observation
                 journal.advance('kernel-observed',{'containerId':container,'cgroup':pinned.before})

@@ -5,6 +5,7 @@ Uses small file/process fixtures only. No Lean, Docker, native checker, WASM
 build, stopped benchmark or cached verdict is executed.
 """
 import ast
+import ctypes
 import fcntl
 import hashlib
 import importlib.util
@@ -14,6 +15,7 @@ from pathlib import Path
 import signal
 import stat
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -77,6 +79,86 @@ class Controls(unittest.TestCase):
             self.assertLess(time.monotonic()-started,2)
             self.assertFalse(Path('/proc/'+pidfile.read_text()).exists())
 
+    def test_real_parent_termination_kills_action_and_descendant(self):
+        # Become a subreaper only in this test so orphan fixture grandchildren
+        # can be reaped; cleanup uses pinned pidfds, never recycled numeric PIDs.
+        libc=ctypes.CDLL(None,use_errno=True);previous=ctypes.c_int()
+        if libc.prctl(37,ctypes.byref(previous),0,0,0)!=0:self.fail('GET_CHILD_SUBREAPER unavailable')
+        if libc.prctl(36,1,0,0,0)!=0:self.fail('SET_CHILD_SUBREAPER unavailable')
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp);supervisor=root/'supervisor.py'
+                supervisor.write_text("import importlib.util,json,os,sys,time\nfrom pathlib import Path\ns=importlib.util.spec_from_file_location('timer',sys.argv[1]);m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\ndef action():\n child=os.fork()\n if child==0:\n  time.sleep(30);os._exit(0)\n ready=Path(sys.argv[2]);pending=ready.with_suffix('.pending');pending.write_text(json.dumps({'leader':os.getpid(),'descendant':child}));pending.replace(ready)\n time.sleep(30)\nm.execute(action)\n")
+                for number in (signal.SIGTERM,signal.SIGHUP):
+                    ready=root/('ready-'+str(number));pins={};identities={}
+                    process=subprocess.Popen([sys.executable,str(supervisor),str((AREA/'invocation-deadline.py').resolve()),str(ready)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
+                    try:
+                        stop=time.monotonic()+3
+                        while not ready.exists():
+                            if process.poll() is not None or time.monotonic()>stop:self.fail('fixture supervisor did not become ready')
+                            time.sleep(0.01)
+                        identities=json.loads(ready.read_text())
+                        for name,pid in identities.items():pins[name]=os.pidfd_open(pid)
+                        os.kill(process.pid,number)
+                        _,stderr=process.communicate(timeout=3)
+                        self.assertNotEqual(process.returncode,0)
+                        self.assertIn(b'supervisor interrupted',stderr)
+                        self.assertFalse(Path('/proc/'+str(identities['leader'])).exists())
+                        stop=time.monotonic()+3
+                        while True:
+                            child,status=os.waitpid(identities['descendant'],os.WNOHANG)
+                            if child:
+                                self.assertTrue(os.WIFSIGNALED(status));self.assertEqual(os.WTERMSIG(status),signal.SIGKILL);break
+                            if time.monotonic()>stop:self.fail('fixture descendant survived supervisor termination')
+                            time.sleep(0.01)
+                    finally:
+                        if process.poll() is None:process.kill();process.wait()
+                        for fd in pins.values():
+                            try:signal.pidfd_send_signal(fd,signal.SIGKILL)
+                            except ProcessLookupError:pass
+                            os.close(fd)
+                        if 'descendant' in identities:
+                            try:os.waitpid(identities['descendant'],0)
+                            except ChildProcessError:pass
+                        process.stdout.close();process.stderr.close()
+        finally:
+            if libc.prctl(36,previous.value,0,0,0)!=0:self.fail('restore child subreaper failed')
+
+    def test_early_signal_cannot_start_action_after_group_cleanup_miss(self):
+        libc=ctypes.CDLL(None,use_errno=True);previous=ctypes.c_int()
+        self.assertEqual(libc.prctl(37,ctypes.byref(previous),0,0,0),0)
+        self.assertEqual(libc.prctl(36,1,0,0,0),0)
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp);script=root/'startup.py';before=root/'before';release=root/'release';group=root/'group';action=root/'action'
+                script.write_text("import importlib.util,os,sys,time\nfrom pathlib import Path\ns=importlib.util.spec_from_file_location('timer',sys.argv[1]);m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nbefore,release,group,action=map(Path,sys.argv[2:])\nreal_setsid=os.setsid\ndef delayed_group():\n pending=before.with_suffix('.pending');pending.write_text(str(os.getpid()));pending.replace(before)\n while not release.exists():time.sleep(.005)\n real_setsid();group.touch()\nm.os.setsid=delayed_group\nreal_killpg=os.killpg\ndef cleanup_miss(pid,number):\n try:return real_killpg(pid,number)\n except ProcessLookupError:\n  release.touch()\n  deadline=time.monotonic()+1\n  while not group.exists():\n   if time.monotonic()>deadline:raise RuntimeError('fixture group did not start')\n   time.sleep(.005)\n  time.sleep(.03)\n  raise\nm.os.killpg=cleanup_miss\ndef work():\n action.touch();time.sleep(30)\nm.execute(work)\n")
+                process=subprocess.Popen([sys.executable,str(script),str((AREA/'invocation-deadline.py').resolve()),str(before),str(release),str(group),str(action)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
+                descriptor=None;leader=None
+                try:
+                    end=time.monotonic()+3
+                    while not before.exists():
+                        if process.poll() is not None or time.monotonic()>end:self.fail('startup fixture not ready')
+                        time.sleep(.005)
+                    leader=int(before.read_text());descriptor=os.pidfd_open(leader)
+                    os.kill(process.pid,signal.SIGTERM)
+                    process.communicate(timeout=3)
+                    self.assertNotEqual(process.returncode,0)
+                    self.assertTrue(group.exists())  # created after killpg's ESRCH
+                    self.assertFalse(action.exists())  # no parent ACK, no action
+                    self.assertFalse(Path('/proc/'+str(leader)).exists())
+                finally:
+                    release.touch()
+                    if process.poll() is None:process.kill();process.wait()
+                    if descriptor is not None:
+                        try:signal.pidfd_send_signal(descriptor,signal.SIGKILL)
+                        except ProcessLookupError:pass
+                        os.close(descriptor)
+                    if leader is not None:
+                        try:os.waitpid(leader,0)
+                        except ChildProcessError:pass
+                    process.stdout.close();process.stderr.close()
+        finally:self.assertEqual(libc.prctl(36,previous.value,0,0,0),0)
+
     def test_zero_exit_overrun_cannot_publish_child_pass(self):
         spec=importlib.util.spec_from_file_location('negative_replay',AREA/'scripts/native-negatives.py')
         replay=importlib.util.module_from_spec(spec);spec.loader.exec_module(replay)
@@ -111,9 +193,10 @@ class Controls(unittest.TestCase):
 
     def test_optimized_python_cannot_disable_validation_assertions(self):
         with tempfile.TemporaryDirectory() as tmp:
-            for name in ('closure-audit.py','native-negatives.py'):
-                child=subprocess.run(['python3','-O',str(AREA/'scripts'/name)],cwd=tmp,capture_output=True,text=True,timeout=3)
-                self.assertNotEqual(child.returncode,0);self.assertIn('assertions enabled',child.stderr)
+            for name in ('closure-audit.py','native-negatives.py','stack-symbols.py','capture-selected-c.py'):
+                for flags,extra in ((['-O'],{}),([],{"PYTHONOPTIMIZE":"1"})):
+                    child=subprocess.run(['python3',*flags,str(AREA/'scripts'/name)],cwd=tmp,env=dict(os.environ,**extra,NATIVE_BROWSER_SYMBOL_OUTPUT=str(Path(tmp)/'symbols')),capture_output=True,text=True,timeout=3)
+                    self.assertNotEqual(child.returncode,0);self.assertIn('assertions enabled',child.stderr)
             self.assertEqual(list(Path(tmp).iterdir()),[])
 
     def test_publication_overrun_syncs_retraction_and_preserves_failed_rollback(self):
