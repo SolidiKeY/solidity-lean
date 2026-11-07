@@ -62,3 +62,5 @@ with the pinned base runtime entrypoint separately. -/
 #print axioms Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_narrow
 
 #print axioms Solidity.Frontend.ExecutableAst.Shared.primitiveReturnObligation
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_fixedBytes

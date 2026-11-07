@@ -9,6 +9,8 @@ OUT=OWNED/'artifacts/h90';PROFILE=OUT/'reader-profile'
 parser=argparse.ArgumentParser();parser.add_argument('--capture-manifest',action='store_true');args=parser.parse_args()
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def narrow(s):
+ b=re.fullmatch(r'bytes([0-9]+)',s or '')
+ if b:return str(int(b[1]))==b[1] and 1<=int(b[1])<=32
  m=re.fullmatch(r'(?:uint|int)([0-9]+)',s or '')
  return bool(m and str(int(m[1]))==m[1] and 8<=int(m[1])<256 and int(m[1])%8==0)
 def nodes(value):
@@ -55,11 +57,11 @@ for new in paths:
   node=cache[fixture]
   for part in c['pointer'].split('/')[1:]:
    key=part.replace('~1','/').replace('~0','~');node=node[int(key)] if isinstance(node,list) else node[key]
-  assert narrow_witness(node),'changed witness outside H90 narrow-local scope'
+  assert narrow_witness(node),'changed witness outside H90 narrow/fixed-byte local scope'
   row={'snapshot':str(legacy.relative_to(ROOT)),'index':index,'fixture':c['fixture'],'pointer':c['pointer'],'before':a,'after':b}
   changes.append(row);delta.append(row)
  records.append({'legacy':str(legacy.relative_to(ROOT)),'legacySha256':sha(legacy),'profile':str(new.relative_to(ROOT)),'profileSha256':sha(new),'rows':len(current),'changes':len(delta),'transitions':dict(collections.Counter(r['before']['natural']['status']+'->'+r['after']['natural']['status'] for r in delta))})
-summary={'regression':'H90 narrow-local reader observations','files':records,'inputs':inputs,'changes':len(changes),'rows':sum(r['rows'] for r in records),'boundary':'Historical snapshots untouched. Finite decoder/diagnostic controls only; no source, overload, intrinsic or backend proof.'}
+summary={'regression':'H90 narrow/fixed-byte local reader observations','files':records,'inputs':inputs,'changes':len(changes),'rows':sum(r['rows'] for r in records),'boundary':'Historical snapshots untouched. Finite decoder/diagnostic controls only; no source, overload, intrinsic or backend proof.'}
 manifest=OWNED/'h90-reader-profile-manifest.json'
 if args.capture_manifest:
  (OUT/'reader-profile-changes.json').write_text(json.dumps(changes,indent=2)+'\n')
@@ -80,4 +82,4 @@ else:
    assert entry.isfile() and entry.name in expectedFiles and entry.name not in seen;seen.add(entry.name)
    assert tar.extractfile(entry).read()==expectedFiles[entry.name]
  assert seen==set(expectedFiles)
-print(json.dumps({'files':len(records),'rows':summary['rows'],'changes':len(changes),'transitions':dict(collections.Counter(r['before']['natural']['status']+'->'+r['after']['natural']['status'] for r in changes)),'scope':'narrow locals/tuple leaves only; unknown roots refused'}))
+print(json.dumps({'files':len(records),'rows':summary['rows'],'changes':len(changes),'transitions':dict(collections.Counter(r['before']['natural']['status']+'->'+r['after']['natural']['status'] for r in changes)),'scope':'narrow/fixed-byte locals/tuple leaves only; unknown roots refused'}))

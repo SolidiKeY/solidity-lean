@@ -1,5 +1,5 @@
 {
-  "regression": "H90 narrow-local function admission",
+  "regression": "H90 narrow/fixed-byte local function admission",
   "decision": "Q-H90-CENSUS GitHub42 option2: all78 files at CR e0a5ac26",
   "inputHead": "e0a5ac26ed521bde70e3ce4da5120d05a991d9ca",
   "inputSha256": "f93e5718928cfc74b0fb9262f4d76949f742c5ca1b3d5024e5d727aca93f07da",
@@ -8,7 +8,7 @@
     {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
       "baseSha256": "f915d2fdc5a7fd1cf36284df63f4952b99f6f8d8dc913432dde6627f583b4594",
-      "headSourceSha256": "5737f20ff0baed482561a57652d04168b034eb782af11799ac52a5defc070bbd"
+      "headSourceSha256": "4b87138bc39130fcc0eaf2e6127336fbd0710d8c4520072d3e1be3aaf1493104"
     },
     {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
@@ -129,7 +129,7 @@
       "after": "ok"
     }
   ],
-  "refusalRefinements": 12,
+  "refusalRefinements": 15,
   "lostAdmissions": 0,
   "historicalBaseline": {
     "functions": 1599,
@@ -139,15 +139,15 @@
   },
   "boundary": "Printer/name-matched census and decoder admissions only; no elaboration, overload identity, whole-contract, source or backend adequacy claim.",
   "archive": {
-    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h90/census-34efd951378bc282.tar.gz",
-    "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/census-34efd951378bc282.tar.gz",
-    "sha256": "34efd951378bc2825f5f1f4da234336635d9d76c652bbbf39c66db42ab7867d2",
-    "bytes": 46113,
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h90/census-65d2c5680eba9779.tar.gz",
+    "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/census-65d2c5680eba9779.tar.gz",
+    "sha256": "65d2c5680eba9779913b6b29092238cded97f808088a9198dee778a90291dac5",
+    "bytes": 46173,
     "files": {
       "cr-census-inputs.json": "f93e5718928cfc74b0fb9262f4d76949f742c5ca1b3d5024e5d727aca93f07da",
       "base-census-results.json": "cb811c532e38ca90d3673e74d15f3ab71bb4fe9d1229227c329917bf2fd52182",
-      "cr-census-results.json": "03d52357addeb441ec382e7bc470857372efa241a75379328fd104fae0e74d93",
-      "census-changes.json": "2c8c9b0632a9987740fc3ca704cee7999ccbbf98fdd32b8d0b896fe75f2fb6f9"
+      "cr-census-results.json": "5d05a562f15a95a88b306dbc97055f824bd7ccf5439434369b2dd9de31c2d56a",
+      "census-changes.json": "db9d0460e7436e532ecd41fed7b76421b5e519ca548f006e2c826a623509aa31"
     }
   }
 }

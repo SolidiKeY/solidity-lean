@@ -18,7 +18,7 @@ private def preserves (name : String) (p : PrimTy) : Bool :=
 #guard preserves "int248" .int
 #guard ((List.range 256).filter (fun n => 8 ≤ n && n < 256 && n % 8 == 0)).all
   (fun n => preserves s!"uint{n}" .uint && preserves s!"int{n}" .int)
-#guard ["uint0", "uint7", "uint08", "int264", "address", "bytes1", "string"].all
+#guard ["uint0", "uint7", "uint08", "int264", "address", "string"].all
   (fun n => !(localTypeName (elementary n)).isOk)
 -- The storage/type boundary has not silently lost narrow metadata.
 #guard !(typeName (elementary "uint8")).isOk

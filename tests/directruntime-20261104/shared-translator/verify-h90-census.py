@@ -33,14 +33,14 @@ for old,new in zip(a['rows'],b['rows'],strict=True):
  assert {k:v for k,v in old.items() if k!='canonical'}=={k:v for k,v in new.items() if k!='canonical'},'row identity/printer changed'
  assert old['canonical']!='ok' or new['canonical']=='ok','lost admission'
  if old==new:continue
- assert re.fullmatch(r'compact verifier: unsupported type (?:uint|int)[0-9]+',old['canonical']), 'changed refusal outside narrow scalar scope'
+ assert re.fullmatch(r'compact verifier: unsupported type (?:(?:uint|int)[0-9]+|bytes[0-9]+)',old['canonical']), 'changed refusal outside narrow/fixed-byte local scope'
  row={'identity':{k:old[k] for k in ['fixture','contract','function','sourceId']},'before':old['canonical'],'after':new['canonical']}
  changes.append(row)
  (gains if new['canonical']=='ok' else refinements).append(row)
 assert len(gains)==b['summary']['canonicalAdmitted']-a['summary']['canonicalAdmitted']
 modules=['Solidity/Frontend/ExecutableAst/Shared/Translate.lean','Solidity/Frontend/ExecutableAst/Shared/Compose.lean','Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean']
 base=(OUT/'measurement-base.txt').read_text().strip()
-summary={'regression':'H90 narrow-local function admission','decision':'Q-H90-CENSUS GitHub42 option2: all78 files at CR e0a5ac26','inputHead':inputs['head'],'inputSha256':sha(OUT/'cr-census-inputs.json'),'measurementBase':base,'sourceFiles':[{'path':p,'baseSha256':hashlib.sha256(subprocess.check_output(['git','show',base+':'+p],cwd=ROOT)).hexdigest(),'headSourceSha256':sha(ROOT/p)} for p in modules],'base':a['summary'],'head':b['summary'],'gains':gains,'refusalRefinements':len(refinements),'lostAdmissions':0,'historicalBaseline':{'functions':1599,'existingPrinted':1446,'canonicalAdmitted':226,'boundary':'Historical reported68-fixture baseline; exact original selection unavailable. Exploratory69-top-level run reproduced counts but is not authoritative. Not used for matched78-file parity.'},'boundary':'Printer/name-matched census and decoder admissions only; no elaboration, overload identity, whole-contract, source or backend adequacy claim.'}
+summary={'regression':'H90 narrow/fixed-byte local function admission','decision':'Q-H90-CENSUS GitHub42 option2: all78 files at CR e0a5ac26','inputHead':inputs['head'],'inputSha256':sha(OUT/'cr-census-inputs.json'),'measurementBase':base,'sourceFiles':[{'path':p,'baseSha256':hashlib.sha256(subprocess.check_output(['git','show',base+':'+p],cwd=ROOT)).hexdigest(),'headSourceSha256':sha(ROOT/p)} for p in modules],'base':a['summary'],'head':b['summary'],'gains':gains,'refusalRefinements':len(refinements),'lostAdmissions':0,'historicalBaseline':{'functions':1599,'existingPrinted':1446,'canonicalAdmitted':226,'boundary':'Historical reported68-fixture baseline; exact original selection unavailable. Exploratory69-top-level run reproduced counts but is not authoritative. Not used for matched78-file parity.'},'boundary':'Printer/name-matched census and decoder admissions only; no elaboration, overload identity, whole-contract, source or backend adequacy claim.'}
 manifest=OWNED/'h90-census-manifest.json'
 if args.capture_manifest:
  (OUT/'census-changes.json').write_text(json.dumps(changes,indent=2)+'\n')

@@ -1,28 +1,28 @@
 {
-  "regression": "H90 narrow-local reader observations",
+  "regression": "H90 narrow/fixed-byte local reader observations",
   "files": [
     {
       "legacy": "tests/directruntime-20261104/shared-translator/artifacts/corpus-readers/composed.json",
       "legacySha256": "fac90877f5476957ff1f43e6f01ebddaf07955b12c367938a388ee9dc54b1613",
       "profile": "tests/directruntime-20261104/shared-translator/artifacts/h90/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__corpus-readers__composed.json",
-      "profileSha256": "a3c217afe04199c976dccd3cef28a294cd081abe3ea14658a3b0ca87e2f3e3dc",
+      "profileSha256": "29cedec176b4cf3b662c59835521265b77289b725d8069feda9d06a1d3a82840",
       "rows": 1926,
-      "changes": 14,
+      "changes": 18,
       "transitions": {
-        "refused->decoded": 7,
-        "refused->refused": 7
+        "refused->decoded": 8,
+        "refused->refused": 10
       }
     },
     {
       "legacy": "tests/directruntime-20261104/shared-translator/artifacts/corpus-readers/default.json",
       "legacySha256": "1c9b2872f40e125c9d4e29ba0c2390b7400464aea9a597ed9fb9d0c03acb4616",
       "profile": "tests/directruntime-20261104/shared-translator/artifacts/h90/reader-profile/tests__directruntime-20261104__shared-translator__artifacts__corpus-readers__default.json",
-      "profileSha256": "a74c2b46407c7c3ec47d85157a6bf42401efd25cb254887571ccdbc05fc4fdaf",
+      "profileSha256": "e7d1a9ae6c388da83a2d6a24a01c43bb1bcc08ddce58762b36f379affc129696",
       "rows": 1926,
-      "changes": 10,
+      "changes": 14,
       "transitions": {
-        "refused->refused": 7,
-        "refused->decoded": 3
+        "refused->decoded": 4,
+        "refused->refused": 10
       }
     },
     {
@@ -161,13 +161,13 @@
     "tests/directruntime-20261104/shared-translator/construct-reader-cases.json": "e7a6552022f8fbf40538217ca815408d70c6cab9c394dc9a37764f9c0a89f130",
     "tests/directruntime-20261104/shared-translator/fresh-construct-reader-cases.json": "8e1de225ef44ab754acc969e31319e7ebb9493674854d6d6c713e7d72e9a34b4"
   },
-  "changes": 27,
+  "changes": 35,
   "rows": 5692,
   "boundary": "Historical snapshots untouched. Finite decoder/diagnostic controls only; no source, overload, intrinsic or backend proof.",
   "archive": {
-    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h90/reader-profile-46ea8956dc56fb81.tar.gz",
-    "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/reader-profile-46ea8956dc56fb81.tar.gz",
-    "sha256": "46ea8956dc56fb81f0549a23b043f5a8a671db64ed8753adbc9b57e5cede6ff5",
-    "bytes": 277774
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h90/reader-profile-e60b086804dbd772.tar.gz",
+    "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/reader-profile-e60b086804dbd772.tar.gz",
+    "sha256": "e60b086804dbd7729a049f679588c258abf840f208dd3b5193df60dd7a0d7e47",
+    "bytes": 278143
   }
 }

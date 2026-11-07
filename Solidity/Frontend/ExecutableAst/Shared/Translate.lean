@@ -35,6 +35,7 @@ Parameter decoding deliberately keeps `prim`, since Ty alone erases width. -/
 def localPrim (j : Json) : Except String Ty := do
   let spelling ← str (← field j "typeDescriptions") "typeString"
   if let some (p, _) := narrowTy? spelling then return .prim p
+  if (bytesTy? spelling).isSome then return .prim .uint
   prim j
 
 def typeNameStep (read : Json → Except String (Ty × RawTy)) (j : Json) : Except String (Ty × RawTy) := do
@@ -76,7 +77,10 @@ def localTypeName (j : Json) : Except String (Ty × RawTy) :=
       | .ok name =>
         match narrowTy? name with
         | some (p, _) => .ok (.prim p, .named name)
-        | none => typeName j
+        | none =>
+          match bytesTy? name with
+          | some _ => .ok (.prim .uint, .named name)
+          | none => typeName j
     else typeName j
 
 /-- Every canonical narrow local keeps its exact spelling; this is a decoder
@@ -86,6 +90,14 @@ theorem localTypeName_of_narrow (j : Json) (name : String) (p : PrimTy) (width :
     (hwidth : narrowTy? name = some (p, width)) :
     localTypeName j = .ok (.prim p, .named name) := by
   simp only [localTypeName, hkind, beq_self_eq_true, ↓reduceIte, hname, hwidth]
+
+/-- Canonical fixed-byte locals retain their exact marker-bearing spelling.
+This general decoder fact is not an AST/source or intrinsic adequacy theorem. -/
+theorem localTypeName_of_fixedBytes (j : Json) (name : String) (size : Nat)
+    (hkind : node j = .ok "ElementaryTypeName") (hname : str j "name" = .ok name)
+    (hnarrow : narrowTy? name = none) (hbytes : bytesTy? name = some size) :
+    localTypeName j = .ok (.prim .uint, .named name) := by
+  simp only [localTypeName, hkind, beq_self_eq_true, ↓reduceIte, hname, hnarrow, hbytes]
 
 def expressionStep (read : Json → Except String RawExpr) (j : Json) : Except String RawExpr := do
   let kind ← node j

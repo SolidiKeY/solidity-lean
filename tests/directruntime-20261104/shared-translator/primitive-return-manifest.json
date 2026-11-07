@@ -15,7 +15,7 @@
     "freshControlTupleProved": 9,
     "freshControlTupleUnsupported": 4,
     "ownedModuleBuilds": 9,
-    "affectedFilesPassingAfterRecovery": 27
+    "affectedFilesPassingAfterRecovery": 26
   },
   "axioms": [
     "propext",
@@ -67,5 +67,6 @@
     "archiveRelative": "artifacts/primitive-return-evidence.tar.zst",
     "sha256": "67b260b2e616aa4b6deb33a470eff8f35f574d624ab8dd8876ced2d737cc0871",
     "bytes": 36746
-  }
+  },
+  "historicalGateCorrection": "The957e aggregate27passed claim was incorrect: SelectionControls also retained an obsolete plain-return refusal, besides ObligationControls. Main25/27passed; recovery restoredObligationControls for26/27. Later fixed-byte checkpoint migratesSelectionControls to exact-ID ready checks and reruns it. Dedicated primitive-return execution controls passed; no source behavior change from this correction."
 }

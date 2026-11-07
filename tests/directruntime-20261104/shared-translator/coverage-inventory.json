@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "status": "initial census; full coverage gates pending",
   "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
-  "headAtGeneration": "594236263bb1f70d23b7e51d69e35da0a566ec2d",
+  "headAtGeneration": "20ad62f98579fd1f3554f212973b41f8fe6b5cbb",
   "upstream": {
     "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
     "exporterGitBlob": "b855c19efcb9061c7b19b696cf7045f25e78dc74",
@@ -34,7 +34,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:50"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:51"
         ]
       },
       "existingSolcJson": {
@@ -223,8 +223,8 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:278",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:368"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:290",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:380"
         ]
       },
       "existingSolcJson": {
@@ -433,9 +433,9 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:114",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:367",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:373"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:126",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:379",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:385"
         ]
       },
       "existingSolcJson": {
@@ -672,8 +672,8 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:252",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:339"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:264",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:351"
         ]
       },
       "existingSolcJson": {
@@ -853,7 +853,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:273"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:285"
         ]
       },
       "existingSolcJson": {
@@ -1023,8 +1023,8 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:122",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:367"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:134",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:379"
         ]
       },
       "existingSolcJson": {
@@ -1220,7 +1220,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:274"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:286"
         ]
       },
       "existingSolcJson": {
@@ -1394,7 +1394,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:410"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:422"
         ]
       },
       "existingSolcJson": {
@@ -1778,9 +1778,10 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:42",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:73",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:85"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:43",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:74",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:89",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:97"
         ]
       },
       "existingSolcJson": {
@@ -1982,16 +1983,17 @@
       "h90LocalFacet": {
         "authority": "H90 OT-CR-READER",
         "owner": "solidity-directruntime-20261104/shared-translator",
-        "admission": "Canonical uint8..uint248/int8..int248 primitive local declarations; tuple scalar leaves preserve declaration widths. Parameters, returns, state roots and reference locals retain previous refusals.",
-        "proofClosure": "localTypeName_of_narrow kernel decoder fact, axioms[propext, Classical.choice, Quot.sound]; nine finite model/checker controls. Not a source-equivalence proof.",
-        "semanticSupport": "Existing width-aware local/tuple elaboration. Checked standalone overflow is model revert; source Panic(0x11) distinction remains an inherited adequacy gap.",
-        "backendGap": "Existing-importer migration, new-head native/WASM closure, remaining type/expression/statement forms and primitive-return backend repair pending.",
+        "admission": "Canonical narrow integer and bytes1..32 primitive locals; tuple scalar leaves retain RawTy spellings. Parameters/state/reference callbacks retain previous refusal boundaries.",
+        "proofClosure": "General localTypeName_of_narrow/localTypeName_of_fixedBytes kernel decoder equations, standardaxioms[propext,Classical.choice,Quot.sound]. Finite/trustedchecker controls are not source-equivalence proofs.",
+        "semanticSupport": "Existing intrinsic width and byte markers; tested copy/complement/tuple/widening/indexing in bothmodalities. Positive.length checker range-literal refusal remains; false.length refutes. Narrow overflow model/source payload gap unchanged.",
+        "backendGap": "OtherH90contexts/forms, existing-importer parity/migration, latest-source native/WASM validation, ReadBounds stack/cost diagnosis and final transport proofs remain open. Primitive-return source repair exists;957aggregategatecorrected26/27, current28pass afterrepair.",
         "evidence": [
           "h90-census-manifest.json",
           "h90-reader-profile-manifest.json",
-          "h90-occurrence-manifest.json"
+          "h90-occurrence-manifest.json",
+          "fixed-byte-manifest.json"
         ],
-        "regression": "H90 canonical reader narrow-local admission and width preservation"
+        "regression": "H90 narrow/fixed-byte local admission, width/marker preservation and retained refusals"
       }
     },
     {
@@ -3010,7 +3012,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:275"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:287"
         ]
       },
       "existingSolcJson": {
@@ -3181,7 +3183,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:269"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:281"
         ]
       },
       "existingSolcJson": {
@@ -3367,8 +3369,8 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:293",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:368"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:305",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:380"
         ]
       },
       "existingSolcJson": {
@@ -3827,8 +3829,8 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:354",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:402"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:366",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:414"
         ]
       },
       "existingSolcJson": {
@@ -4278,9 +4280,9 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:108",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:300",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:367"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:120",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:312",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:379"
         ]
       },
       "existingSolcJson": {
@@ -4810,7 +4812,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:257"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:269"
         ]
       },
       "existingSolcJson": {
@@ -5149,8 +5151,8 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:109",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:368"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:121",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:380"
         ]
       },
       "existingSolcJson": {
@@ -5339,7 +5341,7 @@
       "defaultExecutableReader": {
         "admission": "refused/not a standalone reader input",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:369"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:381"
         ]
       },
       "existingSolcJson": {
@@ -5872,10 +5874,10 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:93",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:98",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:367",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:376"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:105",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:110",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:379",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:388"
         ]
       },
       "existingSolcJson": {
@@ -6120,7 +6122,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:57"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:58"
         ]
       },
       "existingSolcJson": {
@@ -6337,9 +6339,9 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:113",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:295",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:368"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:125",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:307",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:380"
         ]
       },
       "existingSolcJson": {
@@ -7128,7 +7130,7 @@
       "defaultExecutableReader": {
         "admission": "refused/not a standalone reader input",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:368"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:380"
         ]
       },
       "existingSolcJson": {
@@ -7982,7 +7984,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:256"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:268"
         ]
       },
       "existingSolcJson": {
@@ -9412,7 +9414,7 @@
       "defaultExecutableReader": {
         "admission": "refused/not a standalone reader input",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:369"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:381"
         ]
       },
       "existingSolcJson": {
@@ -9611,16 +9613,17 @@
       "h90LocalFacet": {
         "authority": "H90 OT-CR-READER",
         "owner": "solidity-directruntime-20261104/shared-translator",
-        "admission": "Canonical uint8..uint248/int8..int248 primitive local declarations; tuple scalar leaves preserve declaration widths. Parameters, returns, state roots and reference locals retain previous refusals.",
-        "proofClosure": "localTypeName_of_narrow kernel decoder fact, axioms[propext, Classical.choice, Quot.sound]; nine finite model/checker controls. Not a source-equivalence proof.",
-        "semanticSupport": "Existing width-aware local/tuple elaboration. Checked standalone overflow is model revert; source Panic(0x11) distinction remains an inherited adequacy gap.",
-        "backendGap": "Existing-importer migration, new-head native/WASM closure, remaining type/expression/statement forms and primitive-return backend repair pending.",
+        "admission": "Canonical narrow integer and bytes1..32 primitive locals; tuple scalar leaves retain RawTy spellings. Parameters/state/reference callbacks retain previous refusal boundaries.",
+        "proofClosure": "General localTypeName_of_narrow/localTypeName_of_fixedBytes kernel decoder equations, standardaxioms[propext,Classical.choice,Quot.sound]. Finite/trustedchecker controls are not source-equivalence proofs.",
+        "semanticSupport": "Existing intrinsic width and byte markers; tested copy/complement/tuple/widening/indexing in bothmodalities. Positive.length checker range-literal refusal remains; false.length refutes. Narrow overflow model/source payload gap unchanged.",
+        "backendGap": "OtherH90contexts/forms, existing-importer parity/migration, latest-source native/WASM validation, ReadBounds stack/cost diagnosis and final transport proofs remain open. Primitive-return source repair exists;957aggregategatecorrected26/27, current28pass afterrepair.",
         "evidence": [
           "h90-census-manifest.json",
           "h90-reader-profile-manifest.json",
-          "h90-occurrence-manifest.json"
+          "h90-occurrence-manifest.json",
+          "fixed-byte-manifest.json"
         ],
-        "regression": "H90 canonical reader narrow-local admission and width preservation"
+        "regression": "H90 narrow/fixed-byte local admission, width/marker preservation and retained refusals"
       }
     },
     {
@@ -9648,10 +9651,10 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:117",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:287",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:367",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:371"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:129",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:299",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:379",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:383"
         ]
       },
       "existingSolcJson": {
@@ -9869,7 +9872,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:253"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:265"
         ]
       },
       "existingSolcJson": {
@@ -10585,8 +10588,8 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:350",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:412"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:362",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:424"
         ]
       },
       "existingSolcJson": {
@@ -10839,7 +10842,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:260"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:272"
         ]
       },
       "existingSolcJson": {
@@ -10999,16 +11002,17 @@
       "h90LocalFacet": {
         "authority": "H90 OT-CR-READER",
         "owner": "solidity-directruntime-20261104/shared-translator",
-        "admission": "Canonical uint8..uint248/int8..int248 primitive local declarations; tuple scalar leaves preserve declaration widths. Parameters, returns, state roots and reference locals retain previous refusals.",
-        "proofClosure": "localTypeName_of_narrow kernel decoder fact, axioms[propext, Classical.choice, Quot.sound]; nine finite model/checker controls. Not a source-equivalence proof.",
-        "semanticSupport": "Existing width-aware local/tuple elaboration. Checked standalone overflow is model revert; source Panic(0x11) distinction remains an inherited adequacy gap.",
-        "backendGap": "Existing-importer migration, new-head native/WASM closure, remaining type/expression/statement forms and primitive-return backend repair pending.",
+        "admission": "Canonical narrow integer and bytes1..32 primitive locals; tuple scalar leaves retain RawTy spellings. Parameters/state/reference callbacks retain previous refusal boundaries.",
+        "proofClosure": "General localTypeName_of_narrow/localTypeName_of_fixedBytes kernel decoder equations, standardaxioms[propext,Classical.choice,Quot.sound]. Finite/trustedchecker controls are not source-equivalence proofs.",
+        "semanticSupport": "Existing intrinsic width and byte markers; tested copy/complement/tuple/widening/indexing in bothmodalities. Positive.length checker range-literal refusal remains; false.length refutes. Narrow overflow model/source payload gap unchanged.",
+        "backendGap": "OtherH90contexts/forms, existing-importer parity/migration, latest-source native/WASM validation, ReadBounds stack/cost diagnosis and final transport proofs remain open. Primitive-return source repair exists;957aggregategatecorrected26/27, current28pass afterrepair.",
         "evidence": [
           "h90-census-manifest.json",
           "h90-reader-profile-manifest.json",
-          "h90-occurrence-manifest.json"
+          "h90-occurrence-manifest.json",
+          "fixed-byte-manifest.json"
         ],
-        "regression": "H90 canonical reader narrow-local admission and width preservation"
+        "regression": "H90 narrow/fixed-byte local admission, width/marker preservation and retained refusals"
       }
     },
     {
@@ -11029,7 +11033,7 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:267"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:279"
         ]
       },
       "existingSolcJson": {
@@ -11450,7 +11454,7 @@
   "localSharedImportClosure": {
     "Solidity.Frontend.ExecutableAst.Shared.Translate": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
-      "sha256": "5737f20ff0baed482561a57652d04168b034eb782af11799ac52a5defc070bbd"
+      "sha256": "4b87138bc39130fcc0eaf2e6127336fbd0710d8c4520072d3e1be3aaf1493104"
     },
     "Solidity.Frontend.ExecutableAst.Shared.Boundary": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
@@ -11520,7 +11524,7 @@
   "localIntrinsicImportClosure": {
     "Solidity.Frontend.ExecutableAst.Shared.Intrinsic": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
-      "sha256": "272ce9d6ffa2e19739de6252e84ba4bbb804677c54ce6750aa9226eabe310ef2"
+      "sha256": "74c01bacb59ba4783bc20a02d23b594dff458a34e30b2c3e40aa9f9fc0b64577"
     },
     "Solidity.Frontend.ExecutableAst.Shared.Scope": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Scope.lean",
@@ -11950,7 +11954,7 @@
     },
     "Solidity.Frontend.ExecutableAst.Shared.Translate": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
-      "sha256": "5737f20ff0baed482561a57652d04168b034eb782af11799ac52a5defc070bbd"
+      "sha256": "4b87138bc39130fcc0eaf2e6127336fbd0710d8c4520072d3e1be3aaf1493104"
     },
     "Solidity.Frontend.ExecutableAst.Shared.Boundary": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
@@ -16536,15 +16540,16 @@
   "h90NarrowLocalIncrement": {
     "authority": "H90 OT-CR-READER",
     "owner": "solidity-directruntime-20261104/shared-translator",
-    "admission": "Canonical uint8..uint248/int8..int248 primitive local declarations; tuple scalar leaves preserve declaration widths. Parameters, returns, state roots and reference locals retain previous refusals.",
-    "proofClosure": "localTypeName_of_narrow kernel decoder fact, axioms[propext, Classical.choice, Quot.sound]; nine finite model/checker controls. Not a source-equivalence proof.",
-    "semanticSupport": "Existing width-aware local/tuple elaboration. Checked standalone overflow is model revert; source Panic(0x11) distinction remains an inherited adequacy gap.",
-    "backendGap": "Existing-importer migration, new-head native/WASM closure, remaining type/expression/statement forms and primitive-return backend repair pending.",
+    "admission": "Canonical narrow integer and bytes1..32 primitive locals; tuple scalar leaves retain RawTy spellings. Parameters/state/reference callbacks retain previous refusal boundaries.",
+    "proofClosure": "General localTypeName_of_narrow/localTypeName_of_fixedBytes kernel decoder equations, standardaxioms[propext,Classical.choice,Quot.sound]. Finite/trustedchecker controls are not source-equivalence proofs.",
+    "semanticSupport": "Existing intrinsic width and byte markers; tested copy/complement/tuple/widening/indexing in bothmodalities. Positive.length checker range-literal refusal remains; false.length refutes. Narrow overflow model/source payload gap unchanged.",
+    "backendGap": "OtherH90contexts/forms, existing-importer parity/migration, latest-source native/WASM validation, ReadBounds stack/cost diagnosis and final transport proofs remain open. Primitive-return source repair exists;957aggregategatecorrected26/27, current28pass afterrepair.",
     "evidence": [
       "h90-census-manifest.json",
       "h90-reader-profile-manifest.json",
-      "h90-occurrence-manifest.json"
+      "h90-occurrence-manifest.json",
+      "fixed-byte-manifest.json"
     ],
-    "regression": "H90 canonical reader narrow-local admission and width preservation"
+    "regression": "H90 narrow/fixed-byte local admission, width/marker preservation and retained refusals"
   }
 }

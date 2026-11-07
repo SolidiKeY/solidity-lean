@@ -16,13 +16,13 @@
     "boundary": "Every frozen AST occurrence/pointer/hash,not every semantic context or source state. Decoder/printing success is not intrinsic proof or source/backend preservation.",
     "default": {
       "not-standalone": 9507,
-      "decoded": 28648,
-      "refused": 17063
+      "decoded": 28649,
+      "refused": 17062
     },
     "composed": {
       "not-standalone": 9507,
-      "decoded": 28862,
-      "refused": 16849
+      "decoded": 28863,
+      "refused": 16848
     },
     "unknownRootRefusalsEachReader": 45711,
     "changes": {
@@ -31,15 +31,15 @@
     },
     "inputs": {
       "cases.json": "9404d8aaf991a9e5615778d15559a43f6f8cdbb3b084ea0acde29d8d14ed6659",
-      "default.json": "52c74feb25906094e5aa5ba227f3e86dcd0a616ecb00d973d8b7267ab430349c",
-      "composed.json": "12ab14f12127b9e403f13370b9bbaf019fb52e71e6e5ab7299a324d8cce566c9"
+      "default.json": "826463f653e75249cf88ab1a84d19966629e25a2220532313406475a110fcb29",
+      "composed.json": "1f12d65c30f7a6707f73133b7fdb283922ab5f5dafd7d630087b08ebf929acb2"
     }
   },
   "archive": {
-    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h90/occurrences-bc8ade9cc95867bd.tar.zst",
-    "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/occurrences-bc8ade9cc95867bd.tar.zst",
-    "bytes": 9402066,
-    "sha256": "bc8ade9cc95867bd597568f4a8a6e3712e4796114cc9242843e28602f1f2be28"
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/h90/occurrences-5efc2472f66a0226.tar.zst",
+    "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/h90/occurrences-5efc2472f66a0226.tar.zst",
+    "bytes": 9401866,
+    "sha256": "5efc2472f66a0226b093ee61194a0d24d0ad1bcb751cad3e6878738368c3f79c"
   },
   "files": [
     {
@@ -51,20 +51,20 @@
     {
       "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/default.json",
       "relative": "tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/default.json",
-      "bytes": 18002117,
-      "sha256": "52c74feb25906094e5aa5ba227f3e86dcd0a616ecb00d973d8b7267ab430349c"
+      "bytes": 18002046,
+      "sha256": "826463f653e75249cf88ab1a84d19966629e25a2220532313406475a110fcb29"
     },
     {
       "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/composed.json",
       "relative": "tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/composed.json",
-      "bytes": 17983491,
-      "sha256": "12ab14f12127b9e403f13370b9bbaf019fb52e71e6e5ab7299a324d8cce566c9"
+      "bytes": 17983420,
+      "sha256": "1f12d65c30f7a6707f73133b7fdb283922ab5f5dafd7d630087b08ebf929acb2"
     },
     {
       "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/summary.json",
       "relative": "tests/directruntime-20261104/shared-translator/artifacts/occurrence-readers/summary.json",
       "bytes": 24590,
-      "sha256": "d57b418a8d88040a7ad3778ddac50011e5559b42f8568cc08917202d849ef06b"
+      "sha256": "125288a404da5d69dba93297824a09163220165a9eb080d44948f2c3e0c8e928"
     }
   ],
   "priorTimingStop": "Original quadratic uniqueness check stopped137after467.071s without matrices; retained in occurrence-timing-stop. Optimized capture32s and frozen replay25s both passed; not a successful before-run ratio.",

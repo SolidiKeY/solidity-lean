@@ -1,14 +1,15 @@
 {
   "authority": "H90 OT-CR-READER",
   "owner": "solidity-directruntime-20261104/shared-translator",
-  "admission": "Canonical uint8..uint248/int8..int248 primitive local declarations; tuple scalar leaves preserve declaration widths. Parameters, returns, state roots and reference locals retain previous refusals.",
-  "proofClosure": "localTypeName_of_narrow kernel decoder fact, axioms[propext, Classical.choice, Quot.sound]; nine finite model/checker controls. Not a source-equivalence proof.",
-  "semanticSupport": "Existing width-aware local/tuple elaboration. Checked standalone overflow is model revert; source Panic(0x11) distinction remains an inherited adequacy gap.",
-  "backendGap": "Existing-importer migration, new-head native/WASM closure, remaining type/expression/statement forms and primitive-return backend repair pending.",
+  "admission": "Canonical narrow integer and bytes1..32 primitive locals; tuple scalar leaves retain RawTy spellings. Parameters/state/reference callbacks retain previous refusal boundaries.",
+  "proofClosure": "General localTypeName_of_narrow/localTypeName_of_fixedBytes kernel decoder equations, standardaxioms[propext,Classical.choice,Quot.sound]. Finite/trustedchecker controls are not source-equivalence proofs.",
+  "semanticSupport": "Existing intrinsic width and byte markers; tested copy/complement/tuple/widening/indexing in bothmodalities. Positive.length checker range-literal refusal remains; false.length refutes. Narrow overflow model/source payload gap unchanged.",
+  "backendGap": "OtherH90contexts/forms, existing-importer parity/migration, latest-source native/WASM validation, ReadBounds stack/cost diagnosis and final transport proofs remain open. Primitive-return source repair exists;957aggregategatecorrected26/27, current28pass afterrepair.",
   "evidence": [
     "h90-census-manifest.json",
     "h90-reader-profile-manifest.json",
-    "h90-occurrence-manifest.json"
+    "h90-occurrence-manifest.json",
+    "fixed-byte-manifest.json"
   ],
-  "regression": "H90 canonical reader narrow-local admission and width preservation"
+  "regression": "H90 narrow/fixed-byte local admission, width/marker preservation and retained refusals"
 }
