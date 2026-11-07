@@ -2737,9 +2737,8 @@ source to the checker-read fixture, raw target type, frozen source scope, native
 output/log/monitor records and all 39 product hashes. Separate independent
 read-only finder and skeptic found no semantic issue. Logs, products, failed
 attempts and receipts stay off branch under
-/workspace/parallel-20261103/executable-bytecode/runtime-empty-domain/. Private
-archival and adoption of the newly published master still await credential
-repair. Original Source/runtime/G01, physical, Bridge, global census, performance
+/workspace/parallel-20261103/executable-bytecode/runtime-empty-domain/. Exact review evidence is now archived at the immutable
+H145 citation below; fresh-master adoption still awaits Git access repair. Original Source/runtime/G01, physical, Bridge, global census, performance
 and full validation obligations remain open; no runtime gate is claimed.
 
 
@@ -2778,4 +2777,55 @@ control and receipt join. Full original source/runtime, G01, physical, Bridge,
 performance and affected-build obligations remain open. Evidence, native output,
 ledger and reproduction stay off branch under
 /workspace/parallel-20261103/executable-bytecode/runtime-consumer-domains/;
-private archival and fresh-master adoption still await credential repair.
+exact private evidence is now archived at the immutable H145 citation below;
+fresh-master adoption still awaits Git access repair.
+
+
+### H145 immutable review evidence
+
+The exact sealed runtime-control, empty-composition and runtime-consumer packets
+are archived in the private coordination repository:
+
+```text
+evidence: 22f01d60f11a07b6b92b72fee357ffc5abc5a868 evidence/solidity-parallel-20261103/executable-bytecode/
+```
+
+Publication used the authenticated GitHub connector after the VM Git credential
+was rejected; it did not publish code or change the sealed snapshots. The API
+returned the archive blob hash and commit, and nineteen key archived text files
+were read back at that immutable commit and compared byte-for-byte. This is
+transport verification, not coordinator integration acceptance.
+
+The empty-composition review material includes its
+[exact generated source](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/RuntimeEmptyDomain.lean),
+[import hashes](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/evidence/import-bindings.json),
+[kernel result](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/final/evidence/proof-result.json),
+[axiom output](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/final/evidence/proof.log),
+and [independent reviews](https://github.com/SolidiKeY/solidity-lean-coord/blob/22f01d60f11a07b6b92b72fee357ffc5abc5a868/evidence/solidity-parallel-20261103/executable-bytecode/runtime-empty-domain/evidence/reviews.md).
+The sibling runtime-consumer packet likewise contains its generated source,
+source/type pins, native kernel and axiom records, eleven-field linkage ledger,
+and reviews. The archive index identifies the compact binary archive containing
+native kernel output artifacts as well as all nonregenerable evidence. Shared
+regenerable import products remain separately retained on the VM with complete
+archive size and SHA256 in that index; their manifests and hashes are archived
+directly. Original seal/checksum files are preserved unchanged.
+
+The Python fixture assertions are structural roster/reuse checks. They do not
+render or kernel-check a witness and cannot substitute for the separately
+archived native check. Kernel acceptance claims refer only to the exact checked
+sources and records above. Merge acceptance remains with the coordinator;
+original Source/runtime/G01, physical, Bridge and global-census gaps are not
+resolved by this publication.
+
+### H151 historical evidence gaps
+
+Unavailable historical raw/MCP exports are **UNVERIFIABLE**; their original
+claims remain unproven. Fresh native records above cover only their explicitly
+named new witnesses and do not reconstruct or validate those lost exports.
+The historically referenced off-Git ExactInstances fixture certification is
+also **UNVERIFIABLE in this audit** from the available material. Its old
+acceptance claim receives no credit, and retrieval of that historical payload
+is removed from this lane's waits. Any fresh owner regeneration is a separate
+result; neither its repaired documentation nor this archive supplies that proof.
+Current producer obligations and regenerable missing Bridge/Mathlib products
+remain distinct from these historical gaps.
