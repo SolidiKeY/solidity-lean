@@ -103,6 +103,19 @@ theorem blockhash_outside_window (e : Environment) (query : Roadmap.Word)
 def blobhash (e : Environment) (i : Roadmap.Word) : Roadmap.Word :=
   e.blobHashes[i.val]?.getD 0
 
+/-- An eligible blob index returns the supplied word at that exact index.
+No blob list is sampled or inferred from program code. -/
+theorem blobhash_in_bounds (e : Environment) (index : Roadmap.Word)
+    (inside : index.val < e.blobHashes.length) :
+    blobhash e index = e.blobHashes[index.val]'inside := by
+  exact congrArg (fun entry => entry.getD 0) (List.getElem?_eq_getElem inside)
+
+/-- Regression boundary: every index beyond the supplied blob list yields zero,
+independently of all other environment fields and hash inputs. -/
+theorem blobhash_outside_bounds (e : Environment) (index : Roadmap.Word)
+    (outside : e.blobHashes.length ≤ index.val) : blobhash e index = 0 := by
+  exact congrArg (fun entry => entry.getD 0) (List.getElem?_eq_none outside)
+
 theorem environment_address_width (e : Environment) :
     (e.read .coinbase).val < 2 ^ 160 ∧ (e.read .origin).val < 2 ^ 160 :=
   ⟨e.coinbase.isLt, e.origin.isLt⟩
