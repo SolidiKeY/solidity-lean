@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "baseHead": "d8cab018a8b813e54dfaa3dbe0bb1691397a94eb",
+  "testedSourceFiles": [
+    {
+      "path": "Solidity/Frontend/SolcJson/Contract.lean",
+      "bytes": 129632,
+      "sha256": "884ba6dde5ffef72f8a5d4f64235412be098e2e581f27a2baef19a9bd0e8ba2a"
+    },
+    {
+      "path": "Solidity/Frontend/Import.lean",
+      "bytes": 57306,
+      "sha256": "64ad4c8c4ddaaecd8c5dfd306368a17e9f4190ff5a8ae9f6963f0ef2144ec172"
+    },
+    {
+      "path": "Solidity/Frontend/CounterexampleMetadataV1.lean",
+      "bytes": 19367,
+      "sha256": "19a9e8fb92e02e88838312a7cf456e7072ba0f46dcbc5cc4ff2fbfa4334d4580"
+    },
+    {
+      "path": "vscode/parity/ledger-transport-controls.lean",
+      "bytes": 7135,
+      "sha256": "c4c63698fad69887acde093ad29f20ed47a7e82c7f30e2e12eaaf57b43fae2a0"
+    }
+  ],
+  "fileCount": 157,
+  "uncompressedBytes": 2161098,
+  "archive": {
+    "path": "/workspace/dafny-ledger-transport-20261107/bulk.tar.gz",
+    "bytes": 158861,
+    "sha256": "011b6be9d391c35b33d84caa399f710dd4f4481c2621034fd5346a189b644250"
+  },
+  "index": {
+    "path": "/workspace/dafny-ledger-transport-20261107/files.json",
+    "bytes": 31796,
+    "sha256": "b702ae2d86164ad44cd0f8d38576c727e050c1098c31118cefa949ec27e6cf85"
+  },
+  "boundaries": [
+    "Actual admission-context/normalization ledger and indexed canonical-to-raw-source correspondence only. Selected-clause failure at retained candidate remains unproved; no failing location emitted.",
+    "Targeted build/control/per-file supervisor exits0. Failed diagnostic/control attempts retained. Source hashes bind precommit checks; final full/timed/performance gates remain pending.",
+    "All491 ordered obligations/frozen270 unchanged. No completed row or paired row judgment."
+  ]
+}

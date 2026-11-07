@@ -107,6 +107,15 @@ def CanonicalImportInputV1.read (input : CanonicalImportInputV1) :
     input.env input.sourceNames input.provenance input.compilerCode
     input.namedErrorSourceOrder input.compilationUnits
 
+/-- Preserve every actual admission argument; no public reader default is used. -/
+def CanonicalImportInputV1.ofAdmission (context : ImportNormalizationContextV1) : CanonicalImportInputV1 :=
+  ⟨context.ast, context.name, context.ren, context.testing, context.entrypoints,
+    context.env, context.sourceNames, context.provenance, context.compilerCode,
+    context.namedErrorSourceOrder, context.compilationUnits⟩
+
+theorem CanonicalImportInputV1.ofAdmission_read (context : ImportNormalizationContextV1) :
+    (ofAdmission context).read = context.read.map Prod.fst := rfl
+
 /-- Guards the regression where a clause from another normalizer, function or
 ordinal is attached to a retained row. These equations identify the exact reader
 result and canonical clause. They do not bind the input to a live importer or
@@ -128,25 +137,30 @@ structure CanonicalClauseV1 (input : CanonicalImportInputV1) (row : ImportRow) w
 rows and absent ordinals yield no metadata; no text matching or index fallback.
 The producer must separately bind this context to its actual importer/candidate
 and prove source-origin and failed-clause correspondence before publication. -/
+private def canonicalClauseInResultV1? (input : CanonicalImportInputV1) (row : ImportRow)
+    (functionIndex clauseIndex : Nat) (contract : SolcContract)
+    (h : input.read = .ok contract) : Except String (Option (CanonicalClauseV1 input row)) :=
+  if !row.admissionChecked || input.provenance.legacyFixture || row.sourceId < 0 then .ok none
+  else match hf : (contract.funs ++ contract.ctor.toList)[functionIndex]? with
+  | none => .ok none
+  | some f =>
+    if hi : f.sourceId = row.sourceId then
+      if hn : f.name = row.name then
+        if hs : f.sourceSignature = row.sourceSignature then
+          match hc : f.specClauses[clauseIndex]? with
+          | none => .ok none
+          | some clause => .ok (some ⟨contract, h, functionIndex, f, hf, hi, hn, hs,
+              clauseIndex, clause, hc⟩)
+        else .ok none
+      else .ok none
+    else .ok none
+
+
 def canonicalClauseV1? (input : CanonicalImportInputV1) (row : ImportRow)
     (functionIndex clauseIndex : Nat) : Except String (Option (CanonicalClauseV1 input row)) :=
   match h : input.read with
   | .error reason => .error reason
-  | .ok contract =>
-    if !row.admissionChecked || input.provenance.legacyFixture || row.sourceId < 0 then .ok none
-    else match hf : (contract.funs ++ contract.ctor.toList)[functionIndex]? with
-    | none => .ok none
-    | some f =>
-      if hi : f.sourceId = row.sourceId then
-        if hn : f.name = row.name then
-          if hs : f.sourceSignature = row.sourceSignature then
-            match hc : f.specClauses[clauseIndex]? with
-            | none => .ok none
-            | some clause => .ok (some ⟨contract, h, functionIndex, f, hf, hi, hn, hs,
-                clauseIndex, clause, hc⟩)
-          else .ok none
-        else .ok none
-      else .ok none
+  | .ok contract => canonicalClauseInResultV1? input row functionIndex clauseIndex contract h
 
 /-- Dropping the clause ledger returns the exact original reader result. -/
 def CanonicalClauseV1.forget {input : CanonicalImportInputV1} {row : ImportRow}
@@ -161,7 +175,7 @@ theorem canonicalClauseV1_forget {input : CanonicalImportInputV1} {row : ImportR
 modules cannot silently reconstruct it using a later environment. -/
 private structure CapturedCanonicalImportV1 where
   fixture : Json
-  input : CanonicalImportInputV1
+  admission : ImportedNormalizationCaptureV1
 
 private initialize capturedCanonicalImportsV1 :
     EnvExtension (NameMap CapturedCanonicalImportV1) ←
@@ -183,9 +197,13 @@ def importedCanonicalClauseV1? (N : Lean.Name) (rowIndex functionIndex clauseInd
   unless captured.fixture.compress == fixture.compress do return none
   let rows ← reportRows N
   let some row := rows[rowIndex]? | return none
-  let some clause ← ofExcept (canonicalClauseV1? captured.input row functionIndex clauseIndex)
-    | return none
-  pure (some ⟨captured.input, row, clause⟩)
+  let input := CanonicalImportInputV1.ofAdmission captured.admission.context
+  have h : input.read = .ok captured.admission.result.1 :=
+    (CanonicalImportInputV1.ofAdmission_read captured.admission.context).trans
+      (congrArg (Except.map Prod.fst) captured.admission.equation)
+  let some clause ← ofExcept (canonicalClauseInResultV1? input row functionIndex clauseIndex
+      captured.admission.result.1 h) | return none
+  pure (some ⟨input, row, clause⟩)
 
 /-- The exact retained candidate beside a clause from its actual captured
 import context. This still does not establish that the selected clause failed. -/
@@ -204,12 +222,109 @@ def retainedCanonicalClauseV1? (N : Lean.Name) (rowIndex functionIndex clauseInd
   unless captured.fixture.compress == fixture.compress do return none
   let some retained ← retainedCounterexampleMetadataV1? N rowIndex fixture sourceName bytes report
     | return none
-  let some clause ← ofExcept (canonicalClauseV1? captured.input retained.row.legacy
-      functionIndex clauseIndex) | return none
-  pure (some ⟨captured.input, retained, clause⟩)
+  let input := CanonicalImportInputV1.ofAdmission captured.admission.context
+  have h : input.read = .ok captured.admission.result.1 :=
+    (CanonicalImportInputV1.ofAdmission_read captured.admission.context).trans
+      (congrArg (Except.map Prod.fst) captured.admission.equation)
+  let some clause ← ofExcept (canonicalClauseInResultV1? input retained.row.legacy
+      functionIndex clauseIndex captured.admission.result.1 h) | return none
+  pure (some ⟨input, retained, clause⟩)
 
 theorem retainedCanonicalClauseV1_forget (metadata : RetainedCanonicalClauseV1) :
     metadata.retained.forget = metadata.retained.candidate.original := rfl
+
+/-- Ordered canonical projection with original clause ordinals. A failed
+normalization drops the whole specification, exactly as the legacy reader does.
+This consumes the admission ledger; it does not parse or normalize again. -/
+def FunctionNormalizationRowV1.canonicalOrdinals (row : FunctionNormalizationRowV1) :
+    List ((String × String) × Nat) :=
+  ((row.normalization.results.mapM id).toOption.getD []).zipIdx.filterMap fun (clause, ordinal) =>
+    if ["requires", "ensures", "invariant", "assignable"].contains clause.kind then
+      some ((clause.kind, clause.text), ordinal) else none
+
+/-- Source correspondence from the actual captured computation. The full
+ordered canonical table and raw parser fields must agree, before selecting an
+ordinal. A duplicate clause's text is never used to choose a source location.
+This certifies correspondence only, not failure of the selected clause. -/
+structure ImportedCanonicalSourceClauseV1 where
+  admission : ImportedNormalizationCaptureV1
+  row : ImportRow
+  canonical : CanonicalClauseV1 (CanonicalImportInputV1.ofAdmission admission.context) row
+  contractEquation : canonical.contract = admission.result.1
+  ledgerIndex : Nat
+  ledger : FunctionNormalizationRowV1
+  ledgerEquation : admission.result.2[ledgerIndex]? = some ledger
+  origins : AdmittedSpecOriginsV1
+  ownerIdEquation : J.id? ledger.entry = some row.sourceId
+  ownerEquation : ledger.entry.compress = origins.owner.compress
+  rawEquation : origins.result.legacy.toOption.map (List.map specClauseFieldsV1) =
+    some (ledger.rawSpec.map specClauseFieldsV1)
+  canonicalEquation : canonical.functionData.specClauses =
+    ledger.canonicalOrdinals.map Prod.fst
+  rawOrdinal : Nat
+  ordinalEquation : ledger.canonicalOrdinals[canonical.clauseIndex]? =
+    some (canonical.clause, rawOrdinal)
+  source : SpecClauseOriginV1
+  sourceEquation : origins.result.origins.bind (·[rawOrdinal]?) = some source
+
+/-- The source selector takes a namespace, actual report row and canonical
+index, never an arbitrary input context or claimed clause text. A requested
+span must equal the retained raw source extent; unsupported layouts refuse. -/
+def importedCanonicalSourceClauseV1? (N : Lean.Name) (rowIndex functionIndex clauseIndex : Nat)
+    (fixture : Json) (sourceName : String) (bytes : ByteArray)
+    (span : YulJson.SourceSpan) : CommandElabM (Option ImportedCanonicalSourceClauseV1) := do
+  let some captured := (capturedCanonicalImportsV1.getState (← getEnv)).find? N | return none
+  unless captured.fixture.compress == fixture.compress do return none
+  let rows ← reportRows N
+  let some row := rows[rowIndex]? | return none
+  let input := CanonicalImportInputV1.ofAdmission captured.admission.context
+  have h : input.read = .ok captured.admission.result.1 :=
+    (CanonicalImportInputV1.ofAdmission_read captured.admission.context).trans
+      (congrArg (Except.map Prod.fst) captured.admission.equation)
+  let some canonical ← ofExcept (canonicalClauseInResultV1? input row functionIndex clauseIndex
+      captured.admission.result.1 h) | return none
+  have contractEquation : canonical.contract = captured.admission.result.1 :=
+    Except.ok.inj (canonical.contractEquation.symm.trans h)
+  let some origins := admittedSpecOriginsV1? fixture sourceName bytes row.sourceId
+    | return none
+  -- Require one source-ID match, rather than choosing a first duplicate.
+  let candidates := captured.admission.result.2.zipIdx.filter fun (entry, _) =>
+    J.id? entry.entry == some row.sourceId
+  let [(_, ledgerIndex)] := candidates | return none
+  match hl : captured.admission.result.2[ledgerIndex]? with
+  | none => return none
+  | some ledger =>
+    if hid : J.id? ledger.entry = some row.sourceId then
+     if ho : ledger.entry.compress = origins.owner.compress then
+       if hr : origins.result.legacy.toOption.map (List.map specClauseFieldsV1) =
+           some (ledger.rawSpec.map specClauseFieldsV1) then
+         if hc : canonical.functionData.specClauses = ledger.canonicalOrdinals.map Prod.fst then
+           match hi : ledger.canonicalOrdinals[clauseIndex]? with
+           | none => return none
+           | some (clause, ordinal) =>
+             if he : clause = canonical.clause then
+               match hs : origins.result.origins.bind (·[ordinal]?) with
+               | none => return none
+               | some source =>
+                 if source.span != span || source.ordinal != ordinal then return none
+                 -- The canonical lookup preserves its requested index.
+                 if hci : canonical.clauseIndex = clauseIndex then
+                   have ordinalEquation : ledger.canonicalOrdinals[canonical.clauseIndex]? =
+                       some (canonical.clause, ordinal) := by
+                     rw [hci, hi, he]
+                   return some ⟨captured.admission, row, canonical, contractEquation, ledgerIndex, ledger, hl,
+                     origins, hid, ho, hr, hc, ordinal, ordinalEquation, source, hs⟩
+                 else return none
+             else return none
+         else return none
+       else return none
+     else return none
+    else return none
+
+/-- Forgetting source correspondence preserves the actual imported clause. -/
+theorem importedCanonicalSourceClauseV1_forget (metadata : ImportedCanonicalSourceClauseV1) :
+    metadata.canonical.forget = .ok metadata.canonical.contract :=
+  metadata.canonical.contractEquation
 
 elab_rules : command
   | `(solc_import_origins_v1 $path:str hash $expected:num as $N:ident) => do
@@ -222,24 +337,18 @@ elab_rules : command
     let declaration := N.getId ++ `report ++ `fixtureSha256V1
     if (← getEnv).contains N.getId || (← getEnv).contains declaration then
       throwError "origin companion requires a new import namespace"
-    let compilation ← ofExcept (Source.readCompilationUnit fixture)
-    let compilerCode ← ofExcept (Source.readCompilerCode fixture compilation.primary compilation.provenance)
-    let env ← getEnv
-    let sourceNames := (J.nodes (.arr compilation.asts.toArray)).filterMap (J.str? · "name")
-      |>.flatMap (·.splitOn ".") |>.eraseDups
-    let context : CanonicalImportInputV1 := {
-      ast := compilation.primary, name := N.getId.getString!, ren := [], testing := true,
-      entrypoints := false, env := env, sourceNames := sourceNames,
-      provenance := compilation.provenance, compilerCode := compilerCode,
-      namedErrorSourceOrder := compilation.provenance.pipeline == some .viaIR,
-      compilationUnits := if compilation.provenance.sources.isEmpty then [] else compilation.asts }
+    requestImportNormalizationV1 N.getId
     elabCommand (← `(solc_import $path hash $expected as $N testing))
     unless before == (← IO.FS.readBinFile input) do throwError "fixture changed during import"
+    let some admission ← importedNormalizationCaptureV1? N.getId
+      | throwError "actual importer normalization capture unavailable"
+    unless admission.bytes == before && admission.fixture.compress == fixture.compress do
+      throwError "actual importer normalization snapshot differs"
     let digest := Hashes.sha256Nat (fixture.compress.toUTF8.data.toList.map UInt8.toNat)
     liftCoreM <| addAndCompile <| .defnDecl {
       name := declaration, levelParams := [], type := mkConst ``Nat,
       value := toExpr digest, hints := .abbrev, safety := .safe }
     modifyEnv fun env => capturedCanonicalImportsV1.modifyState env
-      (·.insert N.getId ⟨fixture, context⟩)
+      (·.insert N.getId ⟨fixture, admission⟩)
 
 end Solidity.Frontend

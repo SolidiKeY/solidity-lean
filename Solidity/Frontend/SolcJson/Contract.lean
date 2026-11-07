@@ -997,7 +997,15 @@ theorem normalizeFunctionSpecV1_length (rawSpec : List KeyClause) (st : PState)
     (normalizeFunctionSpecV1 rawSpec st params rets rewriteSpec).results.length = rawSpec.length := by
   simp only [normalizeFunctionSpecV1, List.length_map]
 
-def readContract (ast : Json) (name : String) (ren : List (String × String)) (testing : Bool := false)
+/-- Admission-site normalization record. The original AST identity, raw clauses
+and ordered normalization results are retained together, before filtering. This
+is not a source-span or failed-postcondition certificate. -/
+structure FunctionNormalizationRowV1 where
+  entry : Json
+  rawSpec : List KeyClause
+  normalization : FunctionSpecNormalizationV1
+
+def readContractWithNormalizationV1 (ast : Json) (name : String) (ren : List (String × String)) (testing : Bool := false)
     (rewriteSpec : String → List (String × String) → List (String × String) → String → Except String String :=
       fun _ params rets text => if params.isEmpty && rets.isEmpty then .ok text
         else .error "specification needs renamed locals: not imported")
@@ -1011,7 +1019,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     (entrypoints : Bool := false) (viaIR : Bool := false)
     (compilerCode : List (Int × (String × String)) := [])
     (namedErrorSourceOrder : Bool := false) (compilationUnits : List Json := []) :
-    Except String SolcContract := do
+    Except String (SolcContract × List FunctionNormalizationRowV1) := do
   let primaryAst := ast
   let units := compilationNodes ast compilationUnits
   let declarations := (J.nodes (compilationAst ast compilationUnits)).filter fun node => (J.id? node).isSome
@@ -1597,7 +1605,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let modifierScopes := modifierReadResults.map fun (id, result) =>
     (id, (result.toOption.map (·.2)).getD default)
   let modifierMembers := modifierReads.filterMap fun (_, text) => text.toOption
-  let read := funs.map fun f =>
+  let readWithNormalization := funs.map fun f =>
     let fname := internalName f
     let st := specState f (renames stateVars f ++ funRenames)
     let rawSpec := (keyClauses (docText f)).toOption.getD []
@@ -1753,65 +1761,68 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       pure (← bodyRead).1
     let sourceParams := ((J.opt f "parameters").bind (J.arr? · "parameters")).getD #[]
     let sourceTypes := sourceParams.toList.map fun p => sourceType (J.tyStr p)
-    { name := fname, sourceName := nameOfFun f, sourceId := (J.id? f).getD (-1),
-      sourceDecl := identity.toOption, sourceScope,
-      sourceSignature := s!"{nameOfFun f}({",".intercalate sourceTypes})",
-      modifierApps := apps.toOption.getD "",
-      line := J.line f, tag := (tag.toOption).getD .malformed,
-      params := (ps.toOption).getD [], rets := (rs.toOption).getD [],
-      payable := J.str? f "stateMutability" == some "payable",
-      writingCall := writingCall f || (dispatchOf f).external || (modifierInvocations f).any fun m =>
-        ((modifierId m).bind fun id => modifierDefs.find? (J.id? · == some id)).all fun root =>
-          writingCall root || (dispatchOf root).external,
-      retEnums := (((J.opt f "returnParameters").bind (J.arr? · "parameters")).getD #[]).toList.zipIdx
-          |>.filterMap fun (p, i) => do
-            guard (((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds)).isSome
-            pure i,
-      paramEnums := sourceParams.toList.zipIdx |>.filterMap fun (p, i) => do
-        guard (((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds)).isSome
-        pure i,
-      paramEnumPositions := sourceParams.toList.zipIdx |>.filterMap fun (p, i) => do
-        let t ← J.opt p "typeName"
-        let ps ← abiEnumPositions declarations enumBounds
-          ((J.nodes t).length + declarations.length + 1) "" t
-        guard (ps.any (·.1 != ""))
-        pure (i, ps),
-      paramRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, t), p) => do
-        if let some n := ((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds) then
-          return (x, 0, n)
-        -- a `bytesN` is a `uint` of `8N` bits (`valueRows?`)
-        let (q, n) ← (narrowTy? t).orElse fun _ =>
-          (bytesTy? t).map fun n => (.uint, 8 * n)
-        guard (n < 256)
-        if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1) else pure (x, 0, 2 ^ n - 1),
-      -- a memory array of a narrow integer or an enum: each element in its range
-      elemRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
-        let t ← J.opt p "typeName"
-        -- `bytes`/`string`: a `bytes1[]`, each element below `2^8`
-        let mem := J.str? p "storageLocation" == some "memory" ||
-          J.str? p "storageLocation" == some "calldata"
-        if J.kind t == "ElementaryTypeName" && mem &&
-            dynBytesTy ((J.str? t "name").getD "") then
-          return (x, 0, 255, none)
-        guard (J.kind t == "ArrayTypeName" && mem)
-        let b ← J.opt t "baseType"
-        let len : Option Nat := (J.opt t "length").bind fun l =>
-          (solcArrayLength? t).orElse fun _ => (J.str? l "value").bind String.toNat?
-        guard ((J.opt t "length").isNone || len.isSome)
-        if let some n := (J.ref? b).bind (lookupBy · enumBounds) then
-          return (x, 0, n, len)
-        let (q, n) ← (narrowTy? ((J.str? b "name").getD "")).orElse fun _ =>
-          (bytesTy? ((J.str? b "name").getD "")).map fun n => (.uint, 8 * n)
-        guard (n < 256)
-        if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1, len)
-        else pure (x, 0, 2 ^ n - 1, len),
-      specMembers := if testing then String.join (fspec
-        |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
-        |>.map (fun c => s!"{c.kind} {c.text}; ")) else "",
-      specClauses := if testing then fspec
-        |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
-        |>.map (fun c => (c.kind, c.text)) else [],
-      body := do let _ ← ps; let _ ← rs; body : SolcFun }
+    let result :=
+      { name := fname, sourceName := nameOfFun f, sourceId := (J.id? f).getD (-1),
+        sourceDecl := identity.toOption, sourceScope,
+        sourceSignature := s!"{nameOfFun f}({",".intercalate sourceTypes})",
+        modifierApps := apps.toOption.getD "",
+        line := J.line f, tag := (tag.toOption).getD .malformed,
+        params := (ps.toOption).getD [], rets := (rs.toOption).getD [],
+        payable := J.str? f "stateMutability" == some "payable",
+        writingCall := writingCall f || (dispatchOf f).external || (modifierInvocations f).any fun m =>
+          ((modifierId m).bind fun id => modifierDefs.find? (J.id? · == some id)).all fun root =>
+            writingCall root || (dispatchOf root).external,
+        retEnums := (((J.opt f "returnParameters").bind (J.arr? · "parameters")).getD #[]).toList.zipIdx
+            |>.filterMap fun (p, i) => do
+              guard (((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds)).isSome
+              pure i,
+        paramEnums := sourceParams.toList.zipIdx |>.filterMap fun (p, i) => do
+          guard (((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds)).isSome
+          pure i,
+        paramEnumPositions := sourceParams.toList.zipIdx |>.filterMap fun (p, i) => do
+          let t ← J.opt p "typeName"
+          let ps ← abiEnumPositions declarations enumBounds
+            ((J.nodes t).length + declarations.length + 1) "" t
+          guard (ps.any (·.1 != ""))
+          pure (i, ps),
+        paramRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, t), p) => do
+          if let some n := ((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds) then
+            return (x, 0, n)
+          -- a `bytesN` is a `uint` of `8N` bits (`valueRows?`)
+          let (q, n) ← (narrowTy? t).orElse fun _ =>
+            (bytesTy? t).map fun n => (.uint, 8 * n)
+          guard (n < 256)
+          if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1) else pure (x, 0, 2 ^ n - 1),
+        -- a memory array of a narrow integer or an enum: each element in its range
+        elemRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
+          let t ← J.opt p "typeName"
+          -- `bytes`/`string`: a `bytes1[]`, each element below `2^8`
+          let mem := J.str? p "storageLocation" == some "memory" ||
+            J.str? p "storageLocation" == some "calldata"
+          if J.kind t == "ElementaryTypeName" && mem &&
+              dynBytesTy ((J.str? t "name").getD "") then
+            return (x, 0, 255, none)
+          guard (J.kind t == "ArrayTypeName" && mem)
+          let b ← J.opt t "baseType"
+          let len : Option Nat := (J.opt t "length").bind fun l =>
+            (solcArrayLength? t).orElse fun _ => (J.str? l "value").bind String.toNat?
+          guard ((J.opt t "length").isNone || len.isSome)
+          if let some n := (J.ref? b).bind (lookupBy · enumBounds) then
+            return (x, 0, n, len)
+          let (q, n) ← (narrowTy? ((J.str? b "name").getD "")).orElse fun _ =>
+            (bytesTy? ((J.str? b "name").getD "")).map fun n => (.uint, 8 * n)
+          guard (n < 256)
+          if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1, len)
+          else pure (x, 0, 2 ^ n - 1, len),
+        specMembers := if testing then String.join (fspec
+          |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
+          |>.map (fun c => s!"{c.kind} {c.text}; ")) else "",
+        specClauses := if testing then fspec
+          |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
+          |>.map (fun c => (c.kind, c.text)) else [],
+        body := do let _ ← ps; let _ ← rs; body : SolcFun }
+    (result, ({ entry := f, rawSpec, normalization } : FunctionNormalizationRowV1))
+  let read := readWithNormalization.map Prod.fst
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
   let initSt : PState := { declarations, renderedErrors, compilerCode, namedErrorSourceOrder, enumNativeNames, enumCarriers, enumDecodeTypes, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
@@ -2212,7 +2223,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let sourceDecls := byId.filterMap fun (_, f) => f.sourceDecl.map (f.name, ·)
   let sourceDecls := sourceDecls ++ internalFuns.map fun name =>
     (name, ({ callable := .implementation } : SourceFunction))
-  pure {
+  pure ({
     name
     members
     dropped := droppedNames
@@ -2223,6 +2234,35 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     modifierMembers
     ctor
     initMembers
-    initGap }
+    initGap }, readWithNormalization.map Prod.snd)
+
+def readContract (ast : Json) (name : String) (ren : List (String × String)) (testing : Bool := false)
+    (rewriteSpec : String → List (String × String) → List (String × String) → String → Except String String :=
+      fun _ params rets text => if params.isEmpty && rets.isEmpty then .ok text
+        else .error "specification needs renamed locals: not imported")
+    (rewriteLoop : List (String × String) → String → Except String String :=
+      fun names text => if names.any (fun (a, b) => a != b) then
+        .error "loop specification needs renamed locals: not imported" else .ok text)
+    (scanSource : Source.AdmissionRequest → Source.ScopeScan := fun _ => default)
+    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default)
+    (readsSpec : String → String → List String → String → Except String Bool :=
+      fun name _ bound text => .ok (!bound.contains name && specReadsName name (specTokens text)))
+    (entrypoints : Bool := false) (viaIR : Bool := false)
+    (compilerCode : List (Int × (String × String)) := [])
+    (namedErrorSourceOrder : Bool := false) (compilationUnits : List Json := []) :
+    Except String SolcContract :=
+  (readContractWithNormalizationV1 ast name ren testing rewriteSpec rewriteLoop scanSource
+    scanLoop readsSpec entrypoints viaIR compilerCode namedErrorSourceOrder compilationUnits).map Prod.fst
+
+/-- Forgetting the admission-site ledger is exactly the legacy reader. -/
+theorem readContractWithNormalizationV1_forget (ast : Json) (name : String)
+    (ren : List (String × String)) (testing : Bool) (rewriteSpec) (rewriteLoop)
+    (scanSource) (scanLoop) (readsSpec) (entrypoints viaIR : Bool)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json) :
+    (readContractWithNormalizationV1 ast name ren testing rewriteSpec rewriteLoop scanSource
+      scanLoop readsSpec entrypoints viaIR compilerCode namedErrorSourceOrder compilationUnits).map Prod.fst =
+    readContract ast name ren testing rewriteSpec rewriteLoop scanSource scanLoop readsSpec
+      entrypoints viaIR compilerCode namedErrorSourceOrder compilationUnits := rfl
 
 end Solidity.Frontend
