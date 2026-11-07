@@ -111,3 +111,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## Reconciled totals
 
 `python3 scripts/h62/item1/packet-panic/ledger_totals.py --declarations <fresh-declarations.json>` regenerates the literal census and all sixteen ledgers, checks original-row membership and overlap, and emits per-ledger totals and unclassified rows. On this base-pinned tree it reports 465 original rows, nine private rows, 410 described original rows, 419 described total and 55 unclassified original rows. These replace prior hand addition of subtotals. The generator verifies textual identity and set membership; it does not mechanically verify the manual observation prose against Lean statements, establish proof validity or close the lexical/semantic gaps.
+
+## Same-line attribute candidate scan
+
+`attributed_header_scan.py` examines the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.

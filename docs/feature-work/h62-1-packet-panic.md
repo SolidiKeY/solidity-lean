@@ -141,3 +141,7 @@ Twelve per-file ledger tests now restore the removed census row at its original 
 ## Mechanically reconciled ledger totals
 
 `ledger_totals.py` checks a fresh ordered census, regenerates all sixteen ledgers and rejects overlapping, duplicate or unmatched rows. The actual totals remain 465 original, nine private, 419 described and 55 unclassified original headers. Independent read-only finder confirmed the current reconciliation; skeptic identified that an unclassified census row could be omitted or invented, so fresh-census validation and CLI negative controls were added and rechecked without Lean. Manual observation prose is not mechanically checked against theorem statements; the result is not proof or semantic closure.
+
+## Attributed-header scan follow-up
+
+The original census omits same-line attributed declarations. `attributed_header_scan.py` checks only a narrow single-simple-attribute pattern across the 48 base-validated files and found zero raw candidates. Independent read-only finder and skeptic independently matched this result without Lean. The scanner deliberately does not mask comments or cover nested/multiple attributes, multiline headers or other syntax; its synthetic controls demonstrate a block-comment false positive. This does not establish absence of attributed declarations or full coverage.
