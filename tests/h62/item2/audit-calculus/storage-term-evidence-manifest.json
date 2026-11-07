@@ -1,0 +1,52 @@
+{
+  "scope": "Complete45 TermLaws.Storage roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1297,
+    "pending": 3986,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/storage-term-roles-v103/evidence.tar.gz",
+      "bytes": 334668,
+      "sha256": "6e0fe782487c346d5db4a226fa39ca2d0a1d6b74f4fc8c42d5f41bedcb800c2c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/storage-term-roles-v103/inputs.json",
+      "bytes": 773,
+      "sha256": "f771d364afaab4ffc230ca3dbd3d5db700a007061c3ce773e36c3306e3e79fb6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/storage-term-roles-v103/gates.json",
+      "bytes": 2808,
+      "sha256": "0f35f6b96834b541d10af315d3c84f388353086e36a7ae036957a36c8689c4b1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/storage-term-roles-v103/reviews.md",
+      "bytes": 1005,
+      "sha256": "60c055b5411624123c2555962fa4a31058df2af0a516efa754cf9f2366cc6a62"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/storage-term-roles-v103/case-rosters.json",
+      "bytes": 2958,
+      "sha256": "8962f233d44926b3d3fe82b1a2d367673cb148241f1c9a6507128fa5b1364ddf"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/storage-term-roles-v103/doc-master-repair-binding.json",
+      "bytes": 211,
+      "sha256": "f32743f8f3269c5f66f2b99f1d6d9703f6d22f299dec9f35ae808685aac1b9a1"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/storage-term-roles-v103/external-retention.json",
+      "bytes": 328044,
+      "sha256": "33818c8eaa4611b24e7a3da168c237021e3c0ce0945b854115e6347dd5158457"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/storage-term-roles-v103/semantic-roles-reviewed.json",
+      "bytes": 3461546,
+      "sha256": "cef40becec0e2abe91c60317eaf98de9681471627361249b2ed58ab557d7d451"
+    }
+  ]
+}
