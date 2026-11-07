@@ -1,0 +1,68 @@
+{
+  "guardedRegression": "Historical native/WASM stack/cost evidence must not imply H90 freshness or a causal repair",
+  "inputArchive": {
+    "path": "/workspace/h62-coordinator-inputs/exact-A-intake-729b0cb18b0d.tar.gz",
+    "sha256": "729b0cb18b0d9f11232c6db92358a3e53d6a7075a2e775fee1e0a2f3e3df31da",
+    "bytes": 10873861,
+    "verifiedNamedMembers": 10
+  },
+  "historicalSourceBuildHead": "0140eb13b2f122d421deb07a19575a6801b21dfc",
+  "currentRuntimeRepairHead": "957e5defaa3c2e32df1e692d8781e0d89fed5199",
+  "verifiedHistoricalSourceFiles": 343,
+  "recordedCompiledCHashParityModules": 206,
+  "savedCoreProjectionParityRequests": 249,
+  "stack": {
+    "wasmSha256": "6ae1d6db106102dc38725cb32cb1ba7996c537d1948b156d4acae1cd9139b563",
+    "functionImports": 17,
+    "definedFunctions": 3922,
+    "topExport": "malloc",
+    "topIndex": 3207,
+    "repeatedInternalIndices": [
+      3126,
+      2208,
+      2210
+    ],
+    "allTenFrameOffsetsInIndexedBodies": true,
+    "nameSectionPresent": false,
+    "sourceAttribution": "Follow-up authenticated symbol map identifies LTm.fitsM/LFml.fitsM ReadBounds frames; no rootcause or algorithmrepair established.",
+    "followupManifest": "stack-symbols-manifest.json"
+  },
+  "timing": {
+    "savedSummaries": {
+      "nativeAst": {
+        "requests": 249,
+        "functions": 83,
+        "rounds": 3,
+        "medianMs": 1.0177800000001298,
+        "p95Ms": 4.11926399999993
+      },
+      "browser": {
+        "requests": 249,
+        "functions": 83,
+        "rounds": 3,
+        "medianMs": 191.49797799999942,
+        "p95Ms": 235.34401600000092
+      }
+    },
+    "nativeMedianStopRatio": 1.2132243817835349,
+    "browserStartupStopRatio": 1.3219560218205622,
+    "medianWireRatio": 1.220340922091294,
+    "cause": "Unestablished; payload/schema/runtime confounded. No unchanged STOP rerun."
+  },
+  "gates": {
+    "integrityControls": 8,
+    "controlsWallSeconds": 0.6451499949980644,
+    "controlsMaxRssKiB": 47744,
+    "diagnosisWallSeconds": 2.236022604000027,
+    "diagnosisMaxRssKiB": 54412,
+    "deliveredExecutableRuns": 0,
+    "leanRuns": 0
+  },
+  "evidence": {
+    "archiveRelative": "artifacts/native-diagnosis-7d8c02c6a60a81b3.tar.gz",
+    "sha256": "7d8c02c6a60a81b3d76506cacf493c8950aa3441ded37c3d86843228b4291439",
+    "bytes": 3839
+  },
+  "boundary": "Static authenticated saved evidence only.343source hashes match0140; no206object-byte verification, source/compiler/native correctness, current957e freshness, new runtime acceptance or benchmark execution.",
+  "remaining": "Freshruntimevalidation957e/fixed-bytefeature; ReadBounds ownerdiagnosis; causalcostinvestigation; CRlanding and originalqueues/finalgates."
+}
