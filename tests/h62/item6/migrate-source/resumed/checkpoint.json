@@ -1,0 +1,45 @@
+{
+  "schema": "schema-v1",
+  "authority": "Coordinator explicit merge/resume; H82 standing proof-only agreement; H78 public API freeze retained",
+  "merged_master": "d96f2406d352de7e0b72ba6ac4ab29dc457582c6",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "file": "Solidity/Source/Ctor.lean",
+  "sha256": "cbb058de6cdc41a5ea12e8a4e2d0865d91381551d27bf2ee02418dd74af53d92",
+  "source_proof_bodies": [
+    "Solidity.Source.Syn.nodes_eq",
+    "Solidity.Source.Syn.excl_ctor"
+  ],
+  "frozen_statements_touched": [],
+  "installed_shims": [],
+  "new_axioms": 0,
+  "new_sorry": 0,
+  "new_native_decide": 0,
+  "new_lean_runs": 0,
+  "evidence": "/workspace/h62-migrate-source-evidence/resumed",
+  "open_queue_reference": "tests/h62/item6/migrate-source/retirement/original-queue.md",
+  "scope_reference": "tests/h62/item6/migrate-source/retirement/scope-manifest.json",
+  "pending_gates": [
+    "fresh Ctor/consumer validation",
+    "full target directory build",
+    "complete H78 compatibility",
+    "per-declaration axiom reconciliation",
+    "matched complete clean timing",
+    "repository final gates"
+  ],
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "MS-H78-SHIM-PERF-STOP disposition; same-original-name generated API shims; metadata and axiom closure review"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Accepted Raw prerequisite"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "Accepted CollisionBound prerequisite"
+    }
+  ],
+  "full_timing_delta": null,
+  "questions": []
+}
