@@ -167,6 +167,526 @@ the original launch authorization from the subsequent integration authorization.
 
 ## Handoffs
 
+None yet. Each checkpoint appends its handoff here (revision, theorems and
+premises, checks, remaining obligations).
+
+
+### VY2 preparation handoff (2026-10-31)
+
+On `codex/solidity-inline-assembly5-20261031/vy2-physical` from exact base
+`0b078cefaf7daad79007b87b72df64eb6936420f`,
+[VY2](inline-assembly-vy2.md) adds dependency-free intrinsic physical-view
+preparation under `Solidity/Yul/Views/`: packed-field read/update/frame/width
+laws, typed canonical codecs and residual reconstruction, byte/word/copy
+operations with both word roundtrips, raw calldata/fixed hash/environment
+inputs, allocation and actual V04b MemOK extension obligations, and inhabited
+negative/combination/source-reset/rollback controls. YQ1–YQ7 approval is recorded
+in scope; no frontend or manifest exclusion is reopened.
+
+This is partial backfill, not Y04/Y05/Y06/Y09.02 completion. VY1 is absent;
+full typed source packing/writeback, dirty owned bits, residual journaling,
+V10/V11 agreement instances, memory-safe MemOK preservation, allocation's final
+refinement/adequacy, source builtin/row integration, notation/printers and
+statement soundness remain open. Separate finder/skeptic findings and checks
+are in the lane record. Committed revision, exact commands/outcomes/resources,
+raw failures, patch/bundle and checksum paths are in
+`/workspace/vy2-evidence/HANDOFF.md` on this VM.
+
+
+### VY2 canonical scalar codec handoff (2026-10-31)
+
+The lane's next preparation checkpoint adds concrete integer/fixed/address/
+contract/enum/UDVT/bytesN/external-function canonical codecs over Source.Val,
+proves their inverses and connects them to typed byte/residual regions. Signed
+bounds, enum refusals, packing combinations and residual controls are inhabited.
+Pinned solc raw-storage witnesses pass both pipelines. Final full gate passes
+999/262 jobs and131 sort annotations; audit covers222 declarations/109 theorems.
+Separate finder/skeptic reviews report no confirmed findings.
+See [VY2](inline-assembly-vy2.md) for exact premises, evidence and remaining
+full-lane dependencies; no admission row or whole-layout instance is claimed.
+Full committed revision/patch/bundle/checksums remain in the VM handoff.
+
+
+### VY2 aggregate and raw-fixture handoff (2026-10-31)
+
+Further Backfill A constructs flat scalar fixed-array/heterogeneous-struct codecs
+over actual Data/DataList, computes documented storage packing, and proves typed
+roundtrip, extent/separation, unchanged and residual/padding preservation through
+actual Word slot maps. Inhabited multi-slot controls and pinned compiler goldens
+agree. A closed four-fixture raw adapter retains13 calls and4 deployments per
+pipeline, fixes the previous raw-vector/host overclassification failures, and
+passes81 fail-closed controls. Original failing records remain preserved.
+Finder/skeptic findings (indexed match and unsupported storage-root observation)
+were fixed and independently reviewed. Exact premises, proof/external boundaries,
+remaining full Y04–Y09.02 dependencies and cumulative artifact paths are in
+[VY2](inline-assembly-vy2.md) and `/workspace/vy2-evidence/HANDOFF.md`.
+
+
+### VY2 disjoint and fixed nested handoff (2026-10-31)
+
+The next [VY2](inline-assembly-vy2.md) checkpoint proves disjoint composition of
+existing encoders and constructs two fixed nested forms over actual Source.Data/
+DataList: struct with fixed scalar array plus struct, and fixed array of
+heterogeneous structs. Real next-slot alignment/bounds, actual outputs, exact
+residual and unchanged-view proofs are retained. Full5/7-word computational
+goldens and pinned solc observations agree; prior ordered fixtures/81 controls
+remain passing. Kernel audit407/213 and wrapper1007/262+131 pass.
+Independent reviews found no remaining confirmed finding after documentation
+fixes. This is bounded canonical Backfill A, not full Y04–Y09.02 completion;
+source/MemOK/dirty/journal/compiler/allocator/calculus dependencies remain open.
+Cumulative revision, evidence, prior-artifact preservation and checksum paths:
+`/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 canonical scalar writeback handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) now constructs a bounded singleton physical writeback
+over actual Source.Storage and actual account/transient operations. Original-cell
+administrative identity, unrelated paths, residual bytes and actual source-frame
+controls are proved/tested. Canonical preparation does not model dirty values;
+raw bool2 remains observable in both pinned pipelines. Nine additional ordered
+observations,14 fail-closed controls, original fixtures/81 controls,489/260 axiom
+reports and wrapper1010/262+131 pass after independent reviews. This is Backfill
+progress, not full Y04–Y09.02 closure; raw residual journaling and source/heap/
+MemOK/allocator/compiler/calculus integration remain open. Cumulative evidence:
+`/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 fixed-domain residual journal handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) constructs an intrinsically unowned-slot journal
+beside actual typed Source state/frames. Actual source operations and residual
+old-word undo compose through nested rollback, outer revert after child commit
+and persistent/transient reset, with nontrivial controls. Fixed ownership is an
+input, not whole-store coverage; owned dirty/padding bits and dynamic paths/Yul
+integration remain open. Both pinned pipelines pass five new ordered state-rich
+calls and33 negative controls after independent review fixes. Existing fixtures,
+writeback vectors and budgets preserved. Kernel544/287 and wrapper1012/262+131
+pass. Full Y04–Y09.02 and Backfills A/B stay unfinished; goal blocked unchanged.
+Exact committed head and cumulative/versioned artifacts: `/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 finite-path writeback handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) constructs finite heterogeneous canonical writeback
+into actual Source.Storage, with real pairwise path/physical separation and
+constructed finite agreement instance. Encoded views, unchanged administrative
+identity, reconstruction/residual laws, permutation and actual source batches
+are proved. Residual keys now derive from the same fixed registrations; combined
+actual source/residual frames are controlled. Finite ownership is not whole-store
+coverage or dirty/heap/Yul integration. New ten-call pinned fixture and55 negative
+controls pass both pipelines; existing fixtures/controls preserved.659/348 scoped
+signatures/axioms and wrapper1017/262+131 pass after independent read-only reviews.
+Y04/Y05/Y06/Backfills A/B stay partial, concrete Y09.02 blocked and goal unchanged.
+Exact revisions, raw gate failures/comparisons and cumulative/versioned artifacts:
+`/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 actual selected heap-object handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) constructs ordinary allocated bytes/string physical
+writeback into actual Source.Heap, exact whole-heap identity and unchanged types/
+next/bounds/other cells, original Placement transport and nonoverlap/residual/
+reserved laws. It proves ACTUAL owner Source.MemOK transport for selected steps,
+with inhabited source states and real reads through bytes/string alias locals.
+Same-header-length preparation is not full heap/Y05 support: raw header growth
+succeeds in both compiler pipelines and remains explicitly open in this model.
+New ten-call exact-byte fixture and89 negatives pass, all previous observations/
+controls preserved.768/413 signatures/axioms and wrapper1024/262+131 pass after
+independent reviews/fixes. Full Y04/Y05/Y06/Backfills A/B stay partial, concrete
+Y09.02 and original goal blocked. Exact heads/gates/limitations/versioned artifacts:
+`/workspace/vy2-evidence/HANDOFF.md`.
+
+### VY2 bounded heap-resize handoff (2026-10-31)
+
+[VY2](inline-assembly-vy2.md) adds separate footprint-bounded bytes/string resizing
+into actual Source.Heap, preserving the fixed API and proving old-domain
+compatibility. Actual output Placement updates selected shape, retaining
+addresses/free/other objects and deriving bounds/separation; real MemOK, aliases,
+shrink-tail and two-object composition are proved/controlled. Historical capacity
+and larger growth remain open, not refusals. Twelve new exact22-word observations
+and103 negatives pass both pipelines; all old fixtures/controls unchanged.
+859/470 signatures/axioms and wrapper1029/262+131 pass after independent reviews.
+Entire Y04/Y05/Y06/Backfills A/B stay partial, Y09.02 and goal blocked unchanged.
+Exact revisions/gates/full obligations/versioned artifacts: `/workspace/vy2-evidence/HANDOFF.md`.
+
+
+### VY2 retained-allocation handoff (2026-10-31)
+
+Constructive selected-object retained-allocation lineage now preserves original
+real Placement extents across bytes/string shrink-to-zero and regrowth, with
+exact current shapes, full-region separation, actual owner MemOK and logical/
+physical two-order laws. Fixed/bounded APIs and original counter-control remain.
+See [VY2 checkpoint](inline-assembly-vy2.md#retained-ordinary-allocation-checkpoint-2026-10-31)
+and `/workspace/vy2-evidence/retained-allocation/HANDOFF.md` for full committed
+revision, premises, reviews and gates. Initial allocator provenance, whole-store/
+heap/assembly/source/compiler/calculus/refinement closure remain open. Y04–Y06
+partial, Y09.02 blocked, both backfills unfinished; no admission promotion.
+
+
+### VY2 supported byte-heap view handoff (2026-10-31)
+
+Continued original backfill constructs finite ordinary bytes/string whole-
+supported-heap views from actual Heap.get witnesses and valid Placement, with
+exact typed layout reads/reserved/residual/unchanged laws. Real three-object and
+retained-regrowth controls are inhabited. An actual owner-MemOK oversized object
+provably lacks ordinary Placement; no obligation signature or scope changed.
+See [VY2 realization](inline-assembly-vy2.md#constructive-supported-byte-heap-realization-2026-10-31)
+and `/workspace/vy2-evidence/heap-realization/HANDOFF.md`. Universal realization,
+source/assembly/allocator/compiler/calculus closure and full VY2 remain open.
+
+
+### VY2 mixed ordinary aggregate view handoff (2026-10-31)
+
+New intrinsic constructor witnesses serialize actual scalar/pointer struct and
+static/dynamic array members alongside bytes/string images. Real child typing,
+placement-derived bounds, supported covered-heap source layout reads, actual
+owner invariants and six-object alias controls are constructive. Both pipelines
+compare complete pointer/header/alias/ABI observations with157negative controls;
+initial broken fixture evidence preserved. See [lane checkpoint](inline-assembly-vy2.md#mixed-ordinary-aggregatepointer-views-2026-10-31)
+and `/workspace/vy2-evidence/mixed-heap/HANDOFF.md`. Universal realization,
+writeback/allocation/source/compiler/calculus closure and full VY2 remain open.
+
+
+### VY2 selected word writeback handoff (2026-10-31)
+
+Continued after mixed-view checkpoint: concrete full-width static uint256 array
+decode/writeback and ownership-based pointer decoder composed with actual typed
+Source.writeLoc, all-initial-H owner MemOK, unchanged and concrete physical/source
+two-order controls. Isolated pinned fixture checks both combinations/maxword/
+revert/fresh with149negative controls. See [lane record](inline-assembly-vy2.md#concrete-selected-array-and-pointer-writeback-2026-10-31)
+and `/workspace/vy2-evidence/static-uint/HANDOFF.md`. Selected support is not
+universal whole-memory/dirty/shared-zero/source/compiler/calculus closure;
+full VY2 and both backfills remain unfinished, goal blocked unchanged.
+
+
+### VY2 dynamic uint256 writeback handoff (2026-10-31)
+
+Concrete fixed-length and retained-original-extent dynamic array writeback,
+actual current Placement/all-H MemOK, exact residual/tails and source alias
+controls, plus18ordered pinned pipeline calls/153negative controls. See
+[lane record](inline-assembly-vy2.md#dynamic-full-width-array-writeback-2026-10-31)
+and `/workspace/vy2-evidence/dynamic-uint/HANDOFF.md`. Full lane/both backfills
+remain unfinished, including simultaneous general aggregate/source integration;
+this component does not promote admission or replace full obligations.
+
+
+### VY2 simultaneous struct writeback handoff (2026-10-31)
+
+Constructive actual declared DataList member decoding, whole-state unchanged,
+actual heapPut full Except/state/all-initial-H MemOK and Placement/residual laws;
+canonical bool/fulluint/real owned pointers, including shared children. See
+[lane record](inline-assembly-vy2.md#simultaneous-heterogeneous-struct-writeback-2026-10-31)
+and `/workspace/vy2-evidence/aggregate-writeback/HANDOFF.md`. Both pinned pipelines
+retain all prior214calls and add12/153negative controls. Full lane/both backfills
+remain unfinished; no admission, full writeback or source/compiler/calculus
+closure follows from these supported components.
+
+
+### VY2 canonical array-family handoff (2026-10-31)
+
+Actual fixed/header-preserving bool/u256/owned-reference array decode/writeback,
+complete Source.heapPut result/all-H MemOK, unchanged state/placement/residual
+laws and alias controls. See [lane record](inline-assembly-vy2.md#canonical-array-element-families-2026-10-31)
+and `/workspace/vy2-evidence/member-arrays/HANDOFF.md`. Pinned pipelines add12calls
+and183strict negatives, retain all previous226fields/calls. Full lane/both
+backfills remain unfinished, including retained-capacity/general memory/source/
+compiler/calculus closure; no admission promotion or original obligation change.
+
+
+### VY2 retained array-family handoff (2026-10-31)
+
+Constructive actual retained-capacity canonical array resizing, output current
+Placement/history, complete source heapPut/all-H MemOK and bool/reference
+shrink/regrow/alias/tail controls. [Lane record](inline-assembly-vy2.md#retained-array-element-family-resizing-2026-10-31),
+`/workspace/vy2-evidence/retained-members/HANDOFF.md`. Both pinned pipelines add
+16orderedcalls/195negatives; every prior238reportfield/call unchanged. Full lane/
+both backfills remain unfinished; no admission/universal writeback/allocator/
+source/compiler/calculus closure inferred.
+
+
+### VY2 canonical scalar-memory handoff (2026-10-31)
+
+Pinned pre-proof audit establishes canonical signed/width/address/bytesN memory
+alignment against actual Source.Val.word. Constructive inverse/RefOK and parallel
+canonical array/struct/retained adapters reuse actual Heap/Placement/owner MemOK,
+keeping all old decoder APIs untouched. [Lane record](inline-assembly-vy2.md#canonical-scalar-memory-extension-2026-10-31),
+`/workspace/vy2-evidence/memory-scalars/HANDOFF.md`. Both pipelines preserve all
+prior254calls and add28/99+155negative controls. Full lane remains unfinished;
+no dirty cleanup, new admission exclusion or compiler/source adequacy inferred.
+
+
+### VY2 canonical compatibility/alias handoff (2026-10-31)
+
+Exact old-domain all-raw decoder/heap/state API equality and genuine typed source/
+external aliases with complete Panic bytes. [Lane record](inline-assembly-vy2.md#canonical-compatibility-and-genuine-aliases-2026-10-31),
+`/workspace/vy2-evidence/canonical-aliases/HANDOFF.md`. Both pipelines add14calls/
+137negatives, all preceding282fields/calls unchanged. This follows the canonical
+scalar checkpoint, not full VY2 completion or Yul/compiler correspondence.
+
+
+### VY2 joint ordinary-memory preparation handoff
+
+See [lane checkpoint](inline-assembly-vy2.md#joint-ordinary-memory-writeback-2026-10-31).
+New lane modules construct joint struct/array source writeback, all-raw candidate
+transport, complete-result order/error laws, exact raw re-encode and retained
+placement/history; actual source controls and pinned both-pipeline alias fixtures
+remain distinct evidence. Original Y04–Y06/backfills partial, Y09.02/source/
+compiler/calculus closure blocked. No admission promotion or goal transition.
+Full SHAs/commands/checksums: `/workspace/vy2-evidence/joint-memory/HANDOFF.md`.
+
+
+### VY2 finite owned-inventory preparation handoff
+
+See [lane checkpoint](inline-assembly-vy2.md#finite-owned-memory-inventory-2026-11-01).
+Constructive arbitrary finite canonical inventory codecs, actual source writes,
+per-step placement/history/candidate closure, exact sequential/unchanged/raw-view
+and distinct-ID permutation laws; inhabited multi-root/alias/late-error/retained
+controls and separate pinned reference evidence. Original full lane/goal remains
+partial/blocked, no admission promotion. Exact SHAs/artifacts/commands at
+`/workspace/vy2-evidence/owned-inventory/HANDOFF.md`.
+
+
+### VY2 computed heap-inventory preparation handoff
+
+The [VY2 lane record](inline-assembly-vy2.md#computed-ordinary-heap-inventory-2026-11-01) now constructs intrinsic images and finite inventory directly from actual Heap.next/get and valid Placement, deriving complete coverage/unique IDs and exact sparse/unsupported accounting. Actual owner MemOK plus explicit canonical declared-family support derives preparation without supplied images or completeness laws. Generated inventories feed existing real source writeback, retained placement/history, raw reads, unchanged state and every-H preservation. Full lane, allocator refinement, broader representations and producer/compiler/calculus closure remain open; no admission promotion. Versioned evidence: `/workspace/vy2-evidence/heap-enumeration`.
+
+
+### VY2 packed-slot complement handoff
+
+The [lane record](inline-assembly-vy2.md#packed-slot-complement-journaling-2026-11-01) now derives complement masks from actual finite typed registrations, reconstructs whole raw slots after canonical typed writeback and couples both parts through existing journals and actual Source.applyOp/frame checks. Nonempty actual source controls and pinned mixed-field/padding/order/rollback/reset vectors are included. Pure unchanged preparation is distinct from journaled/static source behavior. Whole ownership/dirty/dynamic/Yul/compiler/calculus closure remains open; no admission or owner-contract change. Versioned evidence: /workspace/vy2-evidence/packed-residual.
+
+
+### VY2 computed word-layout registration handoff
+
+The [lane record](inline-assembly-vy2.md#computed-word-layout-registrations-2026-11-01)
+adds checked actual Source paths through the existing word-granular owner locator,
+approved Fixed preimage bytes, derived finite canonical storage instances and
+source/journal controls. Root0/layout inputs and real per-run region conditions
+remain explicit; no packed-layout or whole-source adequacy is claimed. Full lane
+and producer/compiler/calculus closure remain open. Evidence:
+/workspace/vy2-evidence/hashed-registrations.
+
+
+### VY2 declaration-derived packing handoff
+
+The [lane record](inline-assembly-vy2.md#declaration-derived-packed-registrations-2026-11-01)
+now derives canonical mixed scalar registrations from actual source declarations
+using existing packing arithmetic, proves disjoint ownership and connects the
+computed registry to source/frame/complement journaling. A declaration-derived
+fixed-array/struct boundary adapter and14new pinned ordered calls are included.
+Whole nested/source/layout/dirty/compiler/calculus obligations remain open;
+no admission promotion. Evidence: /workspace/vy2-evidence/declaration-packing.
+
+
+### VY2 nested declaration source-registry handoff
+
+The [lane record](inline-assembly-vy2.md#nested-declared-source-registry-and-writeback-2026-11-01)
+now computes complete fixed-array/inner-struct Source.SPath registrations and
+proves actual whole-store snapshot/source equality, raw reencoding, nonwrapping
+bounds, alias/index-error/MemOK and paired journal controls. Existing380 pinned
+external calls remain unchanged. Arbitrary declarations/dirty/dynamic/Yul/
+compiler/calculus closure remain open. Evidence:/workspace/vy2-evidence/nested-declarations.
+
+
+### VY2 recursive fixed-path handoff
+
+The [lane record](inline-assembly-vy2.md#recursive-fixed-declaration-paths-2026-11-01)
+now derives complete recursive fixed-array/struct source registrations from an
+intrinsic finite actual-metadata certificate, including exact extent, path
+coverage/separation/nonwrapping and concrete whole-source/residual snapshot
+composition. New14pinned calls supplement the unchanged380observations.
+Whole storage/dirty/dynamic/allocation/Yul/compiler/calculus closure remains
+open; goal BLOCKED unchanged. Evidence:/workspace/vy2-evidence/recursive-fixed.
+The follow-up also derives actual owner pathTy presence for every enumerated
+leaf from root and field metadata; missing-path fallback is not assumed valid.
+
+
+### VY2 ordered ordinary-root handoff
+
+The [lane record](inline-assembly-vy2.md#ordered-ordinary-root-declarations-2026-11-01)
+now threads one computed cursor across checked ordinary roots, derives complete
+cross-root geometry/coverage and actual declaration/bank lookup, and connects
+whole typed storage/actual residual journals/source readback. Constructor and
+padding/reset controls plus14new pinned calls supplement unchanged394calls.
+Scope/origin/inheritance/dirty/dynamic/compiler/calculus closure remains open;
+full goal stays BLOCKED. Evidence:/workspace/vy2-evidence/root-sequence.
+
+
+VY2 inherited-root handoff (2026-11-01): constructive canonical active-contract
+root inventory uses reversed ACTUAL Source owner C3 and original typed packer;
+private qualified base members/cross-contract packing, source/store/residual/frame
+and reset controls, pinned diamond pipelines and actual frontend lineage-validator
+controls. Full lane PARTIAL, source/compiler/calculus dependencies and origin
+agreement still OPEN; YQ1–YQ7 unchanged. See lane inherited-active-contract section
+and /workspace/vy2-evidence/inherited-roots/HANDOFF.md for committed head/gates.
+
+
+VY2 computed-origin handoff (2026-11-01): actual active Source contract clause,
+existing rational/literal profile/range checks now compute default0/nonzero Word
+and independent transient0; no caller origin in new preparation entry. Actual
+inherited packed source/store/residual/frame/reset/MemOK and shifted42 diamond
+controls, pinned pipelines and compiler expression-boundary controls are in lane
+computed-active-layout-origin section. Full assignment PARTIAL, original goal
+BLOCKED unchanged; general expressions/dynamic/dirty/whole source/compiler/calculus
+closure remain open. Exact committed head/gates/artifacts:
+/workspace/vy2-evidence/layout-origin/HANDOFF.md.
+
+VY2 dynamic-header/live-inventory checkpoint (2026-11-01): extends the existing
+actual declaration packing/origin computation to uint256[] length cells and
+approved Fixed-hashed element paths, with uncapped runtime-length finite
+inventory, exact canonical raw-map reconstruction, actual Source length/index/
+static/MemOK and paired source/frame controls. See the [lane handoff](inline-assembly-vy2.md#computed-dynamic-headers-and-live-element-inventories-2026-11-01).
+Canonical preparation and finite compiler/EVM controls are not whole Y04/Y05/
+Y06/Y09.02 or source/compiler adequacy; original full lane/goal remains partial/
+BLOCKED. Exact reviewed tree/gates/premises in
+`/workspace/vy2-evidence/dynamic-storage/HANDOFF.md`; no admission promotion.
+
+
+VY2 ownership-changing dynamic-complement checkpoint (2026-11-01): actual
+Source.readLen-derived inventories, complete old/new raw-map/complement transport,
+source-success-only journaling, source/pure snapshot equality, dependent shrink /
+regrowth, exact alias tail reads, frame rollback and transaction controls. See
+[lane scope](inline-assembly-vy2.md#ownership-changing-dynamic-complements-2026-11-01).
+Full original lane remains PARTIAL/BLOCKED, no admission promotion. Committed
+identity, checks, reviews and exports: `/workspace/vy2-evidence/ownership-transport/HANDOFF.md`.
+
+
+VY2 packed dynamic unsigned checkpoint (2026-11-01): declaration-derived generic
+unsigned element packing, partial-slot complement transport and actual source /
+frame/static/alias/MemOK controls; uint16 and uint24 finite pinned pipeline
+observations are separate from kernel/source/compiler correspondence. See
+[lane handoff](inline-assembly-vy2.md#packed-dynamic-unsigned-ownership-2026-11-01).
+Full lane PARTIAL/BLOCKED, no admission promotion. Exact committed identity,
+gates/reviews/exports: `/workspace/vy2-evidence/packed-dynamic/HANDOFF.md`.
+
+
+VY2 signed dynamic integer checkpoint (2026-11-01): additive actual-declaration
+integer inventories, existing signed-codec inversion, negative source/alias
+reads and actual source-success-only complement/frame transport. See
+[lane scope](inline-assembly-vy2.md#signed-dynamic-integer-ownership-2026-11-01).
+Full lane remains PARTIAL/BLOCKED; kernel source laws and finite pinned pipeline
+controls are separate from full Yul/compiler adequacy. Exact committed tree /
+gates/exports: `/workspace/vy2-evidence/signed-dynamic/HANDOFF.md`.
+
+### VY2 scalar-family dynamic ownership checkpoint (2026-11-01)
+
+New intrinsic bool/address/fixedBytes declaration certificates and typed scalar
+header/element/component snapshots reuse existing source codecs, one declaration
+cursor, Source.readLen and Source.applyOp. Persistent canonical complement/frame
+transport is proved; no frontend admission or compiler/source adequacy is claimed.
+Bool2 growth remains unsupported canonical preparation while pinned EVM growth
+succeeds; storage bytesN low alignment is distinct from ABI/memory left alignment.
+Full queue, premises, reviews and versioned handoff:
+[inline-assembly-vy2.md](inline-assembly-vy2.md),
+`/workspace/vy2-evidence/scalar-dynamic/HANDOFF.md`.
+
+### VY2 combined primitive dynamic ownership checkpoint (2026-11-01)
+
+One declaration-derived inventory includes registered fields once plus all live
+integer and bool/address/bytesN elements, using actual Source.readLen and existing
+typed selectors/codecs. One source-success-only account/complement execution proves
+whole supplied-map reconstruction and frame/reset laws; no separate-family masked
+runs are substituted. Original full-lane source/compiler/calculus closure remains
+open. [Lane premises/queue](inline-assembly-vy2.md) and versioned evidence:
+`/workspace/vy2-evidence/combined-dynamic/HANDOFF.md`.
+
+
+VY2 nested primitive members checkpoint: actual struct field paths and one packing
+cursor derive nested length headers and hashed live entries, combined with fixed
+siblings/top-level primitive roots. Actual-source changing ownership and residual
+journal share one success-only operation; full reconstruction, alias/frame/reset
+controls and compatibility are constructive canonical preparation, not full Y04
+or Yul adequacy. [Exact premises and entire queue](inline-assembly-vy2.md#vy2-nested-primitive-members-2026-11-01),
+versioned handoff `/workspace/vy2-evidence/nested-dynamic/HANDOFF.md`. Original full
+lane remains unfinished; YQ1-YQ7 and whole obligations unchanged.
+
+
+VY2 recursive dynamic structs: additive intrinsic finite certificates derive full
+nested paths/headers/packing from actual metadata, with exact one-level/old-root
+compatibility and coupled actual source/complement/frame reconstruction. Three
+struct levels and both-pipeline observations are inhabited; canonical preparation
+is not Yul/compiler adequacy. [Full original queue/premises](inline-assembly-vy2.md#vy2-recursive-dynamic-structs-2026-11-01).
+Versioned handoff `/workspace/vy2-evidence/recursive-dynamic/HANDOFF.md`. Original
+lane remains partial; YQ1-YQ7 and full original closure obligations unchanged.
+
+
+VY2 aggregate dynamic-array preparation checkpoint: see
+[the lane record](inline-assembly-vy2.md#vy2-aggregate-dynamic-array-preparation-2026-11-01).
+Derived aggregate stride, typed nested live collection and actual canonical
+snapshot/source application are partial preparation. Dormant aliases after outer
+shrink expose a concrete retained-path/history obligation, not a new exclusion.
+Full original queue and producer/compiler/calculus closure remain unfinished.
+Exact signatures, tested-tree/gates/reviews/resources and committed full SHA:
+`/workspace/vy2-evidence/aggregate-dynamic/HANDOFF.md`.
+
+
+VY2 retained-reference checkpoint: [original lane queue](inline-assembly-vy2.md#vy2-retained-source-references-2026-11-01).
+Actual source formation/bind/sub traces, current-or-retained child traversal,
+complete canonical source/complement writes and real prefix/frame controls are
+implemented for a supported persistent component. This is not universal
+producer/alias capture, whole storage/heap semantics or full-lane completion.
+Exact committed SHA, theorem premises, final gates/reviews/resources and artifacts:
+`/workspace/vy2-evidence/retained-storage/HANDOFF.md`.
+
+- VY2 computed entry/return capture: [lane checkpoint](inline-assembly-vy2.md#vy2-computed-entry-and-return-capture-2026-11-01); partial, final source/compiler closure open.
+
+- VY2 tuple capture and concrete parallel consumers: [lane checkpoint](inline-assembly-vy2.md#vy2-runtime-tuple-and-argument-capture-parallel-physical-consumers-2026-11-01); partial source assignment, exact peer-input exports and isolated consumers.
+
+- VY2 owned bool representation/source journals: [lane checkpoint](inline-assembly-vy2.md#owned-bool-representation-and-source-journals-2026-11-01); partial physical preparation, dirty local/source/compiler closure remains open.
+
+- VY2 owned bool dynamic inventory: [lane checkpoint](inline-assembly-vy2.md#owned-bool-changing-dynamic-inventory-2026-11-01); actual source/representation/complement transport, partial original lane with retained/local/compiler closure open.
+
+VY2 handoff: [actual location producer capture](inline-assembly-vy2.md#actual-location-producer-capture-2026-11-01) extends typed source-path capture; full lane remains partial.
+
+VY2 handoff: [actual byte/string allocation placement](inline-assembly-vy2.md#actual-bytestring-allocation-placement-2026-11-01) adds constructive actual heap allocation; full lane remains partial.
+
+VY2 handoff: [retained allocation lineage extension](inline-assembly-vy2.md#retained-allocation-lineage-extension-2026-11-01) preserves original capacities across actual allocation; full lane remains partial.
+
+VY2 computed-inventory allocation integration: [lane checkpoint](inline-assembly-vy2.md#computed-inventory-after-allocation-2026-11-01). This derives actual fresh-ID coverage and retains capacity history; full lane closure remains open.
+
+VY2 [actual allocation physical-view bridge](inline-assembly-vy2.md#actual-allocation-physical-view-bridge-2026-11-01) connects the real raw encoder and source writeback under explicit initial-view premises; full closure remains open.
+
+VY2 [generic ordinary object allocation](inline-assembly-vy2.md#generic-ordinary-object-allocation-2026-11-01) constructs typed struct/array physical/source allocation under actual operand and initial-view premises; full closure stays open.
+
+VY2 [actual struct constructor producer](inline-assembly-vy2.md#actual-struct-constructor-producer-2026-11-01) derives constructor execution and physical allocation reuse; full source/compiler closure remains open.
+
+VY2 [actual calldata array allocation](inline-assembly-vy2.md#actual-calldata-array-allocation-2026-11-01) connects the real memory decoder, retained allocation and whole-map writeback; final adequacy remains open.
+
+VY2 [actual memory hash binding](inline-assembly-vy2.md#actual-memory-hash-binding-2026-11-01) connects exact source memory bytes and checked keccak expression to physical hash; final adequacy remains open.
+
+VY2 [actual source environment inputs](inline-assembly-vy2.md#actual-source-environment-inputs-2026-11-01) derives supported source magic and physical context observations; full source/call/compiler closure remains open.
+
+VY2 [concrete packed World adapter](inline-assembly-vy2.md#concrete-packed-world-adapter-2026-11-01) commits actual same-plan source/residual/frame-completion agreement in the private peer-input tree; full lane partial.
+
+VY2 [actual target input frame](inline-assembly-vy2.md#actual-target-input-frame-2026-11-01) supplies concrete bounded source/target Word/address/frame input conversion; lowering and full lane remain open.
+
+VY2 [actual source balance inputs](inline-assembly-vy2.md#actual-source-balance-inputs-2026-11-01) derives the actual balance-read/constructed-funds boundary; independent target ledger and final adequacy remain open.
+
+VY2 storage-effect/input checkpoint: validator-derived persistent/transient packed writes preserve actual source code/balance/history observations and constructed target funds; actual static errors and complete resulting state retained. See [lane accounting](inline-assembly-vy2.md). Independent target-ledger/Yul/compiler/full-lane closure remains open.
+
+VY2 actual effectful balance operand equations and exact halt-prefix controls: [lane checkpoint](inline-assembly-vy2.md). Conditional actual-run premises remain explicit; no global producer or target-ledger adequacy claimed.
+
+VY2 constructive scratch-copy/whole-heap view and computed source writeback transport: [lane checkpoint](inline-assembly-vy2.md). General output-memory and compiler/call adequacy remain open.
+
+VY2 checked residual-window/real retained-tail ownership and actual source writeback: [lane checkpoint](inline-assembly-vy2.md). No new admission or full memory safety/call/compiler claim.
+
+
+VY2 chronological residual-copy handoff: [lane record](inline-assembly-vy2.md#chronological-residual-memory-copies).
+Actual typed current-memory sources, snapshot overlap, arbitrary finite
+chronological copies, whole-map/source-state identity, every-original-H
+MemOK and reserved/unknown-byte laws are additive preparation results.
+Full Y04–Y06/Y09.02 and joint producer/compiler closure remain unfinished.
+
+
+VY2 mapping and transient handoff: [lane record](inline-assembly-vy2.md#mapping-slot-views-and-transient-slots).
+Constructive actual-declaration/key mapping encoding and whole-store roundtrip/
+unchanged laws use the original HashedLayout per-run region contract. Actual
+transient source/complement load/store, static failure, paired frame rollback
+and every-slot transaction reset are additive physical results. Full source/
+Yul/compiler and universal layout/dirty ownership remain unfinished.
+
+
+VY2 actual frame calldata/hash handoff: [lane record](inline-assembly-vy2.md#actual-frame-calldata-copy-and-hash).
+Actual raw frame bytes, source-preserving residual copy, zero padding at maximum
+source offset and SAME-Fixed hashing are standalone proved physical components.
+Concrete producer/compiler/calculus and universal source closure remain open.
 Each checkpoint appends its handoff here (revision, theorems and premises,
 checks, remaining obligations).
 

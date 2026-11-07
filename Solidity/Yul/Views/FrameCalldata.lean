@@ -49,23 +49,19 @@ theorem frameCalldata_copy_byte {D : Source.Layout} {h : Source.Heap D} {p : Pla
     (frame : Source.CallFrame) (plan : ResidualWindowPlan p) (residual : ByteView) (source : Roadmap.Word)
     (i : Nat) (inside : i<plan.size.val) :
     frameCalldataCopy frame plan residual source (plan.destination.val+i)=frame.input[source.val+i]?.getD 0 :=
-  find_copyBytes _ _ _ _ _ i inside
+  calldatacopy_payload residual frame.input plan.destination.val source.val plan.size.val i inside
 
 theorem frameCalldata_padded_byte {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
     (frame : Source.CallFrame) (plan : ResidualWindowPlan p) (residual : ByteView) (source : Roadmap.Word)
     (i : Nat) (inside : i<plan.size.val) (past : frame.input.length≤source.val+i) :
-    frameCalldataCopy frame plan residual source (plan.destination.val+i)=0 := by
-  rw [frameCalldata_copy_byte frame plan residual source i inside,List.getElem?_eq_none past]
-  rfl
+    frameCalldataCopy frame plan residual source (plan.destination.val+i)=0 :=
+  calldatacopy_padded_byte residual frame.input plan.destination.val source.val plan.size.val i inside past
 
 theorem frameCalldata_readBytes {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
     (frame : Source.CallFrame) (plan : ResidualWindowPlan p) (physical : ByteView) (source : Roadmap.Word) :
     readBytes (calldatacopy physical frame.input plan.destination.val source.val plan.size.val) plan.destination.val plan.size.val=
-      readBytes (calldataBytes frame.input) source.val plan.size.val := by
-  unfold readBytes
-  apply List.map_congr_left
-  intro i member
-  exact find_copyBytes _ _ _ _ _ i (List.mem_range.mp member)
+      readBytes (calldataBytes frame.input) source.val plan.size.val :=
+  calldatacopy_readBytes physical frame.input plan.destination.val source.val plan.size.val
 
 /-- Approved SAME Fixed hash over exactly the copied bytes, including all zero
 padding. No collision premise, original-input/selector-strip substitution,
@@ -82,7 +78,8 @@ theorem frameCalldata_hash {D : Source.Layout} {h : Source.Heap D} {p : Placemen
 theorem frameCalldata_zero_copy {D : Source.Layout} {h : Source.Heap D} {p : Placement h}
     (frame : Source.CallFrame) (plan : ResidualWindowPlan p) (residual : ByteView) (source : Roadmap.Word)
     (empty : plan.size.val=0) : frameCalldataCopy frame plan residual source=residual := by
-  unfold frameCalldataCopy calldatacopy
-  rw [empty,copyBytes_zero]
+  unfold frameCalldataCopy
+  rw [empty]
+  exact calldatacopy_zero residual frame.input plan.destination.val source.val
 
 end Solidity.Yul.Views

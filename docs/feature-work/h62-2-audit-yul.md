@@ -228,3 +228,76 @@ all final gates. The current isolated resolver supports core and quoted audit
 module paths; Bridge package-root/dependency handling still requires a scoped
 tooling extension before Bridge can be claimed covered. Keep all producer files
 read-only and coordinate any exact-file change through the current coordinator.
+
+### Y04 Source-to-graph path identity audit
+
+`tests/h62/item2/audit-yul/SourceGraphEndpoints.lean` instantiates the public StorageOps path endpoint for arbitrary finite word-key chains in the existing checked persistent nested-mapping family. The graph key encoding and recursive location equality are proved; the slot image is derived from those laws, rather than assumed. A joint witness constructs a two-key declaration through the existing intrinsic Source syntax and derives its ordinary Source path. A negative control rejects certifying that nested path as the untouched root slot. This is symbolic path/slot metadata correspondence at the existing root0 placement, not Source liveness, graph-value adequacy, numeric-store agreement, compiler selection or ReachedEndpoint. No new witness is counted against the frozen theorem census.
+
+The attempted production import raised NestedMappingLayout checking from median 0.40 seconds to 0.83 seconds. The performance STOP was honored: the exact production source was restored, with a restoration check of 0.40 seconds; the slowed version was not rerun unchanged. The checked prototype is isolated in the authorized additive audit scope. Production integration needs an isolated module boundary, requested through coordinator question VY2-Y04-MODULE. No production producer readiness or full runtime pass is claimed. Independent read-only finder/skeptic found no defects; kernel, axiom exports, raw failed attempts and timing evidence are retained at `/workspace/vy2-evidence/y04-path-endpoint/`.
+
+The current NestedMappingControls execution fixture fails against the available cache at its migrated FailureExecution cursor field. That failed check is retained; Source/Horizon is not rebuilt unchanged. The path audit avoids that execution fixture, so no checked execution adequacy is inferred from stale fixture artifacts.
+
+### Routed Raw contract intake
+
+The VY1 handoff at 45773c1cb85088579dbf48ddfe91ae34d1ad6c40 was fetched read-only and authenticated: packet SHA256, all three Git blobs at producer source 239f71cd3d547c01c0d751f9053c6442c918d0fc and all twenty exact signature hashes match. Sixteen signatures match the live checkout text. RawTypedScope lacks project_close, drop_clean, drop_world and close_captured; that producer branch was not merged. This authentication is not an integration or physical-adapter gate.
+
+`tests/h62/item2/audit-yul/RawContractIntake.lean` consumes already-live RawFrame laws to prove arbitrary world-observer preservation after an actual completed Tier-A run, the completed materialized snapshot identity and skip completion for every supplied raw frame. It does not infer coherence of arbitrary dirty frames, Source/world-changing execution, physical layout or compiler adequacy. RawFrame and RawCoherent checked after refreshing stale objects; their live source bytes match the packet. The current RawTypedScope dependency build stops at LocalU8Statement because the cached Source.evalE lacks its current plan parameter. Raw failure retained; no H16 edit or unchanged Source/Horizon rerun.
+
+The exact V17 synthetic-reference repair a2b8558db548751e414f71d1d3c7889f64cc0ee8 was reused, preserving owner file bytes and all six passing fixture controls. Independent read-only finder/skeptic found no defects in the Raw consumer. Evidence is at `/workspace/vy2-evidence/raw-contract-intake/`; all previous physical/reached-state, production promotion, timing and final-validation limitations remain open. No shared interface is frozen or changed here.
+
+
+### Supplied-witness receipt experiment stopped and restored
+
+A reusable audit_joint_existing command was prototyped in DefaultWitnesses to check a supplied theorem against the existing complete existential telescope, universe parameters and axiom boundary. Positive and refusal controls compiled, but the matched per-file timing gate stopped it: tool median 0.97→1.07 seconds (+10.3%). Removing redundant receipt serialization did not resolve the stop (median 1.12 seconds, +15.5%). Both source files were restored byte-for-byte and the original tool cache was rebuilt; no new command or control is retained. Raw proof checks, both failed timing comparisons and the rejected patch remain at /workspace/vy2-evidence/views-witness-receipt/.
+
+The prior byte_payload_joint theorem and its separate exact-telescope check remain valid at a483e32bc22970f0693e5807a93480cf48900645. Its single-statement evidence is not promoted into the original corpus totals: the authenticated bulk census needed by record_resume.py is absent locally. Retrieval of the original h69-census/census.json (SHA256 1a6f4f9352a0004aa3cfcc67e8e3abd313e5c83864dfe436880aeeb0cb2adcde) remains required. This experiment changes no production statement, proof, budget, trust inventory, acceptance criterion or coverage count. The wider independent witness/backfill queue and all final obligations remain open.
+
+
+### Public word-memory joint-premise batch
+
+Eight closed witnesses now cover every public WordMemory theorem telescope, including the full read congruence hypotheses, 32-byte prefix bound, division bound and final-byte index. They use an ordinary existing ByteView at unaligned base 129 and a nonempty 32-byte window; division uses k=16 and the byte witness uses index31. The existing general DefaultWitnessControls module hosts these audit declarations, with no new per-shape module or memory carrier. The small word-witnesses.json binds all eight source/proof pairs to frozen c6f550e281a7e5affa9a99bc2cdaed556dec00e4 signature hashes. The private division_byte helper is outside this public-interface batch.
+
+All eight full existential telescopes and universe lists check against the imported theorems. Six witnesses use no axioms; the two containing a Roadmap.Word numeral use propext. A negative witness lacking readBE_congr's second view and agreement hypothesis is rejected. The first placement in Fixtures exceeded the 10% stop (0.54→0.63 seconds, +16.7%); that placement and its cache were restored exactly. Moving the audits to the existing general controls module gives matched median 2.02→2.12 seconds (+5.0%), below the stop. Original controls are byte-identical apart from one import and the additive block. Raw failures, restoration, final checks and timings are retained at /workspace/vy2-evidence/views-word-family-witnesses/.
+
+These are local joint-inhabitance results, not per-input feasibility, global census acceptance, physical adequacy or reached execution. Global counts remain unchanged while the authenticated census is missing. The existing Y04 bridge obligation, producer waits, migration/full acceptance obligations and previous STOPs remain open.
+
+
+### Primitive byte-operation joint-premise batch
+
+Seven added witnesses in the existing general audit-controls module cover the eight public Bytes laws, reusing word_window_joint for mcopy_self. Live copy/store indices select byte31 of a nonempty 32-byte interval. The other-address and outside-region witnesses retain their dependent inequalities for the same addresses and lengths; source and destination are ordinary existing ByteViews. The small primitive-byte-witnesses.json records all eight source/proof pairs and original c6f550e281a7e5affa9a99bc2cdaed556dec00e4 signature hashes. All frozen signatures match, and all existing audit declarations are byte-identical outside the added block.
+
+All eight full existential telescopes and universe lists pass serial Lean 4.24 checks. Six mapped witnesses use no axioms; the two word-valued store witnesses use only propext. A negative check omitting the copy outside-region premise is rejected. Three matched control-module samples give median 1.90→1.91 seconds (+0.5%), below the stop. Raw checks and audit source are retained at /workspace/vy2-evidence/views-primitive-byte-witnesses/. This is local joint inhabitance, not memory-range validity for arbitrary inputs, actual overlap execution, compiler admission, physical adequacy or global corpus acceptance. No original theorem, representation, budget, axiom boundary or exclusion was changed; all wider obligations and prior STOPs remain open.
+
+
+### Generic blockhash boundaries and original input witnesses
+
+Inputs now exposes two generic consequences of its unchanged blockhash definition: an eligible strictly previous block at distance at most256 returns the supplied historical hash; every other query returns zero. The environment remains universally supplied. No frontend row, fork policy, compiler/native behavior, hash-collision assumption or gas observation was added. The existing MemoryControls environment and vectors are reused to kernel-check the inclusive256 boundary, distance257, current block and future block through these laws, without adding another fixture table.
+
+Three closed witnesses in the existing general audit-controls module cover all four original Inputs theorem telescopes. Both zero-padding laws share a nonempty calldata/out-of-range witness; hash congruence uses the existing real-Keccak Fixed instance with equal live windows; bounded environment inhabitance is separate from the universally quantified public laws. The input-witnesses.json maps exact original signatures at c6f550e281a7e5affa9a99bc2cdaed556dec00e4 to these proofs. Full telescope/universe checks pass. The padding witness has no axioms; hash/environment witnesses and the two new boundary lemmas use only propext.
+
+Serial Lean4.24 checks pass for Inputs, the audit controls, ByteObjects, GenericByteObjects, Fixtures and the existing MemoryControls. Matched medians are Inputs0.42→0.39 seconds (−7.1%) and audit controls2.16→2.00 seconds (−7.4%), below the stop. Exact original code outside the additive blocks and one audit import is unchanged. Evidence is at /workspace/vy2-evidence/views-input-boundaries/. These local laws and premise witnesses do not promote global corpus totals or establish physical adequacy, a reached state or actual Source/compiler admission. All original final gates, producer dependencies and prior STOPs remain open.
+
+
+### Authenticate the P20 documentation owner answer
+
+The exact VY3 owner head c9cf710a8459581006150a462b69ae8c4f0d13e0 and review snapshot e36cd2491ea6deced730ee103f999847574c2124 were fetched through the existing Git remote. The snapshot control file matches SHA25624566bc7ba6855181af2c933f72dc5ee9034fd847ef3a7ad507a2ec768358917, and its bytes also match the file on the owner head. The compatibility-module correction changes comments only and accurately distinguishes review-snapshot availability from master integration. No owner-lane source or control code was integrated.
+
+One integration detail remains: the corrected comment still includes a backticked local reference to the suite absent on master. An isolated fixture using the unchanged current checker and exact owner comment rejects comment-only integration with exit1. This is not an owner-lane gate failure: the owner lane contains the real suite. Feedback requests an immutable-link-only citation for comment-only publication, or validated publication of the actual suite; no checker waiver or repeat control-byte request is made. Exact objects, isolated reproduction and feedback are retained at /workspace/vy2-evidence/p20-owner-intake/. The supplied HANDOFF report hash is recorded as transport metadata; its original file bytes were not locally available for separate hash verification. Target integration and its actual documentation gate remain open.
+
+
+### Transport blockhash boundaries through actual transaction binding
+
+Two additive lemmas in SourceEnvironmentInputs transport the generic blockhash laws through the existing Environment.bindTransaction operation over actual Source.TxConfig. They retain every environment, transaction and query, with exactly the prior-block/window condition or its negation. The underlying binding, blockhash definition and every original theorem remain byte-identical outside the added block. No Source definition, frontend row, fork exclusion, admission predicate or execution observation was changed.
+
+The existing SourceEnvironmentControls module kernel-checks after the additions. Its existing environment and emTx fixtures are reused to verify the inclusive256-block boundary, distance257 exclusion, current block and future block through the new Source-facing lemmas. Both laws use only propext. Serial Lean4.24 checks give matched median SourceEnvironmentInputs0.26→0.27 seconds (+3.8%), below the stop; peak VmHWM420,244KiB for the matched changed-file checks. Evidence and exact code-preservation checks are at /workspace/vy2-evidence/source-environment-boundaries/.
+
+This connects raw supplied-environment laws to the existing transaction-data binding, not to arbitrary Source program admission, native/emission semantics or a reached physical state. Y04 adequacy/reached-state, V17 dispatch, memory provenance, global corpus accounting and final gates remain open; previous STOPs were not rerun. The P20 owner comment and actual control suite are now present through published master; the suite hash matches the verified owner snapshot, clearing that documentation-reference wait without claiming a full P20 kernel gate. The current documentation gate instead flags an absent SelectedHeapBoundaryWitness source referenced by the audit-v09 document; that separate owner issue is retained.
+
+
+### Generic blob lookup boundaries through Source transaction binding
+
+Inputs now proves that any in-range blob index returns the exact supplied list entry and any index at or beyond the list length returns zero. SourceEnvironmentInputs transports both laws through the existing Environment.bindTransaction over actual Source.TxConfig. The environment, transaction, index and coupled index bounds remain explicit; all old definitions and statements are byte-identical outside the additive lemma blocks. No fixture table, carrier, frontend row, fork exclusion, hash assumption, budget or execution observation was changed.
+
+The existing nonzero blob/environment and emTx fixtures are reused to check the last valid and first invalid indices before and after transaction binding. Existing MemoryControls and SourceEnvironmentControls both pass, and all four new laws use only propext. Matched serial Lean4.24 medians are Inputs0.40→0.43 seconds (+7.5%) and SourceEnvironmentInputs0.25→0.27 seconds (+8.0%), below the stop. Exact preservation, boundary reuse, axiom outputs and raw timings are retained at /workspace/vy2-evidence/source-blob-boundaries/.
+
+These are supplied-input/data-binding laws, not Source program admission, native/emission behavior, compiler dispatch, physical adequacy or a reached-state bridge. Global census/pin acceptance, the separate documentation-reference wait, original producer dependencies and all prior STOPs remain open.
