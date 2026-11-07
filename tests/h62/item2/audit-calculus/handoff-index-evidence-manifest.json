@@ -1,0 +1,62 @@
+{
+  "scope": "Bounded local handoff byte receipts; zero classification credit; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1001,
+    "pending": 4282,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/evidence.tar.gz",
+      "bytes": 252267,
+      "sha256": "0b0d6d2f4ec7760800f86e6fe2ab04711e1bc43a46b8969b88b3cad9d1583c7f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/inputs.json",
+      "bytes": 995,
+      "sha256": "097d659ca012c6e8a3c4b59d5d0e3b96f4b32d44eb0865edd46bc066a67d893a"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/gates.json",
+      "bytes": 2769,
+      "sha256": "825b9c47df8dcefbbad750277e86234706aeed9821e19b78bdbd9feac8b99a1c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/reviews.md",
+      "bytes": 463,
+      "sha256": "784e157bdd932a2df73bdf89169c5f4a822038c6dde6167a4ac041af15fe4154"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/case-rosters.json",
+      "bytes": 414,
+      "sha256": "a9add56b2c3e653c1348fdc58e7d9c374363a0934df41383be27ff811246b7cd"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "4b1ec6a193833b27fd32b58a7a9886f533bdc2ded56b92653f4e26db6c9e7c56"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/external-retention.json",
+      "bytes": 269853,
+      "sha256": "dad0e37f373f36f7fc2cd872b7c15e140bc46641c94a762e50179bc65b90a6df"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/actual-index.json",
+      "bytes": 1459,
+      "sha256": "9321af84072441f032ee83990d505714e22b05b01c016629f018758a355e1a15"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/handoff-index-v85/index-metrics.json",
+      "bytes": 222,
+      "sha256": "8cf2c8abee937d3da23d85dd9f5acea93c240855fe2e37d6056e9337bcadec49"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/term-equality-roles-v84/semantic-roles-reviewed.json",
+      "bytes": 2682483,
+      "sha256": "56d1b68de1c40d8e607e57f4d3b02cf756429724904ced94c6cbb9e638bd83c7"
+    }
+  ]
+}
