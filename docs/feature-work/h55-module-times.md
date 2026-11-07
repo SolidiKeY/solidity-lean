@@ -1963,3 +1963,23 @@ read-only finder and skeptic reviewed roles, source hashes and index preservatio
 without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/native-browser-evidence.sha256`. The non-atomic scan
 and static observations do not establish runtime coverage or acceptance.
+
+## Precompile audit observations
+
+`precompile_audit_controls.py` records ten previously unreferenced audit
+candidates, their source hashes and the precompile audit document hash. The
+roles distinguish BLS, Osaka, PointEval, bridge and stipend witnesses from
+frozen-type fidelity checks. `PointEvalSuccess` addresses a success premise;
+`PointEvalWitnesses` separately leaves its success premise open. Fidelity
+checks are not joint witnesses. Current driver, exact inputs, effects and
+outcomes remain unresolved; no compiler-success or native cryptography
+acceptance follows. The classifier covers only the supplied subset.
+
+At `a8d422b81b2b875ca7bdb5f10f7ac8ff79e32f29`, the static index contains
+739 candidates, 492 with supplied current references and 247 without; five
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked the roles, source hashes and index preservation without Lean or a
+server. Evidence hashes are in
+`tests/h55/module-times/precompile-audit-evidence.sha256`. The scan is
+non-atomic and these references do not establish runtime coverage or acceptance.
