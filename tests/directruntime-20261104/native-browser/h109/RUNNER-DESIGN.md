@@ -374,3 +374,30 @@ immutable mount, hostile-host authentication, lifetime sealing or worker
 execution authorization. Those output fields remain false. Integration into
 the authenticated controller/worker and offline resource/measurement/recovery
 verifier, production qualification and five-module A/B remain unfinished.
+
+## Closed input set and worker environment
+
+`input-set.py` binds exactly four independently pinned complete inventory
+receipts: source, toolchain, packages and initial cache. It re-observes every
+root, rejects overlapping directory identities and external hard links, and
+matches tracked source bytes/modes against the pinned prepared Git plan. The
+actual fifteen slow files, root imports and non-default library mapping must
+remain present. This core-only job requires the existing empty Lake manifest,
+no declared Lake requirements, and an empty package input; no dependency is
+resolved implicitly. Bridge is a separate job.
+
+The toolchain selection remains Lean 4.24.0. Executable hashes identify the
+observed bytes; inert fixture bytes can satisfy the structural tests and do not
+establish binary version, correctness or production readiness. Private Git
+object semantics still require the snapshot verifier. Final re-observation is
+non-atomic and does not establish input lifetime sealing.
+
+The returned worker environment is a fresh fixed dictionary with input and
+output mount paths. It inherits no Lean/Lake/Git paths, loader overrides, caller
+home or CI variables. The controller must still bind those paths to actual
+pinned mounts and an authenticated image, initialize the writable private cache,
+provide network isolation, enforce budgets/resources and verify cleanup. Neither
+this API nor an ambient CI flag authorizes the 600-second CI allowance. All
+image, Git semantics, binary-version, cache-initialization, network, mount,
+lifetime, CI-budget and worker-authorization claims remain false. No process,
+mount or worker is launched by input binding.
