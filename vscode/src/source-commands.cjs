@@ -91,7 +91,7 @@ function install(vscode,context,{settings,output,cancelVerification}){
    }finally{if(jobs.get(uri)===job)jobs.delete(uri);}
   }catch(error){
    if(error.cleanupFailed)recordFailure(error);
-   if(error.code!=='CANCELLED'&&isCurrent(doc,version,text,epoch)&&!job?.abort.signal.aborted){receipt('failed',{admitted:!!job,message:error.message,code:error.code||'SOURCE_COMMAND_FAILED'});vscode.window.showErrorMessage(error.message);}
+   if(error.code!=='CANCELLED'&&isCurrent(doc,version,text,epoch)&&!job?.abort.signal.aborted){receipt('failed',{admitted:!!job,message:error.message,errorName:error.name,code:error.code||'SOURCE_COMMAND_FAILED'});vscode.window.showErrorMessage(error.message);}
   }
  };
  function dispose(){if(disposal)return disposal;disposed=true;disposal=stop();return disposal;}
