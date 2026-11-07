@@ -63,4 +63,60 @@ class ProjectionMetadataTests(unittest.TestCase):
         target['is_projection']=False;target['kind']='theorem'
         with self.assertRaises(ValueError):generator.projection_inspection_source(ROOT,[target])
 
-if __name__=='__main__':unittest.main()
+
+
+class ProjectionGraphTests(unittest.TestCase):
+    fixture = ProjectionMetadataTests.fixture
+    log = ProjectionMetadataTests.log
+    def graph_fixture(self):
+        target,pins,row=self.fixture()
+        def field(name, owner):
+            t=copy.deepcopy(target);t.update(name=name,user_name=name)
+            r=copy.deepcopy(row);r.update(name=name)
+            r['registry']['ctor_name']=owner+'.mk'
+            r['constructor'].update(name=owner+'.mk',inductive=owner)
+            r['inductive']['name']=owner
+            r['structure'].update(name=owner,projections=[name],parents=[])
+            return t,r
+        child,c=field('M.C.f','M.C');parent,p=field('M.P.f','M.P')
+        c['structure']['parents']=[{'structure':'M.P','projection':'M.C.toP','subobject':True}]
+        targets=[child,parent];records=[c,p]
+        pins['targets']={t['name']:metadata.observed_type(t) for t in targets}
+        return targets,pins,records
+    def test_join_routes_and_missing_edge_stay_observations(self):
+        targets,pins,records=self.graph_fixture()
+        out=reader.registry_graph(targets,self.log(pins,records),pins)
+        root=out['structures'][0]
+        self.assertEqual(root['observed_unique_fields'],2)
+        self.assertEqual(root['fields'][1]['routes'],[['M.C','M.P']])
+        self.assertFalse(root['edges'][0]['projection_registry_present'])
+        self.assertFalse(root['inherited_instantiation_accepted'])
+        self.assertEqual(root['joint_witnesses_established'],0)
+        out['nodes'][0]['registry']['num_params']=999
+        self.assertEqual(records[0]['registry']['num_params'],1)
+    def test_missing_parent_and_cycle_retained(self):
+        targets,pins,records=self.graph_fixture();records[0]['structure']['parents'][0]['structure']='M.Absent'
+        out=reader.registry_graph(targets,self.log(pins,records),pins)
+        self.assertEqual(out['structures'][0]['missing'][0]['kind'],'structure')
+        records[0]['structure']['parents'][0]['structure']='M.C'
+        out=reader.registry_graph(targets,self.log(pins,records),pins)
+        self.assertEqual(out['structures'][0]['cycles'],[['M.C','M.C']])
+    def test_diamond_counts_field_once_retains_both_routes(self):
+        targets,pins,records=self.graph_fixture()
+        records[0]['structure']['parents'].append({'structure':'M.P','projection':'M.C.otherP','subobject':False})
+        out=reader.registry_graph(targets,self.log(pins,records),pins)
+        self.assertEqual(out['structures'][0]['observed_unique_fields'],2)
+        self.assertEqual(len(out['structures'][0]['fields'][1]['routes']),2)
+        self.assertEqual(len(out['structures'][0]['edges']),2)
+    def test_snapshot_complete_roster_and_structure_consistency(self):
+        targets,pins,records=self.graph_fixture();bad=copy.deepcopy(targets);bad[0]['type_expr']='changed'
+        with self.assertRaises(ValueError):reader.registry_graph(bad,self.log(pins,records),pins)
+        with self.assertRaises(ValueError):reader.registry_graph(targets[:1],self.log(pins,records),pins)
+        extra=copy.deepcopy(targets[0]);extra['name']='M.C.g';extra['user_name']='M.C.g'
+        duplicate=copy.deepcopy(records[0]);duplicate['name']=extra['name']
+        duplicate['structure']['projections'].append('M.C.g')
+        targets.append(extra);records.append(duplicate);pins['targets'][extra['name']]=metadata.observed_type(extra)
+        with self.assertRaises(ValueError):reader.registry_graph(targets,self.log(pins,records),pins)
+
+if __name__ == "__main__":
+    unittest.main()

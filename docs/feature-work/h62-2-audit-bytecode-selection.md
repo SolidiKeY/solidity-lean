@@ -2394,3 +2394,30 @@ projection-registry-inspection/verify-inspection.py --check. H1 cleanup records
 retain SHA256-identical frozen products while removing owned live build copies;
 shared caches and earlier seals are unchanged. Original source closure and
 PowerBounds STOP remain binding.
+
+### Projection-to-kernel and parent-route join
+
+The generic registry join now binds the native supplement to every supplied
+kernel projection snapshot, rejecting stale types and incomplete rosters. It
+retains all 3,262 records: 130 projection nodes and 3,132 nonprojection names.
+The structure index has 50 roots and one parent edge, with no missing records
+or cycles in this supplied prefix. RawTailGuardCertificate reaches its three
+direct fields and the two TailGuardCertificate fields. Repeated parent routes
+retain all edges while counting each observed field name once per root.
+
+Of the 130 projection types, 117 are proposition-valued and 13 are data-valued.
+This classification proves no inhabitance. Registry ownership means the
+observed containing structure only; it establishes no actor/source ownership.
+Raw types remain uninstantiated, and inherited instantiation, correspondence,
+joint-witness, ledger and completed-census flags remain false. Missing records,
+cycles and unavailable parent projections remain explicit in synthetic controls.
+
+The pure replay verifies the preceding seal, exact parent metadata and native
+receipts, then invokes its non-mutating source/product check. It executes no
+new Lean inspection or prerequisite build. Evidence is under
+/workspace/parallel-20261103/executable-bytecode/projection-kernel-join/.
+The full Python suite passes 119 tests; direct projection-file execution passes
+eight tests. Finder and skeptic confirmed a test entry-point omission, now
+fixed by placing unittest.main after both classes and avoiding inherited test
+duplication. Both final reviews pass. Original source closure, all remaining
+190-core/37-Bridge obligations, producer waits and PowerBounds STOP persist.
