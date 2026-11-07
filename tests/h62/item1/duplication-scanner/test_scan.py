@@ -586,6 +586,36 @@ class ScannerControls(unittest.TestCase):
         clean = b'def a : String := "set_option x in theorem fake"\ndef b : Nat := 0\n'
         self.assertEqual(len(scanner.scan(root / "E.lean", root, clean)), 2)
 
+    def test_guard_msgs_inline_declarations_fail_closed(self):
+        root = Path("/virtual")
+        cases = (
+            b"#guard_msgs in theorem hidden : True := by trivial\ndef visible : Nat := 0\n",
+            b"#guard_msgs in #guard_msgs in theorem hidden : True := by trivial\n",
+            b"#guard_msgs in open Nat in theorem hidden : True := by trivial\n",
+            b"#guard_msgs in set_option autoImplicit false in\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace := lax) in private\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs in @[simp]\n theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace :=\n lax) in theorem hidden : True := by trivial\n",
+            b"#guard_msgs (whitespace :=\n lax) in private\n theorem hidden : True := by trivial\n",
+        )
+        for source in cases:
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "unsupported same-line guard_msgs declaration"):
+                scanner.scan(root / "A.lean", root, source)
+        for source in (b"#guard_msgs in\ntheorem visible : True := by trivial\n",
+                       b"#guard_msgs in #eval 1\ndef visible : Nat := 0\n",
+                       b"#guard_msgs (whitespace :=\n lax) in #eval 1\ndef visible : Nat := 0\n",
+                       b'-- #guard_msgs in theorem hidden\ndef visible : String := "#guard_msgs in theorem fake"\n'):
+            self.assertEqual(scanner.scan(root / "A.lean", root, source)[0]["name"], "visible")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(cases[0])
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            value = json.loads(report.stdout)
+            self.assertEqual(value["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(value["incremental"]["removed"])
+
     def test_scoped_open_inline_declarations_fail_closed(self):
         root = Path("/virtual")
         cases = (

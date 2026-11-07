@@ -1441,3 +1441,25 @@ not an authenticated producer. The replay does not invoke opt-in signature
 binding or establish complete Lean census, semantic duplication, or live
 ownership. Evidence is outside Git in
 `/workspace/h62-duplication-scanner-evidence/postmerge-replay/`.
+
+
+## Guarded command boundary
+
+`#guard_msgs` headers are scanned with balanced parentheses across lines.
+A same-line declaration, modifier, attribute or recognized nested wrapper is
+refused as an incomplete input instead of silently omitting the declaration.
+Malformed or ambiguous headers are also refused. Following-line declarations
+and ordinary `#eval` payloads remain lexical observations. This narrow guard
+is not an exhaustive parser for custom commands, macros or generated names.
+
+Independent finder and skeptic reviews without Lean identified and rechecked
+multiline options and nested wrappers. The combined Python suite passed 205
+tests. A same-tree, fixed-selection scan took 111.077 seconds before and
+115.082 seconds after (+3.61%); both had the same 7,544 input hashes and
+126,304 lexical rows, no errors or unmatched patterns. Both used an 8 GiB
+address-space cap and sampled local cgroup 4 GiB reserve and zero-swap guard
+without a stop. Cache advice and sampling do not prove identical operating
+system caches or continuous system-wide reserve. Matching group counts do not
+prove equal group members. Evidence, including two superseded intermediate
+measurements, is outside Git in
+`/workspace/h62-duplication-scanner-evidence/guard-msgs/`.

@@ -290,6 +290,25 @@ def scan(path, root, source=None):
     if source is None: source = path.read_bytes()
     text = mask(source.decode("utf-8"))
     skeleton, attribute_spans = hide_attributes(hide_strings(text))
+    # Guard command options can span lines. Conservatively refuse ambiguous
+    # headers and inline declaration prefixes that the line matcher misses.
+    for guard in re.finditer(r"(?m)^[ \t]*#guard_msgs\b", skeleton):
+        pos = guard.end()
+        while pos < len(skeleton) and skeleton[pos].isspace(): pos += 1
+        if pos < len(skeleton) and skeleton[pos] == "(":
+            depth = 1
+            pos += 1
+            while pos < len(skeleton) and depth:
+                if skeleton[pos] == "(": depth += 1
+                elif skeleton[pos] == ")": depth -= 1
+                pos += 1
+            if depth: raise ValueError("unsupported guard_msgs header")
+            while pos < len(skeleton) and skeleton[pos].isspace(): pos += 1
+        keyword = re.match(r"in\b", skeleton[pos:])
+        if not keyword: raise ValueError("unsupported guard_msgs header")
+        pos += keyword.end()
+        if re.match(r"[ \t]+(?:@\[|#guard_msgs\b|(?:open|set_option|include|omit|private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|builtin_initialize|initialize|structure|inductive|class|axiom|constant)\b)", skeleton[pos:]):
+            raise ValueError("unsupported same-line guard_msgs declaration")
     matches = list(DECL.finditer(skeleton))
     attribute_ends = [end for _, end in attribute_spans]
     declaration_starts = []
