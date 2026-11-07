@@ -1,5 +1,6 @@
 import Solidity.Backend.PrimitivePackets.CheckedMul.Agreement
 import Solidity.Backend.PrimitivePackets.CheckedMul.Populated
+import Solidity.Backend.PrimitivePackets.PanicBytes
 import Solidity.Source.SemanticsExamples
 
 /-! Populated caller heap/aliases/frame, arbitrary saved stack, both pipelines,
@@ -178,14 +179,14 @@ end Fixture
 
 theorem exact_panic_bytes : Source.panicData .arithmetic =
     [0x4e,0x48,0x7b,0x71] ++ List.replicate 31 0 ++ [0x11] := by
-  first | decide | rfl | omega
+  exact PanicBytes.exact_panic_bytes
 
 theorem panic_not_truncated : Source.panicData .arithmetic ≠
     [0x4e,0x48,0x7b,0x71,0x11] := by
-  first | decide | rfl | omega
+  exact PanicBytes.panic_not_truncated
 
 theorem panic_not_empty : Source.panicData .arithmetic ≠ [] := by
-  first | decide | rfl | omega
+  exact PanicBytes.panic_not_empty
 
 #print axioms Fixture.nat_range
 #print axioms Fixture.u
