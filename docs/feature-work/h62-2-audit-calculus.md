@@ -769,3 +769,20 @@ This is not the separate stateMerge over storage/memory writes. Existing indexed
 Bulk source identity, static rosters, reviews and measured gates stay off Git at /workspace/h62-successor-evidence/merge-roles-v42 and /workspace/h62-successor-bulk/merge-roles-v42, bound by small path/size/hash manifest. Zero fresh joint witnesses, Lean/axiom/kernel/replay/runtime/cache acceptance. Whole assignment/four audit checkpoints remain unfinished. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw compatibility/Context Classical.choice waits and all timing/reserve STOPs remain. No statement/dependent-definition/budget/axiom/exclusion/toolchain edits. Historical unavailable bytes remain UNVERIFIABLE.
 
 Documentation gate remains FAIL exit1 on unchanged adopted-master fixture references A.lean/B.lean; exact citing source is archived and hash-bound. Accounting and89controls pass; complete acceptance remains FAIL exit1.
+
+
+## Rewrite-law global/local refinement roles (2026-11-07)
+
+Guarded regression: one-way all-state value refinement must not erase local reverse/exhaustion guards or become automatic rewrite success, formula truth or physical gas safety.
+
+Fetched/adopted master e0f4251ff40ad79c37bae53795b7419afe52e8d9, preserving prior head at refs/archive/h28-before-rebase-ea80a221. Complete frozen-selected RewriteLaws source and all7 named signatures match frozen/current bytes. SeqRewrite/StateFacts are hash-bound with only Pick/OLe definitions inspected, adding no coverage credit. Prior557 rows and owner map unchanged. All5283 candidates accounted:564 reviewed/4719 pending,owners3746 confirmed/1537 unresolved; generated declarations separate.
+
+Refines.of_at retains its supplied global evaluation law. q.Refines quantifies every typed state and preserves each successful lhs result as the same rhs result; when lhs is none it does not constrain rhs. pick_some requires actual selection and yields a dependent sort equality plus exact transported lhs/rhs identities, not successful evaluation.
+
+pick_le projects the global forward law at one state. pick_ge requires local reverse OLe; pick_eq needs both global forward and local reverse laws for exact selected-term Option evaluation equality. pick_exh retains both pushFree flags and gives selected-term exhaustion-flag equality in the model, not physical gas or successful evaluation.
+
+holds_upd_rwG retains global forward refinement, the local implication from the REWRITTEN update's exhOk=true to reverse refinement, both pushFree certificates, and actual rewritten-update satisfaction. It yields original-update satisfaction at the same state, modality and postcondition, only in that direction. It adds no LawCov premise; the separate checked wrapper supplies semantic obligations from LawCov and checks hasG, rewritten-update coverage, both pushFree flags and scope equality. No wrapper/search success is assumed.
+
+All picker, exactness, global-result, wrapper and scope traversal/refusal paths are statically rostered. Existing indexed-match/performance exemption is unchanged; no refactor or performance claim. Bulk snapshots, reviews and measured gates stay off Git at /workspace/h62-successor-evidence/rewrite-law-roles-v43 and /workspace/h62-successor-bulk/rewrite-law-roles-v43 with small path/size/hash manifest. Zero new joint witnesses, Lean/axiom/kernel/replay/runtime/cache acceptance. Whole assignment/four audit checkpoints remain unfinished. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw compatibility/Context Classical.choice waits and all timing/reserve STOPs remain. No statement/dependent-definition/budget/axiom/exclusion/toolchain edits. Historical missing bytes remain UNVERIFIABLE. No source/compiler/physical/world/gas/fork adequacy follows.
+
+Documentation gate PASS exit0 after adopted master repaired the other-lane synthetic fixture references; exact current fixture bytes/master identity archived. No local fixture/scanner edit; historical sealed failures retained. Accounting and89controls pass; complete acceptance remains FAIL exit1.
