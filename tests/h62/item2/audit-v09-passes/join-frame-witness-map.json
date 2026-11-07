@@ -1,0 +1,62 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/MemoryJoinFrameControls.lean",
+  "interface_sha256": "3c89a84063448de793495a772ac7aff77a02f2ac4577aa6de599d2d1c21cc088",
+  "joint_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditJoinedAllocation.FrameControls",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.actual_budget",
+      "signature_sha256": "506adbdb85b0ef8492becf3bccb46e920139ed430a0081996305e1ad2554d6ab",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.admitted_execution",
+      "signature_sha256": "81238a88d61bff675377416c33adab6a7cea578a849cac1469114ec69e7dab95",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.prefix_only_frame_is_insufficient",
+      "signature_sha256": "4ad862e96529f0e98d9fe7c45474ba9330a6803aa26917ae6ea87cf8706f9a0d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.scoped_maximum",
+      "signature_sha256": "c3e8df50d2d80e677f74e2353c91f215e55035f2e1af3e4b3db46684fb27ce54",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.scoped_public",
+      "signature_sha256": "c7aa926c4fa23161a880b06aa26dc4551530f2ccb9bf67b3c635d5fc799b5d29",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.scoped_slot_reuse",
+      "signature_sha256": "bcbd4a94cac3ddd8ea26d52e2046f4477da0adfc3221e1a161ab23ed92058797",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.unreachable_public",
+      "signature_sha256": "39c3d41a63c1513c8cf7f0ee7dd6d8ee2c515e330d7c69b9618911a2936d8e3e",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.unreachable_frame_retained",
+      "signature_sha256": "de09881696b76b52afd4c22441d3f3e2f43baaf313346530746e938dad4542bf",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.unreachable_frame_refused",
+      "signature_sha256": "185d0980d28e2d175ae6fd3932b341234ff2a59e4015ce924d1fd3dd76fca31a",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.MemoryJoinFrame.Controls.unreachable_other_fields",
+      "signature_sha256": "96b5d7c3d3080fc886363bc139b94d38d0ff126cfb1745e0f04b650883067d20",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 279,
+  "aggregate_remaining": 980,
+  "limits": "Model frame capacity, scoped slots and allocation/revert only; no native gas/ByteWorld adequacy. Intentional undersized-frame refusal is not an impossible public premise bundle."
+}
