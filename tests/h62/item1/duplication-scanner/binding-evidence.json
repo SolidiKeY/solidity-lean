@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "guarded_regressions": [
+    "stale or fabricated signature packet promotion",
+    "copied-source/compiler/dependency drift",
+    "resource reserve loss and surviving children",
+    "historical Git path ownership promotion",
+    "nested input omission and cross-chain allocation leakage"
+  ],
+  "accepted_live_run": "/workspace/h62-audit-readonly-calls/scanner-binding/accepted-scan",
+  "accepted_receipt_sha256": "ea2c0ff977be1eb709dcdfca7a3163ec0dc5c109b4adf0242d8fffa421dd0f7a",
+  "canonical_scan_sha256": "598d1a64d32e570cb527c046f288a447d8e517712c77fd042199668f526a8b83",
+  "scan_binding_sha256": "53ac850f28f301b544c3302d7c9c29e462a8f020ca3198eb021a3727f4c8a1ac",
+  "ownership_snapshot": "/workspace/h62-audit-readonly-calls/scanner-binding/evidence/ownership-accepted.json",
+  "ownership_snapshot_sha256": "e94e3f6aaf767ec2265fdc3c3ea1baeeaae33b97934f42fc781880293db0a2ef",
+  "ownership_inspected_head": "d34af6bfe0b50ff9a9ff3ced979a390c78d97df6",
+  "tests": 71,
+  "source_files": {
+    "scripts/h62/item1/duplication-scanner/scan.py": "e0c0d35f42f77e9b37e3e427c30c5c5f70e063d2d54ce33ea52e0be98417adeb",
+    "scripts/h62/item1/duplication-scanner/bind_signature_fixture.py": "27ef4e7188d298d3128636fc09e19492cbc4e0d3678bf364d4ed46a83e9f5b68",
+    "scripts/h62/item1/duplication-scanner/ownership_census.py": "b6669954331ec8971ce7bd46209eb545df5a129042458eaa28cc6b111e36ad2e",
+    "tests/h62/item1/duplication-scanner/local-rebuild-pins.json": "fbbf557d615e7475e6993e5fd1d24586bd925560e3082c5d20a2954a8d587077"
+  },
+  "boundary": "Trusted local five-fixture linkage and authenticated allocation census only; raw signature protocol stays unbound. No remote attestation, global signature/ownership completion, unowned grant or Solidity compiler proof. Development runs are not accepted evidence."
+}
