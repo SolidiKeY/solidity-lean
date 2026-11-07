@@ -1,5 +1,9 @@
 import Solidity.Semantics.Storage.Values
 
+-- Preserve 4.24 elaboration of the original intrinsic storage statements.
+-- This changes unification transparency only; kernel checks/budgets stay active.
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # Typed storage: find, save and the stores
 

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "checkpoint": "H129-v435-port",
+  "archive": {
+    "path": "/workspace/h62-migrate-root-gate-evidence/h129-v435-port-checkpoint-20261107.tar.gz",
+    "size_bytes": 1556039,
+    "sha256": "d850c71e6d1d3b13e7814e83e0353a6dcb89b068f16312b0d7d1eae595c7a51e"
+  },
+  "payload_files": 285,
+  "payload_size_bytes": 20321824,
+  "inventory": "snapshot-file-inventory.json inside archive",
+  "classification": "new diagnostic and newly regenerated cache-bound baseline records; not missing original historical bytes",
+  "acceptance": false
+}

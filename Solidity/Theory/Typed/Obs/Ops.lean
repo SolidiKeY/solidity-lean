@@ -1,5 +1,9 @@
 import Solidity.Theory.Typed.Obs.Values
 
+-- Retain legacy elaboration of the original dependent observation proofs.
+-- All statements and proof budgets remain unchanged; the kernel checks each proof.
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # Observations under the storage operations
 

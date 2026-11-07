@@ -3,6 +3,10 @@ import Solidity.Semantics.Run
 import Solidity.Semantics.StorageWt
 import Solidity.Theory.Typed.Obs
 
+-- Preserve legacy elaboration of dependent storage rewrite arguments.
+-- All declarations and kernel-checked proof bodies remain unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # KeY's signature, typed
 

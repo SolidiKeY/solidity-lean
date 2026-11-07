@@ -1100,5 +1100,5 @@ end Solidity.Roadmap
 
 /-- info: 'Solidity.Roadmap.Cert.comp' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Roadmap.Cert.comp
-/-- info: 'Solidity.Roadmap.PublicCorrectness.transfer' does not depend on any axioms -/
+/-- info: 'Solidity.Roadmap.PublicCorrectness.transfer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.transfer

@@ -786,4 +786,57 @@ def IncDec.show (op : IncDec) (x : String) : String :=
 def braced (ss : List String) : String :=
   if ss.isEmpty then "{ }" else s!"\{ {" ".intercalate ss} }"
 
+
+/-! Compatibility names retained from the cache-bound Lean 4.24 public API. -/
+/-- Retain the Lean 4.24 constructor-index name for `ParamLoc`. -/
+@[deprecated ParamLoc.ctorIdx (since := "2025-08-25")]
+protected abbrev ParamLoc.toCtorIdx : type_of% ParamLoc.ctorIdx := ParamLoc.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `OFMode`. -/
+@[deprecated OFMode.ctorIdx (since := "2025-08-25")]
+protected abbrev OFMode.toCtorIdx : type_of% OFMode.ctorIdx := OFMode.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `SourceMutability`. -/
+@[deprecated SourceMutability.ctorIdx (since := "2025-08-25")]
+protected abbrev SourceMutability.toCtorIdx : type_of% SourceMutability.ctorIdx := SourceMutability.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `SourceAbiVisibility`. -/
+@[deprecated SourceAbiVisibility.ctorIdx (since := "2025-08-25")]
+protected abbrev SourceAbiVisibility.toCtorIdx : type_of% SourceAbiVisibility.ctorIdx := SourceAbiVisibility.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `SourceLocalVisibility`. -/
+@[deprecated SourceLocalVisibility.ctorIdx (since := "2025-08-25")]
+protected abbrev SourceLocalVisibility.toCtorIdx : type_of% SourceLocalVisibility.ctorIdx := SourceLocalVisibility.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `EnvKey`. -/
+@[deprecated EnvKey.ctorIdx (since := "2025-08-25")]
+protected abbrev EnvKey.toCtorIdx : type_of% EnvKey.ctorIdx := EnvKey.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `SourceSelection`. -/
+@[deprecated SourceSelection.ctorIdx (since := "2025-08-25")]
+protected abbrev SourceSelection.toCtorIdx : type_of% SourceSelection.ctorIdx := SourceSelection.ctorIdx
+
+-- Match the original aliases' completion visibility.
+run_cmd Lean.modifyEnv fun env =>
+  [``Solidity.ParamLoc.toCtorIdx,
+    ``Solidity.OFMode.toCtorIdx,
+    ``Solidity.SourceMutability.toCtorIdx,
+    ``Solidity.SourceAbiVisibility.toCtorIdx,
+    ``Solidity.SourceLocalVisibility.toCtorIdx,
+    ``Solidity.EnvKey.toCtorIdx,
+    ``Solidity.SourceSelection.toCtorIdx].foldl Lean.Meta.addToCompletionBlackList env
+
+/-- Retain the old bytes-literal call matcher with its exact cached interface. -/
+def RawExpr.bytesLit?.match_3.{u_1} : type_of% RawExpr.bytesLit?.match_4.{u_1} :=
+  fun motive x h_1 h_2 =>
+  @Solidity.RawExpr.casesOn.{u_1} (fun x => motive x) x (fun n => h_2 (Solidity.RawExpr.num n))
+    (fun x => h_2 (Solidity.RawExpr.name x)) (fun b => h_2 (Solidity.RawExpr.bool b)) (fun e f => h_2 (e.field f))
+    (fun e k => h_2 (e.index k)) (fun op a b => h_2 (Solidity.RawExpr.binop op a b))
+    (fun op a => h_2 (Solidity.RawExpr.unop op a)) (fun c a b => h_2 (c.ternary a b))
+    (fun op e => h_2 (Solidity.RawExpr.incDec op e)) (fun T n => h_2 (Solidity.RawExpr.newArr T n))
+    (fun f args => h_1 f args) (fun op a b k => h_2 (Solidity.RawExpr.modular op a b k))
+    (fun f names args => h_2 (Solidity.RawExpr.named f names args)) (fun k => h_2 (Solidity.RawExpr.env k))
+    (fun es => h_2 (Solidity.RawExpr.tuple es)) (fun l r => h_2 (l.assign r)) fun op l r =>
+    h_2 (Solidity.RawExpr.opAssign op l r)
+
 end Solidity

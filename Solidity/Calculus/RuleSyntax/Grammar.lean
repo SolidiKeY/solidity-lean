@@ -371,7 +371,7 @@ open Lean (Ident Macro MacroM mkIdent mkIdentFrom Name TSyntax Syntax)
 
 /-- The kind a name's spelling gives it: `sp2` and `sp₂` are `sp`. -/
 def stemOf (s : String) : String :=
-  let t := s.dropRightWhile fun c => c.isDigit || ('₀' ≤ c && c ≤ '₉') || c == '\''
+  let t := (s.dropEndWhile fun c => c.isDigit || ('₀' ≤ c && c ≤ '₉') || c == '\'').copy
   if t.isEmpty then s else t
 
 /-- A name a declaration to the left bound. -/
@@ -423,8 +423,8 @@ def partIdent (x : Ident) (s : String) : Ident := Id.run do
   let parts := nameParts x.getId
   let some i := parts.idxOf? s | return mkIdentFrom x (Name.mkSimple s)
   let off := (parts.take i).foldl (fun n p => n + p.utf8ByteSize + 1) 0
-  let start : String.Pos := ⟨pos.byteIdx + off⟩
-  let stop : String.Pos := ⟨start.byteIdx + s.utf8ByteSize⟩
+  let start : String.Pos.Raw := ⟨pos.byteIdx + off⟩
+  let stop : String.Pos.Raw := ⟨start.byteIdx + s.utf8ByteSize⟩
   let info := Lean.SourceInfo.original "".toSubstring start "".toSubstring stop
   return ⟨Syntax.ident info s.toSubstring (Name.mkSimple s) []⟩
 

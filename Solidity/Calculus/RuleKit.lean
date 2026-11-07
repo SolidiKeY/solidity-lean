@@ -107,7 +107,7 @@ partial def delabTacletBinders (names : Array Lean.Name)
   -- `hx`, of a fact about the binder `x` before it
   let s := n.eraseMacroScopes.toString
   let carried ← if !s.startsWith "h" then pure false else
-    match (← getLCtx).findFromUserName? (Lean.Name.mkSimple (s.drop 1)) with
+    match (← getLCtx).findFromUserName? (Lean.Name.mkSimple ((s.drop 1).copy)) with
     | some d => pure (names.contains d.userName && t.containsFVar d.fvarId)
     | none => pure false
   let hide := bi == .implicit && carried && !(usedInBinders rest 0) && (← isProp t)

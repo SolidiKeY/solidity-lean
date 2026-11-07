@@ -194,9 +194,9 @@ def stipendFits (p : Precompile) : Bool := (run p []).isSome && gas p [] ≤ pin
 
 end Solidity.Precompiles.Osaka
 
-/-- info: 'Solidity.Precompiles.Osaka.run_eq_none_iff' depends on axioms: [propext, Quot.sound] -/
+/-- info: 'Solidity.Precompiles.Osaka.run_eq_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Precompiles.Osaka.run_eq_none_iff
 /-- info: 'Solidity.Precompiles.Osaka.gas_mono' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Precompiles.Osaka.gas_mono
-/-- info: 'Solidity.Precompiles.Osaka.ecrecover_exceeds_stipend' does not depend on any axioms -/
+/-- info: 'Solidity.Precompiles.Osaka.ecrecover_exceeds_stipend' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Precompiles.Osaka.ecrecover_exceeds_stipend

@@ -35,7 +35,7 @@ abbrev Bytes := List UInt8
 def ascii (s : String) : Bytes := s.toList.map fun c => c.toNat.toUInt8
 
 /-- The string of ASCII bytes (identifiers and pragma words). -/
-def Bytes.str (b : Bytes) : String := ⟨b.map fun c => Char.ofNat c.toNat⟩
+def Bytes.str (b : Bytes) : String := String.ofList (b.map fun c => Char.ofNat c.toNat)
 
 /-- The Solidity keywords that are tokens of their own (the lexer's keyword
 rules, without the elementary type names, the units and the booleans). -/

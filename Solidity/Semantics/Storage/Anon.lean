@@ -1,5 +1,8 @@
 import Solidity.Semantics.Storage.Ops
 
+-- Preserve legacy dependent-rewrite elaboration; kernel checks stay active.
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # Anonymised roots
 

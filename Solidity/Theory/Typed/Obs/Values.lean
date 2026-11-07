@@ -1,5 +1,9 @@
 import Solidity.Theory.Typed.Obs.Paths
 
+-- Retain legacy elaboration of the original typed observation rewrites.
+-- Kernel validation and all original statements/budgets remain unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # Observations of values and storages
 
