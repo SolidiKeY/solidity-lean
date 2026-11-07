@@ -3,7 +3,7 @@
 
 Run the emitted program against source-checked imports. It records kernel type
 expressions and pretty types for named/generated theorems, structure projections,
-and all remaining constants, with predicate bodies, without proving new statements.
+and all remaining constants, with non-proof bodies, without proving new statements.
 The program imports Lean only in this external audit; the core is unchanged.
 """
 import argparse
@@ -73,8 +73,12 @@ run_cmd do
         let rangeJson := ranges.map fun r => Json.mkObj [
           ("start_line", toJson r.range.pos.line),
           ("end_line", toJson r.range.endPos.line),
-          ("selection_line", toJson r.selectionRange.pos.line)]
-        let body := if isTheorem then none else info.value? (allowOpaque := true)
+          ("selection_line", toJson r.selectionRange.pos.line),
+          ("selection_column", toJson r.selectionRange.pos.column),
+          ("selection_end_line", toJson r.selectionRange.endPos.line),
+          ("selection_end_column", toJson r.selectionRange.endPos.column),
+          ("position_units", toJson ("one-based lines; zero-based Unicode codepoint columns" : String))]
+        let body := if isTheorem || isProof then none else info.value? (allowOpaque := true)
         let record := Json.mkObj [
           ("manifest_sha256", toJson manifestFingerprint),
           ("name", toJson name.toString),
@@ -87,7 +91,7 @@ run_cmd do
           ("interface_or_premises_module", toJson isInterface),
           ("predicate_valued", toJson predicateValued),
           ("body_expr", toJson (body.map reprStr)),
-          ("body_status", toJson (if isTheorem then "proof body intentionally omitted" else if body.isSome then "available expression; not unfolded dependency closure" else "no available value")),
+          ("body_status", toJson (if isTheorem || isProof then "proof body intentionally omitted; declaration retained" else if body.isSome then "available expression; not unfolded dependency closure" else "no available value")),
           ("is_theorem", toJson isTheorem),
           ("is_projection", toJson isProjection),
           ("proof_type", toJson isProof),

@@ -79,6 +79,32 @@ class ScannerControls(unittest.TestCase):
             self.assertEqual(scanner.mask(source), source)
             self.assertEqual(len(scanner.hide_strings(source)), len(source))
 
+    def test_multiline_and_stacked_attribute_declarations_are_inventoried(self):
+        root = Path("/virtual")
+        source = ("@[simp,\n  inline] def target : Nat := 1\n"
+                  "@[foo [bar],\n  baz]\n@[other] theorem next : True := by trivial\n"
+                  "def visible : String := \"@[fake] def hidden\"\n")
+        rows = scanner.scan(root / "A.lean", root, source.encode())
+        self.assertEqual([(r["name"], r["line"]) for r in rows],
+                         [("target", 2), ("next", 5), ("visible", 6)])
+        self.assertEqual([r["reject_reason"] for r in rows], [None, None, None])
+        with_comment = "@[simp, /- nested [ comment ] -/\n  inline] def x : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, with_comment.encode())[0]["name"], "x")
+        nested = "@[foo [[bar]]] def target : Nat := 1\ndef visible : Nat := 2\n"
+        self.assertEqual([r["name"] for r in scanner.scan(root / "C.lean", root, nested.encode())], ["target", "visible"])
+        rows = scanner.scan(root / "D.lean", root, b"@[unsafe] def a : Nat := 0\nunsafe def b : Nat := 0\n")
+        self.assertEqual(rows[0]["qualifiers"], [])
+        self.assertEqual(rows[1]["qualifiers"], ["unsafe"])
+        aligned = scanner.scan(root / "F.lean", root, b"@[simp] def first : Nat := 0\n  def inner : Nat := 1\n")
+        self.assertEqual(aligned[0]["body_reject_reason"], "nested-declaration-boundary")
+        following = ("def a : Nat := 1\n@[foo,\n bar] def b : Nat := 2\n"
+                     "def c : Nat := 1\n@[other,\n baz] def d : Nat := 3\n")
+        rows = scanner.scan(root / "G.lean", root, following.encode())
+        self.assertEqual(rows[0]["body"], rows[2]["body"])
+        self.assertEqual(rows[0]["body"], ["1"])
+        with self.assertRaisesRegex(ValueError, "unterminated attribute"):
+            scanner.scan(root / "E.lean", root, b"@[foo [bar]\ndef hidden := 0\n")
+
     def test_definition_delimiter_scope(self):
         split = scanner.split_definition('(x : String := ":=") : String := x')
         self.assertEqual(split, ('(x : String := ":=") : String ', ' x'))
@@ -297,6 +323,32 @@ class ScannerControls(unittest.TestCase):
         self.assertNotEqual(row(literal_a)["context_hash"], row(literal_b)["context_hash"])
         comment = '/- variable\nnamespace Fake -/\n'
         self.assertEqual(row(comment + prefix + "Type" + suffix)["context_hash"], a["context_hash"])
+
+    def test_notation_after_declaration_contributes_to_context(self):
+        root = Path("/virtual")
+        template = ('namespace N\ndef marker : Nat := 0\n'
+                    'local notation \"MyT\" => {typ}\n'
+                    'theorem same ({binder} : MyT) : {binder} = {binder} := by rfl\nend N\n')
+        def theorem(typ, binder):
+            source = template.format(typ=typ, binder=binder).encode()
+            return scanner.scan(root / "A.lean", root, source)[1]
+        nat, integer, renamed = theorem("Nat", "x"), theorem("Int", "x"), theorem("Nat", "y")
+        self.assertEqual(nat["statement"], integer["statement"])
+        self.assertNotEqual(nat["context_hash"], integer["context_hash"])
+        self.assertEqual(nat["context_hash"], renamed["context_hash"])
+        self.assertEqual(nat["statement"], renamed["statement"])
+        full = scanner.scan(root / "A.lean", root, template.format(typ="Nat", binder="x").encode())
+        self.assertEqual(full[0]["body"], ["0"])
+        indented = ('def outer : Nat := by\n  local notation \"x\" => Nat\n'
+                    '  exact 0\ndef next : Nat := 1\n')
+        rows = scanner.scan(root / "C.lean", root, indented.encode())
+        self.assertEqual(rows[0]["body_reject_reason"], "indented-command-boundary")
+        for keyword in ("notation", "infixl", "infixr", "infix", "prefix", "postfix"):
+            source = f'def marker : Nat := 0\nscoped {keyword}:50 \"##\" => Nat\ntheorem same : True := by trivial\n'
+            changed = source.replace('=> Nat', '=> Int')
+            a = scanner.scan(root / "A.lean", root, source.encode())[1]
+            b = scanner.scan(root / "B.lean", root, changed.encode())[1]
+            self.assertNotEqual(a["context_hash"], b["context_hash"], keyword)
 
     def test_equal_context_does_not_prove_local_definition_equivalence(self):
         with tempfile.TemporaryDirectory() as directory:
