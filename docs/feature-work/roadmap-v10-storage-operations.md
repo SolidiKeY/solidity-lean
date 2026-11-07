@@ -605,3 +605,46 @@ inventory or gate policy was edited by this increment. Independent read-only
 finder and skeptic reviews, exact committed-tree documentation comparisons and
 all rejected diagnostics accompany the sealed handoff. Original producer,
 performance, full-validation and documentation holds remain open.
+
+
+### Checkpoint 231: complete default initialization over dirty retained cells
+
+Three exact frozen laws now have simultaneous witnesses: TargetDefaultInit.complete,
+CopyDefaults.represented and CopyDefaults.numeric_transport. The same populated
+array fixture supplies a checked CopyPermit, nonempty supported header/child
+queries, a concrete finite run, numeric Transport, demand/selected coverage and
+all target agreements. Each law is applied directly to its corresponding bundle.
+The complete initializer retains all five conclusions, including successful
+selected SLOAD readback. Default logical element reads are None, while raw dirty
+child words remain 1; only the header becomes zero. A genuinely successful header
+read and noop/reject-all counterexamples prevent an empty success story. This is
+not a Source allocation or physical/world/compiler adequacy result.
+
+Exact source commit `e90ef087062dc975455b436c63b7b292329f7a2e` passed all 51 guards
+in 3.64 seconds, peak aggregate RSS 723103744 bytes, without a resource stop.
+Twelve new proofs use two propext-only and ten standard-three axiom sets. The
+initial check passed with an unused existential-binder warning; that binder was
+renamed without changing the proposition. Existing statements, definitions and
+39 previous guards remain unchanged apart from the added local import. This is
+new audit work, not a matched proof-refactor or whole-build timing comparison.
+
+The registry maps 68 rows: 56 joint bundles and 12 data inhabitants; 3213 of
+3281 conservative rows remain uncovered. Only three new interface statements
+are counted. Historical source identities/receipts and the complete-validation
+marker remain historical. Registry corruption controls pass.
+
+Trust scanning passes 6616 sources and 289 inventoried sites with zero findings.
+After adopting published inventory reconciliation, strict pins remain FAIL:
+16571 pinned, zero errors, 62 unrecorded and zero baselined changes. All 62 are
+new standard-only entries in the two guarded audit modules: nine axiom-free,
+five propext-only and 48 standard-three. Per-entry source/head/log classification
+is exported for coordinator integration; no shared inventory is written here.
+
+Checkpoint 230's oversized sealed HANDOFF.md remains unchanged. A separate
+1811-byte compact relay was locally verified against its original sealed manifest
+and its own checksum list. A first relative-checksum invocation used the wrong
+working directory and read no files; the corrected verification passes. New
+handoffs use a bounded checkpoint history summary while retaining the full
+original-base patch and bundle. Original scope and goal identity are unchanged.
+Read-only finder/skeptic reviews and raw strict/frozen documentation comparisons
+accompany the sealed packet. All broader producer and final-gate work remains.
