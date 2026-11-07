@@ -2085,3 +2085,21 @@ without Lean or a server. The skeptic requested the explicit Payable refutation
 and pending-question boundary above; the regenerated artifact was rechecked.
 Evidence hashes are in `tests/h55/module-times/theories-witness-evidence.sha256`.
 This non-atomic static observation does not establish runtime acceptance.
+
+## Compiler audit follow-up observations
+
+`compiler_audit_followup.py` records eight previously unreferenced compiler
+audit candidates with source hashes and the audit feature document hash. The
+roles distinguish correlated joint inputs and selector equivalences from H69
+intentional refutations. The copy selector includes a reverting destination;
+typed loop output and joint premises do not prove source success or compiler
+totality. Current driver, exact inputs, effects and outcomes remain unresolved.
+This supplied subset does not establish compiler acceptance.
+
+At `0bb0bb33e1037939e46d9d90cf018247efa496cb`, the refreshed static index
+has 766 candidates, 527 with supplied current references and 239 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/compiler-followup-evidence.sha256`.
+This non-atomic static observation does not establish runtime acceptance.
