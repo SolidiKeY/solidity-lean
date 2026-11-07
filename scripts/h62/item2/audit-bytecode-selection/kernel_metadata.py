@@ -178,6 +178,29 @@ def source_links(rows, source_rows, private_ids):
         })
     return results
 
+def observed_type(row):
+    """Retain supplied type evidence, not kernel execution or type correspondence.
+
+    In particular a projection name does not establish its domain, codomain,
+    universe instantiation, or ownership by the purported child structure.
+    """
+    validate_record(row)
+    encoded = json.dumps(row, sort_keys=True, separators=(",", ":")).encode()
+    # A snapshot must not retain mutable aliases to caller-owned metadata.
+    row = json.loads(encoded)
+    return {
+        "name": row["name"], "module": row["module"],
+        "private": row["private"], "declaration_range": row["declaration_range"],
+        "manifest_sha256": row["manifest_sha256"],
+        "record_sha256": hashlib.sha256(encoded).hexdigest(),
+        "type_expr": row["type_expr"], "type": row["type"],
+        "type_expr_sha256": hashlib.sha256(row["type_expr"].encode()).hexdigest(),
+        "level_params": row["level_params"], "binders": row["binders"],
+        "proof_type": row["proof_type"], "predicate_valued": row["predicate_valued"],
+        "status": "observed input record only; no provenance or instantiated type acceptance",
+    }
+
+
 def parent_metadata(rows):
     """Preserve exact observed edges/routes; no instantiated inherited proof follows."""
     validate_rows(rows)
@@ -200,7 +223,10 @@ def parent_metadata(rows):
                 edge = dict(parent, child=row["name"], route=trail + [parent["structure"]],
                             parent_record_present=target is not None,
                             projection_record_present=projection is not None,
-                            projection_kind=projection["kind"] if projection is not None else None)
+                            projection_kind=projection["kind"] if projection is not None else None,
+                            child_type=observed_type(row),
+                            parent_type=observed_type(target) if target is not None else None,
+                            projection_type=observed_type(projection) if projection is not None else None)
                 edges.append(edge)
                 if target is None or projection is None:
                     unresolved.append(edge)
@@ -211,7 +237,7 @@ def parent_metadata(rows):
         walk(root, [])
         results.append({"root": root["name"], "edges": edges, "missing_records": unresolved,
                         "cycles": cycles,
-                        "edge_relationship_status": "observed names only; structure ownership and projection types not checked",
+                        "edge_relationship_status": "observed names and supplied types only; structure ownership and instantiated projection types not checked",
                         "inherited_obligation_status": "uncovered; instantiated inherited types not reconstructed",
                         "witness_status": "uncovered"})
     return results

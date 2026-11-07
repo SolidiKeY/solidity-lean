@@ -803,3 +803,27 @@ Evidence: /workspace/parallel-20261103/executable-bytecode/generic-word-gate/.
 Independent read-only finder and skeptic reviews passed before and after the
 kernel check, with no concrete findings. The 58 audit-tool tests passed.
 Scoped pins remain a coordinator registration proposal, not a global pass.
+
+
+## Supplied inherited-type evidence snapshots
+
+The independent metadata backfill now retains supplied child, parent and
+projection type evidence on every observed inheritance route: full-record and
+expression hashes, expression/printed types, universe parameters, binders,
+proposition/predicate flags and private/source-range metadata. Missing records
+stay null and explicit in the gap list. Diamond paths remain distinct.
+This is supplied-input evidence only: it does not establish execution provenance,
+projection ownership, instantiated inherited types, source correspondence,
+coverage or simultaneous hypotheses. No new generated inspection was run;
+synthetic regression fixtures do not reduce the open census/witness counts.
+
+Five new regression tests cover corrupted type/origin hashes, missing metadata,
+projection evidence, diamond routes and snapshot isolation. Both independent
+read-only reviews found mutable aliasing of nested metadata; a detached canonical
+JSON snapshot fixes it, with mutations of ranges, universes and binder types
+checked in the regression. The complete audit-tool suite now passes 63 tests.
+No Lean source, producer/interface statement, budget, trust policy or exclusion
+changed. This pure-tooling checkpoint starts no proof window or prerequisite
+build and never retries the retained PowerBounds STOP. Full703/190core/37Bridge,
+package/Bridge, provenance, external acceptance and performance gates stay open.
+Evidence: /workspace/parallel-20261103/executable-bytecode/inherited-type-evidence/.

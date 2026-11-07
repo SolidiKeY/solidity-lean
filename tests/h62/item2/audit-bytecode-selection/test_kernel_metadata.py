@@ -94,6 +94,74 @@ class ParentMetadataTests(unittest.TestCase):
         self.assertEqual(linked["missing_records"],[])
         self.assertEqual(linked["edges"][0]["route"],["Child","Parent"])
         self.assertEqual(linked["witness_status"],"uncovered")
+    def test_projection_type_evidence_is_preserved_without_acceptance(self):
+        child=self.constant("Child",[{"structure":"Parent","projection":"Child.toParent","subobject":True}])
+        parent=self.constant("Parent")
+        projection=self.constant("Child.toParent")
+        projection.update(kind="field",is_projection=True, type_expr="forall Child, Parent", type="Child → Parent",
+            level_params=["u"], binders=[{"name":"self","binder_info":"Lean.BinderInfo.default",
+                "type":"Child","proof_binder":False,"head_constant":"Child"}])
+        edge=parent_metadata([child,parent,projection])[0]["edges"][0]
+        evidence=edge["projection_type"]
+        self.assertEqual(evidence["type_expr"],projection["type_expr"])
+        self.assertEqual(evidence["level_params"],["u"])
+        self.assertEqual(evidence["binders"],projection["binders"])
+        self.assertEqual(evidence["type_expr_sha256"],hashlib.sha256(projection["type_expr"].encode()).hexdigest())
+        self.assertIn("no provenance",evidence["status"])
+        self.assertEqual(edge["child_type"]["name"],"Child")
+        self.assertEqual(edge["parent_type"]["name"],"Parent")
+
+    def test_corrupted_type_changes_binding_without_becoming_verified(self):
+        before=self.constant("Child.toParent");after=copy.deepcopy(before)
+        after["type_expr"]="forall Unrelated, Other"
+        left,right=observed_type(before),observed_type(after)
+        self.assertNotEqual(left["record_sha256"],right["record_sha256"])
+        self.assertNotEqual(left["type_expr_sha256"],right["type_expr_sha256"])
+        self.assertEqual(left["status"],right["status"])
+        after=copy.deepcopy(before);after["module"]="Different"
+        self.assertNotEqual(left["record_sha256"],observed_type(after)["record_sha256"])
+        self.assertEqual(left["type_expr_sha256"],observed_type(after)["type_expr_sha256"])
+
+    def test_type_snapshot_does_not_alias_mutable_input(self):
+        original=self.constant("Child")
+        original["level_params"]=["u"]
+        original["binders"]=[{"name":"self","binder_info":"Lean.BinderInfo.default",
+            "type":"Child","proof_binder":False,"head_constant":"Child"}]
+        snapshot=observed_type(original)
+        original["level_params"].append("v")
+        original["binders"][0]["type"]="Other"
+        original["declaration_range"]["end_line"]=9
+        self.assertEqual(snapshot["level_params"],["u"])
+        self.assertEqual(snapshot["binders"][0]["type"],"Child")
+        self.assertEqual(snapshot["declaration_range"]["end_line"],2)
+        snapshot["level_params"].append("w")
+        self.assertEqual(original["level_params"],["u","v"])
+
+    def test_missing_type_records_stay_missing(self):
+        child=self.constant("Child",[{"structure":"External","projection":"Child.toExternal","subobject":True}])
+        result=parent_metadata([child])[0]
+        edge=result["edges"][0]
+        self.assertIsNone(edge["parent_type"])
+        self.assertIsNone(edge["projection_type"])
+        self.assertEqual(result["missing_records"],[edge])
+        self.assertIn("uncovered",result["inherited_obligation_status"])
+
+    def test_diamond_retains_both_inherited_type_routes(self):
+        def link(c,p): return {"structure":p,"projection":c+".to"+p,"subobject":True}
+        records=[self.constant("Root",[link("Root","Left"),link("Root","Right")]),
+                 self.constant("Left",[link("Left","Base")]),
+                 self.constant("Right",[link("Right","Base")]),self.constant("Base")]
+        for child,parent in [("Root","Left"),("Root","Right"),("Left","Base"),("Right","Base")]:
+            projection=self.constant(child+".to"+parent)
+            projection.update(kind="field",is_projection=True,type_expr=child+"→"+parent)
+            records.append(projection)
+        root=parent_metadata(records)[0]
+        self.assertEqual([e["route"] for e in root["edges"] if e["structure"]=="Base"],
+                         [["Root","Left","Base"],["Root","Right","Base"]])
+        self.assertEqual(root["missing_records"],[])
+        self.assertEqual(root["witness_status"],"uncovered")
+        self.assertIn("not reconstructed",root["inherited_obligation_status"])
+
     def test_wrong_projection_is_refused(self):
         edge={"structure":"Parent","projection":"Child.toParent","subobject":True}
         with self.assertRaises(ValueError):
