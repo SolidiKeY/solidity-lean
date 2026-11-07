@@ -61,6 +61,13 @@ theorem mapM_ok_iff_each {α β ε : Type} (read : α → Except ε β)
     xs.mapM read = .ok ys ↔ Each (fun x y => read x = .ok y) xs ys :=
   ⟨each_of_mapM_ok, Each.mapM_ok⟩
 
+/-- A head conversion error precedes every unexamined tail, for any container reader. -/
+theorem mapM_head_failure {α β ε : Type} (read : α → Except ε β)
+    (head : α) (tail : List α) (message : ε) (failed : read head = .error message) :
+    (head :: tail).mapM read = .error message := by
+  rw [List.mapM_cons, failed]
+  rfl
+
 /-- A fallible container finish cannot discard child conversion obligations. -/
 theorem bind_ok_iff_each {α β γ ε : Type} (read : α → Except ε β)
     (finish : List β → Except ε γ) (xs : List α) (out : γ) :
@@ -197,4 +204,6 @@ theorem unit_ok_iff_each (fuel : Nat) (node : Json) (children : Array Json)
 #guard_msgs (whitespace := lax) in #print axioms nonempty_build_ok_iff_each
 /-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.bind_ok_iff_each' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms bind_ok_iff_each
+/-- info: 'Solidity.Lowering.P8.SourceAstCorrespondence.mapM_head_failure' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mapM_head_failure
 end Solidity.Lowering.P8.SourceAstCorrespondence

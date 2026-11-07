@@ -1884,3 +1884,23 @@ reviews found no defect; neither ran Lean/server/builds or edited. Coverage
 remains 72/3281, 3209 uncovered. Actual H121b Source/P8 production and all
 original/consolidated queues, strict pins/docs, full gates and STOPs remain open.
 External library-try, Y04 physical and separate 4.35 waits remain unchanged.
+
+### C276: whole-unit conversion failure and generic first-error reuse
+
+The original shared unit_ok_iff_each already accounts for every successful
+whole-unit child; a redundant draft copy was identified by both independent
+reviews and removed. New unit_children_failure retains exact traversal errors.
+New mapM_head_failure is generic over reader/error types and is used by
+unit_head_failure, which requires no conversion premise for later children.
+No failed child becomes a shortened successful unit. Existing definitions,
+statements, imports, Source interfaces, budgets and exclusions are unchanged.
+These are syntax conversion laws, not Source runtime or admission evidence.
+
+All bounded checks passed. Final: 4.82 s, sampled peak RSS 377634816 bytes, no
+resource stop. Generic guard uses propext/Quot.sound; both unit guards use the
+standard trio. This is no matched timing comparison. Finder/skeptic confirmed
+the duplicate removal and final reuse with no remaining findings; neither ran
+Lean/server/builds or edited. Requested cleanup restored over 2 GB free from
+regenerable build output only. Actual H121b production, original/consolidated
+queues, 3209 uncovered rows, strict pins/docs and full gates remain open.
+External library-try, Y04 physical and separate 4.35 waits/STOPs remain distinct.
