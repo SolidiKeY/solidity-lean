@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "fa6a2e0e585bb7e8005bd68c87bbb45f4f6c10f5b08eb7b50a42e3dbeecf6408",
+  "kind": "data-inhabitance",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetArrayWrite.lean:47:failure",
+      "theorem": "Solidity.Backend.StorageOps.TargetArrayWrite.failure",
+      "signature": "theorem failure {n : Nat} {G : Schema n} {p : PrimTy}\n    (old : Value G (.array (.prim p))) (i : Index) (value : p.Denote) :\n    writeAt old i value = none \u2194 old.length.val \u2264 i.val",
+      "signature_sha256": "27dfd1c15daee76ed9990ca41839d019b7f7880315e93ed0391ca5d8915f0a9f",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.logical_write_inputs",
+      "status": "kernel-checked data-input reference; independent fidelity reviews passed"
+    }
+  ]
+}
