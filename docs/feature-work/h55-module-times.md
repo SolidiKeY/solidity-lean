@@ -1983,3 +1983,28 @@ checked the roles, source hashes and index preservation without Lean or a
 server. Evidence hashes are in
 `tests/h55/module-times/precompile-audit-evidence.sha256`. The scan is
 non-atomic and these references do not establish runtime coverage or acceptance.
+
+## Duplication scanner observation candidates
+
+`scanner_observation_controls.py` records eight previously unreferenced scanner
+fixtures with their source hashes and the scanner feature document hash. The
+roles distinguish AST, KeySort and Scope observations, header parsing,
+metadata handling, fixture census and source ranges. `HeaderImports` reads a
+caller-supplied path; its actual input and invocation remain unresolved. The
+classifier covers a supplied subset. These observations do not establish global
+source coverage, ownership, body equivalence or current execution.
+
+At `644a70776c50532c722710242838cd5b411594bc`, the refreshed index has 762
+candidates, 499 with supplied current static references and 263 without; six
+retain historical references for review. Since the preceding snapshot, 23
+candidates were added, three changed and none removed. The prior packet-panic
+reference for changed `PanicBytes.lean` is retained as historical with its
+previous source identity and artifact hash, bound to the earlier index lineage
+and `packet-panic-controls-evidence.sha256`. The first update correctly refused
+the previous manifest because it lacked that artifact; the committed manifest
+provided the matching version on retry.
+
+Independent read-only finder and skeptic checked roles, hashes and historical
+record preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/scanner-observation-evidence.sha256`. This non-atomic
+static observation does not establish runtime coverage or acceptance.
