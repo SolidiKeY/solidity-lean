@@ -1,0 +1,13 @@
+{
+  "guardedRegression": "OT-H90-FIXED-BYTE-LOCALS exact marker decoder and necessary canonicalreaderwiring",
+  "producerHead": "2738af99661d7ba582c92519b20d47bcba34a5a4",
+  "sourceCommit": "4a66db87c8ed848aef4c2ac1732b1df326c6fa97",
+  "files": {
+    "Translate.lean": "4b87138bc39130fcc0eaf2e6127336fbd0710d8c4520072d3e1be3aaf1493104",
+    "Compose.lean": "ed959b388f3ec3e70d501ac41a5e4720918b551af3b6fdd2710964d611b4680e"
+  },
+  "scope": "Exact Translate plus committed Compose wiring prerequisite;allsharedReader/DirectRuntime source hashes compared toproducerhead,not wholebranch/sourcepreservation.",
+  "boxTwin": "Exactly10source-level @custom:key box lines;erasingthem recovers exact producer source bytes. Actual compiler ASTs,not documentationmutation.",
+  "markerControls": "Exactproducerprefix before externalfixture eval;32canonicalspellings,malformed/parameterdecoderrefusals plus generallemma signatures/axioms.",
+  "status": "Intakecheckpoint;freshbuild/functionalgatespending."
+}

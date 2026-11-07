@@ -47,7 +47,7 @@ let context;try{
  if(suite)for(let i=1;i<trials.length;i++){
   const expected=suite.expected.find(x=>x.name===trials[i].name);assert.ok(expected);
   assert.deepEqual(report.native[i].reply.results,report.browser[i].reply.results,'backend result parity');
-  for(const backend of ['native','browser']){const actual=report[backend][i].reply.results[0];assert.equal(actual.status,expected.status,trials[i].name);if(expected.reason!==undefined)assert.equal(actual.reason||'',expected.reason,trials[i].name);}
+  for(const backend of ['native','browser']){const actual=report[backend][i].reply.results[0];assert.equal(actual.status,expected.status,trials[i].name);if(suite.expectedTag!==undefined)assert.equal(actual.tag,suite.expectedTag,trials[i].name);if(expected.reason!==undefined)assert.equal(actual.reason||'',expected.reason,trials[i].name);}
  }
  report.expectedObservationChecks=suite?names.length:null;
  report.positiveHarnessGuard.passed=true;report.inventoryCompleted=report.native.length===trials.length&&report.browser.length===trials.length;
