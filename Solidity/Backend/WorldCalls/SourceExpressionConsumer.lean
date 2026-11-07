@@ -28,7 +28,7 @@ theorem resume_history (i : InvocationFrame.Invocation E Γ dn ps rs) :
       (resume (Γ := Γ) i.global i.frame i.horizon i.declaration rs i.captured) :=
   SourceHistory.Effect.bind i.mode _ _
     (SourceHistory.Effect.sub i.mode (L0 E) _
-      ((SourceHistory.all_at i.global i.horizon).callAddr i.frame
+      ((SourceDispatchV2.all_at i.global i.horizon).callAddr i.frame
         i.captured.receiver i.captured.value i.captured.input i.requested))
     (fun pair => SourceHistory.extReturn_effect i.mode rs pair.1)
 
