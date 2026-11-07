@@ -2620,3 +2620,22 @@ since the preceding snapshot. Independent read-only finder and skeptic checked
 roles, hashes and history preservation without Lean or a server. Evidence hashes
 are in `tests/h55/module-times/yul-views-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Memory audit tool observations
+
+`memory_audit_controls.py` records two previously unreferenced audit sources
+with hashes and the audit document hash. EntryAudit describes mapped ABI-entry
+component observations; HeaderParser extracts source-signature boundaries with
+Lean parsing only, without elaborating the inventoried source as proof. The
+extractor reads `H62_HEADER_INPUT` and writes `H62_HEADER_OUTPUT`. Current
+invocation and outcomes remain unresolved; this does not establish a compiled
+decoder, charged execution or fork acceptance.
+
+At `4a90547d1e8645e34521d0ddaa5b073706447cf7`, the refreshed static index has
+823 candidates, 634 with supplied current references and 189 without; ten retain
+historical references for review. One previously unreferenced candidate changed
+and none was added or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, file effects, hashes and history preservation
+without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/memory-audit-evidence.sha256`. This non-atomic observation
+does not establish current runtime acceptance.
