@@ -1440,3 +1440,19 @@ inputs, symlinked parent directories, Lake resolution, cache and runtime
 provenance are not authenticated. Historical and current contexts remain
 review hints; no candidate is excluded or accepted. Independent read-only
 finder and skeptic reviews identified these limits. No Lean or build ran.
+
+## Git-tree reconciliation of candidate additions
+
+`snapshot_tree_reconcile.py` compares the 81 standalone-set additions with
+the exact old and observed Git trees. The old commit is an ancestor of the
+observed commit. All 81 paths are absent in the old tree, present as regular
+100644 blobs in the observed tree, and their committed bytes match the
+recorded SHA-256s. Thus these paths were added between those trees, rather
+than merely changing mapper classification. Both reports are bound by
+`tests/h55/module-times/snapshot-tree-reconciliation.sha256`.
+
+This compares path identity and bytes, not similarity-based renames or copies,
+semantics, complete historic inventory, runnable Lake contexts or execution
+inputs. The earlier worktree observation remains non-atomic. Independent
+read-only finder and skeptic checked all 81 paths and hashes; no Lean, server
+or build ran, and no production acceptance follows.
