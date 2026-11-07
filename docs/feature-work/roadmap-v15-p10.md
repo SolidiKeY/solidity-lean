@@ -2068,3 +2068,33 @@ transport) therefore all remain open. No placeholder `BridgeGoal`, assumed
 certificate or narrowed domain is introduced. `FrozenV1.API` and the
 CALL/RETURNDATA laws above are the existing local evidence that `Local_opcode`
 must retain.
+
+### Core `CALLIN` against the reference CALL (move6, H106)
+
+`CallInAgreement` relates the version-2 core law `Evm.callIn_returndata`
+(`Solidity/Evm/MachineV2.lean`) to `CallReturndataLaw.call_returnData`. Both
+leave the callee's output after an entered call and an empty buffer otherwise.
+
+| Theorem | Statement |
+|---|---|
+| `callIn_agrees` | If the reference `EVM.call` does not error, the entry balances agree (`hbal`), depth is below 1024, and the core oracle `reply a v input` equals the output of the exact `Θ` run (`hreply`), then the core `CALLIN` buffer equals the reference buffer byte for byte. |
+| `reference_depth_limit` | At depth 1024 a non-erroring reference CALL leaves an empty buffer. |
+| `core_ignores_depth` | A covered core `CALLIN` leaves `reply a v input`, with no depth condition. |
+
+The differences are explicit. Depth: the core has none, so the two disagree at
+depth 1024 whenever the reply is nonempty. Gas and world: the reference output
+reads the forwarded `Ccallgas` gas, depth + 1, account map, substate and
+header, while the core `reply` reads only callee, value and input. `hreply`
+is therefore a premise about one `Θ` run; no uniformity across states is
+proved or assumed. Input: core `readBytes` of whole cells and reference
+`readWithPadding` are related only through `hreply`. The reference call's own
+errors are excluded by its `.ok` hypothesis; the core step never errors.
+
+Item 1 (EVM agreement over P1) beyond this instruction is not done. The P1
+language `RuntimeFrameP1LangV2` targets core `InstrV2` code. No encoder from
+`InstrV2` to EVM bytes exists, and the core macro instructions (fixed-cell
+`MLOAD`/`MSTORE`, relative jumps, two-operand `CALL`) do not match single
+opcodes (`Solidity.Evm.External` arity obstructions). A whole-frame P1 EVM
+agreement needs that encoder and its execution correspondence; the world-call
+part also still waits on V13's WorldCalls step producers.
+
