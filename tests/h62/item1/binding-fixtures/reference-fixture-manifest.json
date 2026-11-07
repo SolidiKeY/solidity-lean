@@ -66,7 +66,6 @@
   },
   "archive": {
     "repositoryRelative": "tests/h62/item1/binding-fixtures/artifacts/reference-fixture-evidence.tar.gz",
-    "path": "/workspace/solidity-lean/tests/h62/item1/binding-fixtures/artifacts/reference-fixture-evidence.tar.gz",
     "sha256": "cdac20d72b1e6aeabb26072ec3d1d815b7dfe5966f7a72295b92628da1d36d31",
     "bytes": 17454,
     "regularMembers": 27
@@ -95,5 +94,6 @@
   "limits": [
     "No original/producer/relation/frozen statement edits. No extraction checkpoint or timing delta claimed.",
     "Original whole assignment and all runtime/source/compiler/performance obligations remain unfinished."
-  ]
+  ],
+  "sourceFilesAtCommit": "16c7ecb40198fb62187f4adf8dcaee6733e4990f"
 }
