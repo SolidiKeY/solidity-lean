@@ -1246,3 +1246,15 @@ Exact source/signature bindings and complete self/raw/reason/modality roster sta
 Whole assignment/four audit checkpoints unfinished. H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw/Context waits and actual documentation gate limitations persist. Existing rejected prototype/timing/reserve STOPs and historical unavailable-byte gaps remain. Relocatable historical-evidence verification remains independent backfill.
 
 Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and93controls pass; complete acceptance remains FAIL exit1.
+
+## Historical packet relocation (V71)
+
+Guarded regression: relocating byte-identical historical artifacts must not require changing recorded provenance or silently accept missing/changed files. Historical h82-static-handoff verifier now supports explicit optional component-prefix mappings, longest first, without rewriting manifest/state/proposal. Duplicate/traversal/escaping roots and missing mapped files fail; no original-path fallback. All20 hashes, live source/pin comparisons, historical refusal flags and patch dry-run remain required, including under optimized Python. Importing the utility has no side effects.
+
+Eight synthetic checksum/path controls supplement actual20-entry relocation/tamper/missing/restoration checks. These are external utility checks, not formal proofs. Actual original/default and relocated packet checks PASS; same-size tampering under python -O and missing mapped file are refused. Historical status flags remain historical, not assertions that audit-calculus is currently unmerged. No Lean or proposal application occurred.
+
+Three serial default runs per version: median0.051932681s before,0.050586582s after (-2.592%); within10% stop threshold, no speedup claim from short uncontrolled-cache timings. Exact all runs, median/p95 wall/RSS, commands/errors and original input hashes remain off Git under /workspace/h62-successor-evidence/packet-relocation-v71 with a small manifest. Source/proof benchmarks, heartbeats/replay/proof size are not measured by this Python-only checkpoint.
+
+Fresh master32d810f1d adopted with prior head archived/member ancestry retained. Static census unchanged770reviewed/4513pending/1537ownerunresolved/0freshwitnesses. Whole assignment/four audit checkpoints, H28 replay/option pause, Raw/Context trust waits and all timing/reserve STOPs remain. Historical unavailable bytes elsewhere remain UNVERIFIABLE; no proof/axiom/budget/exclusion/toolchain change or new runtime/cache acceptance.
+
+V71 final gates:8 direct/101 aggregate controls PASS; actual20-entry default and relocated/restored static packet checks PASS; real same-size tamper under -O and missing mapped bytes correctly refused. Documentation FAIL1 persists on unchanged master SelectedHeapBoundaryWitness reference. Independent finder/skeptic PASS. No frozen semantic/witness completeness gate cleared.
