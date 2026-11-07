@@ -59,3 +59,6 @@ readonly-call and fetched-call interfaces retain their explicit provenance and
 execution-linkage obligations. These packet facts do not discharge them.
 G40 entry/selector work belongs to `Backend/AbiEntry`; external function values
 belong to their separate owner. No ABI admission profile is narrowed here.
+
+The public compiler success theorem (H62/H69) and the H68 P1-REVERT status
+are in [v13-public-compiler-total.md](v13-public-compiler-total.md).
