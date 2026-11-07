@@ -17,4 +17,4 @@ and register there; no original producer ownership is transferred.
 The HypothesisDomains audit imports the Lean frontend. Keep it audit-only under
 tests; it is not proposed for intrinsic library registration.
 
-Scoped axiom inventory proposal: `tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.pins.json` contains twelve kernel-guarded standard-only records. Coordinator destination: scripts/g07-axiom-pins.d/tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.json, then regenerate the shared inventory. The global scan has 106 unrecorded changes before the entry-witness extension (seven then); its five new guards are also proposed here, zero axiom errors; no global inventory is rewritten by this lane.
+Scoped axiom inventory proposal: `tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.pins.json` contains twelve kernel-guarded standard-only records. Coordinator destination: scripts/g07-axiom-pins.d/tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.json, then regenerate the shared inventory. The current global scan reports 111 unrecorded changes (twelve here), zero axiom errors. This lane does not rewrite the shared inventory.

@@ -769,3 +769,9 @@ guards and empty diagnostics; both monitors passed, maximum sampled parent
 checkpoint window, which was not restarted. Earlier passing versions are
 separately retained with their source hashes. The scoped pin proposal now has
 twelve records; it remains a proposal, not global inventory integration.
+
+This checkpoint's trust, reachability, layers, roots/fragments and whitespace
+checks pass. The global pin scan reports zero errors and 111 unrecorded changes,
+including the twelve proposed here. The known five off-scope missing citations
+remain an unresolved documentation gate; it was not repeated unchanged. No
+checkpoint/full-gate waiver or whole-lane completion is asserted.
