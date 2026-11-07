@@ -1,0 +1,47 @@
+{
+  "scope": "Complete8 typed term-evaluation theorem role classifications; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 579,
+    "pending": 4704,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/term-evaluation-roles-v45/evidence.tar.gz",
+      "bytes": 1112964,
+      "sha256": "33d7cce97453e66d70165bc5e9cf91ac13d70f0c3a84fb291bbdea7d0964107c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-evaluation-roles-v45/inputs.json",
+      "bytes": 916,
+      "sha256": "dc6a29a43267703c19510c2a0bd309cf71fc51057106399dbc43bbf24c6f9829"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-evaluation-roles-v45/gates.json",
+      "bytes": 2977,
+      "sha256": "4b792aaf5d4f1d0d64429c702ff0b8d0566099de635cfa6e086faa8734ed2e13"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-evaluation-roles-v45/reviews.md",
+      "bytes": 694,
+      "sha256": "6937eb4f8d8f6673cabcd58ddf6a4a55cb7dd3ea91377a9aad1c46c931509afc"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-evaluation-roles-v45/case-rosters.json",
+      "bytes": 1009,
+      "sha256": "c2043a014fa1f32433a17f044c281aa23ee4eb1bbe4f883aa94a84d49a6e7e42"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-evaluation-roles-v45/doc-master-repair-binding.json",
+      "bytes": 486,
+      "sha256": "fbb958eb72daf4a9ed53f9a6111b6980cdcce5b7083f25ac4c37af72afdabb48"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/term-evaluation-roles-v45/semantic-roles-reviewed.json",
+      "bytes": 1542486,
+      "sha256": "007d5c8a16fdd314ad18ff3fd7964e597640673a15d8f7f9fc068fbd0a1ad209"
+    }
+  ]
+}
