@@ -605,3 +605,26 @@ Independent read-only finder and skeptic reviews accepted this narrow cleanup:
 exact three-file base identity and zero lane delta, unchanged Lean/config/pins,
 four restored missing references and accurate superseding handoff. Neither
 used Lean/server/builds or edited files; no findings remain for this correction.
+
+## H44 reviewability split (2026-11-07)
+
+At coordinator request, the detailed 110-key owner ticket and the 1524-member
+portable checksum dump were removed from the Git tree without changing their
+bytes. They are preserved under
+/workspace/audit-abi-world-evidence/h44-split-20261107/bulk/.
+The small committed bulk-artifacts.sha256 records each absolute path, byte size
+and SHA256, plus the preserved proof archive. The existing portable index points
+to these external files; its archive and member-manifest hashes are unchanged.
+The portable verifier still checks every archive member with identical logic.
+The ticket generator now requires --output EXTERNAL_PATH in an existing external
+parent, rejects repository-resolving parents and never follows the final output
+symlink. The packer requires
+its per-member manifest outside Git, preventing bulk regeneration into the tree.
+No Lean statement/source, verification gate, proof budget, resource bound or
+central axiom inventory changed. Historical paths above describe prior exports.
+The previous proof/test boundaries and owner waits remain unchanged.
+
+Independent finder and skeptic reviews accepted the H44 split. Their generator
+path-check finding was fixed and verified with three symlink rejection controls
+that create no repository outputs. Both closed the finding; no residual issue.
+No Lean/server/builds or edits by reviewers. Bulk hashes and ticket bytes match.

@@ -40,7 +40,7 @@
   "waits": [
     {
       "lane": "coordinator/G07 inventory owners",
-      "item": "PIN-2a43bf4f: record exact110 existing standard-only pins from committed owner ticket; no theorem/axiom/premise/exclusion edits."
+      "item": "PIN-2a43bf4f: record exact110 existing standard-only pins from the off-Git owner ticket authenticated by bulk-artifacts.sha256; no theorem/axiom/premise/exclusion edits."
     },
     {
       "lane": "coordinator/other-lane documentation owners",

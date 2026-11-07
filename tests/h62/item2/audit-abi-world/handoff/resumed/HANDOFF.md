@@ -73,3 +73,21 @@ fails on four references in the restored other-lane files; earlier PASS refers
 to the pre-cleanup tree. Retain the central110-pin owner wait and this explicit
 documentation limitation until coordinator integration. No master merge/push.
 Latest head/artifact hashes are in the separate conflict-cleanup export.
+
+## H44 reviewability split (2026-11-07)
+
+At coordinator request, the detailed 110-key owner ticket and the 1524-member
+portable checksum dump were removed from the Git tree without changing their
+bytes. They are preserved under
+/workspace/audit-abi-world-evidence/h44-split-20261107/bulk/.
+The small committed bulk-artifacts.sha256 records each absolute path, byte size
+and SHA256, plus the preserved proof archive. The existing portable index points
+to these external files; its archive and member-manifest hashes are unchanged.
+The portable verifier still checks every archive member with identical logic.
+The ticket generator now requires --output EXTERNAL_PATH in an existing external
+parent, rejects repository-resolving parents and never follows the final output
+symlink. The packer requires
+its per-member manifest outside Git, preventing bulk regeneration into the tree.
+No Lean statement/source, verification gate, proof budget, resource bound or
+central axiom inventory changed. Historical paths above describe prior exports.
+The previous proof/test boundaries and owner waits remain unchanged.

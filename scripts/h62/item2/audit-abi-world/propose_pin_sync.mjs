@@ -1,12 +1,21 @@
-// Read-only central inventory census; writes only an owned coordinator ticket.
+// Read-only central inventory census; writes only an explicitly selected off-Git coordinator ticket.
 // Does not update pins, statements, axioms, exclusions or generated fragments.
-import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {readFileSync,writeFileSync,realpathSync,constants} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {collect,compare} from '../../../check-axiom-pins.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../../..');
-const relative='tests/h62/item2/audit-abi-world/handoff/resumed/axiom-pin-owner-ticket.json';
+const args=process.argv.slice(2);
+if(args.length!==2||args[0]!=='--output')throw Error('Usage: propose_pin_sync.mjs --output EXTERNAL_PATH');
+const output=path.resolve(args[1]);
+function requireExternal(file){
+ if(!path.relative(root,file).startsWith('..'+path.sep))throw Error('H44 bulk ticket must stay outside Git');
+}
+requireExternal(output);
+// The external parent must already exist; do not create directories through symlinks.
+const destination=path.join(realpathSync(path.dirname(output)),path.basename(output));
+requireExternal(destination);
 const central='scripts/g07-axiom-pins.json',bytes=readFileSync(path.join(root,central));
 const integration=readFileSync(path.join(root,'scripts/h62/item2/audit-abi-world/prepare_resume_config.py'),'utf8').match(/^INTEGRATION="([a-f0-9]{40})"/m)[1];
 const recorded=JSON.parse(bytes),found=collect(root),result=compare(found,recorded);
@@ -16,5 +25,6 @@ const ticket={schema_version:1,id:'PIN-'+integration.slice(0,8),owner:'coordinat
  action:'Owner reviews and records the existing standard-only pins in its per-file fragments, then regenerates the central inventory. No Lean statement, proof, axiom set, premise or exclusion changes.',
  blocked_by:'Original audit instruction: no generated roots, central module maps or axiom pin edits; supply registration fragments to coordinator.',
  options:['Coordinator applies reviewed existing-pin metadata delta and publishes it; worker reruns the inventory gate.','Keep inventory frozen and retain the final validation blocker with this complete handoff.']};
-mkdirSync(path.dirname(path.join(root,relative)),{recursive:true});writeFileSync(path.join(root,relative),JSON.stringify(ticket,null,2)+'\n');
-console.log(JSON.stringify({ticket:relative,source_pins:found.size,unrecorded_changes:changes.length,errors:result.errors.length}));
+writeFileSync(destination,JSON.stringify(ticket,null,2)+'\n',
+ {flag:constants.O_WRONLY|constants.O_CREAT|constants.O_TRUNC|constants.O_NOFOLLOW});
+console.log(JSON.stringify({ticket:output,source_pins:found.size,unrecorded_changes:changes.length,errors:result.errors.length}));
