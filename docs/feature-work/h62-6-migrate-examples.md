@@ -1,3 +1,19 @@
+# H44 split of held checkpoint 001b1de0a
+
+The coordinator's H44 instruction narrows this increment to reviewable code,
+documentation and one compact external-artifact manifest. The held increment's
+raw datasets and generated Lean fixtures were already off Git. Its generated
+current queue and expanded evidence index are now external as well. The queue is
+preserved byte-for-byte; the expanded index changes only storage references and
+current documentation identity. No theorem, proof gate, budget, source module,
+script, test or accepted inventory payload changes in this split.
+
+The prior head and its archive remain preserved. The replacement increment is
+forward-only on the same branch; its net change from integrated master contains
+scripts/tests, documentation and the compact manifest, with no added dataset,
+corpus, log or generated fixture. All four original migration checkpoints remain
+partial. This split is not migration acceptance or goal completion.
+
 # Continuation after master ac9d8db2a
 
 The latest coordinator instruction explicitly authorized fetching master and
@@ -5,7 +21,8 @@ continuing from its reviewed merge. This branch fast-forwarded cleanly to
 `ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`; original base remains
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. No push, default-branch write,
 new/reset goal or completion transition occurred. The current queue is
-[CURRENT-QUEUE.json](../../tests/h62/item6/migrate-examples/handoff/CURRENT-QUEUE.json).
+`CURRENT-QUEUE.json` in the external archive indexed by the
+[compact manifest](../../tests/h62/item6/migrate-examples/evidence/resume-ac9d8db2a.json).
 It supersedes historical retirement and prior incremental-wait state below.
 
 ## Accepted old inventory checkpoint
@@ -82,23 +99,29 @@ loading, genuine native-node controls, cross-version control provenance and
 legitimate ModuleData occurrence accounting. Full final migration review remains
 pending its gates. Complete review evidence is included in the artifact archive.
 
-[The committed evidence manifest](../../tests/h62/item6/migrate-examples/evidence/resume-ac9d8db2a.json)
-uses repository-relative inputs and archive-relative artifact paths. It explicitly
-requires external artifacts for full file verification; hashes alone do not make
-VM data available from Git. From the checkout, run:
+[The compact committed H44 manifest](../../tests/h62/item6/migrate-examples/evidence/resume-ac9d8db2a.json)
+records the external archive's absolute VM path, exact byte size and SHA256,
+plus its per-file checksum manifest. Generated queue state, the expanded evidence
+index, fixtures, inventories, dumps and logs are external archive members.
+The index is `evidence-manifest.json`; the queue is `CURRENT-QUEUE.json`.
+No VM artifact is claimed to be available from Git alone.
+
+The existing repository-only command still works with the compact manifest;
+it checks the same code/document inputs and reports the archive pending. With
+--artifact-root set to the archive's directory it verifies the whole archive.
+After verifying and unpacking it, run the unchanged expanded per-file verifier:
 
 ```sh
 python3 scripts/h62/item6/migrate-examples/verify_evidence.py \
-  --manifest tests/h62/item6/migrate-examples/evidence/resume-ac9d8db2a.json \
-  --repository-only
+  --manifest "$EXAMPLES_ARTIFACT_ROOT/evidence-manifest.json" \
+  --artifact-root "$EXAMPLES_ARTIFACT_ROOT"
 ```
 
-This reports external artifacts pending. After unpacking the evidence archive,
-use --artifact-root with its directory and run sha256sum -c SHA256SUMS from there.
-The archive explicitly contains the flat old-inventory.jsonl,old-summary.json,
-raw InterfaceDagOldDirect.jsonl, fixture/manifest, compiler/result/log, sealed
-native controls and actual version records. Original full assignment/queue/scope
-files are both in the cumulative patch/bundle and in the evidence archive.
+Using --repository-only instead reports external artifacts pending. The archive
+contains old-inventory.jsonl,old-summary.json,raw InterfaceDagOldDirect.jsonl,
+fixture/manifest, compiler/result/log, sealed controls and actual version records.
+Original assignment/queue/scope files remain in the cumulative patch/bundle and
+in the archive. The generated current queue is moved byte-for-byte, not changed.
 
 ## Remaining queue and typed dependency
 
