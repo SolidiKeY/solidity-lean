@@ -1475,3 +1475,23 @@ relative path are preserved in the absolute VM directory
 `tests/h55/module-times/provenance-40b.sha256`. Independent read-only finder
 and skeptic checked the commit history and both hashes. This provenance
 reconciliation does not establish runtime or full-assignment acceptance.
+
+## Yul audit candidates from the merged-tree delta
+
+`audit_yul_controls.py` records eight supplied delta rows with source hashes;
+this is a subset and does not establish complete coverage. `ImpossiblePremises`
+and `Refutations` are intentional impossibility certificates, not joint
+witnesses. `DefaultWitnesses` constructs complete joint witnesses only when
+the kernel accepts them; its controls include an intentionally uncovered
+case. `Success` does not establish native gas, fork or assembly adequacy.
+
+The witness command appends configured JSONL and its control selects a fixed
+absolute path. The kernel census writes output that may include error rows;
+a printed marker alone is not a clean census. The syntax parser reads files
+and emits data rather than theorem evidence. The historical serial runner
+has a 1,800-second timeout, not the required 300-second gate. Current inputs,
+commands and outcomes remain unresolved. Independent read-only finder and
+skeptic reviewed these distinctions without Lean, server or builds. The
+skeptic corrected which component reads the JSONL: the controls check
+declarations, and the separate acceptance script reads records. No H56 run
+or production acceptance is inferred.
