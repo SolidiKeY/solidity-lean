@@ -676,3 +676,22 @@ skeptic found no defect and used no Lean/server/build/edit. These additive laws
 do not migrate the original case census or establish arbitrary heap/world,
 session/gas or fetched-EVM adequacy. Original fidelity failures, full C4/H68
 obligations and prior timing STOPs remain open.
+
+### Unchecked uint256 shift correspondence
+
+`ShiftsCorrespondence.lean` adds six laws for both directions and all uint256
+values/counts. It constructs the populated physical fixture and its runtime
+cell reads, derives actual public compiler selection, and combines independent
+Source local evaluation with exact selected-code execution. Source globals,
+state and older local tail, and every target saved stack remain general.
+Source is explicitly unchecked, matching the existing General producer; no
+checked-shift claim is added. Count zero preserves the value, counts at least
+256 saturate to zero, and actual success refutes reject-all. Every non-stack
+machine field survives.
+
+The six-law kernel check passes in 1.078 seconds, sampled workload peak
+809160 KiB, using existing standard axioms. Independent read-only finder and
+skeptic found no defect and used no Lean/server/build/edit. Original controls
+and census remain unchanged. This is primitive content correspondence, not
+arbitrary Source heap/world, session/gas or fetched-EVM adequacy. Full C4/H68,
+fidelity drift and prior timing STOPs remain open.
