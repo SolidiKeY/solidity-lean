@@ -3,10 +3,10 @@
 Bulk logs and sampled aggregate process RSS remain outside Git.
 """
 import fcntl, hashlib, json, os, pathlib, re, signal, subprocess, sys, time
+from bulk import load_bulk_json
 ROOT=pathlib.Path(__file__).resolve().parents[4]
 E=pathlib.Path('/workspace/migrate-optimizer-evidence')
-stop=ROOT/'tests/h62/item6/migrate-optimizer/measurements.json'
-if stop.exists() and json.loads(stop.read_text()).get('performance_status')=='STOP_GT_10_PERCENT':
+if load_bulk_json('measurements.json').get('performance_status')=='STOP_GT_10_PERCENT':
  raise SystemExit('STOP_GT_10_PERCENT: root-gate disposition required before further Lean validation')
 D=['env','-u','DOCKER_HOST','-u','DOCKER_CONTEXT','-u','DOCKER_TLS','-u','DOCKER_TLS_VERIFY','-u','DOCKER_CERT_PATH','docker','--host=unix:///var/run/docker.sock']
 VERSION=sys.argv[1]; assert VERSION in ['4.24.0','4.35.0']
@@ -16,7 +16,9 @@ RUN=sys.argv[2] if len(sys.argv)>2 else 'clean-'+VERSION
 assert re.fullmatch(r'[A-Za-z0-9.-]+',RUN)
 name='h62-migrate-optimizer-'+RUN
 MODE=sys.argv[3] if len(sys.argv)>3 else 'closure'
-assert MODE in ['closure','isolated','generic','audit-old']
+if MODE in ['isolated','generic']:
+ raise SystemExit('H112: copied-definition modes are historical only; use real-module closure/audit-old after hold disposition')
+assert MODE in ['closure','audit-old']
 assert MODE!='audit-old' or VERSION=='4.24.0'
 run=E/RUN;run.mkdir(exist_ok=False)
 for proc in pathlib.Path('/proc').iterdir():
@@ -33,7 +35,7 @@ pin=json.loads(pathlib.Path('/workspace/h62-coordinator-inputs/toolchain-pin.jso
 archive=E/'toolchains'/('lean-'+VERSION+'-linux.tar.zst')
 sha=hashlib.file_digest(archive.open('rb'),'sha256').hexdigest()
 if VERSION=='4.35.0':assert sha==pin['sha256']
-x=json.loads((ROOT/'tests/h62/item6/migrate-optimizer/census.json').read_text())
+x=load_bulk_json('census.json')
 # The scope files and dependency source hashes must still match the frozen census.
 for f in x['files'].values():
  assert hashlib.sha256((ROOT/f['path']).read_bytes()).hexdigest()==f['sha256']
@@ -48,15 +50,10 @@ if MODE=='audit-old': config=config.replace('/evidence/'+RUN+'/build','/evidence
 (run/'runtime.toml').write_text(config)
 lines=['set -eu','export PATH=/toolchain/bin:$PATH','export LEAN_NUM_THREADS=1','lean --version','lake --version']
 ordered=x['ordered_closure']
-if MODE=='isolated':
- import importlib.util
- spec=importlib.util.spec_from_file_location('graph',ROOT/'scripts/v08-build-graph.py');g=importlib.util.module_from_spec(spec);sys.dont_write_bytecode=True;spec.loader.exec_module(g)
- ordered=g.SourceGraph(ROOT).closure(['Solidity.KeySort','Solidity.Yul.Syntax','Solidity.Roadmap.Contracts'])
-if MODE=='generic': ordered=['Solidity.KeySort']
 if MODE=='audit-old': ordered=[]
 for m in ordered:
  lines+=['echo TARGET='+m,'lake -d /repo -f /evidence/'+RUN+'/runtime.toml --no-cache build +'+m+':olean']
-fixtures=['Generic.lean'] if MODE=='generic' else ['Isolated.lean'] if MODE=='isolated' else ['Interfaces.lean','Acceptance.lean'] if MODE=='audit-old' else []
+fixtures=['Interfaces.lean','Acceptance.lean'] if MODE=='audit-old' else []
 for fixture in fixtures:
  lines+=['echo FIXTURE='+fixture,'lake -d /repo -f /evidence/'+RUN+'/runtime.toml env lean --tstack=131072 -j1 /repo/tests/h62/item6/migrate-optimizer/'+fixture]
 (run/'build.sh').write_text('\n'.join(lines)+'\n')
@@ -98,7 +95,7 @@ wall=time.monotonic()-start
 inspect=subprocess.run(D+['inspect',name],text=True,capture_output=True)
 (run/'container.json').write_text(inspect.stdout)
 (run/'samples.json').write_text(json.dumps(samples))
-result={'version':VERSION,'archive_sha256':sha,'image':image,'exit':exitcode,'wall_seconds':wall,'peak_sampled_aggregate_rss_bytes':peak,'rss_sampling_seconds':.5,'reason':reason,'targets':x['targets'],'mode':MODE,'ordered_modules':ordered,'fixtures':fixtures,'scope':{'closure':'Clean KeySort prerequisite, local transitive imports and four assigned modules; not full run-lean final gate','isolated':'Clean dependency branch plus 32 exact-source declarations; three Scoped-dependent declarations pending; not full module validation','generic':'Dependency-free exact-source backfill of 27 declarations; eight dependency-bound declarations pending; not full module validation','audit-old':'Full old-toolchain interface and acceptance fixtures using reviewed-old artifacts; warm audit, not a clean build'}[MODE]}
+result={'version':VERSION,'archive_sha256':sha,'image':image,'exit':exitcode,'wall_seconds':wall,'peak_sampled_aggregate_rss_bytes':peak,'rss_sampling_seconds':.5,'reason':reason,'targets':x['targets'],'mode':MODE,'ordered_modules':ordered,'fixtures':fixtures,'scope':{'closure':'Clean KeySort prerequisite, local transitive imports and four assigned modules; not full run-lean final gate','audit-old':'Full old-toolchain interface and acceptance fixtures using reviewed-old artifacts; warm audit, not a clean build'}[MODE]}
 if (run/'usage.json').exists(): result['kernel_usage']=json.loads((run/'usage.json').read_text())
 (run/'result.json').write_text(json.dumps(result,indent=2));print(json.dumps(result),flush=True)
 sys.exit(exitcode if not reason else 125)

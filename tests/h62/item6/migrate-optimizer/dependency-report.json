@@ -180,12 +180,15 @@
       "type": "PERFORMANCE_STOP_GT_10_PERCENT",
       "owner": "solidity-h62-6-20261106/migrate-root-gate",
       "action": "ESCALATE: root gate must investigate and disposition the fixed-resource 27-declaration generic fixture regression before further Lean validation. No rerun or budget adjustment after STOP.",
-      "fixture": "tests/h62/item6/migrate-optimizer/Generic.lean",
+      "fixture": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/Generic.lean",
       "wall_percent": 121.93194216871967,
       "kernel_wall_percent": 74.36557304138312,
       "kernel_max_child_rss_percent": 40.8202048084559,
       "caveat": "Single short fixture run per version; not a full migration slowdown estimate. Full comparison blocked by failed dependencies.",
-      "evidence": "tests/h62/item6/migrate-optimizer/measurements.json"
+      "evidence": "/workspace/migrate-optimizer-evidence/h44-split-20261107/files/tests/h62/item6/migrate-optimizer/measurements.json",
+      "historical_fixture_original_path": "tests/h62/item6/migrate-optimizer/Generic.lean",
+      "bulk_manifest": "tests/h62/item6/migrate-optimizer/BULK-MANIFEST.json",
+      "h44_h112_note": "Archived copied-definition fixture sample, not canonical real-module validation or a whole-library verdict. STOP disposition remains pending; no rerun authorized."
     }
   ],
   "coordination": "No relay.sh exists in this VM checkout and no coordinator relay endpoint is configured. These self-contained exact-file requests are saved for coordinator retrieval; no permission to edit owned originals is inferred. No existing source file edited.",
@@ -209,5 +212,19 @@
       "import": "Solidity.Optimizer.Laws",
       "new_toolchain_validation": "pending owner repairs, performance disposition and final affected-consumer checks"
     }
-  ]
+  ],
+  "h44_split": {
+    "manifest": "tests/h62/item6/migrate-optimizer/BULK-MANIFEST.json",
+    "archive": {
+      "path": "/workspace/migrate-optimizer-evidence/h44-split-20261107/bulk.tar.gz",
+      "bytes": 12749,
+      "sha256": "7869fa0ffb7eb8ba2760a4ed285d0cd3f6813e8fa7f7a60d54a21721a70339cf",
+      "deterministic_generator": "python3 scripts/h62/item6/migrate-optimizer/bulk.py --pack <new-absolute-output-path>"
+    },
+    "canonical_fixtures": [
+      "tests/h62/item6/migrate-optimizer/Acceptance.lean",
+      "tests/h62/item6/migrate-optimizer/Interfaces.lean"
+    ],
+    "scope": "Packaging correction only; original production statements, gates and budgets unchanged."
+  }
 }

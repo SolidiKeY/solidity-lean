@@ -2,6 +2,7 @@
 """Non-Lean frozen-base, scope, trust-token and reproduction gate."""
 from pathlib import Path
 import hashlib,json,re,subprocess
+from bulk import bulk_path, load_bulk_json
 root=Path(__file__).resolve().parents[4]
 def run(*args):return subprocess.check_output(args,cwd=root,text=True)
 base='c6f550e281a7e5affa9a99bc2cdaed556dec00e4'
@@ -11,12 +12,12 @@ run('git','merge-base','--is-ancestor',base,'HEAD')
 run('git','merge-base','--is-ancestor',base,'origin/master')
 run('git','diff','--exit-code',base,'--','Solidity/Optimizer','lean-toolchain')
 run('git','diff','--check')
-x=json.loads((root/'tests/h62/item6/migrate-optimizer/census.json').read_text())
+x=load_bulk_json('census.json')
 for f in x['files'].values():
  old=subprocess.check_output(['git','show',base+':'+f['path']],cwd=root)
  assert hashlib.sha256(old).hexdigest()==f['sha256']
  assert hashlib.sha256((root/f['path']).read_bytes()).hexdigest()==f['sha256']
-assert run('python3','scripts/h62/item6/migrate-optimizer/census.py')==(root/'tests/h62/item6/migrate-optimizer/census.json').read_text()
+assert run('python3','scripts/h62/item6/migrate-optimizer/census.py')==bulk_path('census.json').read_text()
 run('python3','scripts/h62/item6/migrate-optimizer/fixtures.py','--check')
 for p in (root/'tests/h62/item6/migrate-optimizer').glob('*.lean'):
  assert not re.search(r'\b(sorry|axiom|native_decide|maxHeartbeats)\b',p.read_text()),str(p)
@@ -29,7 +30,7 @@ for name,digest in json.loads((inputs/'sha256.json').read_text()).items():
 pin=json.loads((inputs/'toolchain-pin.json').read_text())
 archive=Path('/workspace/migrate-optimizer-evidence/toolchains')/pin['asset']
 assert hashlib.file_digest(archive.open('rb'),'sha256').hexdigest()==pin['sha256']
-summary=json.loads((root/'tests/h62/item6/migrate-optimizer/measurements.json').read_text())
+summary=load_bulk_json('measurements.json')
 assert summary['performance_status']=='STOP_GT_10_PERCENT'
 for label,result in summary['results'].items():
  inspect=json.loads((Path('/workspace/migrate-optimizer-evidence')/label/'container.json').read_text())[0]

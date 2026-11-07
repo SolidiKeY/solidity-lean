@@ -44,3 +44,20 @@ Full migration, intrinsic/Roadmap validation and final/root gates remain pending
 The source owner requests and performance disposition are real blockers. Final
 artifacts must exist before reporting them as supplied; the final export step
 records the actual committed head and absolute paths.
+
+## H44/H112 correction
+
+The generated Generic/Isolated copies and five generated JSON reports are now
+archived off Git with path/size/SHA256 in BULK-MANIFEST.json. Acceptance.lean and
+Interfaces.lean import the real optimizer module and remain unchanged. Historical
+copy-fixture results above do not validate the real module on the new toolchain.
+Required full gates, STOP, proof budgets, retirement and open waits are unchanged.
+Read-only split review and static verification are recorded in the split handoff.
+
+Final split finder/skeptic reviews confirmed byte-exact preservation, unchanged
+canonical fixture imports and production/resource settings, deterministic archive,
+and retained STOP. Both found the summary output-directory name shadowed by its
+record dictionary; fixed by using output_directory, then checked byte-identical
+historical report reproduction. Finder also found stale dependency-report paths;
+those now resolve to archived files and BULK-MANIFEST.json. Final finder found no
+additional defect after the fixes. No Lean/server calls or reviewer edits.

@@ -1,3 +1,54 @@
+# H44/H112 split — 2026-11-07
+
+This is a packaging and fixture-reference correction only. The pre-split checkout
+was `575d277f7d16f1a30c947711fd69a75004fe4797`, containing inherited coordinator
+merges since the H82 acknowledgement. Those commits are preserved. No production
+Lean file, theorem, axiom set, gate command, proof budget or resource setting is
+changed by this split. No Lean validation or timing STOP rerun is performed.
+
+Seven generated files (73,011 bytes) are removed from Git and preserved exactly
+under `/workspace/migrate-optimizer-evidence/h44-split-20261107/files/`.
+The 12749-byte archive is
+`/workspace/migrate-optimizer-evidence/h44-split-20261107/bulk.tar.gz`.
+The committed `tests/h62/item6/migrate-optimizer/BULK-MANIFEST.json` records each
+original relative filename, absolute VM path, byte size and SHA256, plus archive
+size/hash. These files are immutable historical evidence, not current validation.
+
+The copied-definition Generic and Isolated fixtures are archived; neither is a
+canonical test. Their historical success is not a substitute for checking the
+real module. `Acceptance.lean` remains the single source of the acceptance cases,
+and `Interfaces.lean` records the real imported API. Both import
+`Solidity.Optimizer.Controls`, which imports the real production Pass/Laws modules.
+No copies of Pass/Preserves/Validator or acceptance bodies are regenerated.
+The old copy-only modes are explicitly unsupported; required real-module closure,
+KeySort prerequisite, final root gates and resource/proof limits remain unchanged.
+
+`bulk.py` verifies size and SHA256 before loading historical reports. Missing or
+modified bulk fails closed; the performance STOP cannot disappear because its
+JSON moved out of Git. `summarize.py` writes derived output outside the checkout.
+`fixtures.py --check` validates only the retained real-module fixtures. The
+historical frozen-base validator still has its original source/ancestry gates;
+its clean-base reproduction is distinct from this inherited updated checkout.
+
+The complete original assignment/queues/scope and retirement receipt remain
+committed under `tests/h62/item6/migrate-optimizer/retirement/`. Prior handoffs and
+raw evidence remain on the VM. H82 retirement and all unresolved migration waits
+remain in force; this split does not restart the migration queue or claim a new
+passing Lean/root gate. No push, merge, deployment or master change is performed.
+
+Split validation: check_split.py passed exact seven-file preservation, archive
+membership/hash and deterministic repack, unchanged canonical fixtures, missing
+and same-size-tampered evidence rejection, STOP before job creation, identical
+historical report reproduction outside Git, and unchanged production/build files.
+Independent read-only finder/skeptic findings (summary output-path shadowing and
+stale report paths) were fixed; details are in the lane review record. No Lean
+was executed. Historical full migration/final gate failures are not relabeled.
+
+The earlier detailed record below is historical. References to generated files
+or copy-fixture checks describe the archived pre-split runs, not current commands.
+
+---
+
 # H62/H63 optimizer migration overlay — blocked handoff
 
 Owner: `solidity-h62-6-20261106/migrate-optimizer`.
@@ -42,8 +93,8 @@ retain fixture module names, so relocated unequal hashes are not claims of
 semantic interface changes. Full original v4.35.0 interface hashing remains blocked.
 
 `fixtures.py` deterministically copies exact original declaration blocks into
-`Isolated.lean` (32 explicit declarations, three Scoped-dependent declarations
-pending) and `Generic.lean` (27 explicit declarations, eight dependency-bound
+Isolated.lean (archived) (32 explicit declarations, three Scoped-dependent declarations
+pending) and Generic.lean (archived) (27 explicit declarations, eight dependency-bound
 declarations pending). Both preserve copied types and proof bodies. The generic
 fixture's **27 explicit interface hashes match across v4.24.0 and v4.35.0**.
 Generated namespace API differs in eight common constants and adds
