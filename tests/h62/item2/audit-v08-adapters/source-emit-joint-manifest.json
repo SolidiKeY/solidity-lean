@@ -114,5 +114,6 @@
       "bytes": 410,
       "sha256": "4c2bc945fc57df61126f3578fda6a19980a46ae4dd499a815657b094f1684b59"
     }
-  ]
+  ],
+  "receipt_status": "HISTORICAL: source hash and pending-target scope apply to its recorded checkpoint; current audit source superseded by source-emit-encoding-joint-manifest.json"
 }

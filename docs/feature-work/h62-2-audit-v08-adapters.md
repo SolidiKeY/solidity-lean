@@ -927,3 +927,36 @@ logs remain off Git.
 Independent read-only finder and skeptic found no issue in the actual hash run,
 shared reached state, separate observations or full-result negative. Neither ran
 Lean or a server; review evidence remains off Git.
+
+### Local event encoding-error domain (2026-11-07)
+
+The original exec_encoding_failure statement quantifies over typed states with
+no Source admission premise. SourceEmitJoint now proves its parameter-type,
+argument-execution and failed-encoding premises together using the existing
+explicitly dangling pointer99 control, then applies that exact original law.
+This is a genuine local typed-domain model of encoding error and intentionally
+not an inhabitant of canonical Source admission. The distinction preserves both
+the full original theorem domain and H69's separation of negative controls from
+admitted global witnesses. No premise or exclusion is added.
+
+This adds one original target application without adding a fixture or failure
+mechanism. The earlier three applications remain checked; four event observation
+targets and full residual/fidelity acceptance remain pending. The old event
+manifest is explicitly historical and retains its old source hash and receipt;
+the new source-emit-encoding-joint manifest binds the current audit source.
+
+The serial check passed in 1.826 seconds, one Lean, peak sampled RSS 736,567,296
+bytes, no STOP. All seven declarations use only the existing standard axioms;
+registration passed. No canonical Source/session/target/H68 or full-gate claim.
+
+MRS's routed adf3c75bedb77faa8b012abab7cf7a4f0251b64c status identifies the
+accepted H124 frame-free P1RevertBridge and conditional value/reference bridges
+as available components, explicitly not full production transport. H124 remains
+closed. The wait retains actual delegated-frame LibraryPremises.Inputs.g42_body
+with Source.callInternal, entry.body/result, reached stateRelation/valueRelation,
+and complete all-outcome session/profile/origin/physical-frame transports;
+native component certificates do not discharge those obligations.
+
+Read-only finder and skeptic found no issue with the local typed-domain joint,
+negative-model/admission distinction, historical receipt or production boundary.
+Neither ran Lean or a server; review evidence remains off Git.
