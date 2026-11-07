@@ -1346,3 +1346,31 @@ one child import: audited declarations, trust policy and budgets unchanged.
 Both independently confirmed the forwarded report hash and receipt boundaries;
 neither ran Lean/server/builds or a slow audit. Static import-diff and receipt
 hash checks PASS; full trust-audit execution remains pending.
+
+
+### H70/H133 authenticated original proposal receipt
+
+Coordinator delivered the original RowsNine registration proposal at
+/workspace/h62-coordinator-inputs/router-20261107T141332Z/rowsnine-registration-original.json.
+Read and independently SHA256-verified5594f73f12c8c07555e35f475d2dd3dd694b509926f67845210147ddb57fa0b3;
+module identity is OpenLoops.RowsNine. The earlier failed Git retrieval remains
+historical; this delivered file closes only that original-proposal receipt gap.
+The newer helper-ticket hash mismatch remains unresolved and is not substituted.
+No code adoption, central registration, proof acceptance, integration, new cache
+or performance STOP release follows from delivery.
+
+Coordinator confirms EmptyDomainControls was read/hash-verified and relayed
+verbatim to H125 vy1-words. Current H133 EVM/resource owners are
+solidity-v12-v17-20261031/v17-validation-release (V14) and
+solidity-parallel-20261103/executable-bytecode (V15). Prior native-browser
+request is retained without another ping; H127 runner/planner ownership stays.
+No independent runnable item established: wait for actual eligible Source runs/
+environments and admission linkage; EVM/resource operational linkage; exact-source
+ProveChunked cache, generator adapter and central15member RowsNine integration.
+H82/H90b/H112 statements, dependent definitions, interfaces, budgets, axioms and
+exclusions are unchanged. This increment maintains receipts only.
+
+Separate read-only finder/skeptic independently verified original-proposal hash
+and module identity, found no receipt/routing defect, and confirmed no acceptance
+or STOP-release claim. Neither used Lean/server/builds. JSON parsing, exact hash/
+module checks and git diff --check PASS; no new Lean verification was run.
