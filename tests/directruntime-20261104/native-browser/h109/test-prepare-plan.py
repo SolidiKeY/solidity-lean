@@ -51,7 +51,13 @@ class Preparation(unittest.TestCase):
             result = M["prepare"](root, head)
             self.assertEqual(len(result["slowModules"]), 14)
             self.assertEqual(result["status"], "prepared-not-executed")
-            self.assertEqual(result["runnerDeadlineSeconds"], 600)
+            self.assertEqual(result["measurementDeadlineSeconds"], 300)
+            self.assertEqual(result["derived17ReplayDeadlineSeconds"], 300)
+            ci = M["prepare"](root, head, "ci")
+            self.assertEqual(ci["measurementDeadlineSeconds"], 300)
+            self.assertEqual(ci["derived17ReplayDeadlineSeconds"], 600)
+            with self.assertRaisesRegex(ValueError, "Unsupported execution context"):
+                M["prepare"](root, head, "checkpoint")
             with self.assertRaisesRegex(ValueError, "Unexpected source head"):
                 M["prepare"](root, "0" * 40)
             (root / "lakefile.toml").write_text('defaultTargets=["SoliditySlowExamples"]\n[[lean_lib]]\nname="SoliditySlowExamples"\n')

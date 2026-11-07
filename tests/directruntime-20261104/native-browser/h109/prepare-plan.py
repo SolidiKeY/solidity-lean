@@ -60,7 +60,9 @@ def regular_bytes(root, name, size):
         os.close(directory)
 
 
-def prepare(root, head):
+def prepare(root, head, context="lane-end"):
+    if context not in ("ci", "lane-end"):
+        raise ValueError("Unsupported execution context")
     root = Path(root).resolve()
     if not re.fullmatch(r"[0-9a-f]{40}", head):
         raise ValueError("Expected full authenticated commit")
@@ -112,8 +114,12 @@ def prepare(root, head):
     return {"schemaVersion": 1, "status": "prepared-not-executed", "head": head,
             "tree": git(root, "rev-parse", "HEAD^{tree}").decode().strip(),
             "sourceInventory": inventory, "slowModules": list(SLOW),
-            "rootGate": "SoliditySlowExamples", "runnerDeadlineSeconds": 600,
-            "deadlinePolicy": "One total runner deadline; never multiply 600 by the target count.",
+            "rootGate": "SoliditySlowExamples", "executionContext": context,
+            "measurementDeadlineSeconds": 300,
+            "derived17ReplayDeadlineSeconds": 600 if context == "ci" else 300,
+            "deadlinePolicy": "H55 module-time maximum remains300seconds. H116600seconds applies "
+                              "only to the cumulative original Derived17 replay in CI; no general "
+                              "H109 or VM increase. Context is a plan input, not CI attestation.",
             "workerPolicy": {"memoryMaxBytes": 12884901888, "swapMaxBytes": 0,
                              "leanThreads": 1, "lakeJobs": 1, "outerReserveBytes": 4294967296},
             "preparerSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -127,8 +133,9 @@ if __name__ == "__main__":
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--head", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--context", choices=("ci", "lane-end"), default="lane-end")
     args = parser.parse_args()
-    plan = prepare(args.root, args.head)
+    plan = prepare(args.root, args.head, args.context)
     # Exclusive creation: no stale plan can be overwritten or mistaken for a run.
     descriptor = os.open(args.output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(descriptor, "w") as stream:

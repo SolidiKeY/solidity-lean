@@ -1,0 +1,77 @@
+{
+  "guardedRegression": "H127 complete input observations must reject tree/attribute/link/source/budget substitutions before any authenticated measurement runner use.",
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/h109/test-input-inventory.py"
+      ],
+      "exit": 0,
+      "wallSeconds": 0.2733003260073019,
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.157s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/h109/test-prepare-plan.py"
+      ],
+      "exit": 0,
+      "wallSeconds": 0.16264460499223787,
+      "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.083s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/h55/module-times/test_slow_examples.py"
+      ],
+      "exit": 0,
+      "wallSeconds": 1.9836330869875383,
+      "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 1.914s\n\nOK\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "wallSeconds": 0.02008765000209678,
+      "output": ""
+    }
+  ],
+  "reviews": {
+    "finder": "Final scoped static PASS after descriptor traversal, streaminghash and sequentialsymlink-resolution fixes. No new blocker; immutable snapshots/runner remain unimplemented. Independent tests unavailable in read-only reviewer executor; no testPASS attributed.",
+    "skeptic": "Final scoped static PASS after directory/file safety, boundedstreaming and kernel-order symlink fixes. Non-atomic observation only; no runner/resource/measurement acceptance. No Lean/Docker/workloads."
+  },
+  "reviewFindingsFixed": [
+    "Path-based directory/attribute traversal replaced by held nofollow dir/file descriptors.",
+    "Whole-file hash buffers replaced by256KiB streaming; externalhardlinkaliases explicitlyflagged for futuresealingflatten/reject.",
+    "Lexical normpath before symlink expansion could hide rootescape. Sequential component resolution now rejects it and accepts validinternal/revisitedlinks; no filesystem targetfollow."
+  ],
+  "initialFailuresRetained": [
+    "Initial strict supplementalarchive validation rejected duplicate selfhardlink; primary12regularmember delivery independently binds drafts. Supplementalarchive not admitted as productioninput.",
+    "Updated test initially expected FileNotFoundError for danglinglink; pure recorded resolver correctly raises specificValueError, test corrected.",
+    "Directoryswap test initially expected finalpath-replacement error; earlierctime guard correctly rejected first, test narrowed to that specificerror."
+  ],
+  "sourceFiles": [
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/input-inventory.py",
+      "sha256": "b4048cda72fbbb5dd085b7cf4314a80cb7a58603a137cc61dcd2ccbeb04718ae"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/test-input-inventory.py",
+      "sha256": "e8cc1ce69f52e5f6ae118f5131ecde20038dd9c3feee48480b159672bfe786de"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/prepare-plan.py",
+      "sha256": "3c5e67dd58ed0f5d98025fb7bb98463da6b8b7a1112c2890e3b3b2b2b8aba582"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/test-prepare-plan.py",
+      "sha256": "a22f2cf9e1af8ff8fd893be0e00ba1ffba76e68cd220af9fb4ac9967685a7ef1"
+    }
+  ],
+  "scope": "Source/cache/toolchain/package tree observations only. No actual cache/toolchain tree inventoried, no unreviewed draft imported/executed, no Lean/Lake/Docker/CI/measurement or stopped workload run.",
+  "budget": "H55 module300seconds unchanged; H116originalDerived17 cumulative CI600/localVM300 only. No generalH109600 allowance.",
+  "remaining": "Implement/review immutable input snapshots, serial controller/worker, kernel resource mapping, timer/RSS provenance, lifecycle cleanup and offline verification; then gated productionvalidation. Five-moduleA/B and pinquietwindow notready; staticclassification remains module-times."
+}
