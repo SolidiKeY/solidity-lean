@@ -4,6 +4,9 @@ import sys
 import re
 import tempfile
 import unittest
+import json
+import subprocess
+import types
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -52,6 +55,46 @@ class ExactDomainTests(unittest.TestCase):
     def test_closed_render_is_deterministic(self):
         a=self.closed_row();b=self.closed_row();b.update(name='second',user_name='second')
         self.assertEqual(target.closed_render(ROOT,[a,b],[a['name'],b['name']]),target.closed_render(ROOT,[b,a],[b['name'],a['name']]))
+
+    def data_row(self):
+        row=self.closed_row();row['binders']=[{'name':'n','binder_info':'Lean.BinderInfo.default','type':'Nat','proof_binder':False,'head_constant':'Nat'}]
+        return row
+    def test_data_render_reuses_transform_and_keeps_full_dependent_witness(self):
+        row=self.data_row();program,manifest=target.data_render(ROOT,[row],[row['name']])
+        self.assertEqual(program.count(target.macro_fragment(self.macro)),1)
+        self.assertIn('synthInstance? instanceType',program)
+        self.assertIn('if ← isProp alpha then',program)
+        self.assertIn('some alpha,some predicate,some value,some rest',program)
+        self.assertIn('Lean.addDecl (.thmDecl',program)
+        self.assertNotIn('catch ',target.DATA_CHECKER)
+        self.assertIn('empty_domain_impossible',program)
+        self.assertIn('dependent_domain',program)
+        self.assertFalse(manifest['kernel_accepted']);self.assertFalse(manifest['witness_ledger_linked'])
+        self.assertIsNone(manifest['expected_results'])
+    def test_data_render_filters_proof_binders_universes_and_closed_domains(self):
+        for field in ('proof','universe','closed','scope'):
+            row=self.data_row()
+            if field=='proof':row['binders'][0]['proof_binder']=True
+            if field=='universe':row['level_params']=['u']
+            if field=='closed':row['binders']=[]
+            if field=='scope':row['module']='Solidity.Backend.AbiEntry.WordValidation'
+            with self.subTest(field=field),self.assertRaises(ValueError):target.data_render(ROOT,[row],[row['name']])
+    def test_data_render_strict_results_reject_bypass_corruption_and_extra_members(self):
+        row=self.data_row();name=row['name'];helper=target.DATA_NAMESPACE+'.data_domain_0000'
+        record={'target':name,'helper':helper,'status':'proved','reason':'','axioms':[]}
+        golden=json.dumps(record,separators=(',',':'))
+        program,manifest=target.data_render(ROOT,[row],[name],{name:golden})
+        self.assertEqual(manifest['expected_results'],{name:golden})
+        for value in ('probe','{}',json.dumps(dict(record,axioms=['sorryAx'])),json.dumps(dict(record,status='unsupported-default')),json.dumps(dict(record,target='different'))):
+            with self.subTest(value=value),self.assertRaises(ValueError):target.data_render(ROOT,[row],[name],{name:value})
+        with self.assertRaises(ValueError):target.data_render(ROOT,[row],[name],{})
+        with self.assertRaises(ValueError):target.data_render(ROOT,[row],[name],{name:golden,'extra':golden})
+    def test_scope_refactor_preserves_closed_renderer_exactly(self):
+        old=types.ModuleType('frozen_closed_renderer');old.__file__=str(ROOT/'scripts/h62/item2/audit-bytecode-selection/exact_domains.py')
+        raw=subprocess.check_output(['git','-C',str(ROOT),'show','26fc079a1b78aa43239e46bf6e3f25e84279607f:scripts/h62/item2/audit-bytecode-selection/exact_domains.py'])
+        exec(compile(raw,old.__file__,'exec'),old.__dict__)
+        row=self.closed_row()
+        self.assertEqual(target.closed_render(ROOT,[row],[row['name']]),old.closed_render(ROOT,[row],[row['name']]))
 
     def test_existing_implementation_reused_byte_exactly_once(self):
         rendered = target.render(self.macro, self.fixture)

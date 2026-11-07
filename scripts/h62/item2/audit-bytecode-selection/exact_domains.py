@@ -253,6 +253,24 @@ elab "#closed_hypothesis_batch " "[" entries:closedEntry,* "]" : command => do
 '''
 
 
+
+def _frozen_scope(repo, modules):
+    frozen_map = subprocess.check_output(["git","show",BASE+":"+MAP],cwd=repo)
+    allowed = set(mapped_references(frozen_map.decode())[0])
+    producer_sources = {}
+    for module in modules:
+        if module.startswith("Solidity."):
+            path = module.replace(".","/") + ".lean"
+        elif module.startswith("SolidityBridge."):
+            path = "Bridge/" + module.replace(".","/") + ".lean"
+        else:
+            raise ValueError("closed target outside frozen mapped census")
+        if path not in allowed:
+            raise ValueError("closed target outside frozen mapped census")
+        producer_sources[path] = sha(subprocess.check_output(["git","show",BASE+":"+path],cwd=repo))
+    return frozen_map, producer_sources
+
+
 def closed_render(repo, rows, source_candidate_names):
     """Reuse the pinned domain transform for observed closed source candidates.
 
@@ -268,19 +286,7 @@ def closed_render(repo, rows, source_candidate_names):
         raise ValueError("no closed source candidates")
     fragment = macro_fragment((repo / MACRO_PATH).read_text())
     modules = sorted({r["module"] for r in selected})
-    frozen_map = subprocess.check_output(["git","show",BASE+":"+MAP],cwd=repo)
-    allowed = set(mapped_references(frozen_map.decode())[0])
-    producer_sources = {}
-    for module in modules:
-        if module.startswith("Solidity."):
-            path = module.replace(".","/") + ".lean"
-        elif module.startswith("SolidityBridge."):
-            path = "Bridge/" + module.replace(".","/") + ".lean"
-        else:
-            raise ValueError("closed target outside frozen mapped census")
-        if path not in allowed:
-            raise ValueError("closed target outside frozen mapped census")
-        producer_sources[path] = sha(subprocess.check_output(["git","show",BASE+":"+path],cwd=repo))
+    frozen_map, producer_sources = _frozen_scope(repo, modules)
     program = "import Lean\n" + "".join("import " + m + "\n" for m in modules)
     program += "/-! Guard nonempty or stale hypothesis domains from being credited as closed.\nOnly derived empty hypotheses are witnessed; original conclusions are unchanged. -/\n"
     program += fragment + "\nnamespace Closed\nopen Lean Meta Elab Term\n" + CLOSED_CHECKER + CLOSED_BATCH
@@ -306,3 +312,188 @@ def closed_render(repo, rows, source_candidate_names):
         "frozen_map_sha256":sha(frozen_map),"producer_source_sha256":producer_sources,
         "kernel_accepted":False,"witness_ledger_linked":False,
         "boundary":"Candidate rendering only until native kernel/guard receipts pass; no original conclusion or full census acceptance"}
+
+
+DATA_NAMESPACE = NAMESPACE + ".Defaults"
+DATA_CHECKER = r'''
+private partial def defaultDomainProof (goal : Lean.Expr) : MetaM (Except String Lean.Expr) := do
+  let goal ← whnf goal
+  if goal.isConstOf ``True then
+    return .ok (mkConst ``True.intro)
+  unless goal.isAppOfArity ``Exists 2 do
+    return .error "unsupported derived domain shape"
+  let args := goal.getAppArgs
+  let alpha := args[0]!
+  let predicate := args[1]!
+  if ← isProp alpha then
+    return .error "proof binder requires explicit witness"
+  let level ← getLevel alpha
+  let instanceType := mkApp (mkConst ``Inhabited [level]) alpha
+  let some inhabitant ← synthInstance? instanceType
+    | return .error "default instance synthesis unsupported at chosen values"
+  let value ← instantiateMVars (mkAppN (mkConst ``default [level]) #[alpha,inhabitant])
+  if value.hasMVar || value.hasLooseBVars then
+    return .error "unresolved default inhabitant"
+  match ← defaultDomainProof (mkApp predicate value) with
+  | .error reason => return .error reason
+  | .ok rest =>
+    let proof ← mkAppOptM ``Exists.intro #[some alpha,some predicate,some value,some rest]
+    let proof ← instantiateMVars proof
+    if proof.hasMVar || proof.hasLooseBVars then
+      return .error "unresolved dependent witness"
+    return .ok proof
+
+private def dataTarget (name : Lean.Name) : TermElabM (Lean.Expr × Except String Lean.Expr) := do
+  let info ← getConstInfo name
+  unless wasOriginallyTheorem (← getEnv) name do
+    throwError "data hypothesis audit: target is not a theorem"
+  unless info.levelParams.isEmpty do
+    throwError "data hypothesis audit: universe parameters require review"
+  let domain ← explicitDomain info.type
+  if domain.isConstOf ``True then
+    return (domain,.error "empty domain belongs to closed witness path")
+  let proof ← defaultDomainProof domain
+  return (← instantiateMVars domain,proof)
+
+elab "default_domain_witness% " id:ident : term => do
+  let name ← realizeGlobalConstNoOverloadWithInfo id
+  let (_, result) ← dataTarget name
+  match result with
+  | .ok proof => return proof
+  | .error reason => throwError "data hypothesis audit: {reason}"
+
+-- Guard default data witnesses against proof-premise invention, unsupported
+-- empty data, hidden binders, wrong kinds and accidental closed-domain credit.
+theorem positiveToy (_n : Nat) (_b : Bool) : True := True.intro
+theorem dependentToy (n : Nat) (_i : Fin (n+1)) : True := True.intro
+theorem proofToy (n : Nat) (_positive : 0 < n) : True := True.intro
+theorem emptyToy (_i : Fin 0) : True := True.intro
+theorem closedToy : True := True.intro
+def datum : Nat := 0
+universe u
+theorem polyToy (_t : Type u) : True := True.intro
+def hidden : Prop := ∀ (_n : Nat), True
+theorem hiddenToy : hidden := by intro _; exact True.intro
+
+theorem positive_domain : hypotheses_of% positiveToy := default_domain_witness% positiveToy
+theorem dependent_domain : hypotheses_of% dependentToy := default_domain_witness% dependentToy
+theorem empty_domain_impossible : ¬ (hypotheses_of% emptyToy) := by
+  intro witness
+  rcases witness with ⟨value, _⟩
+  exact Fin.elim0 value
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.Defaults.positive_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms positive_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.Defaults.dependent_domain' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms dependent_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.Defaults.empty_domain_impossible' does not depend on any axioms -/
+#guard_msgs in
+#print axioms empty_domain_impossible
+/-- error: data hypothesis audit: proof binder requires explicit witness -/
+#guard_msgs in
+#check default_domain_witness% proofToy
+/-- error: data hypothesis audit: default instance synthesis unsupported at chosen values -/
+#guard_msgs in
+#check default_domain_witness% emptyToy
+/-- error: data hypothesis audit: empty domain belongs to closed witness path -/
+#guard_msgs in
+#check default_domain_witness% closedToy
+/-- error: data hypothesis audit: target is not a theorem -/
+#guard_msgs in
+#check default_domain_witness% datum
+/-- error: data hypothesis audit: universe parameters require review -/
+#guard_msgs in
+#check default_domain_witness% polyToy
+/-- error: hypothesis audit: hidden binders under reducible result -/
+#guard_msgs in
+#check default_domain_witness% hiddenToy
+
+declare_syntax_cat dataEntry
+syntax str " => " ident " against% " str " expecting% " str : dataEntry
+elab "#default_hypothesis_batch " "[" entries:dataEntry,* "]" : command => do
+  let mut index : Std.HashMap String (List Lean.Name) := {}
+  for (name, _) in (← getEnv).constants.toList do
+    let key := name.toString
+    index := index.insert key (name :: index.getD key [])
+  for entry in entries.getElems do
+    match entry with
+    | `(dataEntry| $target:str => $helper:ident against% $expected:str expecting% $golden:str) =>
+      let found := index.getD target.getString []
+      unless found.length == 1 do
+        throwError "data hypothesis audit: missing or ambiguous kernel name"
+      let name := found.head!
+      let info ← getConstInfo name
+      unless reprStr info.type == expected.getString do
+        throwError "data hypothesis audit: recorded type differs"
+      let (domain, result) ← Lean.Elab.Command.liftTermElabM (dataTarget name)
+      let helperName := (← getCurrNamespace) ++ helper.getId
+      let (status, reason, axioms) ← match result with
+        | .error reason => pure ("unsupported-default",reason,#[])
+        | .ok proof => do
+          Lean.Elab.Command.liftCoreM <| Lean.addDecl (.thmDecl {
+            name := helperName,levelParams := [],type := domain,value := proof })
+          let axioms ← collectAxioms helperName
+          unless axioms.all (fun n => n == ``propext || n == ``Classical.choice || n == ``Quot.sound) do
+            throwError "data hypothesis audit: unexpected axiom"
+          pure ("proved","",axioms.map Lean.Name.toString)
+      let record := Json.mkObj [("target",toJson target.getString),("helper",toJson helperName.toString),
+        ("status",toJson status),("reason",toJson reason),("axioms",toJson axioms)]
+      unless golden.getString == "probe" || golden.getString == record.compress do
+        throwError "data hypothesis audit: result differs from recorded expectation"
+      Lean.Elab.Command.liftCoreM <| Lean.Core.liftIOCore <| IO.println ("H62_DEFAULT_RESULT " ++ record.compress)
+    | _ => throwUnsupportedSyntax
+'''
+
+
+def data_render(repo, rows, source_candidate_names, expectations=None):
+    """Kernel-checked default attempts for data-only candidate hypotheses.
+
+    Unsupported default synthesis is not an impossibility result or coverage.
+    Proof binders are refused, resource exceptions propagate, and actual
+    dependent Exists witnesses must pass the kernel without added premises.
+    """
+    import kernel_metadata as metadata
+    metadata.partition_records(rows, source_candidate_names)
+    names = set(source_candidate_names)
+    selected = sorted((r for r in rows if r["name"] in names and r["binders"] and
+                       not r["level_params"] and not any(b["proof_binder"] for b in r["binders"])),key=lambda r:r["name"])
+    if not selected:
+        raise ValueError("no data-only source candidates")
+    if expectations is not None and set(expectations) != {r["name"] for r in selected}:
+        raise ValueError("default expectation membership differs")
+    modules = sorted({r["module"] for r in selected})
+    frozen_map, producer_sources = _frozen_scope(repo,modules)
+    fragment = macro_fragment((repo/MACRO_PATH).read_text())
+    program = "import Lean\n" + "".join("import "+m+"\n" for m in modules)
+    program += "/-! Guard default witness attempts from dropping proof premises or treating unsupported defaults as impossible. Original conclusions are not proved. -/\n"
+    program += fragment + "\nnamespace Defaults\nopen Lean Meta Elab Term\n" + DATA_CHECKER
+    program += '/-- error: data hypothesis audit: missing or ambiguous kernel name -/\n#guard_msgs in\n#default_hypothesis_batch ["missing.kernel.name" => reject_missing against% "" expecting% "probe"]\n'
+    program += '/-- error: data hypothesis audit: recorded type differs -/\n#guard_msgs in\n#default_hypothesis_batch ["'+DATA_NAMESPACE+'.positiveToy" => reject_type against% "wrong recorded type" expecting% "probe"]\n'
+    targets = {}
+    for start in range(0,len(selected),8):
+        entries=[]
+        for index,row in enumerate(selected[start:start+8],start):
+            helper="data_domain_"+str(index).zfill(4)
+            golden="probe" if expectations is None else expectations[row["name"]]
+            if expectations is not None:
+                if not isinstance(golden,str) or golden=="probe":
+                    raise ValueError("strict default expectations cannot bypass checks")
+                record=metadata.parse_json(golden)
+                if (not isinstance(record,dict) or set(record)!={"target","helper","status","reason","axioms"} or
+                        record["target"]!=row["name"] or record["helper"]!=DATA_NAMESPACE+"."+helper or
+                        record["status"] not in {"proved","unsupported-default"} or
+                        not isinstance(record["reason"],str) or not isinstance(record["axioms"],list) or
+                        any(a not in {"propext","Classical.choice","Quot.sound"} for a in record["axioms"]) or
+                        (record["status"]=="proved" and record["reason"]!="") or
+                        (record["status"]=="unsupported-default" and (not record["reason"] or record["axioms"]))):
+                    raise ValueError("invalid strict default expectation")
+            entries.append(json.dumps(row["name"],ensure_ascii=False)+" => "+helper+" against% "+json.dumps(row["type_expr"],ensure_ascii=False)+" expecting% "+json.dumps(golden,ensure_ascii=False))
+            targets[helper]=metadata.observed_type(row)
+        program+="\n#default_hypothesis_batch [\n"+",\n".join(entries)+"\n]\n"
+    program+="\nend Defaults\nend "+NAMESPACE+"\n"
+    return program,{"namespace":DATA_NAMESPACE,"targets":targets,"modules":modules,
+        "macro_sha256":MACRO_SHA256,"frozen_map_sha256":sha(frozen_map),
+        "producer_source_sha256":producer_sources,"generated_lean_sha256":sha(program.encode()),
+        "expected_results":expectations,"kernel_accepted":False,"witness_ledger_linked":False,
+        "boundary":"Default attempts only; unsupported is not uninhabited; no proof premises, original conclusions, Source or compiler coverage assumed"}

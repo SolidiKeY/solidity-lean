@@ -2212,3 +2212,44 @@ Lean module or default-build import was added; generated355proofs remain H44
 external artifacts requiring the explicit native verifier. Scoped touched
 checks cover this generator/test/docs delta only. Full lane, P10 depth-control,
 Bridge/local-cache recovery and runtime acceptance are not asserted.
+
+### Data-only dependent hypothesis defaults
+
+The existing exact-domain renderer now attempts data-only, universe-free
+source candidates through the same pinned `hypotheses_of%` transformation.
+It retains every dependent existential binder, refuses proof binders, and asks
+existing `Inhabited` instances for concrete values. Each successful complete
+witness passes `Lean.addDecl`; unsupported synthesis creates no witness and
+is not evidence that a domain is empty. Resource errors propagate.
+
+The frozen-map slice has 363 candidates across 84 modules. A probe and a
+strict repeat produced 124 joint hypothesis witnesses and 239 explicitly
+unsupported default attempts. Exact kernel names, raw types and result JSON
+are pinned; standard axioms are checked. Eight refusal controls guard omitted
+proofs, empty/default failures, universes, hidden binders and corrupted records;
+two synthetic positive domains and a separate `Fin 0` impossibility control
+also check. The latter refutes only its intentional toy domain.
+
+Evidence is external under
+`/workspace/parallel-20261103/executable-bytecode/default-data-domains/`.
+`verify-proof.py` reproduces the source and binds native outputs, guards and
+602 existing frozen import products. The first probe failed on the command's
+IO API; that receipt is retained. No prerequisite or PowerBounds retry ran.
+The existing 13:23:24–17:23:24 UTC budget window was reused, not extended.
+Independent finder/skeptic static reviews found no blocking issue; native
+acceptance remains distinct from source authenticity or statement correspondence.
+
+These witnesses prove hypothesis feasibility, not the original conclusions,
+compiler success, G01 linkage or full census closure. The 239 unsupported
+cases remain uncovered by this strategy. The original 703-source closure,
+190-core/37-Bridge inspection and all remaining correspondence, joint-witness,
+physical, Source, gas/fork, performance and package gates remain open.
+H126 A remains binding: the nine out-of-census WordValidation domains are
+support-only, with no census or domain credit. No new tracked Lean module or
+public import is introduced.
+
+Final read-only reviews identified two verifier provenance gaps: probe-manifest
+import rebinding and an unpinned parent report. The verifier now rebinds the
+reconstructed strict manifest and checks the exact sealed parent hash/size
+before selection. Both reviewers confirmed the fixes; verifier replay passes.
+Native probe/strict times are 43.675s/39.822s, with no new module over 60s.
