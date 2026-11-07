@@ -1,0 +1,67 @@
+{
+  "status": "STATIC_HYPOTHESIS_COVERAGE_ONLY",
+  "adopted_master": "1563fa72ade2b377f3e68d1d1c9cb1ea55caea77",
+  "source_bindings": {
+    "Solidity/Lowering/V08/InheritedMetadata.lean": "9f4fe12b321a6a48837e312e382a8fafc7436ec427b6157b6ac2a270af236dc6",
+    "Solidity/Lowering/V08/InheritedControls.lean": "47e75399d795283d0d2a531b990ad3547cec699c6f90f246c2203067123f6042",
+    "Solidity/Source/Inheritance.lean": "fac8c3b392d5dd3e917ce4ca8920f37790cf6d81801b2b3780d3e8cdc743190b"
+  },
+  "targets": [
+    {
+      "name": "Solidity.Lowering.V08.InheritedMetadata.mutOK_payable",
+      "hypotheses": [
+        "accepted : Source.mutOK base derived = true"
+      ],
+      "existing_components": [
+        "InheritedControls.checked_override.mutab applied to the actual singleton base list",
+        "InheritedControls.stricter_nonpayable"
+      ],
+      "disposition": "Existing accepted metadata cases; no new joint proof or kernel check in this inventory."
+    },
+    {
+      "name": "Solidity.Lowering.V08.InheritedMetadata.override_payable",
+      "hypotheses": [
+        "checked : Source.FnOverrideOK environment scope derived",
+        "member : base \u2208 environment.baseFns scope derived"
+      ],
+      "existing_components": [
+        "InheritedControls.checked_override",
+        "InheritedControls.base_functions = [base]",
+        "InheritedControls.inherited_payment applies this original theorem"
+      ],
+      "disposition": "Existing same-environment payable model; not Source execution/admission."
+    },
+    {
+      "name": "Solidity.Lowering.V08.InheritedMetadata.override_enter",
+      "hypotheses": [
+        "same checked and member premises as override_payable"
+      ],
+      "existing_components": [
+        "Existing payable checked/member model above"
+      ],
+      "disposition": "Original theorem transports only the payment Boolean on the SAME supplied world/self/context/storage. funded_header is a separate concrete target-call control, not an execution proof for the Source override."
+    },
+    {
+      "name": "Solidity.Lowering.V08.InheritedMetadata.override_nonzero_rejected",
+      "hypotheses": [
+        "checked",
+        "member",
+        "nonpayable : (base.mutability == some .payable) = false",
+        "nonzero : context.value.1 \u2260 0"
+      ],
+      "existing_components": [
+        "stricter_nonpayable witnesses mutOK cases only",
+        "wrong_header evaluates paid false only"
+      ],
+      "disposition": "UNWITNESSED jointly by the inspected checked-override fixture: its base is payable. Neither separate control supplies a nonpayable FnOverrideOK/member model. Independent witness backfill remains open; no producer blocker inferred."
+    }
+  ],
+  "new_joint_witnesses": 0,
+  "new_statement_fidelity_acceptances": 0,
+  "new_lean_run": false,
+  "limitations": [
+    "Static source audit, not kernel revalidation or complete mapped-interface census.",
+    "FnOverrideOK contains ten fields; mutOK acceptance alone does not inhabit it.",
+    "Declaration membership alone does not prove Source provenance, dispatch/body correctness, admission or H68 adequacy."
+  ]
+}

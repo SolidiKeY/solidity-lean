@@ -581,3 +581,9 @@ The initial ambiguous context-type annotation failure remains retained. Explicit
 Re-audited the complete `CallableMetadataJoint` component against adopted master `902e87762`: all three source hashes and all 13 saved evidence sizes/hashes match. The eight joint facts partition into two same-unit memberships, one function signature, identity fit, heterogeneous error fit, declared error parameters, heterogeneous argument fit and matching target names. The three original public-law applications retain their actual hypotheses in the same environment; the heterogeneous conversion retains the rational source origin.
 
 `actual_binding` evaluates target `Args.evalT` only. The refusal declarations reuse existing controls and supply no new Source execution evidence. This audit adds zero models and zero full statement-fidelity acceptances; it closes this component review, not the full audit queue. No Lean/timing rerun or full-gate pass is claimed.
+
+### Inherited metadata hypothesis coverage
+
+The four public `InheritedMetadata` theorems now have an explicit static hypothesis inventory in `tests/h62/item2/audit-v08-adapters/inherited-metadata-hypothesis-inventory.json`. The existing payable fixture supplies the full ten-field `FnOverrideOK` and an actual member of its singleton base list. `override_enter` changes only the payment Boolean on the same supplied world/context/storage; the funded target-call control is not Source override execution.
+
+The existing payable fixture cannot jointly witness `override_nonzero_rejected`, whose nonpayable premise contradicts that fixture's payable base. Separate stricter-mutability and wrong-header controls do not fill this gap. A genuine nonpayable checked-override witness remains independent backfill, not a missing-producer wait. This inventory adds no joint witnesses, kernel checks or statement-fidelity acceptances.
