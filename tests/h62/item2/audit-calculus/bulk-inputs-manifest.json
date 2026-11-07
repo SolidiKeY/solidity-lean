@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/equation-preparation-roles-v52/semantic-roles-reviewed.json",
-    "bytes": 1648352,
-    "sha256": "3cabc5640049f6039ed23e7774e8dc8fa08b25314c1f762266253f2f341135de"
+    "path": "/workspace/h62-successor-bulk/scoped-reduction-roles-v53/semantic-roles-reviewed.json",
+    "bytes": 1658701,
+    "sha256": "a1bd58630eddeab6ce2a66153cae4fa1b1ad6a52230a34a8e7862b2dadaa97cd"
   }
 }
