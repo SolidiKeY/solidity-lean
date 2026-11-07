@@ -1,0 +1,47 @@
+{
+  "scope": "Complete10 universal-premise instantiation theorem roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 671,
+    "pending": 4612,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/all-left-roles-v61/evidence.tar.gz",
+      "bytes": 165630,
+      "sha256": "85b83dddbecfd6cd0d4460297398c8cb7a453c5d65a64d15d84dfd5e16b89178"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/all-left-roles-v61/inputs.json",
+      "bytes": 905,
+      "sha256": "8ee296f6bd6b2d3cbcf95784cc75ca346f4c6c393ed46cb0eae3d5a6651c0e2f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/all-left-roles-v61/gates.json",
+      "bytes": 2793,
+      "sha256": "46585c0e1f344c9d25038ddaa1dd1319a4a9c3d19662aa2e8e064241d17c7464"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/all-left-roles-v61/reviews.md",
+      "bytes": 750,
+      "sha256": "aa512b721d7979fef5fc9aac3d4562f0b15770990ed1a767c0c350083d372b9a"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/all-left-roles-v61/case-rosters.json",
+      "bytes": 1093,
+      "sha256": "79178c2e378a90d136ba6fbed9ec955218ca81e9e84a3913aedfa866e7a758e0"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/all-left-roles-v61/doc-master-repair-binding.json",
+      "bytes": 432,
+      "sha256": "59debcfe3247fd2a5fd873ed54c21c78412e788b06fcd4b8ad8955de8debc8ae"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/all-left-roles-v61/semantic-roles-reviewed.json",
+      "bytes": 1782469,
+      "sha256": "538be89e6cef3a900e9e528ccbb5c3414f5d9ccb3375340f3301be96bd53661f"
+    }
+  ]
+}
