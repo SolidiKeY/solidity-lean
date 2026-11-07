@@ -3,6 +3,9 @@ import Solidity.Evm.MemoryStructDefault
 
 /-! Single primitive-member struct defaults under complete object ownership.
 Reference-bearing struct construction is deliberately excluded. -/
+-- Retain the existing typed flat-object proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 open Semantics
 

@@ -1,6 +1,9 @@
 import Solidity.Evm.MemoryDefaultChildrenSim
 
 /-! Actual source equations for arrays of typed reference defaults. -/
+-- Retain the existing typed reference-default proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 
 private theorem vectors_heq : {E : Ty} → {n m : Nat} →

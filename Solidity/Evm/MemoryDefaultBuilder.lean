@@ -68,7 +68,8 @@ def DefaultBuilder.fixedPrimitive (p : PrimTy) (n : Nat) :
   positive := by omega
   correct := by
     intro H hp base frame cursor m ha hs
-    rw [DefaultBuildResult, defaultFixed_copy hp p n]
+    unfold DefaultBuildResult
+    rw [defaultFixed_copy hp p n]
     refine ⟨upd base H.length cursor, allocateStructMachine m cursor (max 1 n),
       allocateStruct_run m cursor _ ha.free.cell, ha.allocateFixedPrimitive p n hs,
       upd_same _ _ _, (fun r => allocationBase_old base cursor r), rfl, ?_, ?_⟩

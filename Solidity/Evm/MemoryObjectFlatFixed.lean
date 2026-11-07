@@ -2,6 +2,9 @@ import Solidity.Evm.MemoryObjectFlatStruct
 
 /-! Primitive fixed-array defaults reuse the actual typed source copy fold;
 the target is headerless and reserves one padding cell for an empty object. -/
+-- Retain the existing typed fixed-default proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 
 def defaultFixed {H : HTy} (p : PrimTy) (n : Nat) : MObj H (.fixed (.prim p) n) :=
