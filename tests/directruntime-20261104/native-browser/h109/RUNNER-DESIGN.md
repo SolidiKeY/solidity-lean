@@ -213,3 +213,29 @@ end-to-end obligations remain open: fixed controller/worker recipe, sealed sourc
 and cache/image inputs, actual per-stage resources, deadline enforcement, whole
 job measurement, verified cleanup, offline verification and the five-module A/B.
 H134's slow-library CI allowance remains 600 seconds; VM/default remains 300.
+
+## Kernel resource observation component
+
+`kernel-resources.py` now reads a bounded cgroup-v2 hierarchy and identifies a
+process by unique direct PID membership, rather than joining its namespace path
+to a guessed mount root. It pins ancestor directory descriptors and records the
+process start identity, namespace handles, leader affinity/scheduling policy and
+mount identity before/after capture. Threaded or racing layouts, duplicate PID
+membership, unsafe/oversized reads and changing resource settings fail closed.
+Twelve controls include descriptor-leak, configuration-drift and process-identity
+cases. Synthetic filesystem cases are not actual cgroup authentication.
+
+The read-only host observation found `/init`, although the namespace path was
+`/` and the mount root `/..`. Its visible ancestor has a 16-GiB memory maximum;
+the leaf and swap limits are unbounded. The cpuset allows five concurrent CPUs,
+while the configured sustained fair-class quota ratio is four. Quota ratios are
+not short-interval concurrency guarantees; period boundaries, burst credits and
+per-thread scheduling remain relevant. The first review caught an incorrectly
+named CPU-capacity field; the corrected report separates these quantities.
+
+These are non-atomic point-in-time kernel observations. Charged cgroup memory is
+not aggregate process RSS. Complete host-lineage and Docker ownership flags are
+explicitly false. The host observation is not an approved worker scope. Real
+Docker probes are deferred until the owned creation/cleanup controller exists;
+there is no worker, budget authorization, continuous monitor, cleanup or complete
+measurement verdict here. The full runner and five-module A/B remain open.
