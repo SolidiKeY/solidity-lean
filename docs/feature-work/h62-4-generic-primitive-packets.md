@@ -719,3 +719,23 @@ check passes in 2.942 seconds, sampled workload peak 834476 KiB, with existing
 standard axioms. Independent read-only finder/skeptic reviewed the final changes
 and found no defect; neither used Lean/server/build/edit. Full C4/H68, arbitrary
 heap/world/session/gas adequacy, fidelity drift and timing STOPs remain open.
+
+### Strict unsigned narrowing correspondence
+
+`UnsignedCastCorrespondence.lean` adds five laws for the unchanged strict
+smaller-width profile: unsigned byte multiples 8 through 248. Every uint256
+input and second populated-fixture local remain quantified. Public selection
+and actual generated-code execution are derived from constructed physical
+inputs; the exact output machine retains StateRepr, memory and every saved
+stack. Independent Source explicit casts retain general globals/frame/state
+and older local tails, wrapping in either checked mode. Reject-all is refuted,
+and horizons zero and one remain actual Source timeouts. The returned word is
+that of the typed destination-wrap integerValue, matching Source.intWrap.
+No widening or uint256 identity profile is added.
+
+The five-law kernel check passes in 1.434 seconds, sampled workload peak
+810256 KiB, with existing standard axioms. Independent read-only finder and
+skeptic found no defect and used no Lean/server/build/edit. Original controls
+and census remain unchanged. No arbitrary Source heap/world map, gas/session
+or fetched-EVM adequacy follows; full C4/H68, original fidelity drift and timing
+STOPs remain open.
