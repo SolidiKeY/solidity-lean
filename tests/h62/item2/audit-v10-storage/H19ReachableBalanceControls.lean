@@ -1,4 +1,5 @@
 import Solidity.Backend.WorldCalls.SourceCallHistoryControls
+import Solidity.Lowering.Readonly.StaticJournal
 
 /-! H19 regression: derive range from existing concrete Source execution
 outcomes rather than assuming Fits. This observes the original funding-success
@@ -11,6 +12,25 @@ namespace H19.ReachableBalanceControls
 open Solidity.Source
 open Solidity.Source.SemanticsExamples
 open Solidity.Backend.WorldCalls.SourceCallHistoryControls
+
+/-- Regression: the published current-model storage specialization accepts
+an actual Word amount. This is a type-fidelity check, not old-model transport. -/
+example {D : Layout} {L T : Solidity.Roadmap.Address → SPath → STy}
+    (state : ExecState D L T) (address : Solidity.Roadmap.Address)
+    (amount : Solidity.Roadmap.Word) :
+    Solidity.Lowering.Readonly.StaticJournal.SameStorage
+      (state.apply (.account address fun old => old.withBalance amount.val)) state :=
+  Solidity.Lowering.Readonly.StaticJournal.balance_storage_word state address amount
+
+/-- Regression: Word-valued balance steps keep the original mode/history indices.
+This does not assert that arbitrary Source runs construct a History certificate. -/
+example {D : Layout} {L T : Solidity.Roadmap.Address → SPath → STy}
+    {entry state : ExecState D L T} {mode : Bool}
+    (prior : Solidity.Lowering.Readonly.StaticJournal.History entry mode state)
+    (address : Solidity.Roadmap.Address) (amount : Solidity.Roadmap.Word) :
+    Solidity.Lowering.Readonly.StaticJournal.History entry mode
+      (state.apply (.account address fun old => old.withBalance amount.val)) :=
+  Solidity.Lowering.Readonly.StaticJournal.History.balance_word prior address amount
 
 /-- Actual account observations, not replacement Source states or a new model. -/
 def observations : List Monetary.Balance :=
