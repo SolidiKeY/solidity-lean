@@ -1578,3 +1578,58 @@ remains. H121b actual Source admission/origin/lifecycle/P8/S03-PANIC41 duties st
 local; Y04 physical and separate 4.35 waits, all STOPs and original/consolidated
 proof/backfill/coverage/final gates remain open. No new witness rows: 72 mapped
 of 3281, 3209 uncovered.
+
+### C265 — prepared H24 v2 consumption, awaiting published producer
+
+The coordinator released vy1-words' Source work from its timing hold to continue
+to mergeable checkpoints. This supersedes C264's producer-continuation hold; it
+does not authorize draft integration or clear unrelated STOPs. Consume nothing
+until the owner publishes the checkpoint head. The migration-note SHA supplied
+in the ticket is 1c2fbc40a5753d3f672a2e6ce489df183d4c31705faa529612574fcae6fcc289;
+its bytes are not locally retrieved or hash-verified here. Preparation uses the
+verbatim owner ticket, not an assumed producer implementation.
+
+The intended H57 pairing keeps the existing v1 SourceRefusesNonAdmissible,
+Admission, EnvAdmission, DeclarationGraphAdmission.Producer, negative H24
+characterization and every consumer statement unchanged. Proposed v2 symbols
+below are planning names, not declarations or a committed interface:
+
+| Frozen v1 component | Prepared v2 obligation |
+| --- | --- |
+| LocationGraphInterface.SourceRefusesNonAdmissible | A separate predicate with identical environment/context, local stores, type-resolution, explicit location and initializer quantifiers, using Source.V2.StmtD. Derive from the actual published declaration_admissible theorem, without an assumed CompatibleAt or mapping-free premise. |
+| LocationGraphInterface.Admission | A separate versioned admission over the exact same base producer, acceptedSource environment, input, resolved artifact and location. Preserve every graph field; change only the explicitly versioned local-declaration refusal relation. |
+| GraphAdmissionAssembly.EnvAdmission | Pair unchanged per-location certificates with the new refusal. Reuse graph_of_premises and GraphPremises; do not erase selection, related/supported fields, distinct/nonempty checks or rank. |
+| GraphAdmissionAssembly.env_admission_iff | Retain the v1 mapping-free-nameable characterization. Do not transfer that characterization to v2; prove any new v2 constructor directly from its actual components. |
+| DeclarationGraphAdmission.Producer | A separate paired producer contract, never a coercion or replacement of the frozen declarationGraphs field. Preserve base producer/origin/root identity. |
+| ConditionalAssembly.checked_source_refuses and LibraryPremises.Inputs | Keep frozen fields/theorems. Plan paired v2 consumers and obtain the required H57/interface-owner disposition before production migration; a v2 refusal proof alone cannot inhabit the existing v1 Inputs. |
+
+The refusal proof must instantiate the original local declaration shape, with
+actual type-resolution equality and actual v2 derivation, for every initializer
+and explicit location. Its environment must be the same acceptedSource used by
+the graph certificate. A universal v2 location theorem supplies no actual body
+derivation, graph/rank premise, origin, compiler correspondence, lifecycle or
+accepted-source/artifact binding. No toy PlanWitness or empty Source substitution.
+
+Transport preparation: consume published toV1 projections for actual v2
+derivations; use ofV1 only with its real CompatibleAt obligation at the actual
+nameable types. Mapping-free-nameable compatibility is a conditional bridge,
+not a new universal admission restriction. Preserve all v1 Loop-memory negative
+witnesses. Separately check the same v2 memory rejection, an inhabited initialized
+storage declaration and the Bool compatibility witness against the published
+controls. Do not weaken failure, initialization, location or graph observations.
+
+Publication intake sequence: verify exact owner head, ancestry, module and note
+hashes and full gate/resource disposition; inspect the actual theorem types;
+then add only versioned consumer contracts/proofs and registration under the
+authorized scope. Pin new measured axioms without changing existing pin sets.
+Check every affected consumer, statement fidelity and meaning, negative controls,
+matched-resource timing and independent read-only reviews. Library try/Error
+support is a separate producer checkpoint: retain C246's historical manual
+full-elaboration failure until that implementation is published and checked.
+The build target removed by C264 cleanup must be recovered before Lean work.
+
+No draft module imported, no v1 interface or production Source edited, no Lean
+check or timing retry run. This is concrete consumption preparation only, not
+producer delivery or consumer integration. Original H121b actual Source/H24/
+origin/lifecycle/P8/S03-PANIC41 work, exact-19 transport proofs, proof/backfill/
+coverage/final gates and Y04/separate 4.35 waits remain open.
