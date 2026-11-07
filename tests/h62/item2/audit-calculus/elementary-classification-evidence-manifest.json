@@ -1,0 +1,47 @@
+{
+  "scope": "Complete28 elementary refinement theorem roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 888,
+    "pending": 4395,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/elementary-roles-v74/evidence.tar.gz",
+      "bytes": 252603,
+      "sha256": "434cbb18ee1742a60a25d624d133e288aebe8a3925246f3044e4ed512c152f3b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/elementary-roles-v74/inputs.json",
+      "bytes": 1619,
+      "sha256": "96c160232517f808a1f985c9edaf3a138a586d9b76275f29509c9854bfca9c16"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/elementary-roles-v74/gates.json",
+      "bytes": 2810,
+      "sha256": "874a6c52d8a889bf6d1d1f97f7d4006f0c91bc182ae2b98aae7685d96000cfcc"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/elementary-roles-v74/reviews.md",
+      "bytes": 874,
+      "sha256": "68d2ea899819a7b636e35bba570a2695569efa479925142597210fa439a363a5"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/elementary-roles-v74/case-rosters.json",
+      "bytes": 2589,
+      "sha256": "2bacae5e0b2df24dc49a76ca1509908ff0b0be07cf339104c0b06be1e106752d"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/elementary-roles-v74/doc-master-repair-binding.json",
+      "bytes": 416,
+      "sha256": "1496ffdef91f2181747441ad9328d02dd5a3c3f1b6d8f2355291747576859fb6"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/elementary-roles-v74/semantic-roles-reviewed.json",
+      "bytes": 2386102,
+      "sha256": "e5b3e0086f8977182ef110c07c5113a062719de7581e4bce75a9979e260c928d"
+    }
+  ]
+}
