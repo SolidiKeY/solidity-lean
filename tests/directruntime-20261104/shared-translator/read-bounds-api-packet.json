@@ -1,0 +1,12 @@
+{
+  "guardedRegression": "ReadBounds fitsM browser stack overflow without changing exact occurrence/fuel semantics.",
+  "producerHead": "6513fcbde2f10ded8b428e3ede8e87b5bbf7c68b",
+  "base": "9ef9482d550ee45efb7660e2dd961bfe3f1e8e98",
+  "consumer": "solidity-directruntime-20261104/native-browser",
+  "manifest": "tests/directruntime-20261104/shared-translator/read-bounds-stack-manifest.json",
+  "manifestSha256": "6b27b679d822f5f17064ceaf721569aa93c91b67bb4c65c7e2db52bff3f2f173",
+  "request": "Consume reviewed exact repair, rebuilding affected ReadBounds importers and generated C/object closure; qualify retained invariantCountsToBound failure with fresh native/WASM source/binary manifests. Do not reuse stale recursive importer objects or rerun unchanged timing STOPs.",
+  "proofBoundary": "Exact generic remaining-fuel equalities, standard propext/Quot.sound only. Generated C worker has one loop back edge and no direct self-call. No source/compiler/native correctness claim.",
+  "gates": "Affected DirectRuntime build,27per-file checks,unchanged census/profiles and source preservation PASS; finder/skeptic no blocker.",
+  "holds": "Native median/browser startup/prior native build STOPs retained; fresh runtime stack result pending."
+}

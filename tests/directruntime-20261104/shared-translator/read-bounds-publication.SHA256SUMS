@@ -1,0 +1,3 @@
+# Exact reviewed source head: 6513fcbde2f10ded8b428e3ede8e87b5bbf7c68b
+4a26c205be7c34ba3e08d77f1ded6c29e0ee1e6cc2a4577fd0631310dc804a6a  tests/directruntime-20261104/shared-translator/read-bounds-api-packet.json
+6b27b679d822f5f17064ceaf721569aa93c91b67bb4c65c7e2db52bff3f2f173  tests/directruntime-20261104/shared-translator/read-bounds-stack-manifest.json
