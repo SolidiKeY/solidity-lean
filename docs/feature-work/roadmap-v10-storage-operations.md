@@ -1667,3 +1667,49 @@ exact-19 H57/transport proofs, original/consolidated proof/backfill/coverage and
 all final gates remain open. Y04 physical, separate 4.35 disposition and all
 unrelated STOPs remain. Coverage stays 72 mapped / 3281 rows, 3209 uncovered;
 no syntax-control witness credit or whole-lane completion claim.
+
+### C268 — published H128 v2 H24 local refusal consumed
+
+Merged the published Source checkpoint through master f5038bc02, including
+1b3ab0676e24620af56e1408c1aabde9cb4bbdb7. TypingV2 matches published module SHA
+ccfaee52e9891284f5e4bd71687fd9c09f8db9fd7af00df72bd0bd6c5f4b1de2. The released
+migration notes now hash d390a1ad784039b7ad1501bd8e621a23e3f79565dc8c93c91dd34638b2708a3e,
+distinct from the historical draft notes. No draft or unpublished Source code
+was used, and no v1 Source file was edited.
+
+DeclarationGraphAdmissionV2 is an additive H57/H128 pair: local declaration
+refusal quantifies over actual Source.V2.StmtD with all original context/store/
+type-resolution/location/initializer indices. source_refuses directly consumes
+the published declaration_admissible theorem, with no mapping-free or
+CompatibleAt assumption. location_policy_eq ties the promoted Source Boolean
+to the existing H24 formula. Separate EnvAdmission, Admission and Producer
+contracts preserve graph certificate types, graph structural premises, exact
+acceptedSource/input/artifact/location indices and base/origin/root identity.
+No coercion into frozen v1 consumers. from_v1_graphs reuses certificates only;
+it does not lift an actual v1 derivation or supply program typing.
+
+H24V2Controls reuses the existing mixed mapping-bearing environment's computed
+certificates at storage, memory and calldata, retaining physical IDs. A negative
+control uses the unchanged v1 refusal_missing to refute generic v2-refusal-to-v1
+transport. Published TypingV2Controls separately passes its exact initialized
+storage, memory refusal and compatible Bool cases; none was copied here. Six
+production and three consumer axiom guards use the standard trio. Version-pair
+JSON records all four named contracts, exact source hashes and explicit limits.
+Initial consumer syntax/qualification and missing explicit-location arguments
+failed; corrected controls pass, with failures retained and no recovery proof
+accepted. Upstream dependency linter warnings are retained, not suppressed.
+C268 lane history records independent read-only finder/skeptic reviews and
+follow-up controls/hash reviews with no findings; neither used Lean/server/builds.
+
+No actual Source Env/SrcProg, accepted-source/artifact binding, graph structural
+premises for the library program, origin/compiler/lifecycle/S03-PANIC41 producer
+or v1 LibraryPremises.Inputs inhabitant is delivered. V1 predicates, EnvAdmission
+characterization, Producer, ConditionalAssembly and LibraryPremises remain
+unchanged. Separate paired consumer migrations still need actual reproof and
+H57/interface-owner coordination. The H128 producer wait for local typing is
+resolved here; library try/Error(string memory) remains a separate incoming
+Source checkpoint, so C246's historical manual full-elaboration failure remains.
+Original/consolidated proof/backfill/coverage/final gates, exact-19 transport
+proofs, Y04 physical, separate 4.35 disposition and unrelated STOPs stay open.
+Coverage remains 72 mapped / 3281 rows, 3209 uncovered; this interface is not
+whole-program witness coverage or whole-lane completion.
