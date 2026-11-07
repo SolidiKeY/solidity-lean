@@ -966,3 +966,46 @@ raw strict docs at8e7f0883c83d15862f3e42e1f961ff788e65cc6d retain1missing/139amb
 identical to published3a5b9de412b84a13777b6fbf8c8f310e10b3448e (0new/0removed).
 Frozen comparison remains FAIL137new/9removed. No raw failure or historical
 timing STOP is waived. Entire original/consolidated queues remain incomplete.
+
+
+## Checkpoint 241: compiler leaf types into intrinsic Source syntax
+
+Rebased the existing lane on published7265ee136d8eef49b969934d250a536edc97f1df
+after verifying accepted bf7695fa485a ancestry. Existing untracked runtime files
+and historical seals are preserved. Source.elaborate already constructs typed
+programs with derivation evidence; the new P8 SourceAstTypes component prepares
+its existing Syn type/parameter inputs instead of introducing another AST or
+a hand-written resolved program. Source implementation files remain untouched.
+
+The generic leaf converter preserves written qualified struct paths, explicit
+storage/memory/calldata locations, anonymous names and string types. Integer
+and fixed-byte widths are constructed only with the original intrinsic bounds;
+noncanonical leading zeros are refused. Non-leaf conversion is unfinished: its
+errors are component gaps, not Source/profile exclusions or parser admission.
+No Env, complete syntax unit, resolution, program, origin, failure-resource
+realization or reached-state witness is supplied by this leaf component.
+
+Runtime checks reuse the unchanged LibraryTry legacy/via-IR fixtures: all12
+parameters/results per fixture convert, including the actual S-storage formal
+and anonymous string-memory return. These IO checks are not Source semantic
+proofs. Four separate malformed-width/location propositions are kernel proved
+and axiom-free. The three main definitions have exact measured guards: elementary
+axiom-free; typeNameLeaf and parameter use propext only. No native_decide, new
+axiom, statement weakening or heartbeat increase is introduced.
+
+Initial diagnostics found the Lean4.24 String.drop API mismatch. Subsequent
+concrete rfl/decide attempts encountered opaque string operations; failed
+receipts, including rejected recovery sorryAx reports, remain retained. Width
+reading now uses finite character lists, so all four original rejection
+statements reduce in the kernel. No failing artifact or forbidden pin is
+accepted. Independent finder and skeptic reviewed the final algorithm and
+controls without Lean/server and found no findings.
+
+Exact source814ba88f86307e36677cc6e8ae29ea1ce6ee4112 checks pass: definitions
+1.90s/330522624bytes aggregate RSS; controls1.23s/320888832bytes, no resource stop.
+Affected import build and generated registration/layers pass. Trust reports
+6648sources/289sites/0findings. Strict pins remain FAIL:16795pins,0errors,
+205unrecorded,0baselined; inventory is not rewritten. The audit ledger remains
+72mapped/3209uncovered; these new conversion controls are not frozen-row
+witness additions. All original Source/program/lifecycle, physical, coverage
+and final-gate requirements and historical STOPs remain open.
