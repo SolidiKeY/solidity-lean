@@ -5,7 +5,7 @@ const {pathToFileURL}=require('node:url');
 const {createHash}=require('node:crypto');
 const {LeanSession}=require('./lean-session.cjs');
 const projects=require('./project.cjs');
-const {checkDirect}=require('./direct-runtime.cjs');
+const {checkDirect,disposeDirect}=require('./direct-runtime.cjs');
 const {unknownResult}=require('./direct-model.cjs');
 
 let session,compiler,locations;
@@ -82,9 +82,17 @@ async function execute(task){
   return {results,errors,backend:{workerPid:process.pid,directChecks,...(!usedLegacy&&directChecks.length?{kind:directChecks.every(c=>c.backend==='generated-c-wasm')?'generated-c-wasm':directChecks.every(c=>c.backend==='generated-c-native')?'generated-c-native':'compiled-unknown',wasmBuild,native:{active:directChecks.every(c=>c.backend==='generated-c-native'),reason:directChecks.every(c=>c.backend==='generated-c-native')?'standalone-native':'standalone-wasm-or-unavailable'}}:{kind:directChecks.length?'mixed':'lean',leanServerPid:session?.child?.pid,leanDocumentVersion:session?.version,native:session?.native??{active:false,reason:'no-contracts'}}),...(options.benchmark?{benchmarkMessages:benchmarkLog,phases:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/SOLKEY_BENCH (\{[^\r\n]*\})/g)].map(m=>JSON.parse(m[1])),nativeDirectNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_DIRECT_CHECK (\d+)/g)].map(m=>Number(m[1])),nativeWalkNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_SPEC_WALK (\d+)/g)].map(m=>Number(m[1]))}:{})}};
 }
 if(require.main===module){
+let stopping=false;
 process.on('message',async task=>{
-  try{process.send({id:task.id,result:await execute(task)});}
-  catch(error){process.send({id:task.id,error:{message:error.message,diagnostics:error.diagnostics}});}
+  if(task.action==='shutdown'){
+    if(stopping)return;stopping=true;
+    try{const deadline=Math.min(Number.isSafeInteger(task.deadline)?task.deadline:Date.now(),Date.now()+1000);await Promise.all([session?.finishDispose({deadline}),disposeDirect({deadline})]);process.exit(0);}
+    catch(error){process.stderr.write('Lean worker retirement failed: '+error.message+'\n');session?.dispose();process.exit(1);}
+    return;
+  }
+  if(stopping)return;
+  try{const result=await execute(task);if(!stopping)process.send({id:task.id,result});}
+  catch(error){if(!stopping)process.send({id:task.id,error:{message:error.message,diagnostics:error.diagnostics}});}
 });
 process.on('disconnect',()=>{session?.dispose();process.exit(0);});
 for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>{session?.dispose();process.exit(0);});
