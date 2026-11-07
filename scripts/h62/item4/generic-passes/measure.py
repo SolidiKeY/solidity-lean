@@ -9,13 +9,13 @@ This measures the isolated three pass modules, not repository full-build time.
 import argparse, hashlib, json, statistics, subprocess, sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[4]; HERE=Path(__file__).parent
-E=Path('/workspace/h62-generic-passes-evidence')
+from runtime_paths import EVIDENCE as E, load_pin
 p=argparse.ArgumentParser(); p.add_argument('--run-id',required=True); p.add_argument('--acceptance',type=Path,required=True); a=p.parse_args()
 if not __import__('re').fullmatch('[a-zA-Z0-9-]+',a.run_id): raise SystemExit('simple unique run ID required')
 # Fail closed: a failed prerequisite cannot be converted into a timing result.
 if not a.acceptance.is_file(): raise SystemExit('PENDING: successful acceptance manifest required')
 manifest=json.loads(a.acceptance.read_text())
-pin=json.loads(Path('/workspace/h62-coordinator-inputs/toolchain-pin.json').read_text())
+pin=load_pin()
 if manifest.get('status')!='pass' or manifest.get('toolchain')!=pin:
     raise SystemExit('PENDING: full additive acceptance on exact pin required')
 for name,want in manifest['source_sha256'].items():

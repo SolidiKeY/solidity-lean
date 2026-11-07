@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "status": "blocked",
+  "original_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "continuation_base": "5da4771e63a4278ed53932ac39a032e3d7aea6ed",
+  "prior_final_head": "6f3479cdf82761013b09a66d1dcf47c71445b0df",
+  "authority": "Coordinator2026-11-07 explicitly resumed queue after prior retirement and requested rebaseline. Same lane/VM/original goal; no reset/create.",
+  "rebaseline": "Fetched exact published merge; verified original base/prior final head ancestry, then fast-forwarded clean assigned lane. No history discarded and no push.",
+  "completed_independent_items": [
+    "Freeze original15-file census after merger adds5unassignedG49modules",
+    "Consolidate all2077olddeclarations,392old/391newEvm,64individualdeltas, exact candidates and historical provenance",
+    "Static refusal/coverage controls and deterministic generation, reviewed by independent finder/skeptic"
+  ],
+  "remaining_original_queue": {
+    "1": "Original census/old baseline done atC6; new current scope/dependency census complete, historical clean baseline retained.",
+    "2": "Official4.35 archive/versions established historically; production migration, exact API shims and all metadata incomplete.",
+    "3": "Full new379closure and clean matched before/after current-base timings blocked by STOP and pending fixes.",
+    "4": "Reviewable partial artifacts/hashes/cross-directory report supplied; final passing migration patch/gates incomplete."
+  },
+  "remaining_backfill": "Existing scanner/case/negative-control/fixture/timing tooling retained. Static census/H78 consolidation and meaningful refusal controls completed. Further fixture proof/structured export/reproduction/timing work needs Lean and is held by STOP; no newly assigned unclaimed cleanup candidate. No independent authorized runnable item remains.",
+  "waits": [
+    {
+      "lane": "migrate-root-gate",
+      "item": "B-PERF-INSPECTION: resolve supplemental inspection STOP wall+48.568879%, RSS+156.378946% before further Lean; not a full-directory slowdown."
+    },
+    {
+      "lane": "migrate-root-gate / live Contracts producer",
+      "item": "B-CONTRACTS-TRUST: exact-base reproduction and proof retaining PublicCorrectness.transfer exact statement/empty guard/budgets. Reported4.35 three-axiom footprint remains uncorrected; no H30 waiver."
+    },
+    {
+      "lane": "migrate-root-gate / Roadmap",
+      "item": "B-H78-METADATA: public/protected visibility and non-theorem subkinds absent from archived exports;14new module exports and compiled shim signature exports pending. All2077rows retained without exclusions; no implemented production shims."
+    },
+    {
+      "lane": "migrate-root-gate / Roadmap",
+      "item": "B-FINAL-GATES:379-module current closure, frozen meaning/axiom/public API/refusal gates and valid clean matched old/new timings on same base/resources pending. Historical374-module baseline cannot establish current-tree acceptance."
+    },
+    {
+      "lane": "migrate-syntax / migrate-backend",
+      "item": "Historical Raw and Creation.Linking failures remain unvalidated; current originals unchanged. H82 permits statement-preserving proof edits without exact-file permission; this is a dependency/validation wait, not permission wait."
+    },
+    {
+      "lane": "migrate-source",
+      "item": "Ctor repair arrived on merged base; previous missing-owner-patch wait withdrawn. Current closure validation still pending, not a repeated old failure claim."
+    },
+    {
+      "lane": "migrate-hash",
+      "item": "Isolated CollisionBound overlay clearance already recorded. Full affected gates remain pending; do not call Hash the current reported consumer blocker."
+    }
+  ],
+  "current_census": {
+    "assigned": 15,
+    "closure": 379,
+    "boundary_edges": 20,
+    "unassigned_files": [
+      "Solidity/Roadmap/G49Final/BridgeGoal.lean",
+      "Solidity/Roadmap/G49Final/FoldedPublic.lean",
+      "Solidity/Roadmap/G49Final/PassChain.lean",
+      "Solidity/Roadmap/G49Final/PassCorrect.lean",
+      "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean"
+    ],
+    "added_dependencies": [
+      "Solidity.Source.CalldataLayout",
+      "Solidity.Source.FailureCursor",
+      "Solidity.Source.FailurePrimitives",
+      "Solidity.Source.FailureResources",
+      "Solidity.Source.Monetary"
+    ]
+  },
+  "inventory_summary": {
+    "added_names": [
+      "Solidity.Roadmap.Evm.rlpBytes._sparseCasesOn_1",
+      "Solidity.Roadmap.Evm.rlpBytes._sparseCasesOn_2"
+    ],
+    "boundary": "All2077 original exports retained, including33 private-encoded names. No public/generated/private exemption. Visibility/subkind metadata gaps explicit; no semantic or defeq proof. Missing14newmodule exports are not declaration removals.",
+    "changed_names": [
+      "Solidity.Roadmap.Evm.Certificate._sizeOf_1",
+      "Solidity.Roadmap.Evm.Certificate._sizeOf_inst",
+      "Solidity.Roadmap.Evm.Certificate.mk.noConfusion",
+      "Solidity.Roadmap.Evm.Certificate.mk.sizeOf_spec",
+      "Solidity.Roadmap.Evm.Certificate.noConfusion",
+      "Solidity.Roadmap.Evm.Certificate.noConfusionType",
+      "Solidity.Roadmap.Evm.FailurePoints.mk.noConfusion",
+      "Solidity.Roadmap.Evm.FailurePoints.noConfusion",
+      "Solidity.Roadmap.Evm.Fixed.mk.noConfusion",
+      "Solidity.Roadmap.Evm.Fixed.noConfusion",
+      "Solidity.Roadmap.Evm.GasRes.mk.noConfusion",
+      "Solidity.Roadmap.Evm.GasRes.noConfusion",
+      "Solidity.Roadmap.Evm.Halt.noConfusion",
+      "Solidity.Roadmap.Evm.Halt.revert.noConfusion",
+      "Solidity.Roadmap.Evm.Halt.success.noConfusion",
+      "Solidity.Roadmap.Evm.Pin.mk.noConfusion",
+      "Solidity.Roadmap.Evm.Pin.noConfusion",
+      "Solidity.Roadmap.Evm.Pinned._sizeOf_1",
+      "Solidity.Roadmap.Evm.Pinned._sizeOf_inst",
+      "Solidity.Roadmap.Evm.Pinned.mk.noConfusion",
+      "Solidity.Roadmap.Evm.Pinned.mk.sizeOf_spec",
+      "Solidity.Roadmap.Evm.Pinned.noConfusion",
+      "Solidity.Roadmap.Evm.Pinned.noConfusionType",
+      "Solidity.Roadmap.Evm.Schedule.mk.noConfusion",
+      "Solidity.Roadmap.Evm.Schedule.noConfusion",
+      "Solidity.Roadmap.Evm.StipendRule._sizeOf_1",
+      "Solidity.Roadmap.Evm.StipendRule._sizeOf_inst",
+      "Solidity.Roadmap.Evm.StipendRule.mk.noConfusion",
+      "Solidity.Roadmap.Evm.StipendRule.mk.sizeOf_spec",
+      "Solidity.Roadmap.Evm.StipendRule.noConfusion",
+      "Solidity.Roadmap.Evm.StipendRule.noConfusionType",
+      "Solidity.Roadmap.Evm.TxFate.noConfusion",
+      "Solidity.Roadmap.Evm.TxFate.runs.noConfusion",
+      "Solidity.Roadmap.Evm.beBytes._proof_1",
+      "Solidity.Roadmap.Evm.instDecidableEqHalt.decEq",
+      "Solidity.Roadmap.Evm.instDecidableEqHalt.decEq._proof_1",
+      "Solidity.Roadmap.Evm.instDecidableEqHalt.decEq._proof_2",
+      "Solidity.Roadmap.Evm.instDecidableEqHalt.decEq._proof_6",
+      "Solidity.Roadmap.Evm.instDecidableEqHalt.decEq._proof_7",
+      "Solidity.Roadmap.Evm.instDecidableEqHalt.decEq.match_1",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_1",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_2",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_3",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_4",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_5",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_6",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_7",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_8",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq._proof_9",
+      "Solidity.Roadmap.Evm.instDecidableEqPin.decEq.match_1",
+      "Solidity.Roadmap.Evm.instDecidableEqTxFate.decEq",
+      "Solidity.Roadmap.Evm.instDecidableEqTxFate.decEq._proof_3",
+      "Solidity.Roadmap.Evm.instDecidableEqTxFate.decEq._proof_4",
+      "Solidity.Roadmap.Evm.instDecidableEqTxFate.decEq._proof_5",
+      "Solidity.Roadmap.Evm.instDecidableEqTxFate.decEq.match_1",
+      "Solidity.Roadmap.Evm.instReprFork.repr.match_1",
+      "Solidity.Roadmap.Evm.instReprHalt.repr.match_1",
+      "Solidity.Roadmap.Evm.instReprPrecompile.repr.match_1",
+      "Solidity.Roadmap.Evm.instReprTxFate.repr.match_1",
+      "_private.Solidity.Roadmap.Evm.0.Solidity.Roadmap.Evm.instReprHalt.repr.match_1.eq_1",
+      "_private.Solidity.Roadmap.Evm.0.Solidity.Roadmap.Evm.instReprHalt.repr.match_1.eq_2",
+      "_private.Solidity.Roadmap.Evm.0.Solidity.Roadmap.Evm.instReprHalt.repr.match_1.eq_3",
+      "_private.Solidity.Roadmap.Evm.0.Solidity.Roadmap.Evm.instReprHalt.repr.match_1.splitter"
+    ],
+    "compatibility_accepted": false,
+    "current_tree_compiled": false,
+    "declarations": 2077,
+    "export_provenance": "export-provenance.json",
+    "family_counts": {
+      "casesOn": 56,
+      "generated_proof": 273,
+      "matcher": 90,
+      "noConfusion": 173,
+      "other_original_declaration": 1429,
+      "recOn": 56
+    },
+    "implemented_shims": [],
+    "inspected_head": "5da4771e63a4278ed53932ac39a032e3d7aea6ed",
+    "new_evm": 391,
+    "new_modules_not_exported": 14,
+    "old_evm": 392,
+    "old_modules": 15,
+    "original_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "removed_names": [
+      "Solidity.Roadmap.Evm.Fork.toCtorIdx",
+      "Solidity.Roadmap.Evm.Precompile.toCtorIdx",
+      "Solidity.Roadmap.Evm.beBytes._proof_2"
+    ],
+    "schema": 1,
+    "source_hashes": {
+      "Solidity/Roadmap/Contracts.lean": "96cfaa05721c2e8cbf40716bec351d5077f227c97a469337ec6b1e614c33bf79",
+      "Solidity/Roadmap/Controls.lean": "a45a9d8b3417667186b014bd2e13d07362b3bdd3b7ce9dff2a379ec7b5d09510",
+      "Solidity/Roadmap/Evm.lean": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50",
+      "Solidity/Roadmap/Frontend.lean": "cfc3dd64f408ac39ee96c6cb7e1ee6ae0183389e6b00b7ae732e673734665858",
+      "Solidity/Roadmap/TypedRun.lean": "f88399e3e3edc6b2f8c2c62516a48b86054f81c136262950af93b85d4296856f",
+      "Solidity/Roadmap/V16/CreationLibrarySpec.lean": "32b0f636bc0134fd907f65af61feaf974797b1dd35f8c9061e824bbf5786b312",
+      "Solidity/Roadmap/V16/CreationReturnConsumer.lean": "7dea8eba7b75a0ec353bb43989820b0d0a187f286a877622f692e33874d782e6",
+      "Solidity/Roadmap/V16/H24Input.lean": "5eaec4e51121c13f0f56c8b1373adfc5050a3d3ec925aec1bd70a3764b6a2f5e",
+      "Solidity/Roadmap/V16/NativeParentConsumer.lean": "6036e0c748e1820b19140f3c3ce66670b44f7bdc84f46b0ac381f854fa0beae5",
+      "Solidity/Roadmap/V16/NativeRevertConsumer.lean": "7c65042072fd219a366ce16432add5f5bc3078e1a88a30dbb43395422353204a",
+      "Solidity/Roadmap/V16/RelationalGuardSpec.lean": "bd13a5c6503ae37bfd5c379208238777adb16b1f32088f53e2a0c2cc97b87080",
+      "Solidity/Roadmap/V16/SSCP2/NewAllocation.lean": "3b712c7c259c7a4dd65692def429f4467de3483391f2aa5c9e473445eec7a68d",
+      "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean": "d18110c037cc2e4ddf6c89a25351f190e7bd2ae56248d46ca32f46b7b9f92b1a",
+      "Solidity/Roadmap/V16/SourceSizeControls.lean": "8bc33400b5c8409082a803a9d6eddf931f407d4b34c8ff0da0eeadf7a1a08511",
+      "Solidity/Roadmap/V16/SourceTransactionConsumer.lean": "0b839764dd12f6a11c6b8a8a14444e92f9b8bb8323fe17a192a74aaea0c5e18e"
+    },
+    "status_counts": {
+      "alpha_only": 45,
+      "binder_visibility_only": 9,
+      "debug_type_unchanged": 325,
+      "missing_in_new_evm": 3,
+      "new_module_not_exported": 1685,
+      "structural": 10
+    },
+    "visibility_complete": false
+  },
+  "evidence": {
+    "directory": "/workspace/migrate-roadmap-evidence/resume-20261107",
+    "current_census": {
+      "path": "/workspace/migrate-roadmap-evidence/resume-20261107/current-census.json",
+      "sha256": "20f59b7afc36506c370694ca5232c540ac0e6d7b1411fb7f5d5ee7223c54cef0"
+    },
+    "reviewed_data": "/workspace/migrate-roadmap-evidence/resume-20261107/public-api-reviewed",
+    "reviewed_manifest_sha256": "55ae4c39c21c0b18b219f1b47e475576e37ad4f5e921ae3f806458f7f35588a1",
+    "population_files": {
+      "all-original-declarations.json": "77f876c7a61f602b06e4500dd20c567b6d4141154e26f354020c6ffa416e41c8",
+      "evm-64-deltas.json": "e6e9805ae7ca3c7f9c1a1c9453c5a54f1fa170f522c84fa21ae6224f7dee954b",
+      "export-provenance.json": "e2d31de256e45d7c0d6456b8b5afb503b9725ebf0d3ce328f08eae4cfe9a5f04",
+      "inputs.json": "6763dfc6e440fcc57290d1e2bf0686eeb778189db97990e1909d834699d729b3",
+      "summary.json": "2e5e678f7115e6a50ff1d085efb9a4a8ea4247bc4149d86976da1b24fc916c63"
+    }
+  },
+  "historical_evidence_boundary": "Archived compiled heads/input hashes retained;20capturedinputdifferences per archived run are reported. Captures can include unused closure inputs. No current-tree Lean compile claimed.",
+  "source_edits": 0,
+  "new_lean_runs": 0,
+  "new_axioms": 0,
+  "new_sorry": 0,
+  "budget_changes": 0,
+  "frozen_statements_touched": 0,
+  "implemented_shims": [],
+  "goal": "Original persistent goal unfinished. get_goal absent; no create/reset/replacement or completion.",
+  "questions": []
+}
