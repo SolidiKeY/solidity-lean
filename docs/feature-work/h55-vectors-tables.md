@@ -647,3 +647,7 @@ when exposing completed success/revert outcomes after rollback. The current
 frame wrapper alone does not preserve the pending-stop outcome protocol.
 Plan=None functional controls remain valid; enabled-plan integration is not
 accepted. The proposed repair is saved off Git for work after H16 release.
+
+H141 resumed library checkpoint: the authorized Static helper, inferS branch and unchanged-statement completeness case compile. Both actual JSON units pass Static body checking, Source elaboration/execution, and derived rollback controls. The enabled-plan repair now checks preflight before entry and before exposing success/revert; request/ancestor, own-frame, early-depth and disabled controls pass. Frozen V07 SourceRefusal and TypingV2 controls pass. Independent read-only finder/skeptic found no concrete defect. Existing Static modules remain registered; their module-map rows now name the new case.
+
+A new same-resource three-repeat Source measurement is 51.550647435 s, 5.9100% above the H141-accepted 48.673995498 s. This is a new H16 STOP, requested as H125-LIBRARY-TIMING-03. No causal attribution, unchanged timing retry, full affected/checkpoint pass, physical ABI/linkage adequacy or completed assignment is claimed. Prior sealed packets and raw STOP evidence remain unchanged. Current evidence is under /workspace/vy1-words-evidence/h141-library-after/.

@@ -1,3 +1,4 @@
+import Solidity.Frontend.Static.InferStmtComplete
 import Solidity.Source.LibraryTyping
 import Solidity.Source.Eval
 import Solidity.Source.Infer
@@ -132,6 +133,12 @@ def rollbackStress (doc : Json) : Except String Json := do
       if d.hasBody then
         unless (elabBody resolved.env d).isSome do
           throw (IO.userError s!"actual body failed: {d.scope.getD ""}.{d.name}")
+    for d in resolved.env.decls do
+      if d.hasBody then
+        let some frame := d.frame? resolved.env | throw (IO.userError "missing static frame")
+        unless !(Solidity.Frontend.Static.itemsLocals (frame.ctx resolved.env d.scope)
+            frame.body frame.locals).isEmpty do
+          throw (IO.userError s!"static body refused: {d.name}")
     let some el := elaborate resolved | throw (IO.userError "actual whole unit did not elaborate")
     let actual := executeActual el
     let failure : List UInt8 := [102, 97, 105, 108, 117, 114, 101]
@@ -175,6 +182,51 @@ def rollbackStress (doc : Json) : Except String Json := do
   | .error .timeout => pure ()
   | _ => throw (IO.userError "zero-horizon prefix changed")
   IO.println "actual evaluator: unavailable calldata refuses; zero horizon remains timeout"
+
+-- Guards callLibrary resource ownership using an existing registered Source body.
+-- Admission of actual library syntax is checked separately above.
+#eval show IO Unit from do
+  let G := SemanticsExamples.GB (fun _ => .answer (.success []))
+  let some d := SemanticsExamples.EB.decls.find? (fun d => d.name == "callOut")
+    | throw (IO.userError "missing callOut")
+  let args : Vals SemanticsExamples.EB.layout [.address false] :=
+    .cons (.address SemanticsExamples.ext) .nil
+  let F := SemanticsExamples.F0
+  let requestPlan : Solidity.Roadmap.Evm.FailurePoints :=
+    { tx := fun _ => .runs 0 (some 1), frame := fun _ => none }
+  let ancestorPlan : Solidity.Roadmap.Evm.FailurePoints :=
+    { tx := fun _ => .runs 0 none, frame := fun i => if i == 0 then some 1 else none }
+  let ownPlan : Solidity.Roadmap.Evm.FailurePoints :=
+    { tx := fun _ => .runs 0 none, frame := fun _ => some 1 }
+  let reachedPlan : Solidity.Roadmap.Evm.FailurePoints :=
+    { tx := fun _ => .runs 0 (some 0), frame := fun _ => none }
+  let request := (FailureExecution.Cursor.empty.enterRequest requestPlan rfl).2
+  let ancestor := FailureExecution.Cursor.empty.enterFrame ancestorPlan
+  for (plan, cursor, owner) in [(requestPlan, request, true), (ancestorPlan, ancestor, false)] do
+    let input := { SemanticsExamples.sB with resource := cursor }
+    let actual := (callLibrary G F 20 d args [] (some plan)).run (L0 _, input)
+    unless (match actual.1 with | .error (.revert []) => true | _ => false) &&
+        (match actual.2.2.resource.pending with
+        | some (.request i) => owner && i.val == 0
+        | some (.frame i) => !owner && i.val == 0
+        | none => false) do
+      throw (IO.userError "library swallowed request/ancestor stop")
+  let reached := (FailureExecution.Cursor.empty.enterRequest reachedPlan rfl).2
+  for depth in [0, 1024] do
+    let input := { SemanticsExamples.sB with resource := reached }
+    let actual := (callLibrary G { F with depth := depth } 20 d args [] (some reachedPlan)).run (L0 _, input)
+    unless (match actual.1 with | .error (.revert []) => true | _ => false) &&
+        actual.2.2.resource.nextFrame == 0 do
+      throw (IO.userError "library entry failed preflight")
+  let own := (callLibrary G F 20 d args [] (some ownPlan)).run (L0 _, SemanticsExamples.sB)
+  unless (match own.1 with | .ok (.error []) => true | _ => false) &&
+      own.2.2.resource.pending.isNone do
+    throw (IO.userError "library own-frame stop escaped")
+  let disabled := (callLibrary G F 20 d args [] none).run
+    (L0 _, { SemanticsExamples.sB with resource := reached })
+  unless (match disabled.1 with | .ok (.ok .nil) => true | _ => false) do
+    throw (IO.userError "disabled library plan changed execution")
+  IO.println "library enabled plans: request/ancestor propagation, own-stop locality, entry preflight and disabled compatibility passed"
 
 /-- info: 'Solidity.Source.withLibraryCalldata_known' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "to_lane": "coordinator",
   "item": "H125-STATIC-COMPLETE-01",
-  "status": "LIVE_STATIC_OWNER_OR_SCOPED_AUTHORIZATION_REQUIRED",
+  "status": "ANSWERED_A_IMPLEMENTED_FOCUSED_GATES_PASS",
   "files": [
     "Solidity/Frontend/Static/InferStmt.lean",
     "Solidity/Frontend/Static/InferStmtComplete.lean"
@@ -11,7 +11,10 @@
   "gate_failure": "Source H24 per-file gates fail through the missing companion: stmt_complete elaboration reaches 200000 heartbeats; no budget increase authorized.",
   "evidence": [
     "/workspace/vy1-words-evidence/h125-library-functional-gates/1.log",
-    "/workspace/vy1-words-evidence/h125-library-functional-gates/2.log"
+    "/workspace/vy1-words-evidence/h125-library-functional-gates/2.log",
+    "/workspace/vy1-words-evidence/h141-library-resume.log",
+    "/workspace/vy1-words-evidence/h141-library-static-controls.log",
+    "/workspace/vy1-words-evidence/h141-library-h24-refusal-correct/1.log"
   ],
-  "limits": "No live Frontend/Static file edited. Source timing STOP also remains; no gate acceptance claimed."
+  "limits": "Authorized helper/branch and new proof case only. Existing cases/statements unchanged. Full checkpoint remains under new H16 timing STOP."
 }

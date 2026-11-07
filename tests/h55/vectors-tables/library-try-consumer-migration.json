@@ -7,7 +7,9 @@
     "H125",
     "H132",
     "H154 (#154)",
-    "H157 (#157)"
+    "H157 (#157)",
+    "H141 accepts prior 48.674 seconds",
+    "H125-STATIC-COMPLETE-01 option A"
   ],
   "modules": [
     "Solidity/Source/Typing.lean",
@@ -15,7 +17,9 @@
     "Solidity/Source/LibrarySemantics.lean",
     "Solidity/Source/Infer.lean",
     "Solidity/Source/Resolved.lean",
-    "Solidity/Source/Eval.lean"
+    "Solidity/Source/Eval.lean",
+    "Solidity/Frontend/Static/InferStmt.lean",
+    "Solidity/Frontend/Static/InferStmtComplete.lean"
   ],
   "control": "tests/h55/vectors-tables/LibraryTryControls.lean",
   "fixtures": {
@@ -30,7 +34,7 @@
     "existing_theorems": "same statements; only new proof cases"
   },
   "migration": "Adopt the separate Source checkpoint and rerun the actual whole-unit elaboration probe for both JSON inputs. Preserve H128 v1/H24 negative controls and migrate H24 refusal consumers explicitly to v2; library support does not retire v1.",
-  "coverage": "Both original units and f/g outcomes; independent derived Source-only write/revert stress; generic typed guard laws and actual refusal/zero-horizon controls.",
+  "coverage": "Both original units and f/g outcomes; independent derived Source-only write/revert stress; generic typed guard laws and actual refusal/zero-horizon controls.; Static checker accepts every original fixture body; enabled plans preserve request/ancestor ownership, own-frame locality, entry preflight and disabled compatibility.",
   "limits": [
     "No physical storage-pointer ABI or linked library installation evidence",
     "No compiler/G01 SourceSpec/IntrinsicSpec adequacy or lifecycle/admission rescope",
@@ -39,15 +43,25 @@
     "Not a fresh EVM replay"
   ],
   "timing": {
-    "accepted_seconds": 46.08038527399185,
-    "candidate_seconds": 48.673995498000295,
-    "further_percent": 5.628447350400734,
-    "status": "STOP under H132; disposition requested in H125-LIBRARY-TIMING-02"
+    "accepted_seconds": 48.673995498000295,
+    "candidate_seconds": 51.55064743498224,
+    "percent": 5.9100386305869,
+    "medians": {
+      "Solidity/Source/ExpressionTyping.lean": 11.336500705001527,
+      "Solidity/Source/LibraryTyping.lean": 0.742936569993617,
+      "Solidity/Source/Typing.lean": 4.962809675998869,
+      "Solidity/Source/Resolved.lean": 4.861181625004974,
+      "Solidity/Source/Infer.lean": 12.642178857990075,
+      "Solidity/Source/Eval.lean": 13.699615142002585,
+      "Solidity/Source/Semantics.lean": 1.3552524949918734,
+      "Solidity/Source/TypingV2.lean": 1.3837348919914803,
+      "Solidity/Source/LibrarySemantics.lean": 0.5664374720072374
+    },
+    "authorization": "H141 accepts 48.674 seconds; further noticeable slowdown stops",
+    "status": "STOP: further +5.91%; H125-LIBRARY-TIMING-03 submitted"
   },
   "remaining": [
-    "H16 timing disposition",
-    "Frontend/Static checker branch and unchanged-statement completeness proof",
-    "Enabled-plan preflight/pending-stop repair and validation",
-    "Full affected/checkpoint gates after repairs"
+    "Disposition of new 51.551-second H16 STOP",
+    "Full affected/checkpoint gates after release"
   ]
 }

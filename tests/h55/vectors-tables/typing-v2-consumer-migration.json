@@ -61,7 +61,7 @@
     }
   ],
   "inventory_limit": "These are direct H24 refusal/assembly consumers identified in the current tree, not a claimed census of every v1 typing user.",
-  "pending": "H128 remains accepted/on master. Separate library candidate is H16 STOP, unmergeable pending further timing disposition, static companion and enabled-plan repair. V10-first H24 migrations/v1 retirement remain open.",
+  "pending": "H128 remains accepted/on master. Library Static companion and enabled-plan repair now pass focused checks; separate candidate remains STOP at new 51.551 seconds pending H125-LIBRARY-TIMING-03. V10-first H24 migrations/v1 retirement remain open.",
   "timing_release": {
     "authority": "Newest coordinator-relayed user decision, 2026-11-07",
     "accepted_before_seconds": 42.19636442301271,

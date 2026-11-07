@@ -1589,7 +1589,7 @@ def callLibrary (G : Glob E) (F : Fr) (n : Nat) (d : Decl) {ps : List STy}
     EM E [] (Except Bytes (Vals E.layout rs)) :=
   match n with
   | 0 => halt .timeout
-  | n + 1 => do
+  | n + 1 => FailureExecution.preflight plan do
     if F.depth ≥ 1024 then return .error []
     if !libraryBoundary ps rs then halt (.stuck "unsupported library ABI boundary")
     let known := ps.all STy.isValue
@@ -1608,10 +1608,11 @@ def callLibrary (G : Glob E) (F : Fr) (n : Nat) (d : Decl) {ps : List STy}
     match result with
     | .ok value => do
       let raw ← lift (unRet rs value)
-      return .ok (← lift raw.toVals)
+      let values ← lift raw.toVals
+      FailureExecution.preflight plan (pure (.ok values))
     | .error (.revert data) => do
       rollbackTo saved
-      return .error data
+      FailureExecution.preflight plan (pure (.error data))
     | .error other => halt other
 termination_by structural n
 

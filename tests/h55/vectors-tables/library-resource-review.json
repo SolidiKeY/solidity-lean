@@ -1,7 +1,8 @@
 {
-  "status": "CONFIRMED_ENABLED_PLAN_BUG_OPEN_UNDER_H16_STOP",
+  "status": "REPAIRED_FOCUSED_CONTROLS_PASS",
   "reviewer": "read-only skeptic; no Lean/writes",
   "finding": "callLibrary lacks outer preflight before early depth/boundary/encoding work, and catches a frame resource halt into ordinary error bytes without post-outcome preflight. Named Error currently does not decode empty resource bytes, so handler-success conversion is not claimed; call-level pending-stop protocol is nevertheless violated.",
   "repair": "Preflight before positive-fuel entry/refusal/encoding; recheck pending stops when exposing completed success/revert outcomes, retaining cursor ownership through rollback.",
-  "scope": "Plan=None actual-unit and derived rollback controls passed; no enabled-plan acceptance."
+  "scope": "Outer entry preflight and post-success/revert preflight applied. Request/ancestor, local frame, early depth and disabled-mode controls pass. No complete cursor invariant or physical linkage claim.",
+  "evidence": "/workspace/vy1-words-evidence/h141-library-enabled-plans-gate.log"
 }
