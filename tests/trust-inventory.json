@@ -457,6 +457,16 @@
   {
     "file": "Solidity/Calculus/ReadBounds.lean",
     "kind": "override",
+    "code": "@[implemented_by LTm.fitsStack]"
+  },
+  {
+    "file": "Solidity/Calculus/ReadBounds.lean",
+    "kind": "override",
+    "code": "@[implemented_by LFml.fitsStack]"
+  },
+  {
+    "file": "Solidity/Calculus/ReadBounds.lean",
+    "kind": "override",
     "code": "@[implemented_by LTm.fitsM]"
   },
   {

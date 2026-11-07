@@ -4413,3 +4413,30 @@ retrieve the listed artifacts from the originating VM and verify the committed
 size/hash manifest before reuse. Missing artifacts remain an evidence wait.
 Full validation and Y04
 physical adequacy/reached-state work remain open.
+
+
+### Published Source dispatcher dependency intake
+
+Master 37d2c2d0486bf283fcb4dc6e0e498bde075fc651 contains the H125 dispatcher
+from producer source commit e6f6a19e44b9255f89c80a03d288b34eaf5a5b2b:
+`Solidity/Backend/StructuredFlow/SourceDispatch.lean` defines `dispatch` and its
+intrinsic `Compiled` artifact. Recognition selects the finite existing template
+union; `mapping?`, `Evm.inFragP`, and `Evm.Compiler.compile` retain separate
+refusals. `Compiled.code_exact` identifies the emitted code with the existing
+core compiler. This resolves the previously missing dispatcher publication,
+not all consumer integration or general Source admission.
+
+`Solidity/Backend/StructuredFlow/SourceDispatchCorrect.lean` reuses complete
+per-construct operational laws through `OperationalFact`. Its statement and
+proof retain those laws' remaining premises; the wrapper is not an unconditional
+physical/world adequacy result. The existing controls exercise actual accepted
+compiler artifacts and unsupported/mismapped syntax. This intake inspected the
+published contracts without rerunning the stopped Source/Horizon build.
+
+VY2 still requires physical memory realization and memory agreement from
+`Solidity/Backend/MemoryOps/PhysicalByteWorldInterface.lean`, which explicitly
+supplies no Producer instance, plus concrete composition with the supported
+source forms. No bridge from raw Yul physical state to these compiler inputs,
+Y04 reached execution, or full Y04/Y05/Y06/Y09.02 closure follows from this
+publication. Existing STOPs remain. The coordinator's combined-tree gate report
+is producer provenance, not a new local kernel or full-validation claim.

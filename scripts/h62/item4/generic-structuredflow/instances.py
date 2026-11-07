@@ -22,16 +22,30 @@ def select(rows, path, short):
     return row
 
 
+def verify_frozen(live, frozen):
+    if live != frozen:
+        raise ValueError('frozen source/statement drift')
+
+
 def generate():
     helper = c.ROOT/'tests/h62/item4/generic-structuredflow/GenericMapped.lean'
     text = helper.read_text()
     imports = set(re.findall(r'^import .+$', text, re.M))
     rows, chunks = [], []
     inventory = c.census()
+    frozen = c.census(c.BASE)
+    selected_paths = {c.FAMILY+name+'.lean' for name in TARGETS}
+    def selected(source):
+        return {key: [row for row in source[key] if row['path'] in selected_paths]
+                for key in ('files', 'declarations')}
+    verify_frozen(selected(inventory), selected(frozen))
+    frozen_hashes = {row['path']: row['sha256'] for row in frozen['files']}
     for basename, names in sorted(TARGETS.items()):
         path = c.FAMILY+basename+'.lean'
         raw = (c.ROOT/path).read_bytes()
         original = raw.decode()
+        if hashlib.sha256(raw).hexdigest() != frozen_hashes[path]:
+            raise ValueError('source changed after census')
         imports.update(re.findall(r'^import .+$', original, re.M))
         namespace = re.search(r'^namespace (.+)$', original, re.M)[1]
         part = ['namespace '+namespace, '\n'.join(re.findall(r'^open .+$', original, re.M))]
@@ -42,6 +56,7 @@ def generate():
                 raise ValueError('unexpected declaration syntax')
             base = 128 if short == 'nonzero_frame' else 0
             part.append(statement+' := by\n  exact Solidity.Backend.StructuredFlow.GenericMapped.emitted_snapshot '+str(base)+' flag\n')
+            part.append('#print axioms '+short+'_generic_instance')
             rows.append(dict(original=row['name'], statement_sha256=row['statement_sha256'],
                              source_sha256=hashlib.sha256(raw).hexdigest(), path=path))
         chunks.append('\n'.join(part+['end '+namespace]))

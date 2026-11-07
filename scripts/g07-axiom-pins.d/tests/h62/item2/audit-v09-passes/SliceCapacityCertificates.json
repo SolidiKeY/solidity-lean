@@ -1,0 +1,23 @@
+{
+ "tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean:Solidity.Yul.Compilation.pair_add_overflow": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean:Solidity.Yul.Compilation.pair_add_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean:Solidity.Yul.Compilation.Slice.comp_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean:Solidity.Yul.Compilation.Slice.comp_prefix_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean:Solidity.Yul.Compilation.Slice.comp_prefix_witness": [
+  "Quot.sound",
+  "propext"
+ ]
+}
