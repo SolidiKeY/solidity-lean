@@ -9,6 +9,8 @@ endpoint. This roadmap replaces the former 19-step feature-coverage plan.
 Existing integrated work is reused after checking its exact theorem and input
 coverage; the groups below are remaining obligations, not claims of missing code.
 
+Audit: [proof-coverage audit](audits/proof-coverage.md) (2026-11-06) traces each claimed row to its backing theorem and lists the open end-to-end links.
+
 ## Scope contract
 
 The versioned starting point is [solidity-scope.md](solidity-scope.md), the
