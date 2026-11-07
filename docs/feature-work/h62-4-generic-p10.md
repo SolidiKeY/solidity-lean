@@ -414,3 +414,38 @@ Independent read-only finder and skeptic reviewed this successor check without
 Lean or builds. The finder requested binding the final committed verifier to the
 receipt. The skeptic found and prompted the pre-authentication import repair
 described above; original acceptance and all production statements remain unchanged.
+
+
+## H126 authorized production application (2026-11-07)
+
+H126 freezes the former Claude V15 lane and transfers the staged P10 production
+body/signature application to this successor. Merged the exact authorized
+90153461127d8d0f1f188021e79bc1ccb256e1e5 producer snapshot after master; this
+adds CallInAgreement/depth_disagreement and its published companions without
+changing a frozen interface. Its instruction-lowering coverage remains the
+existing push/pop/jump/jumpi/loop and storage subset: no InstrV2 fixed-cell
+MLOAD/MSTORE, CALL or V2 data-instruction lowering is supplied by this adoption.
+
+Applied the existing single-file BYTE proposal to ByteObservationControls.
+The source hash is ae0f960bf933aca562e15eaeb90586d081ea90943e87752f38e0d6d1cf5e729b,
+exactly the preserved proposal. All32 original signatures and unchanged fixture
+and negative-control bodies remain; the generic fetched-execution lemma, typed
+nine-row table and original exact instances add eight helpers. Closed fixture
+arithmetic does not decide native execution. No statement, premise, exclusion,
+proof budget or axiom set was weakened. Original overlay tests now explicitly
+read the frozen original source; an added production test checks the actual
+applied bytes, all32 contracts, unchanged bodies and nine table instances.
+
+Current kernel/axiom/meaning checks, paired production measurements and full
+Bridge gates remain pending. The local Bridge has no ByteObservation.olean,
+no built Mathlib import products and an empty package directory; historical
+retired proof receipts are not a current pass. Preserve those historical
+receipts and recover exact pinned dependencies/artifacts before current proof
+validation. No Lean workload, prerequisite allowance or new proof epoch has
+been consumed by this source application. Source-only acceptance is not proof
+acceptance or full-lane completion.
+
+Independent read-only finder and skeptic pass the source application and test
+updates, with no statement weakening found. Source checks and trust/orphans/
+roots/fragments/whitespace pass. These results do not discharge the pending
+kernel, axiom, meaning, timing, touched-build or full Bridge gates.
