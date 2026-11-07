@@ -288,3 +288,38 @@ VM/branch/worktrees/toolchains/bulk evidence remain intact. No master push/merge
 Coordinator-local source paths are provenance only; actual copied mandatory input
 files are included in the handoff. Future successor checks require current H81
 policy and applicable trust/performance/public-API dispositions.
+
+## Explicit post-retirement limited pre-gate repair
+
+The coordinator explicitly requested fixing this lane's failed pre-gate, first
+merging origin/master706e36825929 and then pushing only the original lane branch.
+This is a limited repair authorization; it does not resume the retired full queue
+or waive prior H78, trust, performance, baseline or final-gate obligations.
+
+Merged exact master706e36825929d6d0084dc08b88de9349abcd25aa as merge commit
+86b259fdce240c1beb8f9d4e721d375d2e47a3e5. Master still pins Lean4.24.0; its core
+does not define ite_eq_left/ite_eq_right. Replace those proof-only references in
+both Hash files with if_pos/if_neg, available in4.24 and4.35. Keep the explicit
+contains-cons/proposition-extraction/zero-query proof repairs and every original
+statement, definition, import, axiom-message guard and resource/proof budget. The
+fixture generator now retains these compatible names instead of restoring the
+new-only names. Lean4.35 emits expected alias-deprecation warnings, with no errors.
+
+The updated repository per-file gate checks KeySort, CollisionBound and Adaptive
+on each official toolchain. Both runs exit0, source hashes remain unchanged, and
+no resource stop occurs. Each uses fresh separate build/cache paths, package -j1,
+LEAN_NUM_THREADS=1, an8GiB address-space cap, no configured swap,4GiB effective
+available-memory reserve and300s total command timeout.4.24:14.9024s,425528KiB
+max child RSS;4.35:9.4475s,595580KiB. These validation runs are not a matched clean
+full-build performance comparison. Logs, exact commands/settings/source hashes and
+independent read-only finder/skeptic results are saved off git under
+/workspace/migrate-hash-repair-706e36825929. No Lean MCP tools are exposed, so the
+repository's gate.sh per-file fallback was used. The source census confirms125
+original declarations, identical signature/context/definition hashes and no budget
+change. Full affected gate.sh touched remains for the coordinator's next pre-gate;
+no local full runtime or original-assignment completion claim.
+
+No master push, default-branch merge, source-scope expansion, new goal or old
+baseline restart. Only the explicit current instruction authorizes the lane push;
+original retirement artifacts remain unchanged as historical handoffs. After the
+repair handoff this worker returns to the H82 stopped state.
