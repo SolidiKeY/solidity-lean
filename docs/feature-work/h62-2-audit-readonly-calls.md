@@ -1789,3 +1789,45 @@ stay open. No Source or owner module was edited/imported for this reply.
 Full owned H121 Source/callee/selected compiler-world/physical-frame production,
 external compiler-success/G42.04, inherited queues and final acceptance remain
 unfinished. Next work remains original joint inputs and the owned producer.
+
+
+### Joint exact private transport inputs (2026-11-07)
+
+PrivateTransportWitnesses supplies simultaneous equality/type/value inputs to
+the original private PrimitiveFields.cast_injective, cast_back, default_transport
+and PrimitiveReads.cancel constants. The actual Bool true value is carried
+through both roundtrip casts, the injective pair has its equality premise, and
+the actual Bool default is false. A negative control distinguishes transported
+true from that default. Reflexive conclusions are premise satisfiability only,
+not Source execution or compiler/world/frame adequacy.
+
+Test-only SDK macros construct the exact mkPrivateNameCore identities. The
+ordinary kernel checks each application. A separate probe inspects each witness
+proof term and requires its exact original private theorem constant, excluding
+public-surrogate substitution. Both frozen/current logs record all four links.
+The SDK elaborator import stays confined to this test module; it must never
+be imported or registered in the dependency-free core roots. No original source
+interface, dependent definition, premise, exclusion, budget or axiom changed.
+
+Both isolated gates pass: four original private kernel types match and all five
+witness/control axiom sets match the existing propext/Classical.choice/Quot.sound
+sets. One initial gate stopped on the mandatory memory reserve because clean
+file cache consumed headroom. Advisory release of this task's clean saved-object
+pages preserved file bytes and restored headroom; retry passed at unchanged
+limits. This cache-state change is not a before/after performance comparison or
+release of the historical Premises timing STOP. Exact commands, resources,
+attempts and manifests remain private under H145. No runtime pass is claimed.
+
+The collector admits only these four present private helpers. All 792 originals
+remain: 83 joint, 403 ordinary pending, 3 target-failure joint, 45 intentional
+impossibility, 256 no-input and 2 frozen-v1 refutation/migration results. The
+other 788 rows and all three removed-private identity gaps are unchanged. Those
+missing identities are separate obligations; no public alias or these four
+helpers restore them. Independent read-only finder and skeptic confirmed the
+private links, joint inputs and complete ledger preservation with no findings;
+neither used Lean servers, execution, tests/builds or writes.
+
+Full owned H121 Source/callee/selected compiler-world/physical-frame production,
+external compiler-success/G42.04 and all nineteen H57 transports, inherited
+queues and final acceptance remain open. Next work remains original joint
+inputs/exact bindings and that owned producer, with all existing STOPs retained.
