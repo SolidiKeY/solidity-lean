@@ -739,3 +739,26 @@ skeptic found no defect and used no Lean/server/build/edit. Original controls
 and census remain unchanged. No arbitrary Source heap/world map, gas/session
 or fetched-EVM adequacy follows; full C4/H68, original fidelity drift and timing
 STOPs remain open.
+
+### Unchecked signed subtraction correspondence
+
+`UncheckedSignedSubCorrespondence.lean` adds four laws. Constructed Source
+locals and a simultaneous content/alias family connect every in-range signed
+operand pair to the published populated physical fixture. Public selection,
+actual unchecked Source wrapping and selected target execution are derived;
+Source globals/state/older local tails and every saved target stack remain
+general. The exact output retains full StateRepr. Reject-all is refuted and
+fuel zero remains timeout. Checked subtraction and arbitrary heap/world,
+session/gas or fetched-EVM adequacy are not asserted; original controls/census
+remain unchanged.
+
+The first check rejected `decide` on alias equalities with a free Source tail
+context. All dependency checks passed, none above 60 seconds; that aggregate
+attempt took 218.924 seconds. The bounded MCP diagnostic stopped at 120 seconds
+without a usable result and is retained without credit. The tactic helper
+confirmed generic index reduction; replacing only `decide` with `rfl` fixed the
+proof without narrowing the context or changing a statement/definition/budget.
+The final four-law kernel check passes in 1.376 seconds, sampled workload peak
+849148 KiB, with existing standard axioms. Independent read-only finder/skeptic
+confirmed the final proof-only change and found no defect; neither used Lean,
+server or builds. Full C4/H68, fidelity drift and timing STOPs remain open.
