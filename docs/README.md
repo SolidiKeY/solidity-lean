@@ -179,6 +179,7 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
 V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 
 - [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical codecs, finite storage/selected byte-heap writeback and retained-allocation resizing/supported byte/mixed aggregate heap views and selected word/dynamic uint256 retained-capacity/simultaneous heterogeneous struct and canonical bool/reference array writeback with retained-capacity resizing and canonical scalar-memory extension with exact legacy compatibility, real alias controls and joint ordinary-memory source/placement composition and arbitrary finite canonical owned-inventory writeback, registered residual journals, actual selected-step MemOK and outstanding concrete integration.
 
@@ -289,7 +290,6 @@ VY2 chronological physical `mcopy` preparation and source-state preservation: [l
 VY2 mapping roundtrips and transient slot/frame/reset laws: [lane record](feature-work/inline-assembly-vy2.md#mapping-slot-views-and-transient-slots).
 
 VY2 actual-frame calldata copy/hash binding: [lane record](feature-work/inline-assembly-vy2.md#actual-frame-calldata-copy-and-hash).
-| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 | Assembly lane | Document |
 |---|---|
 | VY5 raw-local/physical, indexed-write/emit composition and differential backfill | [inline-assembly-vy5.md](feature-work/inline-assembly-vy5.md) |
