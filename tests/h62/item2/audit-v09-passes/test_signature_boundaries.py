@@ -47,6 +47,25 @@ class HeaderBoundaries(unittest.TestCase):
         self.assertEqual(first['status'],'unresolved')
         self.assertEqual(second['status'],'recognized-source-header')
 
+    def test_malformed_header_cannot_borrow_following_body(self):
+        for broken in ['theorem broken : (True]',
+                       'theorem broken : (True',
+                       'theorem broken : let value : Nat']:
+            with self.subTest(header=broken):
+                first, second = extract(broken+'\ntheorem valid : True := by trivial\n')
+                self.assertEqual(first['status'], 'unresolved')
+                self.assertNotIn('header_sha256', first)
+                self.assertEqual(second['header'], 'theorem valid : True')
+                self.assertEqual(second['body_kind'], 'assignment')
+
+    def test_equation_header_preserves_dependent_binders(self):
+        statement = 'theorem indexed {n : Nat} (xs : Vector Nat n) : (i : Fin n) → xs[i] = xs[i]'
+        first, second = extract(statement+'\n  | i => rfl\ntheorem following : True := by trivial\n')
+        self.assertEqual(first['header'], statement)
+        self.assertEqual(first['body_kind'], 'equations')
+        self.assertNotIn('following', first['header'])
+        self.assertEqual(second['header'], 'theorem following : True')
+
     def test_frozen_equation_oracle_and_membership(self):
         report = sb.frozen_report(ROOT)
         self.assertEqual((report['files'],report['summary']['rows']),(179,1259))

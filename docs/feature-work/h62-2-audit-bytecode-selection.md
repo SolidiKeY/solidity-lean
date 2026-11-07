@@ -2528,3 +2528,39 @@ for disk headroom; source, frozen products, shared cache and evidence remain
 intact. Future full builds may need those outputs fetched or rebuilt. Original
 closure, full census, source adequacy, runtime/Bridge and performance gates
 remain open; no global ledger or full-source acceptance is inferred.
+
+### Decoder-field feasibility and reject-all control
+
+The generic field renderer now accepts optional shared, hash-pinned audit
+support. Its default source and manifest outputs remain byte-identical to the
+previous implementation. Support is trusted reviewed Lean source, not a
+sandbox. One parametric reference self-adapter supplies all five exact frozen
+DecoderPremise domains: entry, closed, agrees, zero and succ. All global byte,
+height, step/run, reachability and self parameters remain explicit.
+
+The closed-domain witness includes a real gasless JUMPDEST transition: byte
+0x5b, PC zero to one, stack [11] preserved. Negative controls reject an empty
+entry-reachability predicate and corrupted result stack [12]. A general lemma
+proves that any admitted supported reference step rules out an always-none
+adapter; a concrete JUMPDEST instance supplies both hypotheses. This is local
+reference-adapter feasibility. Choosing reference step/iteration as adapter
+functions establishes no external Bridge decoder or G45.05-BR agreement.
+
+Both native runs pass: 5.214 seconds initially and 5.079 seconds with the
+generic reject-all control. All scoped axioms are propext/Quot.sound; the
+shared impossible-certificate control remains axiom-free. Thirty-four existing
+source/product bindings suffice; no new prerequisite build or STOP retry ran.
+The five decoder domains and earlier three compiler domains leave three
+runtime-consumer fields unwitnessed in the 11-field premise packet. This is
+local accounting, not a global ledger or completed census.
+
+The 125-test suite and independent read-only finder/skeptic source and final
+provenance reviews pass. Replay binds shared source, exact generated code,
+native commands/results/guards, prior seal and all imports. The final published
+master77dbfca86aa107955b83529007fcaf3b57c32f29 was adopted without discarding
+work. Its integration success is separate from local full validation. Native
+receipts and handoff are sealed outside the code branch under
+/workspace/parallel-20261103/executable-bytecode/decoder-field-domains/ and
+archived privately under H145. H1 cleanup removed only exited containers whose
+IDs match this lane's saved workload records, reclaiming VFS copies while
+retaining every host-bound proof product and receipt.

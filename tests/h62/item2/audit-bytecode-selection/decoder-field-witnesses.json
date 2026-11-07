@@ -1,0 +1,22 @@
+{
+  "decoder_entry_joint_domain": {
+    "target": "Solidity.Backend.Selection.DecoderPremise.entry",
+    "proof": "⟨[0x5b], 1, Solidity.Backend.LabelExec.step [0x5b], (fun count => Solidity.Backend.LabelExec.advance count [0x5b]), (fun _ => True), referenceDecoder [0x5b] 1, [11], rfl, True.intro⟩"
+  },
+  "decoder_closed_joint_domain": {
+    "target": "Solidity.Backend.Selection.DecoderPremise.closed",
+    "proof": "⟨[0x5b], 1, Solidity.Backend.LabelExec.step [0x5b], (fun count => Solidity.Backend.LabelExec.advance count [0x5b]), (fun _ => True), referenceDecoder [0x5b] 1, ⟨0,[11]⟩, ⟨1,[11]⟩, True.intro, reference_jumpdest_step, True.intro⟩"
+  },
+  "decoder_agrees_joint_domain": {
+    "target": "Solidity.Backend.Selection.DecoderPremise.agrees",
+    "proof": "⟨[0x5b], 1, Solidity.Backend.LabelExec.step [0x5b], (fun count => Solidity.Backend.LabelExec.advance count [0x5b]), (fun _ => True), referenceDecoder [0x5b] 1, ⟨0,[11]⟩, True.intro, True.intro⟩"
+  },
+  "decoder_zero_joint_domain": {
+    "target": "Solidity.Backend.Selection.DecoderPremise.zero",
+    "proof": "⟨[0x5b], 1, Solidity.Backend.LabelExec.step [0x5b], (fun count => Solidity.Backend.LabelExec.advance count [0x5b]), (fun _ => True), referenceDecoder [0x5b] 1, ⟨0,[11]⟩, True.intro⟩"
+  },
+  "decoder_succ_joint_domain": {
+    "target": "Solidity.Backend.Selection.DecoderPremise.succ",
+    "proof": "⟨[0x5b], 1, Solidity.Backend.LabelExec.step [0x5b], (fun count => Solidity.Backend.LabelExec.advance count [0x5b]), (fun _ => True), referenceDecoder [0x5b] 1, 0, ⟨0,[11]⟩, True.intro⟩"
+  }
+}
