@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "handoff_to": "solidity-parallel-20261103/memory-copies",
+  "execution": "H82 retirement; no implementation resumption authorized",
+  "original_queue_files": [
+    "original-work-queue.txt",
+    "original-backfill-queue.txt"
+  ],
+  "original_checkpoints": [
+    {
+      "id": 1,
+      "status": "partial",
+      "original": "Inventory exact frozen signatures and owner; distinguish inhabited global premise structures from per-input feasibility.",
+      "preserved": "550 mapped modules,4141 source identities,3932 parser-captured theorem headers,209 record/class regions,711 own-field candidates; source routes and caller/area roles.23 former source ambiguities and3 where-proof boundaries resolved.",
+      "open": [
+        "Elaborated/kernel FQNs and exact generalized/implicit signatures",
+        "Exact inherited/default/generated field and public API/shim census",
+        "Exact accountable producer attribution for each statement, including CopyPaths; H82 removes proof-only permission barrier",
+        "Classify intentional contradiction controls versus statements requiring inhabitation (H69), preserving exact frozen statements"
+      ]
+    },
+    {
+      "id": 2,
+      "status": "partial",
+      "original": "Prove a simultaneous witness for all hypotheses of EACH statement in additive audit modules importing unchanged interfaces.",
+      "preserved": "EntryAudit local fixture only: global composition certificate and concrete joint prefix/tail antecedents, including nonempty prefix.",
+      "open": [
+        "Statement-by-statement simultaneous global-premise and per-input witnesses for all remaining scope",
+        "Do not credit individual premise inhabitation, arbitrary relations, or source parser success as a joint witness",
+        "Kernel-check and reconcile every witness against exact frozen statement; retain intentional-negative distinction and blockers instead of inventing premises"
+      ]
+    },
+    {
+      "id": 3,
+      "status": "unfinished",
+      "original": "Meaningful totality/success for supported programs; reject-all/always-revert compiler negative controls and observable failure/gas/fork boundary.",
+      "preserved": "Local semantic ABI Boolean success/fuel/empty-revert/result-inequality controls only; no compiler public-contract credit.",
+      "open": [
+        "Actual supported-program compiler selection/totality and observable successful execution",
+        "Actual reject-all and always-revert compiler controls against public contracts",
+        "Failure/gas/fork boundaries, whole observations and supported-domain coverage without new exclusions",
+        "Preserve full H68 PassCorrect bridges and H78 API shims; bodies not supplied locally, obtain canonical decision text before affected work"
+      ]
+    },
+    {
+      "id": 4,
+      "status": "unfinished",
+      "original": "Verify witnesses and statement-fidelity census; report uncovered statements and owners.",
+      "preserved": "Complete conservative source identity list, source hashes, Unicode source spans, owner route candidates, uncovered TSV; independent reviews and tooling regression evidence.",
+      "open": [
+        "Exact-once elaborated statement and witness reconciliation, including records/projections/inherited and implicit premises",
+        "Full affected/final run-lean.sh gates under current canonical resource/editor rules and unchanged trust/axiom/budget constraints",
+        "Controlled before/after timing; do not rerun known STOP unchanged just to pass",
+        "Final finder/skeptic reviews of actual completed proofs and all confirmed fixes",
+        "Resolve retained legacy V1 StorageWordCertificate.correct vacuity through owner/H57 process; no existing statement weakening or H55 duplicate work"
+      ]
+    }
+  ],
+  "backfill_items": [
+    {
+      "item": "Scanner/census",
+      "preserved": "census.py, reconcile.py, HeaderParser.lean/parse-headers.py; all3932 source boundaries; full source regions/owner roles",
+      "open": "Kernel/source symbol reconciliation, section/implicit/inherited fields and exact owner census; no new candidates outside assigned area without claim"
+    },
+    {
+      "item": "Negative controls",
+      "preserved": "Local semantic entry and source-tool malformed-input/fail-closed metadata controls",
+      "open": "Actual public compiler negative controls and approved-domain boundary coverage"
+    },
+    {
+      "item": "Isolated fixture proofs and extra witness/case coverage",
+      "preserved": "EntryAudit local-only successful and failure/joint-antecedent cases",
+      "open": "Remaining genuine simultaneous witnesses and supported-program cases under original statements, distinguishing intentional contradiction controls"
+    },
+    {
+      "item": "Deterministic acceptance and measurements",
+      "preserved": "Deterministic source JSON/TSV/one-entry escalation outputs and regression tests, exact commands and failed experiments",
+      "open": "Required kernel/full affected validation and controlled timing; STOP held, no unchanged rerun"
+    },
+    {
+      "item": "Continuous cleanup",
+      "preserved": "No newly unclaimed audit candidates taken",
+      "open": "Only coordinator/registry explicitly assigned within-scope candidates; never steal scope or duplicate H55"
+    }
+  ],
+  "waits": [
+    {
+      "lane": "coordinator / migrate-syntax",
+      "item": "Compatible Solidity/Syntax/Raw.lean prerequisite and validation, or H82-compliant successor proof-only work where applicable; no retired-worker implementation"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "Full affected gates/compatible bundle; partial3aebc61f... patch received/checksummed/dry-check only, unapplied"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-backend",
+      "item": "Compatible Scalar/Slice.lean and AbiEntry/RawFreeTransport.lean results and affected gate evidence"
+    },
+    {
+      "lane": "coordinator / V11 / current CR owner",
+      "item": "Exact CopyPathInterface.lean and CopyPaths.lean producer attribution; latest forwarding to claudecloud/move6-20261106/cr-p8a is receipt context, not agreement. H82 withdraws proof-only edit permission requests, not accountability inquiry. No direct Claude message"
+    },
+    {
+      "lane": "coordinator / successor",
+      "item": "Controlled timing follow-up for TIMING-SOURCE-REPEAT:4.276746s/5.034220s,+17.7%; STOP not rerun unchanged; not evidence of controlled Lean regression"
+    },
+    {
+      "lane": "coordinator / owning producer",
+      "item": "Existing V1 StorageWordCertificate.correct capacity-vacuity repair disposition; frozen changes require owner/H57. Existing one-entry escalation retained"
+    },
+    {
+      "lane": "coordinator",
+      "item": "Existing goal PAUSED state must be set via trusted capability: worker exposes no pause/get_goal tool; only stop_goal complete|blocked, prior calls lack trusted CCA context. No substitute/reset/replacement/completion"
+    },
+    {
+      "lane": "coordinator",
+      "item": "If byte-identical renderer artifact is needed, provide original rendered bytes matching2ccd74d891fc0608d14734706f7b9ab0fdbebaff864dd255b5035a8e1654016d; complete visible original assignment/queues/scope are committed with separate actual hashes"
+    },
+    {
+      "lane": "coordinator",
+      "item": "Canonical H68/H69/H78/H80/H81 full rule texts were not supplied; preserve references and obtain applicable bodies before affected successor work"
+    }
+  ],
+  "withdrawn_permission_requests": "Any prior exact-file permission request solely for statement-preserving proof/import/doc/additive work is withdrawn under H82. No proof implementation now due explicit retirement.",
+  "no_independent_exhaustion_claim": "Independent implementation/backfill remains; worker stops by explicit H82 retirement, not because every independent item is exhausted."
+}
