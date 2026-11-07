@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.produced_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.call_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.frame_restored": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.spoofed_mode_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.unrelated_raw_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceCallProducerControls.lean:Solidity.Backend.Passes.SourceCallProducerControls.unrelated_target_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

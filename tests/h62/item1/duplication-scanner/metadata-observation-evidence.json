@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "guarded_regression": "Expression metadata stripped, value constructors/order collapsed, or v2 data silently promoted into legacy signatures.",
+  "sources": {
+    "scripts/h62/item1/duplication-scanner/observe_metadata_types.py": "a3413da66f6e5eb96471e684e5197a7cb59a4732cf6f19e68619305e6f452d4b",
+    "tests/h62/item1/duplication-scanner/MetadataFingerprintV2.lean": "87496f2007dd02d0687cd71ca1a581bc2345232504996d9405e7af98020681a2",
+    "tests/h62/item1/duplication-scanner/ScopeMetadataObservation.lean": "3e3510077598d61e4f20cb7a6ef197383cc08488d08f4a3446c711b3cd0d55c4",
+    "tests/h62/item1/duplication-scanner/metadata-observation-pins.json": "5bcb6f0791e860521456892370b110a021eb7a13277f731c8e9af09e5b5fbf48",
+    "tests/h62/item1/duplication-scanner/test_metadata_observations.py": "28762e49ef4cf99315f64d56d5f82f8a042ba3e4d6db043d1caf975a8cb25b51"
+  },
+  "evidence_sha256": {
+    "acceptance.json": "7f42fd78204981c2db8dd5ad5337ce2e9a82febf1d39909b0cac5bf9ab237215",
+    "reviews.json": "287c39df052998e6d85bacf0d70b0d65733acbccceb8d510a1a6996d67bcd3b4",
+    "tests-final.log": "617bbc96a547903ebab6ac5db068df5e5ea25c956d7fdbf09ecef835ddbfc89a"
+  },
+  "external_Python_controls": 167,
+  "new_Python_controls": 9,
+  "Lean_separation_refusal_controls": 14,
+  "coverage": {
+    "total_visible_Scope_constants": 312,
+    "legacy_serialized": 286,
+    "legacy_refused_metadata": 26,
+    "v2_serialized": 312,
+    "legacy_results_and_ranges_preserved": true,
+    "metadata_free_v2_matches_legacy_except_domain": true,
+    "observation_sha256": "1c0b12435f821de19f7f8b65ed715bd4549d935fbb6f8c25648e3c345ee2f531",
+    "final_captures": [
+      "accepted-two",
+      "accepted-three"
+    ],
+    "superseded_development": [
+      "development-one",
+      "accepted-one"
+    ],
+    "scanner_annotations_added": 0,
+    "old_exporter_and_five_record_contract_unchanged": true
+  },
+  "boundary": "Separate local type observation only; no scanner annotation, theorem witness, ownership/equivalence or runtime acceptance. All792original obligations and +80.254966536%STOP remain."
+}

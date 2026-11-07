@@ -1,0 +1,22 @@
+{
+  "pre_retirement_snapshot": "/workspace/migrate-optimizer-evidence/pre-H82",
+  "snapshot_manifest_sha256": "aab4e542aeb8ae1814ae7e3316b6b8172233fa10ec55c4bb0a73720a5a31076e",
+  "snapshot_files": {
+    "CLOUDVM-RESULT.json": "246da2b23a685a4d9d9e8dde670600dcbf98cbdad3119638913ac23b323086a0",
+    "HANDOFF.md": "7df830675420bf501c2fe14c891d54c66459a257fa35963965dd38a858b4e21f",
+    "SHA256SUMS": "7253f329db4255f1bf7b35e6a04cfdda9f576e600fa8bdc584ab2a05888a2bc4",
+    "SNAPSHOT-SHA256SUMS": "aab4e542aeb8ae1814ae7e3316b6b8172233fa10ec55c4bb0a73720a5a31076e",
+    "evidence.tar.gz": "102d44789eaeb17d225f75acb0c3e9686ad46d3aec4255d0aecdf8a380cfbb0b",
+    "migration.bundle": "c32a0122b30c25f4565967d5fe4b22785127ac7649590a626c0211d2f60c651c",
+    "original.patch": "f0408b44899d6eebc2c73372b11c0b65bacf6d8200407bfd72d3ad4fb10d1ac3"
+  },
+  "original_bulk_manifest_sha256": "7253f329db4255f1bf7b35e6a04cfdda9f576e600fa8bdc584ab2a05888a2bc4",
+  "raw_evidence_retained": "/workspace/migrate-optimizer-evidence",
+  "portable_archive_includes": [
+    "all previous raw logs/configs/results/records",
+    "coordinator-inputs/",
+    "pre-H82/",
+    "retirement-provenance/"
+  ],
+  "note": "Pre-H82 SHA256SUMS is historical; SNAPSHOT-SHA256SUMS verifies the actual preserved snapshot files. The full final manifest separately covers all final portable files and snapshots."
+}

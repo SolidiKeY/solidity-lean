@@ -6,7 +6,8 @@ No systemd, v4.24 cache, or unrelated process termination. Explicit Lean -j1.
 import argparse, fcntl, json, os, resource, signal, subprocess, time
 from pathlib import Path
 p=argparse.ArgumentParser(); p.add_argument('label'); p.add_argument('arguments',nargs='+'); a=p.parse_args()
-evidence=Path('/workspace/h62-generic-passes-evidence'); evidence.mkdir(exist_ok=True)
+from runtime_paths import EVIDENCE as evidence
+evidence.mkdir(parents=True,exist_ok=True)
 lean=evidence/'toolchain/lean-4.35.0-linux/bin/lean'
 if '-j1' not in a.arguments: raise SystemExit('explicit -j1 required')
 if any(x in a.label for x in '/.'): raise SystemExit('simple unique label required')

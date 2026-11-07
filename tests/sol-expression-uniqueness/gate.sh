@@ -18,3 +18,5 @@ cd "$(dirname "$0")/../.." || exit 2
   echo "SOL_EU_EXIT $status"
 } > "$log" 2>&1
 grep '^SOL_EU_EXIT' "$log"
+
+exit "$status"
