@@ -3,19 +3,23 @@
 import argparse,json
 from pathlib import Path
 
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     for k in ["census","resource","local","out"]:ap.add_argument("--"+k,type=Path,required=True)
     a=ap.parse_args();c=json.loads(a.census.read_text());r=json.loads(a.resource.read_text());l=json.loads(a.local.read_text())
-    assert c["summary"]["complete_interface_inventory"] is False
-    assert r["status"]=="RESOURCE_FAMILY_ONLY_PASS" and l["status"]=="LOCAL_GUARD_ONLY_PASS"
-    rows=c["declarations"];indexed={x["id"]:x for x in rows};assert len(indexed)==len(rows)
+    require(c["summary"]["complete_interface_inventory"] is False, "Audit reconciliation predicate failed")
+    require(r["status"]=="RESOURCE_FAMILY_ONLY_PASS" and l["status"]=="LOCAL_GUARD_ONLY_PASS", "Audit reconciliation predicate failed")
+    rows=c["declarations"];indexed={x["id"]:x for x in rows};require(len(indexed)==len(rows), "Audit reconciliation predicate failed")
     covered={x["census_id"] for x in r["witnesses"]}
     local_names={x["target"] for x in l["reviewed"]}
     for row in rows:
         if row["name_candidate"] in local_names:
-            assert row["id"] not in covered;covered.add(row["id"])
-    assert len(covered)==13 and covered<=set(indexed)
+            require(row["id"] not in covered, "Audit reconciliation predicate failed");covered.add(row["id"])
+    require(len(covered)==13 and covered<=set(indexed), "Audit reconciliation predicate failed")
     output=dict(status="PARTIAL_AUDIT",complete_interface_inventory=False,
         lexical_theorem_candidates=len(rows),accounted_source_theorems=13,
         ordinary_joint_witness_targets=6,intentional_H69_refutations=1,

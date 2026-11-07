@@ -1,17 +1,36 @@
 import Lean
 import Solidity.Lowering.P8.FrozenInterface
+import Solidity.Lowering.V08.EnvironmentProjection
+import Solidity.Lowering.V08.ConstructorScalarTransport
+import Solidity.Lowering.V08.LibraryFrameTransport
+import Solidity.Lowering.V08.CreationPremises
+import Solidity.Lowering.V08.LibraryPremises
 
 /-! Kernel-environment census, including exact elaborated types and imported
-defining-module provenance. Metaprogramming remains under tests; the core is unchanged. -/
+defining-module provenance. Guards omission of proof projections, predicate
+definitions and generated declarations from lexical-only audits. The separate
+world-agreement marker extends inventory without changing P8 consumer input.
+Set H62_WORLD_CENSUS=1 to opt into this additional diagnostic work.
+Metaprogramming remains under tests; the core is unchanged. -/
 open Lean Elab Command Meta
 
 run_cmd do
   let environment ← getEnv
-  let target := `Solidity.Lowering.P8.FrozenInterface
+  let includeWorld ← liftIO <| IO.getEnv "H62_WORLD_CENSUS"
+  let targets : Array (Name × String) := if includeWorld == some "1" then #[
+    (`Solidity.Lowering.P8.FrozenInterface, "H62_CENSUS_JSON "),
+    (`Solidity.Lowering.V08.EnvironmentProjection, "H62_WORLD_CENSUS_JSON "),
+    (`Solidity.Lowering.V08.ConstructorScalarTransport, "H62_WORLD_CENSUS_JSON "),
+    (`Solidity.Lowering.V08.LibraryFrameTransport, "H62_WORLD_CENSUS_JSON "),
+    (`Solidity.Lowering.V08.CreationPremises, "H62_WORLD_CENSUS_JSON "),
+    (`Solidity.Lowering.V08.LibraryPremises, "H62_WORLD_CENSUS_JSON ")
+  ] else #[(`Solidity.Lowering.P8.FrozenInterface, "H62_CENSUS_JSON ")]
   let constants := environment.constants.toList.mergeSort (fun a b => a.1.toString ≤ b.1.toString)
   for (name, info) in constants do
     let some index := environment.getModuleIdxFor? name | continue
-    if environment.header.moduleNames[index]! != target then continue
+    let target := environment.header.moduleNames[index]!
+    let some marker := targets.findSome? (fun entry =>
+      if entry.1 == target then some entry.2 else none) | continue
     let theoremDecl := getOriginalConstKind? environment name == some ConstantKind.thm
     let isProof ← liftTermElabM <| isProp info.type
     let returnsProp ← liftTermElabM do
@@ -47,4 +66,4 @@ run_cmd do
       ("module", toJson target.toString), ("type_expr", toJson (reprStr info.type)),
       ("type_pretty", toJson pretty.pretty), ("binders", toJson binders),
       ("axioms", toJson (axioms.map Name.toString))]
-    liftIO <| IO.println ("H62_CENSUS_JSON " ++ row.compress)
+    liftIO <| IO.println (marker ++ row.compress)
