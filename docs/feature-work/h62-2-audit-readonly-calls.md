@@ -1507,3 +1507,66 @@ execution, selected compiler/world binding and physical frame remain OUR
 unfinished producer for memory-reference-structs. G42.04 body binding, nineteen
 H19/H60 transports, inherited queues, historical proof-cleanup artifact recovery
 and full acceptance remain open. No new scope question or goal change.
+
+
+### Exact loaded-original type census (2026-11-07)
+
+Fetched/rebased masterdcf33632c2e88dd2161a0f1b212954ea84647f5f, including its
+private-path policy. No newer equivalent census was present. The query reuses
+only the admitted current read-statement proof closure:58 project object hashes,
+captured/current source hashes, tool/log/input pins and the leaf proof object
+are checked before/after. It imports only that unheld closure and Lean metadata;
+no Premises load, proof rerun, cache fallback or new dependency build occurs.
+Standard SDK/import-loader trust remains; object hashes are not independent
+loader-byte or source-to-object attestation.
+
+Exactly49 of the original792 declarations belong to loaded modules. The actual
+Lean query observes every original kernel name/module/kind, exports closed raw
+types, and obtains direct declaration selection ranges. Private names use
+Lean's constructor and are checked against original identities, with no public
+alias or basename fallback. All49 are present and directly source-bound,
+including seven private declarations;743 unloaded originals remain explicit.
+Kernel ranges must match the exact lexical declaration name span in captured
+source, not another occurrence of the same token. Current signature, variable
+context and visibility are retained separately. A raw type match does not prove
+unchanged dependency definitions, execution adequacy or live ownership.
+
+The final bounded metadata gate passes12.568s/805502976 bytes peak aggregate RSS:
+38 raw types match frozen exports and11 differ. Four Source drifts were already
+reported and StaticJournal.balance_storage is already an H19 case. Six newly
+reported drifts are SourceCallBoundary.call_zero/call_depth/call_static_value
+and SourceTypedCall.eval_external/external_captured/external_capture_failure.
+Their visible headers/context remain equal while elaborated types differ.
+RO-READ-PLAN-TRANSPORT now contains ten Source-related declarations; the known
+H19 overlap stays with its existing ticket. One new ESCALATE record per new
+declaration is retained off git, without repeating the prior four records.
+
+call_depth and call_static_value retain historical C6 joint-witness status.
+That original result is preserved, but it is not current-version fidelity.
+The new ledger records these axes separately and gives zero new credit. All792
+original rows, root coverage and historical classifications are unchanged:
+67joint,3target-failure joint,45intentional impossibility,256no-input,
+2frozen-v1 refutation/migration and419ordinary pending, including three private
+identity gaps. No unloaded/missing/private/range refusal is dropped or inferred
+to be feasible, impossible, owned or semantically equivalent.
+
+Six controls pass, including missing/duplicate identities, private missing-name
+retention, wrong identity/range, same-token-at-wrong-location and type drift
+without credit. Independent finder/skeptic found missing final log sealing and
+insufficient declaration-location binding; both were fixed. The initial query
+also needed explicit Lean.Name and proper private-name construction. Both
+reviewers confirmed final source/evidence without execution or writes and found
+no remaining issue. No new Lean declarations, premises, axioms or budgets.
+
+Actual wrapper versions remain Lean4.24.0/Lake5.0.0-src+797c613. Prior bounded
+KeySort PASS remains recorded in read-statements/evidence/keysort.json; this
+metadata gate is not a new runtime pass or proof-speed comparison. Historical
+Premises +80.254966536% STOP is unchanged. Full owned H121 Source/callee execution,
+compiler/world binding and physical frames, nineteen H19/H60 transports,
+G42.04 body binding, inherited queues and all final acceptance remain open.
+The existing generic-v08 documentation citation failure remains owner-pending.
+
+Evidence: /workspace/h62-audit-readonly-calls/loaded-original-types/; committed
+pins `tests/h62/item2/audit-readonly-calls/loaded-original-types.sha256`. No scope
+question, push or goal change. Next independent work: remaining original joint
+inputs, broader exact bindings and the owned full RO execution/frame producer.
