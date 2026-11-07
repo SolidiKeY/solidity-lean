@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Checks/ScopedSyntax.lean:Solidity.Yul.ScopedSyntax.Prepared.code_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/ScopedSyntax.lean:Solidity.Yul.ScopedSyntax.Prepared.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/ScopedSyntax.lean:Solidity.Yul.ScopedSyntax.Prepared.wordRun_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

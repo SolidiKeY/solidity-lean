@@ -17,8 +17,8 @@ assigned branch produced c60d01cb49e5dff1287de4c572b39fa46bd9a48b; no reset/disc
 Current upstream code includes further producer changes; originalc6 evidence
 remains explicitly pinned-source evidence, not a current-master timing baseline.
 
-1. **Partial:** pinned clean2143-module baseline passed. Original API snapshots
-   now962/1774 verified (261old prefix+700suffix+1DAG recovery);812 remain.
+1. **Partial:** pinned clean2143-module baseline passed. Original persisted-kernel snapshots
+   now1774/1774 verified, with55647 declaration records and52406 public records.
 2. **Partial:** B05 production repair integrated upstream. H78 generated public
    API compatibility and full new-toolchain dependency closure remain pending.
 3. **Pending:** full new build, common-source clean timings and regression gates.
@@ -668,3 +668,76 @@ Final finder/skeptic checks approve the explicit812 schema3 exporter and revised
 immutable plan; no blocking findings. Final47 Python tests pass in24.988s.
 Remaining checksum stays null until the tail completes; no consolidation pass
 can be claimed from that pending plan. No reviewer ran Lean or wrote files.
+
+## Completed original old-kernel inventory and second Nov7 rebaseline
+
+All812 DAG tail modules completed. Source-bound complete four-fragment plan is
+four-fragment-plan-complete.json; prior partial plans remain immutable. Bounded
+consolidate-fragments.py without --prefix-only passes exactly1774 ordered unique
+original modules:261+700+1+812. Report complete-old-inventory.json contains55647
+persisted declaration records,52406 public records; shared declaration records
+are not asserted globally unique. It retains all old kernel types,proof/value
+expressions,private/generated records and encoding provenance. IR-only names are
+retained in headers; their separate type/visibility disposition remains pending.
+This is not attribute/instance-priority validation or new-toolchain compatibility.
+
+Actual checker152.592778158s, sampled peak1799716864bytes, minimum availability
+14783451136bytes,exit0,no resource stop,unchanged limits. Original source hashes,
+all parent/census/helper/parser/validator hashes and each probe/raw/gzip/summary
+binding verified. Report explicitly migration_acceptance=false. Lean4.24.0
+commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and Lake5.0.0-src+797c613.
+Independent finder/skeptic reviews confirm exact coverage,totals,resource/source
+bindings and limited claims; no findings. Neither ran Lean or wrote files.
+
+Coordinator then required origin/master95d1e9cb29dc5a34d1db68af3ca47e47b75e293f.
+After in-flight export finished, fetched and verified the reported commit and
+7029a97d72bde21abe4b636b8125302debdd65c9 as ancestors; fast-forwarded the clean
+assigned branch. Owned task files were byte-identical across this update. No
+push,reset,default-branch merge or replacement goal. Original pinned baseline
+view/cache remain unchanged. Current source census at95d has1809 Yul modules,
+2229 closure modules,35 additions beyond original scope and82 changed original
+source hashes. Rebaseline-state evidence is in
+/workspace/migrate-yul-artifacts/rebaseline-95d1e9cb2/. Original benchmark and
+inventory are historical c6 evidence, not a direct current-tree benchmark.
+
+Original migration remains partial: complete current/new source compatibility,
+all generated public interfaces and IR type disposition,new clean build,common
+baseline timing/RSS and final root gates remain. Known external Raw/Hash/Scalar/
+Frontend/SortCheck failures have unchanged original source files; Source.Ctor
+has a producer proof update and needs renewed dependency validation. No new
+original declaration,statement,budget,axiom or exclusion was changed by this
+serializer/inventory work. Kernel inventory integrity is distinct from external
+compiler/KeY/solc validation and full migration acceptance.
+
+
+## Extra compiler-name accounting — historical header correction
+
+Deterministic census-ir-names.py consumes the completed, previously reviewed
+old-kernel inventory and verifies every referenced summary hash. It retains all
+32734 extraConstNames across1774 modules (1356 with extra names), including610
+records in310 modules which ALSO occur in that module's kernel declarations.
+All32734 compiler names are globally distinct in this dataset. The historical
+header label "IR-only names; not kernel ConstantInfo declarations" was too
+narrow: extra compiler names can overlap kernel declarations. This correction
+supersedes that label's interpretation in prior prose, not the immutable raw
+headers or their source bindings. No name was omitted from either inventory.
+
+old-compiler-name-census.json retains exact structured names,per-module order,
+per-name module membership and explicit kernel overlaps. IR type and public
+visibility are null for every name; no public/private inference is made from
+name spelling. This accounts for names only, not IR signatures or attributes.
+It derives from a previously verified/hash-bound inventory rather than replaying
+the full raw/probe validation. It has migration_acceptance=false,empty shims,
+and no exclusions or waivers. Generator and name-validator hashes are recorded.
+
+Five accounting controls pass: overlap retained,summary tampering rejected,
+incomplete inventory rejected,duplicate name rejected,malformed Name rejected.
+Initial local attempts exposed the overlap and a test path typo; both corrected
+before acceptance. Finder and skeptic independently reproduce all counts and
+bindings and report no findings. Neither ran Lean or wrote files.
+
+This increment contains only additive external census/test tooling and docs.
+No original Lean declaration,statement,definition body,budget,axiom or exclusion
+changed. Original old-kernel inventory and this compiler-name accounting do not
+resolve H78 generated API shims,IR types/visibility/attributes,new builds,clean
+common-source performance comparison,KeySort35 or root runtime gates.
