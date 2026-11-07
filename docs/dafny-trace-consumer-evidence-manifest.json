@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceHead": "734c6578695ee3b5ed4d6d5b0d9301aa6ee8b9e4",
+  "nativeSourceHead": "26010a9ce1ddebbea8ea1f8f86704e14428d72e1",
+  "fileCount": 29,
+  "uncompressedBytes": 1803541,
+  "boundaries": [
+    "Offline reprocessing, not native replay: complete3cases and9mutations retained in rejectedResult; overall broken/exit1. Original native0/0/0 CLI and exit1 guard unchanged.",
+    "Production positioned trace provider is absent/null. Actions explicitly unavailable and start no proof/language request. F7/F8 map show/hide only; native key/rendered correspondence remains unproved.",
+    "Consumer injection tests cover normalization, real-position validation, exact-source/version/session/config/current-editor ownership, debounce/cancellation, close/reopen, switching, scoped config, copy, disposal and errors. No kernel certificate or source span is derived.",
+    "95 targeted tests pass including all original trace harness controls byte-identical; no row complete and no paired row judgments."
+  ],
+  "archive": {
+    "path": "/workspace/dafny-trace-consumer-evidence-20261107/bulk.tar.gz",
+    "bytes": 183155,
+    "sha256": "4f138f90d4d5e368cd2cae8a5d05f2fa0aafb26c446a63c4e5f117a0c6067bff"
+  },
+  "index": {
+    "path": "/workspace/dafny-trace-consumer-evidence-20261107/files.json",
+    "bytes": 5968,
+    "sha256": "5bce3b186b67e6bb91935eb911f93063d307374b8a47ac6ac48ebb1852d8f0cb"
+  },
+  "priorNativeEvidenceManifest": "docs/dafny-command-output-evidence-manifest.json",
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-trace-consumer-evidence-manifest.json --restore"
+}

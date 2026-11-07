@@ -52,7 +52,7 @@ async function run() {
       scenarios.push({id,status,elapsedMs:performance.now()-start,observation});
       if(status==='passed')result.checks.push(id);
     }
-    catch(error) {scenarios.push({id,status:error.code === 'TIMEOUT' ? 'timeout' : 'broken',elapsedMs:performance.now()-start,error:error.stack});}
+    catch(error) {scenarios.push(require('./core.cjs').scenarioFailure(id,performance.now()-start,error));}
     record('scenario.end',{id}); activeScenario=null;
   }
   function keybindingRequest(request){require('./phase-capture.cjs').atomicJson(join(config.dir,'keybinding-request.json'),request);}
@@ -105,7 +105,13 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(config.suite==='dafny-compiler-output'){
+    if(config.suite==='testing-symbols'){
+      await scenario('native-compiler-testing',()=>require('./hierarchy-lifecycle.cjs').runRendered({vscode,config,api,events,until}));
+    }else if(config.suite==='trace-unavailable'){
+      await scenario('native-trace-unavailable',()=>require('./trace-presentation.cjs').runUnavailable({vscode,config,events,record,api,sessionFor,until}));
+    }else if(config.suite==='dafny-command-output'){
+      await scenario('native-dafny-command-output',()=>require('./dafny-command-output.cjs').run({vscode,config,events,keybindingRequest,until,observation}));
+    }else if(config.suite==='dafny-compiler-output'){
       await scenario('native-dafny-output-configuration',()=>require('./dafny-output.cjs').run({vscode,config,events,keybindingRequest,until,observation}));
     }else if(config.suite==='compiler-output'){
       await scenario('native-compiler-output-configuration',()=>require('./compiler-output.cjs').run({vscode,config,events,keybindingRequest,until}));

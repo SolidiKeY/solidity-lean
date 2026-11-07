@@ -39,7 +39,9 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       workers: cfg.get('workers', 1), automaticVerification: {onchange:'change',onsave:'save',never:'never'}[automatic] || 'never' };
   }
   const sourceCommands=require('./source-commands.cjs').install(vscode,context,{settings,output,cancelVerification:uri=>cancel(uri,true)});
+  const tracePresentation=require('./trace-presentation.cjs').install(vscode,context,{notify:message=>{output.appendLine(message);vscode.window.showInformationMessage?.(message);}});
   function cancel(uri,preserveSource=false) {
+    for(const [id,snapshot]of symbolSnapshots)if(snapshot.compilerOnly&&(!uri||id===key(uri))){snapshot.abort.abort();symbolSnapshots.delete(id);}
     if(!preserveSource)sourceCommands.cancel(uri?key(uri):undefined);
     automaticTests.stop(uri);
     service?.cancel(uri);
@@ -97,6 +99,13 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     Promise.resolve().then(()=>{if(current())return service.request('textDocument/documentSymbol',doc,{}, {signal:snapshot.abort.signal});}).then(symbols=>{
       if(!current())return;const validated=require('./testing-tree.cjs').currentSymbols(symbols,snapshot.text);snapshot.symbols=validated;testingTree.render(doc,report,validated);
     }).catch(error=>{if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED')output.appendLine('Testing symbols unavailable: '+error.message);});
+  }
+  async function compilerTesting(doc){
+    if(!service?.request||disposed||doc.isClosed||!isSolidity(doc)||!vscode.workspace.isTrusted||reports.has(key(doc.uri))||!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true))return;
+    const id=key(doc.uri),previous=symbolSnapshots.get(id);if(previous?.compilerOnly&&previous.doc===doc&&previous.version===doc.version&&previous.text===doc.getText())return;
+    previous?.abort.abort();const snapshot={doc,version:doc.version,text:doc.getText(),compilerOnly:true,abort:new AbortController()};symbolSnapshots.set(id,snapshot);
+    const current=()=>!disposed&&!doc.isClosed&&!snapshot.abort.signal.aborted&&documents.get(id)===doc&&doc.version===snapshot.version&&doc.getText()===snapshot.text&&symbolSnapshots.get(id)===snapshot&&!reports.has(id)&&vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true);
+    try{const symbols=await service.request('textDocument/documentSymbol',doc,{}, {signal:snapshot.abort.signal});if(current())testingTree.renderCompiler(doc,symbols);}catch(error){if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){symbolSnapshots.delete(id);output.appendLine('Compiler Testing symbols unavailable: '+error.message);}}
   }
   function accept(doc, report, config, options = {}) {
     const identities=report.results.map(row=>require('./testing-tree.cjs').rowId(key(doc.uri),row));if(new Set(identities).size!==identities.length)throw new Error('Verifier report has duplicate obligation identities');
@@ -173,9 +182,9 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       catch (error) { showError(error); }
     }
   }
-  controller.resolveHandler = async item => { if (!item) await discover(); };
+  controller.resolveHandler = async item => { if (!item){if(service?.request)await Promise.all([...documents.values()].map(compilerTesting));else await discover();} };
   controller.refreshHandler = discover;
-  controller.createRunProfile('Verify', vscode.TestRunProfileKind.Run, async (request, profileToken) => {
+  const verifyProfile=controller.createRunProfile('Verify', vscode.TestRunProfileKind.Run, async (request, profileToken) => {
     const run=controller.createTestRun(request),cancellation=new vscode.CancellationTokenSource();
     testRunCancellations.add(cancellation);
     const tokens=[profileToken,run.token].filter(Boolean);
@@ -223,16 +232,17 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       releaseAutomatic();registrations.forEach(registration=>registration.dispose());testRunCancellations.delete(cancellation);cancellation.dispose();run.end();
     }
   },true);
+  if(testingTree.obligationTag)verifyProfile.tag=testingTree.obligationTag;
   context.subscriptions.push(
     diagnostics, controller, outputOwner,
     vscode.commands.registerCommand('solidityLean.verify', () => activeCommand(false)),
     vscode.commands.registerCommand('solidityLean.list', () => activeCommand(true)),
-    vscode.commands.registerCommand('solidityLean.cancel', () => {for(const cancellation of testRunCancellations)cancellation.cancel();cancel();}),
+    vscode.commands.registerCommand('solidityLean.cancel', () => {tracePresentation.reset();for(const cancellation of testRunCancellations)cancellation.cancel();cancel();}),
     vscode.commands.registerCommand('solidityLean.showOutput', () => output.show(true)),
     vscode.workspace.onDidChangeConfiguration(event=>{
       for(const doc of documents.values())if(event.affectsConfiguration('solidityLean.displayVerificationAsTests',doc.uri)){
         if(!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true)){automaticTests.visible(doc,false);clearTests(doc.uri,true);}
-        else {automaticTests.visible(doc,true);const report=reports.get(key(doc.uri));if(report&&!doc.isClosed)publish(doc,report);}
+        else {automaticTests.visible(doc,true);const report=reports.get(key(doc.uri));if(report&&!doc.isClosed)publish(doc,report);else compilerTesting(doc);}
       }
     }),
     vscode.workspace.onDidSaveTextDocument(doc => {
@@ -281,6 +291,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     const receiveStatus=params=>{
       const doc=documents.get(params.uri);if(disposed||!doc||doc.isClosed||doc.version!==params.version||hash(doc.getText())!==params.sourceHash)return;
       if(!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true))return;
+      if(params.state==='ready'&&!reports.has(key(doc.uri)))void compilerTesting(doc);
       if(!Array.isArray(params.functions)||params.functions.some(row=>!row||!model.validRange(row.range)||typeof row.status!=='string'||row.name!==undefined&&typeof row.name!=='string'))return;
       automaticTests.status(doc,params);
     };
@@ -288,14 +299,14 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version)return;
       diagnostics.set(doc.uri,params.diagnostics.map(row=>{const d=new vscode.Diagnostic(toRange(row.range),row.message,row.severity-1);d.source=row.source;d.code=row.code;if(row.relatedInformation)d.relatedInformation=row.relatedInformation.map(r=>new vscode.DiagnosticRelatedInformation(new vscode.Location(vscode.Uri.parse(r.location.uri),toRange(r.location.range)),r.message));return d;}));
     };
-    const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version)clear(doc.uri,false);};
+    const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version){tracePresentation.reset(doc.uri);clear(doc.uri,false);}};
     service.on('invalidated',invalidated);
     const serverError=error=>{
       if(disposed||[-32800,-32801].includes(error.code)||error.code==='CANCELLED')return;
       if(error.uris&&!error.uris.some(uri=>{const doc=documents.get(uri);return doc&&!doc.isClosed;}))return;
       const affected=error.uris?new Set(error.uris):null;
       for(const [id,doc]of documents)if(!affected||affected.has(id)){
-        saving.delete(id);active.get(id)?.abort();clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);
+        tracePresentation.reset(doc.uri);saving.delete(id);active.get(id)?.abort();clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);
       }
       showError(error);
     };
@@ -303,7 +314,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     service.on('status',receiveStatus);service.on('report',receive);service.on('diagnostics',receiveDiagnostics);service.on('serverError',serverError);service.on('log',log);
     const restart=async selected=>{
       if(disposed)return;
-      const operation=++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
+      if(selected)for(const doc of selected)tracePresentation.reset(doc.uri);else tracePresentation.reset();const operation=++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
       if(!selected)cancel();
       for(const doc of targets){const id=key(doc.uri),generation=(documentGenerations.get(id)||0)+1;documentGenerations.set(id,generation);generations.set(id,generation);if(selected)cancel(doc.uri);clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);}
       const current=doc=>!disposed&&!doc.isClosed&&documentGenerations.get(key(doc.uri))===generations.get(key(doc.uri));
