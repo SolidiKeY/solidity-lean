@@ -4164,6 +4164,7 @@ import Solidity.Source.HorizonDeploy
 import Solidity.Source.HorizonFuel
 import Solidity.Source.HorizonGrow
 import Solidity.Source.Infer
+import Solidity.Source.InferHelpers
 import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples
 import Solidity.Source.Ledger
