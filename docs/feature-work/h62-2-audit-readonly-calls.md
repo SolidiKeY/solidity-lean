@@ -723,3 +723,13 @@ dependent definition, premise, exclusion, axiom or budget changed; no new
 sorry/native_decide. Full original/inherited acceptance, owner compiler success,
 our full H121 producer and runtime gates remain unfinished. No runtime pass or
 master publication is claimed.
+
+
+Post-rebase validation on coordinator master 658d1b1d14c68a031c137f576764ec7e9e7a6359
+found one inherited documentation failure: the Claude-origin compatibility
+module `Solidity/Yul/Compilation/P20InterfaceV2Controls.lean` cites the absent
+file tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean. Ticket
+RO-DOC-P20-REF routes this exact docstring repair to the live Yul/original vy3
+owner through the coordinator. That source remains read-only here. The global
+documentation gate is failing, not waived; native source/object bindings and
+proof results remain unchanged. Original/inherited full acceptance is pending.
