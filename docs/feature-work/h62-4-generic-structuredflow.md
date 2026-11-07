@@ -156,3 +156,11 @@ Only the intrinsic universal compiler execution lemma and its two typed fixture 
 Cache-aware bounded check generic-mapped-emitted-1107-02 exits0 in3.267seconds. Both new theorem axiom outputs contain only propext/Classical.choice/Quot.sound. Failed elaboration and recursion attempts remain retained; no budget was raised. Separate independent read-only finder and skeptic found no soundness issue and confirmed the exact snapshot/whole-machine distinction. Finder noted unused simp arguments; dependency and local warnings remain visible. No Lean server/build was used by reviewers.
 
 The inherited `gate.py`/`measure.py` protocol requires a pinned4.35 runtime and matched fresh-private-output receipts across all six original modules. Current successful checks use live4.24 and cannot be substituted into that comparison. No timing acceptance or STOP release is claimed. Exact ten-control correspondence, unchanged refusal coverage, complete declaration audit and final affected gates remain open.
+
+## Ten original positive propositions checked
+
+One off-Git `ExactInstances.lean` combines the checked helper with the original import/namespace contexts and ten exact extracted proposition headers from the six proposed control files. Each proof uses `emitted_snapshot` at its original base0/base128. `bindings.json` records each original declaration name and statement SHA256. Production controls were not modified.
+
+The actual cache-aware bounded check generic-mapped-instances-1107-01 exits0 in112.261seconds, including changed import-closure compilation. This is an importing-consumer check, not a per-module timing or paired performance result. Replayed dependency and unused-simp warnings remain retained. Printed helper theorem axiom sets are standard-only; a complete per-instance/declaration axiom comparison remains open.
+
+This closes only the ten positive proposition-instance check. Full refusal preservation/audit, deterministic committed reproduction of this new test input, independent review, all-declaration trust and matched before/after timing remain required. P7 nonempty-payload rollback and unified event/world/frame coupling remain separate original producer obligations for MIC and G52 consumers; no instance-test result is promoted to those semantics.
