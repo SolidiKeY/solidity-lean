@@ -482,3 +482,43 @@ are all standard-only entries; no shared axiom inventory was written. Independen
 read-only finder and skeptic found no semantic fidelity issue; metadata review
 and sealed evidence accompany this checkpoint. Full lane validation and all
 previous producer, timing and documentation gate holds remain open.
+
+
+### Checkpoint 228: live-array access and retained refusal audit
+
+The additive ArrayAccessWitnesses module supplies six exact frozen premise
+bundles: TargetArrayRead.run_current and failure_matches, plus
+TargetArrayWrite.run_current, success, failure_matches and header_frame.
+One existing intrinsic Bool array has length 1 and retained extent 3, with true
+payloads; the populated symbolic-slot machine has the same current header.
+The successful index-0 write stores false. Actual read/write execution reuses
+the frozen laws, including the complete machine context and stack tail. The
+selected header representation is supplied jointly with actual adapter success.
+
+Retained index 1 has a raw present cell and permits raw save, while live access
+and the write adapter refuse it. Index 3 is separately out of extent and also
+reverts. The observations retain the header, untouched retained cell and outside
+slot. Reject-all disagrees with the successful read. These controls establish
+no Source lowering, numeric/physical hash, gas/fork or world adequacy.
+
+Source commit `c4484a7dc292c1cf547a99e8f48bcfeb1763e8d7` passed its exact-head
+serial check in 1.84 seconds, peak aggregate RSS 701554688 bytes, without a
+resource stop. Sixteen measured axiom guards pass: seven axiom-free and nine
+using only propext, Classical.choice and Quot.sound. Initial local extent
+construction, dependent record syntax, and header compatibility proof failures
+are retained; corrected definitions use the existing intrinsic types and
+explicit length/extent bounds, without producer statement or budget changes.
+
+The frozen registry now maps 62 rows: 50 joint-premise bundles and 12 data
+inhabitants. 3219 of the 3281 conservative rows remain unmapped. Six new rows
+are counted once; additional execution/refusal controls add no interface count.
+New source/pin corruption checks pass. Prior complete and per-source validation
+heads stay historical; only this additive module has a fresh receipt.
+
+The repository trust wrapper passes 6614 sources and 289 inventoried sites with
+zero findings. Strict pins remain FAIL: 16532 pinned, zero errors, 372 unrecorded
+and 99 baselined changes. The sixteen new declarations are standard-only;
+shared inventories and gate policies are unchanged. Independent read-only
+finder and skeptic found no source fidelity defects; metadata reviews and
+strict committed-tree documentation comparisons accompany the sealed handoff.
+All original producer, full-validation, timing and documentation holds remain.
