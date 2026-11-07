@@ -1,6 +1,7 @@
 import Solidity.Yul.Compilation.ArtifactPreparation
 import Solidity.Yul.Compilation.LetBranchCompletionControls
 import Solidity.Yul.Compilation.LetControlCompilationControls
+import Solidity.Yul.Compilation.LetSequenceCompletion
 import Solidity.Yul.Compilation.InitializedSequenceCompilationControls
 import Solidity.Yul.Compilation.LetControlCompletion
 import Solidity.Yul.Compilation.LetScopeCompletion
@@ -360,3 +361,96 @@ end RawControls
 #print axioms RawControls.original_recovered
 #print axioms RawControls.source_completes
 end Solidity.Yul.Compilation.H55ControlFamilies.LetScope
+
+namespace Solidity.Yul.Compilation.H55ControlFamilies.LetSequence
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : LetSequenceCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code a.source_to_model
+    (LetSequenceCompletion.artifact_reflected a)
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+theorem source_roundtrip (a : LetSequenceCompilation.Artifact fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fuel stmt) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+/-- Accepted sequence evidence consists only of selected scopes and their
+concatenations. Unlike a raw guard, it cannot have code-selection refusal. -/
+theorem code_total (a : LetSequenceCompilation.Compiled fuel stmt) :
+    ∃ code, a.code = some code := by
+  induction a with
+  | scope artifact => exact ⟨artifact.code, rfl⟩
+  | seq left right ihLeft ihRight =>
+    obtain ⟨leftCode, leftSelected⟩ := ihLeft
+    obtain ⟨rightCode, rightSelected⟩ := ihRight
+    refine ⟨leftCode ++ rightCode, ?_⟩
+    change (do
+      let first ← left.code
+      let second ← right.code
+      pure (first ++ second)) = some (leftCode ++ rightCode)
+    rw [leftSelected, rightSelected]
+    rfl
+
+noncomputable def encodeRaw (a : LetSequenceCompilation.Compiled fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofTotalSelection LetSequenceCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) code_total a
+
+abbrev RawImage (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encodeRaw (fuel := fuel) (stmt := stmt))
+
+theorem raw_source_roundtrip (a : LetSequenceCompilation.Compiled fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encodeRaw a) = a := Artifact.source_roundtrip encodeRaw a
+
+theorem raw_image_roundtrip (a : RawImage fuel stmt) :
+    Artifact.toImage encodeRaw (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+theorem raw_code_selected (a : LetSequenceCompilation.Compiled fuel stmt) :
+    a.code = some (encodeRaw a).code := Classical.choose_spec (code_total a)
+
+theorem code_ne_none (a : LetSequenceCompilation.Compiled fuel stmt) : a.code ≠ none := by
+  obtain ⟨code, selected⟩ := code_total a
+  rw [selected]
+  intro impossible
+  cases impossible
+
+namespace Controls
+theorem selected_model (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode LetSequenceCompilation.Controls.artifact).code
+      {m with stack := coreWord b :: caller} =
+      .ok {m with stack := coreWord (LetSequenceCompilation.Controls.update
+        (LetSequenceCompilation.Controls.update b)) :: caller} 0 :=
+  LetSequenceCompilation.Controls.target_done b m caller
+
+theorem raw_model (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encodeRaw LetSequenceCompilation.Controls.artifact.compiled).code
+      {m with stack := coreWord b :: caller} =
+      .ok {m with stack := coreWord (LetSequenceCompilation.Controls.update
+        (LetSequenceCompilation.Controls.update b)) :: caller} 0 := by
+  have same : (encodeRaw LetSequenceCompilation.Controls.artifact.compiled).code =
+      LetSequenceCompilation.Controls.artifact.code :=
+    Option.some.inj ((raw_code_selected _).symm.trans LetSequenceCompilation.Controls.artifact.lowered)
+  rw [same]
+  exact LetSequenceCompilation.Controls.target_done b m caller
+
+#guard (LetSequenceCompilation.compile 0 LetSequenceCompilation.Controls.source).isNone
+#guard (LetSequenceCompilation.lower 2 LetScopeCompilation.Controls.beyondSource).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms code_total
+#print axioms encodeRaw
+#print axioms raw_source_roundtrip
+#print axioms raw_image_roundtrip
+#print axioms raw_code_selected
+#print axioms code_ne_none
+#print axioms Controls.selected_model
+#print axioms Controls.raw_model
+#print axioms Artifact.select_total
+end Solidity.Yul.Compilation.H55ControlFamilies.LetSequence

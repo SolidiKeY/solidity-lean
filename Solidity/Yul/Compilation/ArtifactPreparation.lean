@@ -40,6 +40,22 @@ theorem select_some {E A : Type} (selection : E → Option A)
     subst actual
     rfl
 
+/-- A total accepted producer can yield a semantic certificate directly.
+Selection totality is an actual proof obligation; this asserts no visitor or
+admission totality. The chosen payload is constrained by exact selection. -/
+noncomputable def ofTotalSelection {E A : Type} (selection : E → Option A)
+    (certify : ∀ original payload, selection original = some payload → Artifact depth stmt)
+    (total : ∀ original, ∃ payload, selection original = some payload)
+    (original : E) : Artifact depth stmt :=
+  certify original (Classical.choose (total original)) (Classical.choose_spec (total original))
+
+theorem select_total {E A : Type} (selection : E → Option A)
+    (certify : ∀ original payload, selection original = some payload → Artifact depth stmt)
+    (total : ∀ original, ∃ payload, selection original = some payload)
+    (original : E) :
+    select selection certify original = some (ofTotalSelection selection certify total original) :=
+  select_some selection certify original _ (Classical.choose_spec (total original))
+
 structure PreparationImage {E : Type} (encode : E → Option (Artifact depth stmt)) where
   original : E
   artifact : Option (Artifact depth stmt)

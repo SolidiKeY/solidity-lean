@@ -135,6 +135,24 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetScope",
       "adapter_kind": "preselection_provenance",
       "boundary": "Instantiates generic Artifact.select/PreparationImage using the existing selected LetScope adapter. Exact selected payload and all raw producer data retained; actual source-feasible DUP17 refusal remains None without runtime-failure claims."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetSequenceCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetSequence",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_kind": "total_compiled_artifact",
+      "boundary": "Structural code_total proof for accepted selected-scope/concatenation evidence instantiates generic Artifact.ofTotalSelection; exact semantic Image retains raw original. Code is constrained by actual selection. No preparation envelope or visitor/admission totality claim."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetSequenceCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetSequence",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates generic Artifact.ofZero and exact Image from both original sequence execution laws, actual source/profile/code and full original selected evidence. Empty newer prefix and arbitrary caller/machine framing preserved."
     }
   ]
 }
