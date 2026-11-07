@@ -1540,3 +1540,41 @@ evidence request remains assigned and unfulfilled. All original/consolidated
 proof/backfill/coverage/final gates, Y04 physical and separate 4.35 waits and
 STOPs remain. Coverage is still 72 mapped / 3281 rows, 3209 uncovered; these
 conversion laws add no witness rows or whole-lane completion credit.
+
+### C264 — exact-19 source evidence and H16 hold
+
+The coordinator disk helper removed the regenerable pinned .lake/build, leaving
+over 2 GB free; sealed evidence and historical failures were preserved. The live
+build symlink now needs its target restored before future Lean work. No Lean,
+Source check, integration or timing retry was run in this checkpoint.
+
+transport_pairs.py reuses the readonly-call consumer's lexical scanner and pins
+the exact inventory bytes. It captures original C6/current source and signatures
+for all 19 H19/H60 pairs (11 projections, one balance domain, seven typing
+parameters), separately retaining the three missing private identities. Original
+signature/context hashes must match; current drift is retained and fails the
+observation gate. All 22 current observations match the recorded hashes. The
+recorded 6f7002ca commit object is unavailable locally and is explicitly not
+verified as retrieved. Current source is tied to its actual captured Git head.
+This supplies source-version extracts only: zero transport proofs, zero H57
+approvals verified, zero kernel-fidelity or original-obligation credit. No
+assumed Fits/mapFree premise substitutes for actual range or typed-program
+evidence. The exact-19 proof/authorization portion remains open.
+
+Four Python controls cover original/context tampering, current drift or absence,
+exact membership, duplicate identity, unsafe paths and non-promotion to proof.
+They pass. C264 lane history records independent read-only finder/skeptic reviews
+with no findings; neither used Lean, its server or builds. No production file,
+reader, frozen statement, interface, budget, axiom set or exclusion changed.
+
+The vy1-words ticket at 2efd664e52612f4ae39af083180a9a1990ce2ec9 is a DRAFT under
+H16 TIMING HOLD, not a merge/retirement/acceptance. Do not integrate TypingV2 or
+run Source checks/timing retries against that draft. Aggregate median +9.2046%
+is a qualitative H16 hold despite being below the mechanical 10% threshold.
+Library try/Error(string memory) remains separate, unimplemented and held.
+V1 refusal statements stay frozen; future v2 consumer migration requires the
+versioned contracts and actual reproofs. Historical C246 full-elaboration failure
+remains. H121b actual Source admission/origin/lifecycle/P8/S03-PANIC41 duties stay
+local; Y04 physical and separate 4.35 waits, all STOPs and original/consolidated
+proof/backfill/coverage/final gates remain open. No new witness rows: 72 mapped
+of 3281, 3209 uncovered.
