@@ -1,9 +1,0 @@
-# Raw Boolean Source copy validation
-
-SourceRawBoolCopy derives actual decode runs from canonical raw cdWordAt values (zero or one), rather than assuming a decoded payload or successful mapM run. rawBoolPayload is an observation of these frame bytes, not a new decoder or interpreter. source_raw_bool_copy derives the existing cdToMem allocation, and source_raw_bool_copy_frames derives its fresh object, next address, all other Source addresses, locals and complete nonheap state. Runtime lengths and raw byte lengths remain arbitrary for this standalone operation.
-
-source_raw_bool_copy_first_error uses structural ordered indices, canonical raw words before the selected index and a raw word greater than one there. It derives the actual accepted prefix, exact empty-data revert at that decoder call and whole copy failure with the initial state retained. No final relation or failed suffix is assumed. These success/refusal clauses are not new Source admission restrictions.
-
-Inhabited controls use a three-byte nonempty prefix, copied false/true values, two old objects and repeated old aliases. Ordered initial/final object tables and local/nonheap frames distinguish old and fresh identities. A valid false prefix followed by raw two rejects before allocation. Standalone empty calldata pads to false values, and zero requested length allocates an actual empty dynamic object. cdTail entry bounds remain separate; no truncated-entry refusal, Source RItems program, intrinsic/native writer, allocation-capacity, ABI, physical memory or external EVM/compiler theorem is claimed. cdToMem has no pipeline or horizon argument.
-
-Exact standard guards and bounded diagnostics are component evidence; original full-lane gates and all Source/V10/target/world dependencies remain open. Earlier source, fixtures and failed receipts are preserved.
