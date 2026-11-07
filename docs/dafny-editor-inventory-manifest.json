@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
   "decision": "H44 coordinator follow-up2026-11-06: full inventory is bulk; retain outside git with exact checksums",
-  "sourceHead": "734c6578695ee3b5ed4d6d5b0d9301aa6ee8b9e4",
+  "sourceHead": "99d454f42ffe83a84fbf782452ed0a2ca7b47f49",
   "repository": "/workspace/solidity-lean",
   "fileCount": 1,
-  "uncompressedBytes": 746559,
+  "uncompressedBytes": 768347,
   "rowCount": 489,
   "frozenRowCount": 270,
   "frozenSha256": "d2f7e40e0c4cd370d09f9feb04872ea81963524b48be8e46c9b98dba26f945f1",
   "archive": {
-    "path": "/workspace/dafny-trace-consumer-evidence-20261107/inventory/bulk.tar.gz",
-    "bytes": 48788,
-    "sha256": "cc291d2f17f71385e923df2aac0c31fb72017a31adc48637789fd101f33fcf1f"
+    "path": "/workspace/dafny-native-trace-testing-evidence-20261107/inventory/bulk.tar.gz",
+    "bytes": 51062,
+    "sha256": "c6a27d212af6689b4ca1f7eb4ba75f7e86de9adb3cf740c0fad451a8c1b04b96"
   },
   "index": {
-    "path": "/workspace/dafny-trace-consumer-evidence-20261107/inventory/files.json",
+    "path": "/workspace/dafny-native-trace-testing-evidence-20261107/inventory/files.json",
     "bytes": 186,
-    "sha256": "1fdb8c2c88723113f877589c5bcfb5471f264dc5db8e5f93b0053096cda0c884"
+    "sha256": "b2b7f06c52994dca938ccda5cdf439e861100ee6866ccd5e9e25bc1b6a2cc9c5"
   },
   "rawInventory": {
-    "path": "/workspace/dafny-trace-consumer-evidence-20261107/inventory/inventory.json",
-    "bytes": 746559,
-    "sha256": "13ffd3d5372d1605cec1b2b2bcf181f0b04652e7c426000ac0f65750ddd8f11a"
+    "path": "/workspace/dafny-native-trace-testing-evidence-20261107/inventory/inventory.json",
+    "bytes": 768347,
+    "sha256": "e63777f8f896e511e91dc3d1eebad2da9e5079adb0a22c9fc1fd05b560a407ad"
   },
   "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
   "relocation": "Provision both bulk.tar.gz and files.json together, then pass --directory DIR; CI uses DAFNY_PARITY_INVENTORY_DIR. Existing evidence bundle is separately required.",
@@ -44,6 +44,7 @@
     "docs/dafny-output-settings-evidence-manifest.json",
     "docs/dafny-upstream-output-evidence-manifest.json",
     "docs/dafny-command-output-evidence-manifest.json",
-    "docs/dafny-trace-consumer-evidence-manifest.json"
+    "docs/dafny-trace-consumer-evidence-manifest.json",
+    "docs/dafny-native-trace-testing-evidence-manifest.json"
   ]
 }
