@@ -41,7 +41,7 @@ test('native custom Build resolves its declared include/remapping options withou
 
 for(const scenario of ['cancel','unsupported','closed','configuration'])test('custom Build prompt '+scenario+' never admits stale/unsupported work (injected editor)',async()=>{
  const e=fake(),env=require('./mock.cjs').mock();let release,configChanged;env.doc.uri.fsPath=e.source;env.doc.text=fs.readFileSync(e.source,'utf8');env.vscode.window.activeTextEditor={document:env.doc};env.vscode.workspace.onDidChangeConfiguration=fn=>{configChanged=fn;return{dispose(){}};};env.vscode.window.showInputBox=()=>new Promise(r=>{release=r;});const logs=[],api=require('../src/source-commands.cjs').install(env.vscode,env.context,{settings:()=>e.config,output:{show(){},appendLine:text=>logs.push(text)}});const pending=env.commands.get('solidityLean.buildCustomArgs')();
- try{while(!release)await new Promise(setImmediate);if(scenario==='closed')env.doc.isClosed=true;if(scenario==='configuration')configChanged({affectsConfiguration:key=>key==='solidityLean.includePaths'});release(scenario==='cancel'?undefined:scenario==='unsupported'?'{"timeoutMs":999}':'{}');await pending;assert.deepEqual(logs,[]);assert.equal(env.notices.length,scenario==='unsupported'?1:0);
+ try{while(!release)await new Promise(setImmediate);if(scenario==='closed')env.doc.isClosed=true;if(scenario==='configuration')configChanged({affectsConfiguration:key=>key==='solidityLean.includePaths'});release(scenario==='cancel'?undefined:scenario==='unsupported'?'{"timeoutMs":999}':'{}');await pending;if(scenario==='unsupported'){assert.equal(logs.length,1);const failure=JSON.parse(logs[0]);assert.equal(failure.phase,'failed');assert.equal(failure.admitted,false);assert.equal(failure.operation,'buildCustomArgs');assert.match(failure.message,/only includePaths and remappings/);}else assert.deepEqual(logs,[]);assert.equal(env.notices.length,scenario==='unsupported'?1:0);
  }finally{await api.dispose();e.dispose();}
 });
 
@@ -90,4 +90,10 @@ test('opening then cancelling a superseding custom prompt retires the invalidate
   await env.commands.get('solidityLean.buildCustomArgs')();assert.equal(promptSawLive,false,'lost-owner child must retire before a new prompt can be cancelled');await first;
   assert.equal(logs.some(line=>{try{return JSON.parse(line).phase==='completed';}catch{return false;}}),false);assert.equal(env.notices.length,0);
  }finally{await api.dispose();await first;e.dispose();}
+});
+
+// Guard regression: rejected custom options must retain current source ownership without admitting proof/compiler work.
+test('custom Build option rejection records a pre-admission source-bound failure',async()=>{
+ const e=fake(),u=ui(e);u.env.vscode.window.showInputBox=async()=>'{invalid';
+ try{await u.env.commands.get('solidityLean.buildCustomArgs')();const packets=u.logs.flatMap(line=>{try{return[JSON.parse(line)];}catch{return[];}}),failure=packets.find(p=>p.kind==='source-command'&&p.phase==='failed');assert.ok(failure,'current option rejection needs an owned receipt');assert.equal(failure.admitted,false);assert.equal(failure.operation,'buildCustomArgs');assert.equal(failure.uri,u.env.doc.uri.toString());assert.equal(failure.version,u.env.doc.version);assert.equal(failure.sourceHash,require('node:crypto').createHash('sha256').update(u.env.doc.text).digest('hex'));assert.equal(failure.verification,'not-run');assert.equal(packets.some(p=>p.phase==='started'),false);assert.equal(u.env.notices.length,1);}finally{await u.api.dispose();e.dispose();}
 });
