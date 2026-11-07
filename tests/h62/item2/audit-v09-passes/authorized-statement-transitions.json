@@ -25,14 +25,14 @@
         "name": "Solidity.Backend.Passes.BitwiseValueContextControls.signed_acceptance",
         "source_sha256": "809fd4451599fac533f8a01122d3903abe686189f19d1386c10867c5990cc2b7",
         "signature_sha256": "7ae57e33ffb0dc204e5f883b461091600996c716addaadd11c4a6e8d726a53c5",
-        "status": "published exact bytes and statement verified; separate kernel/witness adoption pending",
+        "status": "published exact bytes/signature and local control kernel/axiom guards verified under matching master cache; broader joint-witness adoption remains separate",
         "signature": "theorem signed_acceptance :\n    (compileVal 1 (Frag.init _) (signedExpression C .bitAnd)).isSome = true",
         "source_commit": "abf726ff80b52c1e4bfd6e95dcea64cef1ee2830",
         "reported_source_axioms": [
           "propext",
           "Quot.sound"
         ],
-        "reported_axioms_are_local_kernel_validation": false
+        "reported_axioms_are_local_kernel_validation": true
       },
       "local_observation": {
         "master": "f5038bc02bc52ea08f5a3cec7de292aef424e7c8",
@@ -51,9 +51,9 @@
         "selected_witness_credit_transferred": 0,
         "checkpoint_selected": 489,
         "checkpoint_open": 770,
-        "positive_adoption_status": "Exact authorized replacement identified; no frozen-row rename, re-proof or credit transfer. Live kernel/witness validation remains separate."
+        "positive_adoption_status": "Exact delivery and local control kernel/axiom validation resolved; no frozen-row rename or credit transfer."
       },
-      "remaining_obligation": "Kernel/axiom and joint-witness validation of signed_acceptance under a matching updated Layout/SimLemmas/Bitwise.Selected import closure; retain frozen historical registration/assertions and failures unchanged.",
+      "remaining_obligation": "Separate joint-witness and broader production adoption of the authorized acceptance; retain frozen historical registration/assertions and failures. Full affected validation and paired timings remain open.",
       "local_observation_history": [
         {
           "master": "a8f684928fa085d8976ead33e3d0db30208e7a4f",
@@ -74,7 +74,34 @@
           "Solidity/Evm/SimLemmas.lean",
           "Solidity/Backend/PrimitivePackets/Bitwise/Selected.lean"
         ],
-        "fresh_live_closure_validation": "pending; do not validate new theorem against stale cached signed-refusal imports"
+        "fresh_live_closure_validation": "Original control file and axiom guards passed matching master cache; full affected and broader joint coverage remain open."
+      },
+      "local_control_validation": {
+        "cache_head": "3da1da5b1e0b2417e92d1e9c6763e2b730f8f648",
+        "source_master": "f5038bc02bc52ea08f5a3cec7de292aef424e7c8",
+        "toolchain": "leanprover/lean4:v4.24.0",
+        "result": {
+          "command": [
+            "/lean/bin/lake",
+            "-f",
+            "/evidence/matched-master-cache-20261107/lakefile-ram.toml",
+            "--no-build",
+            "lean",
+            "Solidity/Backend/Passes/BitwiseValueContextControls.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "exit": 0,
+          "resource_stop": null,
+          "seconds": 3.01,
+          "peak_parent_memory": 10296020992,
+          "min_parent_headroom": 6883848192,
+          "container_memory_limit": 12884901888,
+          "container_memory_swap_limit": 12884901888,
+          "cache": "/dev/shm/vy3-master-cache-76jqm_3v/cache"
+        },
+        "evidence": "/workspace/vy3-evidence/matched-master-cache-20261107/matched-signed-restored.log",
+        "scope": "Original control file and its axiom guards only; no full affected gate or new frozen witness credit."
       }
     }
   ]

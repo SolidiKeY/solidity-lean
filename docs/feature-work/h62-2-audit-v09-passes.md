@@ -1434,3 +1434,24 @@ validation must use their matching updated import closure. Source-reported axiom
 pins alone are not local kernel validation. Frozen coverage538/1259,721open is
 unchanged. Exact-byte delivery wait is resolved; semantic/kernel adoption remains
 pending. Evidence: `/workspace/vy3-evidence/signed-bitwise-transition-reconciliation-20261107`.
+
+
+Matching master artifact closure follow-up: the coordinator identified qualified-units
+commit 912456d61 and the published lake-cache release as the UnsignedCast closure.
+The repository cache fetcher verified and restored that release in a private RAM
+staging directory, using hard links to avoid a second artifact copy. Lean 4.24
+serial checks passed KeySort (2.41s), the unchanged UnsignedCast controls (2.61s),
+and the original signed-bitwise controls including their axiom guards (3.01s).
+The cache identifies head 3da1da5b1e; checked source master was f5038bc02.
+Initial missing-artifact, permission and resource-stopped probes remain raw
+evidence and receive no passing credit. Generated native C was retained with
+verified hashes in RAM and original-path symlinks to preserve disk headroom;
+its relocation manifest is included in the evidence directory.
+This resolves the local UnsignedCast closure ticket and signed-acceptance control
+validation wait, without changing source or frozen historical accounting.
+Broader acceptance joint coverage, native production, full affected checks and
+paired timings remain open. Coverage stays 538/1259 selected, 721 open.
+The unrelated RelatedMemoryCapture/Source.SemanticsExamples STOP remains in force.
+Evidence: `/workspace/vy3-evidence/matched-master-cache-20261107`; comparison,
+ticket resolution, raw logs, resource records and native-C relocation hashes
+are retained there. The RAM artifacts are VM-local and are not portable Git data.
