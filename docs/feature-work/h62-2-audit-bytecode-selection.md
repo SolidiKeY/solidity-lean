@@ -2330,3 +2330,40 @@ file inventories and before/after free bytes; free space was restored above
 original source/census, supported-success, Source/physical, gas/fork, full
 runtime/Bridge and performance obligations remain open; H126 support-only
 WordValidation treatment is unchanged.
+
+### Deduplicated hypothesis-report accounting
+
+The existing metadata graph now accepts explicit report pointers with exact
+observed-type snapshots and receipt fingerprints. It preserves every source
+candidate and kernel record, earlier unsupported attempts beside later successful
+reports, unreported constants/fields/theorems, private names and uninstantiated
+parent metadata. Repeated successful reports count once per kernel target.
+Requested helper names do not assert that declarations exist, especially for
+unsupported attempts. The pure join validates metadata shape and association;
+it does not independently validate native proofs or grant source coverage.
+
+A replay bound to four existing sealed artifacts joins 1,374 reports to 3,262
+metadata records. It records 528 distinct targets with supplied successful
+reports, 518 with unsupported-only reports, and 2,216 with no report. The latter
+are 1,281 constants, 130 fields and 805 theorems; they are not silently omitted
+or classified as failed proof attempts. These are prefix report-accounting
+counts, not global witness-ledger or completed-census totals. Manual evidence
+outside these four artifacts is not classified by this index.
+
+The full 1,660 frozen lexical candidates remain in the source-position table.
+Their position joins retain exact signature hashes; 150 modules have supplied
+inspection metadata, while 40 core and 37 Bridge modules remain uninspected.
+Source identity/correspondence, inherited instantiation, global-versus-input
+premise roles and all acceptance flags remain open. Source-position matches and
+native-report pointers establish no additional theorem or full-source closure.
+
+Evidence is under
+/workspace/parallel-20261103/executable-bytecode/hypothesis-report-accounting/.
+The non-mutating replay pins parent metadata, the frozen census, four seal hashes
+and relevant native source/output/log/guard receipts. It reruns no Lean workload
+and mutates no earlier seal. Independent finder and skeptic found a Boolean/int
+snapshot-equality issue: Python treats True and 1 as equal. Canonical JSON
+comparison now rejects those substitutions; regression cases cover private and
+proof-type flags. Both reviewers pass the correction and final provenance join.
+All original 703-source, source/statement/owner, joint-witness/supported-success,
+Source/physical, gas/fork, Bridge/runtime and performance obligations remain.
