@@ -59,3 +59,7 @@ The 89 pipeline rows are disjoint from the prior 102 unsigned and 71 signed Cont
 ## SignedMod Source
 
 `signed_mod_source_ledger.py` records all 12 literal headers in SignedMod/Source.lean, pinned to the assigned base bytes. They include the signed type/range and remainder bound; arbitrary checked-flag Source nonzero and zero-divisor outcomes; local reads with fuel+3 and the complete retained Source state; sign identities; and the pure minimum remainder -1 equality. The latter is not an execution theorem. The observations do not assert target payloads, unlisted cases or Lean validation. With this ledger, 274 of 465 enumerated literal headers have manual per-declaration observations; 191 remain unclassified. This is still not full semantic or dependency closure.
+
+## SignedMod Selection
+
+The base-byte-pinned `signed_mod_selection_ledger.py` adds ten literal declarations: public selection, operator-level nonzero/zero results, representation uniqueness, combined Source and selected execution, and separate symbolic success, zero-revert and origin success. The combined numeric theorem requires the stated finite-word saved stack and both capacity hypotheses; symbolic success and zero-revert quantify a separate arbitrary EVM-word tail. This is manual textual accounting, not Lean validation or a target panic-payload claim. Together the ledgers account for 284 of 465 literal headers; 181 remain.

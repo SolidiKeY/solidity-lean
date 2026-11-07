@@ -85,3 +85,7 @@ Independent read-only finder and skeptic reviewed the structured MCP output and 
 ## SignedMod Source continuation
 
 The base-byte-pinned `signed_mod_source_ledger.py` adds 12 manually reviewed Source observations, bringing detailed textual accounting to 274 of 465 literal headers; 191 remain. This Source-only ledger does not prove Lean statements, target payloads or semantic closure. `test_signed_mod_source_ledger.py` checks valid output and rejects missing, duplicate and forged census headers and changed source bytes even when the census digest is refreshed. Independent read-only finder and skeptic matched all observations to the original declarations without Lean; the skeptic requested the negative controls, which were added. Generated JSON remains off Git.
+
+## SignedMod Selection continuation
+
+`signed_mod_selection_ledger.py` accounts for ten base-pinned Selection declarations; its tests reject missing, duplicate and forged headers and changed Source bytes. Independent read-only finder and skeptic reviews identified numeric SMOD wording and the distinction between finite-word numeric saved stacks and arbitrary symbolic tails; those descriptions were corrected and rechecked without Lean. The ledger does not prove Lean statements or full semantic closure. See `tests/h62/item1/packet-panic/CASE-ACCOUNTING.md`.
