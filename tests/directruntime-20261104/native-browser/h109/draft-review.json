@@ -1,0 +1,186 @@
+{
+  "guardedRegression": "Rejected H109 drafts must not be counted as authenticated serial timing or conclusive cleanup.",
+  "intake": [
+    {
+      "path": "/workspace/h62-coordinator-inputs/router-20261107T125818Z/h109-native-intake.tar.gz",
+      "bytes": 62196,
+      "sha256": "79733a72d7f74efb7348bf3f96d0fde9801929eafcb0be279cb4a73266f8a49a",
+      "memberEntries": 12,
+      "uniqueRegularPayloads": 12,
+      "embeddedChecksumsVerified": 11,
+      "strictRegularUniqueArchiveAccepted": true,
+      "exceptions": [],
+      "inspection": "In-memory text/JSON only; no extraction, import, installation or execution."
+    },
+    {
+      "path": "/workspace/h127-intake/h109-intake.tgz",
+      "bytes": 3412910,
+      "sha256": "49d6a22ef0f8e9d12e9b203c06fb1efce503a321bc3da49dda127d1897a93580",
+      "memberEntries": 49,
+      "uniqueRegularPayloads": 48,
+      "embeddedChecksumsVerified": 0,
+      "strictRegularUniqueArchiveAccepted": false,
+      "exceptions": [
+        {
+          "name": "h109-prepare-deps-unreviewed.py",
+          "type": "1",
+          "target": "h109-prepare-deps-unreviewed.py",
+          "reason": "Non-regular/duplicate entries are not installed or used as executable input."
+        }
+      ],
+      "inspection": "In-memory text/JSON only; no extraction, import, installation or execution."
+    }
+  ],
+  "latestProducerHead": "b3fb97985860dc154e377a959f6c1d9778be8cf9",
+  "latestProducerStatus": "partial",
+  "producerWaits": [
+    {
+      "lane": "native-browser",
+      "item": "Authenticated serial H109 runner remediation; provide five-module A/B evidence when requested"
+    },
+    {
+      "lane": "module-times",
+      "item": "Full-inventory source, resource and measurement provenance"
+    },
+    {
+      "lane": "module-times",
+      "item": "H109 five-module A/B evidence and coordinator quiet window for pin relocation"
+    },
+    {
+      "lane": "timing-tools",
+      "item": "Exact historical Git object 28900209b0e221f9e20e07e06921a79527ca4d18; no reconstruction accepted"
+    }
+  ],
+  "ownReview": "Native-browser reviewed exact draft text; these are thislane source findings, not separate historical review artifacts. Neither draft executed/imported.",
+  "draftPins": {
+    "h109-ab-runner-unreviewed.py": "68a6305e0d103e900245c5035ce780fdc49f5bf9c7c9d95bc66c9e38bce3cfb3",
+    "h109-prepare-deps-unreviewed.py": "a3f9580b537227b981fd1c57a0da2e0d992d75a930a733739db7d200719d30b8"
+  },
+  "findings": [
+    {
+      "id": "R1",
+      "title": "Incomplete tree/cache/toolchain binding",
+      "sourceAnchors": [
+        {
+          "file": "h109-prepare-deps-unreviewed.py",
+          "line": 45
+        }
+      ],
+      "problem": "Only selectedsource/config/lean/lake hashes; fullsource/cache/packages/libraries/headers and changes unbound.",
+      "requiredRepair": "Complete immutable input manifests and before/after drift checks.",
+      "status": "Open real-runner obligation; prototypes/inventories alone do not discharge it."
+    },
+    {
+      "id": "R2",
+      "title": "Dependency scheduler not serial",
+      "sourceAnchors": [
+        {
+          "file": "h109-ab-runner-unreviewed.py",
+          "line": 57
+        },
+        {
+          "file": "h109-prepare-deps-unreviewed.py",
+          "line": 57
+        }
+      ],
+      "problem": "Lake :deps build lacks scheduler-j1; weakLeanArgs or leaf -j1 doesnot constrain concurrent dependency jobs.",
+      "requiredRepair": "Fixed trusted recipe with scheduler and Lean -j1; no arbitrary argv.",
+      "status": "Open real-runner obligation; prototypes/inventories alone do not discharge it."
+    },
+    {
+      "id": "R3",
+      "title": "Timer precision/channel",
+      "sourceAnchors": [
+        {
+          "file": "h109-ab-runner-unreviewed.py",
+          "line": 69
+        }
+      ],
+      "problem": "Rounded time %e parsed from shared log is not nanosecond clock provenance.",
+      "requiredRepair": "Dedicated structured ns measurement channel and independent deadline/clock checks.",
+      "status": "Open real-runner obligation; prototypes/inventories alone do not discharge it."
+    },
+    {
+      "id": "R4",
+      "title": "Whole-job RSS gap",
+      "sourceAnchors": [
+        {
+          "file": "h109-ab-runner-unreviewed.py",
+          "line": 98
+        }
+      ],
+      "problem": "time %M is not total overlapping job RSS.",
+      "requiredRepair": "Separate kernelwhole-cgroup memory from wait4/process/sampleRSS; no exact RSS inference.",
+      "status": "Open real-runner obligation; prototypes/inventories alone do not discharge it."
+    },
+    {
+      "id": "R5",
+      "title": "Effective CPU/resources unbound",
+      "sourceAnchors": [
+        {
+          "file": "h109-ab-runner-unreviewed.py",
+          "line": 62
+        },
+        {
+          "file": "h109-prepare-deps-unreviewed.py",
+          "line": 51
+        }
+      ],
+      "problem": "Docker flags are not authenticated effective nested CPU/memory/swap state.",
+      "requiredRepair": "Bindhost/containercgroup paths and kernelreadings includingancestors, image/tool identities.",
+      "status": "Open real-runner obligation; prototypes/inventories alone do not discharge it."
+    },
+    {
+      "id": "R6",
+      "title": "Interrupted create/cleanup leak",
+      "sourceAnchors": [
+        {
+          "file": "h109-ab-runner-unreviewed.py",
+          "line": 70
+        },
+        {
+          "file": "h109-prepare-deps-unreviewed.py",
+          "line": 58
+        }
+      ],
+      "problem": "Createoutside try; firstdraft watchalsooutside try. Unknownsuccessfulcreate and suppressedcleanup errors can leak worker.",
+      "requiredRepair": "Persistownedname beforecreate, signals first, ownershiprecovery, wholecontainer kill/drain and persistent barrier before nextjob.",
+      "status": "Open real-runner obligation; prototypes/inventories alone do not discharge it."
+    },
+    {
+      "id": "R7",
+      "title": "Evidence/path failure gaps",
+      "sourceAnchors": [
+        {
+          "file": "h109-ab-runner-unreviewed.py",
+          "line": 100
+        },
+        {
+          "file": "h109-prepare-deps-unreviewed.py",
+          "line": 73
+        }
+      ],
+      "problem": "Exists+write races and pre-recording errors lose evidence; mixedstderr notcomplete measurement channel.",
+      "requiredRepair": "Exclusive newpaths, failurestage journal, complete hashedlogs and atomicsealing.",
+      "status": "Open real-runner obligation; prototypes/inventories alone do not discharge it."
+    },
+    {
+      "id": "R8",
+      "title": "Matched A/B state unresolved",
+      "sourceAnchors": [
+        {
+          "file": "h109-ab-runner-unreviewed.py",
+          "line": 36
+        }
+      ],
+      "problem": "Mutablephase trees/cache andthree repeat labels do not bind identicalinitialconditions; oldnormalization/deps areobservations.",
+      "requiredRepair": "Independentarms pinnedsource/cache/toolchain andmetadata with intendedsource delta; matchedraw distributions before slowdownverdict.",
+      "status": "Open real-runner obligation; prototypes/inventories alone do not discharge it."
+    }
+  ],
+  "budgetScope": "H116 cumulative originalDerived17 only: CI600/localVM300. Separate H55module maximum300; no generalH109600allowance.",
+  "coordAskRef": "coord-q/codex/solidity-directruntime-20261104/native-browser/20261107T130107Z",
+  "staticClassification": "Module-times owned; no takeover.",
+  "quietWindow": "Not requested/approved; exactreviewedpinmapping andrunner gatesnotready.",
+  "archiveInspectionHistory": "Initial strict allregular/unique assertion rejected supplemental49entry archive; its duplicate selfhardlink is recorded above, not silently admitted to production input. Drafts independently verify in the primary12regularmember sealed delivery."
+}

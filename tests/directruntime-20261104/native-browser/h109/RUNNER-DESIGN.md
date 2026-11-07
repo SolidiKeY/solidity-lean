@@ -1,18 +1,22 @@
 # H127 serial slow-example runner: pre-use contract
 
 Status: design and source-plan preparation, **not an executable measurement
-runner or acceptance result**. Latest module-times result and rejected-draft
-bytes are requested in intake-request.json. The available H82 handoff is older.
-Existing repository documentation supplies failure observations, not delivery
-of that latest result. H127 transfers this runner, not the whole H55–H58 lane.
+runner or acceptance result**. The exact module-times intake at b3fb97985860dc154e377a959f6c1d9778be8cf9
+has now arrived in the hash-pinned coordinator archive. It includes both
+rejected drafts, their findings, latest result/waits and scope-binding scripts.
+The drafts are historical inputs and are not executed. The older H82 handoff
+is superseded for intake. H127 transfers this runner, not the whole H55–H58 lane.
 
 H109 already has a non-default SoliditySlowExamples library containing fourteen
 modules: DecisionGaps and its eleven example importers, OpenLoops and RevertData.
 The current generated roots and statements stay unchanged. Every module is
 re-elaborated serially; cache admission or a cached root build cannot replace
 these checks. CI and lane-end/full validation keep the slow root. Ordinary
-checkpoint selection keeps its current exclusion. Pending the exact H116 scope in the latest handoff, this candidate uses a conservative 600-second
-runner deadline here (one total deadline, not 600 multiplied by fourteen); it changes no theorem heartbeat or other module budget.
+checkpoint selection keeps its current exclusion. The authenticated H116 intake limits 600 seconds to the cumulative original
+Derived17 replay in CI (300 seconds on VM/local). It grants no general H109
+600-second allowance. The separate H55 module-time maximum stays 300 seconds
+for each measurement invocation in either context. No proof heartbeat or other
+module budget changes. The earlier provisional general-600 plan is superseded.
 No unchanged stopped timing workload is authorized by this plan.
 
 ## Execution and trust boundary
@@ -22,7 +26,8 @@ receipt verifier. A plan cannot execute arbitrary argv. The only execution
 recipe is the repository per-file gate with a reviewed Lake shim enforcing
 `-j1` and `LEAN_NUM_THREADS=1`, followed by the slow-library/root and existing
 required audit checks. Inspect the gate's current timeout before integration:
-a hidden 300-second wrapper cannot silently negate the candidate 600 seconds.
+keep the existing 300-second per-module maximum; do not substitute the unrelated
+Derived17 CI calibration.
 Dependency preparation is a separately timed stage, never part of a fake
 cached-verdict pass. Direct re-elaboration of each selected file is required.
 
@@ -43,10 +48,19 @@ read-only with the source. The preparer's descriptor-relative no-follow regular
 file reads reject symlink ancestors/FIFOs/devices and bound reads by blob size;
 this is still a non-atomic live observation, not a substitute for snapshot proof.
 
+input-inventory.py supplies a full-tree content/metadata observation primitive
+for source/cache/toolchain/package roots. It records xattrs, modes, ownership,
+mtime and content, with device/inode/ctime separately. It refuses special files
+and escaping/dangling links; atime and physical/page-cache equality are not
+claimed. Verification CLI requires an external exact receipt SHA256. This is
+not yet immutable snapshot creation, atomic observation, a copy-provenance
+proof or a production runner: those obligations remain open.
+
 Pin every Lake dependency/package tree and lake-manifest.json, including ignored
 .lake/packages inputs, with exact source and resolved package identities. Reject
 unlisted dependencies or packages not present in the sealed input inventory;
-no network resolution during checking. Pin the Docker image by immutable digest, full Lean toolchain tree (binaries,
+no network resolution during checking. Construct a minimal pinned environment rather than inherit LEAN_PATH, Lake or
+Git configuration from the caller. Pin the Docker image by immutable digest, full Lean toolchain tree (binaries,
 libraries and headers), version output/commit, Lake config, scripts and input
 cache tree. Keep toolchain/source mounts read-only. Use a private cache with
 recorded initial/final content and metadata; changed artifacts are outputs,
@@ -69,7 +83,7 @@ trusted recipe and `-j1`; kernel/process observations are corroboration only.
 ## Lifecycle and measurement
 
 States are prepared, created, kernel-verified, running, stopped, drained and
-sealed. Only a drained, verified zero-exit module within the remaining runner budget is a pass.
+sealed. Only a drained, verified zero-exit module within its existing 300-second measurement budget is a pass.
 Every failure records its stage; missing data is unknown/fail, never zero time.
 
 Reserve an unguessable run name and ownership label before container creation.
@@ -80,7 +94,7 @@ failure, OOM or reserve breach initiates whole-container kill/removal, including
 setsid/double-fork descendants. Waiting for the launcher or killing its process
 group is insufficient. Confirm the owned cgroup is empty/removed and reconcile
 the Docker identity before declaring cleanup complete. Failure to establish
-cleanup is a failed run that blocks the next module. The 600-second acceptance
+cleanup is a failed run that blocks the next module. The 300-second measurement
 deadline stops new work and triggers termination; cleanup continues beyond it
 until emptiness is established, but all excess time is recorded and cannot be
 counted as a passing run or a renewed deadline. A separate cleanup watchdog
@@ -90,11 +104,14 @@ pre-existing or foreign containers. Never start a second worker speculatively.
 
 Use monotonic_ns plus CLOCK_BOOTTIME for sub-second elapsed measurement and
 detect disagreement/suspension. Start timing before the measured command;
-enforce one total 600-second runner deadline independently of exits, covering
-all worker/dependency/check/cleanup stages, with no reset between modules.
+enforce the 300-second module-measurement deadline independently of exits.
+Each dependency preparation/check invocation has its own identified stage;
+separate stage times may not be combined into a fictitious within-budget check.
+Only the existing Derived17 replay receives H116's cumulative CI600/local300
+policy, with its original workload denominator and CI provenance.
 Source/toolchain preparation before that invocation is recorded separately and
-runs no Lean. Obtain the original H116 granularity from the requested handoff;
-if it authorizes a different policy, review that explicit policy before use. Report setup,
+runs no Lean. The exact delivered H116 scope above supersedes the earlier
+provisional interpretation. Report setup,
 dependency preparation, check and cleanup separately. Record exact command,
 exit/signal, compiler provenance, per-file logs and hashes; post-verify source,
 toolchain and input identities before sealing an exclusive new output path.
