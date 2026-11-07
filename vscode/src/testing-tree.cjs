@@ -12,6 +12,7 @@ function currentSymbols(symbols,text){
  return symbols.every(symbol=>valid(symbol))?structuredClone(symbols):null;
 }
 function install(vscode,controller,metadata){
+ const obligationTag=vscode.TestTag?new vscode.TestTag('solidityLean.discoveredObligation'):null;
  const key=uri=>uri.toString(),toRange=range=>new vscode.Range(range.start.line,range.start.character,range.end.line,range.end.character);
  const descendants=item=>[item,...items(item.children).flatMap(descendants)];
  function leaves(uri){const file=controller.items.get(key(uri));return file?descendants(file).filter(item=>metadata.get(item.id)?.row):null;}
@@ -23,7 +24,7 @@ function install(vscode,controller,metadata){
  function clear(uri){const file=controller.items.get(key(uri));if(file)for(const item of descendants(file))metadata.delete(item.id);controller.items.delete(key(uri));}
  function render(doc,report,symbols){
   const fileId=key(doc.uri),oldFile=controller.items.get(fileId),old=new Map(oldFile?descendants(oldFile).map(item=>[item.id,item]):[]),used=new Set(),children=new Map();
-  function item(id,label,parent,range,description,row){const value=old.get(id)||controller.createTestItem(id,label,doc.uri);value.label=label;value.range=range?toRange(range):undefined;value.description=description;used.add(id);children.set(id,[]);metadata.set(id,{item:value,parent,uri:doc.uri,...(row?{row}:{})});if(parent)children.get(parent).push(value);return value;}
+  function item(id,label,parent,range,description,row){const value=old.get(id)||controller.createTestItem(id,label,doc.uri);value.label=label;value.range=range?toRange(range):undefined;value.description=description;value.tags=row&&obligationTag?[obligationTag]:[];used.add(id);children.set(id,[]);metadata.set(id,{item:value,parent,uri:doc.uri,...(row?{row}:{})});if(parent)children.get(parent).push(value);return value;}
   const file=item(fileId,vscode.workspace.asRelativePath(doc.uri),null);controller.items.add(file);
   const paths=[];function visit(nodes,parents=[]){for(const node of nodes){const path=[...parents,node];paths.push(path);visit(node.children,path);}}if(symbols)visit(symbols);
   const grouped=new Map();
@@ -41,6 +42,11 @@ function install(vscode,controller,metadata){
   for(const id of old.keys())if(!used.has(id))metadata.delete(id);
   return file;
  }
- return{render,clear,leaves,live,excluded};
+ function renderCompiler(doc,symbols){
+  const valid=currentSymbols(symbols,doc.getText());if(!valid)return false;clear(doc.uri);const file=controller.createTestItem(key(doc.uri),vscode.workspace.asRelativePath(doc.uri),doc.uri);file.description='Current compiler declarations; no verification outcomes';controller.items.add(file);metadata.set(file.id,{item:file,parent:null,uri:doc.uri,compilerOnly:true});
+  function visit(nodes,parent,path=[]){for(const symbol of nodes){if(![5,12].includes(symbol.kind))continue;const trail=[...path,[symbol.name,symbol.kind,symbol.selectionRange]],id=key(doc.uri)+'#compiler:'+JSON.stringify(trail),item=controller.createTestItem(id,symbol.name,doc.uri);item.range=toRange(symbol.selectionRange);item.description='Current compiler declaration; verification obligation not discovered';item.tags=[];parent.children.add(item);metadata.set(id,{item,parent:parent.id,uri:doc.uri,compilerOnly:true});visit(symbol.children,item,trail);}}
+  visit(valid,file);return true;
+ }
+ return{render,renderCompiler,obligationTag,clear,leaves,live,excluded};
 }
 module.exports={install,currentSymbols,rowId,items};
