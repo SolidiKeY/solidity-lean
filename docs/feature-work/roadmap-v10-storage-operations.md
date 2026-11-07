@@ -952,3 +952,17 @@ signatures, caller storage aliases, no second payment and all four existing
 native observations must be preserved; those observations are requirements,
 not a Source adequacy proof. No toy/model substitution, profile narrowing,
 frozen weakening or Source single-writer violation is authorized by this intake.
+
+At post-adoption source8e7f0883c83d15862f3e42e1f961ff788e65cc6d, fresh checks
+pass the model's3guards in1.81s/639221760bytes aggregate RSS and the audit's
+59guards in3.65s/726745088bytes, no resource stops. Actual Lean4.24.0/Lake versions
+and KeySort prerequisite pass. The audit source-specific pin records this
+new receipt; earlier receipts and complete markers remain historical.
+
+Static trust passes6635sources/289sites/0findings; registration/layers pass
+6618reachable/0orphans/0newforbiddenedges. Strict pins remain FAIL:16782pins,
+0errors,192unrecorded,0baselined; shared inventories are not rewritten. Exact
+raw strict docs at8e7f0883c83d15862f3e42e1f961ff788e65cc6d retain1missing/139ambiguous,
+identical to published3a5b9de412b84a13777b6fbf8c8f310e10b3448e (0new/0removed).
+Frozen comparison remains FAIL137new/9removed. No raw failure or historical
+timing STOP is waived. Entire original/consolidated queues remain incomplete.
