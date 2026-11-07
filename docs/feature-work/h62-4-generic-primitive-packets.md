@@ -762,3 +762,25 @@ The final four-law kernel check passes in 1.376 seconds, sampled workload peak
 849148 KiB, with existing standard axioms. Independent read-only finder/skeptic
 confirmed the final proof-only change and found no defect; neither used Lean,
 server or builds. Full C4/H68, fidelity drift and timing STOPs remain open.
+
+### Populated relational comparison correspondence
+
+`ComparisonCorrespondence.lean` adds four laws covering every signed and
+unsigned 256-bit operand pair for all four relational orders. Two actual local
+words extend the published populated aliasing heap; a full StateRepr is
+constructed. The joint law derives independent Source evaluation, public
+compiler selection, canonical Boolean execution and the exact physical
+post-representation. Source globals/frame/state/older local tails and every
+saved target stack remain general. Reject-all and fuel-zero controls retain
+distinct outcomes. Original controls/census and unresolved frozen-file fidelity
+findings remain unchanged; no arbitrary heap/world/session/gas adequacy follows.
+
+The first check found a free-signedness capacity `decide` goal and a rewrite
+hidden behind the new code abbreviation. MCP confirmed both errors; the tactic
+helper checked generic capacity reduction. Explicit numeric capacity goals and
+unfolding only the abbreviation fixed the proof without changing statements,
+definitions, premises or budgets. The final four-law check passes in 1.375
+seconds, sampled workload peak 828948 KiB, with existing standard axioms.
+Independent read-only finder/skeptic confirmed the final changes and found no
+defect; neither used Lean/server/build/edit. Full C4/H68, original fidelity drift
+and prior timing STOPs remain open.
