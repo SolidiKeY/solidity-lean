@@ -1006,3 +1006,18 @@ A tiny TERM-ignoring detached-process regression passes; the former cleanup
 fails its bound, and an injected fixture error still leaves no owned descendants.
 This repairs cleanup latency, not the rebinding proof's memory use. Original
 global failures, exact-byte fidelity debt and performance STOPs remain open.
+
+
+Rebinding resource isolation after master 3c2734000: the input-only fragment
+checks in 0.855 seconds (805352 KiB sampled workload RSS). The first agreement
+theorem alone stops at the unchanged whole-VM guard after 44.571 seconds;
+explicit input/call unfolding also stops after 18.939 seconds. These are
+reduced diagnostics, not a rerun of the full draft or a passing simulation.
+Restricted-transparency variants produce prompt context-conversion errors.
+Local reducibility annotations were rejected and no unsafe override was used.
+This localizes the unfinished elaboration to the first theorem's application
+rather than input construction alone; it does not prove the root cause.
+Exact sources, errors and resource receipts remain off Git under
+/workspace/mrs-h121-rebind-isolation, covered by SHA256SUMS. The candidate stays
+parked and unregistered; all original global failures and performance STOPs
+remain open. No production P1/G42.04 completion is claimed.
