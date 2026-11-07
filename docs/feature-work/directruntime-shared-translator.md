@@ -1120,3 +1120,58 @@ archive. Independent read-only finder/skeptic found no confirmed proof or
 normalization defect; neither used Lean/server/builds or writes. Original H90
 forms/importer migration, inherited queues, absent address runtime payloads,
 environment qualification and all stack/native/browser holds remain open.
+
+
+### Portable decoder validation inputs
+
+The active `environment-decoder-validate.sh` now preflights 185 exact data files
+before Lean runs: 73 tracked files remain read-only and 112 untracked inputs
+are confined to this lane's artifact directory. `validation-inputs-manifest.json`
+records relative paths, sizes, hashes and required Git objects. The input
+archive is off Git under H44, 1,571,832 bytes, SHA256
+`fde3beea1c7d20ec0af848db05907d3ff66d9f0b2cb3254dbc17f2ee293aad95`.
+Its data pins derive from existing committed manifests and authenticated
+archives at pre-work16c7ecb40198. Repeat capture produced identical bytes.
+
+```bash
+python3 tests/directruntime-20261104/shared-translator/validation-inputs.py
+python3 tests/directruntime-20261104/shared-translator/validation-inputs.py --restore /path/to/validation-inputs-fde3beea1c7d20ec.tar.gz
+bash tests/directruntime-20261104/shared-translator/bounded.sh bash tests/directruntime-20261104/shared-translator/environment-decoder-validate.sh
+```
+
+Preflight reports all missing/changed files and missing Git objects. Restoration
+authenticates the whole archive and exact member set before writing, accepts
+only missing untracked owned artifact data, and rejects changed existing files,
+missing tracked fixtures, path escapes and symlinks. It never replaces CR's
+tracked fixtures or silently updates their pins. Git history, Lean/Lake and
+managed dependency setup remain separate prerequisites; no executable cache
+is included. Unavailable bulk is a delivery dependency, not successful validation.
+
+The proof baseline is an explicit immutable Git constant instead of a VM-only
+`base-head.txt`. All nine requested builds, six per-file checks and census,
+profile and static verifiers remain. Replay no longer runs the authoring
+`--capture-manifest` operation, so expected committed census pins stay frozen.
+No statement, premise, exclusion, axiom, gate check or resource budget changes.
+This inventory covers the active decoder runner; historical runners retain
+their own versioned checkpoint contracts.
+
+Six external controls cover missing/idempotent restoration, changed tracked
+and existing data, damaged or extra-member archives, per-member tampering,
+unsafe paths/symlinks, tracked reclassification and missing tracked inputs.
+A synthetic data tree copied 73 read-only files and restored all 112 archived
+files; every one of the 185 hashes matched. This establishes data integrity,
+not clean-VM/toolchain, source/compiler or runtime acceptance.
+
+Published master80c156bf13d1 arrived during this work and was fast-forwarded
+without discarding it. The full decoder gate and inherited five-fixture-proof
+gate passed together in 27.1722 seconds, child maximum RSS1,266,512KiB, cgroup
+peak220,766,208bytes and minimum outer available11,132,612,608bytes. Actual
+Lean4.24.0/Lake5.0.0-src+797c613 and serial12GiB/no-swap/threads1/-j1 are unchanged.
+These are checking measurements, not matched performance acceptance or release
+of existing runtime timing STOPs. No production Lean or proof changed.
+
+`portable-validation-manifest.json` records the evidence and input archive pins.
+Both archives remain off Git under H44. Read-only finder/skeptic found no
+confirmed restore-scope or freeze-boundary defect; neither used Lean/server,
+builds or writes. Original H90/importer, inherited extraction, binary-courier
+and native/browser obligations remain open.

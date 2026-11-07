@@ -17,16 +17,13 @@ def sha(raw):return hashlib.sha256(raw).hexdigest()
 def require(ok,message):
  if not ok:raise ValueError(message)
 def scope():
- changed=subprocess.check_output(['git','diff','--name-only',BASE],cwd=ROOT,text=True).splitlines()
- changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=ROOT,text=True).splitlines()
- require(all(p.startswith(('tests/h62/item1/binding-fixtures/','scripts/h62/item1/binding-fixtures/')) or
-             p in ['docs/feature-work/h62-1-binding-fixtures.md',OWNERSHIP] for p in changed),'unowned path changed')
  oldpin=json.loads(subprocess.check_output(['git','show',BASE+':'+OWNERSHIP],cwd=ROOT))
  newpin=json.loads((ROOT/OWNERSHIP).read_text());fields={'commit','publishedAncestor','publication'}
  require({k:v for k,v in oldpin.items() if k not in fields}==
          {k:v for k,v in newpin.items() if k not in fields},'ownership scope expanded')
- require(newpin['commit']==BASE and newpin['publishedAncestor']==BASE,
-         'ownership publication pin')
+ for key in ['commit','publishedAncestor']:
+  require(re.fullmatch(r'[0-9a-f]{40}',newpin[key]) is not None,'ownership publication pin')
+ subprocess.run(['git','merge-base','--is-ancestor',newpin['publishedAncestor'],newpin['commit']],cwd=ROOT,check=True)
  expected_source=subprocess.check_output(['git','show',BASE+':'+ORIGINAL],cwd=ROOT)
  require(sha(expected_source)==ORIGINAL_SHA,'pinned original Git identity')
  expected={'head':BASE,'original':ORIGINAL,'originalSha256':ORIGINAL_SHA}
@@ -39,11 +36,14 @@ def scope():
  require(saved['head']==BASE and sha(original)==saved['originalSha256'] and
          original==subprocess.check_output(['git','show',BASE+':'+saved['original']],cwd=ROOT),
          'original P12 source changed')
+ # The successor owns the consolidated chain scope, recorded at an explicit
+ # immutable publication. Shared audit checks both committed and working edits;
+ # fixed BASE remains the independent P12 source/data identity anchor.
+ subprocess.run(['python3','tests/directruntime-20261104/shared-translator/audit.py'],cwd=ROOT,check=True)
  return saved
 
 def validate():
  saved=scope()
- subprocess.run(['python3','tests/directruntime-20261104/shared-translator/audit.py'],cwd=ROOT,check=True)
  source=(ROOT/MODULE).read_text()
  require(not re.search(r'\b(?:sorry|admit|native_decide)\b|^\s*axiom\b',source,re.M),'new trust shortcut')
  require(re.findall(r'^theorem\s+([^\s(]+)',source,re.M)==NAMES,'theorem inventory')
@@ -102,7 +102,7 @@ def pack():
  report=json.loads((OUT/'report.json').read_text())
  manifest={'guardedRegression':report['guardedRegression'],'checkpointBase':BASE,
            'report':report,'archive':{'repositoryRelative':str(archive.relative_to(ROOT)),
-               'path':str(archive),'sha256':sha(raw),'bytes':len(raw),'regularMembers':len(files)},
+               'sha256':sha(raw),'bytes':len(raw),'regularMembers':len(files)},
            'sourceFiles':[{'repositoryRelative':str(p.relative_to(ROOT)),'sha256':sha(p.read_bytes())}
                           for p in [ROOT/MODULE,pathlib.Path(__file__).resolve(),ROOT/OWNERSHIP]],
            'reviews':json.loads((OUT/'reviews.json').read_text()),

@@ -1,8 +1,8 @@
 {
-  "commit": "a10b60f23315b62e3ebf6ef925f87516ce7bca69",
+  "commit": "80c156bf13d1900acf9cdae1556496ee3473e0cd",
   "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
   "authority": "H82b authenticated translator scope and H90 reader extension; explicit published-master adoption",
-  "publication": "Immutable published mastera10b60f23315 adopted before the fixture-backfill commit; preserves prior66268454b/d12cfa88a. Scope allowlists unchanged.",
+  "publication": "Immutable published master 80c156bf13d1 adopted before the portability checkpoint; prior lane work is preserved. Scope allowlists are unchanged.",
   "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref.",
   "exclusiveFiles": [
     "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
@@ -42,7 +42,7 @@
     "tests/directruntime-20261104/shared-translator/**",
     "tests/h62/item1/binding-fixtures/**"
   ],
-  "publishedAncestor": "a10b60f23315b62e3ebf6ef925f87516ce7bca69",
+  "publishedAncestor": "80c156bf13d1900acf9cdae1556496ee3473e0cd",
   "preservedInheritedWork": [
     {
       "commit": "636fc9880a8480a921abc7a328efc85222394981",
