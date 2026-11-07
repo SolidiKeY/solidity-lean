@@ -375,3 +375,37 @@ registration/validation obligations remain pending. Exp remains separate.
 Exact commands/results: `evidence/rebase-e684.json`; handoff and checksums:
 `evidence/HANDOFF-rebase-e684.md` and `evidence/SHA256SUMS-rebase-e684`.
 No whole-goal/runtime completion or cache freshness is claimed.
+
+## H70 DEP-BRIDGE-435 environment receipt, 2026-11-06
+
+The external audit-precompiles owner relay at
+`13ae4273bad4123baea9347dfa724ded432dfd57` (not reachable in this checkout)
+requests Bridge dependency evidence. On the unchanged frozen v4.24 setup,
+all 11 installed git packages match the Bridge manifest. The Mathlib Log
+artifact exists. Owned `H70BridgeProbe.lean` imports it, the actual vendored
+precompiles and existing IDENTITY proof; the bounded serial import/elaboration probe
+passes in 4.744s. This proves neither installation in the requester worktree
+nor v4.35 compatibility. Migration, RAW/BLS prerequisites and G43/V14's separate
+compiler-success theorem remain with their respective owners. No frozen
+configuration/interface/vendor/Source edit or re-pin was made.
+Both independent read-only finder/skeptic receipt reviews PASS, no findings.
+Receipt and handoff: `evidence/H70-bridge-receipt.json` and
+`evidence/HANDOFF-H70-bridge.md`; exact command/output:
+`evidence/H70-bridge-probe.log`; checksums: `evidence/SHA256SUMS-H70-bridge`.
+Original whole-lane and validation obligations remain open; no goal reset or
+completion, cache shipment or host relay is claimed.
+
+## H44 reviewable evidence split, 2026-11-06
+
+The five new raw log captures relative to held integration base
+`b7c3cc5110b1ebee1eab45e8b1b9894ecada7237` are no longer tracked. Their original
+absolute VM paths and all bytes remain intact. The logs total495449bytes; the
+archive is30700bytes. Exact paths, individual sizes/hashes and archive location
+are recorded in [H44-bulk-manifest.json](../../Bridge/tests/precompile-agreement/evidence/H44-bulk-manifest.json).
+Only that small manifest is committed for the bulk. Existing Lean declarations,
+proofs, deterministic generators, gates, budgets and small reviewable handoffs
+are unchanged. Restore the archive at repository root when a fresh checkout
+needs saved evidence; no gate is weakened to accommodate missing captures.
+Historical evidence already present at the held base is unchanged. No full
+build, cache shipment, scope expansion or goal transition occurs in this split.
+The41ready core audit cases remain queued under the same original goal.

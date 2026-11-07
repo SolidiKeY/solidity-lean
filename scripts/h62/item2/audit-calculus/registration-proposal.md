@@ -1,9 +1,10 @@
 # Proposed audit registration fragment
 
-Coordinator review artifact only. Current modules remain in the authorized tests directory. Registration or relocation requires the area owner's decision; this inventory does not modify generated roots or central maps. Lean elaborator tooling belongs in a separate audit/tool target that preserves Gate G0, rather than the dependency-free core. All fourteen current paths follow.
+Coordinator review artifact only. Current modules remain in the authorized tests directory. Under H82, statement-preserving placement and registration need no exact-file agreement; this tests-tool inventory changes no generated roots or central maps. Lean elaborator tooling belongs in a separate audit/tool target that preserves Gate G0, rather than the dependency-free core. All fifteen current paths follow.
 
 | Current module path | Role |
 |---|---|
+| `tests/h62/item2/audit-calculus/WitnessAxiomChecks.lean` | Imported fixture theorem/axiom inventory, including private/generated constants and empty-module refusal |
 | `tests/h62/item2/audit-calculus/KernelCensus.lean` | Exact nonreducing joint-premise extraction and textual kernel inventory |
 | `tests/h62/item2/audit-calculus/ChunkCensus.lean` | Bounded textual inventory chunks under unchanged command budgets |
 | `tests/h62/item2/audit-calculus/ExprDagCensus.lean` | Structurally shared exact type inventory for large declarations |

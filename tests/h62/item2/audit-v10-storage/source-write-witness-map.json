@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "3d34a78026ca6e9982fde85737a58f1e5c3ba2cf79f3772e5c79c1853d9d1eb6",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Lowering/StorageOps/SourceWordWrite.lean:19:source_write",
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordWrite.source_write",
+      "signature": "theorem source_write {E : Source.Env} {\u0393 : Source.RCtx}\n    (frame : Source.Fr) (path : Source.SPath) (value : Source.Val E.layout (E.cellTy path))\n    (locals : Source.Locals E.layout \u0393) (state : Source.St E)\n    (writable : frame.static=false) (ordinary : E.transientRoot path=false) :\n    (Source.writeAt frame path value : Source.EM E \u0393 Unit).run (locals,state) =\n      (.ok (), (locals,after frame path value state))",
+      "signature_sha256": "250f9bf8a882f78e7e6f9f741a7379ad02fdfb91b3516af1c1b2dd822e2f2198",
+      "witness": "H62.StorageAudit.SourceWriteWitnesses.source_joint",
+      "status": "kernel-checked raw Source write premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Lowering/StorageOps/SourceWordWrite.lean:38:storeVal_word",
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordWrite.storeVal_word",
+      "signature": "theorem storeVal_word {E : Source.Env} {\u0393 : Source.RCtx} (frame : Source.Fr)\n    (budget : Nat) (\u03c4 : Source.STy) (path : Source.SPath) {\u03c3 : Source.STy}\n    (value : Source.Val E.layout \u03c3) (word : Roadmap.Word) (coherent : value.word=some word) :\n    (Source.storeVal frame (budget+1) \u03c4 path value : Source.EM E \u0393 Unit) =\n      Source.writeAt frame path value",
+      "signature_sha256": "5d1dd323154ec4c282106a352515d7564b292878d3e02d33394bf9e466b3412b",
+      "witness": "H62.StorageAudit.SourceWriteWitnesses.word_joint",
+      "status": "kernel-checked raw Source write premise bundle; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Lowering/StorageOps/SourceWordWrite.lean:54:complete",
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordWrite.complete",
+      "signature": "theorem complete :\n \u2200 (E : Source.Env) (\u0393 : Source.RCtx) (frame : Source.Fr) (path : Source.SPath)\n (value : Source.Val E.layout (E.cellTy path)) (locals : Source.Locals E.layout \u0393) (state : Source.St E)\n (_writable : frame.static=false) (_ordinary : E.transientRoot path=false) (budget : Nat)\n (word : Fin Evm.W) (_coherent : value.word=some word) (machine : Evm.Machine) (slot : Evm.Slot),\n let sourceResult := (Source.storeVal frame (budget+1) (E.cellTy path) path value : Source.EM E \u0393 Unit).run (locals,state)\n let targetResult := {machine with store := Evm.WordStore.write machine.store slot word.val}\n sourceResult=(.ok (), (locals,after frame path value state)) \u2227\n Evm.run (StackWordWrite.code slot) {machine with stack := .val word :: machine.stack}=.ok targetResult 0 \u2227\n ((sourceResult.2.2.ex.world.accounts frame.this).storage.read path).bind Source.Val.word=some word \u2227\n targetResult.store.cells slot=word",
+      "signature_sha256": "7f147cbee716a635ba82b1188f17fbe8d95e0dbc8fe86a7e1baba82410aafc8a",
+      "witness": "H62.StorageAudit.SourceWriteWitnesses.complete_joint",
+      "status": "kernel-checked raw Source write premise bundle; independent fidelity reviews passed"
+    }
+  ],
+  "substitutions": "Existing SourceWordWriteControls env, [] locals context, frame, left path, value=int53, .nil locals, state, budget0 (actual fuel1), word=wmod53, machine and slot.root0. For storeVal_word both sigma and tau are env.cellTy left.",
+  "scope": "Input flags/word observations and dependent value typing only. Published complete is two independent executions sharing a word; no address/lowering/world/compiler preservation inferred."
+}

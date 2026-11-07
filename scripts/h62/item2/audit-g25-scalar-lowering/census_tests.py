@@ -69,6 +69,17 @@ end N
         self.assertEqual(first["signature"], "theorem t (x : Nat) : x = (let y := x; y) ")
         self.assertTrue(second["signature"].endswith("  let z := y\n  z "))
 
+    def test_exact_published_scheduling_change_only(self):
+        old = b"/- doc -/\nnamespace Solidity.Backend.Scalar\ntheorem a : True := trivial\nend Solidity.Backend.Scalar\n"
+        current = old.replace(b"-/\nnamespace", b"-/\n" + census.SCHEDULING_EDIT + b"namespace", 1)
+        self.assertTrue(census.scheduling_only_change(census.SCHEDULING_PATH, old, current))
+        self.assertFalse(census.scheduling_only_change("other.lean", old, current))
+        self.assertFalse(census.scheduling_only_change(census.SCHEDULING_PATH, old, current.replace(b"True", b"False")))
+        self.assertFalse(census.scheduling_only_change(census.SCHEDULING_PATH, old, current.replace(b"async false", b"async true")))
+        a = census.declarations(old.decode(), "fixture")
+        b = census.declarations(current.decode(), "fixture")
+        self.assertEqual([r["signature"] for r in a], [r["signature"] for r in b])
+
     def test_unterminated_comment(self):
         with self.assertRaises(ValueError): census.mask("/-")
 

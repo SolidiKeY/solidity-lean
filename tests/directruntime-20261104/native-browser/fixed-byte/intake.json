@@ -1,0 +1,14 @@
+{
+  "guardedRegression": "OT-H90-FIXED-BYTE-LOCALS exact marker decoder and necessary canonicalreaderwiring",
+  "producerHead": "2738af99661d7ba582c92519b20d47bcba34a5a4",
+  "sourceCommit": "4a66db87c8ed848aef4c2ac1732b1df326c6fa97",
+  "files": {
+    "Translate.lean": "4b87138bc39130fcc0eaf2e6127336fbd0710d8c4520072d3e1be3aaf1493104",
+    "Compose.lean": "ed959b388f3ec3e70d501ac41a5e4720918b551af3b6fdd2710964d611b4680e",
+    "ControlTuple/Adapter.lean": "12abef1db6404447a71cd500f6e0d8d16cc33bd75a5c286e9de4172bb3925ace"
+  },
+  "scope": "Exact Translate plus committed Compose wiring prerequisite;allsharedReader/DirectRuntime source hashes compared toproducerhead,not wholebranch/sourcepreservation. Exact producer ControlTuple.Adapter local scalar callback required; original failed runs retained without oracle edits.",
+  "boxTwin": "Exactly10source-level @custom:key box lines;erasingthem recovers exact producer source bytes. Actual compiler ASTs,not documentationmutation.",
+  "markerControls": "Exactproducerprefix before externalfixture eval;32canonicalspellings,malformed/parameterdecoderrefusals plus generallemma signatures/axioms.",
+  "status": "Initial exact Shared-only intake failed tupleSwap/repeated on native/browser; exact committed adapter prerequisite consumed; fresh amended-source gates pending."
+}

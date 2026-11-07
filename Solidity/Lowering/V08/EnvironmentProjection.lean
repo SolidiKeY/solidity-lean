@@ -1,4 +1,5 @@
 import Solidity.Source.World
+import Solidity.Source.Machine
 import Solidity.Semantics.ContractWorld
 import Solidity.Semantics.TransientWorld
 
@@ -249,4 +250,75 @@ theorem source_outer_rollback_funds {D : Source.Layout}
 #print axioms state_environment_reset
 #print axioms source_rollback_funds
 #print axioms source_outer_rollback_funds
+
+/-- Shared input relation, indexed by the reached storage address. Guarded
+regression: constructor Nat projections must not clip a negative intrinsic
+word, and delegated library agreement must use caller storage, not code identity.
+This certifies frame inputs only, not body or post-state preservation. -/
+structure FrameAgreement (f : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : Prop where
+  address : (f.this.val : Int) = address.1.1
+  sender : (f.sender.val : Int) = ctx.sender.1.1
+  value : (f.value.val : Int) = ctx.value.1
+  static : f.static = ctx.isStatic
+
+/-- Exact Nat/Int correspondence over the existing unsigned intrinsic word.
+No additional fit premise or changed word representation is introduced. -/
+theorem frame_nat_int_exact (n : Nat) (word : Semantics.Word) :
+    n = word.1.toNat ↔ (n : Int) = word.1 := by
+  have bound := word.2
+  simp only [PrimTy.inRange, decide_eq_true_eq] at bound
+  rw [← Int.natCast_inj, Int.toNat_of_nonneg bound.1]
+
+/-- A total witness of the shared input relation. Only its four observed
+fields change; this constructs no admission, code identity or body producer. -/
+def frameForContext (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : Source.Fr :=
+  { template with
+    this := lowerAddress address
+    sender := lowerAddress ctx.sender
+    value := lowerWord ctx.value
+    static := ctx.isStatic }
+
+/-- Guarded regression: individually representable projections must have ONE
+joint frame witness, including read-only and maximum-word contexts. -/
+theorem frameForContext_agrees (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) : FrameAgreement (frameForContext template address ctx) address ctx :=
+  ⟨(frame_nat_int_exact _ address.1).mp rfl,
+    (frame_nat_int_exact _ ctx.sender.1).mp rfl,
+    (frame_nat_int_exact _ ctx.value).mp rfl, rfl⟩
+
+/-- Unobserved Source fields are retained, rather than reset by the witness. -/
+theorem frameForContext_preserves (template : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) :
+    (frameForContext template address ctx).contract = template.contract ∧
+    (frameForContext template address ctx).checked = template.checked ∧
+    (frameForContext template address ctx).depth = template.depth ∧
+    (frameForContext template address ctx).cd = template.cd :=
+  ⟨rfl, rfl, rfl, rfl⟩
+
+/-- Guarded regression: rebuilding an already agreeing frame must preserve
+its ENTIRE Source value, rather than just four observed projections. -/
+theorem frameForContext_eq_self (frame : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) (agreement : FrameAgreement frame address ctx) :
+    frameForContext frame address ctx = frame := by
+  have sameAddress : lowerAddress address = frame.this :=
+    Fin.ext ((frame_nat_int_exact _ address.1).mpr agreement.address).symm
+  have sameSender : lowerAddress ctx.sender = frame.sender :=
+    Fin.ext ((frame_nat_int_exact _ ctx.sender.1).mpr agreement.sender).symm
+  have sameValue : lowerWord ctx.value = frame.value :=
+    Fin.ext ((frame_nat_int_exact _ ctx.value).mpr agreement.value).symm
+  unfold frameForContext
+  rw [sameAddress, sameSender, sameValue, ← agreement.static]
+
+/-- Exact fixed points exclude treating reconstruction of a mismatched frame
+as preservation. This is an input correspondence, not an execution theorem. -/
+theorem frameForContext_fixed_iff (frame : Source.Fr) (address : ContractWorld.Address)
+    (ctx : ContractWorld.Context) :
+    frameForContext frame address ctx = frame ↔ FrameAgreement frame address ctx :=
+  ⟨fun same => same ▸ frameForContext_agrees frame address ctx,
+    frameForContext_eq_self frame address ctx⟩
+
+#print axioms frame_nat_int_exact
+
 end Solidity.Lowering.V08.EnvironmentProjection

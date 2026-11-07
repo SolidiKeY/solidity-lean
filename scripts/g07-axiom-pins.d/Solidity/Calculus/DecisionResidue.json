@@ -1,0 +1,22 @@
+{
+ "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.decideGoal_proved_iff_off_residue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.decisionTheorem_iff_residue_disjoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.DecisionTheorem'": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/DecisionResidue.lean:Solidity.Decide.residue_iff_unknown": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

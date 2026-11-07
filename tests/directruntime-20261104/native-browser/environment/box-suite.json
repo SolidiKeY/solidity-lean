@@ -1,0 +1,50 @@
+{
+  "guardedRegression": "Existing msg.value/block.timestamp must use the shared intrinsic environment path while preserving sender/ordinary-field metadata distinctions",
+  "source": ".lake/native-browser-environment/EnvironmentMembers.box.sol",
+  "sourceSha256": "8191ceef94534b3b7af8bdfafce7e1f27b1b3cfa1636e0d4d3217b4913a26948",
+  "contract": "EnvironmentMembers",
+  "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+  "expectedTag": "box",
+  "expected": [
+    {
+      "name": "valueSelf",
+      "status": "proved",
+      "reason": ""
+    },
+    {
+      "name": "valueCopy",
+      "status": "proved",
+      "reason": ""
+    },
+    {
+      "name": "nonnegativeValue",
+      "status": "proved",
+      "reason": ""
+    },
+    {
+      "name": "timeCopy",
+      "status": "proved",
+      "reason": ""
+    },
+    {
+      "name": "wrongValue",
+      "status": "refuted",
+      "reason": "counterexample found"
+    },
+    {
+      "name": "wrongTime",
+      "status": "refuted",
+      "reason": "counterexample found"
+    },
+    {
+      "name": "siblingBlock",
+      "status": "unsupported",
+      "reason": "unknown name block"
+    },
+    {
+      "name": "siblingTx",
+      "status": "unsupported",
+      "reason": "unknown name tx"
+    }
+  ]
+}

@@ -179,6 +179,10 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/ConstantDepth/Controls.lean` | SOL-CB controls, decided on the real `evalConst`/`nconstP`/`rank`/`acyclicB`: a chain whose rank is the declaration count and one just below it (one level fewer refuses), a shared diamond, contract scopes with inheritance and shadowing, duplicates, used and unused cycles, a qualified member reference and `uint8` overflow; clash-free acyclic units are tied to `TEval` through `evalConst_iff`/`evalConst_none_iff`. Ends with the lane's exact axiom pins. |
 | `Frontend/ConstantDepth/Correspondence.lean` | SOL-CB backfill: a declared constant's graph edges are exactly the resolved constant paths of its initializer; rank decreases on each and along every path; typed evaluation, named constants and array lengths are functional under the clash-free acyclic contract. |
 | `Frontend/ConstantDepth/Determinism.lean` | SOL-CB backfill: `TEval`, `NamedConst` and `ArrayLenOK` are deterministic in every environment (no clash-freedom or acyclicity premise), by mutual recursion on the derivations. |
+| Module | Role |
+| --- | --- |
+| `Frontend/SpecOriginsV1.lean` | Additive source-pinned NatSpec directive origins, exact legacy clause-field agreement and forget lemmas; unsupported layouts have no origin. |
+| `Frontend/CounterexampleMetadataV1.lean` | Opt-in exact-fixture importer companion and no-second-search retained-certificate ingress; canonical failed-clause attribution remains unimplemented. |
 | `Frontend/ExpressionUniqueness/Accepted.lean` | Accepted expression trees equal every certified tree of their actual tokens The original parseCat_sound certificate supplies the lexical tokens, complete layout witness and precedence. |
 | `Frontend/ExpressionUniqueness/AddControls.lean` | Inhabited arbitrary prefix and additive-root controls The old raw-marker countercontrol is handled by the new unfinished-state scan. |
 | `Frontend/ExpressionUniqueness/AddFreeAlgebra.lean` | Operand-sensitive additive algebra Expression freedom starts unfinished. |

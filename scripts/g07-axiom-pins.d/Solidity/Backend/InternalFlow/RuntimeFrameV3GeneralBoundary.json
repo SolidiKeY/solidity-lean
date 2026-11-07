@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3GeneralBoundary.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.no_unrestricted_closure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3GeneralBoundary.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.of_unrolled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3GeneralBoundary.lean:Solidity.Backend.InternalFlow.RuntimeFrame.V3GeneralBoundary.unrolled_returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

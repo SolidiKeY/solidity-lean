@@ -1,0 +1,60 @@
+{
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.assign_not_fits_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.empty_fits_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.fits_iff_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.loop_not_fits_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.not_fits_cons_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.pow_not_fits_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.read_not_fits_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.requires_cost_data": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.requires_eleven_not_fits_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.requires_ten_fits_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.requireValue_fits_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/StipendWitnesses.lean:H62.AuditPrecompiles.Successor.Stipend.transfer_not_fits_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

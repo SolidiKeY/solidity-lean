@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "023e90b50d57348c7985c992215bbb337d4b76bd48e3ba20a17877dde7dbe439",
+  "kind": "joint-premise",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetDefaultInit.lean:99:complete",
+      "theorem": "Solidity.Backend.StorageOps.TargetDefaultInit.complete",
+      "signature": "theorem complete {n N L R : Nat} (G : Schema n) (T : TypeGraph.Ty n)\n (permit : CopyPermit G T) (queries : List (Query G T))\n (supported : \u2200 q \u2208 queries, q.supported)\n (base : Solidity.Storage.Loc) (fits : TargetOperations.KeysFit base)\n {hash : Solidity.Storage.Pre \u2192 Nat} {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}\n (run : FiniteRun N L R hash P locations) (captured : Store) (numeric : WordStore) (machine : Evm.Machine)\n (initial : Transport N hash locations captured numeric)\n (covered : \u2200 q \u2208 CopyDefaults.demands G T ++ queries, q.location base \u2208 locations)\n (fitting : \u2200 l \u2208 locations, TargetOperations.KeysFit l)\n (before : \u2200 l (member : l \u2208 locations), machine.store.cells (TargetOperations.toSlot l (fitting l member))=TargetOperations.encodeWord (captured l)) :\n let afterStore := (CopyDefaults.updates G T base).foldl (fun store op => Representation.write store op.1 op.2) captured\n let afterNumeric := CopyDefaults.numericInit (N:=N) G T base hash numeric\n let afterTarget := afterInit G T base fits machine\n Evm.run (code G T permit base fits) machine=.ok afterTarget 0 \u2227\n Represented (Value.dflt T) queries base afterStore \u2227\n Transport N hash locations afterStore afterNumeric \u2227\n (\u2200 l (member : l \u2208 locations), afterTarget.store.cells (TargetOperations.toSlot l (fitting l member))=TargetOperations.encodeWord (afterNumeric (l.word N hash))) \u2227\n (\u2200 q \u2208 queries, \u2200 word, q.read (Value.dflt T)=some word \u2192\n Evm.run (TargetOperations.readCode (TargetOperations.toSlot (q.location base) (TargetOperations.query_keysFit q base fits))) afterTarget=\n .ok {afterTarget with stack := .val (TargetOperations.encodeWord word) :: afterTarget.stack} 0)",
+      "signature_sha256": "e28121de0e8154e51cbeac7d92d393bcf910fa15ff52c3713f4be3a74f5ead91",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.default_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetDefaultInit.lean:80:updates_fit",
+      "theorem": "Solidity.Backend.StorageOps.TargetDefaultInit.updates_fit",
+      "signature": "theorem updates_fit {n : Nat} (G : Schema n) (T : TypeGraph.Ty n)\n (base : Solidity.Storage.Loc) (fits : TargetOperations.KeysFit base) :\n \u2200 op \u2208 CopyDefaults.updates G T base, TargetOperations.KeysFit op.1",
+      "signature_sha256": "6e65c44bf58157a15328e0d45bd4e0034224b9421f1348073b758ad690aa3583",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.default_fit_base_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}

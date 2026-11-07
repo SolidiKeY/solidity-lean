@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "b1d5051e6082afe206ea370e11e5afc78903e988efa5160a9dee8bb3fca7f269",
+  "kind": "joint-premise",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetRetainedCycle.lean:47:after_reuse",
+      "theorem": "Solidity.Backend.StorageOps.TargetRetainedCycle.after_reuse",
+      "signature": "theorem after_reuse (machine : Evm.Machine) (slot : Evm.Slot)\n (room : machine.store slot + 1 < Evm.W)\n (empty : machine.store (.data slot (machine.store slot)) = 0) :\n TargetNestedPop.after (TargetHeaderPush.incremented slot machine) slot = machine",
+      "signature_sha256": "2d5b022066b91decc45c0093c1fb8ebbad557f8602b056b2ea6fbcfc4f957902",
+      "witness": "H62.StorageAudit.TargetReuseWitnesses.after_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetRetainedCycle.lean:59:run_reuse",
+      "theorem": "Solidity.Backend.StorageOps.TargetRetainedCycle.run_reuse",
+      "signature": "theorem run_reuse (machine : Evm.Machine) (slot : Evm.Slot)\n (room : machine.store slot + 1 < Evm.W)\n (empty : machine.store (.data slot (machine.store slot)) = 0) :\n Evm.run (code slot) machine = .ok machine 0",
+      "signature_sha256": "fbf4e8ec4cf601efa8694b718904b2e0bc445b3d169b0735e54e6b61ed1d6f57",
+      "witness": "H62.StorageAudit.TargetReuseWitnesses.run_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}

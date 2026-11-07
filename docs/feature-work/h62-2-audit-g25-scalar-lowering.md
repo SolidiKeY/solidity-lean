@@ -278,3 +278,65 @@ paths, exact commands/outcomes, proof/external-test boundary, timings, reviews,
 remaining work and checksum manifest. Do not start/reset a goal or self-launch
 a replacement thread. After the required 3–5 completed items, hand the exact
 original VM/goal/state to the coordinator; a checkpoint is not full completion.
+
+## Successor regeneration after H82 consolidation
+
+This update preserves the retired worker's historical results above. Their raw
+archives and original timing baseline are unavailable here and are
+**UNVERIFIABLE** as exact bytes under H30/H86. Fresh results below are separate
+measurements, not authentication or reproduction of the old receipts. The
+ownership labels were reconstructed verbatim from the authenticated H82b frozen
+assignment; they are not recovered/current registry keys.
+
+The fresh Lean 4.24 witness closure checked 149 modules in 513.191 seconds and
+verified all 311 frozen public statements with zero uncovered statements. The
+original statement base remains c6f550e281a7e5affa9a99bc2cdaed556dec00e4. The only
+permitted mapped-file scheduling difference is the published exact PowerBounds
+preamble setting Elab.async false; any other source change fails census
+validation. PowerBounds took 212.904 seconds. Checking witnesses establishes
+these particular simultaneous premises, not full semantic coverage or complete
+Source/EVM correspondence. Fresh C3 evidence validates 55 public theorem axiom
+reports and 104 proof receipts. Six actual-byte gas/fork/halt cases and two
+rejecting-harness controls are external tests, not universal gas/fork correctness.
+
+Fresh resource policy v3 retains the hard 12 GiB per-process address-space
+limit, sampled 10 GiB workload-tree RSS stop, 4 GiB available reserve and existing
+16 GiB VM bound with no active swap. Per-file time is 300 seconds; aggregate
+build time remains 14,400 seconds. The sampled guards are not a hard aggregate
+12 GiB cgroup cap. The runner now tracks detached descendants through a child
+subreaper, reaps its own children after interruption, and rejects late successful
+exits. Regression tests cover detached-session cleanup, cancellation during
+process creation and late completion. The interrupted v2 attempt receives no
+proof credit. Historical PID-1 zombies remain recorded; cleanup of new owned
+children does not establish cleanup of all historical processes.
+
+The first core checkpoint failed with thread-creation exceptions in generated
+Yul checks. A direct recheck of the failing Arithmetic.Part00 with scheduling
+Elab.async=false passed in 10.598 seconds under unchanged budgets. A temporary
+command wrapper applies that scheduling setting only to Yul/Checks modules;
+production Lean statements and proof bodies were not edited. This is a new
+operational recovery measurement, not a successful before/after speed baseline.
+The resumed core checkpoint was interrupted after its outer supervisor disappeared across a turn/environment transition. Its orphaned workload was stopped after detection; the sampled aggregate guard had a coverage gap, so this attempt receives no resource or full-gate pass. The queued documentation correction likewise did not survive and was executed explicitly afterwards. These failures are preserved separately. The interrupted checkpoint does not establish the
+full Examples/run-lean.sh gate or remove original timing STOPs.
+
+Acceptance retains all original 15 checks, including the original-base
+whitespace and global documentation checks. Consolidated incremental scope is
+checked against the exact authenticated H82b manifest, while frozen statement
+fidelity continues to use the original base. The collector records its source
+hash. Unit controls reject arbitrary widened manifests and wrong namespaces;
+a positive main-path test exercises report serialization. These tests do not
+supply runtime-gate proof. Original-base whitespace debt and other-owner missing
+documentation references remain failures, without checker exemptions.
+
+The fresh kernel and C3 receipts above were generated before adoption of master e8247d927. Their exact input fingerprints remain recorded; they do not automatically validate changed upstream dependencies. Acceptance is rerun after adoption, with any invalidated receipt retained as a failure requiring regeneration.
+
+Post-adoption acceptance completed 13/15 checks. The current collector source
+hash is 934df9288cee02a2cfe681b4e51a020cee8b5b4ec6497bc4bcba82d339404489;
+the report records no scope violations or forbidden Lean tokens. All 149 witness
+closure receipts and all 311 statement links remain valid after adoption.
+Original-base whitespace exits 2 and global documentation paths exits 1 (five
+missing references); neither failure is waived. The incremental diff is clean.
+Independent read-only finder and skeptic reviewed the scoped tooling and these
+boundaries without Lean/server/build. C4 and the original whole lane remain
+incomplete. No resource/full-gate acceptance or historical timing identity is
+claimed from the interrupted checkpoint.

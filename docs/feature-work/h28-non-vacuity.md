@@ -628,3 +628,59 @@ independent reviews and cache/seal evidence are recorded in the local
 ### Human H82 retirement and H44 packaging split
 
 Implementation remains stopped; the accepted successor is `solidity-v12-v17-20261031/v17-validation-release`. The reviewable retirement increment keeps the complete original rendered prompt, original work/backfill queue and human-readable handoff under `tests/h28-sol/non-vacuity/retirement-h82/`. `BULK-MANIFEST.json` authenticates an off-git archive of every original retirement file, including the full scope/open-queue data, drafts, unfinished patch and evidence records. The held head remains preserved on a backup ref and its earlier immutable seal. No theorem, gate, budget, scope or live implementation changes. The PAUSED tool transition was rejected by its enum; human STOP remains binding. No applicable H71 push grant was available, so no push occurs. The coordinator/successor integrates the split head after review.
+
+The assurance successor also retains its earlier preservation records and `H44-OFF-TREE.json`; the published archive manifest is additive provenance. This merge does not certify archive availability on the successor VM, accept unfinished drafts or close any original obligation.
+
+### H107 headline witness CI safety net
+
+The library CI job now runs `kernel.py --all --fresh` with serial threads after
+cache restoration. It elaborates every private H28 witness module, including
+Families' actual Main.compiler_correct, compiler_net and compiler_checked
+applications. Any dependency or elaboration failure fails the step. Witnesses
+and check.py are unchanged. Finder and skeptic accepted the wiring read-only.
+V2 headlines are not present in the inspected tree; include their witness
+applications when V14 publishes them, without dropping existing coverage.
+
+Local validation subsequently passed at reviewed CI commit
+`e04e0b8e6cc8b15a28d51922a697112e6d19ee6c`: all 26 modules freshly elaborated
+in the coordinator-authorized owned worktree `/workspace/v17-witness`, using
+serial Lean and the unchanged 12 GiB address-space cap. All witness source
+hashes match the original checkout. Earlier prerequisite/permission failures
+remain preserved. The master-cache seed fell back after temporary staging
+reached its reserve; the successful build used existing artifacts through an
+owned cache view at `/tmp/v17-witness-owned/cache`, with new outputs in owned
+temporary storage. The original root-owned build tree was not repaired.
+
+The coordinator-published lane branch was verified at that same reviewed CI
+commit. Workflow dispatch no longer waits on a VM token: the coordinator will
+dispatch the published branch and return its run URL. That reference remains
+pending. The H107 evidence manifest pins successful and failed raw logs off git.
+This suite pass does not close the whole non-vacuity or V17 release assignment.
+
+### H121: inhabited H98 V2 headlines and actual checked-entry success
+
+`Solidity/Backend/Payments/EntrySuccess.lean` adds
+`Evm.Compiler.compile_core_some` and `Evm.Compiler.compile_core_success`.
+These concern the actual `Evm.Compiler.compile`, not an arbitrary result:
+every existing core-fragment certificate produces a compilation result, and
+the original simulation, stack-room and successful typed-run premises yield
+successful emitted-code execution, protected stack and final representation.
+The proof reuses `Payments.compile_success`; no frozen definition or statement
+changes, new admission predicates or assumed preservation are introduced.
+This is success on the stated supported core domain, not all-source compiler
+totality, physical EVM adequacy or precompile/gas/fork agreement.
+
+`tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean`
+reuses the existing nonempty require family and jointly constructed simulation.
+It directly applies `Main.compiler_checked_v2` in `checked_v2_family` and
+`Main.compiler_correct_v2` in `correct_v2_success`. `actual_entry_success`
+applies the actual compiler theorem over arbitrary contracts and fresh balances;
+`closed_actual_entry_success` provides a closed successful instance with no
+caller feasibility premise. All six new declarations have exact standard-axiom
+pins. The existing H107 all-module CI step discovers this new witness module;
+`check.py`, the original families and H98 interfaces remain unchanged.
+
+The production theorem is the reusable OBL-SUCCESS artifact for the
+precompile-agreement consumer. That consumer must still audit its own original
+statements and failure/gas/fork obligations; no downstream acceptance or whole
+lane completion follows from this additive checkpoint.

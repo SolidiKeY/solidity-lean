@@ -56,14 +56,28 @@ def hash_field(value, length):
     return isinstance(value, str) and len(value) == length and all(c in '0123456789abcdef' for c in value)
 
 
-def validate_owners(catalog, ownership):
+def validate_source_snapshot(catalog):
+    if catalog.get('sourceSnapshot') is None:
+        require(not any('sourceLocator' in n for n in catalog.get('pendingInputs', [])), 'source locator lacks snapshot')
+        return None
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('h62_source_policy', Path(__file__).with_name('source_intake.py'))
+    policy = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(policy)
+    return policy.validate_catalog_snapshot(catalog)
+
+
+def validate_owners(catalog, ownership, source=None):
     if ownership is None:
         require(catalog.get('fixture') is True, 'production graph requires an ownership snapshot')
         return
     require(catalog.get('fixture') is not True, 'fixture catalog cannot claim production ownership')
     items = {item['id']: item for item in ownership['items']}
     require(len(items) == len(ownership['items']), 'duplicate ownership item')
-    for node in catalog['nodes']+catalog.get('pendingInputs',[]):
+    records = catalog['nodes']+catalog.get('pendingInputs',[])
+    if source is not None:
+        records += source['sourceInputBindings']+source['sharedPublicObligations']
+    for node in records:
         assignments = [node]+[r for r in node.get('binderRoles',{}).values() if r.get('kind')=='premise']
         for assignment in assignments:
             ref = assignment.get('ownerReference')
@@ -72,7 +86,8 @@ def validate_owners(catalog, ownership):
 
 
 def build(export, catalog, base, tree, ownership=None):
-    validate_owners(catalog, ownership)
+    source = validate_source_snapshot(catalog)
+    validate_owners(catalog, ownership, source)
     require(hash_field(base, 40) and hash_field(tree, 40), 'invalid base/tree SHA1')
     require(export.get('schema') == 1 and export.get('source') == 'Lean.ConstantInfo.type', 'not an elaborated Lean export')
     rows = export['declarations']
@@ -170,13 +185,16 @@ def build(export, catalog, base, tree, ownership=None):
                                  type=row['type'], typeExpr=row['typeExpr'])
     for entry in sorted(pending, key=lambda n:n['id']):
         required = {'id','area','owner','ownerReference','inputArtifact','reason','source'}
-        require(set(entry) == required and all(isinstance(v,str) and v for v in entry.values()),
+        require(set(entry) in (required, required|{'sourceLocator'}) and all(isinstance(entry[k],str) and entry[k] for k in required),
                 'pending input must contain only nonempty provenance/owner fields')
         nodes[entry['id']] = dict(entry, kind='pending-input', inputStatus='pending-input',
                                  declaration=None, exists=None, type=None, typeExpr=None,
                                  dependencies=[], dependenciesKnown=False,
                                  proofDependencies=[], proofHelpers=[], witnessDependencies=[], premises=[],
                                  premiseInventoryComplete=False)
+        if 'sourceLocator' in entry:
+            nodes[entry['id']]['declaration'] = entry['sourceLocator']['declaration']
+            nodes[entry['id']]['declarationEvidence'] = 'static-source-only'
     # A premise/helper can appear in a type. It remains a typed edge, not a proof edge.
     colors, order = {}, []
     def visit(key):
@@ -217,6 +235,10 @@ def build(export, catalog, base, tree, ownership=None):
         counts['dischargedPremises'] = sum(p['status']=='done' for k in keys for p in nodes[k]['premises'])
         counts['premiseInventoryComplete'] = pending_count == 0
         counts['openPremises'] = None if pending_count else known
+        if source is not None:
+            located = [nodes[k]['sourceLocator'] for k in keys if 'sourceLocator' in nodes[k]]
+            counts['sourceLocatedInputs'] = len(located)
+            counts['distinctLocatedSourceDeclarations'] = len({n['declaration'] for n in located})
         return counts
     areas = {a: summary([k for k,n in nodes.items() if n['area'] == a]) for a in sorted({n['area'] for n in nodes.values()})}
     roots = catalog.get('roots', {})
@@ -235,6 +257,14 @@ def build(export, catalog, base, tree, ownership=None):
     result = dict(schema=1, fixture=catalog.get('fixture') is True, ownershipSha256=digest(ownership) if ownership is not None else None,
                   base=base, tree=tree, exportSha256=digest(export), catalogSha256=digest(catalog),
                   nodes=list(nodes.values()), areas=areas, counts=summary(list(nodes)), progress=progress)
+    if source is not None:
+        result['sourceEvidence'] = source
+        result['sourceCounts'] = dict(explicitDeclarationLocators=len(source['declarationLocators']),
+            namedOpenPublicFields=len(source['sharedPublicObligations']),
+            sourceContextBindings=len(source['sourceInputBindings']),
+            certificatePackageAssumptions=sum(n['role']=='certificate-package' for n in source['sourceInputBindings']),
+            reportedBridgeRequests=len(source['reportedProducerGaps']),
+            dischargedPremises=0, atomicOpenPremises=None, premiseInventoryComplete=False)
     result['graphSha256'] = digest(result)
     return result
 

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "checked_master": "33eb46304cdb536e6c8b686223c6d8e456b703ae",
+  "v09_commit": "afd7287e9a0e4944e51c07fac6ed1cdcefeb6d9d",
+  "v09_commit_is_ancestor": true,
+  "saved_packet_head": "6ed2ced6b87b5dd7e282f71fcfba1dc1d80c5fd0",
+  "saved_packet_worktree": "/workspace/solidity-lean-exp",
+  "source_modules": [
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Exp/Arithmetic.lean",
+      "saved_packet_sha256": "468ab2bfba45a192da5a3aebe0607cefa8ce9c43104b0d3595d62176f2a51769",
+      "present_on_master": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Exp/Source.lean",
+      "saved_packet_sha256": "9863600f95ffa676353ea70da000d6f82fad3cf56d2fba03ef40d969a428aa4c",
+      "present_on_master": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Exp/Selected.lean",
+      "saved_packet_sha256": "168832a47af26349da8680a26c9033fd7fe9108bbe6027740f5b606bbb427728",
+      "present_on_master": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Exp/Target.lean",
+      "saved_packet_sha256": "27d8bfd6fe7c1d8d80b0c4b3971498b2f5b760d0ac4043db3e36cb9cf9f72e3d",
+      "present_on_master": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Exp/Agreement.lean",
+      "saved_packet_sha256": "cdac937c1ddfd40e48ce2dc2f682974f55c846108db165ecd1dd0b36dc65d3db",
+      "present_on_master": false
+    },
+    {
+      "path": "Solidity/Backend/PrimitivePackets/Exp/Controls.lean",
+      "saved_packet_sha256": "e50f4349b247886d31782a21f156dbc12da97e175aac1e1df113b0f7457c2c7b",
+      "present_on_master": false
+    }
+  ],
+  "root_imports_present": [],
+  "module_map_packet_rows_present": [],
+  "exact_axiom_keys_present": [],
+  "expected_axiom_keys": 72,
+  "existing_power_apis": {
+    "Solidity.Backend.Passes.StatefulPower": "signed .int base/.uint exponent; existing CompiledVal/stateful interface, not the saved uint256 Source-local/public-selection packet",
+    "Solidity.Backend.Scalar.Exponentiation": "wrappingPow instruction-slice certificate; not an integration receipt for the packet"
+  },
+  "corrected_registration_export": {
+    "path": "/workspace/solidity-lean-exp/tests/primitive-packets-1105/Exp/evidence/H82-integration-corrected.patch.log",
+    "sha256": "6475ea7e467b8272a69fab88d80eb984d051622bc059ae4df0bd7a1d1c84d586",
+    "fresh_master_validation": "not performed; earlier gate/export scope remains as sealed"
+  },
+  "conclusion": "V09 ancestry confirmed; six packet source modules, six root imports, six map rows and72 exact proposed pin keys absent on checked master. Existing power APIs are not claimed equivalent to the packet. Remaining packet integration/fresh gates stay open.",
+  "new_builds_or_proof_changes": false,
+  "exp_worktree_preserved": true
+}

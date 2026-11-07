@@ -1,6 +1,7 @@
 // Startup checks validate executable/configuration only, never proof/backend readiness.
 'use strict';
 const fs=require('node:fs/promises'),{constants}=require('node:fs'),{join}=require('node:path'),{spawn}=require('node:child_process'),{terminateTree}=require('./backend.cjs');
+const {performance}=require('node:perf_hooks');
 const startupError=(message,setting,cause)=>Object.assign(new Error(message,{cause}),{code:'STARTUP',setting});
 const cancelled=()=>Object.assign(new Error('Startup cancelled'),{code:'CANCELLED'});
 function runtimeVersion(executable,cwd,signal){
@@ -39,11 +40,11 @@ function serverIdentity(value){return {name:typeof value?.name==='string'&&value
 // Local producer is the running server manifest, never a Dafny/Lean version or proof status.
 const versionNotification='solidityLean/serverVersion',versionTimeoutMs=5000,versionCandidateLimit=128,versionMetadataLimit=65536;
 function waitForServerVersion(peer,signal){
- let settled=false,started=false,initial,timer,resolve,reject,earlyBytes=0;const early=new Map();
+ let settled=false,started=false,initial,timer,deadline,resolve,reject,earlyBytes=0;const early=new Map();
  const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});promise.catch(()=>{});
  const finish=(error,serverInfo,source)=>{if(settled)return;settled=true;early.clear();earlyBytes=0;clearTimeout(timer);registration.dispose();peer.removeListener('close',closed);signal?.removeEventListener('abort',abort);error?reject(error):resolve({serverInfo,source});};
  const valid=value=>value&&typeof value.name==='string'&&value.name.trim()&&value.name.length<=128&&typeof value.version==='string'&&value.version.length<=versionMetadataLimit&&serverIdentity(value).version!=='unknown';
- const accept=value=>{if(!valid(value))return;const identity=serverIdentity(value);if(initial.name!=='unknown'&&initial.name!==identity.name)return;finish(null,identity,'notification');};
+ const accept=value=>{if(!valid(value))return;const identity=serverIdentity(value);if(initial.name!=='unknown'&&initial.name!==identity.name)return;if(performance.now()>=deadline){finish(null,initial,'timeout');return;}finish(null,identity,'notification');};
  const metadataError=()=>finish(startupError('Server version metadata exceeded 128 candidates or 64 KiB',null));
  const registration=peer.onNotification(versionNotification,value=>{
    if(settled)return;if(typeof value?.version==='string'&&value.version.length>versionMetadataLimit){metadataError();return;}if(!valid(value))return;
@@ -54,7 +55,7 @@ function waitForServerVersion(peer,signal){
  peer.on('close',closed);signal?.addEventListener('abort',abort,{once:true});
  if(signal?.aborted||peer.closed)finish(cancelled());
  return {promise,get pending(){return !settled;},start(info){
-   if(!started&&!settled){started=true;initial={...serverIdentity(info),version:'unknown'};timer=setTimeout(()=>finish(null,initial,'timeout'),versionTimeoutMs);const candidate=initial.name==='unknown'?early.values().next().value:early.get(initial.name);early.clear();earlyBytes=0;if(candidate)accept(candidate);}
+   if(!started&&!settled){started=true;initial={...serverIdentity(info),version:'unknown'};deadline=performance.now()+versionTimeoutMs;timer=setTimeout(()=>finish(null,initial,'timeout'),versionTimeoutMs);const candidate=initial.name==='unknown'?early.values().next().value:early.get(initial.name);early.clear();earlyBytes=0;if(candidate)accept(candidate);}
    return promise;
  },dispose(){finish(cancelled());}};
 }

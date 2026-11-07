@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "guarded_regression": "AST binding target confusion, replayed leaf selection and promotion of dependency/alias or unmatched rows.",
+  "source_sha256": {
+    "scripts/h62/item1/duplication-scanner/scan.py": "02e708b6589ad963f1f7592cf944c79adfcd486c17c9dde42ccebf217d0afdfd",
+    "tests/h62/item1/duplication-scanner/test_scan_project_binding.py": "00d8660eef3db9cba99bfb3c104bb5a29c55013eda5ca62dc33bc60e0da1806f"
+  },
+  "evidence_sha256": {
+    "acceptance.json": "c0d049bd907a13bcf972b0aa6861bbd221ffa527d88b4e3883060645ab59c901",
+    "timing-summary.json": "aa2d9cbddd8a3f35f169fc1a359421011009965927a17421b36fbc2f101bd96b",
+    "tests.log": "6bdf1177b8557209ce120dc85ce38392745359ff83af996ab4fb0af25f984fef",
+    "ast-scan-one.json": "834574b8e3c94872943a664c1f3558b5fd7d42b91d2a34fa440b9158faaf05be",
+    "ast-scan-two.json": "a9887f6a2ff80d349a8c70819788ffe9b2125cf010d714750fed5d8ee0ba99ec",
+    "keysort-default.json": "b8a892741eb2e8fffd12773d4dcc61265f9a74f90af8626301d47517d4b7939e",
+    "reviews.json": "32a3a023176183d6860476679f6c503fc2adf5c1c2fbb1c0a6c014f588f5a561"
+  },
+  "external_tests": 144,
+  "observations": {
+    "historical_keysort_report_sha256": "3989890f9e26676f0d35a3c1618ba175fda6f3233f5e6436ff89b7d07726358a",
+    "keysort_live_payload_equal_except_scanner_hash": true,
+    "ast_selected_rows": 187,
+    "ast_links": 98,
+    "unresolved_rows": 89,
+    "unknown_ownership_rows": 187,
+    "all_original_refusals_preserved": true,
+    "non_AST_rows_unannotated": true,
+    "incremental_candidate_changes": 0,
+    "AST_metadata_and_bindings_identical": true,
+    "boundary": "Checked local live outputs, not general coverage, current ownership, semantic equivalence or a proof/timing hold clearance."
+  },
+  "production_Lean_delta": {
+    "files": 0,
+    "lines": 0
+  },
+  "boundary": "All792original audit obligations unchanged; original +80.254966536%STOP remains, no RUNTIME_GATE_PASS."
+}

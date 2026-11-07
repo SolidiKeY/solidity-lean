@@ -1,0 +1,44 @@
+{
+  "guardedRegression": "Exact B original journal substitution/selector/common-field-value drift; no semantic equivalence oracle.",
+  "parentHead": "3efa0a3832de30e514ca9d2fd286f129c0ca9984",
+  "journalDelivered": true,
+  "cases": 84,
+  "commonFieldValueDifferences": 0,
+  "exactRequestObjectsEqual": 0,
+  "archive": {
+    "path": "/workspace/solidity-lean/.lake/native-browser-b-original-reconciliation/evidence.tar.gz",
+    "bytes": 49041,
+    "sha256": "40436ffb2fb002578dc00da33e3e0a3733a339b82c96f756b44e78a9c2b6859e",
+    "payloadFiles": 16,
+    "archiveMembers": 17
+  },
+  "report": {
+    "path": "/workspace/scratch/browser-chain/b-original-reconciliation/accepted-reconciliation.json",
+    "sha256": "b96cb6c3a6bbf1ce7b5943f62044dc8a361c169f9ed36656225a6db76d9d8cfe"
+  },
+  "gate": {
+    "command": [
+      "python3",
+      "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/reconcile-b-journal.py",
+      "--output",
+      "/workspace/scratch/browser-chain/b-original-reconciliation/accepted-reconciliation.json"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 0.06102295900200261,
+    "maxRssKiB": 16156,
+    "scriptSha256": "569f39a906e998138b5eaebe0c727142085bc2b341e4d3f656888aba162cf769",
+    "scope": "Read-only lightweight Python; no Lean/build/browser or timing rerun."
+  },
+  "reviews": {
+    "finder": "PASS with limits. Observation hashes now persisted;84denominators,selector/value negatives,zero exactmatches verified. No Lean/build/server.",
+    "skeptic": "PASS with limits. Missing fields are unrestricted;only four primary files snapshot; boundary made explicit. No semantic equivalence/replay inferred. No Lean/build/server."
+  },
+  "clearedWait": "Exact B browser-handoff.json and requests.jsonl delivery;537822bytes journal SHA verified.",
+  "remaining": [
+    "No execution of delivered journal bytes claimed; previous84case backend observations use normalized requests.",
+    "Field presence differences are observations, not proven metadata-only equivalence.",
+    "A H44 archive, reviewed runtime stack/return support and native/browser timing STOP investigation remain.",
+    "Four storage diamond cases pending;13C constructs unsupported;final original assignment gates pending."
+  ],
+  "cachePolicy": "H88 master release cache rollout supersedes old H41 workflow once working; no ship-cache or new cache semantic gate."
+}

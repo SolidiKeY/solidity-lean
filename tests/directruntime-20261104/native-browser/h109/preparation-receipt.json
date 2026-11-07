@@ -1,0 +1,52 @@
+{
+  "guardedRegression": "H127 source-plan preparation and design review cannot be substituted for an authenticated serial measurement runner or slow-example acceptance.",
+  "sourcePlan": {
+    "path": "/workspace/scratch/h109-source-plan-safe-306688e865.json",
+    "sha256": "c650b35b49d580d23d5d343196667e8e0b1a667ea661b3150b96934ccbb71450",
+    "bytes": 5763128,
+    "head": "306688e865ffc0dfcf5ea24bb9fd3dd5c095e0c6",
+    "files": 19004,
+    "targets": 14
+  },
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "/workspace/solidity-lean/tests/directruntime-20261104/native-browser/h109/test-prepare-plan.py"
+      ],
+      "exit": 0,
+      "wallSeconds": 0.15076330599549692,
+      "output": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.073s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/h55/module-times/test_slow_examples.py"
+      ],
+      "exit": 0,
+      "wallSeconds": 1.8377792749961372,
+      "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 1.767s\n\nOK\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "wallSeconds": 0.013394319001236,
+      "output": ""
+    }
+  ],
+  "reviews": {
+    "finder": "Scoped design/preparation PASS after isolatedGit/package/cleanup-contract and file-safety fixes; no new blocker. Latesthandoff/realrunner pending. Read-only; noLean/server/build.",
+    "skeptic": "Scoped static PASS after descriptor-based regular-file safety and provenance/lifecycle contract fixes. Observation not sealed snapshot; implementation unqualified. NoLean/Docker/build."
+  },
+  "initialFailures": [
+    "Initial synthetic test attempt in read-only sandbox had no writable temporary directory; no control executed. Retried with authorized owned TMPDIR, two methods pass.",
+    "Pre-use reviews found missing actual regular-file/ancestor checks and isolatedGit/package/cleanup specification; fixed before runner use."
+  ],
+  "executionBoundary": "NoLean/Lake/Docker/CI or stopped workload executed. Preparationonly: no toolchain/cache/resource attestation, authenticated executable runner or runtimegatepass.",
+  "intake": "Latestmodule-timesCLOUDVM-RESULT/rejecteddrafts/evidence/H116scope requested; availableH82handoff older.",
+  "quietWindow": "Not requested yet: exact reviewed pin relocation/mapping not ready; no pins/roots/sharedinventory edited."
+}

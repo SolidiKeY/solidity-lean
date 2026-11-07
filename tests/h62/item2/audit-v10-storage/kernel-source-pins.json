@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "boundary": "Source identities from the separately executed bounded Lean4.24.0 kernel/axiom-guard checks. This metadata does not replace kernel execution or semantic review.",
+  "sources": {
+    "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean": {
+      "sha256": "c60e03615c0c3400c9f2dc2861523a850d1dc38d8888b7f90cd9143ef11b8637",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/1.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/KeyBoundsWitnesses.lean": {
+      "sha256": "4b05fe6e6926b4ad3b50c68bc3835532fd135689990a1e41000d9b19958b90be",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/2.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/RepresentedWitnesses.lean": {
+      "sha256": "c50c3da1fe1bc508f0638fe8698ac973a25d0f62d8e0b5947df626a3092c732c",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/3.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean": {
+      "sha256": "e022c4d26cc1f4e65888116d1ae1d2230e0924078bd76071bfe624e3cacf3b43",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint222-source-read-gates/1.log",
+      "checked_head": "7cf454b36d35e7b9f2783eb962573b8f7fbd3166"
+    },
+    "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean": {
+      "sha256": "85c54bf51f313fb235dd99d4fcc7e39a822c01acf6bf969d9f4567984e617987",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint222-source-write-gates/1.log",
+      "checked_head": "7cf454b36d35e7b9f2783eb962573b8f7fbd3166"
+    },
+    "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean": {
+      "sha256": "ae5fc9ba79e1725860ccec31a9713d83d45db8ef0c4aca15d7dd7554e8e35d55",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/4.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean": {
+      "sha256": "c21eb09f4facc7a5ef86cbfb96ec1e1420af95aef1915b06360154d453bd75f4",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/5.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean": {
+      "sha256": "4ddf34ba7d724ef2ef3c7eb6dbcc4995378dc76a5dddf8bd10e6cd8552f32ac2",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/6.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/PushWitnesses.lean": {
+      "sha256": "ab6f6b2ea60f955481f1929d51a7f9ca09d743f97e52b92fdfc08807cdac6e6d",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint213-sourcefree-gates/7.log",
+      "checked_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30"
+    },
+    "tests/h62/item2/audit-v10-storage/TargetReuseWitnesses.lean": {
+      "sha256": "687edc982deb68779252ff7ea9a7cf42afa5b39e1e65b23f34894ca9f481bde1",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint223-final-gates/1.log",
+      "checked_head": "6346da978fe6c9ae53306b4cf78894faad6e04ee"
+    },
+    "tests/h62/item2/audit-v10-storage/TargetWriteSequenceWitnesses.lean": {
+      "sha256": "a356460ec74085f9b564f07c5d66a922ccac777a6e39530fbc5e34083e273805",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint227-exact-source-head.log",
+      "checked_head": "f869a9173e50390a3f88f8444453b42fb73fb6ce"
+    },
+    "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean": {
+      "sha256": "893e1fb6ab927f66ab62c1373d4e81111cf495657841cfbdced5abfe8bfbd5a4",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint240-array-current.log",
+      "checked_head": "8e7f0883c83d15862f3e42e1f961ff788e65cc6d",
+      "historical_checks": [
+        {
+          "sha256": "1e3ab539bfcce7a29123380bd100fe683b17e172f42df32965716f0bef102748",
+          "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint228-exact-head.log",
+          "checked_head": "c4484a7dc292c1cf547a99e8f48bcfeb1763e8d7"
+        },
+        {
+          "sha256": "b95984fbdb682f8da2e90706745b3d19e537bca066586803d0cbe273c1cc19d1",
+          "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint229-exact-head.log",
+          "checked_head": "3695698ee4e9806353038c773409dc0182e781c6"
+        },
+        {
+          "sha256": "e266c0bc2e49f1d0343272c6da0fa2023fc230e5f91528648b251a74f01c3b58",
+          "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint230-corrected-exact-head.log",
+          "checked_head": "f2189455bb6c61b10022b6d81e5a49cb241c4461"
+        },
+        {
+          "sha256": "c5859b60d4106399b798be0c0ef233b2022db93ca7b05f10fed7b150a45662fe",
+          "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint231-exact-head.log",
+          "checked_head": "e90ef087062dc975455b436c63b7b292329f7a2e"
+        },
+        {
+          "sha256": "f937349d71926cc7aee4afad89ca36d7669d941a9fc0eb2386d7371ee19301ab",
+          "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint234-exact-head.log",
+          "checked_head": "83ca445d1aed1e9099d398193543abe4643e2561"
+        },
+        {
+          "sha256": "893e1fb6ab927f66ab62c1373d4e81111cf495657841cfbdced5abfe8bfbd5a4",
+          "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint239-exact-head.log",
+          "checked_head": "2212d6770a5ed8a4c712957564cccdec1767abe2"
+        }
+      ]
+    }
+  },
+  "validated_dependency_head": "bd5c6da4c3bfb60ca208f634d4e474e712478b30",
+  "latest_partial_validation": {
+    "head": "7cf454b36d35e7b9f2783eb962573b8f7fbd3166",
+    "sources": [
+      "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean",
+      "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean"
+    ],
+    "boundary": "Only these two unchanged Source witness modules were freshly checked. validated_dependency_head retains the historical complete nine-module check; other checked_head values and receipts are unchanged."
+  },
+  "latest_additive_validation": {
+    "head": "8e7f0883c83d15862f3e42e1f961ff788e65cc6d",
+    "source": "tests/h62/item2/audit-v10-storage/ArrayAccessWitnesses.lean",
+    "guards": 59,
+    "boundary": "This unchanged extended audit module was rechecked after master adoption. All other source-specific checks and complete marker remain historical."
+  }
+}

@@ -3,7 +3,7 @@
 No binder is classified as feasible merely because its type is Prop/Type.
 """
 import argparse, collections, fnmatch, hashlib, json, pathlib
-p=argparse.ArgumentParser(); p.add_argument('--source',required=True); p.add_argument('--kernel',required=True); p.add_argument('--output',required=True); p.add_argument('--ownership',required=True); p.add_argument('--coverage',required=True); a=p.parse_args()
+p=argparse.ArgumentParser(); p.add_argument('--source',required=True); p.add_argument('--kernel',required=True); p.add_argument('--output',required=True); p.add_argument('--ownership',required=True); p.add_argument('--coverage',required=True); p.add_argument('--additional-coverage',action='append',default=[]); a=p.parse_args()
 x=json.loads(pathlib.Path(a.source).read_text()); kernel=[json.loads(line) for line in pathlib.Path(a.kernel).read_text().splitlines() if line.startswith('{')]
 def normalize(s):return s.replace('«','').replace('»','')
 def module(file):return file.removeprefix('Bridge/').removesuffix('.lean').replace('/','.')
@@ -41,6 +41,10 @@ x['duplicate_public_source_candidates']={name:ids for name,ids in public.items()
 x['unmapped_kernel_constants']=[dict(module=r['module'],name=r['name']) for r in kernel if (r['module'],r['name']) not in matched]
 coverage=json.loads(pathlib.Path(a.coverage).read_text())
 if coverage['base']!=x['base']:raise ValueError('coverage base mismatch')
+for extra_path in a.additional_coverage:
+    extra=json.loads(pathlib.Path(extra_path).read_text())
+    if extra['base']!=x['base']:raise ValueError('additional coverage base mismatch')
+    coverage['links'].extend(extra['links'])
 by_id={r['statement_id']:r for r in x['statements']}; seen=set()
 for link in coverage['links']:
     key=link['statement_id']

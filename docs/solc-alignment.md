@@ -767,6 +767,31 @@ in `tests/yul-composition/vy1-h3-input-obligations.json`; it awaits exact commit
 producer evidence, without re-asking or presenting approval as implemented support.
 This does not change any existing sealed fixture/report or establish adequacy.
 
+## Dirty narrow and `bool` locals after assembly (YQ4, H109)
+
+An assembly block may leave a dirty word in a narrow integer or `bool`
+local. Pinned solc 0.8.38 cleans it at every Solidity-level use, identically
+in both pipelines (`tests/evm-reference/dirty-locals.json`, from
+`scripts/evm-reference/dirty-locals.mjs`, optimizer off, 33 probes, none
+reverting): `uintN` keeps the low `N` bits, `intN` sign-extends them, `bool`
+is true exactly when the word is not zero (comparisons, checked and
+unchecked arithmetic operands, division, shifts, conditions, storage
+writes). `Solidity.Yul.DirtyReadback.cleanWord`/`frame` read a raw LOCAL
+frame back into Source locals that way, keeping Source values intrinsic.
+Dirty locals of other types (addresses, `bytesN`, enums, user-defined value
+types, contracts, fixed point, function values) are not cleaned there and
+refuse the readback.
+
+Limit: solc cleans lazily and the stack slot stays dirty, so a later
+assembly read of the local, or of a Solidity copy of it, sees the raw word
+in both pipelines (`u8_asm_direct`, `b_asm_direct`, `u8_asm_reread`). The
+readback drops those bits: it agrees with solc when no later assembly block
+reads the local or a copy before it is rewritten; the raw frame keeps the
+bits for that case. No Source semantics calls the readback yet. The one
+pipeline difference observed is the recorded H3 one, an unchecked narrow
+addition's result left dirty by legacy and cleaned by via-IR
+(`u8_unchecked_add_widen`: `0x200` and `0`), not a read of a dirty local.
+
 ## Overloads differing only in return types
 
 solc rejects two functions with the same name and parameter types and

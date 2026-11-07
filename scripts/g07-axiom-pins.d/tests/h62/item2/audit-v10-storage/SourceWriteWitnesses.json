@@ -1,0 +1,38 @@
+{
+ "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean:H62.StorageAudit.SourceWriteWitnesses.complete_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean:H62.StorageAudit.SourceWriteWitnesses.complete_reused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean:H62.StorageAudit.SourceWriteWitnesses.failure_contrasts_reused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean:H62.StorageAudit.SourceWriteWitnesses.source_joint": [],
+ "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean:H62.StorageAudit.SourceWriteWitnesses.static_zero_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean:H62.StorageAudit.SourceWriteWitnesses.word_is_not_type_compatibility": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean:H62.StorageAudit.SourceWriteWitnesses.word_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean:H62.StorageAudit.SourceWriteWitnesses.wrong_operand_executes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

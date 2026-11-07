@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "92aadd00475c7027eec52a958219188ae1669e1e",
+  "archives": [
+    {
+      "path": "/workspace/dafny-parity-command-identity-20261106/evidence.tar.gz",
+      "bytes": 7948,
+      "sha256": "60ea6cf8c056c7a5e6c948552e5cf3e3b3b91d99934f2d61324d882ea0ec979b"
+    },
+    {
+      "path": "/workspace/dafny-parity-testsuite-20261106/failed-build-evidence.tar.gz",
+      "bytes": 141275,
+      "sha256": "41d18bc5119b0df4d53b66d2fd2dc2f9336ab101f2d597d755cda6f3f615c22e"
+    }
+  ],
+  "testsuiteOutcome": "FAIL resource STOP exit-9/shell247; RSS5557956608, available12859424768, swap0, ownedSurvivors=[]; no unchanged retry.",
+  "boundaries": [
+    "All489 obligations remain non-complete; no judge/gate/budget changes.",
+    "Compiler plus injected editor source command receipts do not prove native F6 or original annotated imported fixture support.",
+    "TestSuite normal build incomplete; prepared fresh replay prerequisites are not a timed-strict pass."
+  ]
+}

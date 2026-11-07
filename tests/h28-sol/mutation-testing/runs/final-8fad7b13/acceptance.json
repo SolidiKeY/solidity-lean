@@ -1,0 +1,131 @@
+{
+ "scope_complete": true,
+ "failures": [],
+ "constructors_without_compiled_mutant": [
+  "LeanTaclet.loopExit",
+  "Rule.key",
+  "Rule.lean",
+  "Taclet.assertSimple",
+  "Taclet.newArrayCapture",
+  "Taclet.storageLocalDeclSkip",
+  "Taclet.storageLocalPrimitivePushBind",
+  "Taclet.storagePopSaveMappingElement",
+  "Taclet.storagePop_unfold_leftCallReceiver",
+  "Taclet.storagePushLengthSave",
+  "Taclet.storagePushLengthSaveMappingElement",
+  "Taclet.storagePushLengthSaveReferenceElement",
+  "Taclet.storagePushValue_unfold_leftCallReceiver",
+  "Taclet.storagePushValue_unfold_rightFstPrimitiveArgument",
+  "Taclet.valueDeclSkip"
+ ],
+ "family_semantic_negative_controls": {
+  "pop-delete": [
+   "control.semantic.pop-delete"
+  ],
+  "index-bounds": [
+   "control.semantic.index-bounds"
+  ],
+  "push-tail-length": [
+   "control.semantic.push-tail-length"
+  ],
+  "division-minimum": [
+   "control.semantic.division-minimum"
+  ]
+ },
+ "manifest": "tests/h28-sol/mutation-testing/manifests/h28-final.json",
+ "manifest_sha256": "fc4727c54b5e2536295f4088e1706c2b587c4ae6796ddd068e752a554a35daa7",
+ "run": "final-8fad7b13",
+ "head": "8fad7b132faa70ea02a92ca279a0b647ea0a6d95",
+ "constructors": 215,
+ "census_constructors": 117,
+ "clause_rows": 98,
+ "clause_fixtures": 136,
+ "clauses_with_reason": 8,
+ "proof_entries": 342,
+ "family_verdicts": {
+  "rollback-payment": [
+   "control.revert-diamond-true",
+   "payment.success-flag-false",
+   "census.transferNoCallbackBox.payment-amount-zeroed.1",
+   "census.transferDiamond.close-false-to-true.1"
+  ],
+  "overflow": [
+   "overflow.increment-erased-max",
+   "census.storageRootIncrement.increment-step-dropped.1"
+  ],
+  "pop-delete": [
+   "delete.array-index-skipped",
+   "census.storageRootDelete.delete-dropped.1"
+  ],
+  "push-tail-length": [
+   "push.reference-tail-cleared",
+   "census.storagePushAddAssign.last-slot-is-length.1"
+  ],
+  "guard-polarity": [
+   "guard.require-success-false",
+   "guard.require-revert-true",
+   "census.ifElseSplit.guard-true-to-false.1",
+   "census.ifElseSplit.guard-false-to-true.1"
+  ],
+  "callback-frames": [
+   "callback-table.failed-send-flag-true"
+  ],
+  "index-bounds": [
+   "census.storageIndexReadArrayFind.index-constant-zero.1"
+  ],
+  "division-minimum": [
+   "census.clause.binopAssignment.operands-swapped.1"
+  ],
+  "alias-capture-once": [
+   "census.storageLengthRead_unfold_rightFst.receiver-reevaluated.1"
+  ]
+ },
+ "family_negative_controls": {
+  "guard-polarity": [
+   "control.guard-label-equivalent",
+   "control.cross-witness-survivor",
+   "control.negative.guard-polarity"
+  ],
+  "pop-delete": [
+   "control.negative.pop-delete",
+   "control.semantic.pop-delete"
+  ],
+  "index-bounds": [
+   "control.negative.index-bounds",
+   "control.semantic.index-bounds"
+  ],
+  "push-tail-length": [
+   "control.negative.push-tail-length",
+   "control.semantic.push-tail-length"
+  ],
+  "overflow": [
+   "control.negative.overflow"
+  ],
+  "division-minimum": [
+   "control.negative.division-minimum",
+   "control.semantic.division-minimum"
+  ],
+  "alias-capture-once": [
+   "control.negative.alias-capture-once"
+  ],
+  "callback-frames": [
+   "control.negative.callback-frames"
+  ],
+  "rollback-payment": [
+   "control.negative.rollback-payment"
+  ]
+ },
+ "proof_oracle": {
+  "detected": 273,
+  "invalid-compilation": 62,
+  "equivalent-certified": 7
+ },
+ "semantic_counts": {
+  "killed": 24,
+  "equivalent": 1,
+  "link-mismatch": 2,
+  "survivor-sound": 1,
+  "witness-failed": 8,
+  "semantic-witness-failed": 4
+ }
+}

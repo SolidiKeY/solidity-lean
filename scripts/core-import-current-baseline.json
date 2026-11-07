@@ -1,0 +1,582 @@
+{
+  "schema": 1,
+  "sourceCommit": "fea090bf9fec1a372ad32952a5e72eb4d7015888",
+  "previousBaselineSha256": "d202b21ddde800b40237b9c4a95482c17b8d5ea8d2c78c1b42e4bad7344ac80b",
+  "authorization": "OT-W0-TOOLING coordinator follow-up, 2026-11-07",
+  "edges": [
+    [
+      "Solidity.Calculus.Blocks",
+      "Solidity.Calculus.LexDiamond"
+    ],
+    [
+      "Solidity.Calculus.CallResultCapture",
+      "Solidity.Calculus.LeafShare"
+    ],
+    [
+      "Solidity.Calculus.CallResultCapture",
+      "Solidity.Calculus.TermSize"
+    ],
+    [
+      "Solidity.Calculus.JoinSequenceSize",
+      "Solidity.Calculus.TermSize"
+    ],
+    [
+      "Solidity.Calculus.PaymentWitness",
+      "Solidity.Calculus.CallbackHolds"
+    ],
+    [
+      "Solidity.Calculus.Sound.LoopLexDiamond",
+      "Solidity.Calculus.LexDiamond"
+    ],
+    [
+      "Solidity.Calculus.Sound.LoopLexDiamond",
+      "Solidity.Calculus.LexVariantSound"
+    ],
+    [
+      "Solidity.Roadmap.Frontend",
+      "Solidity.Frontend.SourceUnits"
+    ],
+    [
+      "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+      "Solidity.Lowering.P8b.Frozen"
+    ],
+    [
+      "Solidity.Roadmap.V16.CreationLibrarySpec",
+      "Solidity.Backend.Executable.CreationReturnProducerControls"
+    ],
+    [
+      "Solidity.Roadmap.V16.CreationReturnConsumer",
+      "Solidity.Backend.Executable.CreationReturnInterfaceV1Controls"
+    ],
+    [
+      "Solidity.Roadmap.V16.H24Input",
+      "Solidity.Lowering.P8.DeclarationGraphAdmission"
+    ],
+    [
+      "Solidity.Roadmap.V16.H24Input",
+      "Solidity.Lowering.P8b.P8aInterface"
+    ],
+    [
+      "Solidity.Roadmap.V16.NativeParentConsumer",
+      "Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingActivation"
+    ],
+    [
+      "Solidity.Roadmap.V16.RelationalGuardSpec",
+      "Solidity.Backend.FailurePaths.RelationalGuardControls"
+    ],
+    [
+      "Solidity.Roadmap.V16.RelationalGuardSpec",
+      "Solidity.Source.Hoare"
+    ],
+    [
+      "Solidity.Roadmap.V16.SSCP2.NewAllocation",
+      "Solidity.Source.Preservation.AllocationSites"
+    ],
+    [
+      "Solidity.Roadmap.V16.SourceSizeControls",
+      "Solidity.Lowering.P8.SourceSize"
+    ],
+    [
+      "Solidity.Roadmap.V16.SourceSizeControls",
+      "Solidity.Lowering.V08.SourceTransactionControls"
+    ],
+    [
+      "Solidity.Roadmap.V16.SourceTransactionConsumer",
+      "Solidity.Lowering.V08.SourceTransactionControls"
+    ],
+    [
+      "Solidity.Roadmap.V16.SourceTransactionConsumer",
+      "Solidity.Source.Hoare"
+    ],
+    [
+      "Solidity.Semantics.CtxEquiv.Source",
+      "Solidity.Source.Session"
+    ],
+    [
+      "Solidity.Semantics.Dispatch",
+      "Solidity.Syntax.DispatchChain"
+    ],
+    [
+      "Solidity.Semantics.Nondeterminism.ForkAgreement",
+      "Solidity.Language.Features"
+    ],
+    [
+      "Solidity.Semantics.Nondeterminism.ForkAgreement",
+      "Solidity.Yul.Views.Inputs"
+    ],
+    [
+      "Solidity.Semantics.Nondeterminism.ForkStipend",
+      "Solidity.Stipend.Rule"
+    ],
+    [
+      "Solidity.Semantics.Nondeterminism.Source",
+      "Solidity.Source.Semantics"
+    ],
+    [
+      "Solidity.Semantics.Nondeterminism.SourceWitness",
+      "Solidity.Source.SemanticsExamples"
+    ],
+    [
+      "Solidity.Semantics.NumericLowering",
+      "Solidity.Syntax.Numeric"
+    ],
+    [
+      "Solidity.Theory.CallerModel.Static",
+      "Solidity.Calculus.CallerModelValid"
+    ],
+    [
+      "Solidity.Theory.Progress.Controls",
+      "Solidity.Source.SoundnessExamples"
+    ],
+    [
+      "Solidity.Theory.Progress.Leaves",
+      "Solidity.Source.Progress.BuiltinStatements"
+    ],
+    [
+      "Solidity.Theory.Progress.Leaves",
+      "Solidity.Source.Progress.EmitBuiltins"
+    ],
+    [
+      "Solidity.Theory.Progress.Outcome",
+      "Solidity.Source.ExprProgress"
+    ],
+    [
+      "Solidity.Theory.Progress.Program",
+      "Solidity.Lowering.P9.FunctionCatalog"
+    ],
+    [
+      "Solidity.Theory.Progress.Tuple",
+      "Solidity.Source.Progress.BuiltinAdmission"
+    ],
+    [
+      "Solidity.Theory.Progress.Tuple",
+      "Solidity.Source.StmtProgress"
+    ],
+    [
+      "Solidity.Theory.Reachable.CallerModel",
+      "Solidity.Calculus.CleanTailBoundary"
+    ],
+    [
+      "Solidity.Theory.Reachable.CleanTail",
+      "Solidity.Calculus.TailMode"
+    ],
+    [
+      "Solidity.Yul.BlockHeaders",
+      "Solidity.Source.Syntax"
+    ],
+    [
+      "Solidity.Yul.BuiltinUse",
+      "Solidity.Source.Syntax"
+    ],
+    [
+      "Solidity.Yul.Checks.LocalBlock",
+      "Solidity.Source.Semantics"
+    ],
+    [
+      "Solidity.Yul.Checks.LocalBlock",
+      "Solidity.Yul.RawFrameLogic"
+    ],
+    [
+      "Solidity.Yul.Checks.LocalBlock",
+      "Solidity.Yul.RawHorizon"
+    ],
+    [
+      "Solidity.Yul.Checks.LocalBoolExpr",
+      "Solidity.Source.SemanticsExamples"
+    ],
+    [
+      "Solidity.Yul.Checks.LocalState",
+      "Solidity.Source.Semantics"
+    ],
+    [
+      "Solidity.Yul.CleanLocals",
+      "Solidity.Source.ExprProgress"
+    ],
+    [
+      "Solidity.Yul.ClosedSyntax",
+      "Solidity.Frontend.Checked.Prec"
+    ],
+    [
+      "Solidity.Yul.Compilation.ArithmeticMachineControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.BitMachineExecutionControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.ComparisonMachineControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.ExponentMachineControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.FramedControl",
+      "Solidity.Backend.Selection.FramedLoweringInterface"
+    ],
+    [
+      "Solidity.Yul.Compilation.FramedControl",
+      "Solidity.Backend.Selection.LiteralSelection"
+    ],
+    [
+      "Solidity.Yul.Compilation.FramedWordLowering",
+      "Solidity.Backend.Selection.FramedLoweringInterface"
+    ],
+    [
+      "Solidity.Yul.Compilation.MachineAdapter",
+      "Solidity.Evm.Machine"
+    ],
+    [
+      "Solidity.Yul.Compilation.MemoryHarness",
+      "Solidity.Backend.Environment.ByteConstants"
+    ],
+    [
+      "Solidity.Yul.Compilation.P20InterfaceV1",
+      "Solidity.Backend.Passes.Boundary"
+    ],
+    [
+      "Solidity.Yul.Compilation.P20InterfaceV1",
+      "Solidity.Backend.Selection.InterfaceV2"
+    ],
+    [
+      "Solidity.Yul.Compilation.PhysicalHash",
+      "Solidity.Backend.Environment.Composition"
+    ],
+    [
+      "Solidity.Yul.Compilation.PhysicalHashControls",
+      "Solidity.Backend.Environment.ObservationsChecks"
+    ],
+    [
+      "Solidity.Yul.Compilation.PhysicalStore",
+      "Solidity.Backend.Environment.ByteConstants"
+    ],
+    [
+      "Solidity.Yul.Compilation.PhysicalStore",
+      "Solidity.Yul.Views.MemoryImages"
+    ],
+    [
+      "Solidity.Yul.Compilation.PhysicalStoreControls",
+      "Solidity.Yul.Views.MixedHeapControls"
+    ],
+    [
+      "Solidity.Yul.Compilation.QuotientMachineControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.ShapeCapacity",
+      "Solidity.Backend.LabelExec.FragmentSound"
+    ],
+    [
+      "Solidity.Yul.Compilation.ShiftSubMachineControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.SignedComparisonMachineControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.SignedInstructionCertificates",
+      "Solidity.Backend.Selection.Interface"
+    ],
+    [
+      "Solidity.Yul.Compilation.SignedQuotientMachineControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.Slices",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.TraceFrameCapacity",
+      "Solidity.Backend.Selection.FrameCapacityV2"
+    ],
+    [
+      "Solidity.Yul.Compilation.UnaryMachineControls",
+      "Solidity.Backend.Scalar.Heights"
+    ],
+    [
+      "Solidity.Yul.Compilation.WordBlockExecution",
+      "Solidity.Backend.Selection.Interface"
+    ],
+    [
+      "Solidity.Yul.Compilation.WordInstructionCertificates",
+      "Solidity.Backend.Selection.Interface"
+    ],
+    [
+      "Solidity.Yul.Composition.Controls",
+      "Solidity.Source.StateExamples"
+    ],
+    [
+      "Solidity.Yul.Composition.Interface",
+      "Solidity.Backend.Environment.ByteConstants"
+    ],
+    [
+      "Solidity.Yul.Composition.MonetaryLifecycleControls",
+      "Solidity.Source.StateExamples"
+    ],
+    [
+      "Solidity.Yul.Composition.P6FrameCorrectness",
+      "Solidity.Backend.MemoryOps.PhysicalFrameImage"
+    ],
+    [
+      "Solidity.Yul.Composition.PhysicalBytes",
+      "Solidity.Yul.Views.Bytes"
+    ],
+    [
+      "Solidity.Yul.Composition.PhysicalControls",
+      "Solidity.Yul.Views.OwnedBoolDeclarationControls"
+    ],
+    [
+      "Solidity.Yul.Composition.PhysicalFrames",
+      "Solidity.Yul.Views.OwnedBoolFrame"
+    ],
+    [
+      "Solidity.Yul.Composition.PhysicalMemory",
+      "Solidity.Yul.Views.MemoryControls"
+    ],
+    [
+      "Solidity.Yul.Composition.PhysicalMemory",
+      "Solidity.Yul.Views.MemoryImages"
+    ],
+    [
+      "Solidity.Yul.Composition.SourceCatchBinding",
+      "Solidity.Lowering.Readonly.SourceTryEffects"
+    ],
+    [
+      "Solidity.Yul.Composition.SourceCatchBinding",
+      "Solidity.Source.FailureRuntimeControls"
+    ],
+    [
+      "Solidity.Yul.DeclarationCheck",
+      "Solidity.Frontend.Checked.Lexer"
+    ],
+    [
+      "Solidity.Yul.EvmSigned",
+      "Solidity.Evm.Signed"
+    ],
+    [
+      "Solidity.Yul.ExpressionCheck",
+      "Solidity.Source.Syntax"
+    ],
+    [
+      "Solidity.Yul.HorizonAdapter",
+      "Solidity.Source.Semantics"
+    ],
+    [
+      "Solidity.Yul.LocalBoolAgreement",
+      "Solidity.Source.Eval"
+    ],
+    [
+      "Solidity.Yul.LocalForFirstDone",
+      "Solidity.Source.Semantics"
+    ],
+    [
+      "Solidity.Yul.LocalValues",
+      "Solidity.Source.Machine"
+    ],
+    [
+      "Solidity.Yul.OccurrenceCheck",
+      "Solidity.Source.Syntax"
+    ],
+    [
+      "Solidity.Yul.PlacementCheck",
+      "Solidity.Source.Syntax"
+    ],
+    [
+      "Solidity.Yul.SourceBindings",
+      "Solidity.Source.Resolved"
+    ],
+    [
+      "Solidity.Yul.SourceBoundary",
+      "Solidity.Source.Value"
+    ],
+    [
+      "Solidity.Yul.StatementTags",
+      "Solidity.Source.Syntax"
+    ],
+    [
+      "Solidity.Yul.Views.NominalInventory",
+      "Solidity.Yul.Views.InventorySnapshot"
+    ],
+    [
+      "Solidity.Yul.Views.NominalInventory",
+      "Solidity.Yul.Views.NominalMemory"
+    ],
+    [
+      "Solidity.Yul.Views.NominalInventoryControls",
+      "Solidity.Yul.Views.InventoryUnchanged"
+    ],
+    [
+      "Solidity.Yul.Views.NominalInventoryControls",
+      "Solidity.Yul.Views.NominalMemoryControls"
+    ],
+    [
+      "Solidity.Yul.World.ByteMemory",
+      "Solidity.Backend.Environment.ByteConstants"
+    ],
+    [
+      "Solidity.Yul.World.Frames",
+      "Solidity.Source.World"
+    ],
+    [
+      "Solidity.Yul.World.Raw",
+      "Solidity.Source.Observe"
+    ],
+    [
+      "Solidity.Yul.World.SelfDestructBuiltin",
+      "Solidity.Yul.World.CallBuiltin"
+    ],
+    [
+      "Solidity.Yul.World.SelfDestructBuiltinControls",
+      "Solidity.Yul.World.SelfDestructControls"
+    ]
+  ],
+  "additions": [
+    {
+      "source": "Solidity.Roadmap.G49Final.PassCorrectAdapters",
+      "target": "Solidity.Lowering.P8b.Frozen",
+      "file": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+      "line": 2,
+      "fileSha256": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+      "introducingCommit": "138f7a568b6aeb4a98fad985b8d7b0c628356c5e",
+      "introducingSubject": "Define H64 constructive pass fold and conditional frozen public theorem",
+      "originFile": "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.Controls",
+      "target": "Solidity.Source.StateExamples",
+      "file": "Solidity/Yul/Composition/Controls.lean",
+      "line": 2,
+      "fileSha256": "f5cb2cfa5a2d3badec9ac1f855ce8640ea51c859aceebbcf21ee2141981e6a32",
+      "introducingCommit": "e75bad809cfda97eedc97d694eaeeac3243ae353",
+      "introducingSubject": "Add composition interface",
+      "originFile": "Solidity/Yul/Composition/Controls.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.Interface",
+      "target": "Solidity.Backend.Environment.ByteConstants",
+      "file": "Solidity/Yul/Composition/Interface.lean",
+      "line": 3,
+      "fileSha256": "f397d8ca5170fd1bc392d6fe3093d3e80e9ee4c376aff3703f250430d41945fa",
+      "introducingCommit": "e75bad809cfda97eedc97d694eaeeac3243ae353",
+      "introducingSubject": "Add composition interface",
+      "originFile": "Solidity/Yul/Composition/Interface.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.MonetaryLifecycleControls",
+      "target": "Solidity.Source.StateExamples",
+      "file": "Solidity/Yul/Composition/MonetaryLifecycleControls.lean",
+      "line": 2,
+      "fileSha256": "fe30d429244c341decc40d77264d60f1293c3c8abcfb842e377c16b651520888",
+      "introducingCommit": "9572b8d3edd01e1dc11689a85f016d9d25f92af7",
+      "introducingSubject": "Preserve whole natural balances",
+      "originFile": "Solidity/Yul/Composition/MonetaryLifecycleControls.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.P6FrameCorrectness",
+      "target": "Solidity.Backend.MemoryOps.PhysicalFrameImage",
+      "file": "Solidity/Yul/Composition/P6FrameCorrectness.lean",
+      "line": 1,
+      "fileSha256": "8c77b9c58b2a6bba9164affe7c273a5bf21bf9d699c6a8626709260a3c36e668",
+      "introducingCommit": "705ed8517c55ea42897c6991d252ffd45a2836be",
+      "introducingSubject": "Integrate VY5 P8-SPEC operations and Yul composition",
+      "originFile": "Solidity/Yul/Composition/P6FrameCorrectness.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.PhysicalBytes",
+      "target": "Solidity.Yul.Views.Bytes",
+      "file": "Solidity/Yul/Composition/PhysicalBytes.lean",
+      "line": 2,
+      "fileSha256": "e9ad1835b2dafc295407f1912f5286064b72d40a15737da3be8f220b742de84c",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "originFile": "Solidity/Yul/Composition/PhysicalBytes.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.PhysicalControls",
+      "target": "Solidity.Yul.Views.OwnedBoolDeclarationControls",
+      "file": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "line": 3,
+      "fileSha256": "1cea48b2286f82e8fb478c4f345c59e329908e29e7f99b2923c4db1854505ee7",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "originFile": "Solidity/Yul/Composition/PhysicalControls.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.PhysicalFrames",
+      "target": "Solidity.Yul.Views.OwnedBoolFrame",
+      "file": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "line": 2,
+      "fileSha256": "1c4387e7cf69c8475fe60cad52fdac618173e8147017c4bcd3592ab41ba086f8",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "originFile": "Solidity/Yul/Composition/PhysicalFrames.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.PhysicalMemory",
+      "target": "Solidity.Yul.Views.MemoryControls",
+      "file": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "line": 3,
+      "fileSha256": "492c975cfb33c7683bd5e134c62aa07cad14cdcf28da59c063bf9b8fb3361e28",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "originFile": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.PhysicalMemory",
+      "target": "Solidity.Yul.Views.MemoryImages",
+      "file": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "line": 2,
+      "fileSha256": "492c975cfb33c7683bd5e134c62aa07cad14cdcf28da59c063bf9b8fb3361e28",
+      "introducingCommit": "d36a280a9e6a68eefc2283b62e4623b3bfbeabdc",
+      "introducingSubject": "Compose physical state",
+      "originFile": "Solidity/Yul/Composition/PhysicalMemory.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.SourceCatchBinding",
+      "target": "Solidity.Lowering.Readonly.SourceTryEffects",
+      "file": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+      "line": 1,
+      "fileSha256": "c96e935db8d5fd4119e512db0c84e64647650e2dba5419ac1d5afd3b10f02aaa",
+      "introducingCommit": "eb9c75194d65f896c9bc483050ecea67fbe41318",
+      "introducingSubject": "Compose actual catch binding",
+      "originFile": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    },
+    {
+      "source": "Solidity.Yul.Composition.SourceCatchBinding",
+      "target": "Solidity.Source.FailureRuntimeControls",
+      "file": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+      "line": 2,
+      "fileSha256": "c96e935db8d5fd4119e512db0c84e64647650e2dba5419ac1d5afd3b10f02aaa",
+      "introducingCommit": "eb9c75194d65f896c9bc483050ecea67fbe41318",
+      "introducingSubject": "Compose actual catch binding",
+      "originFile": "Solidity/Yul/Composition/SourceCatchBinding.lean",
+      "absentFromAllIntroducingParents": true,
+      "presentAtInitialPinParent": true
+    }
+  ]
+}

@@ -2,14 +2,8 @@
  "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_length": [
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_rows_length": [
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_rows_repr": [
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_rows_kept": [
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_row_turn_refusal": [
+  "Classical.choice",
   "Quot.sound",
   "propext"
  ],
@@ -18,12 +12,18 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_row_turn_refusal": [
-  "Classical.choice",
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_rows_demand_bound": [
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_rows_demand_bound": [
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_rows_kept": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_rows_length": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryRows.lean:Solidity.Backend.MemoryCopies.fixed_memory_rows_repr": [
   "Quot.sound",
   "propext"
  ]

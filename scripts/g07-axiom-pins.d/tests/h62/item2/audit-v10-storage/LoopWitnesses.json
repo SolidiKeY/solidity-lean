@@ -1,0 +1,55 @@
+{
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.body_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.changed_stack": [],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.exit_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.finished_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.pending_index_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.positive_body_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.positive_condition_after": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.positive_condition_before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.positive_finished": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.positive_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.positive_store_change": [],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.step_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/LoopWitnesses.lean:H62.StorageAudit.LoopWitnesses.zero_is_not_nonzero": []
+}

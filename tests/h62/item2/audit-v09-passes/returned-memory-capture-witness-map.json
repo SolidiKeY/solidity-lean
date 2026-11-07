@@ -1,0 +1,44 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/ReturnedMemoryCaptureControls.lean",
+  "interface_sha256": "4408b588e139aca1f233a693ce2f290b51853f38b632a8fa47036e1a58e35f4e",
+  "joint_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture",
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.fresh_bound",
+      "signature_sha256": "1b86b35a5ed26dbc768bcac8d8628f2bfb30672981914367885420de9557128e",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.whole_input",
+      "signature_sha256": "4018e2174ed4011c30468dd8cdf8f7b17615d38f9cfc96f86ed1e9fd7cf985e6",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.complete_pointer_observation",
+      "signature_sha256": "420f0b192be1f7369fdbd91eab361c4a0c61b32dae4cb10de46cd09c501d03dd",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.stale_initial_map",
+      "signature_sha256": "f388891773152bcf74fa5d5b212aab4364290dcd055bae045c9ffa45aaf9c89a",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.stale_readback_refused",
+      "signature_sha256": "474d19c86aec116d53748d0395b8674a107130efdca3e61efd07995dfc7d4d12",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.saved_tail_refused",
+      "signature_sha256": "54e78f692bf8d88e383df317ffc0f982e181750849ea899660d21c1a054c73a5",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 340,
+  "aggregate_remaining": 919,
+  "auxiliary_application": "Solidity.Backend.Passes.AuditJoinedAllocation.ReturnedCapture.application",
+  "auxiliary_selected_rows": 0,
+  "limits": "Six selected original controls; existing generic readback application checked separately without counting a definition as a theorem row. Actual selected map model only, no native ByteWorld/emission or full Source/G24/resource adequacy."
+}

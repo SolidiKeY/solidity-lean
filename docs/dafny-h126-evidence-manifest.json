@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "decision": "H126",
+  "sourceHead": "8eaa868a24942d71b35957152181ef3a3ec0fe1b",
+  "nativeHead": "8eaa868a24942d71b35957152181ef3a3ec0fe1b",
+  "fileCount": 126,
+  "uncompressedBytes": 9887162,
+  "boundaries": [
+    "Unchanged annotated native F6 passes with primary/dependency byte equality and actual compiler artifact; admission remains strict; external compiler/UI evidence only.",
+    "Import accessor compiled and rfl theorem kernel checked; transitive axioms exactly the legacy propext/Classical.choice/Quot.sound set; no other old declaration changed.",
+    "Per-file MCP reports0errors but supervised helper retirement1 retained. Import-dependent touched build fails1 on unmatched Shared.Translate prerequisite after successful frontend builds; no full build/TestSuite/timed strict pass.",
+    "Authorized cache archive refetched and verified; only230missing artifacts45.995MB added; original installer unchanged and prior input prefix/four known mappings preserved. Preliminary stricter comparison failure retained.",
+    "H126 resolves the three scope questions; timed workload waits on OT-PERF-SLOW, not a new question or waiver. All old failures and original gate/judge/budget contracts persist."
+  ],
+  "archive": {
+    "path": "/workspace/dafny-h126-evidence-20261107/bulk.tar.gz",
+    "bytes": 2419108,
+    "sha256": "b678f83d6ebcad877e6ba968ab86aaa8f66615ae7174f24086e12d00731307cf"
+  },
+  "index": {
+    "path": "/workspace/dafny-h126-evidence-20261107/files.json",
+    "bytes": 25426,
+    "sha256": "c2c734433277665d955324d20de01ddc73a62e22fa9f3d1f1cdedf1bbe9d22ee"
+  },
+  "cacheArchive": {
+    "path": "/workspace/dafny-h126-cache-20261107/master-cache.tar.gz",
+    "bytes": 1992585807,
+    "sha256": "4d2131484c664a99e5a88fd64dfaf608ca2745baf6c448376274b8f4aaf77016"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-h126-evidence-manifest.json --restore",
+  "controlInputs": [
+    {
+      "path": "/workspace/solidity-lean/.lake/dafny-h126-serial.toml",
+      "bytes": 2384,
+      "sha256": "d63a6936b76c417f70697da7890416c93dbac762bfee3974bd8db512c7cb1615"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/dafny-h126-accessor-check.lean",
+      "bytes": 291,
+      "sha256": "185d09b6eef6cd7d63e56b1f2736c058de0fb7d41e2ec4d398a30d5f01a243ea"
+    },
+    {
+      "path": "/workspace/solidity-lean/.lake/dafny-h126-axiom-check.lean",
+      "bytes": 929,
+      "sha256": "236d452a0fcec56d413d2d5637fb9aa6b50d2414d830c925470448952659fbf8"
+    }
+  ]
+}

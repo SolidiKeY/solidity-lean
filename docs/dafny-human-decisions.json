@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "Coordinator messages2026-11-05 in this exact thread; human decisions H47-H50 and coordinator Q-RES answer",
+  "source": "Incoming user messages H80 (2026-11-06), scoped instructions in this exact thread; supersedes earlier coordinator claims. This file records instructions, not proof/gate evidence. Incoming user H126 (2026-11-07) supplies the three scoped answers below; decision records are not validation evidence.",
   "decisions": [
     {
       "question": "Q-VIS-01",
@@ -8,22 +8,67 @@
     },
     {
       "question": "Q-RES-01",
-      "authorization": "This VM is isolated. Run heavy proof gates one at a time without a systemd scope, keep the12GiB/no-swap intent by running nothing else alongside, and record missing scope. Do not keep gates blocked on this."
+      "authorization": "Provision pinned validated CLI/Frontend dependencies on this lane VM; record checksums. Use12GiB no-swap serial-j1 scope, systemd user scope if available else ulimit-v fallback; report concrete failures. Original12GiB headroom and budgets remain.",
+      "decision": "H80"
     },
     {
       "question": "Q-REL-01",
-      "authorization": "Add verifier-owned failed-postcondition identity/exact location and related decoration from real metadata; keep kernel checks; no fabricated diagnostics."
+      "authorization": "Add kernel-checked verifier metadata for actual failed obligation identity and exact source span; drive decorations from real metadata; no fabricated locations.",
+      "decision": "H80"
     },
     {
       "question": "Q-STATUS-HELP-01",
-      "decision": "H49",
-      "status": "excluded",
-      "scope": "proof-help action only",
-      "authorization": "Leave it out. No proof-help action; mark the row excluded by human decision H49."
+      "decision": "H80",
+      "status": "implementation-partial",
+      "scope": "Project proof documentation help",
+      "authorization": "The proof-help action links project docs/README.md and proof guide docs/calculus.md. Earlier H49 exclusion is superseded; no row waived."
     },
     {
       "question": "Q-CLI-01",
-      "authorization": "Choose runtime/test runner and artifact contract, preferring existing repository tooling; document then implement build/run/test."
+      "authorization": "Build produces compiler artifacts only; runtime/test equivalence remains incomplete. Existing concrete-model observations are not equivalence evidence.",
+      "decision": "H80"
+    },
+    {
+      "question": "Q-REL-HOOK-01",
+      "decision": "Incoming user answer #72,2026-11-07",
+      "status": "implementation-partial",
+      "authorization": "Additive SourceCounterexample.lean companion allowed; preserve old proof/report fields and all old declarations/premises/signatures/budgets. Real clause/span and wrong-span controls remain required."
+    },
+    {
+      "question": "Q-REL-IMPORT-01",
+      "decision": "Incoming user answer #73,2026-11-07",
+      "status": "implementation-pending",
+      "authorization": "Additive span companions in Solidity/Frontend/SolcJson/Contract.lean, Body.lean, Import.lean and Testing.lean authorized with forget lemmas per layer; old normalization/results/signatures unchanged. No source span may be inferred where not carried."
+    },
+    {
+      "question": "Q-REL-MODULE-01",
+      "decision": "Incoming user answer #76,2026-11-07",
+      "status": "implementation-partial",
+      "authorization": "New isolated SpecOriginsV1 and CounterexampleMetadataV1; import/reuse existing declarations, explicit new consumers and registered roots/module-map; legacy frontend unchanged; forget and real/wrong span/ordinal controls required."
+    },
+    {
+      "question": "Q-TESTSUITE-ARTIFACT-01",
+      "decision": "Incoming user answer #75,2026-11-07",
+      "status": "artifact-no-build-validated",
+      "authorization": "Refetch exact4f0 lake-cache through H88; verify official sha256; no cold Derived20/21 build. Exact published isolated index resolves five conflicting preserved mappings; requested no-build targets exit0."
+    },
+    {
+      "question": "Q-CUSTOM-CRLF-01",
+      "decision": "H126",
+      "status": "answered",
+      "authorization": "H126 authorizes this lane to correct scripts/solc-unit.mjs documentation spans by excluding trailing CR, retaining every admission requirement; add LF/CRLF and loop/global/nominal controls, then replay the unchanged native F6 fixture."
+    },
+    {
+      "question": "Q-REL-NORMALIZER-01",
+      "decision": "H126",
+      "status": "answered",
+      "authorization": "H126 option1 authorizes only a public wrapper around private readImportedContract with identical arguments/result and an rfl equality lemma in Solidity/Frontend/Import.lean. No other existing declaration changes. Rebuild only Import dependents and refetch other cache artifacts."
+    },
+    {
+      "question": "Q-TIMING-REPAIR-01",
+      "decision": "H126",
+      "status": "answered",
+      "authorization": "H126 option1 routes the Derived17 proof-cost repair to module-times (OT-PERF-SLOW). Do not rerun the unchanged300s workload before that repair is merged; continue independent work."
     }
   ]
 }

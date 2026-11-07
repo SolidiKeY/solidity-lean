@@ -1,3 +1,153 @@
+# H44 split of held checkpoint 001b1de0a
+
+The coordinator's H44 instruction narrows this increment to reviewable code,
+documentation and one compact external-artifact manifest. The held increment's
+raw datasets and generated Lean fixtures were already off Git. Its generated
+current queue and expanded evidence index are now external as well. The queue is
+preserved byte-for-byte; the expanded index changes only storage references and
+current documentation identity. No theorem, proof gate, budget, source module,
+script, test or accepted inventory payload changes in this split.
+
+The prior head and its archive remain preserved. The replacement increment is
+forward-only on the same branch; its net change from integrated master contains
+scripts/tests, documentation and the compact manifest, with no added dataset,
+corpus, log or generated fixture. All four original migration checkpoints remain
+partial. This split is not migration acceptance or goal completion.
+
+# Continuation after master ac9d8db2a
+
+The latest coordinator instruction explicitly authorized fetching master and
+continuing from its reviewed merge. This branch fast-forwarded cleanly to
+`ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`; original base remains
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. No push, default-branch write,
+new/reset goal or completion transition occurred. The current queue is
+`CURRENT-QUEUE.json` in the external archive indexed by the
+[compact manifest](../../tests/h62/item6/migrate-examples/evidence/resume-ac9d8db2a.json).
+It supersedes historical retirement and prior incremental-wait state below.
+
+## Accepted old inventory checkpoint
+
+The saved incremental retry log ended “Build completed successfully (1080 jobs)”,
+but the VM restart left no monitor seal. It is not accepted timing evidence.
+A fresh bounded incremental confirmation passes exit0,1080 jobs,1.01795s,
+58986496-byte sampled peak. This is a cached build, not the clean baseline.
+All354 assigned source files and1075 explicit-import closure files remain
+byte-identical to the pinned base, including721 external local modules.
+
+A complete old ModuleData inventory now records15858 kernel occurrences,
+15818 unique kernel names,107634 compiler-extra occurrences/names,40 kernel
+reemissions across modules and55 kernel/compiler name overlaps. All123492
+occurrences are retained;123397 distinct structural names; no exclusions.
+Repeated kernel names have zero signature variants. Occurrence identity is
+(module,category,structural name): exact duplicates within a table still fail.
+ModuleData provenance is not exclusive source ownership; lazy generated
+realizations can appear under multiple modules. This does not transfer ownership.
+
+The full source stream contains604931 structural expression nodes. Kernel
+signatures retain declaration kind/safety, universes, binder names/order/flags,
+private/protected-name flags and canonical metadata. Fingerprint:
+`4787a9ecf205001781a58bab547ab4f91f491aeb02cf332f986b2c51d1a78e16`.
+Native IO memoization uses existing ExprPtr keys solely to traverse shared
+expressions; addresses and node IDs never enter structural fingerprints.
+Strong Expr references prevent live pointer reuse. No model statements,
+definition bodies, proof budgets, axiom declarations or trust shortcuts changed.
+
+The accepted direct-file export passes exit0 in23.21997s at1816281088 bytes RSS;
+bounded stream validation passes exit0 in13.13199s at516358144 bytes. These are
+instrumentation measurements, not assigned-module timing comparisons. The
+validator authenticates all354 frozen paths/hashes, actual4.24.0 compiler/full
+commit, capture source commit, exact regenerated fixture, read-only repository
+codec inputs, module counts/completion and a matching compiler/file stream seal.
+Compiler-extra signatures and actual export accessibility remain unresolved;
+new signatures/shims are null. No full H78, new parity, semantic or axiom-equality
+acceptance follows. Type fingerprints do not establish definition-value semantics.
+
+The encoder and codec are read-only tooling dependencies from
+scripts/h62/item6/migrate-testsuite/expr_dag.py and dag_codec.py, already present
+in the authorized integration. Their repository paths/hashes are in the manifest.
+The scoped patch does not take ownership of or duplicate those files; the bundle
+retains the integrated upstream ancestry needed by this tooling.
+
+The tree export failed the unchanged RSS cap after150.0478s (12942381056 bytes);
+its1.7GB partial stream lacks completion and remains unaccepted on the original
+VM. Two later buffered audit trials were explicitly interrupted, recorded and
+preserved. Lean's run_elab captures stdout; direct file transport avoids retaining
+or formatting the large stream as one diagnostic. Neither interrupted trial is
+accepted timing/proof evidence. No known STOP was repeated unchanged.
+
+## Gates, reviews and portable evidence
+
+25 Python controls pass: process/interface8, dependency/fixture5, DAG10,
+portable evidence2. Native controls pass on both actual official toolchains,
+exercise distinct runtime nodes, and preserve shared-content/binder/let hashes.
+Their checker authenticates successful bounded compiler results, actual runtime
+version/full commit, file/node seals and exact regenerated fixtures. Reusing the
+old stream or old result as new is refused. Current bounded per-file KeySort
+checks exit0 on both versions. Lean MCP diagnostics are not exposed here.
+
+Actual old: Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613. Actual new: Lean4.35.0
+commiteb6cafb7290e8bd5f2937522d8d804f58f02bafc, Lake5.0.0-src+eb6cafb.
+Official4.35 archive SHA256 remains
+`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
+The authoritative preserved pin/provenance artifact is required; archive hash
+verification is an external-artifact check, not something inferred from this prose.
+
+Finder and skeptic reviewed read-only without Lean/server/writes. Fixed findings:
+streaming memory, frozen-census/compiler provenance, bytecode-cache-free dependency
+loading, genuine native-node controls, cross-version control provenance and
+legitimate ModuleData occurrence accounting. Full final migration review remains
+pending its gates. Complete review evidence is included in the artifact archive.
+
+[The compact committed H44 manifest](../../tests/h62/item6/migrate-examples/evidence/resume-ac9d8db2a.json)
+records the external archive's absolute VM path, exact byte size and SHA256,
+plus its per-file checksum manifest. Generated queue state, the expanded evidence
+index, fixtures, inventories, dumps and logs are external archive members.
+The index is `evidence-manifest.json`; the queue is `CURRENT-QUEUE.json`.
+No VM artifact is claimed to be available from Git alone.
+
+The existing repository-only command still works with the compact manifest;
+it checks the same code/document inputs and reports the archive pending. With
+--artifact-root set to the archive's directory it verifies the whole archive.
+After verifying and unpacking it, run the unchanged expanded per-file verifier:
+
+```sh
+python3 scripts/h62/item6/migrate-examples/verify_evidence.py \
+  --manifest "$EXAMPLES_ARTIFACT_ROOT/evidence-manifest.json" \
+  --artifact-root "$EXAMPLES_ARTIFACT_ROOT"
+```
+
+Using --repository-only instead reports external artifacts pending. The archive
+contains old-inventory.jsonl,old-summary.json,raw InterfaceDagOldDirect.jsonl,
+fixture/manifest, compiler/result/log, sealed controls and actual version records.
+Original assignment/queue/scope files remain in the cumulative patch/bundle and
+in the archive. The generated current queue is moved byte-for-byte, not changed.
+
+## Remaining queue and typed dependency
+
+The committed testsuite owner report records five official4.35.0 failures in
+Solidity/Syntax/Raw.lean at597,650,665,682,684. That unchanged dependency is in
+this directory's closure; accepted String/Slice/dependent-pattern compatibility
+work belongs to migrate-syntax via root/gate. This lane did not repeat the known
+failure or change an existing parser definition. See CURRENT-QUEUE.json for the
+repository-relative report and source hash. SortCheck.Parser remains a separate
+nonblocking CLI issue outside this examples closure.
+
+All four original checkpoints remain partial: clean old baseline, complete new
+build, new generated-public/signature/visibility inventory and producer shims,
+matched clean timing/RSS with >10percent STOP, definition/meaning/axiom checks,
+final ./run-lean.sh and complete root-gate handoff. The current DAG collector is
+explicitly old-only; new-stage collection/comparison still needs validation.
+Before reusing measure.sh, establish a pinned-base owned fixture worktree or
+exact original354-target/configuration: the current generated master root also
+contains unassigned DecisionResidue. Recording a fresh cache does not fix target
+scope drift. This measurement setup remains unfinished.
+No valid assigned old/new timing delta exists. No RUNTIME_GATE_PASS.
+Fresh-thread continuation retains the original VM/branch/goal; no competing
+continuation was created. The sections below are historical checkpoints.
+
+---
+
 # Reactivated after the coordinator merge (2026-11-06)
 
 The coordinator explicitly instructed: “Merged migrate-examples e511ddcb6e into

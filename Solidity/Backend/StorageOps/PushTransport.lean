@@ -36,10 +36,7 @@ theorem element_read {n : Nat} {G : Schema n} {p : PrimTy}
     next full => cases pushed
 
 private theorem data_ne_base (base : Solidity.Storage.Loc) (i : Nat) : Solidity.Storage.Loc.data base i ≠ base := by
-  intro same
-  have depth := congrArg Solidity.Storage.Loc.depth same
-  simp only [Solidity.Storage.Loc.depth] at depth
-  omega
+  exact Solidity.Storage.Loc.data_ne_self base i
 
 /-- The post-owner relation holds IFF its original header coverage holds.
 This characterizes the real public-interface boundary without adding a source

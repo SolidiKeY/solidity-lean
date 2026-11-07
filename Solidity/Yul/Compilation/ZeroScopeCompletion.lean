@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.ZeroLoopScope
 import Solidity.Yul.Compilation.LoopControlCompletion
 /-! Reverse normal-success correspondence for actual lexical zero scopes.
@@ -60,23 +61,14 @@ theorem completion_iff {c : Control} {n fresh fuel : Nat} {body : Stmt [] [] c (
    some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- constructor
- · rintro ⟨horizon,source⟩
-   obtain ⟨actual,same,target⟩ := ZeroLoopScope.source_to_model artifact code lowered horizon locals
-     ⟨sourceLocals out,.normal⟩ source m caller
-   have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
-   cases equal
-   exact target
- · intro ran
-   obtain ⟨horizon,actual,source,_,frame⟩ := model_to_source artifact code lowered locals m
-     {m with stack := out.toList.map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : out.toList.map coreWord = actual.toList.map coreWord := List.append_cancel_right stacks
-   have lists : out.toList = actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp lists
-   cases equal
-   exact ⟨horizon,source⟩
+ apply CompletionControls.completion_iff_zero (.zero fresh body) artifact.compiled.profile code
+   ?_ (model_to_source artifact code lowered) locals out m caller
+ intro horizon locals out source m caller
+ obtain ⟨actual,same,target⟩ := ZeroLoopScope.source_to_model artifact code lowered horizon locals
+   ⟨sourceLocals out,.normal⟩ source m caller
+ have equal : out = actual := CompletionControls.sourceLocals_injective (congrArg Outcome.vars same)
+ cases equal
+ exact target
 
 /-- info: 'Solidity.Yul.Compilation.ZeroScopeCompletion.model_to_source' depends on axioms: [propext,
  Classical.choice,

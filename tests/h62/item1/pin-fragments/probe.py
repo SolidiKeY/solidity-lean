@@ -68,6 +68,73 @@ class FragmentProbes(unittest.TestCase):
             self.assertTrue(any("changed on both sides" in note for note in notes))
             self.assertEqual(file.read_bytes(), before)
 
+    def test_merge_removal_conflicts_preserve_current_value(self):
+        key = "Solidity/F.lean:x"
+        with tempfile.TemporaryDirectory() as root:
+            file = pathlib.Path(root) / FRAGMENTS / "Solidity/F.json"
+            file.parent.mkdir(parents=True)
+            file.write_text(json.dumps({key: ["Quot.sound"]}) + "\n")
+            before = file.read_bytes(); notes = []; old = os.getcwd()
+            try:
+                os.chdir(root)
+                accepted = fragments.apply_json(FixtureTree(root), "inventory.json", FRAGMENTS,
+                    json.dumps({key: []}), "{}", "lane", notes, False)
+            finally:
+                os.chdir(old)
+            self.assertFalse(accepted)
+            self.assertTrue(any("removed" in note and "changed on the other side" in note for note in notes))
+            self.assertEqual(file.read_bytes(), before)
+
+    def test_own_fragment_is_authoritative_over_stale_combined_value(self):
+        key = "Solidity/F.lean:x"
+        with tempfile.TemporaryDirectory() as root:
+            file = pathlib.Path(root) / FRAGMENTS / "Solidity/F.json"
+            file.parent.mkdir(parents=True)
+            file.write_text(json.dumps({key: ["Quot.sound"]}) + "\n")
+            before = file.read_bytes(); notes = []; old = os.getcwd()
+            try:
+                os.chdir(root)
+                accepted = fragments.apply_json(FixtureTree(root), "inventory.json", FRAGMENTS,
+                    json.dumps({key: []}), json.dumps({key: ["propext"]}), "lane", notes, True)
+            finally:
+                os.chdir(old)
+            self.assertTrue(accepted)
+            self.assertEqual(file.read_bytes(), before)
+
+    def test_merge_conflict_prevents_other_pending_writes(self):
+        key, other = "Solidity/F.lean:x", "Solidity/G.lean:y"
+        with tempfile.TemporaryDirectory() as root:
+            file = pathlib.Path(root) / FRAGMENTS / "Solidity/F.json"
+            file.parent.mkdir(parents=True)
+            file.write_text(json.dumps({key: ["Quot.sound"]}) + "\n")
+            before = file.read_bytes(); notes = []; old = os.getcwd()
+            try:
+                os.chdir(root)
+                accepted = fragments.apply_json(FixtureTree(root), "inventory.json", FRAGMENTS,
+                    json.dumps({key: []}), json.dumps({other: ["propext"]}), "lane", notes, False)
+            finally:
+                os.chdir(old)
+            self.assertFalse(accepted)
+            self.assertTrue(any("removed" in note and "changed on the other side" in note for note in notes))
+            self.assertEqual(file.read_bytes(), before)
+            self.assertFalse((pathlib.Path(root) / FRAGMENTS / "Solidity/G.json").exists())
+
+    def test_uncontested_removal_deletes_empty_fragment(self):
+        key = "Solidity/F.lean:x"
+        with tempfile.TemporaryDirectory() as root:
+            file = pathlib.Path(root) / FRAGMENTS / "Solidity/F.json"
+            file.parent.mkdir(parents=True)
+            file.write_text(json.dumps({key: []}) + "\n")
+            notes = []; old = os.getcwd()
+            try:
+                os.chdir(root)
+                accepted = fragments.apply_json(FixtureTree(root), "inventory.json", FRAGMENTS,
+                    json.dumps({key: []}), "{}", "lane", notes, False)
+            finally:
+                os.chdir(old)
+            self.assertTrue(accepted)
+            self.assertFalse(file.exists())
+
     def test_cleanup_removes_stale_fragments_and_keeps_live_pins(self):
         with tempfile.TemporaryDirectory() as root:
             write_fragments(root, {"Solidity/Old/Nested.lean:x": [], "Solidity/Keep.lean:a": []})

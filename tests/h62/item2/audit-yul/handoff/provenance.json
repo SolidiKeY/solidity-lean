@@ -1,0 +1,17 @@
+{
+  "source": "Complete original visible user assignment and original supplied goal objective transcribed from original thread; environment captured separately. No get_goal or original renderer export API is exposed.",
+  "original_rendered_prompt_sha256_from_launcher": "9200a8189edd8b29e6a04c04ac15ec542d6d227fe52f77b2344ca13b65b7fecf",
+  "renderer_hash_verifiable": false,
+  "warning": "The launcher hash describes an unavailable rendered serialization; do not equate it to the separately hashed visible assignment text.",
+  "captured_files": {
+    "original-work-backfill-queue.md": "ba5094909f62bf97015da9dc5664077071f3889a4de1507c4111e86d70b53060",
+    "original-assignment.txt": "07ab1e8918a9ea261a7364f94593456786e32f865f58b8b3bb3f36fab601e4a2",
+    "retirement-instruction.txt": "d780aa8a4bbc0cf69004325102b8ca87f46767a0a0eb254a75e9d23412987b7e",
+    "original-environment.xml": "469a9f19d7c944ad0ef577b81c8759d4b72d4af2bae18363e03379fab0b94522",
+    "original-goal-objective.txt": "6d26560a6134a217b4c3f13410fffd158d1ce05e83f0453a7864933c9c71f34c",
+    "remaining-queue.md": "1e44556efd4da58becb18450bec4b52613dadeb63f609b3fd23738d78de33d8e",
+    "waits.json": "74c0c71807bb94f1d9ae27558e3f46372dd9122b2d73d85d06d96978788ea9eb",
+    "retirement-reviews.md": "51b872fdc680ce5cc428b8a0adcfa73fb385b6590cbda993739077e7478949cd",
+    "scope-manifest.json": "88bedba5ab12f5d921938202acb474cdcad11963359d2fa662ebaf776ad783e2"
+  }
+}

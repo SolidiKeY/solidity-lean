@@ -1,21 +1,15 @@
 import Solidity.Storage.HashedSeparation
 
-/-! Isolated symbolic-location fixture. This is not registered or integrated. -/
+/-! Symbolic-location correspondence and alias controls. This test module is not registered. -/
 namespace H62.LocationFixture
 open Solidity.Storage
 
 theorem child_ne_base (base : Loc) (i : Nat) : Loc.data base i ≠ base := by
-  intro h
-  have hd : (Loc.data base i).depth = base.depth := congrArg Loc.depth h
-  simp only [Loc.depth] at hd
-  omega
+  exact Solidity.Storage.Loc.data_ne_self base i
 
 theorem grandchild_ne_base (base : Loc) (i j : Nat) :
     Loc.data (.data base i) j ≠ base := by
-  intro h
-  have hd : (Loc.data (.data base i) j).depth = base.depth := congrArg Loc.depth h
-  simp only [Loc.depth] at hd
-  omega
+  exact Solidity.Storage.Loc.data_data_ne_self base i j
 
 theorem base_ne_child (base : Loc) (i : Nat) : base ≠ Loc.data base i :=
   Ne.symm (child_ne_base base i)
@@ -47,4 +41,8 @@ theorem child_word_alias : Loc.data (.root 0) 0 ≠ .root 0 ∧
 #print axioms child_ne_base
 #print axioms grandchild_ne_base
 #print axioms distinct_indices
+/-- info: 'Solidity.Storage.Loc.data_ne_self' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.Loc.data_ne_self
+/-- info: 'Solidity.Storage.Loc.data_data_ne_self' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Storage.Loc.data_data_ne_self
 end H62.LocationFixture

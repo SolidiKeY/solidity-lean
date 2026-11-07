@@ -6,6 +6,7 @@ Each imported repository module is compiled once in topological order. This
 is per-file dependency validation; it DOES NOT replace ./run-lean.sh final gate.
 """
 import argparse
+import ctypes
 import hashlib
 import re
 import json
@@ -17,6 +18,9 @@ import shutil
 import subprocess
 import time
 import census
+
+INTERRUPTED = None
+RESOURCE_POLICY = "vm16GiB-reserve4GiB-treeRss10GiB-AS12GiB-time300s-no-swap-v3"
 
 
 def available():
@@ -74,26 +78,122 @@ def dependencies(repo, targets):
 
 
 def limits():
-    # Lean reserves large virtual arenas; RLIMIT_AS is not an RSS limit.
-    # Keep the VM's existing hard cgroup cap, guard 4 GiB available memory and
-    # 12 GiB child resident memory below. Do not alter the VM/cgroup limits.
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+    existing = [x for x in (soft, hard) if x != resource.RLIM_INFINITY]
+    ceiling = min([12*1024**3] + existing)
+    resource.setrlimit(resource.RLIMIT_AS, (ceiling, ceiling))
 
 
-def terminate(proc):
-    if proc.poll() is None:
-        os.killpg(proc.pid, signal.SIGTERM)
-        try: proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            os.killpg(proc.pid, signal.SIGKILL)
+def scoped_pids(records, group):
+    chosen = {pid for pid, (_, pgrp, _) in records.items() if pgrp == group}
+    while True:
+        more = {pid for pid, (parent, _, _) in records.items() if parent in chosen}
+        if more <= chosen: return chosen
+        chosen |= more
+
+
+def workload_rss_kib(proc=None):
+    """Include descendant process groups, including the separate Lean session."""
+    records = {}
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit(): continue
+        try:
+            stat = (entry/"stat").read_text(); fields = stat[stat.rfind(")")+2:].split()
+            rss = int((entry/"statm").read_text().split()[1]) * os.sysconf("SC_PAGE_SIZE") // 1024
+            records[int(entry.name)] = (int(fields[1]), int(fields[2]), rss)
+        except (OSError, ValueError): continue
+    if proc is not None: remember_children(proc)
+    if os.getpid() not in records: raise RuntimeError("runner RSS could not be measured")
+    return sum(records[pid][2] for pid in scoped_pids(records, os.getpgrp()))
+
+
+def process_tree():
+    records = {}
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit(): continue
+        try:
+            stat = (entry/"stat").read_text(); fields = stat[stat.rfind(")")+2:].split()
+            records[int(entry.name)] = (int(fields[1]), fields[19])
+        except (OSError, ValueError): continue
+    return records
+
+
+def remember_children(proc):
+    records = process_tree()
+    # This runner is a child subreaper and runs only one Lean child at a time.
+    chosen = {proc.pid} | {p for p, (parent, _) in records.items() if parent == os.getpid()}
+    while True:
+        more = {p for p, (parent, _) in records.items() if parent in chosen}
+        if more <= chosen: break
+        chosen |= more
+    known = getattr(proc, "_audit_children", {})
+    known.update({p: records[p][1] for p in chosen if p in records and p != os.getpid()})
+    proc._audit_children = known
+
+
+def signal_children(proc, sig):
+    remember_children(proc)
+    current = process_tree()
+    for pid, started in proc._audit_children.items():
+        if pid == proc.pid: continue
+        if pid in current and current[pid][1] == started:
+            try: os.kill(pid, sig)
+            except ProcessLookupError: pass
+
+
+def terminate(proc, force=False):
+    if force:
+        # Resource/interrupt stops must not grant a growing workload a grace
+        # period in which it can consume the VM reserve. Preserve PID identity
+        # checks for detached descendants, then reap the owned process group.
+        signal_children(proc, signal.SIGKILL)
+        if proc.poll() is None:
+            try: os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError: pass
             proc.wait()
+        signal_children(proc, signal.SIGKILL)
+        for pid in proc._audit_children:
+            if pid == proc.pid: continue
+            try: os.waitpid(pid, 0)
+            except ChildProcessError: pass
+        return
+    signal_children(proc, signal.SIGTERM)
+    if proc.poll() is None:
+        try: proc.wait(timeout=.2)
+        except subprocess.TimeoutExpired:
+            os.killpg(proc.pid, signal.SIGTERM)
+            try: proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                os.killpg(proc.pid, signal.SIGKILL); proc.wait()
+    signal_children(proc, signal.SIGKILL)
+    for pid in proc._audit_children:
+        if pid == proc.pid: continue
+        try: os.waitpid(pid, 0)
+        except ChildProcessError: pass
+
+
+def subreaper():
+    # Linux PR_SET_CHILD_SUBREAPER: detached grandchildren remain owned/reapable.
+    libc = ctypes.CDLL(None, use_errno=True)
+    if libc.prctl(36, 1, 0, 0, 0) != 0:
+        raise RuntimeError("cannot establish child subreaper: " + str(ctypes.get_errno()))
+
+
+def deadline_expired(start, end):
+    return end-start >= 300
 
 
 def interrupted(signum, _frame):
-    raise SystemExit(128+signum)
+    # Defer until the active Popen object is protected by its cleanup finally.
+    global INTERRUPTED
+    INTERRUPTED = signum
 
 
 def main():
+    global INTERRUPTED
+    INTERRUPTED = None
+    subreaper()
     signal.signal(signal.SIGTERM, interrupted)
     signal.signal(signal.SIGINT, interrupted)
     p = argparse.ArgumentParser(description=__doc__)
@@ -137,7 +237,7 @@ def main():
                 imports.extend(module_name(name) for name in line[7:].split())
         data = {"source":census.digest(path.read_bytes()),"compiler":compiler,
                 "flags":["-j1","--tstack=131072"],
-                "resource_policy":"vm-hard-cgroup-16GiB-reserve4GiB-rss12GiB-no-system-swap",
+                "resource_policy":RESOURCE_POLICY,
                 "imports":{name:fingerprint(name) for name in imports}}
         result = census.digest(json.dumps(data,sort_keys=True).encode())
         fingerprints[module] = result
@@ -166,6 +266,7 @@ def main():
                 raise RuntimeError("direct check requires validated import receipt: "+imported)
     failed = set()
     for module in (a.modules if a.direct else ordered):
+        if INTERRUPTED is not None: raise SystemExit(128+INTERRUPTED)
         if available() < 4*1024**3: raise RuntimeError("less than 4 GiB headroom")
         source = repo/(module.replace(".", "/")+".lean")
         imported = [module_name(name) for line in census.mask(source.read_text()).splitlines() if line.startswith("import ") for name in line[7:].split()]
@@ -205,27 +306,44 @@ def main():
                                     stderr=subprocess.STDOUT, start_new_session=True, preexec_fn=limits)
             resource_stop = False
             sampled_peak_rss_kib = 0
+            sampled_peak_workload_rss_kib = 0
+            stop_reason = None
+            abnormal = True
             try:
+                if INTERRUPTED is not None: raise SystemExit(128+INTERRUPTED)
                 while proc.poll() is None:
+                    if INTERRUPTED is not None: raise SystemExit(128+INTERRUPTED)
                     try:
                         rss_kib = int(Path(f"/proc/{proc.pid}/statm").read_text().split()[1]) * os.sysconf("SC_PAGE_SIZE") // 1024
                     except FileNotFoundError: rss_kib = 0
                     sampled_peak_rss_kib = max(sampled_peak_rss_kib, rss_kib)
-                    if available() < 4*1024**3 or rss_kib > 12*1024**2:
-                        resource_stop = True
-                        terminate(proc)
+                    workload_rss = workload_rss_kib(proc)
+                    sampled_peak_workload_rss_kib = max(sampled_peak_workload_rss_kib, workload_rss)
+                    if deadline_expired(start, time.monotonic()):
+                        resource_stop = True; stop_reason = "per-file-timeout"
+                        terminate(proc, force=True)
                         break
-                    try: proc.wait(timeout=1)
+                    if available() < 4*1024**3 or workload_rss > 10*1024**2:
+                        resource_stop = True
+                        stop_reason = "reserve-or-workload-rss"
+                        terminate(proc, force=True)
+                        break
+                    try: proc.wait(timeout=.1)
                     except subprocess.TimeoutExpired: pass
                 code = proc.wait()
+                if INTERRUPTED is not None: raise SystemExit(128+INTERRUPTED)
+                if deadline_expired(start, time.monotonic()):
+                    resource_stop = True; stop_reason = "per-file-timeout"
+                abnormal = False
             finally:
-                terminate(proc)
+                terminate(proc, force=abnormal or resource_stop or INTERRUPTED is not None)
         usage = resource.getrusage(resource.RUSAGE_CHILDREN)
         row = dict(module=module, command=cmd, exit=code, resource_stop=resource_stop,
                    cache_hit=False, fingerprint=expected,
                    cpu_seconds=round(usage.ru_utime+usage.ru_stime-before_usage.ru_utime-before_usage.ru_stime,6),
                    max_child_rss_since_runner_start_kib=usage.ru_maxrss,
                    sampled_peak_rss_kib=sampled_peak_rss_kib,
+                   sampled_peak_workload_rss_kib=sampled_peak_workload_rss_kib, stop_reason=stop_reason,
                    seconds=round(time.monotonic()-start, 3), log=str(log),
                    source_sha256=census.digest(source.read_bytes()))
         if code == 0 and not resource_stop:

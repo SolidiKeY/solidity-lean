@@ -1,0 +1,18 @@
+/** Guarded regression: mutating a block timestamp must trigger the real pinned header validator; conformance cannot be manufactured with skipHeaderValidation. Synthetic controls only, also guarding accepted-invalid blocks being counted as rejection matches. */
+import test from 'node:test';import assert from 'node:assert/strict';import {createReadStream} from 'node:fs';import {createGunzip} from 'node:zlib';import {createInterface} from 'node:readline';import {fork} from 'node:child_process';import {createRequire} from 'node:module';import {pathToFileURL,fileURLToPath} from 'node:url';
+test('real provider rejects timestamp equal to genesis',{timeout:65000},async()=>{
+ const bulk=process.env.G52_BULK;if(!bulk)throw new Error('G52_BULK required; never skip');
+ const require=createRequire(bulk+'/reference/package.json');const {RLP}=await import(pathToFileURL(require.resolve('@ethereumjs/rlp')).href);const {hexToBytes,bytesToHex}=await import(pathToFileURL(require.resolve('@ethereumjs/util')).href);
+ const source=createReadStream(bulk+'/blockchain-inputs.jsonl.gz').pipe(createGunzip());const lines=createInterface({input:source,crlfDelay:Infinity});let record;for await(const l of lines){record=JSON.parse(l);break;}lines.close();source.destroy();
+ const decoded=RLP.decode(hexToBytes(record.fixture.blocks[0].rlp));decoded[0][11]=hexToBytes(record.fixture.genesisBlockHeader.timestamp);record.fixture.blocks[0].rlp=bytesToHex(RLP.encode(decoded));
+ const child=fork(fileURLToPath(new URL('../../../../scripts/h62/item3/g52-differential/eest_reference.mjs',import.meta.url)),['--worker',bulk],{execArgv:['--max-old-space-size=4096'],stdio:['ignore','ignore','inherit','ipc']});
+ try{const result=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('control timeout')),60000);child.once('message',v=>{clearTimeout(timer);resolve(v);});child.once('error',e=>{clearTimeout(timer);reject(e);});child.once('exit',()=>{clearTimeout(timer);reject(new Error('worker exited'));});child.send(record);});assert.equal(result.status,'engine_error');assert.match(result.reason,/invalid timestamp/);assert.match(result.stack,/Blockchain.validateHeader/);}finally{if(child.exitCode===null)await new Promise(done=>{child.once('exit',done);child.kill('SIGKILL');});}
+});
+
+test('a valid native block tagged expected-invalid remains a mismatch',{timeout:65000},async()=>{
+ const bulk=process.env.G52_BULK;if(!bulk)throw new Error('G52_BULK required; never skip');
+ const source=createReadStream(bulk+'/blockchain-inputs.jsonl.gz').pipe(createGunzip());const lines=createInterface({input:source,crlfDelay:Infinity});let record;for await(const line of lines){record=JSON.parse(line);break;}lines.close();source.destroy();
+ record.fixture.blocks[0].expectException='BlockException.INVALID_REQUESTS';
+ const child=fork(fileURLToPath(new URL('../../../../scripts/h62/item3/g52-differential/eest_reference.mjs',import.meta.url)),['--worker',bulk],{execArgv:['--max-old-space-size=4096'],stdio:['ignore','ignore','inherit','ipc']});
+ try{const result=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('control timeout')),60000);child.once('message',v=>{clearTimeout(timer);resolve(v);});child.once('error',e=>{clearTimeout(timer);reject(e);});child.once('exit',()=>{clearTimeout(timer);reject(new Error('worker exited'));});child.send(record);});assert.equal(result.status,'reference_mismatch');assert.deepEqual(result.fields,['block_admission']);assert.deepEqual(result.validation_stages,['decode','provider-validation','runBlock']);assert.ok(result.observed.transactions.length>0);}finally{if(child.exitCode===null)await new Promise(done=>{child.once('exit',done);child.kill('SIGKILL');});}
+});

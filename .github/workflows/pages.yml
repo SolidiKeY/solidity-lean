@@ -117,7 +117,7 @@ jobs:
       - name: Build
         uses: leanprover/lean-action@v1
         with:
-          build-args: "Solidity SolidityExamples"
+          build-args: "Solidity SolidityExamples SoliditySlowExamples"
           use-mathlib-cache: "false"
           test: "false"
           lint: "false"

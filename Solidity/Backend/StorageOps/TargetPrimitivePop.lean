@@ -42,10 +42,7 @@ theorem run_current (slot : Evm.Slot) (machine : Evm.Machine) :
     rw [Evm.WordStore.write_same_of_lt _ _ _ bound]
 
 private theorem child_ne_header (base : Solidity.Storage.Loc) (i : Nat) : Solidity.Storage.Loc.data base i ≠ base := by
-  intro same
-  have depth := congrArg Solidity.Storage.Loc.depth same
-  change base.depth + 1 = base.depth at depth
-  omega
+  exact Solidity.Storage.Loc.data_ne_self base i
 
 /-- The two OPERATION-GENERATED symbolic updates commute. Numeric separation
 is supplied later by the existing covered finite-run transport, not global hashing. -/

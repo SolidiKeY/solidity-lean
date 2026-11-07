@@ -1,0 +1,128 @@
+{
+  "schema": "memory-runtime-census-v1",
+  "checkedHead": "6479617481ce020d41f7061d9dcf4dbfe9bd1ab8",
+  "censusScriptSha256": "98fe52c0bf413d1ef2e1bec04e4588dcefba20151fa864598b547d26a5939b07",
+  "binarySha256": "a3f920a74d53ea9f5201cbafa166900efd2495c65b1bd98e7c7ef26990bd8c6a",
+  "producerSha256": "67a7525b4a8afff0746d5d5aedfe9e8cdc028a1ac1bfb2184dd5dae774d730f7",
+  "leanSourceFingerprints": 343,
+  "generatedSourceFingerprints": 1631,
+  "selectedModules": 206,
+  "selectedFunctions": 10159,
+  "nonInitializerFunctions": 9953,
+  "initializerFunctions": 206,
+  "closedValueFingerprints": 4987,
+  "definedELFSymbols": 14789,
+  "undefinedELFSymbols": 298,
+  "textELFSymbols": 8405,
+  "textSymbolsWithoutExactGeneratedName": 3783,
+  "originNameCandidates": 14,
+  "functionsWithForbiddenLexicalHits": 0,
+  "otherCallSpellings": 190,
+  "nativeTextSymbolsWithCandidateOrigins": 3249,
+  "nativeTextSymbolsWithoutCandidateOrigins": 6,
+  "archiveFingerprints": 16,
+  "buildInputFingerprints": 60,
+  "dynamicLibraryFingerprints": 6,
+  "retainedLinkInputFingerprints": 3,
+  "coverage": "Every producer-selected function/initializer and closed value, every traversed generated-C source, every sourceFiles entry, and every nm defined/undefined row is enumerated. No row excluded by a safety classification.",
+  "limitations": [
+    "Finite source/object/symbol inventory, not C-parser completeness or semantic certification.",
+    "Lexical references and names do not prove absence of forbidden functionality, including indirect calls or native runtime code.",
+    "Native and dynamically linked code beyond generated definitions remains unclassified; no RUNTIME_GATE_PASS.",
+    "No compiler/source adequacy, browser execution, or closure of four pending storage diamonds."
+  ],
+  "closure": {
+    "modules": 206,
+    "functions": 9953,
+    "closedValues": 4987,
+    "sourceModules": 1631
+  },
+  "censusGate": {
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/memory-references/runtime-boundary-census.py",
+      "/workspace/solidity-lean",
+      "tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/native-prefix",
+      "tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/native",
+      "tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/census-complete"
+    ],
+    "exit": 0,
+    "wallSeconds": 35.99771245600277,
+    "peakAggregateRssKiB": 1230236,
+    "headroomGuardStopped": false,
+    "memoryMax": 12884901888,
+    "memorySwapMax": 0,
+    "leanThreads": 1
+  },
+  "refusalGate": {
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/memory-references/census-controls.py",
+      "/workspace/solidity-lean",
+      "tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/native-prefix",
+      "tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/native",
+      "tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/census-complete",
+      "tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/census-complete-refusals"
+    ],
+    "exit": 0,
+    "wallSeconds": 0.6020097870023164,
+    "peakAggregateRssKiB": 30264,
+    "headroomGuardStopped": false,
+    "memoryMax": 12884901888,
+    "memorySwapMax": 0,
+    "leanThreads": 1
+  },
+  "refusals": [
+    "truncated-source-manifest",
+    "wrong-binary-fingerprint",
+    "wrong-build-input-fingerprint",
+    "truncated-build-inputs",
+    "python-optimization"
+  ],
+  "archive": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/runtime-census-complete-evidence.tar.zst",
+    "bytes": 5667527,
+    "sha256": "0b03fd9919417b69d50eec2c6a5086fb1afbac88ff868b50c6ecb4a86662bb55",
+    "files": 248,
+    "payloadBytes": 48030665,
+    "completeMemberReadbackVerified": true
+  },
+  "summary": {
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/census-complete/summary.json",
+    "sha256": "661a594beb82a5a5479f0a321590e0476da2adffca8abdfc7d5fc9eaa20a355e",
+    "inventoriedFiles": 223
+  },
+  "controlsScriptSha256": "05bfa22dd632620be5e86ca9865ed739d567a31fb703fc1e3688fe3fd84b301d",
+  "review": "Independent read-only finder and skeptic verified all223 inventory hashes and4987 unique closed-value initializer bindings; both confirmed completeness repairs, final gate results and enumeration-only boundaries. No remaining concrete finding; no Lean/server used.",
+  "documentationGate": {
+    "command": "bash scripts/check-doc-paths.sh",
+    "exit": 1,
+    "failures": [
+      {
+        "file": "docs/feature-work/h62-6-migrate-theory.md",
+        "sha256": "6ad1fff6a82d0ba930b6a3af18d6d6ffe0da4704f89a57c214003b85fbf19632",
+        "reference": "StringApiWitness.original-unproved.lean"
+      },
+      {
+        "file": "tests/h62/item1/packet-panic/H71-CANDIDATE.md",
+        "sha256": "9612dee464c227093c88686dd182fccbbb07e2c56932f8a432cb6bd769107f93",
+        "reference": "Solidity/Backend/PrimitivePackets/PanicBytes.lean"
+      },
+      {
+        "file": "tests/h62/item4/generic-structuredflow/registration.md",
+        "sha256": "9c4a839c56c39b29ba90335892eeb9713a3a133d91a7697b749358d7d55e8a21",
+        "reference": "Backend/StructuredFlow/GenericMapped.lean"
+      },
+      {
+        "file": "tests/h62/item4/generic-structuredflow/registration.md",
+        "sha256": "9c4a839c56c39b29ba90335892eeb9713a3a133d91a7697b749358d7d55e8a21",
+        "reference": "Solidity/Backend/StructuredFlow/GenericMapped.lean"
+      }
+    ],
+    "ownedDocumentMissing": []
+  },
+  "policy": {
+    "H89": "No solkey checker gate run; previous output historical only.",
+    "H90": "New scripts identify guarded regressions in module docstrings."
+  }
+}

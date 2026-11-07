@@ -5,12 +5,12 @@
   "source": "docs/feature-work/h55-g49-final-theorem.md#exact-common-result-type-for-all-five-owner-deliveries",
   "genericRequirements": [
     "For each family i the owner must first publish the concrete canonical endpoint API, then prove the corresponding factory type below:",
-    "- `NativeContext_i`: the family's actual typed program/producer indices. - `Approved_i`: its UNCHANGED independently approved/admitted producer domain, with a proof of that domain's agreement/coverage. It must not be a success-only or implemented-fragment filter or an extra per-pass no-failure condition. - `A_i, B_i : NativeContext_i → Lang Event Outcome` with the original resource orders, Allowed/Admissible/Forward/Guard predicates and consistent prefixes. - `ps_i : (x : NativeContext_i) → (A_i x).Prog` and the analogous `pt_i`. - `beta_i : (x : NativeContext_i) → (B_i x).Env → (A_i x).Env`, prescribed independently of pc and proved uniform with the single public map across programs/artifacts in the fixed interface context. - `nu_i : (x : NativeContext_i) → (B_i x).Env → (A_i x).Res → (B_i x).Res`, an independently prescribed executable bound, not a choice witness or a post-hoc name for pc.need. - `Local_i`: the ENTIRE exact original conditional lane conclusion, keeping its old quantifiers/antecedents and all physical/frame/state/step facts.",
+    "- `NativeContext_i`: the family's actual typed program/producer indices. - `Approved_i`: its UNCHANGED independently approved/admitted producer domain, with a proof of that domain's agreement/coverage. It must not be a success-only or implemented-fragment filter or an extra per-pass no-failure condition. - `A_i, B_i : NativeContext_i \u2192 Lang Event Outcome` with the original resource orders, Allowed/Admissible/Forward/Guard predicates and consistent prefixes. - `ps_i : (x : NativeContext_i) \u2192 (A_i x).Prog` and the analogous `pt_i`. - `beta_i : (x : NativeContext_i) \u2192 (B_i x).Env \u2192 (A_i x).Env`, prescribed independently of pc and proved uniform with the single public map across programs/artifacts in the fixed interface context. - `nu_i : (x : NativeContext_i) \u2192 (B_i x).Env \u2192 (A_i x).Res \u2192 (B_i x).Res`, an independently prescribed executable bound, not a choice witness or a post-hoc name for pc.need. - `Local_i`: the ENTIRE exact original conditional lane conclusion, keeping its old quantifiers/antecedents and all physical/frame/state/step facts.",
     "The names with family suffixes are REQUIRED OWNER DELIVERABLES, not asserted existing APIs. The inspected local statements do not already publish all their canonical Lang/program/map/bound definitions. Owners must include operational and source-origin/encoding/observation binding equations to the actual executions. Arbitrary Behaviours, empty/trivial traces, success-only prefix families and narrowed resource/environment domains are not acceptable instantiations. `typedRunPrefixes` is not already a G01 Event/Outcome language: its actual Unit/raw typed-state observations and missing transaction/general-call semantics still require proof.",
     "A factory quantifies the full approved native context. Original local preconditions such as Entry, Input or a selected successful phase remain in Local_i's original implications; they cannot silently become new restrictions on the full bridge. Owners must establish their actual reached applicability and independently prove the other outcomes/prefixes. Returning an assumed full certificate or BridgeGoal as a premise merely moves the obligation and does not fulfill this request. Reuse the original local theorems; do not restate, weaken or edit them.",
     "The pc component must supply ALL existing PassCorrect fields: the fixed beta is sound and onto for the full Allowed environments; nu transports each source A/F/G bound to target A/F/G with Prefix.Le; and every target A/G prefix maps back to source A/G with reverse Prefix.Le, without adding backward Forward. No monotonicity of nu is requested. Complete events/outcomes and hash guards remain those of the actual canonical languages."
   ],
-  "commonResultType": "open Solidity.Roadmap Solidity.Roadmap.G49Final\n\nabbrev BridgeGoal (A B : Lang Event Outcome)\n    (ps : A.Prog) (pt : B.Prog)\n    (beta : B.Env → A.Env)\n    (nu : B.Env → A.Res → B.Res)\n    (Local : Prop) :=\n  { pc : PassCorrect (Behaviour.ofLang A ps) (Behaviour.ofLang B pt) //\n      pc.envAbs = beta ∧ pc.need = nu ∧ Local }",
+  "commonResultType": "open Solidity.Roadmap Solidity.Roadmap.G49Final\n\nabbrev BridgeGoal (A B : Lang Event Outcome)\n    (ps : A.Prog) (pt : B.Prog)\n    (beta : B.Env \u2192 A.Env)\n    (nu : B.Env \u2192 A.Res \u2192 B.Res)\n    (Local : Prop) :=\n  { pc : PassCorrect (Behaviour.ofLang A ps) (Behaviour.ofLang B pt) //\n      pc.envAbs = beta \u2227 pc.need = nu \u2227 Local }",
   "sharedImports": {
     "PassCorrect": "Solidity.Roadmap.G49Final.PassCorrect",
     "ofLang_and_cert_adapter": "Solidity.Roadmap.G49Final.PassCorrectAdapters"
@@ -27,35 +27,37 @@
       "family": "Bare prefix refinement",
       "relayTo": "Actual producer owner; H55/G49.02 integrates. No owner can be inferred from RefinesUnder alone.",
       "factory": "bare_prefix_bridge",
-      "requiredType": "bare_prefix_bridge : (x : NativeContext_bare) → Approved_bare x → BridgeGoal (A_bare x) (B_bare x) (ps_bare x) (pt_bare x) (beta_bare x) (nu_bare x) (Local_bare x)",
+      "requiredType": "bare_prefix_bridge : (x : NativeContext_bare) \u2192 Approved_bare x \u2192 BridgeGoal (A_bare x) (B_bare x) (ps_bare x) (pt_bare x) (beta_bare x) (nu_bare x) (Local_bare x)",
       "context": "The actual canonical producer, its unchanged approved domain, source/target programs, resource families and observed prefixes. Local_bare is its entire original RefinesUnder claim with original antecedents.",
       "variantNote": null,
       "endpointBinding": "A_bare/B_bare must be the actual canonical languages; ps_bare/pt_bare must be exactly the programs of that producer. beta_bare is the predetermined public environment abstraction and nu_bare the independently specified executable resource calculation.",
       "mustSurvive": "All original A/F/G and prefix observations; full forward A/F/G, reverse A/G, envSound/envOnto and explicit need are additional proved transports.",
-      "constraints": "No generic h : RefinesUnder → PassCorrect request is made: it is refuted by the existing control. Our pass_chain already has its full-package route through pipeline.fold; any other missing producer must be identified/routed individually.",
+      "constraints": "No generic h : RefinesUnder \u2192 PassCorrect request is made: it is refuted by the existing control. Our pass_chain already has its full-package route through pipeline.fold; any other missing producer must be identified/routed individually.",
       "status": "pending",
       "deliveredDeclaration": null,
-      "adapterStatus": "pending until delivery is verified"
+      "adapterStatus": "pending until delivery is verified",
+      "h121Collector": "solidity-h62-3-20261106/g52-differential"
     },
     {
       "family": "Compiler Input/Agrees",
       "relayTo": "H55/G49.01 collector and G49.02 runtime integration; concrete branch proofs remain with V07/V09/V11/V12 and recorded memory/copy/internal-call producers.",
       "factory": "compiler_agreement_bridge",
-      "requiredType": "compiler_agreement_bridge : (x : NativeContext_compiler) → Approved_compiler x → BridgeGoal (A_compiler x) (B_compiler x) (ps_compiler x) (pt_compiler x) (beta_compiler x) (nu_compiler x) (Local_compiler x)",
-      "context": "Same C,b,Gamma,Delta,F,P and result : Solidity.Evm.Compiler.Compilation b F P, with actual source-origin and emitted-code identities. Local_compiler universally retains the SAME L,frame,base,sigma,m and result.Input → result.Agrees law.",
+      "requiredType": "compiler_agreement_bridge : (x : NativeContext_compiler) \u2192 Approved_compiler x \u2192 BridgeGoal (A_compiler x) (B_compiler x) (ps_compiler x) (pt_compiler x) (beta_compiler x) (nu_compiler x) (Local_compiler x)",
+      "context": "Same C,b,Gamma,Delta,F,P and result : Solidity.Evm.Compiler.Compilation b F P, with actual source-origin and emitted-code identities. Local_compiler universally retains the SAME L,frame,base,sigma,m and result.Input \u2192 result.Agrees law.",
       "variantNote": null,
       "endpointBinding": "Canonical intrinsic source sessions for this P/world and canonical structured-IR sessions for exactly result.code; their observation/origin equations and all original environment/resource predicates must be published.",
       "mustSurvive": "Complete branch-specific Rep, protected stack, guarded panic, payment refusal and divergence/fault alternatives. No source-success, desired-target, notExhausted or new pays=false premise.",
       "constraints": "The payment-free compilation_exact variant is not a replacement for the general correct theorem. Original physical preconditions remain inside Local_compiler and must be established at the actual reached boundary, not assumed as a new full-pass domain restriction.",
       "status": "pending",
       "deliveredDeclaration": null,
-      "adapterStatus": "pending until delivery is verified"
+      "adapterStatus": "pending until delivery is verified",
+      "h121Collector": "solidity-h62-3-20261106/g52-differential"
     },
     {
       "family": "P1 frame claims",
       "relayTo": "V12 for P1/P1-REC/P1-PROFILE; MRS for P1-CALL/P4/G37.03; V17 for P1-THUNK; V13 for P1-REVERT.",
       "factory": "p1_frame_bridge",
-      "requiredType": "p1_frame_bridge : (x : NativeContext_frame) → Approved_frame x → BridgeGoal (A_frame x) (B_frame x) (ps_frame x) (pt_frame x) (beta_frame x) (nu_frame x) (Local_frame x)",
+      "requiredType": "p1_frame_bridge : (x : NativeContext_frame) \u2192 Approved_frame x \u2192 BridgeGoal (A_frame x) (B_frame x) (ps_frame x) (pt_frame x) (beta_frame x) (nu_frame x) (Local_frame x)",
       "context": "Actual canonical call/callRec, args, return binding, body and plan; SAME L,frame,caller,base,machine,start in Entry. Local_frame contains the original ReturnClaim and separate BareRevertClaim with their original quantifiers/antecedents, plus applicable frozen V3 admission agreement, universal entry coverage and genuine outcome witnesses.",
       "variantNote": "Local_frame is variant-specific: failure-only PendingBareRevertProducer retains exactly its original failure-only fields and is not represented as already supplying successful-entry witnesses.",
       "endpointBinding": "Actual source call/session and the SAME emitted plan.code/cursor/frame target sessions, under the independently approved/admitted P1 domain and one code image for recursive depths.",
@@ -63,13 +65,14 @@
       "constraints": "Success and bare-revert evidence, or existential successful fixtures, must not become all-outcome adequacy. Do not narrow the recursive/profile domain or add per-pass no-failure/desired-run premises.",
       "status": "pending",
       "deliveredDeclaration": null,
-      "adapterStatus": "pending until delivery is verified"
+      "adapterStatus": "pending until delivery is verified",
+      "h121Collector": "solidity-h62-3-20261106/g52-differential"
     },
     {
       "family": "V08 image/reached phase",
       "relayTo": "V08 for G22.03 creation/G22.04 libraries/G22.05 world/G23 source-unit-transient composition; original P8a/CR, P8a-SPEC/VY5, P4/MRS, P7/VY4, G42.04/V13 and SS-NEW/V17 dependencies remain.",
       "factory": "v08_world_phase_bridge",
-      "requiredType": "v08_world_phase_bridge : (x : NativeContext_world) → Approved_world x → BridgeGoal (A_world x) (B_world x) (ps_world x) (pt_world x) (beta_world x) (nu_world x) (Local_world x)",
+      "requiredType": "v08_world_phase_bridge : (x : NativeContext_world) \u2192 Approved_world x \u2192 BridgeGoal (A_world x) (B_world x) (ps_world x) (pt_world x) (beta_world x) (nu_world x) (Local_world x)",
       "context": "Same Source global/environment, contract catalogue, StoreRelation, environment/history, source St and intrinsic World; original ResetInputs/Image implication and creation/library Inputs, selected invocation/horizon, P8a origin/admission, reached frame/layout and body-producer conditions remain inside Local_world.",
       "variantNote": null,
       "endpointBinding": "Canonical complete Source and intrinsic unit/session semantics for those exact programs and phases, with actual published V08 agreement migration and admitted input identities.",
@@ -77,13 +80,14 @@
       "constraints": "Do not use successful reached-phase/body premises to filter the full pass to successful runs. Preserve local conditional laws while proving the complete failing/resumed-session behavior and resource/environment transports additively.",
       "status": "pending",
       "deliveredDeclaration": null,
-      "adapterStatus": "pending until delivery is verified"
+      "adapterStatus": "pending until delivery is verified",
+      "h121Collector": "solidity-h62-3-20261106/g52-differential"
     },
     {
       "family": "P10 opcode-local laws",
       "relayTo": "V15 for P10/G46.06/G47; V14 G45.03/G45.06, V11 P6 and PAR G46.02/.03 dependencies retain their owners.",
       "factory": "p10_execution_bridge",
-      "requiredType": "p10_execution_bridge : (x : NativeContext_opcode) → Approved_opcode x → BridgeGoal (A_opcode x) (B_opcode x) (ps_opcode x) (pt_opcode x) (beta_opcode x) (nu_opcode x) (Local_opcode x)",
+      "requiredType": "p10_execution_bridge : (x : NativeContext_opcode) \u2192 Approved_opcode x \u2192 BridgeGoal (A_opcode x) (B_opcode x) (ps_opcode x) (pt_opcode x) (beta_opcode x) (nu_opcode x) (Local_opcode x)",
       "context": "SAME Backend-emitted Site op, encoded code, nonwrapping PC, arbitrary supplied valid array, fuel/cost indices and frozen CALL/RETURNDATA/JUMP decode/charged-step/continuation laws. Local_opcode retains every field of the existing FrozenV1.API for its original domain.",
       "variantNote": null,
       "endpointBinding": "Canonical assembly/encoding sessions and the pinned Osaka EVM on the SAME assembled/loaded Artifact. Publish complete assembler/domain/load agreement and operational observation equations, not just a decoder roundtrip.",
@@ -91,12 +95,137 @@
       "constraints": "No new gate-success, favourable-call or source-success premise. If canonical execution computes a jump scanner, prove the actual binding and coverage separately; do not silently replace arbitrary valid with an assumed scanner certificate.",
       "status": "pending",
       "deliveredDeclaration": null,
-      "adapterStatus": "pending until delivery is verified"
+      "adapterStatus": "pending until delivery is verified",
+      "h121Collector": "solidity-h62-3-20261106/g52-differential",
+      "h121cOwner": "solidity-h62-3-20261106/g52-differential",
+      "h121cOwnership": {
+        "authority": "H121c user decision: frozen Claude V15 full p10_execution_bridge transfers to this lane",
+        "owner": "solidity-h62-3-20261106/g52-differential",
+        "frozen_implementation": "90153461127d8d0f1f188021e79bc1ccb256e1e5",
+        "fetched_remote_tip": "0db48c0a48a8aef8dd6dc6ccbeababf409d67c2d",
+        "integration_head": "3b5528fdf6284b4b6a88bc2b99a8459e51bc3e76",
+        "general_goal_state": "paused; adoption task only",
+        "former_v15_provider_wait": "superseded; full bridge is owned unfinished work",
+        "full_bridge_delivered": false,
+        "complete_producing_files": null,
+        "complete_producing_head": null,
+        "external_inputs": [
+          {
+            "lane": "VY1",
+            "required": "Concrete admitted assembly SourceSpec/frontend and raw session dispatch/semantics."
+          },
+          {
+            "lane": "VY4",
+            "required": "Unified log/emit Event observations and raw world/frame coupling."
+          },
+          {
+            "lane": "VY2",
+            "required": "Physical allocation/layout/MemOK and representation refinement."
+          },
+          {
+            "lane": "VY3",
+            "required": "Concrete lowering/compilation/opcode/pass certificates."
+          },
+          {
+            "lane": "V13",
+            "required": "WorldCalls callee/world execution producers for the actual entered Theta run; no separate ownership of the core/reference representation is inferred."
+          },
+          {
+            "lane": "executable-bytecode",
+            "required": "P10 body/signature application and exact emitted-code, PC and Site/source-origin binding; no lowering ownership is reassigned by this receipt."
+          },
+          {
+            "lane": "Original V14/V11/PAR dependencies",
+            "required": "Existing bytecode/execution, memory/resource and ABI-entry obligations remain with their owners."
+          }
+        ],
+        "owned_open_obligations": [
+          "Same-artifact canonical assembly-session Lang and pinned Osaka EvmSpec construction/integration from actual inputs, including session/failure-point/hash-preimage observations",
+          "Full independently approved opcode domain, exact code/load and operational observation binding",
+          "Fixed uniform public environment map and independent executable resource bound",
+          "Two-sided transport for all failure/resource/hash-guarded prefixes, retaining the entire original Local_opcode",
+          "Missing InstrV2 memory/CALL/data macro lowering and execution correspondence remain open implementation gaps; coordinate with body/signature and original dependency owners, do not assume frozen Instr encoding covers them",
+          "Core/reference CALL operand/state representation and flag/balance/journal/gas correspondence remain owned bridge integration with actual provider inputs; not assigned to V13 by proximity."
+        ],
+        "local_law_limits": [
+          "CodeLayout handles frozen Instr push/pop/relative jump/jumpi/loop; StorageMacros is a separate subset, not a full InstrV2 encoder",
+          "callIn_agrees assumes non-erroring reference call, entry/depth agreement and exact callee reply for entered calls; operands/flag/balances/journal/gas are not all related",
+          "depth_disagreement and existing arity obstructions remain; vendored CLZ-to-INVALID discrepancy is not an approved Osaka exclusion"
+        ],
+        "proof_source_sha256": {
+          "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean": "d57a9013a5a2aca6683e7ead412115b77b9647097e21bae876b0812561e87742",
+          "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean": "4d58a680c0ac557f55c27d698a85b03d9796f8e1d9ff916d035e5c04c79e5821",
+          "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean": "c03909837d563a6ebfefbd01c442767873aac5f63d7d64f39ad323f59d988b08",
+          "Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean": "9560a674e2be7f4efeb9601cc25a36f5e93387335c3f023c0c5866b7d7cb3ee6"
+        },
+        "unchanged_h68_approved_and_frozen_requirements": true,
+        "public_obligations_open": 15,
+        "new_lean_run": false,
+        "new_proof_or_axiom_or_budget_edits": false,
+        "contact_frozen_claude": false,
+        "acceptance_claim": false
+      }
     }
   ],
   "leanDeclaration": {
     "name": "Solidity.Roadmap.G49Final.BridgeGoal",
     "module": "Solidity.Roadmap.G49Final.BridgeGoal",
     "note": "Same definition as commonResultType, now elaborated; cert_bridge is a positive control (axioms: Quot.sound)."
+  },
+  "h121Adoption": {
+    "authority": "H121 user decision: full composed source/runtime producer transfers from frozen Claude G49 lane to solidity-h62-3-20261106/g52-differential; H68 Approved_i rules unchanged",
+    "frozenProducerHead": "8e9a052f115cb12c2549db8654422a1728046a01",
+    "mergedMaster": "7683091e7c35d265b3b76fdf2a93d0197ce9f556",
+    "integrationHead": "6039dfe7b7122e8d178f4b18ea055feea1ec1c0e",
+    "originalGoalUnchanged": true,
+    "formerClaudeFollowups": false,
+    "inspectionScope": "Textual exact factory definition census plus independent read-only source review; not typed completeness or proof of absence under renamed APIs",
+    "trackedLeanFilesScanned": 7255,
+    "factoryCandidates": {
+      "bare_prefix_bridge": [],
+      "compiler_agreement_bridge": [],
+      "p1_frame_bridge": [
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean",
+          "line": 101,
+          "source_sha256": "7aba8254ec7bcf3529e43be6e989c1f9e5fddc7b139cce28ceadeece6b2190c0"
+        },
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameP1BridgeV2.lean",
+          "line": 196,
+          "source_sha256": "1e505d9949beb4735542e4e78b1db8a061be473441136d5f4ce5ce7bd5cd0dd0"
+        }
+      ],
+      "v08_world_phase_bridge": [],
+      "p10_execution_bridge": []
+    },
+    "fullFactoryAcceptance": {
+      "bare_prefix_bridge": false,
+      "compiler_agreement_bridge": false,
+      "p1_frame_bridge": false,
+      "v08_world_phase_bridge": false,
+      "p10_execution_bridge": false
+    },
+    "p1CandidateBoundary": "V1 trivial/coarse; V2 handwritten image, depth-constant Boolean-cell family; neither proves unchanged independently approved full P1 domain, complete original Local or public-map compatibility",
+    "publicObligationsOpen": [
+      "sourceApproved",
+      "sourceNonVacuous",
+      "targetApproved",
+      "keccak",
+      "coverage",
+      "bothPipelines",
+      "artifact",
+      "fixed",
+      "session",
+      "ifixed",
+      "isession",
+      "creates_table",
+      "hashes_source",
+      "decode_reach",
+      "decode_commutes"
+    ],
+    "nextOwnedWork": "Bind actual canonical Source.sourceLangEvents/native program and emitted code identities; integrate full owner factories; construct production admission/lowering/compilation/execution; discharge public residuals. Reuse existing Stages.coverage once actual stages exist. No conditional wrapper counted as producer.",
+    "newLeanProofEdits": false,
+    "routeInterpretation": "relayTo preserves historical provider provenance; h121Collector governs the transferred G49 collector/runtime integration. No follow-ups to the frozen former Claude lane."
   }
 }

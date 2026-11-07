@@ -4,12 +4,12 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/FixedReferenceMemoryTurn.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_turn_success": [
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryTurn.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_turn_correct": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/FixedReferenceMemoryTurn.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_turn_correct": [
+ "Solidity/Backend/MemoryCopies/FixedReferenceMemoryTurn.lean:Solidity.Backend.MemoryCopies.fixed_reference_memory_turn_success": [
   "Classical.choice",
   "Quot.sound",
   "propext"

@@ -59,6 +59,13 @@ jobs:
           if [[ -n "$DAFNY_PARITY_INVENTORY_DIR" ]]; then inventory_args+=(--directory "$DAFNY_PARITY_INVENTORY_DIR"); fi
           flock /tmp/solidity-lean-feature-groups-20261025/writer.lock python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore "${inventory_args[@]}"
           node -e "require('./vscode/parity/inventory.cjs').loadInventory()"
+      - name: Prepare pinned source compiler before native integration tests
+        run: |
+          mkdir -p .cache/parity-solkey/keyext.solidity.core/build/soljson
+          cp tests/migration/solkey/keyext.solidity.core/build.gradle .cache/parity-solkey/keyext.solidity.core/build.gradle
+          curl --fail --location --retry 3 https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js --output .cache/parity-solkey/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js
+          echo 'c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8  .cache/parity-solkey/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js' | sha256sum -c -
+          echo "SOLKEY_ROOT=$GITHUB_WORKSPACE/.cache/parity-solkey" >> "$GITHUB_ENV"
       - name: Validate source inventory and harness
         run: |
           node vscode/parity/discover.cjs --extension .cache/dafny-extension --server .cache/dafny-source --check-source
@@ -92,11 +99,6 @@ jobs:
           use-mathlib-cache: 'false'
           test: 'false'
           lint: 'false'
-      - name: Prepare source compiler
-        run: |
-          mkdir -p .cache/parity-solkey/keyext.solidity.core/build/soljson
-          cp tests/migration/solkey/keyext.solidity.core/build.gradle .cache/parity-solkey/keyext.solidity.core/build.gradle
-          curl --fail --location --retry 3 https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js --output .cache/parity-solkey/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js
       - name: Compare real editors serially
         if: inputs.transport != 'stdio'
         env:
