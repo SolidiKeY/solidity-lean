@@ -662,3 +662,64 @@ Whole original/inherited acceptance, broader binding/live ownership, actual
 compiler success and full RO G42.02 source/callee execution plus physical-frame
 correspondence remain unfinished. Historical +80.254966536% Premises STOP remains;
 no runtime pass, goal completion or master publication is claimed.
+
+
+## Executed native reply adapter (2026-11-07)
+
+The H121 producer investigation found that MachineV2 CALLIN still reads reply
+and accepts oracles; SourceCallProducerV2.returndata_any does not relate a source
+callee to executed code. A new additive ExecutionReplies helper makes a narrower
+piece explicit: prepare the target child receiver/caller/value header and exact
+input memory window, run an explicit native code image, and derive reply/status
+from the existing OutV2.exit observation. No source outcome or desired bytes are
+arguments of attach. Actual success/revert payloads are retained; fault and
+pending execution produce no adapter. Funded and poor CALLIN cases are both
+accounted for, with caller memory/storage preservation proved at callInStep.
+Native echo/revert images and fault/pending controls distinguish outcomes.
+
+This precomputes a target execution reply and configures the frozen machine's
+oracle for one selected call. It does not replace CALLIN with recursive callee
+execution. Its reply is input-specific, while accepts(address,value) has no input
+parameter, so acceptance affects every input at that pair. The adapter is for
+single-input use. Child final state is discarded; no world code selection,
+callee state commit, emitted caller program, Source-to-core compiler, nested-call,
+gas/fork, heap/allocator P1 or full G42.02 adequacy follows. The existing native
+frame proof is only caller memory/storage at callInStep. These limits leave our
+full RO source/callee execution and physical-frame producer unfinished.
+
+Final validation freshly compiled all 16 project dependencies (including
+KeySort) and the helper in a private library, without shared project cache
+fallback or any held Premises import. The exact current source/import graph,
+staged sources, objects, tool inputs and logs are sealed before success. Eleven
+theorem axiom sets contain only propext, Classical.choice and Quot.sound. The
+final-reused gate passed in 69.847 seconds at 828407808 bytes peak aggregate RSS.
+Actual Lean 4.24.0 / Lake 5.0.0-src+797c613; explicit -j1, 12 GiB cap, 4 GiB
+reserve, no swap. Initial elaboration/proof failures and earlier successful
+pre-reuse checks are retained separately, not substituted for this final gate.
+
+Self-review replaced a duplicate outcome classifier with existing OutV2.exit.
+Five paired warm-cache runs from the same source path, dependency library,
+compiler and flags measured 0.978159551 seconds before and 0.943724352 after
+(medians, -3.520407%); median peak RSS was 571092992 and 570155008 bytes.
+This native-adapter measurement does not rebaseline or clear the historical
+Premises +80.254966536% STOP. The first timing utility missed staged-file and
+final-log checks; finder and skeptic independently found the gap. The corrected
+utility verifies actual staged bytes before/after each compiler run, seals all
+logs, pins instrumentation, and checks the exact current dependency graph. Its
+library receipt is caller-supplied: byte binding is not build authentication or
+SDK source certification. Only the corrected sealed measurement is pinned as
+final timing evidence; earlier timing is historical. Five external controls
+include staged-file/log substitution and unauthorized/incomplete proof evidence.
+
+Independent read-only finder and skeptic confirmed the target-only scope and
+reviewed the integrity fixes; neither executed Lean/tests or wrote files.
+Nine raw pins are in
+`tests/h62/item2/audit-readonly-calls/execution-replies.sha256`; evidence and
+handoff are under `/workspace/h62-audit-readonly-calls/execution-replies/`.
+No original obligation is discharged by this adapter. Coverage remains
+byte-identical: all 792 rows, 451 ordinary pending, three private-identity gaps,
+and all previous witness/refutation classifications remain. No frozen statement,
+dependent definition, premise, exclusion, axiom or budget changed; no new
+sorry/native_decide. Full original/inherited acceptance, owner compiler success,
+our full H121 producer and runtime gates remain unfinished. No runtime pass or
+master publication is claimed.
