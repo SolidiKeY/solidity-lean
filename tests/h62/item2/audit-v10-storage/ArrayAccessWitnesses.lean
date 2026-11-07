@@ -1,3 +1,4 @@
+import Solidity.Backend.StorageOps.TargetDefaultInit
 import Solidity.Backend.StorageOps.TargetArrayWrite
 import Solidity.Backend.StorageOps.CopyDemandControls
 import Solidity.Backend.StorageOps.ProducerInterfaceControls
@@ -315,6 +316,119 @@ theorem colliding_hash_refuses :
     write_header_covered write_child_covered rfl
   exact (Storage.Loc.data_ne_self (.root 0) 0) alias.symm
 
+def defaultQueries : List (Query graph (.array (.prim .bool))) :=
+  [.length .nil, PrimitivePop.elementQuery zero, PrimitivePop.elementQuery one]
+def defaultPermit : CopyPermit graph (.array (.prim .bool)) :=
+  CopyPermit.checked (fun _ => true) (by decide)
+
+theorem default_supported : ∀ query ∈ defaultQueries, query.supported := by
+  intro query member
+  simp only [defaultQueries, List.mem_cons, List.not_mem_nil, or_false] at member
+  rcases member with rfl | rfl | rfl
+  · exact True.intro
+  · change 0 < Storage.lmax ∧ True
+    exact ⟨by decide, True.intro⟩
+  · change 1 < Storage.lmax ∧ True
+    exact ⟨by decide, True.intro⟩
+
+theorem default_covered :
+    ∀ query ∈ CopyDefaults.demands graph (.array (.prim .bool)) ++ defaultQueries,
+      query.location (.root 0) ∈ writeLocations := by
+  intro query member
+  change query ∈ [.length .nil, .length .nil,
+    PrimitivePop.elementQuery zero, PrimitivePop.elementQuery one] at member
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at member
+  rcases member with rfl | rfl | rfl | rfl <;> decide
+
+theorem default_joint : ∃ _permit : CopyPermit graph (.array (.prim .bool)),
+    (∀ query ∈ defaultQueries, query.supported) ∧
+    TargetOperations.KeysFit (.root 0) ∧
+    FiniteRun 16 2 1 hash writePreimages writeLocations ∧
+    Transport 16 hash writeLocations readStore numeric ∧
+    (∀ query ∈ CopyDefaults.demands graph (.array (.prim .bool)) ++ defaultQueries,
+      query.location (.root 0) ∈ writeLocations) ∧
+    ∃ fitting : ∀ loc ∈ writeLocations, TargetOperations.KeysFit loc,
+      ∀ loc (member : loc ∈ writeLocations),
+        machine.store.cells (TargetOperations.toSlot loc (fitting loc member)) =
+          TargetOperations.encodeWord (readStore loc) :=
+  ⟨defaultPermit, default_supported, True.intro, write_run, write_transport,
+    default_covered, write_fitting, write_initial⟩
+
+noncomputable def defaultStore : Store :=
+  (CopyDefaults.updates graph (.array (.prim .bool)) (.root 0)).foldl
+    (fun store op => write store op.1 op.2) readStore
+noncomputable def defaultNumeric : WordStore :=
+  CopyDefaults.numericInit (N := 16) graph (.array (.prim .bool)) (.root 0) hash numeric
+noncomputable def defaultTarget : Evm.Machine :=
+  TargetDefaultInit.afterInit graph (.array (.prim .bool)) (.root 0) True.intro machine
+
+theorem default_complete_actual :
+    Evm.run (TargetDefaultInit.code graph (.array (.prim .bool)) defaultPermit (.root 0) True.intro)
+      machine = .ok defaultTarget 0 ∧
+    Represented (Value.dflt (.array (.prim .bool))) defaultQueries (.root 0) defaultStore ∧
+    Transport 16 hash writeLocations defaultStore defaultNumeric ∧
+    (∀ loc (member : loc ∈ writeLocations),
+      defaultTarget.store.cells (TargetOperations.toSlot loc (write_fitting loc member)) =
+        TargetOperations.encodeWord (defaultNumeric (loc.word 16 hash))) ∧
+    (∀ query ∈ defaultQueries, ∀ word, query.read (Value.dflt (.array (.prim .bool))) = some word →
+      Evm.run (TargetOperations.readCode (TargetOperations.toSlot (query.location (.root 0))
+        (TargetOperations.query_keysFit query (.root 0) True.intro))) defaultTarget =
+          .ok {defaultTarget with stack := .val (TargetOperations.encodeWord word) :: defaultTarget.stack} 0) := by
+  rcases default_joint with ⟨permit, supported, fits, run, initial, covered, fitting, before⟩
+  exact TargetDefaultInit.complete graph (.array (.prim .bool)) permit defaultQueries supported
+    (.root 0) fits run readStore numeric machine initial covered fitting before
+
+theorem default_observations :
+    (defaultQueries.map (fun query => query.read (Value.dflt (.array (.prim .bool)))),
+      defaultNumeric 0, defaultNumeric 8, defaultNumeric 9,
+      defaultTarget.store (.root 0), defaultTarget.store (.data (.root 0) 0),
+      defaultTarget.store (.data (.root 0) 1), defaultTarget.store (.root 9),
+      defaultTarget.stack, defaultTarget.mem 0) =
+    ([some (PrimTy.toWord (p := .bool) false), none, none],
+      PrimTy.toWord (p := .bool) false, PrimTy.toWord (p := .bool) true,
+      PrimTy.toWord (p := .bool) true, 0, 1, 1, 99, machine.stack, machine.mem 0) := rfl
+
+theorem default_read_header : Evm.run (TargetOperations.readCode (.root 0)) defaultTarget =
+    .ok {defaultTarget with stack := .val (TargetOperations.encodeWord (PrimTy.toWord (p := .bool) false)) :: defaultTarget.stack} 0 :=
+  default_complete_actual.2.2.2.2 (.length .nil) List.mem_cons_self
+    (PrimTy.toWord (p := .bool) false) rfl
+
+theorem default_noop_mismatch : Evm.run [] machine ≠
+    Evm.run (TargetDefaultInit.code graph (.array (.prim .bool)) defaultPermit (.root 0) True.intro) machine := by
+  rw [default_complete_actual.1]
+  intro equal
+  have observed := congrArg (fun output : Evm.Out => match output with
+    | .ok next _ => next.store (.root 0)
+    | _ => 99) equal
+  change (1 : Nat) = 0 at observed
+  omega
+
+theorem default_reject_mismatch : Evm.run [.revert] machine ≠
+    Evm.run (TargetDefaultInit.code graph (.array (.prim .bool)) defaultPermit (.root 0) True.intro) machine := by
+  rw [default_complete_actual.1]
+  intro equal
+  cases equal
+
+theorem default_owner_joint : ∃ _permit : CopyPermit graph (.array (.prim .bool)),
+    ∀ query ∈ defaultQueries, query.supported := ⟨defaultPermit, default_supported⟩
+
+theorem default_transport_joint :
+    FiniteRun 16 2 1 hash writePreimages writeLocations ∧
+    Transport 16 hash writeLocations readStore numeric ∧
+    (∀ query ∈ CopyDefaults.demands graph (.array (.prim .bool)),
+      query.location (.root 0) ∈ writeLocations) :=
+  ⟨write_run, write_transport, fun query member => default_covered query
+    (List.mem_append.mpr (Or.inl member))⟩
+
+theorem default_owner_actual :
+    Represented (Value.dflt (.array (.prim .bool))) defaultQueries (.root 0) defaultStore := by
+  rcases default_owner_joint with ⟨permit, supported⟩
+  exact CopyDefaults.represented graph (.array (.prim .bool)) permit defaultQueries supported (.root 0) readStore
+
+theorem default_transport_actual : Transport 16 hash writeLocations defaultStore defaultNumeric := by
+  rcases default_transport_joint with ⟨run, initial, covered⟩
+  exact CopyDefaults.numeric_transport graph (.array (.prim .bool)) run (.root 0) readStore numeric initial covered
+
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.read_joint' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms read_joint
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.write_joint' does not depend on any axioms -/
@@ -395,5 +509,31 @@ theorem colliding_hash_refuses :
 #guard_msgs (whitespace := lax) in #print axioms numeric_write_observations
 /-- info: 'H62.StorageAudit.ArrayAccessWitnesses.colliding_hash_refuses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms colliding_hash_refuses
+
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_supported' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms default_supported
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_covered' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_covered
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_joint
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_complete_actual' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_complete_actual
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_observations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_observations
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_read_header' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_read_header
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_noop_mismatch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_noop_mismatch
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_reject_mismatch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_reject_mismatch
+
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_owner_joint' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms default_owner_joint
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_transport_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_transport_joint
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_owner_actual' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_owner_actual
+/-- info: 'H62.StorageAudit.ArrayAccessWitnesses.default_transport_actual' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms default_transport_actual
 
 end H62.StorageAudit.ArrayAccessWitnesses
