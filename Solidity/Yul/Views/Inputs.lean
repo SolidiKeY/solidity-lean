@@ -86,6 +86,20 @@ def Environment.read (e : Environment) : EnvRead → Roadmap.Word
 def blockhash (e : Environment) (query : Roadmap.Word) : Roadmap.Word :=
   if query.val < e.number.val ∧ e.number.val - query.val ≤ 256 then e.historicalHash query else 0
 
+/-- Every universally supplied environment returns its own historical hash for
+an eligible prior block; no hash value or compiler behavior is assumed. -/
+theorem blockhash_in_window (e : Environment) (query : Roadmap.Word)
+    (past : query.val < e.number.val) (recent : e.number.val - query.val ≤ 256) :
+    blockhash e query = e.historicalHash query :=
+  if_pos ⟨past, recent⟩
+
+/-- Regression boundary: current/future blocks and blocks older than the prior
+256-block window return zero, independently of the historical-hash function. -/
+theorem blockhash_outside_window (e : Environment) (query : Roadmap.Word)
+    (outside : ¬ (query.val < e.number.val ∧ e.number.val - query.val ≤ 256)) :
+    blockhash e query = 0 :=
+  if_neg outside
+
 def blobhash (e : Environment) (i : Roadmap.Word) : Roadmap.Word :=
   e.blobHashes[i.val]?.getD 0
 

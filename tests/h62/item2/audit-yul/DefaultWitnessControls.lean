@@ -1,5 +1,5 @@
 import tests.h62.item2.«audit-yul».DefaultWitnesses
-import Solidity.Yul.Views.WordMemory
+import Solidity.Yul.Views.Inputs
 import Solidity.Yul.Words
 import Solidity.Yul.Checks.ClosedFunctions
 set_option h62.auditOutput "/workspace/h62-audit-yul-evidence/h69-default-controls.jsonl"
@@ -113,5 +113,24 @@ theorem store_outside_joint :
     ∃ (_m : ByteView) (a b : Nat) (_w : Roadmap.Word)
       (_h : ¬ (a ≤ b ∧ b < a + 32)), True :=
   ⟨(fun _ => 0), 129, 128, 2, by decide, True.intro⟩
+
+/-- Nonempty calldata with a genuinely out-of-range address jointly witnesses
+both zero-padding theorem telescopes, without arbitrary-input validity claims. -/
+theorem calldata_padding_joint :
+    ∃ (input : List UInt8) (a : Nat) (_h : input.length ≤ a), True :=
+  ⟨[0xaa], 33, by decide, True.intro⟩
+
+/-- Hash congruence uses the existing real-Keccak instance and one common live
+window. No collision premise or arbitrary hash result is introduced. -/
+theorem input_hash_joint :
+    ∃ (_fixed : Roadmap.Evm.Fixed) (m m' : ByteView) (a n : Nat)
+      (_h : readBytes m a n = readBytes m' a n), True :=
+  ⟨Roadmap.Evm.withKeccak, (fun _ => 0xaa), (fun _ => 0xaa),
+    129, 32, rfl, True.intro⟩
+
+/-- One closed value inhabits the existing bounded environment carrier; it is
+not substituted for the universally supplied environment in any public law. -/
+theorem input_environment_joint : ∃ (_e : Environment), True :=
+  ⟨⟨0, 0, 257, 1, 0, 0, 1, 0, 0, 0, (fun _ => 0), []⟩, True.intro⟩
 
 end Solidity.Yul.Views.H62
