@@ -414,8 +414,9 @@ def prior_map(records, key, label):
 def selected_paths(root, pattern, errors):
     """Path.glob-style selection with explicit enumeration errors.
 
-    Recursive ** does not follow directory symlinks. Explicit finite directory
-    components can follow them; resolved containment is checked before reading.
+    Recursive ** does not follow directory symlinks and reports their omission.
+    Explicit finite directory components can follow them; resolved containment
+    is checked before reading.
     """
     parts = Path(pattern).parts
     directories_only = pattern.endswith("/")
@@ -440,13 +441,22 @@ def selected_paths(root, pattern, errors):
         if part != "**" and not any(c in part for c in "*?["):
             path = base / part
             try:
-                path.lstat()
-                if index + 1 == len(parts) or path.is_dir():
-                    yield from descend(path, index + 1)
+                mode = path.lstat().st_mode
             except FileNotFoundError:
-                pass
+                return
             except OSError as exc:
                 failure(path, exc)
+                return
+            if index + 1 == len(parts):
+                yield from descend(path, index + 1)
+            else:
+                try:
+                    if stat.S_ISLNK(mode):
+                        mode = path.stat().st_mode
+                    if stat.S_ISDIR(mode):
+                        yield from descend(path, index + 1)
+                except OSError as exc:
+                    failure(path, exc)
             return
         if part == "**":
             yield from descend(base, index + 1)
@@ -460,7 +470,13 @@ def selected_paths(root, pattern, errors):
             path = base / entry.name
             if part == "**":
                 try:
-                    if entry.is_dir(follow_symlinks=False):
+                    if entry.is_symlink():
+                        # Path.glob-style recursion skips directory links. A
+                        # whole-scope report must not silently call that complete.
+                        target = entry.stat(follow_symlinks=True)
+                        if stat.S_ISDIR(target.st_mode):
+                            failure(path, ValueError("recursive selection skips directory symlink"))
+                    elif entry.is_dir(follow_symlinks=False):
                         yield from descend(path, index)
                 except OSError as exc:
                     failure(path, exc)
@@ -469,7 +485,11 @@ def selected_paths(root, pattern, errors):
                     yield from descend(path, index + 1)
                 else:
                     try:
-                        if entry.is_dir():
+                        if entry.is_symlink():
+                            is_directory = stat.S_ISDIR(entry.stat(follow_symlinks=True).st_mode)
+                        else:
+                            is_directory = entry.is_dir(follow_symlinks=False)
+                        if is_directory:
                             yield from descend(path, index + 1)
                     except OSError as exc:
                         failure(path, exc)

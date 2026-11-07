@@ -1087,3 +1087,35 @@ remained 5,516. Counts do not establish equal group membership, intrinsic
 signatures or complete declaration coverage. Reports, failed attempts,
 controls and timings are outside Git under
 `/workspace/h62-duplication-scanner-evidence/set-option-context/`.
+
+## Recursive and finite alias accounting after integration
+
+After rebasing onto the published signature-linkage and selector work,
+recursive `**` selection now reports an incomplete scan when it skips a
+directory symlink or encounters a dangling symlink. Finite directory
+components explicitly report dangling or inaccessible symlink targets, even
+when a different path matches. Explicit valid finite aliases retain their
+logical paths and existing shared-source and containment checks. Recursive
+selected paths continue to match the no-follow selection set, but the report
+is incomplete when a directory alias was skipped; incremental removals and
+candidate deltas remain null on selection errors.
+
+This is point-in-time accounting, not a race-proof source attestation. An
+explicit outside-root directory alias can still be enumerated before per-file
+containment rejects its selected files. Lexical candidates retain unresolved
+signature and ownership reasons; no semantic or unowned conclusion follows.
+
+Finder and skeptic independently reviewed the rebase and selection fix
+without Lean. The combined Python suite passed 195 tests. An initial run
+failed because an upstream test expected skipped recursive aliases to be
+silent; the reconciled test now requires an incomplete report while retaining
+its finite-alias checks. A matched bounded scan took 110.215 seconds before
+and 115.784 seconds after (+5.05%). Both used the same 7,303 inputs,
+recognized 123,314 declarations and reported no file errors or unmatched
+globs. Complete reports matched after normalizing scanner identity. Evidence
+is outside Git under
+`/workspace/h62-duplication-scanner-evidence/rebased-recursive-links/`.
+
+The rebased repository documentation-path gate exited 1 on two missing
+references, `A.lean` and `B.lean`, cited by the upstream audit-evm-compiler
+scope test. These are outside this scanner lane; the gate remains failed.

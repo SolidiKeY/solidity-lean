@@ -577,7 +577,54 @@ class ScannerControls(unittest.TestCase):
                     actual={p.relative_to(root).as_posix() for p in scanner.selected_paths(root,pattern,errors)}
                     expected={p.relative_to(root).as_posix() for p in root.glob(pattern)}
                     self.assertEqual(actual,expected)
-                    self.assertEqual(errors,[])
+                    if pattern == "**/*.lean":
+                        self.assertEqual([e["path"] for e in errors], [str(root / "alias")])
+                        self.assertIn("skips directory symlink", errors[0]["reason"])
+                    else:
+                        self.assertEqual(errors,[])
+
+    def test_recursive_directory_alias_reports_incomplete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "real").mkdir()
+            (root / "real" / "A.lean").write_text("def a : Nat := 0\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "**/*.lean"]
+            baseline = root / "prior.json"
+            baseline.write_bytes(subprocess.check_output(cmd))
+            (root / "alias").symlink_to("real", target_is_directory=True)
+            result = subprocess.run(cmd + pinned(baseline), capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(any("skips directory symlink" in e["reason"] for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            self.assertIsNone(report["incremental"]["candidate_groups"])
+            explicit = subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "alias/*.lean"])
+            self.assertEqual(json.loads(explicit)["inputs"][0]["path"], "alias/A.lean")
+            (root / "alias").unlink()
+            (root / "dangling").symlink_to("missing", target_is_directory=True)
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(json.loads(result.stdout)["incremental"]["comparison_status"], "current-incomplete")
+
+    def test_finite_dangling_directory_alias_is_incomplete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "good").mkdir()
+            (root / "good" / "Target.lean").write_text("def good : Nat := 0\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*/Target.lean"]
+            baseline = root / "prior.json"
+            baseline.write_bytes(subprocess.check_output(cmd))
+            (root / "dangling").symlink_to("missing", target_is_directory=True)
+            result = subprocess.run(cmd + pinned(baseline), capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(any(Path(e["path"]).name == "dangling" for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            explicit = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "good/Target.lean", "dangling/*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(explicit.returncode, 0)
+            self.assertTrue(any(Path(e["path"]).name == "dangling" for e in json.loads(explicit.stdout)["errors"]))
 
     def test_nonrecursive_selection_does_not_read_unselected_subtree(self):
         with tempfile.TemporaryDirectory() as directory:
