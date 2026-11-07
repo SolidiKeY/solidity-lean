@@ -1291,3 +1291,24 @@ correspondence. Independent read-only reviews checked the source references
 and added a regression for VT1 skip behavior and generated outputs; they used
 no Lean, server or build. Full contexts, inputs, outcomes and H56 acceptance
 remain unresolved, with no candidate excluded by this classification.
+
+## Readonly overlays, roadmap controls and statement graphs
+
+The expanded static index records 54 supplied candidates, including five
+readonly-bind, five roadmap and six statement-graph files in addition to the
+38 previously classified. Both outputs are recorded in
+`tests/h55/module-times/fixture-effects-seven-groups.sha256`. The overlay
+generator writes or truncates three copies by default; its `--check` mode
+compares them. Current Lean drivers and outcomes remain unresolved.
+
+Roadmap `WitnessObstruction` contains both an intentional contradiction and
+a toy positive control; neither establishes a general witness. The graph
+verifier explicitly handles its exporter and fixture inputs, while Census
+and EvmCensus invocation remains unresolved. Graph output can be written
+under `H62_GRAPH_OUTPUT_DIR`; generated negative drivers are not tracked
+candidates and their expected failure is not a joint witness.
+
+Independent read-only finder and skeptic reviews checked these distinctions.
+The roadmap reviewer identified and verified the correction to the mixed
+contradiction/toy role. These are static observations, not execution recipes,
+proofs or exclusions; no Lean server or build was used.

@@ -13,6 +13,9 @@ SHARED = "tests/directruntime-20261104/shared-translator/"
 VT = "tests/fullscope-20261104/vt1/"
 VO = "tests/fullscope-20261104/vo1/"
 PRE = "tests/h62/item2/audit-precompiles/"
+BIND = "tests/h62/item1/readonly-bind/"
+ROADMAP = "tests/h62/item2/audit-roadmap/"
+GRAPH = "tests/h62/item5/statement-graph/"
 FILES = {
     "shared": {"AdmissionControls", "ApiSignatures", "AxiomInventory", "ComposedControls", "ConstructReaderControls",
                "DirectResultControls", "FixtureControls", "IntrinsicControls", "MetadataBench", "ModalityControls",
@@ -21,6 +24,10 @@ FILES = {
            "IrHelperChecks", "IrImportChecks", "IrLeanGen", "IrParseChecks", "ObjectDataChecks"},
     "vo": {"O02Controls", "O03Controls", "PipelineControls", "ValueValidatorControls", "X06Controls", "YulValidatorControls"},
     "precompiles": {"BasicWitnesses", "CoreSignatures", "CoreWitnesses", "DataWitnesses", "JointPremiseFixture", "StipendControl", "TypeFidelity"},
+    "bind": {"BindControls", "PhaseControls", "overlay/Solidity/Lowering/Readonly/CaptureFailures",
+             "overlay/Solidity/Lowering/Readonly/CapturePhases", "overlay/Solidity/Lowering/Readonly/EnvironmentCredit"},
+    "roadmap": {"ContextWitnesses", "CreationWitnesses", "EvmWitnesses", "FrontendWitnesses", "WitnessObstruction"},
+    "graph": {"Census", "EvmCensus", "Exporter", "Fixture", "Pending", "WitnessFixture"},
 }
 
 
@@ -29,7 +36,8 @@ def classify(root, manifest):
         raise ValueError("invalid census")
     root = pathlib.Path(root)
     out, seen = [], set()
-    groups = ((SHARED, "shared"), (VT, "vt"), (VO, "vo"), (PRE, "precompiles"))
+    groups = ((SHARED, "shared"), (VT, "vt"), (VO, "vo"), (PRE, "precompiles"),
+              (BIND, "bind"), (ROADMAP, "roadmap"), (GRAPH, "graph"))
     for row in manifest["rows"]:
         if not isinstance(row, dict) or not isinstance(row.get("path"), str):
             raise ValueError("invalid candidate")
@@ -74,9 +82,24 @@ def classify(root, manifest):
                 effects = "writes fixture .term outputs"
         elif group == "vo":
             driver = "candidate tests/fullscope-20261104/vo1/bounded.py; applicability unverified"
-        else:
+        elif group == "precompiles":
             driver = "candidate scripts/h62/item2/audit-precompiles/bounded.py; applicability unverified"
-        role = "historically-unchecked-pending" if group == "precompiles" and name == "StipendControl" else "static-fixture"
+        elif group == "bind":
+            driver = "unresolved Lean driver; scripts/h62/item1/readonly-bind/overlay.py generates overlay copies"
+            if name.startswith("overlay/"):
+                inputs = "isolated overlay source and matching private oleans; exact current inputs unverified"
+                effects = "overlay.py writes copies by default; --check is comparison only"
+        elif group == "roadmap":
+            driver = "scripts/h62/item2/audit-roadmap/serial_checks.py; current applicability unverified"
+            effects = "driver may write private oleans, logs and receipts"
+        else:
+            driver = ("scripts/h62/item5/statement-graph/verify.py; current applicability unverified"
+                      if name in ("Exporter", "Fixture", "WitnessFixture", "Pending") else "unresolved")
+            inputs = "H62_GRAPH_OUTPUT_DIR and pinned archive/oleans as applicable; current inputs unverified"
+            effects = "graph commands write JSON into H62_GRAPH_OUTPUT_DIR; exact invocation unverified"
+        role = ("historically-unchecked-pending" if group == "precompiles" and name == "StipendControl" else
+                "intentional-contradiction-and-toy-control" if group == "roadmap" and name == "WitnessObstruction" else
+                "overlay-copy" if group == "bind" and name.startswith("overlay/") else "static-fixture")
         out.append({"candidate": row, "group": group, "role": role, "driver_reference": driver,
                     "expected_outcome": "unresolved per current invocation", "auxiliary_inputs": inputs,
                     "side_effects": effects, "status": "static-reference-not-execution-acceptance"})
