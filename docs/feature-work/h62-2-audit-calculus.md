@@ -364,3 +364,12 @@ The ledger retains strictness/expansion/evaluation/summary premises, preserves i
 
 
 Measured term-power/context-metric accounting passed at 0.242540s / 74,124 KiB maximum child RSS; complete acceptance failed exit 1 at 0.239374s / 74,024 KiB; 89 controls passed at 0.138177s / 15,236 KiB. Documentation now passes exit 0 at 43.541806s / 9,216 KiB on adopted master: every backticked Lean path resolves, with 132 non-strict ambiguity warnings. Exact argv/metrics are archived. This clears only that documentation check, not full classification/runtime acceptance or a matched performance gate.
+
+
+## Whole-formula transform/strict-sharing source roles (2026-11-07)
+
+After adopting master ac46c197828e8b0f17d6b59d93872d75101e0f83 with history preserved and unchanged toolchain pin, classified all six CallFunctionTransform and seven LeafShare declarations against exact frozen/current identities. Prior 240 rows and owners unchanged; ledger now 253 roles reviewed, 5,030 pending; 3,746 owners confirmed, 1,537 unresolved. No new audit witnesses.
+
+The ledger retains indexed update recognition/refusal, all formula constructors and original contexts, without program-body traversal or truth claims. Pointwise/validity equivalence and structural nonincrease are separate from physical/compiler/performance acceptance. Strictness, exact redex selection, failure/return conditional conclusions, reflexive-pop direction and separate no-push/satisfaction inputs remain. Arbitrary old-context drop adds no target-survival premise. Both independent reviews pass; 89 Python controls pass; complete acceptance remains FAIL exit 1. No source/tactic/budget edit. Off-Git measured evidence is indexed by transform-leafshare manifest; original queues/pauses, historical gaps and STOPs remain binding.
+
+Frozen-map boundary: all 76 declarations in the eleven selected CallFunction files now have roles. CallFunctionAffine existed at the frozen commit but is not named by the frozen calculus map and is outside that selected census; no coverage claim is made for it. Documentation passes exit 0 (43.737290s, 9,216 KiB maximum child RSS). Accounting passes (0.259469s, 74,324 KiB); complete acceptance fails exit 1 (0.250338s, 74,324 KiB); 89 controls pass (0.128071s, 15,240 KiB). These static measurements supply no matched tactic-performance or runtime acceptance.

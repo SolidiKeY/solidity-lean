@@ -1,0 +1,52 @@
+{
+  "scope": "thirteen static transform/strict-sharing roles; zero new audit witnesses/runtime acceptance",
+  "counts": {
+    "role_reviewed": 253,
+    "role_pending": 5030,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/transform-leafshare-classification-v18/evidence.tar.gz",
+      "bytes": 920794,
+      "sha256": "adca30c76340cf073e67bd4b5507def79c3c2361040612da37bcf3ac63d402d3"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/transform-leafshare-classification-v18/inputs.json",
+      "bytes": 1180,
+      "sha256": "116817bcabb0a941e7792a05297aeeb507edf88b0ac0658432a071b8218293b9"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/transform-leafshare-classification-v18/gates.json",
+      "bytes": 2772,
+      "sha256": "82ab8e140cb8dc45fe8a6177633f240a15f864a28c4d6d1ac5267c7b459bc749"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/transform-leafshare-classification-v18/reviews.md",
+      "bytes": 1228,
+      "sha256": "53bfcc8768322166b465d6c16ef5968545987c75684d690be76422289dd4e56f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/transform-leafshare-classification-v18/doc-gate.json",
+      "bytes": 499,
+      "sha256": "069f535cd69baaf6e32387505559654b5324457eee2dbb3ce766ebaaf2336e87"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/transform-leafshare-classification-v18/supporting-source-bindings.json",
+      "bytes": 541,
+      "sha256": "bdae06978c38999afdd987e3dec5242d56912b65ac49e05240832b0cb777cead"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/transform-leafshare-classification-v18/selected-callfunction-coverage.json",
+      "bytes": 2642,
+      "sha256": "21caa7a5490cc59065d43e23278c007e04dd55a25f15d359b58ce078d29ac200"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/transform-leafshare-classification-v18/semantic-roles-reviewed.json",
+      "bytes": 702621,
+      "sha256": "e4ddb000cdc2947611eecd1066a0ce03c629e156441909af5a04ad9a28dc1ee2"
+    }
+  ]
+}
