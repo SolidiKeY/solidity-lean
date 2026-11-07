@@ -1265,3 +1265,29 @@ review found the first classifier would label any newly added `*Driver` as
 reviewed; it now accepts only the explicit reviewed set and rejects unknown
 ones. Independent read-only reviews checked these roles without Lean, server
 or builds. No H56 run or production acceptance is inferred.
+
+## Shared translator, fullscope and precompile fixture effects
+
+`fixture_effects.py` records 38 supplied tracked candidates: 15 shared
+translator, ten VT1, six VO1 and seven precompile fixtures. The v2 index and
+first draft are checksum-bound in
+`tests/h55/module-times/shared-fullscope-precompiles.sha256`. They are
+static references with unresolved current invocation and subset coverage.
+
+Three shared-translator files read bulk AST fixtures.
+`DirectResultControls` can overwrite an observation under its capture
+environment setting; `MetadataBench` writes a fixed benchmark JSON. These
+are external observations, not proof of all translator behavior. VT1
+`IrCensusGen` and `IrLeanGen` write fixture files, while several checks read
+fixture data; commands require an owned workspace and input review. The
+`check-ir.sh` driver can skip Lean with `VT1_SKIP_LEAN=1` while still
+printing its pass marker, so that marker alone is not Lean evidence. VO1
+driver references remain candidates, not observed current runs.
+
+The seven precompile fixtures include data and joint-premise controls; the
+StipendControl was historically unchecked/pending and is not counted as a
+pass. Finite fixtures do not establish broader BLS, gas/fork or EVM
+correspondence. Independent read-only reviews checked the source references
+and added a regression for VT1 skip behavior and generated outputs; they used
+no Lean, server or build. Full contexts, inputs, outcomes and H56 acceptance
+remain unresolved, with no candidate excluded by this classification.
