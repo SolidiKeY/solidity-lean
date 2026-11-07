@@ -1,0 +1,159 @@
+{
+  "guardedRegression": "Existing msg.value/block.timestamp must use the shared intrinsic environment path while preserving sender/ordinary-field metadata distinctions",
+  "producerHead": "44d89439afd8fe7aca251cd5693b5b7ea36cf603",
+  "adoptedMaster": "e0f4251ff40ad79c37bae53795b7419afe52e8d9",
+  "authenticatedArchive": {
+    "path": "/workspace/h62-coordinator-inputs/router-20261107T055306Z/environment-44d89439-source.tar.gz",
+    "sha256": "6e53ff492fd458ac7110c9b3ba0a90be57f2cb558f00a84a2b93ae38286646ac"
+  },
+  "authenticatedTicket": {
+    "path": "/workspace/h62-coordinator-inputs/router-20261107T055306Z/cd333e5e80b0b4d78b9865d2cb1642aeda8d543acbcb6523043c5ea84d35f645.ticket",
+    "sha256": "cd333e5e80b0b4d78b9865d2cb1642aeda8d543acbcb6523043c5ea84d35f645"
+  },
+  "sourceInventory": {
+    "archive": "/workspace/h62-coordinator-inputs/router-20261107T055306Z/environment-44d89439-source.tar.gz",
+    "archiveSha256": "6e53ff492fd458ac7110c9b3ba0a90be57f2cb558f00a84a2b93ae38286646ac",
+    "ticket": "/workspace/h62-coordinator-inputs/router-20261107T055306Z/cd333e5e80b0b4d78b9865d2cb1642aeda8d543acbcb6523043c5ea84d35f645.ticket",
+    "ticketSha256": "cd333e5e80b0b4d78b9865d2cb1642aeda8d543acbcb6523043c5ea84d35f645",
+    "extractedAt": "/workspace/h62-coordinator-inputs/router-20261107T055306Z/environment-44d89439-inspected",
+    "archiveFiles": 13,
+    "frontier": [
+      {
+        "path": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
+        "expectedSha256": "a8bc38ff1cffea32a6af360812335aa7f6d9262875cfd19daca8c9ecbd53cf64",
+        "archiveSha256": "a8bc38ff1cffea32a6af360812335aa7f6d9262875cfd19daca8c9ecbd53cf64",
+        "checkoutSha256": "a8bc38ff1cffea32a6af360812335aa7f6d9262875cfd19daca8c9ecbd53cf64",
+        "checkoutMatches": true
+      },
+      {
+        "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+        "expectedSha256": "90479bcc5c022c435be037ccb2bf16a95dd41b7c15d8cd79696502c3a3e508c5",
+        "archiveSha256": "90479bcc5c022c435be037ccb2bf16a95dd41b7c15d8cd79696502c3a3e508c5",
+        "checkoutSha256": "35d64218f2156a209f0d9873e7c55e9568de9e1393304ebe02faa50a2928fcd3",
+        "checkoutMatches": false
+      },
+      {
+        "path": "Solidity/Frontend/ExecutableAst/Shared/Scope.lean",
+        "expectedSha256": "3a84fd3a33229ee1877e44c4ab0ca59ea957a5cc83e2543451d93c97d54d1a1e",
+        "archiveSha256": "3a84fd3a33229ee1877e44c4ab0ca59ea957a5cc83e2543451d93c97d54d1a1e",
+        "checkoutSha256": "3a84fd3a33229ee1877e44c4ab0ca59ea957a5cc83e2543451d93c97d54d1a1e",
+        "checkoutMatches": true
+      },
+      {
+        "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+        "expectedSha256": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed",
+        "archiveSha256": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed",
+        "checkoutSha256": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed",
+        "checkoutMatches": true
+      },
+      {
+        "path": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+        "expectedSha256": "74c01bacb59ba4783bc20a02d23b594dff458a34e30b2c3e40aa9f9fc0b64577",
+        "archiveSha256": "74c01bacb59ba4783bc20a02d23b594dff458a34e30b2c3e40aa9f9fc0b64577",
+        "checkoutSha256": "74c01bacb59ba4783bc20a02d23b594dff458a34e30b2c3e40aa9f9fc0b64577",
+        "checkoutMatches": true
+      },
+      {
+        "path": "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
+        "expectedSha256": "12abef1db6404447a71cd500f6e0d8d16cc33bd75a5c286e9de4172bb3925ace",
+        "archiveSha256": "12abef1db6404447a71cd500f6e0d8d16cc33bd75a5c286e9de4172bb3925ace",
+        "checkoutSha256": "12abef1db6404447a71cd500f6e0d8d16cc33bd75a5c286e9de4172bb3925ace",
+        "checkoutMatches": true
+      },
+      {
+        "path": "Solidity/Frontend/ExecutableAst/Memory/Reader.lean",
+        "expectedSha256": "9d1a8e15551e979a347a267585f373a814cc5f877de94b073d3cc13bf1349350",
+        "archiveSha256": "9d1a8e15551e979a347a267585f373a814cc5f877de94b073d3cc13bf1349350",
+        "checkoutSha256": "9d1a8e15551e979a347a267585f373a814cc5f877de94b073d3cc13bf1349350",
+        "checkoutMatches": true
+      },
+      {
+        "path": "Solidity/Tools/DirectRuntime.lean",
+        "expectedSha256": "2cc70038fea989248d13ed444a2760c72dbfbbd2dab33128b0bec45e622303a6",
+        "archiveSha256": "2cc70038fea989248d13ed444a2760c72dbfbbd2dab33128b0bec45e622303a6",
+        "checkoutSha256": "2cc70038fea989248d13ed444a2760c72dbfbbd2dab33128b0bec45e622303a6",
+        "checkoutMatches": true
+      }
+    ],
+    "coordinatorManifest": {
+      "head": "44d89439afd8fe7aca251cd5693b5b7ea36cf603",
+      "source": "git object, no reconstruction",
+      "files": [
+        {
+          "path": "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
+          "sha256": "12abef1db6404447a71cd500f6e0d8d16cc33bd75a5c286e9de4172bb3925ace",
+          "bytes": 5762
+        },
+        {
+          "path": "Solidity/Frontend/ExecutableAst/Memory/Reader.lean",
+          "sha256": "9d1a8e15551e979a347a267585f373a814cc5f877de94b073d3cc13bf1349350",
+          "bytes": 7042
+        },
+        {
+          "path": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
+          "sha256": "a8bc38ff1cffea32a6af360812335aa7f6d9262875cfd19daca8c9ecbd53cf64",
+          "bytes": 1042
+        },
+        {
+          "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+          "sha256": "81834803c899cea42d45fb11ce95888dddc2170e5000067d5c93aeb8d22d87ed",
+          "bytes": 2373
+        },
+        {
+          "path": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+          "sha256": "74c01bacb59ba4783bc20a02d23b594dff458a34e30b2c3e40aa9f9fc0b64577",
+          "bytes": 4081
+        },
+        {
+          "path": "Solidity/Frontend/ExecutableAst/Shared/Scope.lean",
+          "sha256": "3a84fd3a33229ee1877e44c4ab0ca59ea957a5cc83e2543451d93c97d54d1a1e",
+          "bytes": 2877
+        },
+        {
+          "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+          "sha256": "90479bcc5c022c435be037ccb2bf16a95dd41b7c15d8cd79696502c3a3e508c5",
+          "bytes": 23900
+        },
+        {
+          "path": "Solidity/Tools/DirectRuntime.lean",
+          "sha256": "2cc70038fea989248d13ed444a2760c72dbfbbd2dab33128b0bec45e622303a6",
+          "bytes": 9546
+        },
+        {
+          "path": "tests/directruntime-20261104/shared-translator/EnvironmentMemberControls.lean",
+          "sha256": "ca049e01d55a2bfab4e01d47fd0db3d9e60d07405a180ef42bacdb0d46f509f5",
+          "bytes": 4241
+        },
+        {
+          "path": "tests/directruntime-20261104/shared-translator/EnvironmentMembers.sol",
+          "sha256": "c6b4f237531cd900bda25997e752f64efd1c7fb9004c60d33501b5bd2ab92b0b",
+          "bytes": 798
+        },
+        {
+          "path": "tests/directruntime-20261104/shared-translator/environment-fixture.mjs",
+          "sha256": "5d502c35f23c9d50b4c62f83afad3a44b7fe8be7cd48b0195fb6e8e465ac88c9",
+          "bytes": 1371
+        },
+        {
+          "path": "tests/directruntime-20261104/shared-translator/environment-manifest.json",
+          "sha256": "8ee027cf3c84e2162d98a07cf38e07706076be85948483e8a9d5e35cbeb5f6b5",
+          "bytes": 14522
+        }
+      ],
+      "limits": "Source/control/manifest delivery only. Fixture AST and environment evidence archive unavailable on host. No gate rerun or runtime qualification."
+    },
+    "boundary": "Authenticated inbox extraction/source comparison only;no environmentexecution orproducer-source adoption inferred."
+  },
+  "currentTranslateSha256": "35d64218f2156a209f0d9873e7c55e9568de9e1393304ebe02faa50a2928fcd3",
+  "deliveredTranslateSha256": "90479bcc5c022c435be037ccb2bf16a95dd41b7c15d8cd79696502c3a3e508c5",
+  "projectionSha256": "90479bcc5c022c435be037ccb2bf16a95dd41b7c15d8cd79696502c3a3e508c5",
+  "projectionBoundary": "Only published37line guard theorem/doc removed forcomparison;not editinglivecode.Not8fullfilebyteidentity/binaryequivalence/fullsourceadequacy. Runtime definitions/imports/attributes same;publishedlemma retained.",
+  "sourceLevelBoxAnnotations": 8,
+  "controls": "16source-ID-bound cases8proved/4refuted/4unsupported +2harness guards planned;15metadata negatives,2unsupported siblings andbase-first error guard preserved.",
+  "missingProducerData": [
+    "environment-evidence.tar.zst SHA d8a141a7703e95cc81f7aa0741ed12a5073739b1cb7d4363354211ca3cb16060",
+    "exact producer fixture AST SHA4b57bac4071f9d3962d9814e20d87faf1edb4a7c3c89669738ada399cd9e86a4"
+  ],
+  "ownCompilationBoundary": "Willcompileexactauthenticatedc6source independently;no claimproducerAST/evidence delivered or oldverdict reused.",
+  "status": "Authenticatedintake;publishedproof-onlyextension retained;freshproof/build/runtimegates pending."
+}
