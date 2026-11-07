@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "dbf61c06ab14df73509b243fd4e84887c6b51e36569e60158274e79ef49a1172",
+  "kind": "data-inhabitance",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Touched.lean:22:mem_touched",
+      "theorem": "Solidity.Backend.StorageOps.mem_touched",
+      "signature": "theorem mem_touched (base q : Solidity.Storage.Loc) (stride count : Nat) :\n    q \u2208 touched base stride count \u2194\n      \u2203 i, i < count \u2227 base.add (i * stride) = q",
+      "signature_sha256": "668707484596327db079ceb575df278c851174ef3fab79819d9c04b97e8cb326",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.membership_inputs",
+      "status": "kernel-checked exact finite-run input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Touched.lean:27:touched_length",
+      "theorem": "Solidity.Backend.StorageOps.touched_length",
+      "signature": "theorem touched_length (base : Solidity.Storage.Loc) (stride count : Nat) :\n    (touched base stride count).length = count",
+      "signature_sha256": "33fe3e5cb5422580b16f3fb25d8236b618c96027359a7198d769bee74cba319d",
+      "witness": "H62.StorageAudit.GeneratedFamilyWitnesses.length_inputs",
+      "status": "kernel-checked exact finite-run input reference; independent fidelity reviews passed"
+    }
+  ]
+}
