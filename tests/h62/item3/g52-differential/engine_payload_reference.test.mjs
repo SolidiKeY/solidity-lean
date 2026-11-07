@@ -2,7 +2,7 @@
  * refusals must not manufacture payload matches or complete RPC/source claims. */
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createReadStream} from 'node:fs';import {createGunzip} from 'node:zlib';import {createInterface} from 'node:readline';import {createRequire} from 'node:module';import {pathToFileURL,fileURLToPath} from 'node:url';import {fork,spawnSync} from 'node:child_process';
-import {convertEngineFixture} from '../../../../scripts/h62/item3/g52-differential/engine_payload_reference.mjs';
+import {convertEngineFixture,selectionRange} from '../../../../scripts/h62/item3/g52-differential/engine_payload_reference.mjs';
 test('wrong fork/format and negative/version RPC profiles refuse before native conversion',async()=>{
  for(const f of [{network:'Prague'},{network:'Osaka',_info:{'fixture-format':'blockchain_test_sync'}},{network:'Osaka',_info:{'fixture-format':'blockchain_test_engine'},pre:{},postState:{},genesisBlockHeader:{},engineNewPayloads:[{params:[],newPayloadVersion:5,forkchoiceUpdatedVersion:3}]}])assert.equal((await convertEngineFixture({fixture:f},{})).status,'unsupported');
 });
@@ -17,4 +17,12 @@ test('real constructors reject bad payload hash/blob parameters and native worke
 });
 test('oversized parent heap is refused before any payload can run',()=>{
  const bulk=process.env.G52_BULK;if(!bulk)throw new Error('G52_BULK required');const result=spawnSync(process.execPath,['--max-old-space-size=8192',fileURLToPath(new URL('../../../../scripts/h62/item3/g52-differential/engine_payload_reference.mjs',import.meta.url)),bulk,'1','heap-refusal-control'],{encoding:'utf8',timeout:10000});assert.notEqual(result.status,0);assert.match(result.stderr,/parent heap prerequisite/);
+});
+
+test('resumed selections are nonempty bounded ranges without rounding or wrap',()=>{
+ assert.deepEqual(selectionRange(21124,20),{start:0,end:20});
+ assert.deepEqual(selectionRange(21124,20,20),{start:20,end:40});
+ assert.deepEqual(selectionRange(21124,20,21120),{start:21120,end:21124});
+ assert.deepEqual(selectionRange(Number.MAX_SAFE_INTEGER,Number.MAX_SAFE_INTEGER,1),{start:1,end:Number.MAX_SAFE_INTEGER});
+ for(const args of [[0,20,0],[10,0,0],[10,2,-1],[10,2,10],[10,1.5,0],[10,1,NaN],[10,Infinity,0],[10,1,Number.MAX_SAFE_INTEGER+1]])assert.throws(()=>selectionRange(...args),/invalid Engine selection range/);
 });

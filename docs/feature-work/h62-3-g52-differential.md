@@ -1264,3 +1264,104 @@ and construct canonical production endpoints/premise integration as original
 inputs permit. Do not repeat completed53serialized rejection classifications or
 accept a toy/conditional wrapper as the complete producer. This is a partial
 checkpoint handoff on the original goal, not completion of its work queue.
+
+
+## Resumable Engine-X native execution and strict coverage accounting
+
+Origin/master was fetched and its log/code inspected before this item. The
+published5414256fdf7b78e8debe5e571c7af06ee55a5563 was merged cleanly, preserving
+13c4280d23c06b52215ae915143f7b3e4f3fe06a and the original assigned branch/base.
+New upstream P9 catalogue/body recognizers do not supply full runtime factories.
+No reset, discard, push, default publication or competing goal/continuation.
+
+The existing runner now accepts a final START argument (default0). selectionRange
+requires safe integers and a finite nonempty range; the end clamps to the actual
+corpus size. Scanned prefix identities are still checked before skipping them.
+Rows retain original global indices; each summary publishes range_start/end and
+selected count. Existing final/partial output labels are refused, preserving
+sealed evidence. No native worker, block adapter, instruction, state-manager,
+reference package, allocation semantics or proof budget changed.
+
+The new generic engine_execution_coverage.py accepts complete captured native
+Engine-X runs only. It checks input/export/inventory/allocation/installed-lock
+and unchanged validator hashes, exact range/command/exit/no-stop receipts,
+contiguous original identities, payload/executed-block hashes and transaction
+output/status/gas/log consistency. Historical pilot wrapper acceptance is bound
+to the exact committed13c4280source, not an arbitrary supplied program; the current
+wrapper is pinned separately. Duplicate labels and any overlapping case reject.
+Binding-only rows, altered provenance, truncated ranges and absent/non-null stop
+fields cannot become native matches. Explicit complement ranges remain open.
+This is an external-artifact checker, not a Source/runtime theorem or attestation.
+
+Actual accepted union is[0,500):500payload matches,0mismatches,0unsupported,500blocks,
+500transaction observations,0raw logs. This adds480unique format cases beyond
+prior20, in24disjoint20case runs. All new exits2/incomplete, no resource stops;
+summed new-run time2408.019s,largest single run117.118s,maximum sampled external
+peak1212420096bytes. Native execution still has20624UNPROCESSED cases in[500,21124).
+Unprocessed/bind-only/replay rows add zero matches; cross-format overlap is not
+counted as unique source/proof coverage. Full payload/RPC/forkchoice/source and
+final-account-map conformance remain false. All15public obligations remain open.
+
+Coverage output reruns byte-identically, SHA256
+1ec7ad2da5ec5042b98d940c604c870d74cf6ccdf8ab94a5f3aca0562ed30113.
+A real resumed native[20,40) replay also matches byte-for-byte, SHA256
+409fd947e171ad7beb86c7993a89052a233f2c1b4c370773e31051d1c105a045
+(8.046s original,7.544s replay; neither stopped). A full480case native replay was
+NOT performed. Replay is excluded from the union. Some cases exercise Osaka CLZ;
+these reference observations do not resolve the known vendored Lean CLZ gap or
+supply the owned P10 bridge/source binding.
+
+The possible runner slowdown was announced before editing. Same1000-case Engine
+prefix and resource/cache configuration:44.237s before,43.726s after(-1.155percent),
+with byte-identical rows SHA256
+388dcfdfc62d5f1c6f1f2c0612d1ab500d678d90e4fd47934916f6c94fe73857.
+No10percent STOP triggered; existing performance holds are not released. Eight
+serial Node controls pass/no skips, including nonwrapping/clipped/invalid ranges.
+Three Python test methods pass, covering actual disjoint80case receipts, three
+real duplicate/overlap/bind-only refusals and ten corrupted-artifact controls.
+Mutated row hashes are recomputed so substantive guards are exercised. Temporary
+negative artifacts add zero conformance cases. Finder identified that a missing
+stopped field was initially accepted as null; this was fixed and directly tested.
+Actual old-label reuse exits1 before overwriting any prior evidence.
+
+Commands under writerlock and serial_semantics.run, with unchanged12GiBaggregate
+RSS/per-process AS,4GiBavailable reserve,no swap,300sjobcap,Node4096MiBold-space,
+native60s/5Mstep limits:
+
+    G52_BULK=/workspace/h44/g52-differential node --max-old-space-size=4096 --test-concurrency=1 --test tests/h62/item3/g52-differential/engine_x_allocation.test.mjs tests/h62/item3/g52-differential/engine_payload_reference.test.mjs
+    G52_BULK=/workspace/h44/g52-differential python3 -W error::ResourceWarning tests/h62/item3/g52-differential/test_engine_execution_coverage.py
+    node --max-old-space-size=4096 scripts/h62/item3/g52-differential/engine_payload_reference.mjs /workspace/h44/g52-differential 20 engine-x-native-500-520 blockchain_test_engine_x execute 500
+
+The last command is the NEXT UNEXECUTED range, not a passing gate. Actual captured
+commands/ranges/exits/resources are engine-x-native-*-command.json. Reproduce
+coverage using the exact label list in engine-range-coverage-500-command.json;
+new labels are required for runtime replay. Accounting/checker replay, source
+snapshot, default regression, refusal controls, actual versions and reviews are
+under$BULK/evidence/engine-range-*. All3198prior sealed entries rehashed unchanged.
+Strict block-acceptance again exits1 for the same six reference failures. No new
+source/compiler mismatch or owner ticket was fabricated; prior ticket stays open.
+
+Finder/skeptic independently review source, retained receipts, aggregate counts,
+hashes and final documentation without native/Lean/server reruns. Actual version
+inspection remains Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613,Node24.19.0; no Lean proof/build or fresh KeySort run here.
+Historical bounded KeySort pass is not a fresh gate; RUNTIME_GATE_PASS is false.
+Own Lean delta0; frozen statements/dependent definitions/interfaces, axiom set,
+budgets and exclusions unchanged; no sorry/newaxiom/native_decide/trust shortcut.
+
+Latest H70V17 notice confirms H125SourceDispatch is instruction emission only.
+V17 remains downstream. No complete H121b producing files/head are available;
+H121bfullcomposed producer/arbitrary-contract EEST binding and H121cfullP10 remain
+OWNED unfinished implementation, not waits on frozen Claude lanes. Original five
+factory/canonical source/runtime/artifact/session/resource/coverage obligations
+are unchanged. External inputs remain full P1/actualWorldCalls(memory-reference-
+structs and original frame producers), V08world-phase, VY1admitted assembly
+SourceSpec/frontend/rawsessions,VY4event/worldcoupling, executable-bytecodeP10
+body/signature/site-origin, original physical/pass/compiler/frame dependencies;
+composite/bare-prefix ownership is not guessed. No repeated producer ping.
+
+Next original-goal item is bounded native coverage from500 with the same limits,
+then real sync/negativeRPC support and canonical owned producer/P10 work as inputs
+permit. This committed checkpoint/handoff does not complete the original queue.
+Original persistent goal is neither created/reset/stopped/completed; H110same-thread
+continuation applies when fresh-thread handoff machinery is unavailable.
