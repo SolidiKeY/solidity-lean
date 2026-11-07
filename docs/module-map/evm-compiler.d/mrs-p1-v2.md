@@ -1,0 +1,1 @@
+| `Backend/InternalFlow/RuntimeFrameP1V2Lift.lean` | Exact canonical V2 observation of actual lifted frozen execution, including arbitrary existing call journals and every frozen outcome; no frame, admission, payload-producing or full P1 adequacy claim. |

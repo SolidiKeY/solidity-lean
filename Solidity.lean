@@ -379,6 +379,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1BridgeV2Controls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1Lang
 import Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2
 import Solidity.Backend.InternalFlow.RuntimeFrameP1LangV2Migration
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2Lift
 import Solidity.Backend.InternalFlow.RuntimeFrameReference
 import Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram
 import Solidity.Backend.InternalFlow.RuntimeFrameRestore

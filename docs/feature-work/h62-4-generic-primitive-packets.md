@@ -822,3 +822,28 @@ budgets unchanged. The final three-law kernel check passes in 1.390 seconds,
 sampled workload peak 824876 KiB, with existing standard axioms. Independent
 read-only finder/skeptic found no semantic defect and used no Lean/server/build/
 edit. Full C4/H68, frozen-original fidelity and timing STOPs remain open.
+
+## H121 canonical P1 and library intake
+
+Master and the V13 owner baseline `de845240a50622901bd3607dba5d3abefcc710b9`
+are adopted. P1 producer and G42.04 library adequacy are now local open work,
+not waits on the frozen V12/V13 lanes. The V13 bridge is a version-2 frame-free
+analog: it does not inhabit PendingBareRevertProducer, retain its reverting-entry
+field, or cover assert. H68 Approved/native-domain and full Local duties remain.
+
+RuntimeFrameP1V2Lift proves the actual lifted-code observation equation for all
+machines and code images using the existing MachineV2 and P1LangV2. Existing
+journal entries add no events, and every frozen outcome is handled. It introduces
+no new language or admission. Its fresh kernel check took 0.756 seconds, sampled
+workload peak 680712 KiB; axiom reports use only propext, Classical.choice and
+Quot.sound (the journal lemma uses propext alone). Independent read-only finder
+and skeptic found no defect without running Lean/server/builds. This is producer
+support, not full P1 or G42.04 completion: actual payload/event/frame execution,
+original approved-input outcome coverage and all original Local fields remain.
+
+The independent CheckedSub RuntimePair extraction candidate is parked, not
+applied: its predeclared fresh Target/Agreement/Controls timing metric measured
+10.823 seconds before and 12.638 after (+16.769842%, STOP). The original Target
+file is retained unchanged. Raw candidate, failed attempts, matched measurements
+and disposition are preserved off Git under /workspace/mrs-runtime-pair; this
+result neither clears that STOP nor replaces historical timing evidence.
