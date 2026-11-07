@@ -16,6 +16,43 @@ class ExactDomainTests(unittest.TestCase):
         self.macro = (ROOT / target.MACRO_PATH).read_text()
         self.fixture = (ROOT / target.FIXTURE_PATH).read_text()
 
+    def closed_row(self):
+        import test_kernel_metadata as fixtures
+        row=fixtures.MetadataSchemaTests().row()
+        row['module']='Solidity.Backend.AbiEntry.HeadGateControls'
+        return row
+    def test_closed_render_reuses_transform_and_pins_private_kernel_type(self):
+        row=self.closed_row();program,manifest=target.closed_render(ROOT,[row],[row['name']])
+        self.assertEqual(program.count(target.macro_fragment(self.macro)),1)
+        self.assertIn('closed_hypotheses_named%',program)
+        self.assertIn('=> closed_domain_0000 against% "closed type expression"',program)
+        self.assertIn('Lean.addDecl (.thmDecl',program)
+        self.assertIn('value := mkConst ``True.intro',program)
+        self.assertIn('type := domain',program)
+        self.assertIn('missing.kernel.name" => reject_missing',program)
+        self.assertIn('.toy" => reject_type against% "wrong recorded type"',program)
+        self.assertIn(row['name'],program)
+        self.assertIn('reprStr info.type == expected.getString',program)
+        self.assertEqual(len(manifest['targets']),1)
+        self.assertFalse(manifest['kernel_accepted']);self.assertFalse(manifest['witness_ledger_linked'])
+        self.assertEqual(manifest['generated_lean_sha256'],target.sha(program.encode()))
+        self.assertEqual(program.count('#print axioms closed_domain_'),1)
+        for message in ('target has explicit binders','target is not a theorem','universe parameters require review','hidden binders under reducible result','missing or ambiguous kernel name','recorded type differs'):
+            self.assertIn(message,program)
+    def test_closed_render_refuses_unranged_unmapped_and_nonclosed_rosters(self):
+        row=self.closed_row()
+        with self.assertRaises(ValueError):target.closed_render(ROOT,[row],['missing'])
+        with self.assertRaises(ValueError):target.closed_render(ROOT,[row],[row['name'],row['name']])
+        row['module']='Solidity.Backend.AbiEntry.WordValidation'
+        with self.assertRaisesRegex(ValueError,'outside frozen mapped census'):target.closed_render(ROOT,[row],[row['name']])
+        row=self.closed_row();row['level_params']=['u']
+        with self.assertRaises(ValueError):target.closed_render(ROOT,[row],[row['name']])
+        row=self.closed_row();row['binders']=[{'name':'n','binder_info':'Lean.BinderInfo.default','type':'Nat','proof_binder':False,'head_constant':'Nat'}]
+        with self.assertRaises(ValueError):target.closed_render(ROOT,[row],[row['name']])
+    def test_closed_render_is_deterministic(self):
+        a=self.closed_row();b=self.closed_row();b.update(name='second',user_name='second')
+        self.assertEqual(target.closed_render(ROOT,[a,b],[a['name'],b['name']]),target.closed_render(ROOT,[b,a],[b['name'],a['name']]))
+
     def test_existing_implementation_reused_byte_exactly_once(self):
         rendered = target.render(self.macro, self.fixture)
         fragment = target.macro_fragment(self.macro)

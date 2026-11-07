@@ -2155,3 +2155,60 @@ The non-Lean doc-path gate took65.995s;142 ambiguous basenames remain
 informational, all paths resolve. Scoped touched validation is recorded for
 this Python/docs delta only, not the pending P10 proof application. No full
 Lean/Bridge gate or runtime pass is claimed.
+
+
+### Closed explicit-hypothesis witnesses (2026-11-07)
+
+The existing exact-domain renderer now supports a generic closed-domain path.
+It selects355 source-position candidates from the sealed150-module inspection,
+including57 private kernel names, with no recorded binders/universe parameters.
+Lean then independently resolves the unique actual kernel name, compares the
+full recorded type expression, rechecks original theorem kind and universes,
+and runs the unchanged pinned hypothesis transformation. Only a derived `True`
+domain is accepted; each `True.intro` theorem is checked through `Lean.addDecl`.
+Command-local name indexes in batches of64 share lookup work without changing
+any target/type/domain check. Original theorem statements/conclusions are
+unchanged, and their conclusions are not established by these audit witnesses.
+
+The final guarded native group passes in17.581s, including7.078s serial toolkit
+automation. All355 generated witnesses are axiom-free. Eight refusal controls
+cover nonempty binders, non-theorems, universes, hidden binders, missing names
+and corrupted recorded types, including direct batch lookup/type controls.
+All615 selected import products were rebound to their saved frozen-source
+receipts. The355 target names are disjoint from the earlier103-target roster;
+no combined global ledger or full-census acceptance is inferred. Exact native
+hashes, parent inspection/type/source bindings and monitor receipts are checked
+by the external verify-proof.py recipe under
+`/workspace/parallel-20261103/executable-bytecode/closed-source-domains`.
+
+Failures remain preserved and rejected: first namespace/type-name/reserved-token
+errors, then a295s lookup timeout. The proof-only lookup optimization yielded
+an initial strict pass in10.223s; the final changed program added direct batch
+negative controls and toolkit checks. MCP diagnostics were attempted but failed
+on a read-only socket-lock path; the guarded CLI fallback and try-tactics ran
+serially (`decide` and `simp only` passed). No heartbeat or proof budget was
+raised. A genuinely new Q-BUDGET-01/H30/H33 checkpoint epoch spans13:23:24 to
+17:23:24 UTC; the older expired window was not extended. Four native groups
+consume329.653s total; the timeout is not treated as accepted evidence.
+
+Read-only finder/skeptic reviews pass the corrected batched implementation and
+final refusal controls. New source tests guard private type/name pinning,
+nonclosed/unmapped rosters, support-only WordValidation exclusion and exact
+renderer determinism. Source/kernel statement correspondence and global ledger
+links remain open; only these closed explicit-hypothesis domains are accepted.
+Original703-source closure, full190core+37Bridge inspection/statement/inherited
+accounting, supported-program success, other joint witnesses, Source/native/
+gas/fork and package/performance gates remain unfinished. PowerBounds STOP and
+producer/cache waits are unchanged. Masterc71469fa was adopted during this
+checkpoint. Its coordinator-reported full Bridge pass is recorded separately
+from local artifact readiness. The P10 review path is fully qualified, case
+alignment wording remains explicit, and the concrete depth witness remains an
+open implementation/validation obligation requiring Bridge prerequisites.
+
+
+Final checkpoint99source tests, trust/orphans/roots/fragments/whitespace and doc
+paths pass (56.145s;142 ambiguous basenames informational). No newly tracked
+Lean module or default-build import was added; generated355proofs remain H44
+external artifacts requiring the explicit native verifier. Scoped touched
+checks cover this generator/test/docs delta only. Full lane, P10 depth-control,
+Bridge/local-cache recovery and runtime acceptance are not asserted.

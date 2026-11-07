@@ -170,3 +170,139 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+CLOSED_NAMESPACE = NAMESPACE + ".Closed"
+CLOSED_CHECKER = r'''
+private def closedDomain (name : Lean.Name) : TermElabM Expr := do
+  let info ← getConstInfo name
+  unless wasOriginallyTheorem (← getEnv) name do
+    throwError "closed hypothesis audit: target is not a theorem"
+  unless info.levelParams.isEmpty do
+    throwError "closed hypothesis audit: universe parameters require review"
+  let domain ← explicitDomain info.type
+  unless domain.isConstOf ``True do
+    throwError "closed hypothesis audit: target has explicit binders"
+  return domain
+
+elab "closed_hypotheses_of% " id:ident : term => do
+  closedDomain (← realizeGlobalConstNoOverloadWithInfo id)
+
+elab "closed_hypotheses_named% " target:str " against% " expected:str : term => do
+  let foundConstants := (← getEnv).constants.toList.filter fun p => p.1.toString == target.getString
+  unless foundConstants.length == 1 do
+    throwError "closed hypothesis audit: missing or ambiguous kernel name"
+  let name := foundConstants.head!.1
+  let info ← getConstInfo name
+  unless reprStr info.type == expected.getString do
+    throwError "closed hypothesis audit: recorded type differs"
+  closedDomain name
+
+-- Guard regressions: input binders, non-theorems, universe parameters, hidden
+-- binders and corrupted target/type records must never become closed witnesses.
+theorem boundToy (_n : Nat) : True := True.intro
+def datum : Nat := 0
+universe u
+theorem polyToy (_t : Type u) : True := True.intro
+def hidden : Prop := ∀ (_n : Nat), True
+theorem hiddenToy : hidden := by intro _; exact True.intro
+theorem toy : True := True.intro
+/-- error: closed hypothesis audit: target has explicit binders -/
+#guard_msgs in
+#check closed_hypotheses_of% boundToy
+/-- error: closed hypothesis audit: target is not a theorem -/
+#guard_msgs in
+#check closed_hypotheses_of% datum
+/-- error: closed hypothesis audit: universe parameters require review -/
+#guard_msgs in
+#check closed_hypotheses_of% polyToy
+/-- error: hypothesis audit: hidden binders under reducible result -/
+#guard_msgs in
+#check closed_hypotheses_of% hiddenToy
+/-- error: closed hypothesis audit: missing or ambiguous kernel name -/
+#guard_msgs in
+#check closed_hypotheses_named% "missing.kernel.name" against% ""
+'''
+
+CLOSED_BATCH = r'''
+-- Build a command-local immutable name index; each generated theorem is still
+-- independently checked by the kernel with the unchanged derived domain.
+declare_syntax_cat closedEntry
+syntax str " => " ident " against% " str : closedEntry
+elab "#closed_hypothesis_batch " "[" entries:closedEntry,* "]" : command => do
+  let mut index : Std.HashMap String (List Lean.Name) := {}
+  for (name, _) in (← getEnv).constants.toList do
+    let key := name.toString
+    index := index.insert key (name :: index.getD key [])
+  for entry in entries.getElems do
+    match entry with
+    | `(closedEntry| $target:str => $helper:ident against% $expected:str) =>
+      let found := index.getD target.getString []
+      unless found.length == 1 do
+        throwError "closed hypothesis audit: missing or ambiguous kernel name"
+      let name := found.head!
+      let info ← getConstInfo name
+      unless reprStr info.type == expected.getString do
+        throwError "closed hypothesis audit: recorded type differs"
+      let domain ← Lean.Elab.Command.liftTermElabM (closedDomain name)
+      let helperName := (← getCurrNamespace) ++ helper.getId
+      Lean.Elab.Command.liftCoreM <| Lean.addDecl (.thmDecl {
+        name := helperName, levelParams := [], type := domain,
+        value := mkConst ``True.intro })
+    | _ => throwUnsupportedSyntax
+'''
+
+
+def closed_render(repo, rows, source_candidate_names):
+    """Reuse the pinned domain transform for observed closed source candidates.
+
+    Python selects candidates only. Lean rechecks original theorem kind, exact
+    recorded type, universes and the derived empty domain, including private
+    kernel identities. No original conclusion or global census is accepted.
+    """
+    import kernel_metadata as metadata
+    metadata.partition_records(rows, source_candidate_names)
+    names = set(source_candidate_names)
+    selected = sorted((r for r in rows if r["name"] in names and not r["binders"] and not r["level_params"]),key=lambda r:r["name"])
+    if not selected:
+        raise ValueError("no closed source candidates")
+    fragment = macro_fragment((repo / MACRO_PATH).read_text())
+    modules = sorted({r["module"] for r in selected})
+    frozen_map = subprocess.check_output(["git","show",BASE+":"+MAP],cwd=repo)
+    allowed = set(mapped_references(frozen_map.decode())[0])
+    producer_sources = {}
+    for module in modules:
+        if module.startswith("Solidity."):
+            path = module.replace(".","/") + ".lean"
+        elif module.startswith("SolidityBridge."):
+            path = "Bridge/" + module.replace(".","/") + ".lean"
+        else:
+            raise ValueError("closed target outside frozen mapped census")
+        if path not in allowed:
+            raise ValueError("closed target outside frozen mapped census")
+        producer_sources[path] = sha(subprocess.check_output(["git","show",BASE+":"+path],cwd=repo))
+    program = "import Lean\n" + "".join("import " + m + "\n" for m in modules)
+    program += "/-! Guard nonempty or stale hypothesis domains from being credited as closed.\nOnly derived empty hypotheses are witnessed; original conclusions are unchanged. -/\n"
+    program += fragment + "\nnamespace Closed\nopen Lean Meta Elab Term\n" + CLOSED_CHECKER + CLOSED_BATCH
+    program += '/-- error: closed hypothesis audit: recorded type differs -/\n#guard_msgs in\n#check closed_hypotheses_named% "' + CLOSED_NAMESPACE + '.toy" against% "wrong recorded type"\n'
+    program += '/-- error: closed hypothesis audit: missing or ambiguous kernel name -/\n#guard_msgs in\n#closed_hypothesis_batch ["missing.kernel.name" => reject_missing against% ""]\n'
+    program += '/-- error: closed hypothesis audit: recorded type differs -/\n#guard_msgs in\n#closed_hypothesis_batch ["' + CLOSED_NAMESPACE + '.toy" => reject_type against% "wrong recorded type"]\n'
+    targets = {}
+    for start in range(0, len(selected), 64):
+        batch = selected[start:start+64]
+        program += "\n#closed_hypothesis_batch [\n"
+        entries = []
+        for index, row in enumerate(batch, start):
+            helper = "closed_domain_" + str(index).zfill(4)
+            entries.append(json.dumps(row["name"],ensure_ascii=False) + " => " + helper + " against% " + json.dumps(row["type_expr"],ensure_ascii=False))
+            targets[helper] = metadata.observed_type(row)
+        program += ",\n".join(entries) + "\n]\n"
+        for index in range(start, start+len(batch)):
+            helper = "closed_domain_" + str(index).zfill(4)
+            program += "/-- info: '" + CLOSED_NAMESPACE + "." + helper + "' does not depend on any axioms -/\n#guard_msgs in\n#print axioms " + helper + "\n"
+    program += "\nend Closed\nend " + NAMESPACE + "\n"
+    return program, {"namespace":CLOSED_NAMESPACE,"targets":targets,"modules":modules,
+        "macro_sha256":MACRO_SHA256,"generated_lean_sha256":sha(program.encode()),
+        "frozen_map_sha256":sha(frozen_map),"producer_source_sha256":producer_sources,
+        "kernel_accepted":False,"witness_ledger_linked":False,
+        "boundary":"Candidate rendering only until native kernel/guard receipts pass; no original conclusion or full census acceptance"}
