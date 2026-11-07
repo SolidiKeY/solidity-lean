@@ -9,6 +9,8 @@ Latest evidence: /workspace/h62-audit-theories-resumed-20261107-evidence.
 Current validated unchanged-file subset:71 explicit joint inputs. Historical
 60-witness/95-proof results below remain version-scoped, not relabeled as a
 passing current full census. Eight new Bridge and nine Outcome proofs are checked on this base.
+All112 helper proof receipts now validate against current dependencies;
+original frozen-statement/version fidelity remains a separate unresolved gate.
 
 
 This is a reviewable partial audit, not completion of the frozen assignment.
@@ -720,3 +722,73 @@ merged-master layer failure remain unresolved; original pending records remain
 399 public +3 private +986 generated =1,388. Continue independent validation
 and original queue; preserve full target ABI/gas/fork obligations and all final
 gates. No new goal/reset/completion, owner exclusion or push is authorized.
+
+## Resumed checkpoint: all helper proofs revalidated and original-scope ledger
+
+Fresh fetch again observedac46c1978. Log/code inspection found no landed
+duplicate or relevant Source/Theory prerequisite change, so this isolated
+continuation retained its authorized5da4771e6 base. All11 standalone proof
+modules were then serially checked with current dependency fingerprints,
+excluding the side-effectful timed ElaboratedCensus metaprogram.
+
+The run passed283 dependency/cache records, including44 fresh module checks
+totaling336.287s, maximum79.842s and sampled peak RSS1,847,971,840 bytes. No
+failure, resource stop or proof-budget change occurred. Valid unchanged cached
+artifacts were reused; do not describe all11 helpers as freshly recompiled.
+ProgressWitnesses and ScopeControls were genuinely rebuilt in1.405s and1.407s.
+No proof source edit was needed. These are individual checks on changed
+dependencies, not a matched before/after performance comparison. The historical
+authorized +2.073826% census pair was not rerun; no timing STOP was ignored.
+
+verify_helpers.py now passes all112 theorem receipts on the CURRENT tree,
+with20 fixture/predicate definitions and6 private abbreviations. Every current
+source/transitive fingerprint, artifact/log hash and printed axiom report
+matches; only standard propext/Classical.choice/Quot.sound subsets occur.
+verify_totality.py still passes all26 core compiler packet/control theorems.
+Scoped acceptance/rejection controls pass71 unchanged-file joint statements;
+17 premise-role records and13 Python tests also pass. Commands/results are
+in current-gates.json and resource-stats.json. No new proof statement,
+fixture, source definition, axiom, premise, budget or exclusion was added by
+this revalidation item.
+
+coverage_ledger.py provides current ORIGINAL-scope accounting without bypassing
+the frozen guard. All500 historical signature/header/location/type-hash/owner
+records appear exactly once.77 mapped joint certificates and3 H69 certificates
+have current proof provenance;18 original empty telescopes stay explicitly
+historical. Five changed frozen files remain flagged version-pending, with
+no definition-equivalence claim.71 unchanged-file joint coverage is separate
+from77 certificate availability and112 helper proof receipts. All986 ORIGINAL
+generated candidates remain pending; no refreshed current generated inventory
+is claimed. remaining-original-records.json contains exactly1,388 unique
+records:399 public +3 private +986 generated, with owners retained.
+That1,388 is the witness/classification remainder, NOT a count of all unresolved
+fidelity, compiler-contract or final-gate obligations. Full acceptance remains
+false; Q-FROZEN-REBASE, the12-edge merged-master layer failure, broader compiler
+coverage/actual target ABI bytes/gas/Fitted/Enforced/physical forks and full
+run-lean/final gates remain open. No guard, root, module map or axiom pin changed.
+
+Finder and skeptic independently recomputed all112 helper and283 dependency
+receipts, resource totals and the500+986 ledger. They confirmed current proof
+provenance, exact remaining names/owners, H69 separation and explicit version/
+subset/full-goal boundaries; no residual findings or reviewer Lean jobs.
+Bulk ledger/proof outputs remain off Git with deterministic generators in Git.
+
+This completes four reviewed work items in the resumed continuation: Bridge
+joint witnesses, Outcome joint witnesses,17-record premise-role inventory and
+full helper revalidation/original-scope accounting. Per the original3–5-item
+fresh-thread rule, hand off to the coordinator for this SAME original VM,
+branch and persistent goal. Do not create/reset a goal, launch a competing
+continuation, mark the goal complete or infer a new retirement/pause. The
+latest explicit coordinator resumption remains in force. Next work includes
+remaining399 public/3private witnesses, all986 generated dispositions, the
+other483 records outside the role snapshot, live owner census and stronger
+compiler/final gates; use approved independent backfill while Q-FROZEN-REBASE
+waits. Fetch and inspect master first and consume any landed prerequisite.
+
+Final resumed handoff/evidence directory:
+/workspace/h62-audit-theories-revalidation-20261107-evidence. It contains
+absolute patch/bundle paths, exact continuation/frozen bases and committed head,
+full original assignment/queue copies, current proof/role/coverage manifests,
+all gate commands/results, questions/waits and SHA256SUMS. Prior retirement
+archive and every original evidence directory are preserved. No push, merge
+into master, PR, goal replacement or full-runtime PASS is claimed.
