@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "guarded_regression": "Imported or lexical declarations silently dropped, v2 results promoted into legacy bindings, or parent ranges guessed as generated identities.",
+  "source_sha256": {
+    "scripts/h62/item1/duplication-scanner/account_observed_declarations.py": "a3f56cb506b89b757be6cde41e35f68e9ec58de5c3343ed1d0471687eff2971e",
+    "tests/h62/item1/duplication-scanner/test_declaration_accounting.py": "7c1f86a95b6dda5b15ff4040dbdde1dd70da0e5d7300d26505c7dab962515a09"
+  },
+  "evidence_sha256": {
+    "acceptance.json": "fb676aea846bfc8712affd336305777b509f0b0b11e8b19317dbd26d50fd142b",
+    "reviews.json": "e08a0d0c2bed195a6c55ccef7f0e1006a5cdd2d8777ef5687ce74f0f2d35db26",
+    "tests.log": "cc1ea7d8834c455bafd69ffc97fc7d6208170fbca7da65ecf0f6f06c879ff405"
+  },
+  "external_Python_controls": 174,
+  "new_controls": 7,
+  "ledger_sha256": "4ecb6a9be7604f18fb9c3f2219b510d9c7e8b8d0155ebb2e02c56b30e1827ba3",
+  "coverage": {
+    "kernel_total": 312,
+    "lexical_total": 37,
+    "legacy_links": 25,
+    "source_evidence_counts": {
+      "direct-range-without-legacy-link": 17,
+      "existing-direct-source-link": 25,
+      "no-compiler-range": 242,
+      "range-name-differs": 28
+    },
+    "lexical_binding_statuses": {
+      "direct-source-signature-link": 25,
+      "no-direct-location-match": 12
+    },
+    "legacy_type_statuses": {
+      "serialized": 286,
+      "unsupported": 26
+    },
+    "metadata_v2_type_statuses": {
+      "serialized": 312
+    },
+    "byte_identical_final_ledgers": true,
+    "kind_cross_counts": {
+      "direct-range-without-legacy-link": {
+        "constructor": 17
+      },
+      "existing-direct-source-link": {
+        "inductive": 6,
+        "definition": 9,
+        "theorem": 10
+      },
+      "no-compiler-range": {
+        "definition": 143,
+        "recursor": 6,
+        "theorem": 93
+      },
+      "range-name-differs": {
+        "definition": 23,
+        "theorem": 5
+      }
+    },
+    "legacy_metadata_refusals_without_range": 26,
+    "ownership_verified": false,
+    "additional_bindings_or_witnesses": 0
+  },
+  "boundary": "Completed child observations, not current full artifact/runtime recertification or proof/witness/ownership/equivalence. All792original obligations and +80.254966536%STOP remain."
+}
