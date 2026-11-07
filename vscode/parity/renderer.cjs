@@ -1,5 +1,5 @@
 'use strict';
-const {writeFileSync} = require('node:fs');
+const {writeFileSync,mkdirSync} = require('node:fs');
 const {join} = require('node:path');
 const {createServer} = require('node:net');
 const {performance} = require('node:perf_hooks');
@@ -148,13 +148,36 @@ async function captureProofHelp(client,directory,metadata){
 }
 // Public output API presentation, observed from real renderer DOM/AX; no proof or full lifecycle equivalence.
 async function captureOutput(client,directory,metadata){
- const read=async()=>{const result=await client.request('Runtime.evaluate',{expression:`(()=>{const node=document.querySelector('.output-view')||document.getElementById('workbench.panel.output');if(!node)return null;const visible=e=>!!e&&[...e.getClientRects()].some(r=>r.width>0&&r.height>0)&&getComputedStyle(e).visibility!=='hidden';const panel=node.closest('.part')||node.parentElement;const selects=[...panel.querySelectorAll('.monaco-select-box')].filter(visible).map(e=>({tag:e.tagName,label:(e.selectedOptions?.[0]?.textContent??e.innerText??'').trim(),ariaLabel:e.getAttribute('aria-label'),title:e.title}));const viewport=(node.querySelector('.overflow-guard')||node).getBoundingClientRect();const geometry=[...node.querySelectorAll('.view-line')].map(e=>{const r=e.getBoundingClientRect();return{text:e.textContent,top:r.top,left:r.left,bottom:r.bottom,right:r.right,intersectsViewport:r.bottom>viewport.top&&r.top<viewport.bottom&&r.right>viewport.left&&r.left<viewport.right};});const segments=geometry.map(e=>e.text);return{visible:visible(node),text:node.innerText,segments,geometry,continuousText:segments.join('').replace(/\u00a0/g,' '),selects,selectedChannel:selects.length===1?selects[0].label:null};})()`,returnByValue:true});return result.result.value;};
+ const deadline=performance.now()+15000,visibility=require('./output-visibility.cjs');
+ const timeout=()=>Object.assign(Error('Output capture exhausted original15000ms deadline'),{code:'TIMEOUT'});
+ const boundedClient={request:async(...args)=>{const remaining=deadline-performance.now();if(remaining<=0)throw timeout();let timer;try{return await Promise.race([client.request(...args),new Promise((_,reject)=>{timer=setTimeout(()=>reject(timeout()),remaining);})]);}finally{clearTimeout(timer);}}};
+ const read=async()=>{const result=await boundedClient.request('Runtime.evaluate',{expression:`(()=>{const node=document.querySelector('.output-view')||document.getElementById('workbench.panel.output');if(!node)return null;const visible=e=>!!e&&[...e.getClientRects()].some(r=>r.width>0&&r.height>0)&&getComputedStyle(e).visibility!=='hidden';const panel=node.closest('.part')||node.parentElement;const selects=[...panel.querySelectorAll('.monaco-select-box')].filter(visible).map(e=>({tag:e.tagName,label:(e.selectedOptions?.[0]?.textContent??e.innerText??'').trim(),ariaLabel:e.getAttribute('aria-label'),title:e.title}));const viewport=(node.querySelector('.overflow-guard')||node).getBoundingClientRect();const geometry=[...node.querySelectorAll('.view-line')].map(e=>{const r=e.getBoundingClientRect();return{text:e.textContent,top:r.top,left:r.left,bottom:r.bottom,right:r.right,intersectsViewport:r.bottom>viewport.top&&r.top<viewport.bottom&&r.right>viewport.left&&r.left<viewport.right};});const segments=geometry.map(e=>e.text);return{visible:visible(node),text:node.innerText,segments,geometry,continuousText:segments.join('').replace(/\u00a0/g,' '),selects,selectedChannel:selects.length===1?selects[0].label:null};})()`,returnByValue:true});return result.result.value;};
  const valid=o=>typeof metadata.readinessLine==='string'&&metadata.readinessLine.length>0&&o?.visible&&o.selectedChannel===metadata.channel&&o.continuousText?.includes(metadata.readinessLine);
- const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);
- writeFileSync(join(directory,'output-visible-before.json'),JSON.stringify(before,null,2));
- if(!valid(before)){await capture(client,directory,true).catch(()=>{});throw Error('Actual visible output channel/owned readiness line did not match');}
- const captured=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'output-visible-after.json'),JSON.stringify(after,null,2));
- if(!valid(after)||before.continuousText!==after.continuousText)throw Error('Output content/channel changed during screenshot capture');
- return{...captured,output:{panelVisible:true,readinessVisibility:'not-certified',scope:'Visible panel/channel; full owned readiness is DOM-resident. Per-character clipping/visibility is unproved.',selectedChannel:before.selectedChannel,text:before.continuousText,before,after,readinessLine:metadata.readinessLine}};
+ const expression='('+visibility.probe.toString()+')('+JSON.stringify(metadata.readinessLine)+')',inspect=async()=>{const result=await boundedClient.request('Runtime.evaluate',{expression,returnByValue:true});return result.result.value;};
+ let samples=0,primary;
+ try{
+  // Initialize the actual AX/DOM inspection path before settling. This diagnostic
+  // image is not an accepted bracket; watcher epoch is never reset afterward.
+  const initial=await inspect();writeFileSync(join(directory,'output-preparation-initial.json'),JSON.stringify(initial,null,2));
+  const preparation=join(directory,'preparation');mkdirSync(preparation,{recursive:true});await capture(boundedClient,preparation,true);
+  const prepared=await visibility.prepare({read,inspect,valid,expected:metadata.readinessLine,channel:metadata.channel,deadline,now:()=>performance.now(),delay:ms=>new Promise(resolve=>setTimeout(resolve,ms)),record:async sample=>{writeFileSync(join(directory,'output-preparation-'+String(samples++).padStart(3,'0')+'.json'),JSON.stringify(sample,null,2));}});
+  const before=prepared.visible,glyphBefore=prepared.glyph;writeFileSync(join(directory,'output-visible-before.json'),JSON.stringify(before,null,2));writeFileSync(join(directory,'output-glyph-before.json'),JSON.stringify(glyphBefore,null,2));
+  // One screenshot bracket only: a failed bracket is never retried or selected away.
+  const captured=await capture(boundedClient,directory,true),after=await read(),glyphAfter=await inspect();writeFileSync(join(directory,'output-glyph-after.json'),JSON.stringify(glyphAfter,null,2));writeFileSync(join(directory,'output-visible-after.json'),JSON.stringify(after,null,2));
+  const glyphErrors=visibility.errors(glyphBefore,glyphAfter,metadata.readinessLine,metadata.channel);if(glyphErrors.length)throw Error('Output glyph geometry refused: '+glyphErrors.join('; '));
+  if(!valid(after)||before.continuousText!==after.continuousText)throw Error('Output content/channel changed during screenshot capture');
+  if(performance.now()>=deadline)throw timeout();
+  return{...captured,output:{panelVisible:true,readinessVisibility:'not-certified',preparationSamples:samples,glyphGeometry:{before:glyphBefore,after:glyphAfter,scope:'DOM Range geometry/hit-test coverage, not raster glyph identity or unobserved compositor ABA.'},scope:'Visible panel/channel; full owned readiness is DOM-resident. Per-character clipping/visibility is unproved.',selectedChannel:before.selectedChannel,text:before.continuousText,before,after,readinessLine:metadata.readinessLine}};
+ }catch(error){primary=error;writeFileSync(join(directory,'output-capture-failure.json'),JSON.stringify({message:error.message,code:error.code,at:performance.now()},null,2));throw error;
+ }finally{
+  const cleanup={requested:performance.now(),deadline,confirmed:false};let timer;
+  try{
+   const pending=client.request('Runtime.evaluate',{expression:'('+visibility.probe.toString()+')(null,true)',returnByValue:true}),remaining=deadline-performance.now();
+   if(remaining<=0){pending.catch(()=>{});throw timeout();}
+   const result=await Promise.race([pending,new Promise((_,reject)=>{timer=setTimeout(()=>reject(timeout()),remaining);})]);
+   if(result?.result?.value!==true)throw Error('Output observer cleanup was not confirmed');if(performance.now()>=deadline)throw timeout();cleanup.confirmed=true;
+  }catch(error){cleanup.error=error.message;cleanup.connectionRetired=typeof client.close==='function';client.close?.();if(!primary)throw error;
+  }finally{clearTimeout(timer);cleanup.finished=performance.now();writeFileSync(join(directory,'output-observer-cleanup.json'),JSON.stringify(cleanup,null,2));}
+ }
 }
 module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput};
