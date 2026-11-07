@@ -139,4 +139,22 @@ class FieldDomainTests(unittest.TestCase):
         self.assertEqual(combined.count('def emptyReferenceRuntime :'),1)
         self.assertIn('theorem decoder_always_none_run_refused',combined)
 
+    def test_composition_roster_reuses_certificate_and_keeps_nonempty_lowering_frame(self):
+        fixture=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/composition-field-witnesses.json').read_text())
+        targets=[w['target'] for w in fixture['witnesses'].values()]
+        expected={'Solidity.Backend.Selection.'+name for name in [
+            'CompositionCertificate.lowering','CompositionCertificate.control',
+            'CompositionCertificate.assembly','CompositionCertificate.roundtrip',
+            'LoweringCertificate.success','ControlCertificate.shape',
+            'ControlCertificate.room','ControlCertificate.realize']}
+        self.assertEqual(len(targets),8)
+        self.assertEqual(set(targets),expected)
+        previous=json.loads((ROOT/'tests/h62/item2/audit-bytecode-selection/selection-field-witnesses.json').read_text())
+        self.assertFalse(set(targets)&{v['target'] for v in previous.values()})
+        self.assertIn('[11,99]',fixture['witnesses']['lowering_success_joint_domain']['proof'])
+        combined='\n'.join((ROOT/p).read_text() for p in fixture['support_sources'])
+        self.assertEqual(combined.count('def emptyComposition :'),1)
+        self.assertIn('theorem composition_altered_code_refused',combined)
+        self.assertIn('theorem empty_changed_assembly_refused',combined)
+
 if __name__=='__main__':unittest.main()
