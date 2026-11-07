@@ -103,5 +103,6 @@
       "bytes": 253,
       "sha256": "b1b7cc1b647e17d3c839553551384acfc158783e1ee4aaa436a585fe3eb1571b"
     }
-  ]
+  ],
+  "receipt_status": "HISTORICAL: source binding/scope at recorded checkpoint, now superseded for current source by source-hash-boundaries-manifest.json. Old hashes retained."
 }

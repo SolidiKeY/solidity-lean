@@ -987,3 +987,31 @@ assigned H68 world-phase work remain open; H124 stays closed.
 Independent read-only finder and skeptic found no issue in the eight-law
 partition, exact conditional premise, observation boundaries or historical-gate
 qualifications. Neither ran Lean or a server; review receipt remains off Git.
+
+### Hash timeout boundary and seven component links (2026-11-07)
+
+SourceHashJoint now retains the exact zero-horizon timeout/prestate and proves
+its full result differs from every sufficient-horizon successful hash run,
+including empty input. The existing generic zero_horizon law supplies the
+boundary; no new interpreter, resource cutoff or admission restriction is added.
+
+All seven original hash targets now link exactly once: four current checked
+components, one historical checked literal-run component in SourceEnvironmentJoint,
+and two existing total word-constructor/bytesNat observation references. The
+historical environment gate is not claimed rerun. Exact saved type hashes and
+original IDs remain in the off-Git index. No new fixture, noncollision claim or
+full feasibility/fidelity acceptance is counted; residual declarations remain open.
+The old hash receipt retains its historical source hash/scope and points to the
+new source-hash-boundaries manifest for the current audit source.
+
+After adopting master ed4d9cfb7, the serial check passed in 101.970 seconds
+including rebuilt imports, one Lean, peak sampled aggregate RSS 1,367,560,192
+bytes and no STOP. All five declarations use the existing standard axioms;
+registration passed. This is not matched timing, a full-root gate or release of
+prior STOPs. The new conditional v2 assembly on master explicitly leaves actual
+library Source/origin/session/lifecycle bindings open; canonical producer waits
+and the assigned H68 bridge therefore remain unchanged.
+
+Read-only finder and skeptic found no issue in the full timeout/success
+boundary, seven-law partition, bindings or historical-gate qualifications.
+Neither ran Lean or a server; review evidence remains off Git.
