@@ -7,6 +7,9 @@ Copying primitive storage members creates one fresh struct object and no
 recursive children. Its payload retains the actual unsigned, signed and
 Boolean values, rather than the defaults used by construction/deletion.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}

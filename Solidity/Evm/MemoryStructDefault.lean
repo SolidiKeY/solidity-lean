@@ -11,6 +11,9 @@ its target reservation has no header and uses the allocator's zero tail.
 An empty model struct reserves one padding cell so allocation always carries
 an allocator premise, even though it has no field cells.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}
@@ -202,7 +205,7 @@ theorem defaultStruct_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
   · rw [declareStructCode, run_append_ok (allocateStruct_run m cursor _ ha.arrays.free.cell)]
     rfl
   · have hid : (σ.alloc (R := .struct s) (defaultFields (structDef s) hp)).2.id = σ.H.length := rfl
-    simpa only [hid, upd_same] using
+    simpa only [State.allocPush, hid, upd_same] using
       (h.allocateStruct ha hb hp hmf hspace).consMem
         (σ.alloc (R := .struct s) (defaultFields (structDef s) hp)).2 hcap
   · exact (ha.reserveStruct (s := s) (defaultFields (structDef s) hp)

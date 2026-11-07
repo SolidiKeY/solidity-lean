@@ -11,6 +11,9 @@ must start strictly above it. These local simulation lemmas prepare the
 growing address-map result used by the compiler's allocation and
 reached-capacity clauses.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 
 variable {C : Contract}
@@ -146,7 +149,7 @@ theorem newArray_correct {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
       run_append_ok (allocateArray_run m cursor size ha.arrays.free.cell)]
     rfl
   · have hid : (σ.alloc (defaultArray p size)).2.id = σ.H.length := rfl
-    simpa only [hid, upd_same] using
+    simpa only [State.allocPush, hid, upd_same] using
       (h.allocate ha hb p size hspace).consMem (σ.alloc (defaultArray p size)).2 hcap
   · exact (ha.allocateArray p size hspace).localWrite (b + Γ.length)
       (by omega) (by omega) (.val cursor)

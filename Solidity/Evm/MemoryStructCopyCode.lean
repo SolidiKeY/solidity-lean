@@ -9,6 +9,9 @@ memory. The checked load plan records each member's real source type. Stores
 then consume those words beneath a retained allocation pointer, preserving
 the caller's arbitrary stack and every cell outside the written addresses.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}

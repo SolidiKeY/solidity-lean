@@ -18,6 +18,9 @@ proofs state each step against an abstract grown heap (`Grown.prims_cons`,
 definitions unfolded (`with_unfolding_all`).
 -/
 
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 variable {C : Contract}
@@ -38,9 +41,8 @@ theorem SVec.copyStToM_prims {H : HTy} (hp : Heap H) {p : PrimTy} :
       SVec.copyStToM hp (SVec.ofList (l.map fun v => (SVal.prim v : SVal (.prim p)))) h =
         ⟨List.prefix_refl H, hp, ⟨l, by simp⟩⟩
   | [], h => by
-    simp only [List.map_nil, SVec.ofList, SVec.copyStToM_nil]
+    with_unfolding_all exact SVec.copyStToM_nil hp h
   | v :: l, h => by
-    simp only [List.map_cons, SVec.ofList, SVec.copyStToM_cons, SVal.copyStToM_prim]
     with_unfolding_all exact Grown.prims_cons hp v l _ _ (SVec.copyStToM_prims hp l h) _ _ _
 
 end Solidity

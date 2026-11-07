@@ -8,6 +8,9 @@ struct. It does not copy, allocate or mutate the child object. Whole-object
 interval ownership still frames that word against primitive fields, other
 objects and locals, while the reference-word relation tracks its new child.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 variable {C : Contract}
