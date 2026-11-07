@@ -854,3 +854,55 @@ packet integration question is resolved. Source/Typing remains untouched.
 Actual Source resource/session realization, canonical origins, general graph
 admission, Source/lifecycle correspondence and original proof/final gates remain
 locally open. Separate Y04 and 4.35 producer waits are unchanged.
+
+
+## Checkpoint 238: model H24 record after authenticated re-baseline
+
+Fresh fetch verifies published d93f6839c613468610ea488356b174cd183e3772; the
+model-only PlanGraphAdmission module is absent there. The previously withheld
+proposal is now integrated through the existing shared empty-environment helper.
+producer fixes all four PlanWitness models, base_exact preserves planProducer,
+and inhabited supplies this model record only. No refusal proof or per-case
+implementation is copied. Actual Source/session/library/lifecycle adequacy and
+the locally owned producer obligations remain open; this is not their delivery.
+
+The affected build fetches 142 cached jobs, so its 0.64-second success is not
+presented as fresh elaboration. A distinct per-file check at committed source
+3b4440440d9e668041b4b8d530788e683b962f96 passes all three standard-three guards:
+1.86 seconds, aggregate RSS peak 772624384 bytes, no resource stop. Finder and
+skeptic independently reviewed source/scope without Lean/server and found no
+findings. The historical checkpoint-237 auth failure and withdrawn candidate
+receipt remain unchanged; this is a distinct freshly verified adoption.
+
+## Checkpoint 239: premise-free retained-array input domains
+
+Two input inhabitants reuse the existing populated retained fixture for the
+logical live-word/none equivalences and primitive write-failure equivalence.
+Their three original conclusions are exercised directly, keeping raw retained
+access distinct from live refusal. No new fixture or production statement is
+introduced. These rows have data parameters only: they add three DATA entries,
+not joint logical-premise bundles. Counts become 72 mapped = 57 joint + 15 data,
+with 3209 of 3281 conservative rows uncovered. Complete audit/totality and all
+original goals remain unfinished. Historical complete-validation markers stay
+historical; the source-specific receipt is updated only after kernel success.
+
+All 59 guards pass at source2212d6770a5ed8a4c712957564cccdec1767abe2 in 3.63s,
+aggregate RSS peak724922368bytes, no resource stop. Two new guards are axiom-free,
+three use only propext/Classical.choice/Quot.sound. The module totals12empty,
+5propext-only and42standard-three guards. The first diagnostic failed on missing
+explicit Boolean primitive annotation; its receipt is retained, no failing
+artifact accepted, and no statement/premise/budget weakening used.
+
+Same-condition focused pre-change check3.62s versus exact committed3.63s is
+about0.28percent slower, below the10percent STOP threshold; guarded precommit
+check was3.58s. This is no whole-build comparison or statistical speedup claim.
+Finder and skeptic independently confirmed the data-only classification and
+original-law fidelity without Lean/server; no findings remained.
+
+Published DirtyReadback now provides actual selected-read capture/agreement
+and bounded integer/Boolean cleanup roundtrips. Those APIs are reused as
+boundaries, not duplicated or promoted to complete Source session adequacy.
+Frontend.SpecOriginsV1 is editor/NatSpec provenance, not P8a.SourceOrigins for an
+actual Source program. H16/H57 question V10-H121-H24-REFUSAL stays pending for the
+mapping-bearing accepted-origin case. No Source typing or frozen interface edit
+is made; Y04 and separate4.35 trust/timing waits remain distinct.
