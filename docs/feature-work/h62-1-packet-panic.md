@@ -1,5 +1,7 @@
 # H62 packet-panic census handoff
 
+Upstream now registers the canonical `Solidity/Backend/PrimitivePackets/PanicBytes.lean` module. Earlier notes about pending registration are historical; see the final rebase reconciliation. Independent Lean validation and the remaining gates are still pending.
+
 Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. This is a backfill census, not an implementation or completed checkpoint. No Lean statements, proofs, premises, generated roots, pins, or producer files were changed.
 
 At that base, `python3 scripts/h62/item1/packet-panic/census.py --ownership /workspace/h62-coordinator-inputs/ownership.json` finds three `exact_panic_bytes` and three `panic_not_truncated` declarations in CheckedAdd, CheckedSub and CheckedMul Controls, respectively reserved as G25-UADD-CHECKED-1104, G25-USUB-CHECKED-1105 and G25-UMUL-CHECKED-1105. It also finds three `exact_panic` and four `panic_not_empty` controls in six checked arithmetic families. SignedCheckedAdd, SignedCheckedSub and SignedCheckedMul are reserved as G25-IADD-CHECKED-1105, G25-ISUB-CHECKED-1105 and G25-IMUL-CHECKED-1105. These reservations are excluded from the assignment. The audit description of 5x is not reconciled with the three exact-name pairs in this pinned tree; the differently named signed exact-byte assertions are separately reported.
@@ -28,7 +30,7 @@ This is a literal text inventory, including any comments or strings; it is not L
 
 The additive `tests/h62/item1/packet-panic/CASE-ACCOUNTING.md` traces the unsigned and signed checked Source/selected/target/agreement/control branches and the related division, modulo and signed-subtraction contexts beyond the 42 literal references. It distinguishes Source exact data, coarse target reverts, successful and timeout contrasts, frame and saved-stack premises. It is a read-only case ledger, not a new proof, full semantic dependency closure, or completion of all original accounting.
 
-`python3 scripts/h62/item1/packet-panic/declarations.py > /workspace/h62-packet-panic-evidence/declarations.json` lists 465 literal line-start headers across 48 files in the ten packet families in the ledger. The unsigned checked subset has 163: Add 45, Sub 52, Mul 66. This bounded lexical list records raw file hashes and fails if that selected file set changes; it does not capture all possible Lean declaration syntaxes or all dependencies. The three exact-file agreements remain pending from VY4 for `Solidity/Backend/PrimitivePackets/CheckedAdd/Controls.lean`, MRS for `Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean`, and MIC for `Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean`. Accepted ticket relays do not grant edit permission.
+`python3 scripts/h62/item1/packet-panic/declarations.py > /workspace/h62-packet-panic-evidence/declarations.json` lists 465 literal line-start headers across 48 files in the ten packet families in the ledger. The unsigned checked subset has 163: Add 45, Sub 52, Mul 66. This bounded lexical list records raw file hashes and fails if that selected file set changes; it does not capture all possible Lean declaration syntaxes or all dependencies. At the time of that census, the three exact-file agreements remained pending from VY4 for `Solidity/Backend/PrimitivePackets/CheckedAdd/Controls.lean`, MRS for `Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean`, and MIC for `Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean`. Accepted ticket relays did not grant edit permission; H82 later superseded agreement waits for its stated proof-only subset.
 
 Independent read-only finder and skeptic reviews used no Lean server. Both verified the initial case ledger and unsigned header totals; after expansion, finder matched all 465 rows and raw source hashes to a separate scan, and skeptic confirmed the ten families match the literal panicData-bearing family set. Both retained the stated lexical and semantic limits. The skeptic also required the new declarations artifact in the final SHA-256 manifest; the external handoff manifest includes it.
 
@@ -40,7 +42,7 @@ Two independent read-only reviewers, without Lean, checked all 102 observations 
 
 ## H71 owner candidate
 
-The staged `tests/h62/item1/packet-panic/PanicBytes.lean` and `CheckedMulEquivalence.lean`, plus `prepare_mul_patch.py`, prepare an owner-applied proposal without changing any owned original. See `tests/h62/item1/packet-panic/H71-CANDIDATE.md` for exact names, signatures, unregistered module dependency, two-theorem patch scope, owner-message provenance, actual diagnostic outcomes, resource limits and uncompleted gates. The staged candidate is not proved or published. MIC retains CheckedMul ownership; MRS reports a separate unverified 4.35 Roadmap/Contracts axiom blocker and grants no CheckedSub edit or application agreement.
+The staged `tests/h62/item1/packet-panic/PanicBytes.lean` and `CheckedMulEquivalence.lean`, plus `prepare_mul_patch.py`, prepare an owner-applied proposal without changing any owned original. At that earlier stage, see `tests/h62/item1/packet-panic/H71-CANDIDATE.md` for exact names, signatures, then-unregistered module dependency, initial two-theorem patch scope, owner-message provenance, actual diagnostic outcomes, resource limits and uncompleted gates. That staged candidate had not been validated or published. MIC retains CheckedMul ownership; MRS reports a separate unverified 4.35 Roadmap/Contracts axiom blocker and grants no CheckedSub edit or application agreement.
 
 ## H71 isolated fixture and Q1 routing
 
@@ -48,7 +50,7 @@ Q1 is an owner wait, routed to `solidity-compiler10-20261028/memory-internal-cal
 
 ## Post-merge Q1 continuation
 
-The coordinator explicitly requested continuation and a merge from published master; the assigned branch fast-forwarded to `5f14596531efea2be64f1a5e7a83afa5e151e865`, whose history contains the lane head via merge `5ca6d3315e3d76a7da28ed0831f69a8383a51efb`. Q1 was answered YES for the MIC `panic_not_empty` proof-only proposal. The current review-only Mul and Sub patch generators include all three unchanged Source propositions; neither applies edits to excluded producer files or establishes the still-missing real helper proof, registration, equivalence, axiom checks, case coverage or timing. Details and independent reviews are recorded in `tests/h62/item1/packet-panic/H71-CANDIDATE.md`.
+The coordinator explicitly requested continuation and a merge from published master; the assigned branch fast-forwarded to `5f14596531efea2be64f1a5e7a83afa5e151e865`, whose history contains the lane head via merge `5ca6d3315e3d76a7da28ed0831f69a8383a51efb`. Q1 was answered YES for the MIC `panic_not_empty` proof-only proposal. The current review-only Mul and Sub patch generators include all three unchanged Source propositions; neither applies edits to excluded producer files or establishes independent real helper validation, equivalence, axiom checks, case coverage or timing; the canonical helper was registered later upstream. Details and independent reviews are recorded in `tests/h62/item1/packet-panic/H71-CANDIDATE.md`.
 
 ## Post-merge timing receipt controls
 
@@ -64,7 +66,7 @@ Independent read-only finder and skeptic reviews matched the 71 signed rows, sou
 
 ## Post-merge fresh-thread handoff
 
-The post-merge continuation completed three reviewable backfill items: the Q1 review-only three-proof proposals, stricter declared timing-receipt checks, and the 71-row signed checked Controls ledger. Each was independently reviewed without Lean. The original four packet-panic checkpoints are not complete. The production helper import remains unregistered, the actual Source helper and equivalence fixtures have not elaborated, the no-build helper diagnostic last reported stale imports, and no affected/full runtime, axiom or before/after timing gates have passed. The separately reported Roadmap/Contracts 4.35 axiom issue has not been independently reproduced in this VM. The cited migration overlay is not present locally. The 4.35-compatible dependency closure and coordinator handling of the excluded generated roots/maps remain needed. No exact-file proof-only permission wait is asserted under H82; the G25 and H55 exclusions and existing statement/definition/axiom constraints remain.
+The post-merge continuation completed three reviewable backfill items: the Q1 review-only three-proof proposals, stricter declared timing-receipt checks, and the 71-row signed checked Controls ledger. Each was independently reviewed without Lean. The original four packet-panic checkpoints are not complete. At that handoff the production helper import remained unregistered and the actual Source helper and equivalence fixtures had not elaborated; upstream later registered the canonical helper. The no-build helper diagnostic last reported stale imports, and no affected/full runtime, axiom or before/after timing gates have passed. The separately reported Roadmap/Contracts 4.35 axiom issue has not been independently reproduced in this VM. The cited migration overlay is not present locally. The 4.35-compatible dependency closure and coordinator handling of the excluded generated roots/maps remain needed. No exact-file proof-only permission wait is asserted under H82; the G25 and H55 exclusions and existing statement/definition/axiom constraints remain.
 
 The current branch was explicitly continued by the coordinator after the prior retirement handoff and fast-forwarded to `5f14596531efea2be64f1a5e7a83afa5e151e865`. The earlier goal tool reported blocked and this session exposes no goal inspect/resume/pause operation; no goal was recreated or marked complete. The original rendered prompt has still not been recovered byte-for-byte; the prior `handoff/ORIGINAL-ASSIGNMENT-RECOVERED.md` is only a reconstruction. Fresh-thread continuation belongs to the coordinator; this worker does not launch its own replacement.
 
@@ -157,3 +159,19 @@ The base-pinned fourteen-row populated-fixture ledger accounts for the read-only
 ## SignedDiv Contract continuation
 
 The base-pinned checked-contract ledger records the quantified Source/target reads, StateRepr, saved finite words and all three numeric capacity premises alongside the separate Source, symbolic and numeric conclusions. Negative controls pass. Independent read-only finder and skeptic matched the declaration without Lean. All 474 currently observed lexical headers now have descriptions; broader semantic and proof obligations remain open.
+
+## Source-window evidence continuation
+
+`source_windows.py` generates base-pinned source windows and hashes next to all 474 manual observations, with source fidelity and negative controls. Independent read-only finder and skeptic verified all current windows and hashes without Lean. Windows have lexical boundaries, may omit preceding docstrings or attributes and include neighboring material, and do not prove observation prose or Lean statements. The bulk JSON stays off Git.
+
+## Panic occurrence navigation continuation
+
+The deterministic current-tree occurrence/window map records 42 raw panicData regex hits and zero unmapped among regenerated source windows. Synthetic controls cover multiple matches, unmapped and overlapping windows, source hash mismatch and the deliberate apostrophe-suffix false positive. Independent read-only finder and skeptic verified the mapping without Lean; the output now states that files beyond the base-pinned window set are not base-verified. Window membership is a navigation hint, not semantic attribution.
+
+## Proposal textual-check continuation
+
+Mul/Sub review-only proposal tests now reject several malformed cross-declaration, attribute and comment-boundary cases and pin the inspected helper bytes. Both tests pass. Independent read-only finder and skeptic supplied counterexamples, reviewed the fixes and confirmed the pinned current inputs without Lean. The extractor is restricted textual matching and does not determine whether a theorem-shaped header is inside a preceding block comment. It establishes no kernel equivalence, target behavior or timing; upstream registration is a separate fact.
+
+## Registered helper rebase reconciliation
+
+Upstream `3c2734000413fb142b186e93387306bbb01fd181` provides the canonical `Solidity/Backend/PrimitivePackets/PanicBytes.lean` module; earlier unregistered-module notes are historical. The rebased Mul/Sub tests retain restricted textual boundary controls and pin the canonical helper bytes. This does not independently establish Lean proofs, equivalence, axiom inventories, affected/full gates or timing.
