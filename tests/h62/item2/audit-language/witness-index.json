@@ -106,5 +106,356 @@
     "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
     "boundary": "complete leading telescope; final conclusion not assumed",
     "classification": "per-input feasibility; no global compiler producer structure"
+  },
+  {
+    "target": "Solidity.Language.Feature.all_complete",
+    "source_id": "Solidity/Language/Features.lean:1116:Feature.all_complete",
+    "signature_sha256": "1899d0e564a0b4721cec7c30734212fb9bc6ef2029b983cff332c6e93f806ca7",
+    "witness": "Solidity.H62.AuditLanguage.feature_all_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.Feature.info_scope",
+    "source_id": "Solidity/Language/FeatureInfo.lean:1078:Feature.info_scope",
+    "signature_sha256": "e6c1c04523d4779fec941b23c140a707f27e3f9f826dfe0fd3e932da3e396b1f",
+    "witness": "Solidity.H62.AuditLanguage.feature_scope_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.Feature.info_requirement",
+    "source_id": "Solidity/Language/FeatureInfo.lean:1081:Feature.info_requirement",
+    "signature_sha256": "0b488c6a6e0ba45615a0aa80601e1d04a883c940580921cf408616e8776184f2",
+    "witness": "Solidity.H62.AuditLanguage.feature_requirement_full",
+    "module": "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.FxTy.bits_ge",
+    "source_id": "Solidity/Language/FixedPoint.lean:87:bits_ge",
+    "signature_sha256": "6f6398cfabd26847c137f33b7197b5f0882fed56b65c1c7430ffaa5c5a33e6b1",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.FxTy_bits_ge_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.FxTy.bits_le",
+    "source_id": "Solidity/Language/FixedPoint.lean:92:bits_le",
+    "signature_sha256": "24bd97aa90f652d457522d64fdc13afc9df7ea9ea2e46b3e9d25bc271129bd58",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.FxTy_bits_le_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.FxTy.scale_pos",
+    "source_id": "Solidity/Language/FixedPoint.lean:97:scale_pos",
+    "signature_sha256": "bd55dfc2099b1115484a5067ed1716186e9d7e34cac8a049bac9cfdcea4069d8",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.FxTy_scale_pos_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.FxTy.pow_bits",
+    "source_id": "Solidity/Language/FixedPoint.lean:100:pow_bits",
+    "signature_sha256": "696941ef028ce828ec956806491a4d3473e865d7034c23c810b34ea50b82d08f",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.FxTy_pow_bits_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.FxTy.half_pos",
+    "source_id": "Solidity/Language/FixedPoint.lean:104:half_pos",
+    "signature_sha256": "e0df5b8c9b77ea92ce59f68597397dcec2417ca80096cdeeace02b00cfd9ebf7",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.FxTy_half_pos_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.FxTy.lo_le_zero",
+    "source_id": "Solidity/Language/FixedPoint.lean:106:lo_le_zero",
+    "signature_sha256": "de5f595f24be99212eb0cf77f10e813b1edf29e60236e74102d047d26a73cd4b",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.FxTy_lo_le_zero_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.FxTy.hi_nonneg",
+    "source_id": "Solidity/Language/FixedPoint.lean:110:hi_nonneg",
+    "signature_sha256": "dc91014418732bc50a59d370dfc0b703e0c5062e7972feaf5daeabf6e93ebcc7",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.FxTy_hi_nonneg_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.wrapInt_inRange",
+    "source_id": "Solidity/Language/FixedPoint.lean:164:wrapInt_inRange",
+    "signature_sha256": "8a63ec943564fd9b48ae836a185ef44c9082e1e72ee29c248154302f941a160f",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_wrapInt_inRange_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.wrapInt_of_inRange",
+    "source_id": "Solidity/Language/FixedPoint.lean:177:wrapInt_of_inRange",
+    "signature_sha256": "ee961fc8f711e6a18ccf64104194be87ea7bd971a375c361bc493171a398a160",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_wrapInt_of_inRange_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.wrapInt_emod",
+    "source_id": "Solidity/Language/FixedPoint.lean:197:wrapInt_emod",
+    "signature_sha256": "43a613121753af66c066922f8aa1d495e1aa422d3f86a3577b01f04e9d47dfc4",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_wrapInt_emod_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.result_of_inRange",
+    "source_id": "Solidity/Language/FixedPoint.lean:210:result_of_inRange",
+    "signature_sha256": "3402a89426c7fb168e0cb2edb90a49fbfc94f1b6644e1e6260e0767fe12c55ea",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_result_of_inRange_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.result_checked_overflow",
+    "source_id": "Solidity/Language/FixedPoint.lean:217:result_checked_overflow",
+    "signature_sha256": "244d79b6cbd27ef6d93c8e8a356469fc49fe67a1887f8fea9d30082ec89fff47",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_result_checked_overflow_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.add_eq",
+    "source_id": "Solidity/Language/FixedPoint.lean:262:add_eq",
+    "signature_sha256": "c6f62f89002aab694b91b7dc657ee71e1498efa2a203bf12b3b5c0732c515230",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_add_eq_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.add_overflow",
+    "source_id": "Solidity/Language/FixedPoint.lean:266:add_overflow",
+    "signature_sha256": "d30178e5b717607a0ba8484eead8b787315aa616698e6b6044d30accf20f2cc4",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_add_overflow_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.add_unchecked",
+    "source_id": "Solidity/Language/FixedPoint.lean:270:add_unchecked",
+    "signature_sha256": "aad1c63121499d6b2bd9ab9bbe131bd5ed46566fb34827c9fb9c30e0e9e4da44",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_add_unchecked_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.add_comm",
+    "source_id": "Solidity/Language/FixedPoint.lean:272:add_comm",
+    "signature_sha256": "598df65bd4d3f158c2b27f149e6f01351be5603c12ccc37298bc3a0a176720b8",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_add_comm_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.mul_comm",
+    "source_id": "Solidity/Language/FixedPoint.lean:275:mul_comm",
+    "signature_sha256": "78e3ceeeee54f866d41e9020adaa89eff1311e2664503258f0f85bc2f0944e55",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_mul_comm_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.sub_eq",
+    "source_id": "Solidity/Language/FixedPoint.lean:280:sub_eq",
+    "signature_sha256": "5c680e918b03ba492bb37a406b8fdf5292e51c74e6aa7f5906297e8b73a3aaeb",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_sub_eq_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.add_zero",
+    "source_id": "Solidity/Language/FixedPoint.lean:284:add_zero",
+    "signature_sha256": "f3776fbfffa05cfd3fa4f1c2e2aa98b08283b91efa7ba38c4eff53ed47704259",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_add_zero_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.mul_one",
+    "source_id": "Solidity/Language/FixedPoint.lean:290:mul_one",
+    "signature_sha256": "dc06d4520ee29e0100e55486fb125e69f80de19c1cc4a4028a00a9970e8927d9",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_mul_one_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.div_zero",
+    "source_id": "Solidity/Language/FixedPoint.lean:298:div_zero",
+    "signature_sha256": "0b2205cd39cd9f42697458665f151f3070ae1a3708a23d84ae4518ebd59f8865",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_div_zero_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.mod_zero",
+    "source_id": "Solidity/Language/FixedPoint.lean:302:mod_zero",
+    "signature_sha256": "64043ae4479cc81da3ed73abe2642ddb5cac1c5b180a16bf04492e1f8141c9a6",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_mod_zero_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.tmod_between",
+    "source_id": "Solidity/Language/FixedPoint.lean:306:tmod_between",
+    "signature_sha256": "fd9eae133861e3f22737dde96c4fed98a5791ff97245aa3e471caf5d13481319",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_tmod_between_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.mod_inRange",
+    "source_id": "Solidity/Language/FixedPoint.lean:315:mod_inRange",
+    "signature_sha256": "5f72a104194f40adf3511830109a8e7ec90910cf917250724011b8d3dec5e611",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_mod_inRange_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.mod_eq",
+    "source_id": "Solidity/Language/FixedPoint.lean:326:mod_eq",
+    "signature_sha256": "72a517a49343f2c050d23d61979ea642493c218a7eaadc915d72ba847dffc07e",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_mod_eq_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.div_eq",
+    "source_id": "Solidity/Language/FixedPoint.lean:333:div_eq",
+    "signature_sha256": "5286c81ecaffb30d86abb3739dc18ec33d4eec72648d0c5688994e71ab618e92",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_div_eq_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.lt_iff",
+    "source_id": "Solidity/Language/FixedPoint.lean:340:lt_iff",
+    "signature_sha256": "00bf94becc70653cfc6c26cae110e82171d5569717efd18c61a51a3404625950",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_lt_iff_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.inRange_mul_of_subsumes",
+    "source_id": "Solidity/Language/FixedPoint.lean:389:inRange_mul_of_subsumes",
+    "signature_sha256": "88ea84dc828d2ba15f75092a972c043248175fbc65dc5ebff2cd214521576cf4",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_inRange_mul_of_subsumes_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.implicit_sameValue",
+    "source_id": "Solidity/Language/FixedPoint.lean:403:implicit_sameValue",
+    "signature_sha256": "f8e4a1bb4eeb9e90e6a86a4678b4fe067eee925d74d27b2063368fe7d6c2e362",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_implicit_sameValue_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.implicit_lt",
+    "source_id": "Solidity/Language/FixedPoint.lean:413:implicit_lt",
+    "signature_sha256": "5e84746e35a5297338b966a52f078d18d04e90eb33e1784efef9a34fd5b5142f",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_implicit_lt_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.explicit_of_subsumes",
+    "source_id": "Solidity/Language/FixedPoint.lean:433:explicit_of_subsumes",
+    "signature_sha256": "44c91fa0cb80a5642d0bd6feb45d9026808ea16e05707731d6bc2ac812acc064",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_explicit_of_subsumes_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.ofInteger_inRange",
+    "source_id": "Solidity/Language/FixedPoint.lean:443:ofInteger_inRange",
+    "signature_sha256": "a4b190cfd7a9cb49258c3bb66fafd9022a1fb7182ad124abce44d2a644ac9181",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_ofInteger_inRange_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.ofIntegerExplicit_of_implicit",
+    "source_id": "Solidity/Language/FixedPoint.lean:470:ofIntegerExplicit_of_implicit",
+    "signature_sha256": "dd84eff6a208b2ad9387f5ea1ef4e49c3ec26b409de79c8d8c2639e1bb881950",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_ofIntegerExplicit_of_implicit_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.pow_bits_le",
+    "source_id": "Solidity/Language/FixedPoint.lean:522:pow_bits_le",
+    "signature_sha256": "c6df518ff1dc0ebc698091890302460cdd3b67dbeb5e2e1559b8a297489fcee0",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_pow_bits_le_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.toWord_range",
+    "source_id": "Solidity/Language/FixedPoint.lean:530:toWord_range",
+    "signature_sha256": "a66b2e140f790e0cff136080d5c56cd83a58d3323e393af02f3ed0df54f85250",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_toWord_range_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
+  },
+  {
+    "target": "Solidity.Language.FixedPoint.Fx.ofWord_toWord",
+    "source_id": "Solidity/Language/FixedPoint.lean:535:ofWord_toWord",
+    "signature_sha256": "5bda702b8786c776e19e38abcc03d773a7c7b5f0c1fd1f7d92857c1a4405bfe4",
+    "witness": "Solidity.H62.AuditLanguage.FixedWitness.Fx_ofWord_toWord_full",
+    "module": "tests/h62/item2/audit-language/FixedPointWitness.lean",
+    "boundary": "complete leading imported telescope; conclusion not assumed",
+    "classification": "per-input simultaneous feasibility; concrete intrinsic values share the exact witnessed type; no global compiler contract"
   }
 ]

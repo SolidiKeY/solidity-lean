@@ -39,6 +39,15 @@ elab "#verify_hypotheses " witness:ident " for " target:ident : command => do
 
 namespace Solidity.H62.AuditLanguage
 
+theorem feature_all_full : hypotheses_of% Language.Feature.all_complete := by
+  exact ⟨.txOrigin, True.intro⟩
+
+theorem feature_scope_full : hypotheses_of% Language.Feature.info_scope := by
+  exact ⟨.txOrigin, True.intro⟩
+
+theorem feature_requirement_full : hypotheses_of% Language.Feature.info_requirement := by
+  exact ⟨.txOrigin, True.intro⟩
+
 theorem feature_exclusion_full : hypotheses_of% Language.Feature.exclusion_complete := by
   exact ⟨.txOrigin, rfl, True.intro⟩
 
@@ -76,6 +85,9 @@ theorem mul_int_full : hypotheses_of% Checked.mul_int_exact := by
   exact ⟨128, -128, -1, by decide, ⟨by decide, by decide⟩,
     ⟨by decide, by decide⟩, True.intro⟩
 
+#print axioms feature_all_full
+#print axioms feature_scope_full
+#print axioms feature_requirement_full
 #print axioms feature_exclusion_full
 #print axioms diagnostic_full
 #print axioms sort_name_full
@@ -100,6 +112,10 @@ theorem mul_int_full : hypotheses_of% Checked.mul_int_exact := by
 #verify_hypotheses Solidity.H62.AuditLanguage.neg_int_full for Solidity.Checked.neg_int_exact
 #verify_hypotheses Solidity.H62.AuditLanguage.div_int_full for Solidity.Checked.div_int_exact
 #verify_hypotheses Solidity.H62.AuditLanguage.mul_int_full for Solidity.Checked.mul_int_exact
+
+#verify_hypotheses Solidity.H62.AuditLanguage.feature_all_full for Solidity.Language.Feature.all_complete
+#verify_hypotheses Solidity.H62.AuditLanguage.feature_scope_full for Solidity.Language.Feature.info_scope
+#verify_hypotheses Solidity.H62.AuditLanguage.feature_requirement_full for Solidity.Language.Feature.info_requirement
 
 /-- error: hypothesis telescope mismatch -/
 #guard_msgs in
