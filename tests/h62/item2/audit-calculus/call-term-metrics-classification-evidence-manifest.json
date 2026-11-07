@@ -1,0 +1,47 @@
+{
+  "scope": "eighteen static term-power/context-metric roles; zero fresh audit witnesses/runtime acceptance",
+  "counts": {
+    "role_reviewed": 240,
+    "role_pending": 5043,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/call-term-metrics-classification-v17/evidence.tar.gz",
+      "bytes": 914130,
+      "sha256": "18310ae1b2fbd84e7ec0dea36be10430ac593d82093143b42f64f7d86a734663"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-term-metrics-classification-v17/inputs.json",
+      "bytes": 1179,
+      "sha256": "23697a490c0be854b7e3df493bcbfa3e565a9416d6319797627c334bbcaaf374"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-term-metrics-classification-v17/gates.json",
+      "bytes": 2770,
+      "sha256": "48ffe73a3036c7eec6af153ad4889c13d15931b2c1a0064998843485efc6d426"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-term-metrics-classification-v17/reviews.md",
+      "bytes": 1309,
+      "sha256": "272924dbf34f8c07fbcef863fa5c219e1bf05e5735a18aa03f12fa4ff84d01d9"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-term-metrics-classification-v17/doc-gate.json",
+      "bytes": 498,
+      "sha256": "0c93f694be30642220a2b3056797bb16972854c8affcbba24da0fadd286c9de9"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/call-term-metrics-classification-v17/supporting-source-bindings.json",
+      "bytes": 716,
+      "sha256": "5c27712c28a1751ad240904ef78c03f45e1b3b429235ca09c7aabee97fca21c8"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/call-term-metrics-classification-v17/semantic-roles-reviewed.json",
+      "bytes": 671576,
+      "sha256": "3d6a9ea62530e2843bb9c5602ff52f5586b428f4596ce4bda4f1b742e25a9790"
+    }
+  ]
+}
