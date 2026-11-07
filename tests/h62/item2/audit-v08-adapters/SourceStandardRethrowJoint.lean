@@ -62,6 +62,41 @@ theorem raw_payload_refused (pipeline : Roadmap.Pipeline) (static : Bool)
     | _ => []) same
   exact payload_distinctions.1 payload
 
+/-- Both original early horizons retain the full prestate, for any later horizon. -/
+theorem early_timeouts (pipeline : Roadmap.Pipeline) (static : Bool)
+    (statementHorizon : Nat) (bytes : Roadmap.Bytes) :
+    (SourceStandardRethrow.literal (global pipeline) {frame with static:=static} 0
+      statementHorizon bytes).run (locals,populated) =
+      (.error .timeout,(locals,populated)) ∧
+    (SourceStandardRethrow.literal (global pipeline) {frame with static:=static} 1
+      statementHorizon bytes).run (locals,populated) =
+      (.error .timeout,(locals,populated)) :=
+  ⟨SourceStandardRethrow.literal_allocation_timeout (global pipeline) {frame with static:=static}
+      statementHorizon bytes locals populated,
+    SourceStandardRethrow.literal_argument_timeout (global pipeline) {frame with static:=static}
+      statementHorizon bytes locals populated⟩
+
+/-- The same timeout classification does not identify the same complete machine. -/
+theorem post_timeout_not_early (pipeline : Roadmap.Pipeline) (static : Bool)
+    (allocationFuel statementHorizon : Nat) (bytes : Roadmap.Bytes) :
+    (SourceStandardRethrow.literal (global pipeline) {frame with static:=static} (allocationFuel+4)
+      0 bytes).run (locals,populated) ≠
+    (SourceStandardRethrow.literal (global pipeline) {frame with static:=static} 0
+      statementHorizon bytes).run (locals,populated) ∧
+    (SourceStandardRethrow.literal (global pipeline) {frame with static:=static} (allocationFuel+4)
+      0 bytes).run (locals,populated) ≠
+    (SourceStandardRethrow.literal (global pipeline) {frame with static:=static} 1
+      statementHorizon bytes).run (locals,populated) := by
+  have early := early_timeouts pipeline static statementHorizon bytes
+  constructor
+  · rw [early.1]
+    exact timeout_not_prestate pipeline static allocationFuel bytes
+  · rw [early.2]
+    exact timeout_not_prestate pipeline static allocationFuel bytes
+
+#print axioms early_timeouts
+#print axioms post_timeout_not_early
+
 #print axioms joint
 #print axioms statement_timeout
 #print axioms timeout_not_prestate

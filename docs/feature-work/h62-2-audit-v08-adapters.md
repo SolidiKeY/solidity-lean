@@ -1287,3 +1287,34 @@ checker inputs remain byte-identical: witness-ledger.json, local-guard-ledger.js
 and generic-v08's inventory-manifest.json. All 287 checked code files checked before/
 after removal remain byte-identical. Full original queues, semantic/fidelity
 audits, producer waits, final gates and assigned H68 bridge remain open.
+
+### Standard-rethrow early and post-allocation timeouts (2026-11-07)
+
+The existing SourceStandardRethrowJoint audit now supplies both original early
+horizon laws together. Allocation horizon0 and argument horizon1 retain the full
+prestate for every later statement horizon. In contrast, sufficient allocation
+followed by statement horizon0 retains its encoded poststate. Reusing the
+existing full-state negative proves this latter run differs from both early
+runs, despite all three returning timeout. Arbitrary bytes, both pipelines/static
+flags and the original horizon parameters remain; no admission/resource bound,
+success filter, evaluator or fixture is introduced.
+
+All seven original standard-rethrow targets now have component links: three
+checked component applications, one checked use of the existing execution law,
+and three existing local-law references. The independent Source/explicit-target
+execution conjunction remains separate from compiler/frame/session adequacy.
+Full-domain feasibility, ownership, frozen fidelity, residual inventory, final
+gates and the assigned H68 bridge remain open; no previous model is counted as
+new fixture evidence.
+
+The serial per-file check passed in 1.597 seconds, one Lean, peak sampled RSS
+737,890,304 bytes and no STOP. Six printed declarations use only existing
+standard axioms; the prior concrete payload distinction remains axiom-free.
+Registration/evidence checks passed. This is not full-root or matched timing
+acceptance and releases no prior STOP. H145 private checkpoint receipts/index:
+`3a739dc3e2f20a2445cd9ef99cf2e8e6326c5798 evidence/solidity-v07-v11-20261030/v08-world-lowering/source-standard-rethrow-boundaries-20261107/`.
+The earlier five-declaration receipt remains historical and unchanged.
+
+Independent read-only finder and skeptic accepted the full-state comparison,
+retained parameters, source/type/evidence bindings and limited component scope.
+Neither ran Lean or a server; review receipts are private under this checkpoint.
