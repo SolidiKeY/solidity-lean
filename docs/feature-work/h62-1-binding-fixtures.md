@@ -229,3 +229,40 @@ The historical `reference-fixture-manifest.json` records source pins at
 `cdac20d72b1e6aeabb26072ec3d1d815b7dfe5966f7a72295b92628da1d36d31`.
 Current helper checks are recorded separately by portable-validation-manifest.json;
 none of these metadata changes closes an extraction checkpoint.
+
+
+### General fixed-reference proof backfill
+
+`RigidReferenceControls.lean` extends isolated proof coverage from P12 to the
+memory and storage arms of all ten inventoried V07 relations. Three general
+lemmas derive inhabitedness, pair uniqueness and absent-target refusal from an
+exact fixed-reference branch. Ten fixture theorems supply explicit witnesses
+for both arms; qualifier, integer-type and fixed-byte-width parameters remain
+universally quantified with their existing constraints. This covers twenty
+reference arms without copying the three proofs for every fixture.
+
+The property describes each unchanged relation at its own fixed layout and
+heap. It neither replaces nor identifies the producer relations, relates
+arbitrary equal-content objects, proves source/world transport, nor covers
+their primitive arms or G19 control-flow behavior. All four extraction
+checkpoints and before/after extraction measurements remain open.
+
+The initial MCP response was incomplete during cold dependency compilation
+(exit 2, no resource stop); it is not a passing diagnostic. After serial import
+builds, cached MCP diagnostics report zero errors. A direct kernel check and
+KeySort pass under Lean 4.24.0/Lake 5.0.0-src+797c613, with the unchanged 12 GiB,
+no-swap, one-thread/explicit `-j1` bounds and 4 GiB reserve. All thirteen theorem
+axiom reports are standard-only; the general lemmas introduce no axioms.
+The new-file checks are individual checking observations, not matched
+before/after performance acceptance. No stopped benchmark was rerun.
+
+Independent read-only finder and skeptic found no scope, coverage, vacuity or
+relation-unification blocker; neither used Lean/server/builds or wrote files.
+All ten producer sources are byte-identical to the pre-work commit. Logs,
+source hashes, axiom reports and the incomplete setup record are archived in
+the private H145 evidence lane, outside the code branch. No generated root,
+central module map or production registration was edited.
+
+| Standalone per-file candidate | Purpose | Dependencies |
+|---|---|---|
+| `tests/h62/item1/binding-fixtures/RigidReferenceControls.lean` | General exact-reference laws and twenty fixture-arm witnesses | The ten inventoried `Solidity.Lowering.V07.*Controls` relation modules |

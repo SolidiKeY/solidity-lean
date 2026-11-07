@@ -50294,6 +50294,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceWordCommutation.lean:Solidity.Lowering.StorageOps.SourceWordCommutation.journal_order": [
   "Classical.choice",
   "Quot.sound",
@@ -71543,6 +71548,31 @@
   "Quot.sound",
   "propext"
  ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.assembled_library_payload_not_jumpdest": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.known_link_preserved": [],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.linked_pushTag_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.linked_reference_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.push_payload_not_jumpdest": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/LinkingCertificates.lean:Solidity.Yul.Compilation.resolved_address_witness": [
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h62/item2/audit-v09-passes/LoopCallWitness.lean:Solidity.Backend.Passes.AuditLoopCall.cost": [
   "Classical.choice",
   "Quot.sound",
@@ -72478,6 +72508,66 @@
   "propext"
  ],
  "tests/h62/item2/audit-v09-passes/RuntimeVoidCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeVoidCapture.stale_capture_refused": [],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.empty_scope_full": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.popPrefix_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.popPrefix_delta": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.pushPrefix_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.pushPrefix_delta": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.scope_bound_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.scope_capacity_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.scope_updates_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.scope_write_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.Slice.comp_bound_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.stackBound_append_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.stackBound_suffix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean:Solidity.Yul.Compilation.writeSequence_delta": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h62/item2/audit-v09-passes/SequenceJointWitness.lean:Solidity.Backend.Passes.AuditSequence.associations": [
   "Classical.choice",
   "Quot.sound",
@@ -73107,6 +73197,21 @@
   "propext"
  ],
  "tests/h62/item2/audit-v10-storage/GeneratedFamilyWitnesses.lean:H62.StorageAudit.GeneratedFamilyWitnesses.write_joint": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.execution_ranges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.lossless_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v10-storage/H19ReachableBalanceControls.lean:H19.ReachableBalanceControls.observed_values": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
  "tests/h62/item2/audit-v10-storage/H24V2Controls.lean:H128.H24V2ConsumptionControls.mixed_admitted": [
