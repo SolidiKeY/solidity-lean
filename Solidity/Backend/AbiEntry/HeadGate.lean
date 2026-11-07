@@ -101,7 +101,7 @@ theorem semantic_rejection (C : Contract) (base : Nat) (parameters : List Solidi
 def certificate : Interface.HeadGateCertificate program where
   selected := fun C base parameters label => ⟨compiled C base parameters label,selected C base parameters label⟩
   executed := executed
-/-- info: 'Solidity.Backend.AbiEntry.HeadGate.admitted' depends on axioms: [propext] -/
+/-- info: 'Solidity.Backend.AbiEntry.HeadGate.admitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms admitted
 /-- info: 'Solidity.Backend.AbiEntry.HeadGate.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms selected
