@@ -2030,3 +2030,31 @@ retained-certificate kernel check and the diagnostic command scope. The checker,
 axiom policy, kernel ceiling and exclusions are unchanged. The separately
 authorized total typed-source compiler refactor remains subject to exact
 interface/behavior preservation, kernel correspondence and finder/skeptic review.
+
+
+### Total typed-source compiler prerequisite
+
+The authorized `SurfaceSpec` refactor replaces opaque partial recursion with
+structurally terminating recursion in `SpecExpr.memPath`, `path`, `term`,
+`termPair`, `read` and `fml`, including the generated `fml.iff` and `fml.cond`
+helpers. Operational branches, signatures, defaults, error order and admission
+conditions are unchanged; termination uses expression size, without fuel.
+`SpecExpr.fml_boolV1` now gives a kernel-checkable literal equation.
+
+The fixed compiler regression fixture is
+`vscode/parity/typed-spec-compiler-controls.lean`: 39 source expressions in
+three contexts cover sorting, binding, old-state use, membership and refusals.
+All 117 old/new operational observations match byte-for-byte. This finite
+comparison is not a universal theorem about the old opaque implementation.
+The separate closed-proof matrix checks 96 cases and retains 21 failures with
+an overall nonzero exit; a genuine literal proof presented at the wrong
+typed result is rejected. Native evaluation proposes data only; proof
+acceptance requires synchronous kernel checking and the standard axiom audit.
+
+Read-only finder and skeptic reviews found no changed branch, refusal, budget
+or kernel-check bypass. The targeted compiler build and per-file diagnostics
+are distinct from the dependent metadata build, which timed out at its
+unchanged 300-second bound. That failed attempt remains retained. Selected
+failed-clause/source correspondence, span publication, full dependent gates
+and all parity judgments remain unfinished. Detailed evidence stays off the
+code branch under H145.
