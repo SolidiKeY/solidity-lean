@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1BridgeV2.p1_frame_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
