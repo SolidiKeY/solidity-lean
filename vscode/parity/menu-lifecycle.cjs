@@ -5,7 +5,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const phases=['source','unrelated','untitled','tab','restored'];
 function forbidden(events){return events.filter(e=>e.kind==='terminal.start'||e.kind==='clipboard.write'||e.kind==='command.start'&&/^(dafny|solidityLean)\.(build|buildCustomArgs|run|test|verify|showVerificationTrace|hideVerificationTrace|copyVerificationTrace)$/.test(e.data?.id));}
 async function preparation(task,deadline,now=Date.now){const remaining=deadline-now();if(remaining<=0)throw Error('Original3s menu readiness exhausted');let timer;try{const value=await Promise.race([task(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Original3s menu readiness exhausted')),remaining);})]);if(now()>=deadline)throw Error('Late menu readiness response refused');return value;}finally{clearTimeout(timer);}}
-function validate(value,runId,target,workspace){
+function menuErrors(value,runId,target,workspace){
  const errors=[];if(value?.runId!==runId||value?.target!==target)errors.push('foreign menu run/target');
  if(JSON.stringify(value?.phases?.map(p=>p.phase))!==JSON.stringify(phases))errors.push('missing/reordered menu phases');
  for(const row of value?.phases||[]){const b=row.binding,m=row.capture?.capture?.contributionMenu,kind=row.phase==='tab'?'tab':'editor';
@@ -26,6 +26,7 @@ function validate(value,runId,target,workspace){
  if(!Array.isArray(value?.events)||!Array.isArray(value?.forbiddenActions)||value.forbiddenActions.length||forbidden(value?.events||[]).length||JSON.stringify(value.forbiddenActions)!==JSON.stringify(forbidden(value.events||[])))errors.push('command side effects or missing audit');
  return errors;
 }
+function validate(value,runId,target,workspace){try{return menuErrors(value,runId,target,workspace);}catch(error){return ['Malformed native menu observation: '+error.message];}}
 async function run({vscode,config,events,sessionFor,requestPhase=require('./phase-capture.cjs').requestPhase}){
  const begin=events.length,target=config.target,language=target==='local'?'solidity':'dafny',source=require('./workloads.cjs').workload(target,1),file=path.join(config.workspace,'menus.'+(target==='local'?'sol':'dfy'));
  fs.writeFileSync(file,source);const doc=await vscode.workspace.openTextDocument(file),rows=[];

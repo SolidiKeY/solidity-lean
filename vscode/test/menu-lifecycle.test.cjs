@@ -22,3 +22,5 @@ test('failed native phase retains exact event interval and original failure (inj
 });
 
 test('native menu runner refuses implicit multi-worker/multi-trial dimensions',()=>{const{parse}=require('../parity/run.cjs');assert.throws(()=>parse(['--suite','contribution-menus']),/single serial/);assert.equal(parse(['--suite','contribution-menus','--workers','1','--obligations','1','--trials','1','--warmups','0']).suite,'contribution-menus');});
+
+test('malformed menu structures return rejection records rather than losing the host result',()=>{for(const change of [v=>v.phases=null,v=>v.phases[0]=null,v=>v.phases[0].capture.capture.contributionMenu.before.items={},v=>v.phases[0].events={}]){const v=fixture();change(v);let errors;assert.doesNotThrow(()=>{errors=validate(v,'run','local','/');});assert.ok(errors.length);}});
