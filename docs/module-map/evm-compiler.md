@@ -153,6 +153,7 @@
 | `Backend/InternalFlow/RuntimeFrameP1V2ReadAtBridgeControls.lean` | Actual positive/reverting approved inputs and nonempty-domain controls, both observed outcomes and retention of the full Local/reverting-entry duties. |
 | `Backend/InternalFlow/RuntimeFrameP1V2ReferenceAgreement.lean` | Generic actual reference-plan V2 execution with unchanged physical success fields and bare-revert classification; not full session adequacy. |
 | `Backend/InternalFlow/RuntimeFrameP1V2ReferenceControls.lean` | Selected finite nested-default reference call, all legal indices, exact graph snapshot and export/capacity refusals. |
+| `Backend/InternalFlow/RuntimeFrameP1V2ReferenceRebindAgreement.lean` | Selected whole-struct rebinding agrees for all indices and arbitrary V2 metadata; typed aliases bound conversion; source alias and missing-export/wrong-root refusals, with direct-failure/positive target-snapshot drafts still open. |
 | `Backend/PrimitivePackets/PanicBytes.lean` | Exact arithmetic Source panic bytes and nontruncation/nonemptiness observations; no selected-target payload claim. |
 | `Backend/Payments/CoreExact.lean` | G43: the core compiler with no refused-payment outcome (`compile_paid`, `compile_success`, `compile_revert`, `compile_storage_paid`); `Sim` carries the joint world/payment relation. |
 | `Backend/Payments/CompilerExact.lean` | G43: `AgreesExact`, `correct_exact` and the compiler-success theorem `compile_success` over every `Compilation` result. |
