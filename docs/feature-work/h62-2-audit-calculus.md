@@ -1940,3 +1940,7 @@ HaltObserves covers empty revert, primitive Panic1 and revertWith data. ResultOb
 intrinsic_emission retains exact adapter success, Fits and stack+2 bound before its positive local checked result and original-result observation. assert/require results retain actual typed evaluation to false. Intrinsic byte/custom-selector parts preserve existing selector/hash function and preencoded arguments, including empty ofData handling; arbitrary supplied return encoders do not establish ABI fidelity. Same-byte returned/revert classes differ, while distinct same-class payloads require actual byte inequality.
 
 Full input/step/run/stack/observation/adapter/intrinsic proof branches were read. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Evidence/current dataset are prepared for H145 private archival; publication awaits the checkpoint receipt. The checker retains its actual external-input binding. Other VM bulk remains hash-bound pending retrieval. Historical unavailable bytes UNVERIFIABLE; exact archive-backed duplicate evictions restorable. Original queues unfinished; H28 extraction/replay pause, Raw/Context waits and all STOPs retained.
+
+### Backend owner answer
+
+Q-SEM-OWNER-03 confirms the twelve files listed in tests/h62/item2/audit-calculus/BACKEND-OWNER-CONFIRMATION.md as master (coordinator), no live producer. Ownership accounting is 3806 confirmed/1477 unresolved; static role and witness coverage is unchanged.
