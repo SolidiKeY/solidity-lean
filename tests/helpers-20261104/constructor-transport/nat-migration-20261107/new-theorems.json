@@ -1,0 +1,15 @@
+[
+  "word_relation_to_nat",
+  "nat_relation_to_word",
+  "relations_iff_of_word",
+  "relations_iff_of_fits",
+  "initial_balance_fits",
+  "reached_balance_fits",
+  "initial_legacy_related",
+  "reached_legacy_related",
+  "wide_initial_not_fits",
+  "wide_has_no_exact_word",
+  "wide_legacy_view_related",
+  "wide_nat_relation_refused",
+  "legacy_view_not_unconditional_nat"
+]

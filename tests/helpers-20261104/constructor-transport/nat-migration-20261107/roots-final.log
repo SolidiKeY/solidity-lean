@@ -1,0 +1,2 @@
+COMMAND: bash scripts/coord-tools/register.sh --check
+EXIT: 0

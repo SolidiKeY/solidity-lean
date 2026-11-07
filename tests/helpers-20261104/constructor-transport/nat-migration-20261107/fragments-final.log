@@ -1,0 +1,2 @@
+COMMAND: bash scripts/coord-tools/fragments.sh --check
+EXIT: 0

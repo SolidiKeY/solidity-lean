@@ -1,0 +1,20 @@
+{
+  "decision": "CTOR-NAT-1",
+  "status": "resolved-by-authorized-H57-migration",
+  "authority": "Coordinator answer supplied in this conversation: H19 exact unbounded Nat; preserve legacy version, add Nat relation and bounded bridge; no further owner approval needed.",
+  "legacy_snapshot": "tests/helpers-20261104/constructor-transport/nat-migration-20261107/Producer-word-frozen.lean.txt",
+  "legacy_snapshot_sha256": "612b892331fa8a5744c15a90581f27be9d7a07ea291e95c860fc923b0cc96c98",
+  "snapshot_source": "99913e3d9cd4eebf8159453fbfbcb8cd67c9dd03:Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean",
+  "legacy_source_context": "0d92f861b42ecc8f81c1ff303de288cbd532fbc5",
+  "live_V1": "Word-parameterized representation adapter, not unchanged old Source.St compatibility",
+  "live_V2": "MachineRelNat exact unbounded Nat; all other10 observations unchanged",
+  "bridge_domain": "Explicit Word.val=source Nat, or Fits via wordView_exact; no unconditional projection",
+  "dependent_statement_proof_text_comparison": "All five bodies/statements identical after replacing relation name only.",
+  "slot_relation_moved_verbatim": true,
+  "original_guard_file": "unchanged",
+  "supersedes": [
+    "consolidation-20261107/intake.json pending_relation_decision",
+    "consolidation-20261107/acceptance-current.json 16-pass/12-pending snapshot"
+  ],
+  "remaining": "coordinator combined merge validation and492 unrelated adopted-master inventory changes"
+}

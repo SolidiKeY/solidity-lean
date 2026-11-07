@@ -1,0 +1,6 @@
+COMMAND: export PATH=/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/bin:$PATH; export LEAN_MCP_SERVER_CMD="/workspace/solidity-lean/.venv/bin/python -m lean_lsp_mcp --lean-project-path /workspace/solidity-lean"; export LEAN_MCP_START_WAIT=45 LEAN_MCP_TIMEOUT=90 LEAN_LSP_MAX_OPEN_FILES=1; trap "scripts/coord-tools/lean-mcp stop" EXIT; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/MachineRelV1.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/MachineRelNat.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/RelationControls.lean
+diag: 0 errors
+diag: 0 errors
+diag: 0 errors
+diag: 0 errors
+diag: 0 errors

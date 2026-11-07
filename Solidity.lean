@@ -3699,7 +3699,10 @@ import Solidity.Lowering.V08.FixedBytesCallableArgumentControls
 import Solidity.Lowering.V08.H1Audit
 import Solidity.Lowering.V08.HandlerControls
 import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Controls
+import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.MachineRelNat
+import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.MachineRelV1
 import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Producer
+import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.RelationControls
 import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Source
 import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Target
 import Solidity.Lowering.V08.InheritedControls

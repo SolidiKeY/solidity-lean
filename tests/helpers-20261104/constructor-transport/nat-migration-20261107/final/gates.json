@@ -1,0 +1,142 @@
+[
+  {
+    "name": "migration-per-file",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/MachineRelV1.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/MachineRelV1.lean; lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/MachineRelNat.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/MachineRelNat.lean; lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean; lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean; lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/Solidity/Lowering/V08/HelperPackets/ConstructorTransport/RelationControls.setup.json Solidity/Lowering/V08/HelperPackets/ConstructorTransport/RelationControls.lean",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 6.764,
+    "minimum_effective_available_bytes": 15138086912,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/migration-per-file.log"
+  },
+  {
+    "name": "migration-mcp",
+    "command": "export PATH=/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/bin:$PATH; export LEAN_MCP_SERVER_CMD=\"/workspace/solidity-lean/.venv/bin/python -m lean_lsp_mcp --lean-project-path /workspace/solidity-lean\"; export LEAN_MCP_START_WAIT=45 LEAN_MCP_TIMEOUT=90 LEAN_LSP_MAX_OPEN_FILES=1; trap \"scripts/coord-tools/lean-mcp stop\" EXIT; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/MachineRelV1.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/MachineRelNat.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean; scripts/coord-tools/lean-mcp diag Solidity/Lowering/V08/HelperPackets/ConstructorTransport/RelationControls.lean",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 17.546,
+    "minimum_effective_available_bytes": 14281093120,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/migration-mcp.log"
+  },
+  {
+    "name": "migration-audit",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml build ConstructorMigrationAudit",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 2.254,
+    "minimum_effective_available_bytes": 15096307712,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/migration-audit.log"
+  },
+  {
+    "name": "packet",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml build ConstructorTransportAudit",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 1.002,
+    "minimum_effective_available_bytes": 15248654336,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/packet.log"
+  },
+  {
+    "name": "axiom-pins",
+    "command": "lake -f /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/consolidation-20261107/serial.toml env lean --tstack=131072 -j1 --setup .lake/build/ir/AxiomPins.setup.json tests/helpers-20261104/constructor-transport/AxiomPins.lean",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 3.256,
+    "minimum_effective_available_bytes": 15115538432,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/axiom-pins.log"
+  },
+  {
+    "name": "compiler-controls",
+    "command": "node tests/helpers-20261104/constructor-transport/compiler-control.cjs",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 1.503,
+    "minimum_effective_available_bytes": 15126736896,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/compiler-controls.log"
+  },
+  {
+    "name": "roots",
+    "command": "bash scripts/coord-tools/register.sh --check",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 0.752,
+    "minimum_effective_available_bytes": 15242883072,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/roots.log"
+  },
+  {
+    "name": "fragments",
+    "command": "bash scripts/coord-tools/fragments.sh --check",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 1.253,
+    "minimum_effective_available_bytes": 15239622656,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/fragments.log"
+  },
+  {
+    "name": "module-map",
+    "command": "python3 scripts/coord-tools/module-map.py origin/master",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 0.752,
+    "minimum_effective_available_bytes": 15242448896,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/module-map.log"
+  },
+  {
+    "name": "axiom-inventory",
+    "command": "node scripts/check-axiom-pins.mjs",
+    "status": "fail",
+    "exit": 1,
+    "seconds": 21.537,
+    "minimum_effective_available_bytes": 14948782080,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/axiom-inventory.log"
+  },
+  {
+    "name": "trust",
+    "command": "bash scripts/check-trust.sh",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 17.532,
+    "minimum_effective_available_bytes": 14877859840,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/trust.log"
+  },
+  {
+    "name": "layers",
+    "command": "node scripts/check-layers.mjs",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 6.019,
+    "minimum_effective_available_bytes": 14854057984,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/layers.log"
+  },
+  {
+    "name": "orphans",
+    "command": "node scripts/check-orphans.mjs",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 1.503,
+    "minimum_effective_available_bytes": 14988242944,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/orphans.log"
+  },
+  {
+    "name": "doc-paths",
+    "command": "bash scripts/check-doc-paths.sh",
+    "status": "pass",
+    "exit": 0,
+    "seconds": 28.559,
+    "minimum_effective_available_bytes": 15232253952,
+    "reserve_stop": false,
+    "evidence": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/nat-migration-20261107/final/doc-paths.log"
+  }
+]

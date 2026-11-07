@@ -2,3 +2,6 @@
 | `Lowering/V08/HelperPackets/ConstructorTransport/Target.lean` | Intrinsic saved/captured constructor execution and full create outcome with actual entry, settlement and precise reached world. |
 | `Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean` | Concrete ssNew_body from actual executions, independent machine relation and conditional CreationPremises consumer; no fabricated admission instance. |
 | `Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean` | Wrong-order counterexample, admitted Word boundaries and same-case explicit nondefault initialization controls. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/MachineRelV1.lean` | Explicit legacy Word-view relation with preserved nonmonetary fields; archived original declaration remains frozen provenance. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/MachineRelNat.lean` | Exact unbounded-Nat relation and bidirectional Word/exact bridges with explicit match or Fits; derives bounds for the actual fixture only. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/RelationControls.lean` | Actual fixture overlap controls and a representable wide-balance counterexample to unconditional legacy/exact correspondence. |

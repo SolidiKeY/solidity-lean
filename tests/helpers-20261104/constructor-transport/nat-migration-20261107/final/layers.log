@@ -1,0 +1,4 @@
+COMMAND: node scripts/check-layers.mjs
+904 core modules, 0 reach the elaborator
+904 core modules, 0 reach the checked parser adapters
+904 core modules, 0 new core → non-core edges (107 pinned allowances)

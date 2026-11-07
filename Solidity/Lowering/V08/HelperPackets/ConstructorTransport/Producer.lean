@@ -1,4 +1,4 @@
-import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Target
+import Solidity.Lowering.V08.HelperPackets.ConstructorTransport.MachineRelNat
 
 /-! The concrete SS-NEW body duty derived from actual execution.
 SlotRel is independent of constructor arguments and post-state definitions. -/
@@ -6,33 +6,13 @@ namespace Solidity.Lowering.V08.HelperPackets.ConstructorTransport
 open Solidity
 open Solidity.Lowering.V07
 
-def SlotRel (d : Source.Decl) (r : SRef Cell (.prim .uint))
-    (s : Source.St E) (t : State Cell [])
-    (hd : E.lay frame.this d.path = uint := by rfl) : Prop :=
-  ∃ (v : Int) (hv : range v),
-    (s.ex.world.accounts frame.this).storage.read d.path = some (hd.symm ▸ (Source.Val.int v hv : Source.Val E.layout uint)) ∧
-    t.storage.find r = some (.prim (integerValue Source.IntTy.u256 v hv))
-
-structure MachineRel (bytes : Roadmap.Bytes) (s : Source.St E) (t : State Cell []) : Prop where
-  saved : SlotRel savedDecl (SRef.ofRoot "saved" rfl) s t
-  captured : SlotRel capturedDecl (SRef.ofRoot "captured" rfl) s t
-  sourceHeap : s.heap = (initial bytes).heap
-  sourceEvents : s.events = (initial bytes).events
-  sourceLogs : s.logs = (initial bytes).logs
-  sourceLocals : s.fnLocals = (initial bytes).fnLocals
-  targetHeap : t.H = entered.H
-  heap : HEq t.heap entered.heap
-  balance : (s.ex.world.accounts frame.this).balance.val = t.selfBalance.1.toNat
-  net : t.net = entered.net
-  tx : t.tx = entered.tx
-
-theorem initial_related (bytes : Roadmap.Bytes) : MachineRel bytes (initial bytes) entered := by
+theorem initial_related (bytes : Roadmap.Bytes) : MachineRelNat bytes (initial bytes) entered := by
   refine ⟨?_,?_,rfl,rfl,rfl,rfl,rfl,HEq.rfl,rfl,rfl,rfl⟩
   · exact ⟨0,by decide +kernel,rfl,rfl⟩
   · exact ⟨0,by decide +kernel,rfl,rfl⟩
 
 theorem reached_related (bytes : Roadmap.Bytes) (n : Int) (h : range n) :
-    MachineRel bytes (reached bytes n h) (targetReached n h) := by
+    MachineRelNat bytes (reached bytes n h) (targetReached n h) := by
   refine ⟨?_,?_,rfl,rfl,rfl,rfl,rfl,HEq.rfl,rfl,rfl,rfl⟩
   · exact ⟨n,h,source_saved bytes n h,target_saved n h⟩
   · exact ⟨7,by decide +kernel,source_captured bytes n h,target_captured n h⟩
@@ -45,7 +25,7 @@ theorem concrete_ssNew_body (p : Roadmap.Pipeline) (bytes : Roadmap.Bytes)
     (Source.construct (global p) frame 16 "Cell" (locals n h)).run
       (Source.L0 E,initial bytes) = (.ok (),(Source.L0 E,after)) →
     ∃ out : Out Cell entered.H [],
-      (targetBody n h).run entered = .ok out ∧ MachineRel bytes after out.st := by
+      (targetBody n h).run entered = .ok out ∧ MachineRelNat bytes after out.st := by
   intro ran
   rw [source_actual p bytes n h] at ran
   have same : reached bytes n h = after := congrArg (fun x => x.2.2) ran
@@ -59,7 +39,7 @@ theorem complete_transport (p : Roadmap.Pipeline) (bytes : Roadmap.Bytes)
     (Source.construct (global p) frame 16 "Cell" (locals n h)).run
       (Source.L0 E,initial bytes) = (.ok (),(Source.L0 E,reached bytes n h)) ∧
     (targetBody n h).run entered = .ok ⟨targetReached n h,List.prefix_refl _⟩ ∧
-    MachineRel bytes (reached bytes n h) (targetReached n h) ∧
+    MachineRelNat bytes (reached bytes n h) (targetReached n h) ∧
     targetRun n h = .ok (targetNext n h,⟨Controls.self⟩) ∧
     ConstructorScalarTransport.FrameInputs frame Controls.self targetContext :=
   ⟨source_actual p bytes n h,target_body_actual n h,reached_related bytes n h,
@@ -79,16 +59,16 @@ theorem creation_from_inputs
     (inputs : CreationPremises.Inputs S reference origins roots resolved wf profile artifact src
       (Source.construct (global pipeline) frame 16 "Cell" (locals n h))
       (initial bytes) (reached bytes n h) targetInitial () Controls.self (targetBody n h)
-      targetContext (MachineRel bytes)) :
+      targetContext (MachineRelNat bytes)) :
     ∃ out : Out Cell entered.H [], (targetBody n h).run entered = .ok out ∧
-      MachineRel bytes (reached bytes n h) out.st ∧
+      MachineRelNat bytes (reached bytes n h) out.st ∧
       targetRun n h = (do
         let next ← targetInitial.finish (k:=()) Controls.self out.st
         pure (next,(⟨Controls.self⟩ : ContractWorld.Handle ()))) := by
   let supplied : CreationPremises.Inputs S reference origins roots resolved wf profile artifact src
       (Source.construct (global pipeline) frame 16 "Cell" (locals n h))
       (initial bytes) (reached bytes n h) targetInitial () Controls.self (targetBody n h)
-      targetContext (MachineRel bytes) :=
+      targetContext (MachineRelNat bytes) :=
     {inputs with
       caller:=entered
       related:=initial_related bytes

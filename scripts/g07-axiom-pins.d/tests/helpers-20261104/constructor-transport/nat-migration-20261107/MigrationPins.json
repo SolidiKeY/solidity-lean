@@ -1,0 +1,67 @@
+{
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.initial_balance_fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.initial_legacy_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.legacy_view_not_unconditional_nat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.nat_relation_to_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.reached_balance_fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.reached_legacy_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.relations_iff_of_fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.relations_iff_of_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.wide_has_no_exact_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.wide_initial_not_fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.wide_legacy_view_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.wide_nat_relation_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/helpers-20261104/constructor-transport/nat-migration-20261107/MigrationPins.lean:Solidity.Lowering.V08.HelperPackets.ConstructorTransport.word_relation_to_nat": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -824,6 +824,9 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/V08/HelperPackets/ConstructorTransport/Target.lean` | Intrinsic saved/captured constructor execution and full create outcome with actual entry, settlement and precise reached world. |
 | `Lowering/V08/HelperPackets/ConstructorTransport/Producer.lean` | Concrete ssNew_body from actual executions, independent machine relation and conditional CreationPremises consumer; no fabricated admission instance. |
 | `Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean` | Wrong-order counterexample, admitted Word boundaries and same-case explicit nondefault initialization controls. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/MachineRelV1.lean` | Explicit legacy Word-view relation with preserved nonmonetary fields; archived original declaration remains frozen provenance. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/MachineRelNat.lean` | Exact unbounded-Nat relation and bidirectional Word/exact bridges with explicit match or Fits; derives bounds for the actual fixture only. |
+| `Lowering/V08/HelperPackets/ConstructorTransport/RelationControls.lean` | Actual fixture overlap controls and a representable wide-balance counterexample to unconditional legacy/exact correspondence. |
 | `Backend/InternalFlow/RuntimeFrameP1LangV2.lean` | Canonical P1 `Lang Event Outcome` pair, version 2, over the V2 machine: revert data, call events from the journal, frame classes. |
 | `Backend/InternalFlow/RuntimeFrameP1BridgeV2.lean` | `p1_frame_bridge` (V2) for the guarded revert-with-data family: actual source/target runs, full `PassCorrect`, per-input `Local`. |
 | `Backend/InternalFlow/RuntimeFrameP1BridgeV2Controls.lean` | Admitted witnesses of both classes, observed payload, refused mismatch, other-payload disagreement, call events, satisfiability. |
