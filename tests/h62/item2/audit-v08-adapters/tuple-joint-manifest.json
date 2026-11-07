@@ -1,0 +1,112 @@
+{
+  "status": "PROVED_TUPLE_COMPONENT_JOINT_MODEL",
+  "checked_head": "144639f9b62bdb006f6c16f0dc106dcd1dd24a21",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/TupleCallableJoint.lean": "7c9f7002b66f4c93c413bc948c8a3184f2d2d5b9e81fee618212d219d7f13da0",
+    "Solidity/Lowering/V08/TupleCallable.lean": "a33bb27cc5a107759e5d2246534ab51318cb897c428e2334a109c8ea1ec6e34a",
+    "Solidity/Lowering/V08/ConstructorScalarTransport.lean": "6df88166077a519214626d0f9be6de374a8a0121942cc5b87b75a99e5eb6a272"
+  },
+  "original_target": "Solidity.Lowering.V08.TupleCallable.transport",
+  "premise_groups": 7,
+  "new_joint_model_families": 1,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/TupleCallableJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.361,
+    "peak_sampled_aggregate_rss": 789078016,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "retained_negative_controls": [
+    "Solidity.Lowering.V08.TupleCallable.wrong_target_slot",
+    "Solidity.Lowering.V08.TupleCallable.wrong_result_order",
+    "Solidity.Lowering.V08.TupleCallable.wrong_source_slot",
+    "Solidity.Lowering.V08.TupleCallable.zero_horizon"
+  ],
+  "reviews": "Independent read-only finder/skeptic accepted coherent seven-group tuple model, concrete entered caller, full four conclusions and correctly scoped projections; no findings, no reviewer tests/builds.",
+  "limitations": [
+    "Existing ordered signed-int8/uint256 component only; not arbitrary tuple ABI/external-call or canonical body/frame/admission adequacy.",
+    "Main actual theorem preserves full Source pair and both outer/inner target statuses. Numeric Option projection is used only in reversed-order control.",
+    "No full census-fidelity or full-family timing acceptance."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "08e28fda6a6a75b70d7abe7628b4afc1cd37c611edce8548efe445e0d79dd44c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-first/checked-source.lean",
+      "bytes": 4605,
+      "sha256": "0780a09fafad1d6bd96b95a8eccde238c1e3996d333d90931edf090bf320e416"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-first/console.log",
+      "bytes": 150,
+      "sha256": "1e390ea4a7c768798be7191d2e5d6696f0ab56ee39f77565bf398f7eaec62872"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-first/gates/1.log",
+      "bytes": 33381,
+      "sha256": "058b6ca17de2c62df1529ec3a5f94b0936deeccfb2704edc5bb37fefb8eaaffa"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-first/gates/HEAD",
+      "bytes": 41,
+      "sha256": "220ef37e8e854fdf507ae482293c7b4f5e29a3da5946b0eec639276305d0ed5c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-first/gates/gates.tsv",
+      "bytes": 238,
+      "sha256": "7c2fe378010359051183f0dc2dba12f98b7f24f0aa03cfa00675366653b77c08"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-first/results.json",
+      "bytes": 398,
+      "sha256": "e2ae73304b75232e30df99eb411e10e77dfcc7a9642cacf4261a1e7dc785744f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-final/console.log",
+      "bytes": 150,
+      "sha256": "b19285573a0c13350b4b9098510eba9e0c21ae30ea4daf692d08cb878116235d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-final/gates/1.log",
+      "bytes": 33381,
+      "sha256": "058b6ca17de2c62df1529ec3a5f94b0936deeccfb2704edc5bb37fefb8eaaffa"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-final/gates/HEAD",
+      "bytes": 41,
+      "sha256": "220ef37e8e854fdf507ae482293c7b4f5e29a3da5946b0eec639276305d0ed5c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-final/gates/gates.tsv",
+      "bytes": 238,
+      "sha256": "94628941b4b864bc0a19fa0d3f31d100bda76923dedc5e71d9ddaadf3c335779"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/tuple-joint-20261107-final/results.json",
+      "bytes": 398,
+      "sha256": "27dd80b3843ee2cbef4ba034c49f6f1753d517331c457ef9c44dfc9a34787f42"
+    }
+  ]
+}
