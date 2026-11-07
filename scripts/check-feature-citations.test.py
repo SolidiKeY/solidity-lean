@@ -43,6 +43,15 @@ class Controls(unittest.TestCase):
         d = fixture(); d["features"][0]["theorems"][0].update(name="Nat.add_comm", module="Init.Data.Nat.Basic")
         r = self.run_check(d); self.assertEqual(r.returncode, 0, r.stderr)
 
+    def test_optional_gap_schema_and_count(self):
+        d = fixture(); d["features"][0]["modelToSolcGap"] = "Universal agreement remains open"
+        _, summary = checker.validate(d)
+        self.assertEqual(summary["modelToSolcGapRows"], 1)
+        for bad in (None, 0, [], " "):
+            d["features"][0]["modelToSolcGap"] = bad
+            with self.assertRaisesRegex(ValueError, "modelToSolcGap"):
+                checker.validate(d)
+
     def test_missing_name(self):
         d = fixture(); del d["features"][0]["theorems"][0]["name"]
         r = self.run_check(d); self.assertNotEqual(r.returncode, 0); self.assertIn("invalid citation fields", r.stderr)

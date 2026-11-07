@@ -53,10 +53,32 @@ elaborated Lean environment rather than source-text matching.
 
 Optional `citationNotes` records the narrow meaning of a citation and its gap.
 The reader accepts versions 1 and 2; the compatibility test covers both.
-The [E3 citation map](feature-work/e3-feature-citations.md) traces the original
-13 present rows and checkedArithmetic. Six definition-only present rows become
-partial; class c remains finite evidence. Remaining partial citations,
-model-to-solc gaps and the final aggregate metric are still open.
+The [E3 citation map](feature-work/e3-feature-citations.md) distinguishes model
+proofs, explicit premises, finite observations and definition-only traces.
+Six definition-only original present rows become partial. Per-row
+`modelToSolcGap` text preserves the remaining agreement obligations.
+
+<!-- BEGIN_E3_MANIFEST_CITATIONS -->
+### Manifest citations
+
+Derived from source snapshot `a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e`: 173 of 212 rows carry 196 citation entries; Cited present rows: 7/7; cited partial rows: 166/166. Uncited rows by current status: missing=2, notApplicable=37. Rows with class a/b/c/d citations: 19/8/11/139 (overlapping evidence tags, not counts of fully proved language features). Model-only rows: 172; model-to-solc rows: 1 (finite numeric fixtures, class c). Six definition-only original present rows were downgraded to partial; all 212 rows retain explicit general-agreement gaps. No universal solc-equivalence or full-source theorem is inferred from these counts. See [the citation map](feature-work/e3-feature-citations.md).
+
+| Current | Class | Direction | Rows |
+|---|---|---|---|
+| missing | uncited | none | 2 |
+| notApplicable | uncited | none | 37 |
+| partial | a | model | 18 |
+| partial | b | model | 7 |
+| partial | c | model | 4 |
+| partial | c | model-to-solc | 1 |
+| partial | d | model | 138 |
+| present | a | model | 1 |
+| present | b | model | 1 |
+| present | c | model | 6 |
+| present | d | model | 1 |
+
+Cells overlap when a row cites multiple classes/directions.
+<!-- END_E3_MANIFEST_CITATIONS -->
 
 ## Final proof obligations
 

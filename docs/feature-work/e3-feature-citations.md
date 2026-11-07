@@ -10,6 +10,7 @@ Schema version 2 retains existing fields and adds `theorems` per row. Each entry
 has `name` (fully qualified Lean declaration), `module` (owning import module),
 `class`, `premises` (named strings), and `direction` (`model` or `model-to-solc`).
 Optional `citationNotes` explains a bounded claim and its remaining gap.
+Optional `modelToSolcGap` is nonempty text recording an open agreement obligation.
 
 - a: a general kernel theorem against repository semantics, including ordinary
   input-domain conditions; this does not imply source or solc correspondence.
@@ -39,64 +40,103 @@ root or module-map changes are part of this lane.
 
 ## Citation map and limits
 
-The original 13 present rows are traced below, together with the arithmetic
-under-citation. Six definition-only rows are downgraded to partial; the reasons
-are explicit rather than disguised by a stronger evidence class.
+The original 13 present rows and the arithmetic under-citation are traced below.
+Six definition-only rows become partial, with explicit reasons.
 
-| Row | Current | Declaration (class) | Scope and remaining gap |
+| Row | Current | Declaration (class, direction) | Scope and remaining gap |
 |---|---|---|---|
-| booleanLiterals | partial | `Solidity.Frontend.expr` (d) | Definition-only Boolean import branch; no general source/importer correspondence theorem. Downgraded present to partial under the non-d present gate (F8). |
-| etherUnits | present | `Solidity.Source.TypingExamples.w_litUnit` (c)<br>`Solidity.unitFactor?` (d) | Concrete typed one-ether derivation only; factor table is definitional. No theorem covers all denomination folding and range checks. |
-| timeUnits | partial | `Solidity.unitFactor?` (d) | Definition-only literal factor table; no unit-folding preservation theorem. Downgraded present to partial (F8). |
-| boolType | partial | `Solidity.PrimTy.Denote` (d) | Boolean carrier is Bool by definition; no theorem of the full source typing requirement. Downgraded present to partial (F8). |
-| parentheses | partial | `Solidity.expandExpr` (d) | Grouping macro branch only; no source evaluation-preservation theorem. Downgraded present to partial (F8). |
-| ifStatement | present | `Solidity.iteStep_sound` (a)<br>`Solidity.Evm.compile_correct` (b) | Rule soundness is against intrinsic repository semantics. Compiler theorem additionally requires fragment admission, state simulation and local-room bound; neither proves source lowering or solc agreement. |
-| breakStatement | present | `Solidity.lowerLoops` (c) | Class c traces lowerLoops plus guard-message regressions in Solidity/Examples/Tactics/Loops.lean:60-106; transformed syntax tests do not prove general lowering correctness (F3). |
-| erc7201Builtin | present | `Solidity.Examples.Tactics.AbiFeatures.erc20_namespace` (c)<br>`Solidity.Examples.Tactics.AbiFeatures.empty_namespace` (c)<br>`Solidity.Examples.Tactics.AbiFeatures.utf8_namespace` (c) | Three concrete kernel namespace computations; no theorem relates runtime lowering to the ERC7201 root formula. General runtime formula agreement remains open. |
-| msgSender | partial | `Solidity.TTx.msgSender` (d) | Definition-only uint256 context field, not address160 bound or external-self-call transition proof. Downgraded present to partial (F8). |
-| blockTimestamp | partial | `Solidity.TTx.timestamp` (d) | Definition-only environment field; no clock guarantees asserted. Downgraded present to partial (F8). |
-| typeName | present | `Solidity.Frontend.declarationMetadata` (c) | Importer definition tested by tests/solc/DeclarationMetadata.sol:26-29; compiler-supplied metadata, not an all-input source correspondence theorem. |
-| interfaceId | present | `Solidity.Examples.Tactics.DeclarationMetadata.ownInterface` (c) | Concrete imported own-interface fixture only; selectors supplied by solc, not independently computed and proved equivalent. |
-| errorEventSelector | present | `Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors` (c)<br>`Solidity.Examples.Tactics.DeclarationMetadata.eventSelector` (c) | Concrete imported error/event selector fixtures only; no general signature-hash agreement theorem. |
-| checkedArithmetic | partial | `Solidity.Evm.exp_tail` (a)<br>`Solidity.Evm.compile_correct` (b)<br>`Solidity.Evm.add_tail` (a)<br>`Solidity.Evm.sub_tail` (a)<br>`Solidity.Evm.mul_tail` (a)<br>`Solidity.Evm.div_tail` (a)<br>`Solidity.Evm.mod_tail` (a)<br>`Solidity.Evm.sadd_tail` (a)<br>`Solidity.Evm.ssub_tail` (a)<br>`Solidity.Evm.smul_tail` (a)<br>`Solidity.Evm.sdiv_tail` (a)<br>`Solidity.Evm.smod_tail` (a)<br>`Solidity.Evm.neg_run` (a)<br>`Solidity.Evm.tail_simT` (b)<br>`Solidity.Evm.compound_simT` (b)<br>`Solidity.Evm.bump_simT` (b) | uint256/int256 admitted symbolic-machine compiler fragment only. compile_correct has hP/hm/hL premises and permits coarse revert/fault outcomes; guards do not establish all source intermediate widths, pipeline orders or exact panic bytes. F8 under-citation corrected without upgrading partial. F1/F10 payment-disjunction and oracle limits, F2 source composition, F3 lowering, F4 symbolic storage, F5 coarse failures and F6 fragment boundaries remain open. |
+| booleanLiterals | partial | `Solidity.Frontend.expr` (d, model) | Definition-only Boolean import branch; no general source/importer correspondence theorem. Downgraded present to partial under the non-d present gate (F8). |
+| etherUnits | present | `Solidity.Source.TypingExamples.w_litUnit` (c, model)<br>`Solidity.unitFactor?` (d, model) | Concrete typed one-ether derivation only; factor table is definitional. No theorem covers all denomination folding and range checks. |
+| timeUnits | partial | `Solidity.unitFactor?` (d, model) | Definition-only literal factor table; no unit-folding preservation theorem. Downgraded present to partial (F8). |
+| boolType | partial | `Solidity.PrimTy.Denote` (d, model) | Boolean carrier is Bool by definition; no theorem of the full source typing requirement. Downgraded present to partial (F8). |
+| parentheses | partial | `Solidity.expandExpr` (d, model) | Grouping macro branch only; no source evaluation-preservation theorem. Downgraded present to partial (F8). |
+| ifStatement | present | `Solidity.iteStep_sound` (a, model)<br>`Solidity.Evm.compile_correct` (b, model) | Rule soundness is against intrinsic repository semantics. Compiler theorem additionally requires fragment admission, state simulation and local-room bound; neither proves source lowering or solc agreement. |
+| breakStatement | present | `Solidity.lowerLoops` (c, model) | Class c traces lowerLoops plus guard-message regressions in Solidity/Examples/Tactics/Loops.lean:60-106; transformed syntax tests do not prove general lowering correctness (F3). |
+| erc7201Builtin | present | `Solidity.Examples.Tactics.AbiFeatures.erc20_namespace` (c, model)<br>`Solidity.Examples.Tactics.AbiFeatures.empty_namespace` (c, model)<br>`Solidity.Examples.Tactics.AbiFeatures.utf8_namespace` (c, model) | Three concrete kernel namespace computations; no theorem relates runtime lowering to the ERC7201 root formula. General runtime formula agreement remains open. |
+| msgSender | partial | `Solidity.TTx.msgSender` (d, model) | Definition-only uint256 context field, not address160 bound or external-self-call transition proof. Downgraded present to partial (F8). |
+| blockTimestamp | partial | `Solidity.TTx.timestamp` (d, model) | Definition-only environment field; no clock guarantees asserted. Downgraded present to partial (F8). |
+| typeName | present | `Solidity.Frontend.declarationMetadata` (c, model) | Importer definition tested by tests/solc/DeclarationMetadata.sol:26-29; compiler-supplied metadata, not an all-input source correspondence theorem. |
+| interfaceId | present | `Solidity.Examples.Tactics.DeclarationMetadata.ownInterface` (c, model) | Concrete imported own-interface fixture only; selectors supplied by solc, not independently computed and proved equivalent. |
+| errorEventSelector | present | `Solidity.Examples.Tactics.DeclarationMetadata.errorSelectors` (c, model)<br>`Solidity.Examples.Tactics.DeclarationMetadata.eventSelector` (c, model) | Concrete imported error/event selector fixtures only; no general signature-hash agreement theorem. |
+| checkedArithmetic | partial | `Solidity.Evm.exp_tail` (a, model)<br>`Solidity.Evm.compile_correct` (b, model)<br>`Solidity.Evm.add_tail` (a, model)<br>`Solidity.Evm.sub_tail` (a, model)<br>`Solidity.Evm.mul_tail` (a, model)<br>`Solidity.Evm.div_tail` (a, model)<br>`Solidity.Evm.mod_tail` (a, model)<br>`Solidity.Evm.sadd_tail` (a, model)<br>`Solidity.Evm.ssub_tail` (a, model)<br>`Solidity.Evm.smul_tail` (a, model)<br>`Solidity.Evm.sdiv_tail` (a, model)<br>`Solidity.Evm.smod_tail` (a, model)<br>`Solidity.Evm.neg_run` (a, model)<br>`Solidity.Evm.tail_simT` (b, model)<br>`Solidity.Evm.compound_simT` (b, model)<br>`Solidity.Evm.bump_simT` (b, model) | uint256/int256 admitted symbolic-machine compiler fragment only. compile_correct has hP/hm/hL premises and permits coarse revert/fault outcomes; guards do not establish all source intermediate widths, pipeline orders or exact panic bytes. F8 under-citation corrected without upgrading partial. F1/F10 payment-disjunction and oracle limits, F2 source composition, F3 lowering, F4 symbolic storage, F5 coarse failures and F6 fragment boundaries remain open. |
 
-The owning module and full named premises are stored beside each declaration in
-the manifest. Normal word-range hypotheses in arithmetic guard theorems state
-the input domain; typed compiler interfaces additionally list fragment and
-representation premises as class b. Private compiler helper names are not
-invented: the public `tail_simT`, `compound_simT` and `bump_simT` interfaces are
-reused. The exponentiation guard is included through `Evm.exp_tail`.
+## Partial rows and agreement gaps
 
-## Reproduction and integration
+All original partial rows have explicit mappings in
+`scripts/check-feature-citations-partials.json`, in manifest order. They trace
+relevant implementation definitions or narrow existing model theorems. A parser
+branch is not an operational preservation theorem; a type constructor is not a
+compiler typing theorem. Narrow storage/frame/creation laws do not establish
+source or physical-EVM adequacy. Example/test-only traces remain class d with
+notes; new kernel evidence is not inferred merely from a passing example.
 
-The audited mappings are explicit data in
-`scripts/check-feature-citations-populate.py`. It never upgrades `current`.
-The metadata generator remains `scripts/solidity-feature-audit.py`. Its version
-assertion accepts 1 and 2; all other validation is retained. The compatibility
-test covers both the exact old manifest and the new one, additive rendering,
-unsupported versions and retained evidence-path validation.
+The first twelve high-traffic rows comprise F8's nine sampled partial rows plus
+checkedArithmetic, uncheckedArithmetic and evaluationOrder from its traceability
+discussion. Ordinary external-call oracle semantics and the callback invariant
+rule are distinguished from the self-body rule. Named class-b premises record
+fragment, simulation, invariant and continuation boundaries.
 
-After building imports with the pinned toolchain, use:
+The only model-to-solc citation is the finite numeric observation theorem and
+paired external fixture validator. It covers 42 spellings and 18 accepted exact
+values, retaining five lexical-versus-expression-stage differences. It does not
+prove address checksum parity, hex byte-string decoding, denomination factors,
+comment/specification preservation or general Yul/compiler correctness. Its
+universal agreement gap remains open. Every other row explicitly records no
+validated model-to-solc citation here, including legacy scope labels; those
+labels are not new exclusions from the full compiler endpoint.
+
+Bridge external-EVM instruction agreement, repository compiler simulation and
+recorded coder-mode agreement are not solc compiler agreement. The historical
+640-case generated matrix requires current semantic-input validation before it
+can support this snapshot; retained historical results are not promoted here.
+
+## Reproduction
+
+The explicit mapping generator is `scripts/check-feature-citations-populate.py`;
+it never upgrades current status. `scripts/check-feature-citations-docs.py`
+reproduces this map and the roadmap metric. Metadata is regenerated only with
+the existing `scripts/solidity-feature-audit.py`; its sole reader change accepts
+schema versions 1 and 2 while retaining every other validation.
+
+After building imports with the pinned toolchain:
 
 ```sh
+python3 -I scripts/check-feature-citations-populate.py
+python3 -I scripts/solidity-feature-audit.py
+python3 -I scripts/check-feature-citations-docs.py --check
 python3 -I scripts/check-feature-citations.test.py
 python3 -I scripts/check-feature-citations-compat.test.py
-python3 -I scripts/solidity-feature-audit.py --check
 python3 -I scripts/check-feature-citations.py --evidence-dir "$EVIDENCE_DIR"
 ```
 
-The final command is the evidence recipe for every row in the table. It emits
-only a sorted JSON summary on stdout. `rowCells` counts rows once per cell and
-can overlap across classes/directions; it is not a partition. Model-only,
-model-to-solc and uncited row totals are a partition. Imports are checked
-serially with `LEAN_NUM_THREADS=1`, `-j1`, and an 8 GiB Lean memory cap. The
-optional build-config generator supplies bounded weak compiler arguments in an
-off-git Lake configuration without changing tracked build settings.
+The finite external numeric comparison is reproduced without modifying cases,
+settings, expected outputs or pins:
+
+```sh
+python3 -I tests/sol-numeric-literals/generate-fixtures.py --check
+node scripts/check-feature-citations-solc.mjs "$SOLJSON_0838"
+python3 -I tests/sol-numeric-literals/differential.py
+```
+
+The original checker verifies the exact compiler SHA256 and version. These
+commands validate finite AST/numeric observations, not EVM execution or universal
+compiler parity.
+
+The citation checker command is the resolution recipe for every citation. It imports modules
+and queries exact names and owning modules in the elaborated environment; a/b
+require theorem declarations. It does not infer relevance or premise completeness
+from a name. Stdlib modules and ordinary Lean identifier punctuation are supported.
+Imports must be built; cache-fetched artifacts may need materializing. Queries
+run serially with LEAN_NUM_THREADS=1, -j1 and an 8 GiB Lean memory cap. The optional
+build-config generator adds weak bounded arguments without editing tracked pins.
+
+Summary rowCells count a row once per cell, and can overlap across classes or
+directions. Model-only/model-to-solc/uncited totals form a partition. A finite
+model-to-solc citation does not close the general-agreement gap.
 
 ### Coordinator CI registration fragment
 
-Place after existing library/example builds. Cache-fetched artifacts must be
-materialized before direct Lean queries. The fragment does not edit workflows.
+Place after library/example builds; do not change another lane's workflow here.
 
 ```yaml
 - name: Check feature theorem citations
@@ -106,30 +146,24 @@ materialized before direct Lean queries. The fragment does not edit workflows.
     python3 -I scripts/ci/restore-lake-artifacts.py
     python3 -I scripts/check-feature-citations-compat.test.py
     python3 -I scripts/check-feature-citations.test.py
+    python3 -I scripts/check-feature-citations-docs.py --check
     python3 -I scripts/solidity-feature-audit.py --check
     python3 -I scripts/check-feature-citations.py
 ```
 
-## Audit reconciliation
+## Audit reconciliation and integration
 
-This lane cites existing results; it does not repair F1–F10. In particular,
-`compile_correct` retains F1/F10 payment-disjunction and history-free oracle
-limits, F2's missing general source composition, F3's unproved lowering, F4's
-symbolic storage, F5's coarse failures, and F6's admitted fragment. F7's witness
-build coverage and F9's decision-procedure residue are not discharged by adding
-citations. Finite examples are not promoted to generic theorems. Ordinary model
-or external-EVM agreement must not be mislabeled solc compiler agreement.
+This lane does not repair F1–F10. compile_correct retains F1/F10's payment
+weaknesses, F2's missing general source composition, F3's unproved lowering,
+F4's symbolic storage, F5's coarse failures and F6's fragment restriction.
+Citations do not discharge F7's witness-build problem or F9's decision residue.
+No theorem statement, proof budget, axiom, premise or exclusion is changed.
 
-## Remaining queue and handoff
+G00/G03 generated blocks remain coordinator-owned and must be regenerated from
+the eventual integrated inputs. Routing/staging is not gate acceptance.
+Library/full gates and independent final reviews are separate from name lookup.
 
-The high-traffic partial inventory, remaining partial rows, model-to-solc
-citations/gaps and final metric are the next ordered checkpoints. Their final
-reviews and library/full gates remain separate obligations. The frozen audit
-summarizes nine sampled partial rows despite advertising twelve; the planned
-first twelve also include checkedArithmetic, uncheckedArithmetic and
-evaluationOrder, which F8 explicitly discusses under traceability.
-
-Validation and handoff records live in the
+Execution receipts, logs, timings, reviews and handoffs belong in the
 [private coordination archive](https://github.com/SolidiKeY/solidity-lean-coord)
-under `evidence/plan-e3-feature-citations-1107/e3-feature-citations/`.
-The exact archive commit and artifact hashes are supplied in CLOUDVM-RESULT.
+under `evidence/plan-e3-feature-citations-1107/e3-feature-citations/` (H145).
+Exact archive commits and artifact hashes are supplied in CLOUDVM-RESULT.

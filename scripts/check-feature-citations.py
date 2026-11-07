@@ -36,6 +36,8 @@ def validate(data):
         current = row.get("current")
         if current not in ("present", "partial", "missing", "notApplicable"):
             raise ValueError(f"{key}: invalid current")
+        if "modelToSolcGap" in row and (not isinstance(row["modelToSolcGap"], str) or not row["modelToSolcGap"].strip()):
+            raise ValueError(f"{key}: modelToSolcGap must be nonempty text")
         citations = row.get("theorems")
         if not isinstance(citations, list):
             raise ValueError(f"{key}: theorems must be a list")
@@ -68,6 +70,8 @@ def validate(data):
             counts[(current, cls, direction)] += 1
     return sorted(queries), {
         "rows": len(rows),
+        "citationEntries": sum(len(r["theorems"]) for r in rows),
+        "modelToSolcGapRows": sum(bool(r.get("modelToSolcGap")) for r in rows),
         "rowsWithCitations": sum(bool(r["theorems"]) for r in rows),
         "modelOnlyRows": sum(bool(r["theorems"]) and all(c["direction"] == "model" for c in r["theorems"]) for r in rows),
         "modelToSolcRows": sum(any(c["direction"] == "model-to-solc" for c in r["theorems"]) for r in rows),

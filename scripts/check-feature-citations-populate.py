@@ -51,9 +51,18 @@ MAPPING={
     cite("Solidity.Evm.compound_simT","Solidity.Evm.SimLemmas","b",["hop: op.hasCompoundAssign = true","hp: p.isNumeric = true","ha: ReprV p a wa","hb: ReprV p b wb"]),
     cite("Solidity.Evm.bump_simT","Solidity.Evm.SimLemmas","b",["hp: p.isNumeric = true","h: ReprV p a w"])],
 }
+# Additional audited partial mappings are explicit data, not inferred names.
+partial_path = ROOT / "scripts/check-feature-citations-partials.json"
+if partial_path.exists():
+    for key, evidence in json.loads(partial_path.read_text()).items():
+        assert key not in MAPPING
+        MAPPING[key] = evidence["theorems"]
+        NOTES[key] = evidence["citationNotes"]
+
 DOWNGRADE={"booleanLiterals","timeUnits","boolType","parentheses","msgSender","blockTimestamp"}
 
 def main():
+    agreement = json.loads((ROOT / "scripts/check-feature-citations-agreement.json").read_text())
     path=ROOT/"docs/solidity-features.json"
     data=json.loads(path.read_text())
     assert data["schemaVersion"]==2
@@ -64,6 +73,16 @@ def main():
             found.add(key)
             row["theorems"]=MAPPING[key]
             row["citationNotes"]=NOTES[key]
+        if key in agreement:
+            row["theorems"].extend(agreement[key]["theorems"])
+            row["citationNotes"] += " " + agreement[key]["note"]
+            row["modelToSolcGap"] = agreement[key]["gap"]
+        else:
+            row["modelToSolcGap"] = "No validated model-to-solc citation is established here; model declarations do not prove source/compiler agreement."
+            if row["scope"] == "exclude":
+                row["modelToSolcGap"] += " The legacy scope label is not an exclusion from the approved full compiler endpoint."
+            elif row["scope"] == "upstream":
+                row["modelToSolcGap"] += " Upstream/reserved inventory status is not an implementation proof."
         if key in DOWNGRADE:
             assert row["current"] in ("present","partial")
             row["current"]="partial"
