@@ -1904,3 +1904,22 @@ inside removed rows. Reappearing tombstones are refused rather than silently
 merged. Synthetic controls cover these paths; the current observation has no
 tombstones and no unbound historical labels. The version hashes are bound to
 the supplied checksum lineage, not independently signed attestations.
+
+## Post-merge reference inventory
+
+At merge head `9ba87cf1906a2afa11a97db111fcf7406c7d9124`, the
+version-preserving updater observed 7,986 tracked Lean paths and 735
+standalone candidates. Relative to the preceding 718-row snapshot, 17
+candidates were new, six changed and none was removed. The refreshed index
+retains 471 candidates with supplied current static references, 264 without,
+and five with historical references requiring review. None of the six
+changed candidates had a prior current reference; 63 rows have overlapping
+current references. The 23 new or changed candidates remain unresolved, not
+excluded. The evidence artifacts are bound by
+`tests/h55/module-times/reference-postmerge-evidence.sha256`.
+
+Independent read-only finder and skeptic checked the counts, input hashes and
+preservation of historical records; neither used Lean or a server. The scan is
+non-atomic and its source bindings and supplied static references do not prove
+execution context, generated-input coverage, runtime provenance or timing
+acceptance. H93 continues to defer h55b cold timing.
