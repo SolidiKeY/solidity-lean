@@ -1,0 +1,47 @@
+{
+  "scope": "Complete7 term-agreement theorem role classifications; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 571,
+    "pending": 4712,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/term-agreement-roles-v44/evidence.tar.gz",
+      "bytes": 1112706,
+      "sha256": "00ad13deb8fdc633c4b0621667e25d8965eb94047a5c3bd9a3c832064de67057"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-agreement-roles-v44/inputs.json",
+      "bytes": 1245,
+      "sha256": "f4dfaaeca4f50b983e06dc3d6f559fa91ff1af04e0163b181b29eacb1c98e094"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-agreement-roles-v44/gates.json",
+      "bytes": 2979,
+      "sha256": "556fb7f54424b0621a9feb1b6c09c87e654d4e19aae75bc01054175721ca8394"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-agreement-roles-v44/reviews.md",
+      "bytes": 711,
+      "sha256": "a285ab48711b552feeba2b392ab4da96d23f2eecc83a20c541f7ca3ff2af44f5"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-agreement-roles-v44/case-rosters.json",
+      "bytes": 949,
+      "sha256": "05af8734a57f6d76ddd8841a114434e36f7e3ebec780e2d94cbb49b4c112ffd7"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/term-agreement-roles-v44/doc-master-repair-binding.json",
+      "bytes": 486,
+      "sha256": "7759a63a413f49e1c7249faa2b878da9e295fca09fdab93aea6f75415b6e3c12"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/term-agreement-roles-v44/semantic-roles-reviewed.json",
+      "bytes": 1522567,
+      "sha256": "f2769601fd9f96d6b3e6ad8be4075b87f713870e1aded6867de6bee5cc8824ff"
+    }
+  ]
+}
