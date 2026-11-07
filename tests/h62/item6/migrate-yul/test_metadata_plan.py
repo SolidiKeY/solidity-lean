@@ -77,21 +77,45 @@ class MetadataPlan(unittest.TestCase):
             self.inventory['modules'][0]['declarations'] = count
             with self.subTest(count=count), self.assertRaises(ValueError): self.run_plan()
 
+    def test_relative_summary_path_resolves_against_baseline(self):
+        self.inventory['modules'][0]['summary'] = 'summary.json'
+        result = self.run_plan()
+        self.assertEqual(result['modules'][0]['kernel_summary'], str(self.summary.resolve()))
+
+    def test_summary_parsed_from_captured_hashed_bytes(self):
+        original_read = pathlib.Path.read_bytes
+        reads = []
+        def read_and_replace(path):
+            data = original_read(path)
+            if path == self.summary:
+                reads.append(path)
+                # Simulate mutation after the read: parsing must use captured bytes.
+                path.write_text('invalid JSON after captured bytes')
+            return data
+        with patch.object(pathlib.Path, 'read_bytes', read_and_replace):
+            result = self.run_plan()
+        self.assertEqual(reads, [self.summary])
+        self.assertEqual(result['modules'][0]['module'], 'Empty')
+        # make_plan is an in-memory stage; main's final recheck rejects this drift.
+        self.assertNotEqual(plan.interfaces.digest(self.summary),
+                            self.inventory['modules'][0]['summary_sha256'])
+
     def test_cli_rejects_inputs_changed_during_planning(self):
         # Only bypass production size/pin for this finite input-race control.
         census_path = self.root / 'census.json'
         inventory_path = self.root / 'inventory.json'
         output = self.root / 'out.json'
         production_names = [f'Module{i}' for i in range(1774)]
-        census_path.write_text(json.dumps(dict(yul_modules=production_names, modules={})))
+        census_path.write_text(json.dumps(dict(yul_modules=production_names, modules=self.census['modules'])))
         inventory_path.write_text('{}')
         argv = ['plan', '--census', str(census_path), '--inventory', str(inventory_path),
                 '--baseline', str(self.root), '--output', str(output)]
-        for changed in [census_path, inventory_path]:
+        for changed in [census_path, inventory_path, self.source, self.summary]:
             before = changed.read_bytes()
             def changed_plan(*args):
                 changed.write_bytes(before + b' ')
-                return dict(modules=[])
+                return dict(modules=[dict(kernel_summary=str(self.summary),
+                    kernel_summary_sha256=self.inventory['modules'][0]['summary_sha256'])])
             with self.subTest(changed=changed), patch.object(sys, 'argv', argv), \
                     patch.object(plan, 'CENSUS_SHA256', plan.interfaces.digest(census_path)), \
                     patch.object(plan, 'make_plan', side_effect=changed_plan):
