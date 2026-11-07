@@ -9,3 +9,9 @@ def validated_target(project: Path, requested: Path) -> Path:
     if target != expected:
         raise ValueError("diagnostic target is not the project helper")
     return target
+
+def validate_fresh_project(project: Path) -> None:
+    for name in (".lake", "lake-manifest.json"):
+        artifact = project / name
+        if artifact.exists() or artifact.is_symlink():
+            raise ValueError(f"isolated project artifact already exists: {name}")
