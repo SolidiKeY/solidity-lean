@@ -64,6 +64,24 @@ def certify (origin : Name) (fuel : Nat) (settings : Settings) (node : Json) :
   (SourceAstResolvedGraphs.produce origin fuel settings node .storage).map
     (fun result => assemble origin result.1)
 
+/-- Conversion failure retains the exact diagnostic; graph refusal cannot mask it. -/
+theorem conversion_failure (origin : Name) (fuel : Nat) (settings : Settings)
+    (node : Json) (message : String)
+    (failed : SourceAstUnit.unit fuel node = .error message) :
+    certify origin fuel settings node = .error message := by
+  rw [certify, SourceAstResolvedGraphs.conversion_failure
+    origin fuel settings node .storage message failed]
+  rfl
+
+/-- Successful conversion always retains the whole resolution, including graph None. -/
+theorem conversion_success (origin : Name) (fuel : Nat) (settings : Settings)
+    (node : Json) (unit : Syn .unit)
+    (converted : SourceAstUnit.unit fuel node = .ok unit) :
+    certify origin fuel settings node = .ok (assemble origin (Source.resolveUnit settings unit)) := by
+  rw [certify, SourceAstResolvedGraphs.conversion_success
+    origin fuel settings node .storage unit converted]
+  rfl
+
 theorem output_resolution (origin : Name) (fuel : Nat) (settings : Settings)
     (node : Json) (result : Result) (returned : certify origin fuel settings node = .ok result) :
     ∃ unit, SourceAstUnit.unit fuel node = .ok unit ∧ result.1 = Source.resolveUnit settings unit := by
@@ -75,6 +93,19 @@ theorem output_resolution (origin : Name) (fuel : Nat) (settings : Settings)
     rw [certify, computed] at returned
     cases returned
     exact SourceAstResolvedGraphs.output_resolution origin fuel settings node .storage output computed
+
+/-- Output certification is exactly computed readiness at the retained resolution. -/
+theorem output_success_iff (origin : Name) (fuel : Nat) (settings : Settings)
+    (node : Json) (result : Result) (returned : certify origin fuel settings node = .ok result) :
+    result.2.isSome = true ↔ Ready origin result.1 := by
+  cases computed : SourceAstResolvedGraphs.produce origin fuel settings node .storage with
+  | error message =>
+    rw [certify, computed] at returned
+    cases returned
+  | ok output =>
+    rw [certify, computed] at returned
+    cases returned
+    exact certifyEnv_success_iff origin output.1
 
 /-- Joint provenance, original resolution relation and the existing v2 environment contract.
 This is no whole-program v2 typing or actual Source admission theorem. -/
@@ -102,4 +133,10 @@ theorem certified_output (origin : Name) (fuel : Nat) (settings : Settings)
 #guard_msgs (whitespace := lax) in #print axioms output_resolution
 /-- info: 'Solidity.Lowering.P8.ResolvedGraphAdmissionV2.certified_output' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms certified_output
+/-- info: 'Solidity.Lowering.P8.ResolvedGraphAdmissionV2.conversion_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conversion_failure
+/-- info: 'Solidity.Lowering.P8.ResolvedGraphAdmissionV2.conversion_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conversion_success
+/-- info: 'Solidity.Lowering.P8.ResolvedGraphAdmissionV2.output_success_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms output_success_iff
 end Solidity.Lowering.P8.ResolvedGraphAdmissionV2

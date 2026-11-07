@@ -1809,3 +1809,22 @@ duplicate guard; neither ran Lean or edited. Original/consolidated queues, stric
 pins/docs and final gates remain open. Coverage stays 72/3281, 3209 uncovered.
 Library-try/Error support, Y04 physical adequacy and separate 4.35 disposition
 remain external waits; actual Source/P8 production remains this lane’s duty.
+
+### C272: wrapper transport and returned readiness
+
+Three additive ResolvedGraphAdmissionV2 laws preserve the exact conversion-error
+message, return the complete assembled resolution on successful conversion
+(including optional certification None), and equate returned certificate success
+with computed readiness at that same resolution. They reuse existing conversion
+and environment-certification laws. Existing definitions, statements, imports,
+Source bodies and interfaces are unchanged. Each new guard reports only the
+standard trio; this proves no actual Source admission or lifecycle adequacy.
+
+Bounded serial final module check passed in 1.83 s, sampled peak RSS 797171712
+bytes, no resource stop. The preceding two-law check passed in 2.46 s; these are
+incremental checks, not a matched speed comparison. Read-only finder/skeptic
+reviews found no defect and ran no Lean/server/builds. Cleanup removed only the
+regenerable pinned build directory, restoring more than 2 GB free. Strict pin,
+documentation and full gates remain open as recorded in C271. Coverage remains
+72/3281, 3209 uncovered. Actual H121b Source/P8 production, original/consolidated
+queues and all previously recorded external waits and STOPs remain binding.
