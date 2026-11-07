@@ -1,0 +1,42 @@
+{
+  "schema": "h55-producer-fit-source-review-v1",
+  "inspectionMaster": "5414256fdf7b78e8debe5e571c7af06ee55a5563",
+  "inspectionHead": "fae46a1f25de370059e8e7b090c5f941b37d3a69",
+  "producerCommit": "c8010883a15b5444f59c3c1e66818b8e15823454",
+  "producerLane": "solidity-compiler10-20261028/memory-internal-calls",
+  "sourceHashes": {
+    "Solidity/Lowering/P9/BodyRecognizerCompleteness.lean": "281e9f92b35610ecb842a448fd3d6433c938c29c7f18b97fc157d54866715101",
+    "Solidity/Lowering/P9/CatalogueRecognizerCompleteness.lean": "8d25884ceb5ef34d635e8e3da907647dc5b4d7c6ef1000612bbe995977527f2a"
+  },
+  "sourceSignatures": {
+    "Solidity.Source.Calls.Recognize.catalogueB_complete": "theorem catalogueB_complete (G : Glob E) (c : String) (values ds : List Decl)\n    (catalogue : BoundMemoryCatalogue (\u00b7 \u2208 values) G c ds) :\n    \u2203 fuel, catalogueB G c values fuel ds = true",
+    "Solidity.Source.Calls.Recognize.catalogueB_iff_from_elaborate": "theorem catalogueB_iff_from_elaborate (res : Resolution)\n    (elaborated : (Source.elaborate res).isSome = true)\n    (G : Glob res.env) (program : G.prog = Source.progOf res.env) (c : String)\n    (values ds : List Decl) (checked : Solidity.Lowering.P9.WholeProgram.check res G c values = true) :\n    BoundMemoryCatalogue (\u00b7 \u2208 values) G c ds \u2194\n      \u2203 fuel, catalogueB G c values fuel ds = true"
+  },
+  "evidenceKind": "Source-level compatibility inventory of already-landed proofs; not new Lean metadata or axiom validation",
+  "shape": "Recognizer completeness relative to existing readiness/catalogue certificates",
+  "fit": "Admission/recognizer evidence, not a complete semantic pass or full family bridge",
+  "retainedPremises": [
+    "catalogueB_complete takes BoundMemoryCatalogue (\u00b7 \u2208 values) G c ds",
+    "catalogueB_iff_from_elaborate retains successful Source.elaborate, exact G.prog equality and WholeProgram.check = true for its converse"
+  ],
+  "conclusionBoundary": "Existence of a recognizer fuel accepting the same catalogue; no universal Source/profile coverage follows",
+  "missingPassDeliverables": [
+    "Canonical session Lang/program origin and emitted-code observation equations",
+    "Independently approved full native domain and agreement/coverage",
+    "Fixed public environment abstraction with soundness/surjectivity",
+    "Independently prescribed executable session-resource map with forward A/F/G and complete Prefix.Le",
+    "Reverse target A/G to source A/G prefix transport for all original outcomes"
+  ],
+  "recognizerFuelIsPublicResourceMap": false,
+  "axiomEvidence": "Producer source guards report propext/Classical.choice/Quot.sound; not freshly checked or accepted as a new G49 axiom set here",
+  "publicResidualsDischarged": [],
+  "fullFactoriesDischarged": [],
+  "newPassAdapterAdded": false,
+  "supportedSemanticAdapterShapesUnchanged": 1,
+  "carrierEntrypointsUnchanged": 5,
+  "pendingFullFamilyCountUnchanged": 5,
+  "productionAtomicPremiseCount": null,
+  "newLeanRun": false,
+  "statementOrProofEdits": false,
+  "remainingCollector": "solidity-h62-3-20261106/g52-differential"
+}
