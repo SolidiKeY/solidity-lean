@@ -7,6 +7,7 @@ const key=target=>target==='dafny'?'verificationTimeLimit':'timeoutMs',section=t
 function launchSettings(settings,target,suite){if(suite==='verification-time-limit'){delete settings['dafny.verificationTimeLimit'];delete settings['solidityLean.timeoutMs'];}return settings;}
 function records(file){return fs.existsSync(file)?fs.readFileSync(file,'utf8').split('\n').filter(Boolean).map(JSON.parse):[];}
 function serverProcesses(events,target){return events.filter(e=>e.kind==='process.spawn'&&e.data.args?.some(a=>typeof a==='string'&&(target==='local'?a.endsWith('lsp-server.cjs'):a==='server')));}
+function snapshotHover(value){if(!Array.isArray(value))return value;return value.map(h=>({contents:Array.isArray(h.contents)?h.contents.map(c=>typeof c==='string'?c:{value:c.value,language:c.language,kind:c.kind}):h.contents,range:h.range?{start:{line:h.range.start.line,character:h.range.start.character},end:{line:h.range.end.line,character:h.range.end.character}}:undefined}));}
 function hoverText(value){if(typeof value==='string')return value;if(Array.isArray(value))return value.map(hoverText).join('\n');if(value&&typeof value.value==='string')return value.value;return '';}
 async function withinOperation(operation,timeoutMs,label,{now=()=>require('node:perf_hooks').performance.now(),setTimer=setTimeout,clearTimer=clearTimeout}={}){
  if(typeof operation!=='function'||!Number.isSafeInteger(timeoutMs)||timeoutMs<1)throw Error('Invalid original operation deadline');
@@ -52,7 +53,7 @@ async function run({vscode,config,api,events,until}){
  let doc;
  const binding=()=>({uri:doc.uri.toString(),version:doc.version,textHash:digest(doc.getText()),session,closed:doc.isClosed,trusted:vscode.workspace.isTrusted});
  const save=()=>fs.writeFileSync(path.join(config.dir,'verification-time-limit-observations.json'),JSON.stringify(o,null,2));
- const query=async()=>{const b=binding(),position=symbolPosition(target,source),started=Date.now(),wireStart=records(config.trace).length;try{const value=await withinOperation(()=>vscode.commands.executeCommand('vscode.executeHoverProvider',uri,new vscode.Position(position.line,position.character)),config.operationTimeoutMs,'time-limit hover');return{uri:b.uri,sourceHash:b.textHash,version:b.version,position,before:b,after:binding(),started,finished:Date.now(),status:'resolved',nonempty:Array.isArray(value)&&value.length>0,value,wire:records(config.trace).slice(wireStart)};}catch(error){return{uri:b.uri,sourceHash:b.textHash,version:b.version,started,finished:Date.now(),status:'rejected',code:error.code,message:error.message};}};
+ const query=async()=>{const b=binding(),position=symbolPosition(target,source),started=Date.now(),wireStart=records(config.trace).length;try{const value=await withinOperation(()=>vscode.commands.executeCommand('vscode.executeHoverProvider',uri,new vscode.Position(position.line,position.character)),config.operationTimeoutMs,'time-limit hover');return{uri:b.uri,sourceHash:b.textHash,version:b.version,position,before:b,after:binding(),started,finished:Date.now(),status:'resolved',nonempty:Array.isArray(value)&&value.length>0,value:snapshotHover(value),wire:records(config.trace).slice(wireStart)};}catch(error){return{uri:b.uri,sourceHash:b.textHash,version:b.version,started,finished:Date.now(),status:'rejected',code:error.code,message:error.message};}};
  try{
   fs.writeFileSync(uri.fsPath,source);doc=await vscode.workspace.openTextDocument(uri);await vscode.window.showTextDocument(doc,{preview:false});
   for(let i=0;i<3;i++){
@@ -61,7 +62,7 @@ async function run({vscode,config,api,events,until}){
    if(i){pending=query();await withinOperation(()=>cfg().update(setting,target==='dafny'?i+1:(i+1)*1000,vscode.ConfigurationTarget.Workspace),config.operationTimeoutMs,'finite setting update');await withinOperation(()=>vscode.commands.executeCommand(target==='dafny'?'dafny.restartServer':'solidityLean.restartServer'),config.operationTimeoutMs,'time-limit restart');}
    await until(()=>{const ps=serverProcesses(events,target),p=ps.at(-1)?.data;return p&&records(config.trace).some(r=>r.processSession===p.processSession&&r.message?.method==='textDocument/didOpen'&&r.message.params?.textDocument?.uri===uri.toString());},'actual current process open');
    const spawn=serverProcesses(events,target).at(-1),process={...spawn.data,spawnedMs:spawn.ms},protocol=records(config.trace).filter(r=>r.processSession===process.processSession);restart.finished=Date.now();
-   const c={id:['native-default','finite-2','finite-3'][i],configuration:{effective:cfg().get(setting),inspect:inspect(),resource:target==='local'?uri.toString():null},source:binding(),process,protocol,restart,retired:events.slice(start).filter(e=>e.kind==='process.close').map(e=>({...e.data,closedMs:e.ms})),query:await query()};
+   const c={id:['native-default','finite-2','finite-3'][i],configuration:{effective:cfg().get(setting),inspect:inspect(),resource:target==='local'?uri.toString():null},source:binding(),process,protocol,restart,exited:events.slice(start).filter(e=>e.kind==='process.exit').map(e=>({...e.data,exitedMs:e.ms})),retired:events.slice(start).filter(e=>e.kind==='process.close').map(e=>({...e.data,closedMs:e.ms})),query:await query()};
    if(pending)c.queryAcrossConfiguration=await pending;
    if(!i&&target==='local'){
     const controller=new AbortController();controller.abort();const wireStart=records(config.trace).length,started=Date.now();
@@ -80,4 +81,4 @@ async function run({vscode,config,api,events,until}){
  return{...o,status:'partial'};
 }
 const safeErrors=(o,id,timeout)=>{try{return errors(o,id,timeout);}catch{return['malformed time-limit observation'];}};
-module.exports={launchSettings,errors:safeErrors,run,serverProcesses,withinOperation};
+module.exports={launchSettings,errors:safeErrors,run,serverProcesses,withinOperation,snapshotHover};
