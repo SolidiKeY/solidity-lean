@@ -1512,3 +1512,19 @@ not the H55 300-second gate; its address-space limit is not an RSS cap. A
 retained totality draft had failed and remains unvalidated, rather than a
 passing proof. Independent read-only finder and skeptic reviewed these
 boundaries without Lean, server or builds. No runtime acceptance is inferred.
+
+## Exact-verification audit candidates from the merged-tree delta
+
+`exact_audit_controls.py` records eight supplied source-hashed delta rows,
+not complete inventory coverage. The joint-input command checks dependent
+binders; its synthetic missing-binder rejection is expected to elaborate
+successfully. Recovery's two unconditional declarations have empty tuples.
+The independent census includes unclassified declarations and does not prove
+a witness for every declaration; VisitedSet's controls are also partial.
+
+The historical isolated Lean 4.35 driver selects VisitedSet separately;
+H70 names the other seven. Its recorded final timing comparison stopped at
+19.66% slowdown, above the 10% limit; no unchanged rerun or timing pass is
+inferred. A 300-second control there is not H55 runner attestation. Current
+inputs and outcomes remain unresolved. Independent read-only finder and
+skeptic reviewed these boundaries without Lean, server or builds.
