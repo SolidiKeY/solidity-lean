@@ -50,8 +50,8 @@ theorem timeout_after_write (p : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
   cases p <;> rfl
 
 theorem rollback_vector :
-    (rolled.ex.world.accounts sender).balance.val = 93 ∧
-    (rolled.ex.world.accounts self).balance.val = 5 ∧
+    (rolled.ex.world.accounts sender).balance = 93 ∧
+    (rolled.ex.world.accounts self).balance = 5 ∧
     (rolled.ex.world.accounts self).nonce = 0 ∧
     (rolled.ex.world.accounts self).code = none ∧
     (rolled.ex.world.accounts self).storage.read savedDecl.path = some (.bool false) ∧
@@ -62,7 +62,7 @@ theorem rollback_vector :
   exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
 
 theorem timeout_vector :
-    (timedAfterWrite.ex.world.accounts self).balance.val = 12 ∧
+    (timedAfterWrite.ex.world.accounts self).balance = 12 ∧
     (timedAfterWrite.ex.world.accounts self).storage.read savedDecl.path = some (.bool true) ∧
     (timedAfterWrite.ex.world.accounts self).code = none ∧
     timedAfterWrite.ex.journal.length = 4 ∧ timedAfterWrite.heap.next = 0 ∧
@@ -120,7 +120,7 @@ theorem wrong_timeout_rollback : timedAfterWrite.ex ≠ rolled.ex := by
 
 /-- Only the explicitly compared candidate fields; not a whole-world relation. -/
 theorem rollback_candidate :
-    ((rolled.ex.world.accounts self).balance.val,(rolled.ex.world.accounts self).code.isSome) =
+    ((rolled.ex.world.accounts self).balance,(rolled.ex.world.accounts self).code.isSome) =
       ((targetInitial.balance Controls.self).1.toNat,(targetInitial.accounts Controls.self).isSome) := by
   rw [rolled_machine]
   rfl

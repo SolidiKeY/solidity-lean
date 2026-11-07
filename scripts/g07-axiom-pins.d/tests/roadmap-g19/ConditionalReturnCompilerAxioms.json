@@ -1,0 +1,58 @@
+{
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.capture_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.core": [
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.emitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.emitted_split": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.prefix_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.prefix_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.snapshot": [],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.wrong_donor_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.Controls.wrong_flag_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/ConditionalReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalReturnCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintReadSequence.lean:Solidity.Backend.MemoryOps.source_uint_read_assign_chain_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

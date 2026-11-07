@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.actual_exhaustion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.actual_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.base_root": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.certificate_root": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.extra_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.nil_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingSourceViews.Controls.revert_refused": [
+  "Quot.sound",
+  "propext"
+ ]
+}
