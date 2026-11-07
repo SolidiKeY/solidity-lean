@@ -51,14 +51,14 @@ for row in index:
     actual_source = (root / source["path"]).read_bytes()
     assert hashlib.sha256(actual_source).hexdigest() == target_import["sha256"]
     if target_import["sha256"] != census["sources"][source["path"]]["sha256"]:
-        from overlay_review import TRUSTED, reconstruct, fidelity
+        from overlay_review import TRUSTED, reconstruct, fidelity, receipt_patch_path
         from census import git
         receipts = json.loads((root / "tests/h62/item2/audit-language/received-overlays.json").read_text())
         candidates = [r for r in receipts if TRUSTED[r["label"]]["path"] == source["path"]]
         assert len(candidates) == 1
         receipt = candidates[0]
         trusted = TRUSTED[receipt["label"]]
-        patch = Path(receipt["path"]).read_bytes()
+        patch = receipt_patch_path(receipt).read_bytes()
         assert hashlib.sha256(patch).hexdigest() == trusted["sha256"]
         frozen_source = git("show", f"{census['base']}:{source['path']}")
         assert hashlib.sha256(frozen_source).hexdigest() == census["sources"][source["path"]]["sha256"]

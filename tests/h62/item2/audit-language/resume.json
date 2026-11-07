@@ -4,7 +4,7 @@
   "slug": "audit-language",
   "status": "partial",
   "execution_state": "RESUMED_BY_USER_20261107",
-  "accepted_baseline": "df554535e9c8d308276a99ea23611c7d63ae5919",
+  "accepted_baseline": "48ff6a2ebd9a6531a288c0d203c682c4075be25b",
   "original_frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "authorization": "Latest user scheduled-merge instruction explicitly re-baselines and continues original queue; H82 standing statement-preserving agreement applies. Retirement records retained as history, not current prohibition.",
   "original_environment": "ccarenv_b64_Y2NhcmVudl9hNTQ3YjYwNzYwNjA4MTkxOGJhYmM3MGZiMTJjYzk0Mw",
@@ -51,7 +51,9 @@
     "gate-repair-20261107/after-gates.json",
     "gate-repair-20261107/witnesses/checks.json",
     "gate-repair-20261107/timing.json",
-    "merge-fixedpoint-20261107/check/checks.json"
+    "merge-fixedpoint-20261107/check/checks.json",
+    "receipt-relocation-20261107/results.json",
+    "receipt-relocation-20261107/relocated-input-check.json"
   ],
   "review_evidence": "gate-repair-20261107/reviews.json",
   "timing_delta": {
@@ -97,12 +99,16 @@
   ],
   "questions": [],
   "original_scope_inputs": "tests/h62/item2/audit-language/retirement/: complete original rendered prompt, originalqueue and small H44scopepointer; full245627byte inventory remains offGit and in portable archive",
-  "increment_base": "df554535e9c8d308276a99ea23611c7d63ae5919",
+  "increment_base": "60f3df88d6dcb7b9dd1a31e9e8358e8348a01484",
   "gate_repair_manifest": "tests/h62/item2/audit-language/gate-repair-manifest.json",
-  "current_action": "Explicit user merge origin/master; resolve only FixedPoint cast proof; original queue remains unfinished",
+  "current_action": "Fix coordinator finder receipt-relocation and Markdown-table findings; no statement/gate/budget changes",
   "gate_repair_evidence": "gate-repair-20261107/",
   "coordinator_gate_rerun": "pending after merge resolution; no full-gate claim",
   "merge_parent": "bdc5942ac81e4e6b733fc2a7ae7711df97a6c71e",
   "merge_resolution": "tests/h62/item2/audit-language/merge-resolution.json",
-  "merge_evidence": "merge-fixedpoint-20261107/"
+  "merge_evidence": "merge-fixedpoint-20261107/",
+  "lane_push_authorized": true,
+  "push_scope": "Latest user explicitly requests push of this original lane branch only; no default-branch publication",
+  "portability_evidence": "receipt-relocation-20261107/",
+  "portability_regression": "13controls, including both original failures, repaired verify/exportauth flows, corruption/missing/no-fallback, containment and table structure; saved checked-byte fixture, no new Lean proofs"
 }

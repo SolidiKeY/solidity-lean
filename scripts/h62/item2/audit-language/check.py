@@ -36,7 +36,7 @@ def main():
     visited = set()
     overlays = {}
     if args.proof_overlays:
-        from overlay_review import TRUSTED, reconstruct, fidelity
+        from overlay_review import TRUSTED, reconstruct, fidelity, receipt_patch_path
         rows = json.loads(args.proof_overlays.read_text())
         if len(rows) != len(TRUSTED) or {r.get("label") for r in rows} != set(TRUSTED):
             raise RuntimeError("missing or duplicate authenticated receipts")
@@ -45,7 +45,7 @@ def main():
             for supplied, key in (("owner", "owner"), ("expected_sha256", "sha256"),
                                   ("reported_ticket_head", "ticket"), ("reported_source_head", "source")):
                 if row.get(supplied) != trusted[key]: raise RuntimeError("receipt identity differs")
-            patch = Path(row["path"]).read_bytes()
+            patch = receipt_patch_path(row).read_bytes()
             if hashlib.sha256(patch).hexdigest() != trusted["sha256"]:
                 raise RuntimeError("receipt checksum differs")
             original = subprocess.check_output(["git", "show", f"{BASE}:{trusted['path']}"], cwd=ROOT)

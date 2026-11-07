@@ -10,6 +10,31 @@ inside this commit. This is an incomplete checkpoint, never completion of the
 four-checkpoint assignment. The existing goal must remain unfinished.
 
 
+## Coordinator finder portability corrections on 2026-11-07
+
+The held head is `60f3df88d6dcb7b9dd1a31e9e8358e8348a01484`. Historical
+receipt paths remain provenance/defaults; each receipt now also declares its
+member relative to the evidence root. A shared resolver is used by verification,
+export authentication and the other receipt readers. With `H62_EVIDENCE` set,
+only that root is used: missing or corrupt relocated files fail, without reading
+the historical absolute path. Absolute relative-members, parent traversal and
+symlinks escaping the selected root are rejected. Identity, SHA256, reconstruction,
+fidelity, source, axiom and witness predicates are unchanged.
+
+The regression reproduces both reported failures using the held scripts, then
+accepts both repaired flows while all legacy-root file reads are forbidden.
+It also runs from relocated input data with setup-time legacy reads forbidden.
+All 13 controls pass, including corruption/missing receipts, no fallback, default
+path behavior, containment and the five contiguous registration rows. This is
+saved acceptance replay using source bytes matching actual recorded check hashes;
+it invokes no Lean and establishes no new proof or full runtime gate.
+
+The blank line before the FixedPoint registration row is removed. No Lean file,
+statement, proof budget or existing gate predicate changes. The latest user
+explicitly authorizes pushing the original lane branch after these corrections;
+no default-branch push or publication is authorized. Original audit obligations
+remain unfinished and are retained in `resume.json` and the exported handoff.
+
 ## Requested master merge resolution on 2026-11-07
 
 Merged fetched master `df554535e9c8d308276a99ea23611c7d63ae5919` into the

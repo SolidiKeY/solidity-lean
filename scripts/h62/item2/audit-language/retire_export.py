@@ -26,7 +26,7 @@ def digest(path):
 
 def authenticate_resume_proofs(receipts, repair_manifest=None):
     """Require both exact H70 identities before allowing either H82 source path."""
-    from overlay_review import TRUSTED, reconstruct, fidelity
+    from overlay_review import TRUSTED, reconstruct, fidelity, receipt_patch_path
     assert len(receipts) == len(TRUSTED)
     assert {r.get("label") for r in receipts} == set(TRUSTED)
     revisions = {}
@@ -38,7 +38,7 @@ def authenticate_resume_proofs(receipts, repair_manifest=None):
         for supplied, key in (("owner", "owner"), ("expected_sha256", "sha256"),
                               ("reported_ticket_head", "ticket"), ("reported_source_head", "source")):
             assert receipt.get(supplied) == trusted[key], "receipt identity differs"
-        patch_data = Path(receipt["path"]).read_bytes()
+        patch_data = receipt_patch_path(receipt).read_bytes()
         assert hashlib.sha256(patch_data).hexdigest() == trusted["sha256"]
         original = git("show", BASE + ":" + trusted["path"])
         approved, *_ = reconstruct(patch_data, original, trusted["path"])
@@ -140,7 +140,8 @@ def main():
                    external_scope_manifest=scope_manifest,
                    packaging_validation="evidence/h44/split-validation.json",
                    packaging_reviews="evidence/h44/split-reviews.json",
-                   no_push_merge_publication=True, archived_files=len(members),
+                   no_push_merge_publication=not state.get("lane_push_authorized", False),
+                   no_default_branch_mutation=True, archived_files=len(members),
                    archive_exclusions="Compiled lib/cache products and toolchain archive/extraction; all remain on original VM. Official pin is included.",
                    portable_path_rule="Original absolute paths are provenance. Extract portable-evidence.tar.gz: evidence/, coordinator-inputs/, retirement/. Verify PORTABLE-SHA256SUMS.",
                    versions=json.loads((a.evidence / "versions.json").read_text()),

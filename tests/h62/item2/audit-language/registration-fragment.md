@@ -23,5 +23,4 @@ Proposed language-area fragment rows, pending owner approval:
 | `tests/h62/item2/audit-language/IndependentWitness.lean` | Simultaneous lattice/arithmetic hypotheses and actual overflow-boundary client. |
 | `tests/h62/item2/audit-language/AbiEntryWitness.lean` | Actual nonzero boolean decode, failure/fuel/allocation boundaries and error-only decoder controls. |
 | `tests/h62/item2/audit-language/FullTelescopeWitness.lean` | Fifteen kernel-checked complete telescope certificates, exact association receipts and mismatch refusal. |
-
 | `tests/h62/item2/audit-language/FixedPointWitness.lean` | All 36 reference-semantics statements with leading arguments: full imported telescope certificates, intrinsic range/overflow/divisor premises and mismatch refusal. |
