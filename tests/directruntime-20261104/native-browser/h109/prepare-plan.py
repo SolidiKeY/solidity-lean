@@ -19,7 +19,8 @@ SLOW = tuple("Solidity.Examples." + suffix for suffix in (
     "DecisionAPF", "DecisionBlocks", "DecisionGapCore", "DecisionGapHashes",
     "DecisionGapKInt", "DecisionGaps", "DecisionLedger", "DecisionOperators",
     "DecisionRefutations", "DecisionResidue", "DecisionStorageArrays",
-    "DecisionThreeKindCoverage", "Tactics.OpenLoops", "Tactics.RevertData"))
+    "DecisionThreeKindCoverage", "Tactics.OpenLoops", "Tactics.OpenLoops.RowsNine",
+    "Tactics.RevertData"))
 
 
 def git(root, *args):
@@ -119,10 +120,16 @@ def prepare(root, head, context="lane-end"):
             "sourceInventory": inventory, "slowModules": list(SLOW),
             "rootGate": "SoliditySlowExamples", "executionContext": context,
             "measurementDeadlineSeconds": 300,
+            "slowLibraryDeadlineSeconds": 600 if context == "ci" else 300,
+            "slowModuleDeadlineSeconds": {
+                module: 600 if context == "ci" else 300
+                for module in SLOW},
             "derived17ReplayDeadlineSeconds": 600 if context == "ci" else 300,
-            "deadlinePolicy": "H55 module-time maximum remains300seconds. H116600seconds applies "
-                              "only to the cumulative original Derived17 replay in CI; no general "
-                              "H109 or VM increase. Context is a plan input, not CI attestation.",
+            "deadlinePolicy": "Default/VM module maximum remains300seconds. Coordinator explicitly "
+                              "extends600seconds to the H109 slow library in CI; default/VM STOPs remain. "
+                              "Original Derived17 CI600/local300 replay scope is retained. "
+                              "The library deadline is not multiplied by its15members. "
+                              "No non-slow module/VM increase. Context is a plan input, not CI attestation.",
             "workerPolicy": {"memoryMaxBytes": 12884901888, "swapMaxBytes": 0,
                              "leanThreads": 1, "lakeJobs": 1, "outerReserveBytes": 4294967296},
             "preparerSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
