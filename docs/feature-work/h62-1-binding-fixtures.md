@@ -211,3 +211,21 @@ module map was edited and no production registration is claimed. All four
 fixture-extraction checkpoints, original declaration/case accounting, full
 before/after extraction timings and acceptance remain open. Shared translator
 H90/importer obligations and native/browser stack/cost holds also remain open.
+
+
+### Published-master replay scope
+
+Fixture source identity remains pinned independently to a10b60f23315 and its
+P12 SHA. Edit-scope checking now delegates to the existing consolidated Shared
+ownership audit at its explicitly recorded immutable publication, after
+comparing every non-publication metadata field with the original authorized
+scope. Published master history therefore is not mistaken for new unowned edits.
+No allowlist expands; original P12 bytes still must match. The helper passed on
+published80c156bf13d1 with the active Shared portability work present.
+
+The historical `reference-fixture-manifest.json` records source pins at
+16c7ecb40198 explicitly and uses a repository-relative evidence locator. Its
+17,454-byte evidence archive remains off Git under H44, unchanged at SHA256
+`cdac20d72b1e6aeabb26072ec3d1d815b7dfe5966f7a72295b92628da1d36d31`.
+Current helper checks are recorded separately by portable-validation-manifest.json;
+none of these metadata changes closes an extraction checkpoint.
