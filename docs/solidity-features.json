@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "auditedOn": "2026-10-25",
   "upstream": {
     "repository": "argotorg/solidity",
@@ -129,7 +129,8 @@
         "tests/solc/Shadowing.sol",
         "scripts/source-shadowing.test.mjs",
         "docs/feature-work/dafny-verification.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "comments",
@@ -152,7 +153,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "numericLiterals",
@@ -175,7 +177,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "booleanLiterals",
@@ -192,7 +195,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "stringLiterals",
@@ -215,7 +219,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "unicodeLiterals",
@@ -238,7 +243,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "hexLiterals",
@@ -261,7 +267,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "addressLiterals",
@@ -284,7 +291,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "etherUnits",
@@ -301,7 +309,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "timeUnits",
@@ -318,7 +327,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "pragmaVersion",
@@ -341,7 +351,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "pragmaAbicoder",
@@ -370,7 +381,8 @@
         "outcome": "twoPipelines",
         "record": "docs/solidity-scope.md#second-round-2026-10-29",
         "note": "The legacy pipeline takes the pragma coder (v1 or v2); the via-IR pipeline takes coder v2."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "pragmaOther",
@@ -392,7 +404,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "sourceUnits",
@@ -414,7 +427,8 @@
         "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
         "scripts/source-units.test.mjs",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "imports",
@@ -436,7 +450,8 @@
         "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
         "scripts/source-units.test.mjs",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "contracts",
@@ -453,7 +468,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "interfaces",
@@ -470,7 +486,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "libraries",
@@ -492,7 +509,8 @@
         "Solidity/Examples/Tactics/LibraryTrySource.lean",
         "Solidity/Examples/Tactics/LibraryTryControls.lean",
         "Solidity/Examples/Tactics/LibraryTrySourceIR.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "inheritance",
@@ -509,7 +527,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "overrideDeclarations",
@@ -531,7 +550,8 @@
         "tests/upstream/EntryPointsAdmission.lean",
         "scripts/entry-points-left.test.mjs",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "functions",
@@ -549,7 +569,8 @@
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean",
         "tests/solc/DeclarationMetadata.sol"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "freeFunctions",
@@ -566,7 +587,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "constructors",
@@ -583,7 +605,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "modifiers",
@@ -600,7 +623,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "modifierPlaceholder",
@@ -625,7 +649,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "receiveFunction",
@@ -647,7 +672,8 @@
         "tests/upstream/EntryPointsAdmission.lean",
         "scripts/entry-points-left.test.mjs",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "fallbackFunction",
@@ -669,7 +695,8 @@
         "tests/upstream/EntryPointsAdmission.lean",
         "scripts/entry-points-left.test.mjs",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "visibility",
@@ -686,7 +713,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "stateMutability",
@@ -703,7 +731,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "stateVariables",
@@ -720,7 +749,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "constants",
@@ -737,7 +767,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "immutables",
@@ -754,7 +785,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "publicGetters",
@@ -778,7 +810,8 @@
         "tests/upstream/EntryPointsAdmission.lean",
         "scripts/entry-points-left.test.mjs",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "structDeclarations",
@@ -795,7 +828,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "enumDeclarations",
@@ -812,7 +846,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "valueTypeDeclarations",
@@ -829,7 +864,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "errorDeclarations",
@@ -851,7 +887,8 @@
         "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
         "scripts/source-units.test.mjs",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "eventDeclarations",
@@ -868,7 +905,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Contract.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "usingFor",
@@ -890,7 +928,8 @@
         "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
         "scripts/source-units.test.mjs",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "operatorAliases",
@@ -909,7 +948,8 @@
         "Solidity/Frontend/SolcJson/Body.lean",
         "Solidity/Examples/Tactics/OperatorAliasesImport.lean",
         "docs/feature-work/numeric-operators.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "boolType",
@@ -926,7 +966,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "integerTypes",
@@ -943,7 +984,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "addressTypes",
@@ -960,7 +1002,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "fixedBytesTypes",
@@ -977,7 +1020,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "dynamicBytesType",
@@ -994,7 +1038,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "stringType",
@@ -1011,7 +1056,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "dynamicArrays",
@@ -1028,7 +1074,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "fixedArrays",
@@ -1045,7 +1092,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "mappings",
@@ -1062,7 +1110,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "structTypes",
@@ -1079,7 +1128,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "enumTypes",
@@ -1096,7 +1146,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "valueTypes",
@@ -1113,7 +1164,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "internalFunctionTypes",
@@ -1130,7 +1182,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "externalFunctionTypes",
@@ -1154,7 +1207,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "tupleTypes",
@@ -1171,7 +1225,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "storageLocation",
@@ -1188,7 +1243,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "memoryLocation",
@@ -1205,7 +1261,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "calldataLocation",
@@ -1222,7 +1279,8 @@
       ],
       "localEvidence": [
         "Solidity/AST.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "recursiveTypes",
@@ -1241,7 +1299,8 @@
         "Solidity/TypeGraph.lean",
         "Solidity/Semantics/RecursiveStorage.lean",
         "docs/feature-work/recursive-types.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "names",
@@ -1258,7 +1317,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "parentheses",
@@ -1275,7 +1335,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "tupleExpressions",
@@ -1292,7 +1353,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "inlineArrays",
@@ -1314,7 +1376,8 @@
         "Solidity/Examples/Tactics/Aggregates.lean",
         "Solidity/Examples/Tactics/AggregatesImport.lean",
         "docs/feature-work/aggregates.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "memberAccess",
@@ -1331,7 +1394,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "indexAccess",
@@ -1348,7 +1412,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "rangeAccess",
@@ -1370,7 +1435,8 @@
         "Solidity/Syntax/Elab/SliceCopy.lean",
         "Solidity/Examples/Tactics/SliceReferenceCopies.lean",
         "docs/calldata-slice-copies.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "unaryArithmetic",
@@ -1387,7 +1453,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "increments",
@@ -1404,7 +1471,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "deleteExpression",
@@ -1421,7 +1489,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "arithmetic",
@@ -1438,7 +1507,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "bitwise",
@@ -1455,7 +1525,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "shifts",
@@ -1472,7 +1543,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "comparisons",
@@ -1489,7 +1561,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "shortCircuit",
@@ -1506,7 +1579,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "conditional",
@@ -1523,7 +1597,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "assignment",
@@ -1540,7 +1615,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "compoundAssignment",
@@ -1557,7 +1633,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "explicitConversions",
@@ -1574,7 +1651,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "implicitConversions",
@@ -1591,7 +1669,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "structConstruction",
@@ -1608,7 +1687,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "namedArguments",
@@ -1625,7 +1705,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "newMemory",
@@ -1642,7 +1723,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "functionCalls",
@@ -1659,7 +1741,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "callOptions",
@@ -1676,7 +1759,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "metaTypeExpression",
@@ -1693,7 +1777,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "blocks",
@@ -1714,7 +1799,8 @@
         "tests/solc/Shadowing.sol",
         "scripts/source-shadowing.test.mjs",
         "docs/feature-work/dafny-verification.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "uncheckedBlock",
@@ -1731,7 +1817,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "variableDeclarations",
@@ -1748,7 +1835,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "expressionStatements",
@@ -1765,7 +1853,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "ifStatement",
@@ -1782,7 +1871,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "whileStatement",
@@ -1803,7 +1893,8 @@
         "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
         "tests/solc/QuantifiedDiamond.sol",
         "docs/loops.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "forStatement",
@@ -1824,7 +1915,8 @@
         "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
         "tests/solc/QuantifiedDiamond.sol",
         "docs/loops.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "doWhileStatement",
@@ -1841,7 +1933,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "breakStatement",
@@ -1858,7 +1951,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "continueStatement",
@@ -1875,7 +1969,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "returnStatement",
@@ -1892,7 +1987,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "tryStatement",
@@ -1921,7 +2017,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "catchClauses",
@@ -1946,7 +2043,8 @@
         "Solidity/Semantics/RevertData.lean",
         "Solidity/Calculus/DataIn.lean",
         "Solidity/Examples/Tactics/TryConditions.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "revertStatement",
@@ -1963,7 +2061,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "emitStatement",
@@ -1980,7 +2079,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "canonicalRethrow",
@@ -2004,7 +2104,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "assertBuiltin",
@@ -2021,7 +2122,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "requireBuiltin",
@@ -2038,7 +2140,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "revertBuiltin",
@@ -2055,7 +2158,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "addmodBuiltin",
@@ -2076,7 +2180,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "mulmodBuiltin",
@@ -2097,7 +2202,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "keccakBuiltin",
@@ -2124,7 +2230,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Opaque hash approved; a fixed parameter instantiated by keccak, not an environment input. Collisions: per-run premise plus probability bound (G01 Q3)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "sha256Builtin",
@@ -2151,7 +2258,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Opaque hash approved as a fixed function."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "ripemd160Builtin",
@@ -2178,7 +2286,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Opaque hash approved as a fixed function."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "ecrecoverBuiltin",
@@ -2208,7 +2317,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Opaque ecrecover approved as a fixed function."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "erc7201Builtin",
@@ -2237,7 +2347,8 @@
         "docs/feature-work/abi-hashes.md",
         "Solidity/ERC7201.lean",
         "Solidity/Syntax/Elab/Lower.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "wrapUnwrap",
@@ -2254,7 +2365,8 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "bytesConcat",
@@ -2274,7 +2386,8 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "stringConcat",
@@ -2294,7 +2407,8 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "msgSender",
@@ -2318,7 +2432,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Universally quantified input approved."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "msgValue",
@@ -2342,7 +2457,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Universally quantified input approved; bounded by the sender ledger balance (follow-up: sender funds)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "thisAddress",
@@ -2366,7 +2482,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Approved; this comes from deployment."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "addressBalance",
@@ -2390,7 +2507,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Approved as a quantified input; the own balance follows the ledger."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockTimestamp",
@@ -2414,7 +2532,8 @@
         "outcome": "approved",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Universally quantified input approved."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockCoinbase",
@@ -2435,7 +2554,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockDifficulty",
@@ -2456,7 +2576,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockPrevrandao",
@@ -2477,7 +2598,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockNumber",
@@ -2498,7 +2620,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockGaslimit",
@@ -2519,7 +2642,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockChainid",
@@ -2540,7 +2664,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockBasefee",
@@ -2561,7 +2686,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockBlobbasefee",
@@ -2582,7 +2708,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockSlotnum",
@@ -2603,7 +2730,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "txOrigin",
@@ -2624,7 +2752,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "txGasprice",
@@ -2645,7 +2774,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blockhashBuiltin",
@@ -2666,7 +2796,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "blobhashBuiltin",
@@ -2687,7 +2818,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "internalCalls",
@@ -2704,7 +2836,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "recursiveCalls",
@@ -2721,7 +2854,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "externalTypedCalls",
@@ -2745,7 +2879,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "externalSelfCalls",
@@ -2762,7 +2897,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "extensionCalls",
@@ -2779,7 +2915,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "functionValues",
@@ -2796,7 +2933,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "valueOption",
@@ -2813,7 +2951,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "sendTransfer",
@@ -2852,7 +2991,8 @@
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Payment-acceptance boolean not approved: replace it or propose it again. Candidate per G04 Q3: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G47)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "emptyDataValueCall",
@@ -2876,7 +3016,8 @@
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Payment-acceptance boolean not approved: replace it or propose it again. Candidate per G04 Q3: an untyped recipient may accept or refuse each payment depending on history; typed recipients run their own code (G47)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "newContract",
@@ -2903,7 +3044,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "creationTry",
@@ -2934,7 +3076,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "callbackSemantics",
@@ -2967,7 +3110,8 @@
         "outcome": "provedSpecialCase",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "The no-callback reading must become a proved special case of history-dependent callees with unbounded reentrancy (G01 Q4), not a premise; not yet proved."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "externalLibraryCalls",
@@ -2994,7 +3138,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "abiEncode",
@@ -3014,7 +3159,8 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "abiEncodePacked",
@@ -3034,7 +3180,8 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "abiEncodeWithSelector",
@@ -3055,7 +3202,8 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "abiEncodeWithSignature",
@@ -3076,7 +3224,8 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "abiEncodeCall",
@@ -3097,7 +3246,8 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "abiDecode",
@@ -3117,7 +3267,8 @@
         "Solidity/Examples/Tactics/AbiFeatures.lean",
         "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
         "docs/feature-work/abi-hashes.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "typeBounds",
@@ -3134,7 +3285,8 @@
       ],
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Body.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "typeName",
@@ -3154,7 +3306,8 @@
         "Solidity/Examples/Tactics/DeclarationMetadata.lean",
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "interfaceId",
@@ -3174,7 +3327,8 @@
         "Solidity/Examples/Tactics/DeclarationMetadata.lean",
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "functionSelector",
@@ -3193,7 +3347,8 @@
         "Solidity/Syntax/Elab/Values.lean",
         "Solidity/Frontend/SolcJson/Contract.lean",
         "tests/solc/DeclarationMetadata.sol"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "functionAddress",
@@ -3212,7 +3367,8 @@
         "Solidity/Syntax/Elab/Values.lean",
         "Solidity/Frontend/SolcJson/Contract.lean",
         "tests/solc/DeclarationMetadata.sol"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "errorEventSelector",
@@ -3232,7 +3388,8 @@
         "Solidity/Examples/Tactics/DeclarationMetadata.lean",
         "tests/solc/DeclarationMetadata.sol",
         "docs/feature-work/declarations-metadata.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "arrayLength",
@@ -3249,7 +3406,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "arrayPush",
@@ -3266,7 +3424,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "arrayPushReference",
@@ -3283,7 +3442,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "arrayPop",
@@ -3300,7 +3460,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "storageCopy",
@@ -3317,7 +3478,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "memoryAliasing",
@@ -3334,7 +3496,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "storageAliasing",
@@ -3351,7 +3514,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "deleteMappingTails",
@@ -3368,7 +3532,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "danglingReferences",
@@ -3385,7 +3550,8 @@
       ],
       "localEvidence": [
         "Solidity/Semantics/Storage/Ops.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "transientState",
@@ -3413,7 +3579,8 @@
         "Solidity/Frontend/WorldImport.lean",
         "Solidity/Examples/Tactics/TransientWorldSource.lean",
         "scripts/check-transient-world-vectors.mjs"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "checkedArithmetic",
@@ -3430,7 +3597,8 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "uncheckedArithmetic",
@@ -3447,7 +3615,8 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "evaluationOrder",
@@ -3471,7 +3640,8 @@
         "outcome": "twoPipelines",
         "record": "docs/solidity-scope.md#second-round-2026-10-29",
         "note": "Settings are solc's two pipelines only: the legacy order with the pragma coder, and the via-IR order with coder v2; the other six EvalOrder flag combinations are not in the profile."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "exactConstants",
@@ -3494,7 +3664,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "defaultInitialization",
@@ -3511,7 +3682,8 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "referenceCopyRules",
@@ -3530,7 +3702,8 @@
         "docs/solc-alignment.md",
         "Solidity/Examples/Tactics/Aggregates.lean",
         "docs/feature-work/aggregates.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "panicCodes",
@@ -3550,7 +3723,8 @@
         "docs/feature-work/calls-exceptions.md",
         "Solidity/Examples/Tactics/SelfPowerData.lean",
         "tests/solc/SelfPowerData.sol"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "revertPayloads",
@@ -3570,7 +3744,8 @@
         "docs/feature-work/calls-exceptions.md",
         "Solidity/Examples/Tactics/SelfPowerData.lean",
         "tests/solc/SelfPowerData.sol"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "rollback",
@@ -3587,7 +3762,8 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "abiEntryValidation",
@@ -3615,7 +3791,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "constructorLifetime",
@@ -3639,7 +3816,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "nonpayableEntry",
@@ -3656,7 +3834,8 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "staticCallRestriction",
@@ -3680,7 +3859,8 @@
         "outcome": "followsG01",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "No separate approval: this row follows the G01 Q4 environment and the G01 Q8 system boundary (every contract and linked library of the input is compiled)."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "termination",
@@ -3697,7 +3877,8 @@
       ],
       "localEvidence": [
         "docs/solc-alignment.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "worldAssumptions",
@@ -3721,7 +3902,8 @@
         "outcome": "replace",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Not approved: replace it or propose it again. The G01 Q4 environment (history-dependent callees) is the candidate replacement, not part of this decision."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "typeValidation",
@@ -3744,7 +3926,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "featureDetection",
@@ -3766,7 +3949,8 @@
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
         "docs/feature-work/source-admission.md"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "inlineAssembly",
@@ -3787,7 +3971,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "gasleft",
@@ -3808,7 +3993,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "gasOption",
@@ -3829,7 +4015,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "rawCalldata",
@@ -3850,7 +4037,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "rawReturndata",
@@ -3871,7 +4059,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "lowLevelCall",
@@ -3892,7 +4081,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "delegatecall",
@@ -3913,7 +4103,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "lowLevelStaticcall",
@@ -3934,7 +4125,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "selfdestruct",
@@ -3955,7 +4147,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "create2Salt",
@@ -3976,7 +4169,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "addressCode",
@@ -3997,7 +4191,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "addressCodehash",
@@ -4018,7 +4213,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "creationCode",
@@ -4037,7 +4233,8 @@
         "Solidity/Frontend/Source.lean",
         "Solidity/Frontend/SolcJson/Body.lean",
         "scripts/solc-code.mjs"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "runtimeCode",
@@ -4056,7 +4253,8 @@
         "Solidity/Frontend/Source.lean",
         "Solidity/Frontend/SolcJson/Body.lean",
         "scripts/solc-code.mjs"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "logicalStorageBase",
@@ -4074,7 +4272,8 @@
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Admission.lean",
         "Solidity/Semantics/Storage/Anon.lean"
-      ]
+      ],
+      "theorems": []
     },
     {
       "id": "storageLayout",
@@ -4095,7 +4294,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "memoryLayout",
@@ -4116,7 +4316,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "transientLayout",
@@ -4137,7 +4338,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "eventLog",
@@ -4158,7 +4360,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "machineResources",
@@ -4179,7 +4382,8 @@
         "question": "G00 Q1",
         "outcome": "approvedExclusion",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29"
-      }
+      },
+      "theorems": []
     },
     {
       "id": "fixedPoint",
@@ -4201,7 +4405,8 @@
         "outcome": "fullSupport",
         "record": "docs/solidity-scope.md#user-decisions-2026-10-29",
         "note": "Moved from upstream into the profile; current is missing, not an implementation claim."
-      }
+      },
+      "theorems": []
     },
     {
       "id": "removedAliases",
@@ -4216,7 +4421,8 @@
           "line": 3879
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": []
     },
     {
       "id": "unsignedRightShift",
@@ -4231,7 +4437,8 @@
           "line": 575
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": []
     },
     {
       "id": "removedUnits",
@@ -4246,7 +4453,8 @@
           "line": 3985
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": []
     },
     {
       "id": "reservedKeywords",
@@ -4261,7 +4469,8 @@
           "line": 6
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": []
     },
     {
       "id": "invalidLexemes",
@@ -4276,7 +4485,8 @@
           "line": 232
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": []
     },
     {
       "id": "removedGenericSolidity",
@@ -4291,7 +4501,8 @@
           "line": 46
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": []
     },
     {
       "id": "invalidModifierBody",
@@ -4310,7 +4521,8 @@
           "line": 402
         }
       ],
-      "localEvidence": []
+      "localEvidence": [],
+      "theorems": []
     }
   ]
 }

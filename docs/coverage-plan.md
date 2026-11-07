@@ -37,6 +37,24 @@ must be proved. Hash collisions cannot be dismissed by assuming global
 injectivity. Existing cryptographic/environment premises must be stated exactly;
 new premises require approval and cannot conceal a representation defect.
 
+### Manifest citation schema
+
+Each feature row in schema version 2 retains its existing fields and adds a
+`theorems` list. An entry has `name` (fully qualified Lean declaration),
+`module` (Lean import module), `class` (`a`, `b`, `c`, or `d`), `premises`
+(a list of named premises, required and nonempty for class b), and `direction`
+(`model` or `model-to-solc`). Classes follow F8: a is kernel-proved against
+repository semantics; b is proved modulo named premises; c is finite tested
+evidence; d is definition/table evidence. A resolvable declaration alone does
+not establish relevance, coverage, or agreement with solc. Empty lists record
+an uncited row, never proof of absence. The planned checker must reject a
+`present` row with no citation or only class d, and resolve names through an
+elaborated Lean environment rather than source-text matching.
+
+Implementation is pending the reader compatibility dependency recorded in
+[the E3 lane](feature-work/e3-feature-citations.md). No citation coverage is
+claimed by this schema-only checkpoint.
+
 ## Final proof obligations
 
 These are required artifacts, not existing theorem names. G01 fixes their
