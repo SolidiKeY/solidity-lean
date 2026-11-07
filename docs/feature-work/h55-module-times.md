@@ -1371,3 +1371,19 @@ proofs. Result JSON, plugin artifacts and logs require owned writable state.
 Independent read-only finder and skeptic reviews identified the temporary
 directory and rejection success condition, which were added to the records.
 No Lean, server, build, production timing or H56 acceptance is inferred.
+
+## Source relation control candidates
+
+`source_relation_controls.py` records four supplied standalone source-relation
+rows with source hashes. Generic ContextMap transport assumes full pointwise
+equivalence; helper compatibility does not migrate producers; inference
+membership does not claim a selected derivation identity; existing relation
+roundtrips do not establish world or execution correspondence. The supplied
+census may be a subset and current inputs and outcomes are unverified.
+
+Historical standalone checks and a generic bounded runner are source-backed
+references, not current acceptance. The runner's default 600-second timeout
+does not establish the assigned 300-second gate. It takes a writer lock and
+may create Docker and evidence artifacts; no run was attempted here.
+Independent read-only finder and skeptic reviews identified that deadline
+distinction. No Lean server, build, current proof or H56 measurement follows.
