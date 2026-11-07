@@ -179,6 +179,7 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
       intro c _ hc hcspace
       have he : c = cursor := Word.val.inj (hc.free.cell.symm.trans hal.free.cell)
       subst c
+      change Objects.AllocatorRepr _ _ _ ⟨cursor.val + ((n.evalT σ).word.val + 1), _⟩ _
       simpa only [Nat.add_assoc] using hn'.2.2.2.1
   | reprimitive F p dst n hb hn =>
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
@@ -196,6 +197,7 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
       intro c _ hc hcspace
       have he : c = cursor := Word.val.inj (hc.free.cell.symm.trans hal.free.cell)
       subst c
+      change Objects.AllocatorRepr _ _ _ ⟨cursor.val + ((n.evalT σ).word.val + 1), _⟩ _
       simpa only [Nat.add_assoc] using hn'.2.2.2.1
   | nested F E x n hb hns hn hm =>
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
@@ -215,7 +217,8 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
       intro c _ hc hcspace
       have he : c = cursor := Word.val.inj (hc.free.cell.symm.trans hal.free.cell)
       subst c
-      simpa only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt, arrayCost, if_true, Nat.add_assoc] using hal'
+      simpa only [State.adopt, State.push, State.setLocal, allocationCostStmt, hasAllocationStmt,
+        rawAllocationCostStmt, arrayCost, ite_true, Nat.add_assoc] using hal'
   | renested F E dst n hb hns hn hm =>
     rcases ha with hz | ⟨_, cursor, hal, hspace⟩
     · change (n.evalT σ).word.val + 1 + (n.evalT σ).word.val = 0 at hz
@@ -231,7 +234,8 @@ theorem StmtFrag.correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {G : Frag
       intro c _ hc hcspace
       have he : c = cursor := Word.val.inj (hc.free.cell.symm.trans hal.free.cell)
       subst c
-      simpa only [allocationCostStmt, hasAllocationStmt, rawAllocationCostStmt, arrayCost, if_true, Nat.add_assoc] using hal'
+      simpa only [State.adopt, State.push, State.setLocal, allocationCostStmt, hasAllocationStmt,
+        rawAllocationCostStmt, arrayCost, ite_true, Nat.add_assoc] using hal'
   | newEmpty F E x hn hm hb =>
     have hcost : allocationCostStmt (.declMem (.array E) x (some (.newArr (.lit 0 rfl) hn)) rfl hm) σ = 1 := by
       change arrayCost E 0 = 1

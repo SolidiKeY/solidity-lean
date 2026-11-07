@@ -2,6 +2,9 @@ import Solidity.Evm.MemoryDefaultArraySource
 
 /-! Late adoption of a typed dynamic or fixed reference parent after its actual
 source children have been copied and their target pointers stored. -/
+-- Retain the existing typed parent-adoption proof reductions on Lean 4.35.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory.Objects
 
 theorem objectCells_array {H : HTy} {A : RefTy} {E : Ty}

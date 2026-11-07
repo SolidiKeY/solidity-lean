@@ -59,8 +59,9 @@ def DefaultBuilder.fixedReference {R : RefTy} {hm : (Ty.ref R).mapFree = true} {
       have heq : cc.val + n * count = cursor.val + (max 1 n + n * count) := by
         change cursor.val + max 1 n + n * count = cursor.val + (max 1 n + n * count)
         omega
-      simpa only [heq] using hh
-    rw [DefaultBuildResult, referenceFixedCopy_source hp R n hm]
+      simpa only [referenceFixedCopy, Grown.alloc, g, o, base', heq] using hh
+    unfold DefaultBuildResult
+    rw [referenceFixedCopy_source hp R n hm]
     refine ⟨base', m', ?_, haf, upd_same _ _ _, ?_, ?_, ?_, ?_⟩
     · rw [fixedDefaultCode, run_append_ok (fixedDefaultPrefix_run m cursor n ha.free.cell),
         defaultLoop_exit hloop]

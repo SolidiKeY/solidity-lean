@@ -39,7 +39,7 @@ theorem referenceArray_correct {R : RefTy} {hm : (Ty.ref R).mapFree = true} {cou
       (by
         intro Q q
         have he : max 1 (1 + size.val) = size.val + 1 := by omega
-        simpa only [header, he] using hg₁ q)
+        simpa only [g, header, he, Nat.add_assoc] using hg₁ q)
       (by
         have he : max 1 (1 + size.val) = size.val + 1 := by omega
         simp only [header, he]
@@ -55,7 +55,7 @@ theorem referenceArray_correct {R : RefTy} {hm : (Ty.ref R).mapFree = true} {cou
     have heq : cc.val + size.val * count = cursor.val + (size.val + 1 + size.val * count) := by
       change cursor.val + size.val + 1 + size.val * count = cursor.val + (size.val + 1 + size.val * count)
       omega
-    simpa only [heq] using hh
+    simpa only [referenceArrayCopy, Grown.alloc, g, o, base', heq] using hh
   refine ⟨base', m', ?_, haf, upd_same _ _ _, ?_, ?_, ?_, ?_⟩
   · rw [referenceArrayCode, run_append_ok (nestedPrefix_run m cursor size ha.free.cell),
       defaultLoop_exit hloop]
