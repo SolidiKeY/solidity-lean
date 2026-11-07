@@ -1218,3 +1218,37 @@ All72 tests, trust/reachability, roots/fragments, documentation and whitespace
 checks pass. Existing28scoped global pin registrations remain coordinator work;
 no tracked Lean/inventory/layer input changed. Published107allowance layer
 policy and historic failures are preserved, without semantic/full-gate claims.
+
+
+## Sixty-eight primitive guard hypothesis domains
+
+Master254c60df was fetched/inspected and already adopted. Same renderer/fixture
+now add UnsignedGate12publicmethods+2certificate fields, SignedGate6+2 and
+BytesGate4+2:28new domains,68total across7families/14frozenproducerleaves.
+Shared byte-pinned elaborator unchanged; frozen c6f550 equality and lexical
+exactly-once checks expanded to this explicit public subset. Private helpers,
+definitions, other modules and general census completeness remain excluded.
+No producer/interface/statement/premise/exclusion/budget/axiom-set change.
+
+Unsigned rejection domains DERIVE actual selected-code rejection using the
+existing rejected_iff theorem, rather than assume it. One matching dirty word256,
+constant-word machine and30zero bytes followed by1,0 supply load identity at0;
+uint8bound256, boolbound2 and enum-bound1 actually refuse that word. Other
+correspondence domains use the empty zero-padded input at nonzero offset17.
+Typed bits/sizes/program/self/result/frame/proof binders are retained. Only
+conclusions become True; none of this asserts original outcomes, native loading,
+entry-span validity, Source admission, gas/fork, full census or ledger acceptance.
+
+Accepted program ExactPrimitiveDomains passes first kernel attempt28.508s,
+empty diagnostics,68guards (4none,25propext,39standardtrio),2classifierrefusals;
+both monitorsPASS. An earlier ExactGateDomains render with a planned uint0
+fixture was never executed and is explicitly unaccepted; final code usesuint8.
+No modulehere>60s, historical61.994s receipt retained. Same original generic
+epoch/deadline01:11:01.069665→05:11:01.069665UTC, no reset/prerequisite build/
+PowerBounds retry/heartbeat/trust increase. No RUNTIME_GATE_PASS or performance
+acceptance. Reviewed fixture remains not regex-sandboxed; explicit native check
+required beyond72Python tests and six-file roster. Generated artifacts offGit.
+Full703/190core/37Bridge, private/source/type/inherited joins, owner/globalledger,
+Source/native/selector/gas/fork, Bridge/package/performance and producer waits
+remain open; no global uncovered counts changed.
+Evidence: /workspace/parallel-20261103/executable-bytecode/exact-primitive-guard-domains/.

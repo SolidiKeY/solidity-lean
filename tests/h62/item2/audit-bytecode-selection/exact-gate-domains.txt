@@ -367,3 +367,243 @@ theorem binding_certificate_entry_rejection_domain :
 
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.binding_certificate_entry_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms binding_certificate_entry_rejection_domain
+
+private def dirtyWord : Fin W := wmod 256
+private def dirtyMachine : Machine := {Machine.init with mem := fun _ => .val dirtyWord}
+private def dirtyInput : Solidity.AbiEntry.Input := {data := List.replicate 30 (0 : UInt8) ++ [1, 0], free := 0}
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.admitted := by
+  exact ⟨sampleContract, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_admitted_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.selected := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.run_program := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_run_program_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.executed := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.UnsignedGateCertificate.selected := by
+  exact ⟨UnsignedGate.program, UnsignedGate.certificate, sampleContract, 7, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_certificate_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.UnsignedGateCertificate.executed := by
+  exact ⟨UnsignedGate.program, UnsignedGate.certificate, sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_certificate_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_rejected_iff_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.rejected_iff := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_rejected_iff_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_rejected_iff_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_condition_code_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.condition_code := by
+  exact ⟨sampleContract, 7, sampleWord, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_condition_code_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_condition_code_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_enum_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.enum_correspondence := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_enum_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_enum_correspondence_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_uint_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.uint_correspondence := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, UnsignedGate.compiled sampleContract 7 (2^8) sampleLabel, UnsignedGate.selected sampleContract 7 (2^8) sampleLabel, sampleMachine, sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_uint_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_uint_correspondence_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_bool_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.bool_correspondence := by
+  exact ⟨sampleContract, 7, sampleLabel, UnsignedGate.compiled sampleContract 7 2 sampleLabel, UnsignedGate.selected sampleContract 7 2 sampleLabel, sampleMachine, sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_bool_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_bool_correspondence_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.admitted := by
+  exact ⟨sampleContract, 8, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_admitted_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.selected := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.run_program := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_run_program_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.executed := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, SignedGate.compiled sampleContract 7 8 sampleLabel, SignedGate.selected sampleContract 7 8 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SignedGateCertificate.selected := by
+  exact ⟨SignedGate.program, SignedGate.certificate, sampleContract, 7, 8, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_certificate_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.SignedGateCertificate.executed := by
+  exact ⟨SignedGate.program, SignedGate.certificate, sampleContract, 7, 8, sampleLabel, SignedGate.compiled sampleContract 7 8 sampleLabel, SignedGate.selected sampleContract 7 8 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_certificate_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_rejected_iff_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.rejected_iff := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, SignedGate.compiled sampleContract 7 8 sampleLabel, SignedGate.selected sampleContract 7 8 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_rejected_iff_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_rejected_iff_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem signed_correspondence_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.SignedGate.correspondence := by
+  exact ⟨sampleContract, 7, 8, sampleLabel, SignedGate.compiled sampleContract 7 8 sampleLabel, SignedGate.selected sampleContract 7 8 sampleLabel, sampleMachine, sampleWord, rfl, sampleInput, 17, 0, 0, by decide, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.signed_correspondence_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms signed_correspondence_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_admitted_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BytesGate.admitted := by
+  exact ⟨sampleContract, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_admitted_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_admitted_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BytesGate.selected := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_selected_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_run_program_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BytesGate.run_program := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_run_program_domain' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_run_program_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.BytesGate.executed := by
+  exact ⟨sampleContract, 7, 1, sampleLabel, BytesGate.compiled sampleContract 7 1 sampleLabel, BytesGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_certificate_selected_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BytesGateCertificate.selected := by
+  exact ⟨BytesGate.program, BytesGate.certificate, sampleContract, 7, 1, sampleLabel, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_certificate_selected_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_certificate_selected_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem bytes_certificate_executed_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.BytesGateCertificate.executed := by
+  exact ⟨BytesGate.program, BytesGate.certificate, sampleContract, 7, 1, sampleLabel, BytesGate.compiled sampleContract 7 1 sampleLabel, BytesGate.selected sampleContract 7 1 sampleLabel, sampleMachine, sampleWord, rfl, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.bytes_certificate_executed_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms bytes_certificate_executed_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_enum_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.enum_rejection := by
+  have rejected : Solidity.Evm.run (UnsignedGate.compiled sampleContract 7 1 sampleLabel).code dirtyMachine = .revert :=
+    (UnsignedGate.rejected_iff sampleContract 7 1 sampleLabel _ (UnsignedGate.selected sampleContract 7 1 sampleLabel)
+      dirtyMachine dirtyWord rfl).2 (by decide)
+  exact ⟨sampleContract, 7, 1, sampleLabel, UnsignedGate.compiled sampleContract 7 1 sampleLabel, UnsignedGate.selected sampleContract 7 1 sampleLabel, dirtyMachine, dirtyWord, rfl,
+    dirtyInput, 0, 0, 0, by decide, rejected, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_enum_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_enum_rejection_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_uint_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.uint_rejection := by
+  have rejected : Solidity.Evm.run (UnsignedGate.compiled sampleContract 7 (2^8) sampleLabel).code dirtyMachine = .revert :=
+    (UnsignedGate.rejected_iff sampleContract 7 (2^8) sampleLabel _ (UnsignedGate.selected sampleContract 7 (2^8) sampleLabel)
+      dirtyMachine dirtyWord rfl).2 (by decide)
+  exact ⟨sampleContract, 7, 8, sampleLabel, UnsignedGate.compiled sampleContract 7 (2^8) sampleLabel, UnsignedGate.selected sampleContract 7 (2^8) sampleLabel, dirtyMachine, dirtyWord, rfl,
+    dirtyInput, 0, 0, 0, by decide, rejected, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_uint_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_uint_rejection_domain
+
+/-- All raw binders retained; only the original conclusion becomes True. -/
+theorem unsigned_bool_rejection_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.UnsignedGate.bool_rejection := by
+  have rejected : Solidity.Evm.run (UnsignedGate.compiled sampleContract 7 2 sampleLabel).code dirtyMachine = .revert :=
+    (UnsignedGate.rejected_iff sampleContract 7 2 sampleLabel _ (UnsignedGate.selected sampleContract 7 2 sampleLabel)
+      dirtyMachine dirtyWord rfl).2 (by decide)
+  exact ⟨sampleContract, 7, sampleLabel, UnsignedGate.compiled sampleContract 7 2 sampleLabel, UnsignedGate.selected sampleContract 7 2 sampleLabel, dirtyMachine, dirtyWord, rfl,
+    dirtyInput, 0, 0, 0, by decide, rejected, True.intro⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.unsigned_bool_rejection_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unsigned_bool_rejection_domain

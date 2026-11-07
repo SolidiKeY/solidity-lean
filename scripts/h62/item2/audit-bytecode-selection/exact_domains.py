@@ -41,8 +41,17 @@ for method in ("admitted", "selected", "code", "run_program", "executed", "entry
 for field in ("selected", "executed", "entry_rejection"):
     TARGETS["binding_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.BoolBindingCertificate." + field
 
+for gate, prefix, methods in (
+    ("UnsignedGate", "unsigned", ("admitted", "selected", "condition_code", "run_program", "executed", "rejected_iff", "enum_rejection", "uint_rejection", "bool_rejection", "enum_correspondence", "uint_correspondence", "bool_correspondence")),
+    ("SignedGate", "signed", ("admitted", "selected", "run_program", "executed", "rejected_iff", "correspondence")),
+    ("BytesGate", "bytes", ("admitted", "selected", "run_program", "executed"))):
+    for method in methods:
+        TARGETS[prefix + "_" + method + "_domain"] = "Solidity.Backend.AbiEntry." + gate + "." + method
+    for field in ("selected", "executed"):
+        TARGETS[prefix + "_certificate_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface." + gate + "Certificate." + field
+
 PRODUCERS = ["Solidity/Backend/AbiEntry/" + name + ".lean" for name in
-             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface")]
+             ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface")]
 
 
 def sha(raw):
