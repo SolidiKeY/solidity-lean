@@ -231,3 +231,41 @@ source, theorem, admission, toolchain, resource guard or frozen pin changed.
 The original execution draft is preserved off Git. Its six additive declarations now live in `tests/h62/item4/generic-v08/IntrinsicWidths.lean`, avoiding an unregistered `tests` import prefix under the approved per-file Lake gate. Existing width declarations remain unchanged. `source_execution` consumes the actual published evaluator law; `joint_execution` consumes the complete actual-client result and reached local relation. Binary/maximal equalities are proof-term instance identities, with separate fixture field equations; they are not independent target-run proofs. Full generic-family correspondence, refusal coverage, migration-overlay acceptance and matched performance measurements remain open. Cache seeding was skipped; the environment toolchain was activated with one thread.
 
 Actual axiom reports retain the five original axiom-free width declarations. The new source/joint execution consumers and two instance identities depend on `propext`, `Classical.choice`, and `Quot.sound` through the existing producers; both input-field equations are axiom-free. No new axiom declaration is introduced. The preserved standalone draft has the same qualified names and must remain unregistered; do not import both copies. The final focused run took 2.245 seconds with one Lean process and 812314624 bytes sampled aggregate peak RSS. These are focused-check observations, not matched full-family performance acceptance or a full gate.
+
+## Explicit resume after coordinator integration
+
+The coordinator explicitly requested merging `origin/master` and continuing,
+superseding this worker's prior local retirement disposition. The checkout was
+already clean at published lane head `c6b1d20e933b8b4a822442dcb4676798d7dc7cce`,
+which contains retirement head `4a78ae839e026e1a9f8f575cd10fec4478e52305`.
+Fetched and verified the published ancestry, then fast-forwarded the original
+lane branch to `20e492ee99a3fa8679aa526de0b6e731d85e4134` without conflicts.
+No new/reset goal, push or default-branch write was performed. Coordinator
+reported touched/Bridge gates passed upstream; these are not new local gates.
+
+Independent authorized census backfill continues under the original additive
+scope. The current V08 family has 221 files and 4,430 declarations. All 220
+original files and 4,428 original declarations are unchanged. The sole added
+module is `Solidity.Lowering.V08.CallableBodyPremises`, with `Inputs` and
+`complete`. That producer-premise contract does not itself prove a populated
+execution witness or discharge this lane's correspondence obligations.
+
+New `audit_current.py` reports original integrity and every current addition;
+it does not weaken or replace strict `accept.py`, which still correctly refuses
+an expanded inventory. Four new addition/mutation/removal tests pass normally
+and under optimized Python; all twelve prior tests pass. Separate read-only
+finder and skeptic reviews pass, with no Lean processes/server or source edits.
+The report and complete current inventory stay off git with SHA256 in the report:
+`/workspace/generic-v08-evidence/resume-20e492ee9/current-audit.json`.
+Commands and outcomes: that directory's `verification.json`.
+
+No new Lean proof, trust pin, source definition, frozen statement or budget
+change. Historical SortCheck and Roadmap axiom-guard source files are unchanged;
+known heavy failures were not rerun. The all-width admission helper remains
+isolated backfill, not execution/correspondence proof. Original queue steps 2–4
+and runtime/elaborated validation of step 1 remain unfinished. Waits continue
+for the SortCheck migration and the axiom-preserving Roadmap prerequisite fix.
+H82 removes the former proof-only exact-file agreement wait. No automatic
+completion or passing family runtime gate is inferred from the merged work.
+
+Successor merge note: both independent documentation updates are retained as historical reports. This merge does not resume any retired goal or alter the H82 chain ownership supplied by coordinator messages.

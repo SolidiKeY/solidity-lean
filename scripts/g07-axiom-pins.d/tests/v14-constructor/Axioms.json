@@ -1,0 +1,22 @@
+{
+ "tests/v14-constructor/Axioms.lean:Solidity.Backend.Executable.ConstructorArgumentObservations.Checks.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/Axioms.lean:Solidity.Backend.Executable.ConstructorArgumentObservations.successful_numeric_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/Axioms.lean:Solidity.Backend.Executable.ConstructorLocalArguments.source_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/v14-constructor/Axioms.lean:Solidity.Backend.Executable.ConstructorLocalArguments.target_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

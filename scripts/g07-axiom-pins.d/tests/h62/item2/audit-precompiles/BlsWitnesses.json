@@ -1,0 +1,64 @@
+{
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.bind_some_eq_none_data": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.constant_table_bounds": [],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.decodeFp_eq_none_iff_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.decodeFp2_eq_none_iff_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.g1Add_eq_none_iff_data": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.g1Discount_length_fidelity": [],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.g1Msm_eq_none_iff_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.g1MsmGas_mono_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.g2Add_eq_none_iff_data": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.g2Discount_length_fidelity": [],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.g2Msm_eq_none_iff_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.g2MsmGas_mono_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.mapFp2ToG2_eq_none_iff_data": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.mapFpToG1_eq_none_iff_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.msmGas_mono_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.msmGas_succ_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.pair_eq_none_data": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.pairing_eq_none_iff_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.pairingGas_mono_joint": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/BlsWitnesses.lean:H62.AuditPrecompiles.Successor.Bls.replicate_getD": []
+}
