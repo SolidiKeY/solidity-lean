@@ -1,4 +1,4 @@
-# E3 feature citations — schema and checker checkpoints
+# E3 feature citations — schema/checker pass; citation checkpoint pending
 
 Base: `a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e`.
 Branch: `codex/plan-e3-feature-citations-1107/e3-feature-citations`.
@@ -62,7 +62,8 @@ its default thread count must be overridden with `LEAN_NUM_THREADS=1`.
 The serial KeySort command below passes; checkpoint/full builds and
 RUNTIME_GATE_PASS are not claimed. No new axiom or sorry; no Lean files changed.
 
-Queue 1 is partial, blocked on E3-Q1. Queue 2 controls pass independently.
+Historical initial state: queue 1 was partial, blocked on E3-Q1. Queue 2
+controls passed independently. E3-Q1 is now resolved as recorded below.
 Queues 3–6, both required rounds of independent finder/skeptic reviews,
 citation classification, checked arithmetic corrections,
 model-to-solc gaps, deterministic summary and CI fragment remain pending.
@@ -165,3 +166,55 @@ rendering for the citation extension, rejects unsupported versions, and confirms
 missing evidence still fails both versions. No other reader logic changed.
 Earlier blocked-checkpoint sections above record historical results; E3-Q1 is
 resolved. Citation population and its final gates remain pending.
+
+## Active state after reader compatibility checkpoint
+
+Coordinator E3-Q1 (#167) is fully implemented at
+`23afe15b178b2726fc44a1412a806c5670a6e83f`: one assertion change, five passing
+old/new compatibility tests, and `solidity-feature-audit.py --check` passing
+(212 rows; 783 upstream symbols; generated files current). Independent read-only
+finder `schema_finder` and skeptic `schema_skeptic` both confirm the exact
+one-line reader change, no weakened other validation, and meaningful old/new
+controls. Both ran the five tests successfully; neither used a Lean server.
+No findings remain for this reader checkpoint.
+
+Additional existing consumers were run at both this lane and an isolated clean
+worktree at the exact base (`/workspace/e3-reader-baseline`). G00 scope check
+and source-grammar check pass identically. G03 `--check` reports the same stale
+ledger Markdown/JSON at both base and lane; this baseline failure was not fixed
+or hidden. Other corpus-dependent readers remain uncertified.
+
+### ESCALATE E3-Q2 — generated metadata ownership
+
+Sources: queue 3's forced downgrades; F8's definition-only `boolType` evidence;
+`render_lean_info`, `render_report` and the unchanged generated-output reader
+gate; sole write scope plus E3-Q1 (#167). A dry-run of only `boolType` from
+`present` to `partial` changes generated `Solidity/Language/FeatureInfo.lean`
+and `docs/solidity-feature-inventory.md`. The generated scope module stays
+identical. Both changed outputs remain read-only: E3-Q1 permits only the
+reader assertion and compatibility test. No status or generated file has been
+changed. The complete example diff is saved off git as
+`Q2-generated-downgrade-example.patch` in the evidence directory.
+
+Options (neither waives compatibility or changes an exclusion/premise):
+
+- A: extend this lease solely to regenerating metadata in those two outputs
+  for audited manifest downgrades; no theorem statements/proofs or other
+  reader validations may change; review the exact generated diff.
+- B: retain coordinator ownership; coordinator supplies a regeneration commit
+  for the final audited manifest and authorizes incorporating it before the
+  final reader gate.
+
+Submitted successfully using `coord-ask` to
+`coord-q/codex/plan-e3-feature-citations-1107/e3-feature-citations/20261107T163438Z`.
+This is the active scope dependency; E3-Q1 must not be reopened.
+
+Queue 3 has read-only source research for all 13 present rows and the actual
+checked-arithmetic guard interfaces. Candidate names are not yet elaborated or
+entered in the manifest, and are not claimed as resolved citations. Six F8
+rows have definition-only backing: booleanLiterals, timeUnits, boolType,
+parentheses, msgSender, blockTimestamp. Their reassessment must not be evaded
+by relabeling definitions as tested or kernel-proved. All 212 citation lists
+remain empty; class/direction totals remain zero. The final checker correctly
+fails on uncited present rows. Queues 3–6 and their required reviews remain
+pending; no statement/proof/source change or RUNTIME_GATE_PASS is claimed.

@@ -51,9 +51,10 @@ an uncited row, never proof of absence. The planned checker must reject a
 `present` row with no citation or only class d, and resolve names through an
 elaborated Lean environment rather than source-text matching.
 
-Implementation is pending the reader compatibility dependency recorded in
-[the E3 lane](feature-work/e3-feature-citations.md). No citation coverage is
-claimed by this schema-only checkpoint.
+The schema-version reader accepts versions 1 and 2; both manifests pass its
+compatibility tests. Citation population remains pending the generated-metadata
+ownership dependency recorded in [the E3 lane](feature-work/e3-feature-citations.md).
+No citation coverage is claimed by this schema/checker checkpoint.
 
 ## Final proof obligations
 
