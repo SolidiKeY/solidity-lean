@@ -1,5 +1,43 @@
 # H28 drift reports
 
+## H151 status of historical and fresh evidence
+
+The missing retired final delivery at
+`faca44dc415dfbdab9b9ea6b0664f1e755abaa57` and its unavailable original captures
+are **UNVERIFIABLE**. Original delivery, gate and review claims below are historical
+reports, not newly authenticated results. Recovery is a documented gap rather
+than a wait. Available H145 private archives are not classified as missing, and
+no nearby source snapshot is substituted for that final head.
+
+A fresh reconstruction uses the current owned Python tools and a disposable
+checkout at the acceptance's pinned base
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`, tree
+`114f3a4e901fc282cec56d9e210fcffb2776e0cd`. The acceptance script is byte-identical
+to the authenticated original assignment: SHA256
+`01a6a0a842966fa758441e3e70af53799a8d657a181540341a7bcbe759071e64`.
+Its selected corpus contains 5,369 paths, including all 4,184 Lean paths at that
+base. The acceptance's suffix selection and lexical/file-evidence limitations
+still apply. Embedded retained diagnostics exercise multiset and source-identity
+classification; they are not a fresh execution of the historical sort checker.
+
+Fresh output must remain bound to these actual inputs and the current tool hashes.
+It cannot authenticate lost worker captures, establish integration of the missing
+head, satisfy a coordinator rerun, or prove Lean declarations. Timing/RSS records
+are execution observations, not a before/after performance claim. All new receipts
+are private under H145; old code-tree evidence paths below describe historical
+locations and must not be restored.
+
+Fresh local frozen acceptance passed for items 1, 2 and 3: each reported 31 cases,
+including the complete selected pinned corpus and its scope checks. The current
+tools were copied from lane source `9dab41822dba79a548d0d9d8ea7d51c69f66086a`.
+Wall-time and peak-child-RSS records are archived privately. They are execution
+observations, not a performance comparison or evidence of the missing head's
+acceptance.
+Independent read-only finder and skeptic found no boundary blocker; finder also
+verified corpus counts, pinned tree and copied tool/script hashes. Neither used
+Lean or reran acceptance. Coordinator rerun and task-specific final validation
+remain outstanding. No code or Lean source was changed by this reconstruction.
+
 Item 1 reads JSON from stdin and emits a complete path-sorted Lean module census. Its library labels are path-prefix classifications; the module-map counts are exact lexical token occurrences across matching Markdown files, including duplicates. Shorthand, aliases, quotations and unmatched tokens require owner review and are not confirmed drift or a deletion list. Root files are classified as root-or-other. The pinned corpus census and selected-file, fixture and external ownership snapshot are retained under `tests/h28-terra/drift-reports/evidence/`. The ownership snapshot is routing context, not proof that an individual lexical candidate belongs to a particular owner.
 
 The frozen acceptance checks the independent mechanical output against fixtures and the selected pinned corpus. It does not establish semantic module membership or completeness of ownership assignments. No source or shared module map is modified.
