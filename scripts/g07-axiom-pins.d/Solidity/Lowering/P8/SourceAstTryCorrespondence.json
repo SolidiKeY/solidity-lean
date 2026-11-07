@@ -1,0 +1,11 @@
+{
+ "Solidity/Lowering/P8/SourceAstTryCorrespondence.lean:Solidity.Lowering.P8.SourceAstTryCorrespondence.short_clauses_rejected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstTryCorrespondence.lean:Solidity.Lowering.P8.SourceAstTryCorrespondence.try_ok_iff_each": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

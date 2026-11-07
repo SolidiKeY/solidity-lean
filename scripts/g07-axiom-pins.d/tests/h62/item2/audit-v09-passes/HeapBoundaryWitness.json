@@ -1,0 +1,62 @@
+{
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.allocation_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.allocator": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.empty_heap": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.mutation_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.noRefs_premises_impossible": [
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.observation_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.reached_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.source_answer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/HeapBoundaryWitness.lean:Solidity.Backend.Passes.AuditHeapBoundary.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
