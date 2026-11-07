@@ -3263,6 +3263,7 @@ import Solidity.Lowering.P8.SourceAllSettings
 import Solidity.Lowering.P8.SourceAstBranchCorrespondence
 import Solidity.Lowering.P8.SourceAstCompoundTypes
 import Solidity.Lowering.P8.SourceAstCorrespondence
+import Solidity.Lowering.P8.SourceAstDeclarationCorrespondence
 import Solidity.Lowering.P8.SourceAstExpressionCorrespondence
 import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstLiteralCorrespondence

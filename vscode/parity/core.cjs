@@ -216,13 +216,19 @@ function terminalSdkIdentity(output,executable,version){
  if(resolved!==selected)throw Error('Terminal SDK canonical executable differs from selected SDK');
  return{executable:resolved,sha256,version,lines};
 }
+// Preserve rejected observations for diagnosis; they never become accepted metrics.
+function scenarioFailure(id,elapsedMs,error){return{id,status:error.code==='TIMEOUT'?'timeout':'broken',elapsedMs,error:error.stack||String(error),...(error.observation?{observation:error.observation}:{})};}
+function validateHostResult(result,config){const validationErrors=hostEvidenceErrors(result,config);return validationErrors.length?{rejectedResult:result,validationErrors,error:'Host evidence is stale, incomplete or inconsistent: '+validationErrors.join('; ')}:{result};}
 function hostEvidenceErrors(result,config) {
   const errors=[];
   if(result?.runId!==config.runId||result?.target!==config.target||result?.schemaVersion!==1)errors.push('stale or foreign identity');
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='dafny-compiler-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-output-configuration')?.observation;errors.push(...require('./dafny-output.cjs').errors(o,config.runId));
+  if(config.suite==='testing-symbols'){errors.push(...require('./hierarchy-lifecycle.cjs').renderedErrors(result.scenarios.find(s=>s.id==='native-compiler-testing')?.observation,config.runId));
+  }else if(config.suite==='trace-unavailable'){errors.push(...require('./trace-presentation.cjs').unavailableErrors(result.scenarios.find(s=>s.id==='native-trace-unavailable')?.observation,config.runId));
+  }else if(config.suite==='dafny-command-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-command-output')?.observation;errors.push(...require('./dafny-command-output.cjs').errors(o,config.runId));
+  }else if(config.suite==='dafny-compiler-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-output-configuration')?.observation;errors.push(...require('./dafny-output.cjs').errors(o,config.runId));
   }else if(config.suite==='compiler-output'){const o=result.scenarios.find(s=>s.id==='native-compiler-output-configuration')?.observation;errors.push(...require('./compiler-output.cjs').errors(o,config.runId));
   }else if(config.suite==='output-lifecycle'){
     const observation=result.scenarios.find(s=>s.id==='native-output-restart')?.observation;errors.push(...outputLifecycleErrors(observation,config.target));
@@ -287,4 +293,4 @@ function hostEvidenceErrors(result,config) {
   if(result.status!==status&&!(['broken','timeout'].includes(result.status)&&result.error))errors.push('aggregate status contradicts scenarios');
   return errors;
 }
-module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity,outputLifecycleErrors};
+module.exports = {scenarioFailure,validateHostResult,LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity,outputLifecycleErrors};
