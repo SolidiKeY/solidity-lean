@@ -1,0 +1,88 @@
+{
+  "status": "stopped-not-rerun",
+  "originalBudgetSeconds": 300,
+  "exit": 124,
+  "validatorExit": 1,
+  "workload": "fresh original24-module Derived17 group",
+  "measuredCompletedSeconds": 296.8283810890134,
+  "completed": [
+    {
+      "module": "Solidity.Calculus.MemoryLoopReplay",
+      "seconds": 12.214224542003649,
+      "exit": 0,
+      "recordedSha256": "a9e3cfa761887fdcfec63375ecfb8ad057ab59ff483a7d3d5ec33af7d122a7d2",
+      "currentSha256": "a9e3cfa761887fdcfec63375ecfb8ad057ab59ff483a7d3d5ec33af7d122a7d2"
+    },
+    {
+      "module": "Solidity.TestSuite.MemoryLoopReplay.Discover00",
+      "seconds": 59.21971032900183,
+      "exit": 0,
+      "recordedSha256": "16766767e295d96707f4182433e1923a42b568239b8925a4b79addaf86c97858",
+      "currentSha256": "16766767e295d96707f4182433e1923a42b568239b8925a4b79addaf86c97858"
+    },
+    {
+      "module": "Solidity.TestSuite.MemoryLoopReplay.Discover01",
+      "seconds": 18.075412418002088,
+      "exit": 0,
+      "recordedSha256": "06914fe424189044aeada13c090988e6a67fe5d618f3f6c0afdd234b39c8d75a",
+      "currentSha256": "06914fe424189044aeada13c090988e6a67fe5d618f3f6c0afdd234b39c8d75a"
+    },
+    {
+      "module": "Solidity.TestSuite.MemoryLoopReplay.Discover02",
+      "seconds": 23.31328164599836,
+      "exit": 0,
+      "recordedSha256": "36ce727fb7d1c9d895a748248b8d383243fb589e33d4b2118cdd77f6ce07dd32",
+      "currentSha256": "36ce727fb7d1c9d895a748248b8d383243fb589e33d4b2118cdd77f6ce07dd32"
+    },
+    {
+      "module": "Solidity.TestSuite.MemoryLoopReplay.Discover03",
+      "seconds": 30.05780594800308,
+      "exit": 0,
+      "recordedSha256": "c0b1483a35215ddf65f256f57aef26845caaea39a7ddd92dd5d22cf759ce7b53",
+      "currentSha256": "c0b1483a35215ddf65f256f57aef26845caaea39a7ddd92dd5d22cf759ce7b53"
+    },
+    {
+      "module": "Solidity.TestSuite.MemoryLoopReplay.Discover04",
+      "seconds": 24.100549772003433,
+      "exit": 0,
+      "recordedSha256": "9f0dd1e088521bfad277522062bcfcd092058ed6749aee688fc704d7fb1d96c5",
+      "currentSha256": "9f0dd1e088521bfad277522062bcfcd092058ed6749aee688fc704d7fb1d96c5"
+    },
+    {
+      "module": "Solidity.TestSuite.MemoryLoopReplay.Discover05",
+      "seconds": 58.90574487699632,
+      "exit": 0,
+      "recordedSha256": "0cadedcf7c62a812bb7812f4510402d21defcbc0333f6ad54c11103fe50c9d68",
+      "currentSha256": "0cadedcf7c62a812bb7812f4510402d21defcbc0333f6ad54c11103fe50c9d68"
+    },
+    {
+      "module": "Solidity.TestSuite.MemoryLoopReplay.Discover06",
+      "seconds": 70.94165155700466,
+      "exit": 0,
+      "recordedSha256": "473adb34d8fdf5365a194e801eeec8ef4c6dbdeb9572dc70dda294c3580c9664",
+      "currentSha256": "473adb34d8fdf5365a194e801eeec8ef4c6dbdeb9572dc70dda294c3580c9664"
+    }
+  ],
+  "incompleteStartedModule": "Solidity.TestSuite.MemoryLoopReplay.Discover07",
+  "incompleteDuration": "unknown; no completion receipt",
+  "repairRequest": "Current proof owner: optimize measured Discover06, Discover00 and Discover05 through statement-preserving shared proof reuse; preserve full24-member workload, statements, controls and300s aggregate budget. A diagnostic split must not reset the aggregate budget or reuse fresh group outputs. Cache match alone is not repair. Owner identity not independently established; route through coordinator.",
+  "evidence": [
+    {
+      "path": "/workspace/dafny-parity-timed-strict-20261106/fresh-results.json",
+      "sha256": "b84e8393c20a02b3ce1ed4a66d64ce337a63aa19ad1173f2f3f4f78da05245f6"
+    },
+    {
+      "path": "/workspace/dafny-parity-timed-strict-20261106/run/heavy-result.json",
+      "sha256": "7a0b8f9c41d2d9d71c2acd0ebb7bcdc5ce5043e2808fc154e0ece5a98cfa320c"
+    },
+    {
+      "path": "/workspace/dafny-parity-timed-strict-20261106/run/heavy.log",
+      "sha256": "7d31842f732491acd9494459cfd4a6ba5fa6dd5c8c5dfa080a3a2c25b6b5e16b"
+    },
+    {
+      "path": "/workspace/dafny-parity-timed-strict-20261106/validator.log",
+      "sha256": "972a123793609be2ab123e59e8aa995565c78a06a13d19cc4437476f5c8980cd"
+    }
+  ],
+  "routing": "Recorded in committed ticket only; no network messages/ref push authorized by current recovery."
+}
