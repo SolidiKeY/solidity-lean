@@ -1,7 +1,21 @@
 # H62 item 2: V09 empty-statement audit
 
+H145 evidence location: lane receipts, transition records, checksum/resource
+records and validation reports formerly stored below the audit test directory
+are preserved in the private coordination repository, commit
+`f347f97aa7aec79c74e006efaf0508cd077a569c`, under
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/evidence-archive.tar.gz`.
+Historical references below to those evidence JSON files refer to that archive.
+The code branch retains the Lean modules, checker-read witness maps, portable
+fixture/materialization inputs and acceptance code. Frozen registrations,
+expected assertions and external materialization requirements are unchanged.
+The archive preserves fresh records; it does not reconstruct the still-missing
+historical VM evidence.
+
 Status: partial; full assignment unfinished. The selected frozen census contains
-179 files and1259 rows. 225 selected rows now have checked concrete instances;1034 remain open. Counts include checked reuse of original concrete control proofs.
+179 files and1259 rows. Last recorded selected coverage is538 rows;721 remain
+open. These historical counts do not replace missing evidence recovery or fresh
+full kernel acceptance. Counts include checked reuse of original control proofs.
 The19 earlier supplemental instances and4 unselected ClosedValues instances do not reduce this count.
 Earlier subtraction counts are withdrawn; see Coverage membership correction.
 Supplemental proof validity and resolved private identities are retained.
@@ -1455,3 +1469,192 @@ The unrelated RelatedMemoryCapture/Source.SemanticsExamples STOP remains in forc
 Evidence: `/workspace/vy3-evidence/matched-master-cache-20261107`; comparison,
 ticket resolution, raw logs, resource records and native-C relocation hashes
 are retained there. The RAM artifacts are VM-local and are not portable Git data.
+
+
+Original VY3 backfill A: `tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean`
+extends the existing generic Frame API with argument/result/local interval bounds,
+three injectivity laws reusing label injectivity, and constructive coverage of
+every position in the frame footprint. All arities, including empty regions,
+and every base are retained. A nonzero-base combined argument/result/local
+witness rejects the exclusive frame limit as a local. These are allocation
+certificates only; runtime contents, calling convention and G24 simulation are
+not inferred. No per-case interface or new production import was added.
+
+Fresh official Lean4.24.0/Lake5.0.0-src+797c613 runtime was restored separately
+from missing historical evidence. Serial Docker checks enforce12GiB/no swap
+and4GiB headroom. Direct KeySort and the final companion kernel check passed
+(1.409s for the latter), with guarded axiom reports: argument/result bounds
+are axiom-free, other certificates use propext and Quot.sound. No runtime/full
+acceptance marker is inferred from these focused checks.
+
+The first inline draft kernel-checked but exceeded the10% timing threshold
+(0.803s original,1.409s inline), so that workload remains a timing STOP. Proofs
+were split and simplified; the original Allocation module is byte-unchanged.
+Its restored check still measured1.208s, so the timing hold remains open; no
+unchanged retry or performance acceptance is claimed. A first companion check
+failed because its new axiom guards overstated the two optimized bounds' actual
+dependencies; raw failure is retained and final guards reflect the axiom-free
+proofs. Selected538/1259,721open remains unchanged. Evidence and timing/limits
+are inventoried in `frame-allocation-evidence.json`; raw records remain at
+`/workspace/vy3-allocation-evidence-20261107`. Historical `/workspace/vy3-evidence`
+is still missing and has not been reconstructed.
+
+
+Original VY3 backfill A scoped-slot/label extension reuses the same
+`tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean` companion.
+`Slots.covers` constructs the newest-first index for every occupied position;
+`Slots.fresh_above_old` proves fresh binders are above every old slot, complementing
+the unchanged production extension law. Finite label bounds, constructive
+coverage and separated-region disjointness are general in all bases/arities.
+A nonzero-base joint witness preserves an old address under extension, places
+a fresh binder above it and shows the actual collision from moving an adjacent
+label region backward. These identities are not assembled byte offsets or
+scanner-valid JUMPDEST certificates; runtime preservation remains separate.
+
+The focused serial Lean4.24 kernel check passed in1.309s with no resource stop.
+Label bounds/disjointness are axiom-free; the other additions use propext and
+Quot.sound. The first run failed only the new combination witness's expected
+axiom report; its actual standard dependencies are now pinned and raw failure
+is retained. Production Allocation and all prior theorem statements are
+unchanged; no new interface copy or import edge was added. Selected538/1259,
+721open stays unchanged. Prior timing STOPs and full validation holds remain;
+no unchanged STOP workload was retried. Raw resources/logs are off Git at
+`/workspace/vy3-slot-label-evidence-20261107`, inventoried in
+`slot-label-evidence.json`. Historical evidence remains missing.
+
+The unchanged documentation checker reports one missing reference in the
+base-identical generic-v08 feature document (ExecutionTransport citation).
+No changed-file citation failed. The exact source hash and owner request are
+retained in the external evidence's owner-ticket.json; the checker and other
+owner's document remain unchanged. This is not a passing global doc gate.
+
+
+Original VY3 backfill A numeric stack-slot extension:
+`tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean` derives the actual
+exchange result from a prefix/selected-cell/tail split and uses the existing
+readSlot/writeSlot API. For every accessible prefix and arbitrary full-width
+words/tail, writes preserve all other cells and read-then-writeback is a genuine
+identity execution. Separate read/write underflow laws reject the missing cell
+at stack.length even when the Fin16 opcode index is valid. A nonzero-index
+combination witness preserves the preceding cell and arbitrary caller tail.
+No new instruction, interface structure or production-source edit was added.
+
+All six original imports were cold kernel-checked serially into a private
+off-Git artifact directory. The final companion check passed in1.205s with all
+eight axiom guards: exchange prefix/end lemmas are axiom-free, others use
+propext and Quot.sound. The first syntax failure (reserved prefix identifier)
+and its failed-elaboration recovery placeholders are retained as failures only;
+none contributes a proof or axiom acceptance claim. Records/resources/artifact
+hashes are inventoried in `stack-slot-evidence.json` and retained at
+`/workspace/vy3-stack-slot-evidence-20261107`. The12GiB/no-swap serial bound and
+4GiB headroom remained satisfied. Numeric none is not an EVM exception theorem;
+1024 capacity, gas/observations, Source/G24 and native production remain separate.
+Selected538/1259,721open unchanged. All prior timing/trust holds and known
+base-documentation failure remain open; no unchanged STOP workload was retried.
+Historical off-Git evidence is still missing and has not been reconstructed.
+
+
+Original VY3 backfill A capacity extension adds seven general certificates to
+`tests/h62/item2/audit-v09-passes/StackSlotCertificates.lean`. Read and
+read/writeback have the exact prefix condition0<=height and height+1<=1024.
+A joint theorem combines actual identity execution with the existing height
+checker on the same stack. Controls distinguish height-safe empty-stack
+underflow from a successful mathematical identity at initial height1024 whose
+DUP prefix reaches1025 and fails the capacity checker. A nonzero-slot concrete
+witness satisfies both execution and capacity. No budget, instruction, Source
+encoding, existing theorem statement or production definition changed.
+
+The final serial Lean4.24 check passed in1.612s with all old and seven new axiom
+guards. The additions use propext, Classical.choice and Quot.sound; no axiom
+declaration or sorry was introduced. Reused private dependencies match their
+previous cold-checked source/artifact hashes. The initial1.414s observation
+exceeded the prior1.205s run by more than10%; proof-only trace simplification
+reduced an intermediate run to1.312s, but the final guarded check measured1.612s.
+That timing STOP is retained, not accepted or rerun unchanged. These are focused
+observations, not full affected/final or native acceptance. Gas and Source/G24
+observations remain separate. Selected538/1259,721open is unchanged. The H44
+records are inventoried in `stack-capacity-evidence.json`, retained at
+`/workspace/vy3-stack-capacity-evidence-20261107`. Historical evidence, prior
+trust/timing holds and the known baseline documentation failure remain open.
+
+
+Original VY3 backfill A arity-aware composition:
+`tests/h62/item2/audit-v09-passes/SliceCapacityCertificates.lean` reuses
+the existing generic stackBound_comp law from ClzBounds and Slice.comp. Its
+main theorem derives actual intermediate/final vectors, execution of both
+stages and their composition, capacity at the shifted entry height derived
+from run_height, and bounded intermediate/final arities. A constructive
+prefix theorem derives a successful bounded stack for every code decomposition;
+no desired intermediate execution is assumed. General positive addition
+preserves every caller tail with two spare words; a negative control succeeds
+mathematically but rejects the1025-word peak before a1024-word final result.
+The1024 limit and all original producer/interface definitions are unchanged.
+
+The15-module import closure was validated with six exact previously checked
+artifacts and nine fresh bounded cold checks. Allocation was unnecessarily
+recompiled instead of reusing its artifact; this is retained as dependency
+compilation, not timing credit or STOP clearance. The CLZ lowering check took
+100.107s within bounds; no source repair or budget increase was made. Final
+serial Lean4.24 companion check passed in1.307s with five axiom guards: generic
+laws and overflow use propext/Quot.sound; the positive room arithmetic also
+uses Classical.choice. No new axioms/sorry/interface copies or production edits.
+Selected538/1259,721open unchanged. Prior slot timingSTOPs, full validation,
+Source/native waits and known doc failure remain; the stopped slot companion
+was not rerun. H44 records and import/artifact provenance are inventoried in
+`slice-capacity-evidence.json`, retained at
+`/workspace/vy3-slice-capacity-evidence-20261107`. Historical evidence is still
+missing; these fresh checks do not reconstruct it or finish the lane.
+
+
+Original VY3 backfill A emitted-reference extension:
+`tests/h62/item2/audit-v09-passes/AssemblerReferenceCertificates.lean` reuses
+actual assemble_eq/tagIndex uniqueness and both absolute/relative reference
+certificates. Successful checked assembly supplies source-tag uniqueness; the
+general pair theorem derives the two actual emitted pushes, the same unique
+tag/JUMPDEST, absolute=base+relative, and scanner validity behind any correctly
+sized encoded prefix and suffix. This is emitted-code closure, not the earlier
+finite identity arithmetic or an actual jump-execution theorem.
+
+A genuinely assembled three-item Fin1/Empty section at base16 derives its
+output via the existing generic assembly-success theorem, and validates the
+correct destination after16 STOP instructions. The raw relative word differs
+from that target by16; it is not claimed universally to be an invalid offset
+or never another JUMPDEST. The initial attempted direct20/4 reduction lacked
+Decidable equality for Assembled and did not reduce the scanner; that draft
+and failed recovery placeholders are retained as failures, not proof credit.
+The final constructive proof uses no new equality instance or semantic table.
+
+Serial Lean4.24 final check passed in1.306s with three guarded standard axiom
+reports (propext,Classical.choice,Quot.sound), no resource stop or production
+edit. Three private artifacts match prior cold-checked source/byte hashes.
+Master was adopted by rebase; prior slot timingSTOPs were not rerun or cleared.
+New focused duration is not paired/full timing acceptance. Selected538/1259,
+721open unchanged. H44 logs/provenance are inventoried in
+`assembler-reference-evidence.json`, retained at
+`/workspace/vy3-assembler-reference-evidence-20261107`. Historical evidence,
+known doc failure, native/Source waits and full validation remain open.
+
+
+H145 migration preserves the nine archived evidence records byte-for-byte and
+all checker-read fixtures in place. Only two module-docstring pointers changed
+in Python; their executable ASTs are unchanged. The unchanged evidence and
+private-path checks pass. The portable suite currently attempts41 tests and
+reports four errors from the existing frozen/live bitwise statement drift;
+the unmodified committed census source reproduces that same refusal. No missing
+archived JSON is involved, no guard/expected assertion was changed and no
+frozen inventory was repinned. This remains an open acceptance failure.
+
+
+The emitted-reference companion now also proves stable-width relocation of
+section-relative references using the existing relocated-offset and assembler
+reference laws. Both checked assemblies and the stable-width premise are
+retained. The actual emitted relative values stay equal; scanner validity uses
+the new base plus that value. A leading-tag fixture proves successful assembly
+uniformly at positive bases below256 and supplies a genuine delta15 witness
+from base1to16. Its base0-to16 control refutes stable widths, not assembly
+success. Existing emitted-reference statements and production definitions are
+unchanged, with no new interface. Verification, provenance, the formatting-only
+failed guard and retained timing hold are in the private H145 evidence directory
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-relative-reference-publish-20261107/`.
+This adds no selected-row credit and no jump-execution, Source/native or full
+validation claim. All prior holds and historical-evidence waits remain open.

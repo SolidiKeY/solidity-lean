@@ -1224,9 +1224,9 @@ Original full-validation and timing STOPs remain open.
 MIC checkpoint a111ddfd is present on master a0a9ca15. All three panic
 control headers are byte-identical; reversing its single helper import and
 three proof replacements reproduces the entire previous Controls file exactly.
-The current source hash and shifted declaration lines are recorded in
-`tests/h62/item1/packet-panic/checkedmul-current-refresh.json`, separately from
-unchanged old-base evidence. The refreshed lexical counts are 16 named declarations,
+The current source hash and shifted declaration lines are archived separately
+from unchanged old-base evidence in the private coordination repository, H145
+commit `b0d0e95b053cefe4053d319be2424253c10d55c2`. The refreshed lexical counts are 16 named declarations,
 465 selected headers and 45 literal panicData occurrences. Ownership metadata
 is unavailable: this source-only refresh establishes no ownership eligibility.
 Helper publication and MIC application waits are closed. Producer kernel/runtime
