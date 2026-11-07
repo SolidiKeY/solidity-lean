@@ -325,3 +325,40 @@ agreement on existing definition bodies, frozen-statement and axiom checks,
 full affected validation, acceptance and timing comparison remain open. No
 prior stopped Lean build was rerun unchanged. No new owner source edit was
 made, and no master push was performed.
+
+## Re-baseline after drift-control integration
+
+The coordinator reported the lane change integrated on master with touched gate
+pass and finder/skeptic reviews. On fetch, master was
+`2a43bf4fcdaf24750265afc8f8be5b420d1d22b0`. The reported lane commit
+`07a49ac680edb41984c427aebc3049680a738e02` was not its ancestor, but the
+cherry-picked commit `1a12272db` has the identical stable patch ID
+`cb8071c8419de76ab4a255021c83b26b1f66f315`, and all lane scope files matched.
+A normal merge retained the original lane ancestry and produced
+`7e053a71fb811d3ae9f348480d477b038dcf76c4` without conflicts.
+
+This tree includes Source/Ctor proof migration `087f76aa8360db0b89aa99b4f8fcc0022b925e4d`.
+Using official Lean 4.35.0 and a freshly generated current-tree alternate Lake
+configuration with explicit `-j1`, one open MCP file, `LEAN_NUM_THREADS=1`,
+the writer lock, a 12 GiB virtual-memory limit and a 4 GiB available-memory
+guard, the direct `Solidity/Source/Ctor.lean` diagnostic returned success
+without items or failed dependencies. This is a per-file diagnostic, not a
+full gate or timing comparison.
+
+The candidate `CaseSpecifications.lean` still returned
+`diagnostics_unavailable` with failed dependencies including the source and
+static inferencer files. Separately, `Solidity/Frontend/Static/Infer.lean`
+returned success with two unused-variable warnings. `Solidity/Source/Infer.lean`
+returned six errors: dependent slice type mismatches at lines 308, 312, 315
+and 316, and type mismatches at 345 and 382. The exact structured MCP logs
+are exported; this lane did not edit the H55 inferencer or weaken types.
+H55/source-relations must assess these current-tree diagnostics before the
+combined candidate can be validated. The case file is still not known clean.
+
+The proposal generator output remains byte-identical to its checked-in patch
+and `git apply --check` passes on this tree; no proposal was applied. The seven
+external scanner/control tests pass when temporary-file writes are permitted.
+A first test attempt in the read-only sandbox failed because no writable
+scratch directory was available; that attempt is not counted as a pass.
+Owner agreement, independent reviews of any new changes, full affected gates,
+axiom comparison, acceptance and timing remain outstanding.
