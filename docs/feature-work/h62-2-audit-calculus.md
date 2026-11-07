@@ -966,3 +966,18 @@ Reclaimed four more superseded working classification JSON copies after byte-for
 Bulk source identity, constructor/polarity rosters, recovery receipt, reviews and measured gates stay off Git at /workspace/h62-successor-evidence/scoped-reduction-roles-v53 and /workspace/h62-successor-bulk/scoped-reduction-roles-v53, with small path/size/hash manifest. Zero fresh joint witnesses, Lean/axiom/kernel/replay/runtime/cache acceptance. Whole assignment/four audit checkpoints remain unfinished. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw compatibility/Context Classical.choice waits and timing/reserve STOPs remain. No statement/dependent-definition/budget/axiom/exclusion/toolchain edits or normalization-limit changes.
 
 Documentation gate PASS exit0 after adopted master repaired the other-lane synthetic fixture references; exact current fixture bytes/master identity archived. No local fixture/scanner edit; historical sealed failures retained. Accounting and89controls pass; complete acceptance remains FAIL exit1.
+
+
+## Opt-in nonwriting census checks (2026-11-07)
+
+Guarded regression: reducing duplicate report writes must not skip frozen-input authentication, complete-file/signature/owner validation or incomplete acceptance failure.
+
+The census runner now accepts exactly one of --out PATH or --check-only. Existing --out behavior remains: output must be external and newly created, full classification JSON and checksum are written, counts printed and --require-complete enforced. Opt-in check-only runs the same authenticated census, hash-bound curated input, provenance and full classification, prints the same counts and applies the same completeness decision, while writing no report directory/files. No Lean/proof acceptance rule, signature, axiom or budget changed.
+
+Four added Python controls cover report/check-only count and incomplete-exit parity with no filesystem additions, stale-signature rejection, required/mutually-exclusive modes and repository-output refusal. These synthetic fixture controls validate CLI behavior, not formal theorem witnesses. All93 Python controls pass. Actual pinned5283-candidate input runs separately retain625 reviewed/4658 pending/1537 unresolved owners/0new joint witnesses: BOTH report and check-only completeness checks fail exit1. A malformed real census is refused. Exact stdout parity, report bytes and zero check-only report bytes are recorded in sealed parity evidence; no speed claim follows from short command timings.
+
+This is additive runner backfill for low disk capacity. Current ledger/source classifications and owner map are unchanged. Raw report output remains available when requested, while repeated acceptance checks can use the nonwriting mode. It is not a lighter census, sampling mode, excluded statement set or completion waiver.
+
+Bulk exact commands/exits/timing/RSS, logs, parity, source snapshots, reviews and report stay off Git under /workspace/h62-successor-evidence/check-only-runner-v54, bound by a small path/size/hash manifest. Existing archive-backed eviction receipts remain the restoration source for superseded working copies; no unique evidence is removed by this mode.
+
+Whole assignment and four audit checkpoints remain incomplete. No fresh Lean/axiom/kernel/replay/runtime/cache acceptance or new semantic witness. Existing H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw compatibility/Context Classical.choice waits and performance/reserve STOPs remain. Historical unavailable bytes remain UNVERIFIABLE. Next independent work includes continued complete frozen-interface classification and joint feasibility obligations when their gates are available.

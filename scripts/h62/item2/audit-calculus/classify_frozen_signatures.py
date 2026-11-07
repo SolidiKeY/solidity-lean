@@ -90,11 +90,14 @@ def classify(source, curated):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--census", type=Path, required=True)
-    parser.add_argument("--out", type=Path, required=True)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--out", type=Path, help="write the full external report")
+    mode.add_argument("--check-only", action="store_true",
+                      help="validate all inputs and acceptance without writing a report")
     parser.add_argument("--require-complete", action="store_true")
     args = parser.parse_args()
-    output = args.out.resolve()
-    if output.is_relative_to(REPO):
+    output = args.out.resolve() if args.out is not None else None
+    if output is not None and output.is_relative_to(REPO):
         parser.error("H44: output must be outside repository")
     source = authenticated_census(args.census)
     curated_bytes = bulk_bytes("lifetime_roles")
@@ -103,10 +106,11 @@ def main():
         raise ValueError("curation census/base provenance differs")
     result = classify(source, curated)
     result["curation_sha256"] = hashlib.sha256(curated_bytes).hexdigest()
-    output.mkdir(parents=True, exist_ok=False)
-    data = (json.dumps(result, indent=2, ensure_ascii=False) + "\n").encode()
-    (output / "classification.json").write_bytes(data)
-    (output / "SHA256SUMS").write_text(hashlib.sha256(data).hexdigest()+"  classification.json\n")
+    if output is not None:
+        output.mkdir(parents=True, exist_ok=False)
+        data = (json.dumps(result, indent=2, ensure_ascii=False) + "\n").encode()
+        (output / "classification.json").write_bytes(data)
+        (output / "SHA256SUMS").write_text(hashlib.sha256(data).hexdigest()+"  classification.json\n")
     print(json.dumps(result["counts"], sort_keys=True))
     if args.require_complete and (result["counts"]["role_pending"] or result["counts"]["semantic_owners_unresolved"]):
         raise SystemExit(1)
