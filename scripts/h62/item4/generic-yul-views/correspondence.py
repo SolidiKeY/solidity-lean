@@ -65,8 +65,8 @@ def compare(original, candidate):
             normalized_type=before[old], sha256=hashlib.sha256(before[old].encode()).hexdigest()))
     return result
 
-def source_preservation(root, current_files, *, base=BASE):
-    """Bind preservation labels to full frozen Git blobs, not masked types."""
+def frozen_blobs(root, *, base=BASE):
+    """Authenticate and enumerate the existing frozen source universe."""
     try:
         subprocess.run(["git", "merge-base", "--is-ancestor", base, "HEAD"],
             cwd=root, check=True, capture_output=True)
@@ -82,6 +82,11 @@ def source_preservation(root, current_files, *, base=BASE):
             originals[path.decode()] = metadata.split()[2].decode()
     if not originals:
         raise ValueError("empty frozen Views source universe")
+    return originals
+
+def source_preservation(root, current_files, *, base=BASE):
+    """Bind preservation labels to full frozen Git blobs, not masked types."""
+    originals = frozen_blobs(root, base=base)
     current_files = list(current_files)
     expected_paths = {info["path"] for info in current_files}
     def check_universe():

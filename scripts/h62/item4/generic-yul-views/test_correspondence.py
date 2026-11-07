@@ -51,7 +51,7 @@ class CorrespondenceControls(unittest.TestCase):
     def test_dropped_instance_refused(self):
         with self.assertRaises(ValueError): compare(self.original,self.candidate.splitlines()[0])
 
-class FrozenSourceControls(unittest.TestCase):
+class GitViewsFixture:
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -74,6 +74,7 @@ class FrozenSourceControls(unittest.TestCase):
         self.git("commit", "-qm", "frozen fixture")
         self.base = self.git("rev-parse", "HEAD").decode().strip()
 
+class FrozenSourceControls(GitViewsFixture, unittest.TestCase):
     def classify(self, inventory=None):
         inventory = census.scan(self.root) if inventory is None else inventory
         preservation = source_preservation(self.root, inventory["files"], base=self.base)
