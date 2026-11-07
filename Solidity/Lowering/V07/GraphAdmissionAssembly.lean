@@ -32,7 +32,7 @@ the accepted `Source.Env` alone and supplies no producer.
 
 Open (recorded in the feature document): every `P8a.Producer`-indexed result
 is vacuous for every `Nat`-encodable resource (P8-SPEC-LAW1); the only known
-inhabitant is the off-master model witness `P8.PlanWitness.planProducer`; `GraphPremises` is not derived
+inhabitant is the model witness `P8.PlanWitness.planProducer` (G07 toy, empty Source); `GraphPremises` is not derived
 from accepted Source (Source admits inline-recursive structs,
 `GraphAdmissionBoundary`); refusal for mapping-containing structs needs the
 VY5 Source repair (`SourceRefusal.envLocOK`).
@@ -105,7 +105,7 @@ def declarationGraphProducer (producer : P8.P8a.Producer S reference origins roo
   ⟨producer, admission producer env⟩
 
 /-- The empty Source environment (no declarations). Definitionally equal to
-`P8.PlanWitness.emptyEnv` (off master) and
+`P8.PlanWitness.emptyEnv` and
 `Backend.Aggregates.Controls.emptyEnv`; all are `⟨[]⟩`. -/
 def emptyEnv : Source.Env := ⟨[]⟩
 
@@ -125,11 +125,10 @@ theorem empty_admitted : EnvAdmission emptyEnv :=
 
 /-- **The H24 field for any producer whose accepted Sources all live in the
 empty environment.** Degenerate: see `empty_admitted`. The P8 model witness
-`P8.PlanWitness.planProducer` (branch `cloud/move5-20261106/p8-producer`, not
-yet on master) is such a producer: its origins map every admitted input to
-`sourceOf`, whose environment is `P8.PlanWitness.emptyEnv`, definitionally
-`⟨[]⟩` like this module's `emptyEnv`, so its instance is
-`admissionOfEmpty planProducer (fun _ _ _ _ => rfl)`. -/
+`P8.PlanWitness.planProducer` is such a producer: its origins map every
+admitted input to `sourceOf`, whose environment is `P8.PlanWitness.emptyEnv`,
+definitionally `⟨[]⟩` like this module's `emptyEnv`. Its instance is
+`PlanGraphAdmission.planAdmission` (this module does not import the witness). -/
 def admissionOfEmpty (producer : P8.P8a.Producer S reference origins roots)
     (empty : ∀ (i : S.Input) (r : S.Resolved) (h : producer.admission.frontend i = some r)
       (art : Roadmap.Artifact), (P8Bindings.acceptedSource producer i r h art).1 = emptyEnv) :

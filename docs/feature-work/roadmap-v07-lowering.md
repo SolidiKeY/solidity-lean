@@ -135,7 +135,7 @@ the inline-self environment. `LocationGraphInterface.Admission` and
 Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
 resource, where `Producer` is uninhabited (P8-SPEC-LAW1,
 [P8 admission](p8-admission.md#failure-projection-conflict)). The only known
-inhabitant is the off-master model witness `P8.PlanWitness.planProducer` (CP77). `scalar_value` and
+inhabitant is the model witness `P8.PlanWitness.planProducer` (G07 toy, empty Source) (CP77). `scalar_value` and
 `source_assignment_run` ignore the producer; they only rename the environment
 and are proved by `integer_related` and `source_assign_local_run`.
 
@@ -1263,3 +1263,15 @@ conflated; the scratch check not reproducible (commits now named); "V16 not
 on master" wrong (V16 is merged, and its G18.02/.03 work is partial);
 `emptyEnv`, `admission` and `declarationGraphProducer` unpinned; module
 docstring, module-map row and an `empty_produces` docstring missing.
+
+### CP78: latest master and the H24 instance at `planProducer`
+
+Merged master `2102e024a`. It fixes the layers failure inherited from
+`fea090bf9` (12 new core edges, none in V07) and contains the p8-producer
+merge. `Lowering/V07/PlanGraphAdmission.lean` now holds the real instance:
+`accepted_empty` (`rfl`), `planAdmission : Admission planProducer`,
+`planDeclarationGraphProducer`, and `plan_record_producer`. The CP77 scratch
+check is superseded by this module. The record is degenerate as described in
+CP77: it inhabits the additive `DeclarationGraphAdmission.Producer` and says
+nothing about structs in real accepted Source. The "off master" wording is
+updated in the V07 docstrings.

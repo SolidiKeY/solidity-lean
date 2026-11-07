@@ -6,7 +6,7 @@ import Solidity.Lowering.V07.GraphAdmissionBoundary
 Successful checks return a real certificate. None does not reject Source.
 No assumption that all producer-admitted inputs pass these checks is supplied. Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
 resource (P8-SPEC-LAW1, `Lowering/P8/ResourceContractLaw1.lean`); the only
-known inhabitant is the off-master model witness `P8.PlanWitness.planProducer`. -/
+known inhabitant is the model witness `P8.PlanWitness.planProducer` (G07 toy, empty Source). -/
 namespace Solidity.Lowering.V07.AcceptedGraphProducer
 open Solidity.Lowering.P8
 open P8Bindings

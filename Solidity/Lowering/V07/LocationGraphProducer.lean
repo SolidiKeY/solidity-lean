@@ -6,7 +6,7 @@ field and rank checks are computed; no final certificate/preservation premise.
 Source refusal and all-admitted success remain separate obligations.
 Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
 resource (P8-SPEC-LAW1, `Lowering/P8/ResourceContractLaw1.lean`); the only
-known inhabitant is the off-master model witness `P8.PlanWitness.planProducer`. -/
+known inhabitant is the model witness `P8.PlanWitness.planProducer` (G07 toy, empty Source). -/
 namespace Solidity.Lowering.V07.LocationGraphProducer
 open Solidity Solidity.Lowering.V07
 open LocationGraphInterface

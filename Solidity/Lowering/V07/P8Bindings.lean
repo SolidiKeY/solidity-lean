@@ -7,7 +7,7 @@ admission/failure premise structure or producer inhabitant is introduced.
 These conditional laws do not supply Source reference adequacy or a graph
 producer; the graph evidence remains an actual DeclarationGraph argument. Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
 resource (P8-SPEC-LAW1, `Lowering/P8/ResourceContractLaw1.lean`); the only
-known inhabitant is the off-master model witness `P8.PlanWitness.planProducer`.
+known inhabitant is the model witness `P8.PlanWitness.planProducer` (G07 toy, empty Source).
 `scalar_value` and `source_assignment_run` do not use the producer argument. -/
 namespace Solidity.Lowering.V07.P8Bindings
 open Solidity.Lowering.P8

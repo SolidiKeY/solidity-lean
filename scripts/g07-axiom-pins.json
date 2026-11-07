@@ -52838,6 +52838,26 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/PlanGraphAdmission.lean:Solidity.Lowering.V07.PlanGraphAdmission.accepted_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/PlanGraphAdmission.lean:Solidity.Lowering.V07.PlanGraphAdmission.plan_record_producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/PlanGraphAdmission.lean:Solidity.Lowering.V07.PlanGraphAdmission.planAdmission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/PlanGraphAdmission.lean:Solidity.Lowering.V07.PlanGraphAdmission.planDeclarationGraphProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/SignedComplement.lean:Solidity.Lowering.V07.SignedComplement.local_transport": [
   "Classical.choice",
   "Quot.sound",

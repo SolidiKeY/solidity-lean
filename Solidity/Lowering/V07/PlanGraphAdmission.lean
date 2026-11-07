@@ -33,13 +33,13 @@ def planDeclarationGraphProducer :
 /-- The record carries exactly the model producer. -/
 theorem plan_record_producer : planDeclarationGraphProducer.1 = planProducer := rfl
 
-/-- info: 'Solidity.Lowering.V07.PlanGraphAdmission.accepted_empty' does not depend on any axioms -/
+/-- info: 'Solidity.Lowering.V07.PlanGraphAdmission.accepted_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms accepted_empty
 /-- info: 'Solidity.Lowering.V07.PlanGraphAdmission.planAdmission' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms planAdmission
 /-- info: 'Solidity.Lowering.V07.PlanGraphAdmission.planDeclarationGraphProducer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms planDeclarationGraphProducer
-/-- info: 'Solidity.Lowering.V07.PlanGraphAdmission.plan_record_producer' does not depend on any axioms -/
+/-- info: 'Solidity.Lowering.V07.PlanGraphAdmission.plan_record_producer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms plan_record_producer
 
 end Solidity.Lowering.V07.PlanGraphAdmission

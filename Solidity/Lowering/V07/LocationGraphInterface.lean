@@ -91,7 +91,7 @@ def ofStorage {E : Source.Env} {n : Nat} {G : TypeGraph.Schema n}
 Both fields are required: per-admissible-declaration graphs AND actual Source
 refusal. No inhabitant or all-admitted-success theorem is supplied here. Everything indexed by `P8a.Producer` is vacuous for every `Nat`-encodable
 resource (P8-SPEC-LAW1, `Lowering/P8/ResourceContractLaw1.lean`); the only
-known inhabitant is the off-master model witness `P8.PlanWitness.planProducer`. -/
+known inhabitant is the model witness `P8.PlanWitness.planProducer` (G07 toy, empty Source). -/
 structure Admission {S : P8a.Spec} {reference : P8a.OperationalReference}
     {origins : P8a.SourceOrigins S} {roots : P8a.RootModel S}
     (producer : P8a.Producer S reference origins roots) where
