@@ -54,21 +54,38 @@ def validate_record(row):
         raise ValueError("theorem type is not a proposition")
     if row["is_theorem"] and row["body_expr"] is not None:
         raise ValueError("unexpected theorem proof body")
-    expected_body_status = ("proof body intentionally omitted" if row["is_theorem"] else
-                            "available expression; not unfolded dependency closure" if row["body_expr"] is not None else
-                            "no available value")
-    if row["body_status"] != expected_body_status:
+    legacy_status = ("proof body intentionally omitted" if row["is_theorem"] else
+                     "available expression; not unfolded dependency closure" if row["body_expr"] is not None else
+                     "no available value")
+    expanded_status = ("proof body intentionally omitted; declaration retained" if row["is_theorem"] or row["proof_type"] else
+                       "available expression; not unfolded dependency closure" if row["body_expr"] is not None else
+                       "no available value")
+    if row["body_status"] not in {legacy_status, expanded_status}:
         raise ValueError("body availability contradicts record")
+    if row["body_status"] == "proof body intentionally omitted; declaration retained" and row["body_expr"] is not None:
+        raise ValueError("omitted proof unexpectedly has a body")
     if row["interface_or_premises_module"] != ("Interface" in row["module"] or "Premises" in row["module"]):
         raise ValueError("module classification contradicts origin")
     span = row["declaration_range"]
     if span is not None:
-        if not isinstance(span, dict) or set(span) != {"start_line", "end_line", "selection_line"}:
+        legacy_keys = {"start_line", "end_line", "selection_line"}
+        expanded_keys = legacy_keys | {"selection_column", "selection_end_line", "selection_end_column", "position_units"}
+        if not isinstance(span, dict) or set(span) not in (legacy_keys, expanded_keys):
             raise ValueError("invalid declaration range")
-        if any(type(value) is not int for value in span.values()):
+        numeric_keys = set(span) - {"position_units"}
+        if any(type(span[key]) is not int for key in numeric_keys):
             raise ValueError("noninteger declaration range")
         if not 1 <= span["start_line"] <= span["selection_line"] <= span["end_line"]:
             raise ValueError("inconsistent declaration range")
+        if set(span) == expanded_keys:
+            if span["position_units"] != "one-based lines; zero-based Unicode codepoint columns":
+                raise ValueError("unsupported position units")
+            if not span["selection_line"] <= span["selection_end_line"] <= span["end_line"]:
+                raise ValueError("inconsistent selection end")
+            if min(span["selection_column"], span["selection_end_column"]) < 0:
+                raise ValueError("negative selection column")
+            if span["selection_line"] == span["selection_end_line"] and span["selection_end_column"] < span["selection_column"]:
+                raise ValueError("reversed selection columns")
     if not isinstance(row["level_params"], list) or any(not isinstance(x, str) for x in row["level_params"]):
         raise ValueError("invalid universe parameters")
     if len(set(row["level_params"])) != len(row["level_params"]):
@@ -241,3 +258,26 @@ def parent_metadata(rows):
                         "inherited_obligation_status": "uncovered; instantiated inherited types not reconstructed",
                         "witness_status": "uncovered"})
     return results
+
+
+def selected_domains(rows, targets):
+    """Bind a reviewed helper roster to observed kernel types, without coverage.
+
+    This guards stale helper names and missing/non-theorem targets. It neither
+    checks proof receipts nor promotes a partial inspection into global linkage.
+    """
+    validate_rows(rows)
+    if not isinstance(targets, dict) or not targets or any(not text(k) or not text(v) for k, v in targets.items()):
+        raise ValueError("invalid domain target roster")
+    if len(set(targets.values())) != len(targets):
+        raise ValueError("duplicate domain target")
+    by_name = {row["name"]: row for row in rows}
+    result = []
+    for helper, target in sorted(targets.items()):
+        row = by_name.get(target)
+        if row is None or not row["is_theorem"]:
+            raise ValueError("missing original theorem target: " + target)
+        result.append({"helper": helper, "target": target, "kernel_type": observed_type(row),
+                       "statement_correspondence": "not established by roster/type observation",
+                       "witness_ledger_linked": False, "establishes_original_conclusion": False})
+    return result

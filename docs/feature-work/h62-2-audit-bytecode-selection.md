@@ -1449,3 +1449,49 @@ whitespace check flags upstream duplication-scanner/migrate-optimizer files
 including preserved archived patch bytes; these are not altered by this
 resolution. No Lean check or full validation claimed by the merge. Existing
 producer waits, PowerBounds STOP and incomplete audit obligations remain.
+
+
+## Selected gate kernel metadata and source candidates
+
+Adopted published master806a972a4 in merge5d6a709313142f7f9d27a9ea3afc2711108c168f.
+Existing expanded census generator inspected the14frozen gate leaves already
+used by68domain proofs. Initial render against live module-map correctly refused;
+rendering from the exact frozen c6f550 checkout preserved its scope/hash guard.
+Single serial native inspection PASS10.325s; current generator template/source
+manifest, stable inspector source, log and output hashes are bound by report.py.
+Both runtime monitorsPASS under unchanged original01:11→05:11UTC window and
+12GiB/noSwap/4GiBreserve policy. No build/prerequisite/PowerBounds retry.
+
+Actual output has294records:200originaltheorems,21proofconstants,7predicate
+constants,66dataconstants;64private records include55private theorems. All66
+lexical source theorem candidates have unique name/Unicode selection-position
+matching records, including14private source matches.134originaltheorems,41of
+them private, are outside those lexical matches and remain explicitly unlinked.
+All68selected public-method/certificate-field targets occur as originaltheorems;
+report preserves their raw types, universes and binder kinds/types/proof flags.
+No parent metadata roots occur in these14modules; no global inheritance result
+follows.238selected import receipt bindings rechecked against current products
+and frozen source; original full-source terminalRED retained.
+
+Existing metadata validator now accepts the expanded inspector's precise Unicode
+columns and explicit omitted-proof-constant status as well as historical schema.
+Malformed partial ranges, reversed/end positions, byte-unit substitution and
+unexpected omitted proof bodies are refused. A general selected_domains helper
+retains observed target types without promoting feasibility, correspondence,
+proof receipts, source authority or global ledger linkage. Regression tests
+cover empty/missing/duplicate/non-theorem rosters and mutable alias rejection.
+Generated inspection/report/program/products remain offGit. No production
+statement, definition, premise, budget, axiom or exclusion changed. No RUNTIME
+gate or performance acceptance. Full703/190core/37Bridge and all original
+source/witness/owner/semantic/final obligations remain pending.
+Evidence: /workspace/parallel-20261103/executable-bytecode/gate-kernel-metadata/.
+
+Final finder/skeptic reviews pass after fixing direct test discovery, exact
+inspector reconstruction, import-receipt binding and module/source set validation.
+Both79discoverytests and20directmetadatatests pass; trust, orphans, roots,
+fragments and whitespace pass. Global doc-path gate FAILS on incoming
+tests/h62/item2/audit-evm-compiler/check_scope.py references to nonexistent
+A.lean/B.lean; external files preserved, failure retained, no green full gate.
+No module in this checkpoint exceeded60s; native inspection10.325s is not a
+paired performance result. Existing scoped pin registration remains coordinator
+work and is not rerun or waived by this checkpoint.

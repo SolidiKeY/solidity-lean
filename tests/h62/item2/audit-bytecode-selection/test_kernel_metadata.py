@@ -172,5 +172,52 @@ class ParentMetadataTests(unittest.TestCase):
         projection=self.constant("A.self");projection.update(kind="field",is_projection=True)
         self.assertEqual(parent_metadata([row,projection])[0]["cycles"],[["A","A"]])
 
+
+
+class ExpandedMetadataTests(unittest.TestCase):
+    row = MetadataSchemaTests.row
+
+    def expanded(self):
+        row = self.row()
+        row["body_status"] = "proof body intentionally omitted; declaration retained"
+        row["declaration_range"].update(selection_column=2, selection_end_line=1,
+            selection_end_column=3, position_units="one-based lines; zero-based Unicode codepoint columns")
+        return row
+
+    def test_expanded_positions_and_omitted_proof_constants(self):
+        row = self.expanded()
+        self.assertEqual(validate_record(row), row)
+        row.update(is_theorem=False, kind="constant", original_kind="Lean.ConstantKind.defn")
+        self.assertEqual(validate_record(row), row)
+        row["body_expr"] = "unexpected proof"
+        with self.assertRaises(ValueError): validate_record(row)
+
+    def test_expanded_position_corruption_refused(self):
+        changes = [{"selection_column": -1}, {"selection_end_line": 0},
+                   {"selection_end_column": 1}, {"position_units": "bytes"},
+                   {"selection_end_column": True}]
+        for change in changes:
+            row = self.expanded(); row["declaration_range"].update(change)
+            with self.subTest(change=change), self.assertRaises(ValueError): validate_record(row)
+        row = self.expanded(); row["declaration_range"].pop("selection_end_column")
+        with self.assertRaises(ValueError): validate_record(row)
+
+    def test_target_roster_is_partial_observation_not_linkage(self):
+        row = self.expanded()
+        report = selected_domains([row], {"helper": row["name"]})
+        self.assertFalse(report[0]["witness_ledger_linked"])
+        self.assertFalse(report[0]["establishes_original_conclusion"])
+        self.assertEqual(report[0]["kernel_type"]["type_expr"], row["type_expr"])
+        row["binders"].append({"ignored": "mutation"})
+        self.assertEqual(report[0]["kernel_type"]["binders"], [])
+
+    def test_missing_duplicate_and_non_theorem_roster_refused(self):
+        row = self.expanded()
+        for roster in ({}, {"a": "absent"}, {"a": row["name"], "b": row["name"]}, {"a": 1}):
+            with self.subTest(roster=roster), self.assertRaises(ValueError): selected_domains([row], roster)
+        row.update(is_theorem=False, kind="constant", original_kind="Lean.ConstantKind.defn")
+        with self.assertRaises(ValueError): selected_domains([row], {"a": row["name"]})
+
+
 if __name__ == "__main__":
     unittest.main()
