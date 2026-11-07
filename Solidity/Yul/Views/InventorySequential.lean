@@ -3,6 +3,9 @@ import Solidity.Yul.Views.InventoryTraversal
 /-! Legacy canonical sequential preparation. Its recursor and equation API are
 preserved while its planning step is shared with additive decoder adapters. -/
 
+-- Retain dependent heap/image transport reductions in the existing inventory proof.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Yul.Views
 
 /-- Decode each original typed owned root against the CURRENT constructed

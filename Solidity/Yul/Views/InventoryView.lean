@@ -1,5 +1,8 @@
 import Solidity.Yul.Views.InventorySnapshot
 
+-- Retain typed refreshed-image reductions in the existing inventory view proof.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Yul.Views
 
 theorem refreshed_image_encode {D : Source.Layout} {h : Source.Heap D} (p : Placement h)

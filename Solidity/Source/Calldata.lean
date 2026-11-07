@@ -185,7 +185,8 @@ theorem cdToMem_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
           (X := fun e y => MemOK E H y ∧ NotStuck e))
         (fun y hy => ⟨hy, .array fun _ => .val (Val.refOK_of_loc (STy.decodableElem_loc hσ) _)⟩)
         (fun _ _ h => h) (fun _ _ h => h)) fun _ => Hoare.pure' fun _ h => h
-  · simp only [cdToMem, dif_pos hc]
+  · unfold cdToMem
+    rw [dif_pos hc]
     exact Hoare.pure' fun _ h => ⟨h, trivial⟩
 
 /-- **A statically encoded element `cdStaticToMem` copies** (G18.05): a
@@ -258,15 +259,27 @@ theorem cdToMem_static_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
       (∃ σ m, τ = .array .memory σ (some m) ∧ σ.cdCopyElem E = true)) :
     Hoare (MemOK E H) (cdToMem F τ off len : EM E Γ (RVal E.layout τ))
       (fun v y => MemOK E H y ∧ RValOK E y.2.heap.ty v) (fun e y => MemOK E H y ∧ NotStuck e) := by
-  rcases hτ with ⟨e, m, rfl, hσ⟩ | ⟨σ, m, rfl, hσ⟩
-  all_goals
-    simp only [cdToMem, STy.loc?, reduceCtorEq, dite_false]
-    refine Hoare.bind (cdElems_ok _ (fun H' o => cdStaticToMem_ok F _ hσ H' o) H off _) fun xs => ?_
+  have copy_ok (σ : STy) (size : Nat) (k : Option Nat)
+      (hl : ∀ x, k = some x → x = size) (hs : σ.cdCopyElem E = true) :
+      Hoare (MemOK E H)
+        ((cdElems (cdStaticToMem F σ) σ.cdHeadBytes off size >>= fun xs =>
+          allocRef (Data.array (D := E.layout) (l := .memory) (n := k) size hl xs) >>=
+            fun v => pure (.val v)) : EM E Γ (RVal E.layout (.array .memory σ k)))
+        (fun v y => MemOK E H y ∧ RValOK E y.2.heap.ty v)
+        (fun e y => MemOK E H y ∧ NotStuck e) := by
+    refine Hoare.bind (cdElems_ok _ (fun H' o => cdStaticToMem_ok F _ hs H' o) H off _) fun xs => ?_
     refine Hoare.bind ?_ fun _ => Hoare.pure' fun _ h => h
     intro y hy
     exact allocRef_memX (Data.array _ _ xs) rfl (by trivial) (by exact fun j => (hy.2 j).imp fun _ h => h.1)
       (X := fun e y => MemOK E H y ∧ NotStuck e) y
       ⟨hy.1, .array fun j => by obtain ⟨v, hv, hr⟩ := hy.2 j; rw [hv]; exact .val hr⟩
+  rcases hτ with ⟨e, m, rfl, hσ⟩ | ⟨σ, m, rfl, hσ⟩
+  · exact copy_ok (.array .memory e (some m)) len none (fun _ h => nomatch h) hσ
+  · cases σ with
+    | array l e k =>
+      cases l <;> cases k <;>
+        exact copy_ok _ m (some m) (fun _ h => by cases h; rfl) hσ
+    | _ => exact copy_ok _ m (some m) (fun _ h => by cases h; rfl) hσ
 
 /-! ## The evaluation arms on `calldata` locals -/
 

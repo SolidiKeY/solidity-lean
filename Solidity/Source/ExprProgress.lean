@@ -275,7 +275,7 @@ theorem writeAt_ns {Γ : RCtx} (F : Fr) (p : SPath) {τ : STy} (hc : τ = E.cell
   · unfold applyOp
     split
     · exact NS.bind (NS.halt' fun _ h => by cases h) fun _ => NS.modSt' _
-    · exact NS.bind (NS.pure' _) fun _ => NS.modSt' _
+    · exact NS.modSt' _
 
 /-! ## The value fragment -/
 

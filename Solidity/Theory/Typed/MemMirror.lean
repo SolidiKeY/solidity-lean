@@ -18,6 +18,9 @@ which is what lets a struct's later members be copied after its earlier
 ones.
 -/
 
+-- Retain typed heap/reference reductions in the existing memory-copy mirror proofs.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Semantics (structDef lookupBy)
