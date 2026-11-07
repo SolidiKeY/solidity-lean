@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "obligation": "callsite:src/extension.ts:21:24:createOutputChannel",
+  "sourceHead": "e31c419c538bcc7012fd9f3e90f2949a3a5af45a",
+  "fileCount": 102,
+  "uncompressedBytes": 4526001,
+  "archive": {
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/lifetime-evidence/bulk.tar.gz",
+    "bytes": 808071,
+    "sha256": "29477c0c1731c75327eb42d1d829a9d71526e834f3d1fddfa5e67980a0f60826"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-output-lifecycle-20261107/lifetime-evidence/files.json",
+    "bytes": 24822,
+    "sha256": "623c2381632935c352c904b1374baebda25d75935058808419d90ec3cf11474c"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-output-lifetime-evidence-manifest.json --restore",
+  "boundaries": [
+    "Original60000ms native document-close timeout retained; official Code bundle/model-reference cache diagnosis and corrected real editor-open driver evidenced.",
+    "Native correction restores original config slot and actual reported runtime; identical URI/version/text reopens with raw synchronization1to2 and real close/open packets.",
+    "Confirmed local physical close before channel disposal; no paired upstream negative/shutdown matrix, all descendants, full glyph, performance/kernel/EVM or per-row judgment claim."
+  ]
+}
