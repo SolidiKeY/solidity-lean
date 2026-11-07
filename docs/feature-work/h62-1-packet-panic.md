@@ -125,3 +125,7 @@ The base-pinned eight-row witness ledger records the auxiliary machine, arbitrar
 ## SignedSub Execution continuation
 
 The base-pinned seven-row signed subtraction execution ledger retains the unchecked Source frame, local-family and representation premises, arbitrary target tails and Source-only zero-horizon timeout. Negative controls pass. Independent read-only finder and skeptic matched all seven observations without Lean; no material discrepancy was found. No original producer or proof guard was edited.
+
+## SignedMod Controls continuation
+
+The base-pinned thirty-row controls ledger records Source, symbolic target, numeric guard, timeout and refusal distinctions. Negative controls pass. Independent read-only finder and skeptic reviewed without Lean, both flagging a potential initial-memory versus post-execution ambiguity; its wording was corrected and rechecked. No original producer or proof guard was edited.

@@ -99,3 +99,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## SignedSub Execution
 
 `signed_sub_execution_ledger.py` adds seven base-pinned literal declarations for unchecked signed subtraction, public selection and emitted code, arbitrary-tail symbolic execution and its retained StateRepr, and Source-only zero-horizon timeout. The original local-family, range, read and representation premises remain binding. Private `int_word_unique` is separately accounted and axiom guards remain untouched. This is textual accounting, not Lean proof or native execution. The ledgers now describe 368 of 474 observed literal headers; 106 of the original subtotal remain.
+
+## SignedMod Controls
+
+`signed_mod_controls_ledger.py` adds thirty base-pinned literal declarations for populated fixtures, Source and selected symbolic outcomes, separate raw/guarded numeric zero behavior, five signed remainder examples, low-horizon timeouts, saved-tail and short-frame refusals and an initial memory snapshot. Original ranges, checked/pipeline quantifiers and w77-prefixed arbitrary tails remain binding. Exact Source divZero data is not a symbolic target payload claim. The ledgers now describe 398 of 474 observed lexical headers; 76 of the original subtotal remain. This is not Lean proof or full semantic coverage.
