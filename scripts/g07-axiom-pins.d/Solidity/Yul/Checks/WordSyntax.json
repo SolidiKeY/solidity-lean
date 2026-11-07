@@ -1,0 +1,27 @@
+{
+ "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.ClosedSyntax.Checked.finalNames_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.ClosedSyntax.Checked.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.WordSyntax.Prepared.program_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.WordSyntax.Prepared.run_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/WordSyntax.lean:Solidity.Yul.WordSyntax.Prepared.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
