@@ -1,7 +1,21 @@
 # H62 item 2: V09 empty-statement audit
 
+H145 evidence location: lane receipts, transition records, checksum/resource
+records and validation reports formerly stored below the audit test directory
+are preserved in the private coordination repository, commit
+`f347f97aa7aec79c74e006efaf0508cd077a569c`, under
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/evidence-archive.tar.gz`.
+Historical references below to those evidence JSON files refer to that archive.
+The code branch retains the Lean modules, checker-read witness maps, portable
+fixture/materialization inputs and acceptance code. Frozen registrations,
+expected assertions and external materialization requirements are unchanged.
+The archive preserves fresh records; it does not reconstruct the still-missing
+historical VM evidence.
+
 Status: partial; full assignment unfinished. The selected frozen census contains
-179 files and1259 rows. 225 selected rows now have checked concrete instances;1034 remain open. Counts include checked reuse of original concrete control proofs.
+179 files and1259 rows. Last recorded selected coverage is538 rows;721 remain
+open. These historical counts do not replace missing evidence recovery or fresh
+full kernel acceptance. Counts include checked reuse of original control proofs.
 The19 earlier supplemental instances and4 unselected ClosedValues instances do not reduce this count.
 Earlier subtraction counts are withdrawn; see Coverage membership correction.
 Supplemental proof validity and resolved private identities are retained.
@@ -1619,3 +1633,13 @@ New focused duration is not paired/full timing acceptance. Selected538/1259,
 `assembler-reference-evidence.json`, retained at
 `/workspace/vy3-assembler-reference-evidence-20261107`. Historical evidence,
 known doc failure, native/Source waits and full validation remain open.
+
+
+H145 migration preserves the nine archived evidence records byte-for-byte and
+all checker-read fixtures in place. Only two module-docstring pointers changed
+in Python; their executable ASTs are unchanged. The unchanged evidence and
+private-path checks pass. The portable suite currently attempts41 tests and
+reports four errors from the existing frozen/live bitwise statement drift;
+the unmodified committed census source reproduces that same refusal. No missing
+archived JSON is involved, no guard/expected assertion was changed and no
+frozen inventory was repinned. This remains an open acceptance failure.
