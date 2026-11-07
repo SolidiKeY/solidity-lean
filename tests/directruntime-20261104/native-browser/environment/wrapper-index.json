@@ -40,7 +40,7 @@
       "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
     },
     {
-      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/checks.sh",
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/historical/checks.sh",
       "archiveMember": "executed-private/checks.sh",
       "bytes": 5470,
       "sha256": "65316b36daf4368174f0efcacaeaeec553da6b0078c8e9fcc9ce754237fc1d12",
@@ -103,7 +103,7 @@
       "role": "Historical wrapper/config snapshot; fixed paths retained; not a turnkey replay command."
     },
     {
-      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/remaining-checks.sh",
+      "repositoryPath": "tests/directruntime-20261104/native-browser/environment/scripts/historical/remaining-checks.sh",
       "archiveMember": "executed-private/remaining-checks.sh",
       "bytes": 3460,
       "sha256": "13b8b20a57c959c94565fdf7f32d8fa55049c2db934d2459468f7545680ce6db",
@@ -192,5 +192,6 @@
     ],
     "boundary": "VM paths are courier locators, not public download URLs or proof that transport completed."
   },
-  "boundary": "Exact source snapshots extracted from the hash-verified evidence archive; no runtime/control rerun or change to historical receipts. External fixtures, toolchains, private setup shims and candidates remain prerequisites; preservation is not replay acceptance."
+  "boundary": "Exact source snapshots extracted from the hash-verified evidence archive; no runtime/control rerun or change to historical receipts. External fixtures, toolchains, private setup shims and candidates remain prerequisites; preservation is not replay acceptance.",
+  "continuationPolicy": "Historical checks/remaining-checks snapshots moved to scripts/historical with unchanged hashes. Active scripts use known-stack-continuation.py; only exact documented invariant stack failure may permit independent continuation, retaining browser gate FAIL. Other failures stop. No stopped workload rerun."
 }
