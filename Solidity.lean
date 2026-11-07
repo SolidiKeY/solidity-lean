@@ -4105,11 +4105,11 @@ import Solidity.Source.CalldataAggregates
 import Solidity.Source.CalldataCopy
 import Solidity.Source.CalldataCopyAccess
 import Solidity.Source.CalldataExamples
-import Solidity.Source.Calls.BoundRecognizer
-import Solidity.Source.Calls.BoundRecognizerControls
 import Solidity.Source.CalldataLayout
 import Solidity.Source.CalldataNestedCopyControls
 import Solidity.Source.CalldataStaticCopyControls
+import Solidity.Source.Calls.BoundRecognizer
+import Solidity.Source.Calls.BoundRecognizerControls
 import Solidity.Source.Const
 import Solidity.Source.ConstCheck
 import Solidity.Source.Ctor
