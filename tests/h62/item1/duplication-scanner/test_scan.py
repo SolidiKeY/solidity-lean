@@ -526,6 +526,31 @@ class ScannerControls(unittest.TestCase):
         clean = b'def a : String := "set_option x in theorem fake"\ndef b : Nat := 0\n'
         self.assertEqual(len(scanner.scan(root / "E.lean", root, clean)), 2)
 
+    def test_scoped_open_inline_declarations_fail_closed(self):
+        root = Path("/virtual")
+        cases = (
+            b"open Nat in theorem hidden : True := by trivial\ndef visible : Nat := 0\n",
+            b"open Nat\n  in private\n  def hidden : Nat := 0\ndef visible : Nat := 0\n",
+            b"open scoped Foo in @[simp]\n  theorem hidden : True := by trivial\n",
+        )
+        for source in cases:
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "unsupported same-line scoped open declaration"):
+                    scanner.scan(root / "A.lean", root, source)
+        following = b"open Nat in\ntheorem visible : True := by trivial\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, following)[0]["name"], "visible")
+        ordinary = b'open Nat\ndef str : String := "open Nat in theorem fake"\n'
+        self.assertEqual(scanner.scan(root / "C.lean", root, ordinary)[0]["name"], "str")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(cases[0])
+            (temp / "B.lean").write_bytes(following)
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            value = json.loads(report.stdout)
+            self.assertEqual(value["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(value["incremental"]["removed"])
+
     def test_equal_context_does_not_prove_local_definition_equivalence(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -310,11 +310,12 @@ def scan(path, root, source=None):
     for command in context_commands:
         index = bisect.bisect_right(boundaries, command.start())
         stop = boundaries[index] if index < len(boundaries) else len(text)
-        # A scoped command may place `in` on a later line. Refuse an inline
-        # declaration that the line-initial recognizer would silently miss.
-        if (re.match(r"[ \t]*set_option\b", command.group()) and
+        # Scoped option/open headers may place `in` on a later line. Refuse
+        # inline declaration prefixes that the line recognizer would miss.
+        scoped = re.match(r"[ \t]*(set_option|open)\b", command.group())
+        if (scoped and
             re.search(r"\bin[ \t]+(?:@\[|(?:private|public|protected|meta|noncomputable|local|scoped|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
-            raise ValueError("unsupported same-line scoped set_option declaration")
+            raise ValueError("unsupported same-line scoped " + scoped.group(1) + " declaration")
         context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []
     relative_path = path.relative_to(root).as_posix()

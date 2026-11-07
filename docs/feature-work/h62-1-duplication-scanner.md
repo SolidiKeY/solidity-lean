@@ -1294,3 +1294,37 @@ reviewed the replay without Lean. This establishes repeatability for these
 runs, not complete census, resolved kernel names, signature equivalence or
 live ownership. Full reports and timing records are outside Git in the
 priority-instances evidence directory.
+
+## Scoped open command guard
+
+The conservative inline scoped-command guard now covers `open` as well as
+`set_option`. An inline declaration keyword, modifier or attribute prefix
+after `in` makes the file incomplete, including split headers and prefixes.
+Following-line declarations and ordinary open commands remain recognized.
+This prevents the reported silent omission, but scoped namespace lifetime and
+arbitrary wrappers or macros remain lexical approximations; ambiguous text
+may be refused. Candidate signature and ownership rejection reasons remain.
+
+Finder and skeptic independently reviewed the implementation without Lean.
+The combined Python suite passed 201 tests, including incomplete-report,
+multiline, attribute and string controls. A first baseline attempt was refused
+before starting because the conservative resource preflight lacked 2 GiB of
+job headroom beyond the 4 GiB reserve. Task-owned bulk-report cache pages
+were released without changing files; the actual matched pair used the same
+8 GiB address-space cap, re-advised the prior report before the after scan,
+and sampled cgroup availability every half second. Neither run hit the
+resource stop. This sampling is not a continuous or hidden-ancestor guarantee.
+
+The pair took 118.079 seconds before and 118.075 seconds after (-0.0034%).
+Both used the same 7,445 inputs, recognized 124,796 declarations and reported
+no file errors or unmatched globs. Complete reports matched after normalizing
+scanner identity. This is an external lexical-tool measurement, not a Lean
+runtime gate, complete census or signature proof. Evidence is outside Git
+under `/workspace/h62-duplication-scanner-evidence/scoped-open/`.
+
+The repository documentation-path gate exited 1 on a missing witness reference
+in the upstream audit-v09-passes document, outside this scanner lane. The
+initial resource refusal is recorded as a transcription of the visible tool
+response, not an independently captured runner log. Cache advice was applied
+to the prior report before each scan, but the receipts do not prove identical
+operating-system cache state.
