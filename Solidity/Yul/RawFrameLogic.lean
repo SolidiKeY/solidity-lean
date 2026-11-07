@@ -1,10 +1,13 @@
 import Solidity.Yul.RawFrame
+import Solidity.Yul.DirtyReadback
 import Solidity.Yul.WordAdapterLogic
 
 /-! Concrete word-calculus interpretation for the existing raw LOCAL frame.
 The initial frame parameter supplies the clean backup/world retained by capture.
 Box and diamond quantify actual interpreter completions. No Source statement,
-compiler adequacy, new calculus rule or SolKey taclet is supplied. -/
+compiler adequacy, new calculus rule or SolKey taclet is supplied.
+Dirty-readback observations use the published decoder without changing the raw
+frame; pipeline equality includes refused results and backup fallback. -/
 namespace Solidity.Yul.RawFrame.Logic
 
 def holds {ctx control} (mode : Solidity.Modality)
@@ -356,5 +359,34 @@ theorem holds_congr_on_completed :
       exact ⟨fuel,result,done,(agree fuel result done).mp valid⟩
     · rintro ⟨fuel,result,done,valid⟩
       exact ⟨fuel,result,done,(agree fuel result done).mpr valid⟩
+
+/-- The published dirty-readback boundary agrees across pipelines on the full
+optional locals/world result. Refusals remain refusals, untouched unsupported
+locals retain the existing backup fallback, and raw words are not rewritten.
+This is an observation law, not Source execution integration. -/
+theorem frame_readback_pipelines :
+ ∀ (ctx : Solidity.Source.Ctx) (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.DirtyReadback.frame .legacy state =
+ Solidity.Yul.DirtyReadback.frame .viaIR state := by
+  intro ctx state
+  exact congrArg (fun result => result.map (fun locals => (locals, state.world)))
+    (Solidity.Yul.DirtyReadback.readbackFrom_pipelines ctx.env ctx.tys state.clean
+      (Solidity.Yul.RawFrame.materialize state).1)
+
+/-- Every raw-frame modality observing the published optional readback has
+the same meaning in both pipelines. This retains actual completions, whole
+locals/world observations and refused readbacks without claiming Source execution. -/
+theorem holds_readback_pipelines :
+ ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Option (Solidity.Source.Locals ctx.env.layout ctx.tys × Solidity.Source.St ctx.env) → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.Logic.holds mode code policy
+   (fun result => post (Solidity.Yul.DirtyReadback.frame .legacy result.state)) state ↔
+ Solidity.Yul.RawFrame.Logic.holds mode code policy
+   (fun result => post (Solidity.Yul.DirtyReadback.frame .viaIR result.state)) state := by
+  intros ctx control mode code policy post state
+  simp only [Solidity.Yul.RawFrame.Logic.frame_readback_pipelines]
 
 end Solidity.Yul.RawFrame.Logic

@@ -199,3 +199,17 @@ Reader signatures remain intact. The guarded `msg.sender` bridge uses `.env
 .msgSender`; malformed/user identities keep field decoding and error order.
 See address-manifest.json for exact source hashes,30passing file gates and
 245/1486matched census boundary. This is not full address or importer parity.
+
+Existing environment-member increment: `Shared.environmentMember? : Json → String
+→ String → Option EnvKey` is the metadata-shape gate used by shared expressionStep.
+It reuses existing EnvKey.ofParts and adds value/time routing beside sender.
+Reader signatures/imports and entry premises are unchanged. See environment-manifest.json
+for 31-file gates, exact source-ID controls and unchanged census/outcome limits.
+This does not qualify source/world semantics or the latest native/WASM binaries.
+
+Proof-only addition: `environmentMember?_guard` establishes that every successful
+helper result belongs to `EnvKey.ofParts` and satisfies the negative-reference
+guard. It does not authenticate compiler identity or prove source/world adequacy.
+All pre-existing Translate definitions remain byte-identical to prework f83a7016.
+See environment-proof-manifest.json for the exact signature, axiom set and gates.
+Existing H71 runtime packets remain on their original route; no duplicate relay.

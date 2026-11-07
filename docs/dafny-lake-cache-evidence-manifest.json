@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceHead": "4f0a2d6abe3a920d8c5a20c8c06d373a1014824d",
+  "fileCount": 32,
+  "uncompressedBytes": 4785524,
+  "archive": {
+    "path": "/workspace/dafny-parity-lake-cache-20261107/refresh-4f0a/evidence/bulk.tar.gz",
+    "bytes": 1457252,
+    "sha256": "df2c697aec6fef8f97520b8e936fa43a37fbd1626e8c61a7334e31a475ac43c2"
+  },
+  "index": {
+    "path": "/workspace/dafny-parity-lake-cache-20261107/refresh-4f0a/evidence/files.json",
+    "bytes": 6199,
+    "sha256": "be136ece5fd3cfc05793300aff92a90dae5bb95b9a985aa21052050c9e928d11"
+  },
+  "provisionedAssets": [
+    {
+      "path": "/workspace/dafny-parity-lake-cache-20261107/refresh-4f0a/retained/1794022986893556821-master-cache.tar.gz",
+      "bytes": 1991842740,
+      "sha256": "9279b7031dc5ee77ad2e7424ad7936172dc26e9da0d3a453e7e7c7d27a40d722"
+    },
+    {
+      "path": "/workspace/dafny-parity-lake-cache-20261107/refresh-4f0a/retained/1794022987607279825-master-cache.sha256",
+      "bytes": 86,
+      "sha256": "d53f0d05d42b4dd0868950a4380a2a7f0efbae82718d86d223bf393fd5ca9651"
+    }
+  ],
+  "cacheDirectory": "/workspace/dafny-parity-lake-cache-20261107/refresh-4f0a/coherent-cache",
+  "restorationBoundary": "Evidence archive restores receipts only; immutable published artifact packet stays at the listed VM path. Original global cache and mappings preserved.",
+  "outcomes": [
+    "Unchanged official fetch script exit0; exact published4f0 packet checksum matched.",
+    "Preserved old index has five conflicting output mappings. Exact published index plus verified hardlinks in isolated cache; no fabricated keys.",
+    "Original and serial-config no-build checks exit3 retained; isolated coherent cache fetches Derived20/21 with no-build exit0,281targets.",
+    "Canceled cold checkpoint -15 preserved; no cold Derived20/21 proof execution.",
+    "12GiB hardAS/aggregate guard/noSwap/12GiB headroom fallback; no systemd scope."
+  ],
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-lake-cache-evidence-manifest.json --restore"
+}

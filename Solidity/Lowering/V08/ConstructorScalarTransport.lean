@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.EnvironmentProjection
 import Solidity.Lowering.V07.SourceReads
 import Solidity.Lowering.V08.SourcePayableDeploymentControls
 
@@ -298,4 +299,40 @@ theorem timeout (p : Roadmap.Pipeline) (bytes : Roadmap.Bytes) (n : Int) (h : ra
 /-- info: 'Solidity.Lowering.V08.ConstructorScalarTransport.timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms timeout
+
+/-- Exact adapter to the common frame input relation; legacy fields are intact. -/
+def toFrameAgreement {f : Source.Fr} {address : ContractWorld.Address}
+    {ctx : ContractWorld.Context} (p : FrameInputs f address ctx) :
+    EnvironmentProjection.FrameAgreement f address ctx := by
+  rcases p with ⟨ha, hs, hv, ht⟩
+  exact ⟨(EnvironmentProjection.frame_nat_int_exact _ _).mp ha,
+    (EnvironmentProjection.frame_nat_int_exact _ _).mp hs,
+    (EnvironmentProjection.frame_nat_int_exact _ _).mp hv, ht⟩
+
+def ofFrameAgreement {f : Source.Fr} {address : ContractWorld.Address}
+    {ctx : ContractWorld.Context}
+    (p : EnvironmentProjection.FrameAgreement f address ctx) : FrameInputs f address ctx :=
+  ⟨(EnvironmentProjection.frame_nat_int_exact _ _).mpr p.address,
+    (EnvironmentProjection.frame_nat_int_exact _ _).mpr p.sender,
+    (EnvironmentProjection.frame_nat_int_exact _ _).mpr p.value, p.static⟩
+
+theorem frameInputs_roundtrip {f : Source.Fr} {address : ContractWorld.Address}
+    {ctx : ContractWorld.Context} (p : FrameInputs f address ctx) :
+    ofFrameAgreement (toFrameAgreement p) = p := rfl
+
+theorem frameAgreement_roundtrip {f : Source.Fr} {address : ContractWorld.Address}
+    {ctx : ContractWorld.Context} (p : EnvironmentProjection.FrameAgreement f address ctx) :
+    toFrameAgreement (ofFrameAgreement p) = p := rfl
+
+theorem frameAgreement_exact {f : Source.Fr} {address : ContractWorld.Address}
+    {ctx : ContractWorld.Context} :
+    FrameInputs f address ctx ↔ EnvironmentProjection.FrameAgreement f address ctx :=
+  ⟨toFrameAgreement, ofFrameAgreement⟩
+
+#print axioms toFrameAgreement
+#print axioms ofFrameAgreement
+#print axioms frameInputs_roundtrip
+#print axioms frameAgreement_roundtrip
+#print axioms frameAgreement_exact
+
 end Solidity.Lowering.V08.ConstructorScalarTransport
