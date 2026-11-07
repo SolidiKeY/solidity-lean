@@ -2468,3 +2468,22 @@ Independent read-only finder and skeptic checked roles, hashes and history
 preservation without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/v09-audit-evidence.sha256`. This non-atomic observation
 does not establish current runtime acceptance.
+
+## V09 allocation audit observations
+
+`v09_allocation_controls.py` records three previously unreferenced allocation
+audit sources with hashes and the audit document hash. Their stated roles cover
+joint allocation inputs and private identity checks, reached allocation capacity
+and failure, and mapped-prefix allocator preservation. The failure case does not
+invent a post-failure machine or tail. Current invocation, inputs, effects and
+outcomes remain unresolved; this subset does not establish native ByteWorld or
+whole compiler adequacy.
+
+At `3e5a58fad5118c5b58e86964ce9920ffe8e6d40f`, the refreshed static index has
+813 candidates, 605 with supplied current references and 208 without; seven retain
+historical references for review. One previously unreferenced candidate changed
+and none was added or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, hashes and history preservation without Lean or
+a server. Evidence hashes are in
+`tests/h55/module-times/v09-allocation-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
