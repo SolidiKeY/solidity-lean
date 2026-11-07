@@ -1,0 +1,395 @@
+{
+  "version": 1,
+  "boundary": "Area responsibility routing from frozen roadmap and documentary evidence; not exclusive file ownership or edit permission. Historical producer lane hints are not assignments.",
+  "rules": [
+    {
+      "id": "struct-defaults",
+      "pattern": "Solidity/Backend/MemoryOps/StructDefaults/*.lean",
+      "priority": 20,
+      "owners": [
+        "MRS"
+      ],
+      "obligations": [
+        "G33"
+      ],
+      "evidence": [
+        {
+          "path": "docs/feature-work/roadmap-g33-struct-defaults.md",
+          "contains": "from the memory-reference-structs lane"
+        },
+        {
+          "item": "G33",
+          "contains": "G33-structs -> MRS"
+        }
+      ],
+      "producer_status": "documented lane; exact live file ownership not independently confirmed"
+    },
+    {
+      "id": "memory-operations",
+      "pattern": "Solidity/Backend/MemoryOps/*.lean",
+      "priority": 1,
+      "owners": [
+        "V11"
+      ],
+      "obligations": [
+        "G32",
+        "G34",
+        "P6"
+      ],
+      "evidence": [
+        {
+          "item": "G32"
+        },
+        {
+          "item": "G34"
+        },
+        {
+          "item": "P6"
+        },
+        {
+          "path": "docs/feature-work/memory-operation-proofs.md",
+          "contains": "original V11 commit"
+        }
+      ],
+      "producer_status": "documented V11 source provenance; exact live file ownership not independently confirmed"
+    },
+    {
+      "id": "memory-copies",
+      "pattern": "Solidity/Backend/MemoryCopies/*.lean",
+      "priority": 1,
+      "owners": [
+        "V11"
+      ],
+      "obligations": [
+        "G33",
+        "G35.01",
+        "G35.04",
+        "G35.05",
+        "G35.06"
+      ],
+      "evidence": [
+        {
+          "item": "G33"
+        },
+        {
+          "item": "G35.01"
+        },
+        {
+          "item": "G35.04"
+        },
+        {
+          "item": "G35.05"
+        },
+        {
+          "item": "G35.06"
+        },
+        {
+          "path": "docs/feature-work/memory-copies.md",
+          "contains": "parallel-20261103/memory-copies"
+        }
+      ],
+      "producer_lane_hint": "parallel-20261103/memory-copies",
+      "producer_status": "unresolved live producer identity; do not substitute CR based on lane name"
+    },
+    {
+      "id": "byte-aggregates",
+      "pattern": "Solidity/Backend/Aggregates/Byte*.lean",
+      "priority": 10,
+      "owners": [
+        "V14"
+      ],
+      "obligations": [
+        "G18.04",
+        "G18.05"
+      ],
+      "evidence": [
+        {
+          "item": "G18.04"
+        },
+        {
+          "item": "G18.05"
+        },
+        {
+          "path": "docs/module-map/memory-operations.d/00-base.md",
+          "contains": "G18.04/.05 groundwork"
+        }
+      ],
+      "producer_status": "roadmap area assignment; exact live file ownership not independently confirmed"
+    },
+    {
+      "id": "g18-aggregates",
+      "pattern": "Solidity/Backend/Aggregates/G18*.lean",
+      "priority": 1,
+      "owners": [
+        "V16"
+      ],
+      "obligations": [
+        "G18.02",
+        "G18.03"
+      ],
+      "evidence": [
+        {
+          "item": "G18.02"
+        },
+        {
+          "item": "G18.03"
+        },
+        {
+          "path": "docs/module-map/memory-operations.d/00-base.md",
+          "contains": "G18.02: `Env.pathTy`"
+        }
+      ],
+      "producer_status": "roadmap area assignment; exact live file ownership not independently confirmed"
+    },
+    {
+      "id": "abi-entry",
+      "pattern": "Solidity/Backend/AbiEntry/*.lean",
+      "priority": 1,
+      "owners": [
+        "V13"
+      ],
+      "obligations": [
+        "G40"
+      ],
+      "evidence": [
+        {
+          "item": "G40"
+        },
+        {
+          "path": "docs/module-map/memory-operations.d/00-base.md",
+          "contains": "G40 source-boundary obligation"
+        }
+      ],
+      "producer_status": "roadmap area assignment; exact live file ownership not independently confirmed"
+    },
+    {
+      "id": "abi-view-boundary",
+      "pattern": "Solidity/Backend/AbiEntry/Premises/Calldata*.lean",
+      "priority": 20,
+      "owners": [
+        "V11"
+      ],
+      "obligations": [
+        "G34"
+      ],
+      "evidence": [
+        {
+          "item": "G34"
+        },
+        {
+          "path": "Solidity/Backend/AbiEntry/Premises/CalldataViews.lean",
+          "contains": "V11/G34 typed overlapping-calldata-view premise"
+        }
+      ],
+      "producer_status": "explicit V11 boundary; decoder coherence remains V13 caller obligation"
+    },
+    {
+      "id": "abi-mixed-premises",
+      "pattern": "Solidity/Backend/AbiEntry/Premises.lean",
+      "priority": 20,
+      "owners": [
+        "V11",
+        "V09"
+      ],
+      "obligations": [
+        "G34",
+        "G35.03",
+        "G24.03"
+      ],
+      "evidence": [
+        {
+          "item": "G35.03"
+        },
+        {
+          "item": "G24.03"
+        },
+        {
+          "path": "Solidity/Backend/AbiEntry/Premises.lean",
+          "contains": "G24.03 belongs to V09"
+        }
+      ],
+      "producer_status": "joint boundary; declaration-specific ownership overrides required"
+    },
+    {
+      "id": "function-values",
+      "pattern": "Solidity/Backend/FunctionValues/*.lean",
+      "priority": 1,
+      "owners": [
+        "V13"
+      ],
+      "obligations": [
+        "G42.05"
+      ],
+      "evidence": [
+        {
+          "item": "G42.05"
+        },
+        {
+          "path": "docs/module-map/memory-operations.d/00-base.md",
+          "contains": "G42.05 external function value boundary"
+        }
+      ],
+      "producer_status": "roadmap area assignment; exact live file ownership not independently confirmed"
+    },
+    {
+      "id": "try-call-h8",
+      "pattern": "Solidity/Backend/TryCall/*.lean",
+      "priority": 1,
+      "owners": [
+        "DT"
+      ],
+      "obligations": [
+        "H8-known-self-Panic"
+      ],
+      "evidence": [
+        {
+          "path": "docs/feature-work/diamond-try-h8-source-model.md",
+          "contains": "next10/diamond-try H8 checkpoint"
+        }
+      ],
+      "producer_status": "documented DT bounded H8 specialization; not reassignment of generic G36/G42 ownership"
+    }
+  ],
+  "declaration_overrides": [
+    {
+      "path": "Solidity/Backend/AbiEntry/Premises.lean",
+      "short_name": "Statement",
+      "owners": [
+        "V09"
+      ],
+      "obligations": [
+        "G24.03"
+      ],
+      "evidence": [
+        {
+          "path": "Solidity/Backend/AbiEntry/Premises.lean",
+          "contains": "V09/G24.03: actual typed statement execution"
+        }
+      ]
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/Premises.lean",
+      "short_name": "CalldataSlice",
+      "owners": [
+        "V11"
+      ],
+      "obligations": [
+        "G35.03"
+      ],
+      "evidence": [
+        {
+          "path": "Solidity/Backend/AbiEntry/Premises.lean",
+          "contains": "V11/G35.03: a copy or slice"
+        }
+      ]
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/Premises.lean",
+      "short_name": "CopyAgreement",
+      "owners": [
+        "V11"
+      ],
+      "obligations": [
+        "G35.03"
+      ],
+      "evidence": [
+        {
+          "path": "Solidity/Backend/AbiEntry/Premises.lean",
+          "contains": "V11/G35.03: source/target copy agreement"
+        }
+      ]
+    },
+    {
+      "path": "Solidity/Backend/MemoryCopies/Premises.lean",
+      "short_name": "Panic41Premise",
+      "owners": [
+        "MRS"
+      ],
+      "obligations": [
+        "S03-PANIC41"
+      ],
+      "evidence": [
+        {
+          "path": "docs/feature-work/memory-copies.md",
+          "contains": "VY5 H16/S03-PANIC41"
+        },
+        {
+          "item": "S03-PANIC41"
+        },
+        {
+          "external_input": "decisions-20261102.md",
+          "contains": "VY5 (single writer)"
+        }
+      ],
+      "discharger_owners": [
+        "VY5"
+      ],
+      "producer_status": "S03-PANIC41 area responsibility is MRS in snapshot; H16 Source single writer/dependency role is VY5. Neither is an exclusive MemoryCopies file ownership grant."
+    },
+    {
+      "path": "Solidity/Backend/MemoryCopies/Premises.lean",
+      "short_name": "NewArrayLengthPanicPremise",
+      "owners": [
+        "MRS"
+      ],
+      "obligations": [
+        "S03-PANIC41"
+      ],
+      "evidence": [
+        {
+          "path": "docs/feature-work/memory-copies.md",
+          "contains": "VY5 H16/S03-PANIC41"
+        },
+        {
+          "item": "S03-PANIC41"
+        },
+        {
+          "external_input": "decisions-20261102.md",
+          "contains": "VY5 (single writer)"
+        }
+      ],
+      "discharger_owners": [
+        "VY5"
+      ],
+      "producer_status": "S03-PANIC41 area responsibility is MRS in snapshot; H16 Source single writer/dependency role is VY5. Neither is an exclusive MemoryCopies file ownership grant."
+    },
+    {
+      "path": "Solidity/Backend/MemoryCopies/Premises.lean",
+      "short_name": "LocationStepPremise",
+      "owners": [
+        "V10",
+        "V11"
+      ],
+      "obligations": [
+        "G27.05",
+        "G35.02",
+        "G35.03"
+      ],
+      "evidence": [
+        {
+          "path": "Solidity/Backend/MemoryCopies/Premises.lean",
+          "contains": "V10 G27.05, V11 G35.02/.03"
+        }
+      ]
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/Premises/CalldataViews.lean",
+      "short_name": "V11G34_ViewCoherence",
+      "owners": [
+        "V11"
+      ],
+      "obligations": [
+        "G34"
+      ],
+      "discharger_owners": [
+        "V13"
+      ],
+      "evidence": [
+        {
+          "path": "Solidity/Backend/AbiEntry/Premises/CalldataViews.lean",
+          "contains": "G40 discharges this for its actual decoder results"
+        }
+      ]
+    }
+  ]
+}
