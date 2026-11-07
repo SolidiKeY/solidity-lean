@@ -20,7 +20,7 @@ state substitution was attempted. Worker implementation is stopped and the
 coordinator must pause the existing goal externally.
 
 The original prompt, queues, steering and retirement notes are retained under
-scripts/h62/item2/audit-calculus/handoff/. The exact361-path scope inventory
+scripts/h62/item2/audit-calculus/h28-inherited-handoff/. The exact361-path scope inventory
 is external under H44; its absolute path, size and SHA256 are in
 tests/h62/item2/audit-calculus/bulk-inputs-manifest.json. Other bulk and unimplemented drafts
 remain off Git in the authenticated evidence archive. Coordinator-local paths
@@ -1154,3 +1154,11 @@ Bulk source, exact signatures and full shape/result roster remain off Git at /wo
 Whole assignment/four audit checkpoints incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw/Context waits and P20 comment-repair integration/gate wait persist. No duplicate producer ping or application of owner code. Rejected prototype/timing/reserve STOPs and unavailable historical exact-byte gaps remain.
 
 Documentation gate FAIL exit1: adopted-master Solidity/Yul/Compilation/P20InterfaceV2Controls.lean cites missing tests/h62/item2/audit-v09-passes/P20InterfaceV2Controls.lean. Exact citing bytes/master and full failure log archived; no local Yul/scanner edit or waiver. Accounting and93controls pass; complete acceptance remains FAIL exit1.
+
+## Master integration and retirement packet rename (V65)
+
+Adopted master df554535e9c8d308276a99ea23611c7d63ae5919. Reported generic retirement paths are absent in actual master; used explicitly authorized rename option. The five inherited handoff files now live in scripts/h62/item2/audit-calculus/h28-inherited-handoff/ with identical bytes and relative checksums; old generic paths removed and this document link updated. No inherited assignment text or original evidence discarded. Prior721 roles/4562pending,1537 unresolved owners and zero fresh joint witnesses unchanged.
+
+Finder/skeptic PASS packaging; imported producer files match master, no local producer source edits. Accounting and93controls PASS; complete acceptance remains FAIL. P20 missing-path failure cleared by adopted real fixture, without Lean/replay acceptance. Full documentation gate still FAIL on unchanged master docs/feature-work/h62-2-audit-v09-passes.md citing missing SelectedHeapBoundaryWitness.lean. No waiver. H28 Raw/Context and proof/replay pauses and all performance/trust STOPs persist.
+
+Published lane head94d08c7c has only patch-equivalent changes already in this branch; its ancestry is preserved without tree change before normal authorized lane push. No master push. Exact logs, before-file hashes and gate metrics remain off Git under /workspace/h62-successor-evidence/master-integration-v65 with a small manifest. This integration is not whole-goal completion.

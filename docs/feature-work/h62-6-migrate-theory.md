@@ -126,9 +126,10 @@ missing slice `toList`, missing String `dropRight`, and polymorphic `endsWith`
 eta shape. That negative fixture is intentionally excluded from library roots.
 
 An additional, uncommitted positive-suffix experiment did **not** prove its
-statement. Its exact initial source/hash and failed attempts remain off git as
-the artifact named "StringApiWitness.original-unproved.lean" and associated logs
-(not a repository file citation). It is excluded
+statement. Its initial source and failed attempts are off-Git artifacts, not
+repository modules. The historical artifact locator is recorded in the
+[complete work/backfill queue](../../tests/h62/item6/migrate-theory/h82-handoff/complete-work-backfill-queue.json);
+those artifact bytes have not been recovered or revalidated here. It is excluded
 from accepted coverage, is not a replacement or weakening of a frozen theorem,
 and is not claimed successful. No original Theory statement changed.
 
