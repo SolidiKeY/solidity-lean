@@ -1,0 +1,795 @@
+{
+  "status": "FOCUSED_SERIAL_COMPONENT_GATE_PASS",
+  "checked_head": "790cbf3a536cd7719e997cf6d099d46122c56d58",
+  "versions": {
+    "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)"
+  },
+  "component_files": 14,
+  "prerequisites": [
+    "Solidity/KeySort.lean per-file gate"
+  ],
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/CallableMetadataJoint.lean": "2e1d05ecbd3f0323b41506a847f74a2644d503bfb3c4e73fce4f64a7cd8f82e9",
+    "tests/h62/item2/audit-v08-adapters/CallableReflectionJoint.lean": "5713a5f38a65fd1aa2d8e22ca702964d53683648e0cb54445cd079e799f405ed",
+    "tests/h62/item2/audit-v08-adapters/ConditionalCallableJoint.lean": "0b717b465f29aed9827888f8a38c551c240fbff9ba7d7c9386891a67b91824c6",
+    "tests/h62/item2/audit-v08-adapters/FixedBytesArgumentJoint.lean": "a67fe4209824af649c4f8885afe7bb04048d4307500e101f26e78ff74bb3f491",
+    "tests/h62/item2/audit-v08-adapters/InheritedNonpayableJoint.lean": "bfa5f79ac183713f5d601db33f0baafed390ca815222640ce0b580174a7b2264",
+    "tests/h62/item2/audit-v08-adapters/IntegerCallableJoint.lean": "acea5e808b0cd7e8d8dd5911fadffa548619dc874991e3ed1d4466c98e6a6b4c",
+    "tests/h62/item2/audit-v08-adapters/PayableGuardJoint.lean": "ae0687eb6379c25fc06f21a1b61e7d40e83ad8ab9dd7442fb929cd79be19db31",
+    "tests/h62/item2/audit-v08-adapters/PureArgumentJoint.lean": "f5fdd4f6cc7aa05a125e762bc418241de056961735ab91e2e921d9dd26ed7779",
+    "tests/h62/item2/audit-v08-adapters/RoleAttachmentJoint.lean": "2a27598ced4ead2d572ad2d30470d893198a0d84a74a24f6ac99b39248fa25af",
+    "tests/h62/item2/audit-v08-adapters/TupleCallableJoint.lean": "7c9f7002b66f4c93c413bc948c8a3184f2d2d5b9e81fee618212d219d7f13da0",
+    "tests/h62/item2/audit-v08-adapters/TypedKeccakJoint.lean": "15c859c23d36c2a07caf60ef077c09ea59233aa45fc508bd806695d6023fb957",
+    "tests/h62/item2/audit-v08-adapters/UnsignedUpdateJoint.lean": "c075f318231cea88bc50df84f2ae327ca0e56ff71145dd68a7c894f79d3224eb",
+    "tests/h62/item2/audit-v08-adapters/WordCastCallableJoint.lean": "bce6b95064e0947b36ff6b9f061316efa5c3449ce2e5634c549876ab78f40cc9",
+    "tests/h62/item2/audit-v08-adapters/WorldImageJoint.lean": "dd0b1b60309f5f44fa5fb38ab33974cd5116fef053ab2c6349459d295c5bc69b"
+  },
+  "source_stable": true,
+  "total_gate_seconds": 187.866,
+  "peak_sampled_aggregate_rss": 1854423040,
+  "max_lean_processes": 1,
+  "all_stops_null": true,
+  "results": [
+    {
+      "file": "Solidity/KeySort.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "Solidity/KeySort.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 0.945,
+        "peak_sampled_aggregate_rss": 330964992,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "290563756aff3523b1c386e73d6e3b7d29f118e5ac07774d85ebee33d8b8ff95"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/CallableMetadataJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/CallableMetadataJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 1.266,
+        "peak_sampled_aggregate_rss": 696594432,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "ecfa2abf13fab51a8d19ad8dc64debab9b6a138b3b6ab331792224038526c72a"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/CallableReflectionJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/CallableReflectionJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 1.049,
+        "peak_sampled_aggregate_rss": 671993856,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "9d1134c1f6583b7afa64be4713a83e7699cbbf11675fe357d03520d8b631114d"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/ConditionalCallableJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/ConditionalCallableJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 125.968,
+        "peak_sampled_aggregate_rss": 1854423040,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "3865a5f8337552ab9cd1f696b5a4e31a22345b14f8aca47c78eb1a11c01caa47"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/FixedBytesArgumentJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/FixedBytesArgumentJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 23.522,
+        "peak_sampled_aggregate_rss": 838348800,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "e49a98766c8504158e06b4508b6ee1b97865ea50cadd4788114ba804c4494493"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/InheritedNonpayableJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/InheritedNonpayableJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 1.272,
+        "peak_sampled_aggregate_rss": 728080384,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "33e456bbd2cd39c2518d12935698c45dca939a93ddbeeaa39413b4a7618f1838"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/IntegerCallableJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/IntegerCallableJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 1.489,
+        "peak_sampled_aggregate_rss": 761942016,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "878795a03236ba597f3104892c7c62a70ef7cc20ce3b63467d1e1acb5a123e10"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/PayableGuardJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/PayableGuardJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 1.052,
+        "peak_sampled_aggregate_rss": 705200128,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "a4250ed837a6988ed07b0e2ee7521a7a46f89e6241f3267a6e3216e331c7e6ec"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/PureArgumentJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/PureArgumentJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 3.263,
+        "peak_sampled_aggregate_rss": 827084800,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "6ecbd865e140cb620042b0273f4097f803b6bf54bb08b4a319bee7262d8a1f67"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/RoleAttachmentJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/RoleAttachmentJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 0.953,
+        "peak_sampled_aggregate_rss": 677597184,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "befe40a3d9e8e91024c773342c39e84673c52ff7e03d8e6a47c7413d4dc47777"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/TupleCallableJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/TupleCallableJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 3.679,
+        "peak_sampled_aggregate_rss": 832311296,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "0c75d236066f6da21f31c26cfb31d557e1d431d0a6f6d72af96da02c63d7c7a4"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/TypedKeccakJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/TypedKeccakJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 0.949,
+        "peak_sampled_aggregate_rss": 676384768,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "cb389fb719ffebf597542891635e5c051fe0472bd7352eb875846ed4ad043c01"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/UnsignedUpdateJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/UnsignedUpdateJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 10.255,
+        "peak_sampled_aggregate_rss": 817922048,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "7cbb0502362127c1b4b7836f28488ce19b4de034596a3c11b15b4f645db69a22"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/WordCastCallableJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/WordCastCallableJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 4.418,
+        "peak_sampled_aggregate_rss": 873062400,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "3660e399e0ae9adf3904b927fcdea830f99a3401262c02275cabfcba194e1c42"
+    },
+    {
+      "file": "tests/h62/item2/audit-v08-adapters/WorldImageJoint.lean",
+      "gate": {
+        "command": [
+          "bash",
+          "scripts/coord-tools/gate.sh",
+          "per-file",
+          "tests/h62/item2/audit-v08-adapters/WorldImageJoint.lean"
+        ],
+        "exit": 0,
+        "stop": null,
+        "seconds": 7.786,
+        "peak_sampled_aggregate_rss": 768352256,
+        "max_lean_processes": 1,
+        "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+        "LEAN_NUM_THREADS": "1"
+      },
+      "results_sha256": "c0c0fab5f8fca7d76ee3a431a011e90dc8d6a61d74dd518b81d71354da14251c"
+    }
+  ],
+  "full_project_gate": false,
+  "new_joint_witnesses": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "excluded_from_frozen_audit_count": [
+    "FixedBytesArgumentJoint.lean: original module absent from frozen snapshot; retained only as V08 backfill validation."
+  ],
+  "limitations": [
+    "Fourteen current component files and their built imports checked serially, not the full mapped family or project root.",
+    "Mixed cold/cached import rebuild elapsed is not a matched performance comparison and releases no prior timing STOP.",
+    "No Source admission/lifecycle, complete production body/frame/session correspondence or H68 full bridge proved by these component checks.",
+    "Current pin registration hold remains separate; no pin gate rerun or pass here."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/00-KeySort/console.log",
+      "bytes": 135,
+      "sha256": "42d985eecff8f8116fa44ceb4d194175dbd10b1671eddcd6fbc2b51eb302366a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/00-KeySort/gates/1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/00-KeySort/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/00-KeySort/gates/gates.tsv",
+      "bytes": 186,
+      "sha256": "b28cdcb942cf7a063375aefc5f711c7988a2afb8460b48c8d77eb65d82956533"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/00-KeySort/results.json",
+      "bytes": 361,
+      "sha256": "290563756aff3523b1c386e73d6e3b7d29f118e5ac07774d85ebee33d8b8ff95"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/00-runner.log",
+      "bytes": 323,
+      "sha256": "659289b5029c86f458758564d89a3dd4f312437e8be6cf44c5e91dd5a571b60d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/01-CallableMetadataJoint/console.log",
+      "bytes": 189,
+      "sha256": "cfc764c4a02bfef64d261dd91deded03c5022c7b23c56d34b286d0c84d86fff9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/01-CallableMetadataJoint/gates/1.log",
+      "bytes": 12499,
+      "sha256": "04c762f9d255e82626b34a59b350a66be75791ea8841d5398d9af9677e4b4cb3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/01-CallableMetadataJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/01-CallableMetadataJoint/gates/gates.tsv",
+      "bytes": 280,
+      "sha256": "53d5ce1f1abaacc07ce4e6d71ecabdc5f9540f3f74632e00bb8d7fc5445173f9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/01-CallableMetadataJoint/results.json",
+      "bytes": 401,
+      "sha256": "ecfa2abf13fab51a8d19ad8dc64debab9b6a138b3b6ab331792224038526c72a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/01-runner.log",
+      "bytes": 363,
+      "sha256": "2c81d6c38762de440546c661caecec564075620f1a87544907a7f403b3b5dcef"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/02-CallableReflectionJoint/console.log",
+      "bytes": 193,
+      "sha256": "a1804d59769728a93aac7a5daa7e5130a008a8fe3d9a65519797e57a7c831f8c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/02-CallableReflectionJoint/gates/1.log",
+      "bytes": 10227,
+      "sha256": "802277f4dbf7565c7b80d0be0cab88150ea41449e5a4fb44092e9adba7445798"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/02-CallableReflectionJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/02-CallableReflectionJoint/gates/gates.tsv",
+      "bytes": 286,
+      "sha256": "105119dd69359b7967fcd9c7d463fd6f24d3908e3c07504b9813ac4267c3c77e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/02-CallableReflectionJoint/results.json",
+      "bytes": 403,
+      "sha256": "9d1134c1f6583b7afa64be4713a83e7699cbbf11675fe357d03520d8b631114d"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/02-runner.log",
+      "bytes": 365,
+      "sha256": "952c59b7eb614da5599e70cfb7a440fbe7846f9f6bac32b2ea9ea030a24dad5c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/03-ConditionalCallableJoint/console.log",
+      "bytes": 197,
+      "sha256": "b6b640781bb7c95184fee9d6c2033b1694d0459d012263fbdecc2bf7beb92ab6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/03-ConditionalCallableJoint/gates/1.log",
+      "bytes": 35176,
+      "sha256": "2d7d20658d08b61b5237c6e174e3d3310430e396f1e6147b52ee39a22272033e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/03-ConditionalCallableJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/03-ConditionalCallableJoint/gates/gates.tsv",
+      "bytes": 291,
+      "sha256": "da4c1a6c45fc0baeb3668020525935585c12ad20d17dd5c0ba38ce982968e3a9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/03-ConditionalCallableJoint/results.json",
+      "bytes": 407,
+      "sha256": "3865a5f8337552ab9cd1f696b5a4e31a22345b14f8aca47c78eb1a11c01caa47"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/03-runner.log",
+      "bytes": 369,
+      "sha256": "d3eb6c6b574f93821117d17dbe48a9351524759454bc4312a809b6993129fc91"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/04-FixedBytesArgumentJoint/console.log",
+      "bytes": 194,
+      "sha256": "616478eb2738696770133050e473fc92f9099920300501c7586a0a915d195b0b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/04-FixedBytesArgumentJoint/gates/1.log",
+      "bytes": 25624,
+      "sha256": "e613a0dba648c320a7870e21468e95daa4d89f2d44463494e0d1950d73fde7c9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/04-FixedBytesArgumentJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/04-FixedBytesArgumentJoint/gates/gates.tsv",
+      "bytes": 287,
+      "sha256": "fc54c0815716060240ad390d7114744e0c7d41de32a4f32ae4e05b3bc9e344f0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/04-FixedBytesArgumentJoint/results.json",
+      "bytes": 404,
+      "sha256": "e49a98766c8504158e06b4508b6ee1b97865ea50cadd4788114ba804c4494493"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/04-runner.log",
+      "bytes": 366,
+      "sha256": "1d318328b0254494d6fca76eb00a657d3332285136c0836c83e4a9ea40031633"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/05-InheritedNonpayableJoint/console.log",
+      "bytes": 195,
+      "sha256": "c635a16902e17cb0422f0106c6969d50cc319ff38f6f5d5ed022285a9c90be2e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/05-InheritedNonpayableJoint/gates/1.log",
+      "bytes": 12185,
+      "sha256": "6d20655a0bc48a152b59e43620762f315de9d621898cfd73bc7233700817e410"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/05-InheritedNonpayableJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/05-InheritedNonpayableJoint/gates/gates.tsv",
+      "bytes": 289,
+      "sha256": "898e120ab1c011bc538213c663c16c3820e304b03674ce7fd3cb88a66b0bd665"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/05-InheritedNonpayableJoint/results.json",
+      "bytes": 404,
+      "sha256": "33e456bbd2cd39c2518d12935698c45dca939a93ddbeeaa39413b4a7618f1838"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/05-runner.log",
+      "bytes": 366,
+      "sha256": "919a73c9a788317dcf8eb2cbe7b269e57f93b74f78ffb719fdc9f3e735d9bfd4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/06-IntegerCallableJoint/console.log",
+      "bytes": 187,
+      "sha256": "f7a651a5a39a865743fc782e14d1e78f8e18fae3aca7defb9c06690eab63b3b3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/06-IntegerCallableJoint/gates/1.log",
+      "bytes": 19949,
+      "sha256": "e80a83a63f2e420bc9852ae81086a9b472bf669b493aeb1d181d7d37c519cf2a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/06-IntegerCallableJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/06-IntegerCallableJoint/gates/gates.tsv",
+      "bytes": 277,
+      "sha256": "f8c04ae486c117524ae0891713d01a95d0485265666950920a10e9e8b3302914"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/06-IntegerCallableJoint/results.json",
+      "bytes": 400,
+      "sha256": "878795a03236ba597f3104892c7c62a70ef7cc20ce3b63467d1e1acb5a123e10"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/06-runner.log",
+      "bytes": 362,
+      "sha256": "b77b3472acc8fa71a5b803ddccd2e26a35751415d3dd5de7502294c370f9e4d3"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/07-PayableGuardJoint/console.log",
+      "bytes": 181,
+      "sha256": "3e9b7198d74b219ae3c0ded2deb341de85deb7ff39a08e7da75ec0ebb91f13fb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/07-PayableGuardJoint/gates/1.log",
+      "bytes": 15228,
+      "sha256": "77d4f6e2157a452eedb8c431dea47817f7bb14ebef7d6323377bfc530f8afb05"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/07-PayableGuardJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/07-PayableGuardJoint/gates/gates.tsv",
+      "bytes": 268,
+      "sha256": "9de19ab2f896e44d60e9818d0ff2d7f39864032569413c4493ac311f896a8a6c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/07-PayableGuardJoint/results.json",
+      "bytes": 397,
+      "sha256": "a4250ed837a6988ed07b0e2ee7521a7a46f89e6241f3267a6e3216e331c7e6ec"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/07-runner.log",
+      "bytes": 359,
+      "sha256": "a4b997b5176f602d68358980dbf74f23d20b47cf93c6f1e76c470d2d0b4678c0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/08-PureArgumentJoint/console.log",
+      "bytes": 181,
+      "sha256": "b6f41df6ad9519f73c95c9ef217ad20f4b685b4dcbbfc8c7c1f6e2ac23649643"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/08-PureArgumentJoint/gates/1.log",
+      "bytes": 33342,
+      "sha256": "6e29cf405e74559592b87edc1191a19ed92cece887e44ee8009ae13ea9bfb54a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/08-PureArgumentJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/08-PureArgumentJoint/gates/gates.tsv",
+      "bytes": 268,
+      "sha256": "2e8f8d5ec1c3ba1403c6d7749985c04ac06ab1cfc52c05ca0eb58f17975d2608"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/08-PureArgumentJoint/results.json",
+      "bytes": 397,
+      "sha256": "6ecbd865e140cb620042b0273f4097f803b6bf54bb08b4a319bee7262d8a1f67"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/08-runner.log",
+      "bytes": 359,
+      "sha256": "72f2eb2db951e757511082566687d91dd3d1a00619179f02a843a957e751340b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/09-RoleAttachmentJoint/console.log",
+      "bytes": 185,
+      "sha256": "8713a815d5ddb8da8cb8c98c1292b7cb2664f284d2f212c28b3ef54baecf2a85"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/09-RoleAttachmentJoint/gates/1.log",
+      "bytes": 14335,
+      "sha256": "f7d9adcbb6224c6e80c5e7b5a036bed584789d788021e4982b596fe9e43cfcee"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/09-RoleAttachmentJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/09-RoleAttachmentJoint/gates/gates.tsv",
+      "bytes": 274,
+      "sha256": "3989bbb9ddf85caa29914e205616a392b2b805305b02fe0cae68801dddd0fbe8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/09-RoleAttachmentJoint/results.json",
+      "bytes": 399,
+      "sha256": "befe40a3d9e8e91024c773342c39e84673c52ff7e03d8e6a47c7413d4dc47777"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/09-runner.log",
+      "bytes": 361,
+      "sha256": "5834f44ab260b1904f021c130815ee91fe72c6f49c92dfd7b66fea502a063c1e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/10-TupleCallableJoint/console.log",
+      "bytes": 183,
+      "sha256": "f163d2cb91e0cb32358d41356b9c357bb362a54a4814245f55a4bbec344e2c95"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/10-TupleCallableJoint/gates/1.log",
+      "bytes": 33444,
+      "sha256": "bd59852519cea48dbd1e83dfa2a8e7ba9212a9d0793e9e06111ce8eb7a06d39c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/10-TupleCallableJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/10-TupleCallableJoint/gates/gates.tsv",
+      "bytes": 271,
+      "sha256": "d83b5592f2c5ebddf400f9da5941b22a3f6b12a0d603bf8a52ef850af6de5919"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/10-TupleCallableJoint/results.json",
+      "bytes": 398,
+      "sha256": "0c75d236066f6da21f31c26cfb31d557e1d431d0a6f6d72af96da02c63d7c7a4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/10-runner.log",
+      "bytes": 360,
+      "sha256": "e7118ce80994fbc7a30ec494ad4e15e12d99736a861573818c6688f9d0b0e3ac"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/11-TypedKeccakJoint/console.log",
+      "bytes": 179,
+      "sha256": "e980833fa881333feb265fb43fa8b5022147362cb6d817fa77a212856d7ff541"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/11-TypedKeccakJoint/gates/1.log",
+      "bytes": 10910,
+      "sha256": "0b6a80de7fb30050900d908d0eff8e17add502e4e938984fa4eebf27bb90939c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/11-TypedKeccakJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/11-TypedKeccakJoint/gates/gates.tsv",
+      "bytes": 265,
+      "sha256": "447b27adf60956d5775b5d837dd897102589a8e5f8bba70c26700bc1e2479d60"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/11-TypedKeccakJoint/results.json",
+      "bytes": 396,
+      "sha256": "cb389fb719ffebf597542891635e5c051fe0472bd7352eb875846ed4ad043c01"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/11-runner.log",
+      "bytes": 358,
+      "sha256": "fbb9d8d2955c746d6a61a5aae62f4d51a2f3f104ad09038eb3a01a6925712158"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/12-UnsignedUpdateJoint/console.log",
+      "bytes": 186,
+      "sha256": "f9bc90ab2f48a16145a961720b33293c858944affccb7445d03cdf25dd922aaf"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/12-UnsignedUpdateJoint/gates/1.log",
+      "bytes": 24722,
+      "sha256": "a778cb8adbd52c895b9a8de0a378f10b08147bb53e32c8f0500183f8c506b4f8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/12-UnsignedUpdateJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/12-UnsignedUpdateJoint/gates/gates.tsv",
+      "bytes": 275,
+      "sha256": "4f1d14e73a493a2126e5c95b96e83a2229f189eea1dd8239381183f00c1e0ae0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/12-UnsignedUpdateJoint/results.json",
+      "bytes": 400,
+      "sha256": "7cbb0502362127c1b4b7836f28488ce19b4de034596a3c11b15b4f645db69a22"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/12-runner.log",
+      "bytes": 362,
+      "sha256": "7e5e76713cf8c94cbbad331eab89ad203f03246788e1962bb9eee52279c48c22"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/13-WordCastCallableJoint/console.log",
+      "bytes": 189,
+      "sha256": "92d07e99448e806f10d0ec0403d5010e7bd5ef6371ed47342476870151a8f063"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/13-WordCastCallableJoint/gates/1.log",
+      "bytes": 33343,
+      "sha256": "ed2d893f770a69de40c56cbf910a08f41d89946ae4d7bca1dd6407dad186c1dc"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/13-WordCastCallableJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/13-WordCastCallableJoint/gates/gates.tsv",
+      "bytes": 280,
+      "sha256": "87c0dc26cd0afacab26b613e049b5deceed5907268a7e40568be408aa9d7b93e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/13-WordCastCallableJoint/results.json",
+      "bytes": 401,
+      "sha256": "3660e399e0ae9adf3904b927fcdea830f99a3401262c02275cabfcba194e1c42"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/13-runner.log",
+      "bytes": 363,
+      "sha256": "9e707d2b40f7e8a36a5dbb6d671ae614ff086f783f34bce9168fec6de126073c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/14-WorldImageJoint/console.log",
+      "bytes": 177,
+      "sha256": "18a49d0f565b84633cc82df9637732097fb1fa2e2d7a3576849e0b8e0cf14a1f"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/14-WorldImageJoint/gates/1.log",
+      "bytes": 17579,
+      "sha256": "9be3c8d4778f7ddd6cb3dbc1180c7dad9bc8b4ae97fa64d9b93eea395611cff4"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/14-WorldImageJoint/gates/HEAD",
+      "bytes": 41,
+      "sha256": "952fc1d34c7d3f08d75beee138c5758acc114c8c9b5aa03d69f8daa318e83ea2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/14-WorldImageJoint/gates/gates.tsv",
+      "bytes": 262,
+      "sha256": "19261f946ae215d3455051689f97c9338a80fce3a7b60331371c484456917440"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/14-WorldImageJoint/results.json",
+      "bytes": 395,
+      "sha256": "c0c0fab5f8fca7d76ee3a431a011e90dc8d6a61d74dd518b81d71354da14251c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/14-runner.log",
+      "bytes": 357,
+      "sha256": "d5cb900ac9db7ce654d6105f130f790ed52049298ae750d107d07433e6266e34"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/summary.json",
+      "bytes": 5890,
+      "sha256": "7d83fc3145cd3668d0a948aaacbb5b96db1de63bb1d9544863cbc240896a0eff"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/component-focused-validation-20261107/versions.json",
+      "bytes": 188,
+      "sha256": "0784f7342c1ac00b69234b7f4c97f55d1ed2edc06b7ab60962477a48726e1150"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic: no findings. Source bindings, gate counts, serial/resource totals and focused-scope exclusions verified; finder also verified all 92 evidence hashes. No reviewer tests/Lean/server."
+}

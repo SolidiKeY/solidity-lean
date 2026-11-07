@@ -1,0 +1,115 @@
+{
+  "status": "SOURCE_FACING_CENSUS_ACCOUNTING_ONLY",
+  "head": "524d8d75463c86703548b089e9477916d76b2564",
+  "source_bindings": {
+    "Solidity/Lowering/V08/SourceAbi.lean": "99a01f9fae81a81801245c32e177e05ae0b7fd090bca5727df3a7c8e60465d62",
+    "Solidity/Lowering/V08/SourceCustomErrors.lean": "29d81d560c49abafb96aee795ef172464ffaf0165ec023e3f8407cc816714e78",
+    "Solidity/Lowering/V08/SourceDispatch.lean": "4475cac4721e6f062012b202090b9f4b02a274fe02a0ccd445d8c10b77fe14a0",
+    "Solidity/Lowering/V08/SourceCallable.lean": "4b76b7f19609592d7eb816df9d3e6df27a151624996d40e2d641c1e044580a6a",
+    "scripts/h62/item2/audit-v08-adapters/generate_mapped_census.py": "e9211254dbc42d11728eb5833d51b05dab5767ed15bb11e63f849a4c086eab65",
+    "tests/h62/item2/audit-v08-adapters/generated-census/SourceExecutionBoundaryCensus.lean": "0588ca4888ca831abd3f7b7e940139d037223c708accd3e79ab652d83fb5c239"
+  },
+  "frozen_snapshot": {
+    "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/census/census.json",
+    "sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03"
+  },
+  "selected_source_bytes_match_frozen": true,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/generated-census/SourceExecutionBoundaryCensus.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 18.358,
+    "peak_sampled_aggregate_rss": 882003968,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "summary": {
+    "boundary": "Name/provenance candidates only. No parsed-type equivalence, feasible joint premises, owner acceptance or current-source validation follows.",
+    "complete_interface_inventory": false,
+    "kernel_only_pending_count": 59,
+    "kernel_role_counts": {
+      "other_declaration": 12,
+      "theorem": 81
+    },
+    "kernel_scope_total": 93,
+    "lexical_input_total": 7951,
+    "lexical_outside_scope": 7917,
+    "lexical_scope_total": 34,
+    "module_counts": {
+      "Solidity.Lowering.V08.SourceAbi": 64,
+      "Solidity.Lowering.V08.SourceCallable": 16,
+      "Solidity.Lowering.V08.SourceCustomErrors": 9,
+      "Solidity.Lowering.V08.SourceDispatch": 4
+    },
+    "name_status_counts": {
+      "PUBLIC_NAME_CANDIDATE": 34
+    },
+    "new_witnesses": 0,
+    "statement_fidelity_verified": 0,
+    "status": "NAME_RECONCILIATION_ONLY"
+  },
+  "setup_failure": "First wrapper invocation failed before Lean: missing evidence parent directory. Parent created; generated source unchanged; actual checked run recorded separately.",
+  "new_joint_witnesses": 0,
+  "statement_fidelity_acceptances": 0,
+  "limitations": [
+    "34 exact public-name candidates, not 34 semantic fidelity acceptances.",
+    "59 kernel-only records retained; compiler/helper provenance not inferred from capture module or generated-looking names.",
+    "81 theorem-kind constants include generated/helper records; not 81 written source theorem declarations.",
+    "Top-level proposition binder worklist is not joint feasibility: dependent data bundles and nested predicates still require audit.",
+    "No SourceSpec admission, general execution correspondence, full body/frame witness or H68 certificate."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/check/console.log",
+      "bytes": 200,
+      "sha256": "64ec6ba6b086162593ef6913560be1ea31e7dfeb509f16acc4669d5259d3133b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/check/gates/1.log",
+      "bytes": 5457783,
+      "sha256": "0404cdd22a43dde4ee55048ed3c935dae7afc04feb52c8fc06aeb6befef49a93"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "625d566058c356e5a9082c6adc6a6704f2df0fe9c7376731319d729b97bb5708"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/check/gates/gates.tsv",
+      "bytes": 316,
+      "sha256": "1099381e9d7abfcccfc61d27666ef8d59543866888bc0997a6e94346978b47fe"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/check/results.json",
+      "bytes": 427,
+      "sha256": "edfae3b53cf37b1f8d569791d65c034cc10c11562df1684ac395a8fb59ff3cce"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/hypothesis-worklist.json",
+      "bytes": 29050,
+      "sha256": "5d016ea962ccae581d42a3a24a8e3523b28c45ffef6eca85dd15cb497fc5f0f8"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/inventory.json",
+      "bytes": 5497144,
+      "sha256": "fc2c57361a9c000df37e8615fd951d38809b89e3c8bb94ae62a0587e9d351bcf"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/reconciliation.json",
+      "bytes": 72294,
+      "sha256": "47a546e0f299f3dbe3588622b47ca8ed389abb762fbc3a0bfc33352650c51b19"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-execution-boundary-census-20261107/summary.json",
+      "bytes": 811,
+      "sha256": "51277fae8427dd00644dbca7f80a84cf4cda8c98b581b6d38e4679818ff30c39"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic verified source/evidence bindings, counts, frozen-byte boundary and nonacceptance of binder premises; no findings, no reviewer scripts/tests/Lean/server."
+}
