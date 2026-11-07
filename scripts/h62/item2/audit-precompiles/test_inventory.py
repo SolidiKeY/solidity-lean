@@ -72,17 +72,17 @@ class InventoryTests(unittest.TestCase):
   raw=self.value['pending_wait_disposition']['partial_Raw']
   self.assertTrue(raw['content_hashes_verified']);self.assertFalse(raw['trust_accepted']);self.assertFalse(raw['dependency_accepted'])
   self.assertEqual(raw['reported_axiom_growth_entries'],30)
-  packet=json.loads((inventory.ROOT/'tests/h62/item2/audit-precompiles/partial-Raw-receipt.json').read_text())
+  packet=json.loads(inventory.external_record('partial-Raw-receipt.json').read_text())
   packet['dependency_accepted']=True
-  disposition=json.loads((inventory.ROOT/'tests/h62/item2/audit-precompiles/h70-waits.json').read_text())
+  disposition=json.loads(inventory.external_record('h70-waits.json').read_text())
   with patch('inventory.json.loads',side_effect=[packet,disposition]):
    with self.assertRaises(AssertionError):inventory.pending_wait_disposition(list(self.rows.values()),EVIDENCE)
  def test_staged_compiler_route_is_not_delivered(self):
   d=self.value['pending_wait_disposition']['current_disposition']
   self.assertEqual(d['compiler_success_owner'],'claudecloud/move5-20261106/v14-g43')
   self.assertEqual(d['compiler_route_status'],'staged-pending-delivery');self.assertFalse(d['compiler_delivery_confirmed'])
-  packet=json.loads((inventory.ROOT/'tests/h62/item2/audit-precompiles/partial-Raw-receipt.json').read_text())
-  disposition=json.loads((inventory.ROOT/'tests/h62/item2/audit-precompiles/h70-waits.json').read_text())
+  packet=json.loads(inventory.external_record('partial-Raw-receipt.json').read_text())
+  disposition=json.loads(inventory.external_record('h70-waits.json').read_text())
   disposition['current_disposition']['compiler_delivery_confirmed']=True
   with patch('inventory.json.loads',side_effect=[packet,disposition]):
    with self.assertRaises(AssertionError):inventory.pending_wait_disposition(list(self.rows.values()),EVIDENCE)

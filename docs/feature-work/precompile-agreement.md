@@ -409,3 +409,14 @@ needs saved evidence; no gate is weakened to accommodate missing captures.
 Historical evidence already present at the held base is unchanged. No full
 build, cache shipment, scope expansion or goal transition occurs in this split.
 The41ready core audit cases remain queued under the same original goal.
+
+
+## External validation data
+
+H145 keeps receipts and logs in the private coordination repository. To run
+the saved-evidence checker, set `SOLIDITY_LANE_EVIDENCE_ROOT` to its lane
+directory, which contains the repository-relative Bridge and audit paths.
+This changes only receipt lookup: source and fixture paths, source hashes,
+log hashes, compiler arguments, resource checks and axiom checks remain required.
+Missing or stale evidence still fails. Historical receipts are not rewritten
+to certify a changed checker; fresh source-bound gates remain necessary.

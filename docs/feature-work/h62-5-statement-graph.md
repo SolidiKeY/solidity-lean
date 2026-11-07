@@ -1,5 +1,13 @@
 # H62 item 5: statement graph
 
+H145 archival notice: historical receipts, source-hash manifests, routing/chain
+records and handoffs named below now live in the private coordination repository:
+https://github.com/SolidiKeY/solidity-lean-coord/tree/4cb216278ddc62582604b4348d65749fcf9bfeb6/evidence/solidity-h62-5-20261106/statement-graph/
+The private archive preserves their exact bytes and source revision. References
+to “committed evidence” in older milestones describe those earlier revisions.
+Current checker inputs, executable fixtures and checksum constants remain here;
+evidence records are no longer code-branch inputs.
+
 Owner: `solidity-h62-5-20261106/statement-graph`. Base:
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Branch:
 `codex/solidity-h62-5-20261106/statement-graph`.

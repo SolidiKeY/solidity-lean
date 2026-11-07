@@ -6,6 +6,7 @@ import sys
 import hashlib
 import json
 import tempfile
+import subprocess
 
 root = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(root/'scripts/h55/module-times'))
@@ -85,6 +86,54 @@ class ReferenceIndexUpdate(unittest.TestCase):
                 module.lineage_versions(index)
             with self.assertRaises(ValueError):
                 module.parse_versions((sha+'  '+str(p)+'\n').encode())
+
+
+    def test_extended_cli_historical_delta_binding(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            fields = {'category':'control', 'context':'standalone', 'module':None,
+                      'resolution':'review', 'collision':False}
+            candidate = {'path':'a', 'sha256':'1'*64, **fields}
+            def write(name, value):
+                p = base/name
+                p.write_text(json.dumps(value))
+                return p
+            def sha(path):
+                return hashlib.sha256(path.read_bytes()).hexdigest()
+            delta = write('delta.json', {'delta':{'added':[], 'removed':[],
+                'changed_bytes':[], 'changed_mapping':[]}})
+            baseline = write('index.json', {'inputs':[{'path':str(delta), 'sha256':sha(delta)}],
+                'rows':[{'candidate':candidate, 'current_static_references':[],
+                         'historical_references_require_review':[], 'status':'no-supplied-current-reference'}]})
+            drift = write('drift.json', {'head':'synthetic', 'input_sha256':sha(baseline),
+                'rows':[{'candidate':candidate, 'state':'no-supplied-per-path-reference',
+                         'prior_reference_artifacts':[], 'historical_references_require_review':[],
+                         'changed_bytes':False, 'changed_mapping':False}], 'removed_from_candidate_set':[]})
+            versions = base/'versions'; versions.write_text('')
+            classification = write('class.json', {'input_sha256':sha(delta), 'rows':[{'candidate':candidate}]})
+            command = [sys.executable, str(root/'scripts/h55/module-times/reference_index_update.py'),
+                       str(drift), str(baseline), str(versions), '--delta', str(delta), str(classification)]
+            result = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(0, result.returncode, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(1, output['referenced'])
+            self.assertIn({'path':str(delta), 'sha256':sha(delta)}, output['inputs'])
+            stale = write('stale.json', {'input_sha256':sha(delta), 'rows':[{'candidate':{**candidate, 'sha256':'2'*64}}]})
+            self.assertNotEqual(0, subprocess.run(command[:-1]+[str(stale)], capture_output=True).returncode)
+            other = write('other.json', {'delta':{'added':[], 'removed':[], 'changed_bytes':[], 'changed_mapping':[]}})
+            self.assertNotEqual(0, subprocess.run(command[:-2]+[str(other), str(classification)], capture_output=True).returncode)
+            delta.write_text('{"delta": {}}')
+            self.assertNotEqual(0, subprocess.run(command, capture_output=True).returncode)
+            baseline_doc = json.loads(baseline.read_text())
+            baseline_doc['inputs'][0]['sha256'] = sha(delta)
+            baseline.write_text(json.dumps(baseline_doc))
+            drift_doc = json.loads(drift.read_text())
+            drift_doc['input_sha256'] = sha(baseline)
+            drift.write_text(json.dumps(drift_doc))
+            classification.write_text(json.dumps({'input_sha256':sha(delta), 'rows':[{'candidate':candidate}]}))
+            malformed = subprocess.run(command, capture_output=True, text=True)
+            self.assertNotEqual(0, malformed.returncode)
+            self.assertIn('invalid delta artifact', malformed.stderr)
 
 if __name__ == '__main__':
     unittest.main()

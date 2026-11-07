@@ -169,10 +169,17 @@ def parse_versions(raw):
 
 def main():
     if len(sys.argv) < 4:
-        print('usage: reference_index_update.py DRIFT.json INDEX.json DELTA_OR_VERSIONS [CLASSIFICATION.json...]', file=sys.stderr)
+        print('usage: reference_index_update.py DRIFT.json INDEX.json DELTA_OR_VERSIONS [--delta HISTORICAL_DELTA.json] [CLASSIFICATION.json...]', file=sys.stderr)
         return 2
     try:
-        files = [Path(x) for x in sys.argv[1:]]
+        args = sys.argv[1:]
+        delta_path = None
+        if len(args) >= 4 and args[3] == '--delta':
+            if len(args) < 5:
+                raise ValueError('missing explicit delta path')
+            delta_path = Path(args[4]).resolve()
+            args = args[:3] + args[5:]
+        files = [Path(x) for x in args]
         if len({str(p.resolve()) for p in files}) != len(files):
             raise ValueError('duplicate input artifact')
         raws = [p.read_bytes() for p in files]
@@ -185,12 +192,28 @@ def main():
         extended = 'current_static_references' in baseline_rows[0]
         if extended:
             versions = parse_versions(raws[2])
-            for artifact in docs[3:]:
-                if artifact.get('input_sha256') not in {digest(raws[0]), digest(raws[1])}:
-                    raise ValueError('classification input digest is not supplied')
             lineage = lineage_versions(docs[1])
+            accepted = {digest(raws[0]), digest(raws[1])}
+            if delta_path is not None:
+                if delta_path in {p.resolve() for p in files}:
+                    raise ValueError('duplicate delta input')
+                delta_raw = delta_path.read_bytes()
+                delta_sha = digest(delta_raw)
+                if lineage.get(str(delta_path)) != delta_sha:
+                    raise ValueError('delta is not bound by verified index lineage')
+                delta_doc = json.loads(delta_raw)
+                delta_body = delta_doc.get('delta') if isinstance(delta_doc, dict) else None
+                if (not isinstance(delta_body, dict) or any(not isinstance(delta_body.get(k), list)
+                        for k in ('added', 'removed', 'changed_bytes', 'changed_mapping'))):
+                    raise ValueError('invalid delta artifact')
+                accepted.add(delta_sha)
+            for artifact in docs[3:]:
+                if artifact.get('input_sha256') not in accepted:
+                    raise ValueError('classification input digest is not supplied')
             rows, removed = update_extended(docs[1], docs[0], [(str(p.resolve()), d) for p, d in zip(files[3:], docs[3:])], versions, lineage)
         else:
+            if delta_path is not None:
+                raise ValueError('explicit delta is only supported in extended mode')
             if digest(raws[2]) not in {item['sha256'] for item in docs[1]['inputs']}:
                 raise ValueError('coverage delta digest mismatch')
             for artifact in docs[3:]:
@@ -201,7 +224,7 @@ def main():
         referenced = sum(bool(r['current_static_references']) for r in rows)
         print(json.dumps({'status':'static-reference-index-not-execution-acceptance', 'snapshot_head':docs[0]['head'],
             'limitations':'supplied snapshot and artifacts only; references do not resolve execution; ignored/generated inputs, later changes and runtime are not covered',
-            'inputs':[{'path':str(p.resolve()), 'sha256':digest(raw)} for p, raw in zip(files, raws)],
+            'inputs':[{'path':str(p.resolve()), 'sha256':digest(raw)} for p, raw in zip(files, raws)] + ([{'path':str(delta_path), 'sha256':delta_sha}] if delta_path is not None else []),
             'total':len(rows), 'referenced':referenced, 'unreferenced':len(rows)-referenced,
             'historical_reference_review':sum(bool(r['historical_references_require_review']) for r in rows),
             'overlap':sum(len(r['current_static_references'])>1 for r in rows), 'removed_from_candidate_set':removed, 'rows':rows}, indent=2, sort_keys=True))
