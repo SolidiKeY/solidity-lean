@@ -1673,3 +1673,51 @@ Final checkpoint82tests, trust/orphans, roots/fragments, documentation and
 whitespacePASS. Explicit native73guard/70domain check remains required; these
 static gates alone do not establish it. Existing28scoped global pins remain
 coordinator work, not changed or waived.
+
+
+## Common-input raw and reference field domains
+
+Fetched mastere0f4251ff already adopted at a75b307de. Extend the existing
+renderer/fixture with two remaining RawTailGuardCertificate direct-field domains:
+raw retains code/self/input/shape/base/pointer/protected suffix; reference also
+retains its lengthPrefixed proof. Both use the same closed child certificate,
+32zero-byte input, array-of-uint256 shape and zero base/pointer. A stronger
+joint witness combines child/parent equality, actual numeric execution on the
+represented raw operands preserving suffix[258,513], existing semantic reference
+result.ok(32,0), proven prefix premise, capacity10 and refused height1024.
+Reuses existing raw certificate/reference control rather than reproving producer
+semantics. Negative control refuses the conditional prefix premise for a word
+bool shape; no native execution trap or unsupported-compiler claim follows.
+
+72exactdomains+5othertransport/joint/refusal lemmas now checked. Direct first
+native attemptPASS25.903s, emptydiagnostics;77strictaxiomguards comprise5none,
+25propext,2standardpair,45standardtrio, plus2classifierrefusalprobes.19frozen
+producerleaves/249importproducts rechecked. Two previous parent-field witnesses
+and typed transport are preserved. These four selected field domains do not
+establish general inherited flattening, full public-method coverage or any
+global witness linkage. Actual source observations remain those of the frozen
+150module report, not current live RawUint differences or full-area closure.
+
+Replay initially refused a copied reference to the parent inspector's failed
+check1log (StopIteration/missing manifest member). Preserved initial recipe and
+repaired only parent path to acceptedcheck2; current native proof remainscheck1
+and no sealed parent artifact or proof changed. Final replayPASS reconstructs
+exact source/manifest, validates native output/log/monitors, derives actual guard
+counts, rechecks249imports and binds72targettype observations to sealed metadata.
+Independent readonly finder/skepticPASS after confirming the saved acceptance
+receipt; no reviewer builds, edits or Lean/server use.
+
+Same05:20→09:20aggregate epoch/deadline conservatively reused,12GiB/noSwap/CPU1/
+4GiBreserve and300sgroup limits unchanged. No new epoch, prerequisite build,
+PowerBounds retry, maxHeartbeats/axiom/trust change, module>60s or paired
+performance claim. No new compiler family or production module; generated
+program/reports/products stay offGit, trusted fixture still requires explicit
+native checking beyond82Python tests/seven-file verifier. No native load order,
+byte execution, Source admission, whole703source/190core/37Bridge acceptance,
+owner/remainingcorrespondence/witness/globalledger or full-package/runtime
+validation is discharged. All original producer and final-gate waits remain.
+Evidence: /workspace/parallel-20261103/executable-bytecode/raw-tail-fields/.
+
+Checkpoint82tests, trust/orphans, roots/fragments, doc paths and whitespace
+PASS. Strict native proof/replay remains separately required; no global pin,
+full-source or runtime gate is waived or inferred from these checks.

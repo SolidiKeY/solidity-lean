@@ -22,7 +22,7 @@ class ExactDomainTests(unittest.TestCase):
         self.assertEqual(rendered.count(fragment), 1)
         self.assertEqual(target.sha(fragment.encode()), target.MACRO_SHA256)
         self.assertIn("Only the original conclusion is replaced by True", rendered)
-        self.assertEqual(rendered.count("hypotheses_of%"), 73)  # elaborator, seventy domains, two refusal probes
+        self.assertEqual(rendered.count("hypotheses_of%"), 75)  # elaborator, seventy-two domains, two refusal probes
 
     def test_rendered_program_keeps_classifier_refusal_controls(self):
         program=target.render(self.macro,self.fixture)
@@ -41,9 +41,10 @@ class ExactDomainTests(unittest.TestCase):
             expected.update("Solidity.Backend.AbiEntry.Interface."+gate+"Certificate."+name
                             for name in re.findall(r"(?m)^  (\w+) : ∀",interface))
         expected.update("Solidity.Backend.AbiEntry.Interface.TailGuardCertificate."+field for field in ("correct","capacity"))
+        expected.update("Solidity.Backend.AbiEntry.Interface.RawTailGuardCertificate."+field for field in ("raw","reference"))
         self.assertEqual(set(target.TARGETS.values()),expected)
         self.assertEqual(len(target.TARGETS),len(expected))
-        self.assertEqual(len(expected),70)
+        self.assertEqual(len(expected),72)
 
     def test_macro_drift_and_duplicate_boundaries_are_refused(self):
         for value in (self.macro.replace("explicitDomain info.type", "mkConst ``True"),

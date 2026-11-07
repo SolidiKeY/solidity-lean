@@ -53,6 +53,9 @@ for gate, prefix, methods in (
 for field in ("correct", "capacity"):
     TARGETS["tail_inherited_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.TailGuardCertificate." + field
 
+for field in ("raw", "reference"):
+    TARGETS["raw_tail_" + field + "_domain"] = "Solidity.Backend.AbiEntry.Interface.RawTailGuardCertificate." + field
+
 
 PRODUCERS = ["Solidity/Backend/AbiEntry/" + name + ".lean" for name in
              ("HeadGate", "HeadGateInterface", "WordGate", "WordGateInterface", "SingleWordGate", "SingleWordGateInterface", "BoolBinding", "BoolBindingInterface", "UnsignedGate", "UnsignedGateInterface", "SignedGate", "SignedGateInterface", "BytesGate", "BytesGateInterface", "TailGuard", "TailGuardInterface", "RawTailGuard", "RawTailGuardInterface", "TailGuardControls")]
