@@ -27,6 +27,18 @@
       "question": "Q-CLI-01",
       "authorization": "Build produces compiler artifacts only; runtime/test equivalence remains incomplete. Existing concrete-model observations are not equivalence evidence.",
       "decision": "H80"
+    },
+    {
+      "question": "Q-REL-HOOK-01",
+      "decision": "Incoming user answer #72,2026-11-07",
+      "status": "implementation-partial",
+      "authorization": "Additive SourceCounterexample.lean companion allowed; preserve old proof/report fields and all old declarations/premises/signatures/budgets. Real clause/span and wrong-span controls remain required."
+    },
+    {
+      "question": "Q-REL-IMPORT-01",
+      "decision": "Incoming user answer #73,2026-11-07",
+      "status": "implementation-pending",
+      "authorization": "Additive span companions in Solidity/Frontend/SolcJson/Contract.lean, Body.lean, Import.lean and Testing.lean authorized with forget lemmas per layer; old normalization/results/signatures unchanged. No source span may be inferred where not carried."
     }
   ]
 }

@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Checks/DirtyReadbackControls.lean:Solidity.Yul.Checks.DirtyReadbackControls.dirtyTwo_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/DirtyReadbackControls.lean:Solidity.Yul.Checks.DirtyReadbackControls.int_sign_extended": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/DirtyReadbackControls.lean:Solidity.Yul.DirtyReadback.readback_of_clean?": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/DirtyReadbackControls.lean:Solidity.Yul.DirtyReadback.readback_ofClean": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

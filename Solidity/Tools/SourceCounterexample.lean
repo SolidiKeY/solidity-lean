@@ -142,4 +142,103 @@ def refuteSource? (goalTy : Expr) (budget : Nat := 256) : TermElabM (Option Sour
   else Core.setMessageLog messages
   return result
 
+
+/-- Literal source argument bindings. This additive projection does not change
+`Cand.vals` or assert an equivalence for arbitrary `FreshNames` instances. The
+companion must certify equality with the original proof's actual values. -/
+def Cand.sourceValuesV1 {C : Contract} (candidate : Cand C) :
+    List (Var × Semantics.CallValue) :=
+  candidate.args.map fun (name, value) => (Var.user name, value)
+
+/-- Additive V1 companion guarding the editor regression where metadata is
+attached to a second searched candidate. Every expression is closed and checked
+against the exact original proof application, with independent kernel validation. `candidate` has type `Cand C`;
+`failure` proves the evaluator equality at the retained domain/arguments/state.
+A retained kernel-checked equality binds the original proof values to that
+candidate's literal source user-name/value pairs. It makes no general
+`Cand.vals`/`FreshNames` equivalence claim.
+The existing proof and JSON are retained unchanged; JSON remains presentation only. No source span or failed
+postcondition attribution is inferred; those require a separate correspondence.
+Callers retain and axiom-audit both the original proof and argument equality. -/
+structure SourceCounterexampleCandidateV1 where
+  original : SourceCounterexample
+  contract : Expr
+  formula : Expr
+  candidate : Expr
+  domain : Expr
+  values : Expr
+  valuesEquation : Expr
+  state : Expr
+  failure : Expr
+
+/-- Recover the candidate used by an existing exact-goal certificate, without a
+second search. Unexpected proof shapes, a different goal, and inconsistent
+state/domain/argument expressions fail closed. This companion accepts no source
+range and cannot certify one supplied by a caller. -/
+def sourceCounterexampleCandidateV1? (goalTy : Expr) (original : SourceCounterexample) :
+    TermElabM (Option SourceCounterexampleCandidateV1) := do
+  let saved ← Term.saveState
+  let messages ← Core.getMessageLog
+  let result ← tryCatchRuntimeEx (do
+    if original.proof.hasMVar || original.proof.hasFVar || original.proof.hasSorry ||
+        original.proof.hasLevelMVar then return none
+    let goalTy ← instantiateMVars goalTy
+    let proof ← instantiateMVars original.proof
+    if [goalTy, proof].any (fun e => e.hasMVar || e.hasFVar || e.hasSorry) then return none
+    let (``Fml.Valid, #[goalC, goalFormula]) := goalTy.consumeMData.getAppFnArgs | return none
+    let (``Fml.not_valid_of_eval3Peel, #[cE, domE, valsE, stateE, formulaE, failureE]) :=
+      proof.consumeMData.getAppFnArgs | return none
+    unless ← isDefEq (← inferType proof) (mkNot goalTy) do return none
+    -- A public Expr input needs kernel validation, not only inferred types.
+    -- Never exceed the existing producer's 100000-heartbeat kernel ceiling,
+    -- or a caller's smaller nonzero budget.
+    let options ← getOptions
+    let currentLimit := maxHeartbeats.get options
+    let limit := if currentLimit == 0 then 100000 else min currentLimit 100000
+    let options := maxHeartbeats.set options limit
+    let checked (type value : Expr) : TermElabM Bool := do
+      let name ← mkFreshUserName `_source_candidate_v1_certificate
+      let declaration := Declaration.thmDecl {name, levelParams := [], type, value}
+      match Kernel.Environment.addDecl (← getEnv).toKernelEnv options declaration with
+      | .error _ => return false
+      | .ok _ => return true
+    unless ← checked (mkNot goalTy) proof do return none
+    unless ← isDefEq cE goalC do return none
+    unless ← isDefEq formulaE goalFormula do return none
+    let (``Cand.tstate, #[stateC, candidateE]) := stateE.consumeMData.getAppFnArgs | return none
+    unless ← isDefEq stateC cE do return none
+    unless ← isDefEq (← inferType candidateE) (mkApp (mkConst ``Cand) cE) do return none
+    let candidateVals := mkApp2 (mkConst ``Cand.sourceValuesV1) cE candidateE
+    let valuesType ← mkEq valsE candidateVals
+    let valuesEquation ← instantiateMVars (← mkDecideProof valuesType)
+    unless ← checked valuesType valuesEquation do return none
+    let candidateInts ← mkAppM ``Cand.argInts #[candidateE]
+    unless ← withTransparency .all (isDefEq domE (mkApp (mkConst ``poolDom) candidateInts)) do return none
+    let evaluated ← mkAppM ``Fml.eval3Peel #[domE, valsE, stateE, formulaE]
+    unless ← isDefEq (← inferType failureE) (← mkEq evaluated (mkConst ``Tri.ff)) do return none
+    let expressions := [cE, formulaE, candidateE, domE, valsE, valuesEquation, stateE, failureE]
+    if expressions.any (fun e => e.hasMVar || e.hasFVar || e.hasSorry) then return none
+    return some {
+      original := original
+      contract := cE
+      formula := formulaE
+      candidate := candidateE
+      domain := domE
+      values := valsE
+      valuesEquation := valuesEquation
+      state := stateE
+      failure := failureE })
+    fun _ => pure none
+  if result.isNone then saved.restore
+  else Core.setMessageLog messages
+  return result
+
+/-- Search once through the unchanged producer, then expose only the candidate
+already present in its exact-goal certificate. Existing budgets and shrinking
+remain those of `refuteSource?`; this does not run an attribution search. -/
+def refuteSourceCandidateV1? (goalTy : Expr) (budget : Nat := 256) :
+    TermElabM (Option SourceCounterexampleCandidateV1) := do
+  let some original ← refuteSource? goalTy budget | return none
+  sourceCounterexampleCandidateV1? goalTy original
+
 end Solidity.Tools
