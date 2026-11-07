@@ -7,8 +7,11 @@ import fcntl,importlib.util,os,time
 if not __debug__:raise RuntimeError("replay validation requires Python assertions enabled")
 
 def replay():
- root=Path.cwd();out=Path('/workspace/scratch/browser-chain/readbounds-6513/recovered/native-negatives');out.mkdir(exist_ok=False)
- base=Path('/workspace/scratch/browser-chain/readbounds-6513/recovered/negative-controls');requests=[json.loads(x) for x in (base/'browser-control-attempts.jsonl').read_text().splitlines()];records=json.loads((base/'browser-control-completion.json').read_text())['requests'];assert len(requests)==len(records)==7
+ root=Path.cwd()
+ spec=importlib.util.spec_from_file_location('reviewed_negative_inventory',Path(__file__).resolve().parents[1]/'negative-inventory.py')
+ inventory=importlib.util.module_from_spec(spec);spec.loader.exec_module(inventory)
+ base=Path('/workspace/scratch/browser-chain/readbounds-6513/recovered/negative-controls');requests,records=inventory.load(base)
+ out=Path('/workspace/scratch/browser-chain/readbounds-6513/recovered/native-negatives');out.mkdir(exist_ok=False)
  sha=lambda b:hashlib.sha256(b).hexdigest();binary=root/'.lake/native-browser-readbounds-6513/native/direct-check';manifest=json.loads(binary.with_name('build.json').read_text());assert sha(binary.read_bytes())==manifest['executable']
  for a,b in zip(requests,records):
   assert sha(a['wire'].encode())==a['wireSha256']==b['wireSha256'];assert sha(Path(b['compilerHeader']['source']).read_bytes())==a['sourceHash']==b['sourceHash']

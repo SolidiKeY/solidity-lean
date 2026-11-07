@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
+# Fixed local validation: writer lease, exact resource admission and 300s deadline.
+set -euo pipefail
+exec python3 tests/directruntime-20261104/native-browser/validation-admission.py read-bounds
+# FIXED-ADMITTED-RECIPE
+#!/usr/bin/env bash
 # Guards H126 source, kernel equality, exact bounds and existing runtime controls.
 # This separate repair gate preserves all frozen reader/audit v1 expectations.
 set -euo pipefail
+source /workspace/.setup/activate.sh
+export LEAN_NUM_THREADS=1 LAKE_CACHE_DIR=
+export PATH="$PWD/.lake/native-browser-rowsnine-gates/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
 lean --version
 lake --version

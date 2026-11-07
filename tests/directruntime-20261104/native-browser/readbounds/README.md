@@ -45,3 +45,20 @@ is confirmed; interruption closes that acknowledgement before group cleanup.
 SIGKILL-safe control and containment of escaped descendants still require the
 full H127 container protocol. Symbol and selected-C provenance drivers reject
 optimized Python before creating outputs, keeping their validation checks active.
+
+
+The native negative replay admits the exact seven-group request journal and its
+fourteen named expected outcomes through `negative-inventory.py`. Expected
+statuses are fixed independently of observed completion replies; changing a
+false assertion to `proved` with unchanged wire/source hashes is refused.
+This admission does not run the checker or repair the retained browser failure.
+
+The shared ReadBounds and registration-parent validation entry points dispatch
+fixed tracked recipes through `validation-admission.py`. The supervisor owns
+the writer lease until process-group cleanup/reaping, includes lease waiting in
+the 300-second local invocation deadline, and checks actual memory/swap/CPU
+quota, thread configuration and outer reserve before setup and while running.
+The serial Lake configuration and cached shim must match tracked sources.
+These local guards rely on the existing trusted checkout and external bounded
+cgroup mapping. They are not H127 sealed-input, complete resource/measurement
+provenance or whole-container cleanup acceptance. All STOPs remain unchanged.

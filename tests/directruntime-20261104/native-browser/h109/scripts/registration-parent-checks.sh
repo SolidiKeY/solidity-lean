@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Fixed local validation: writer lease, exact resource admission and 300s deadline.
+set -euo pipefail
+exec python3 tests/directruntime-20261104/native-browser/validation-admission.py registration-parent
+# FIXED-ADMITTED-RECIPE
+#!/usr/bin/env bash
 set -euo pipefail
 source /workspace/.setup/activate.sh
 export LEAN_NUM_THREADS=1 LAKE_CACHE_DIR= LEAN_LSP_MAX_OPEN_FILES=1
