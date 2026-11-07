@@ -312,3 +312,38 @@ def partition_records(rows, source_candidate_names):
             "source_identity_established": False, "statement_correspondence_established": False,
             "inherited_obligations_established": False, "witness_ledger_linked": False})
     return groups
+
+
+def binder_metadata(rows):
+    """Guard regression: a binder-head name must not imply global feasibility.
+
+    Preserve the ordered dependent binder prefix and supplied head-record types.
+    Proof/data flags are observations, not a global-premise/per-input decision.
+    Missing heads and nonconstant heads remain distinct unresolved observations.
+    """
+    validate_rows(rows)
+    by_name = {row["name"]: row for row in rows}
+    declarations, referenced = [], set()
+    for row in sorted(rows, key=lambda r: r["name"]):
+        snapshot = observed_type(row)
+        binders = []
+        for index, binder in enumerate(snapshot["binders"]):
+            head = binder["head_constant"]
+            target = by_name.get(head)
+            if target is not None:
+                referenced.add(head)
+            binders.append({"index": index, "binder": binder,
+                "preceding_binder_count": index,
+                "head_status": ("no_constant_head_observed" if head is None else
+                                "supplied_record_present" if target is not None else
+                                "not_in_supplied_records"),
+                "head_record_sha256": observed_type(target)["record_sha256"] if target is not None else None,
+                "premise_role": "unclassified; global versus per-input feasibility not established",
+                "instantiated_type_accepted": False, "joint_witness_established": False})
+        declarations.append({"name": row["name"], "module": row["module"],
+            "private": row["private"], "record_sha256": snapshot["record_sha256"],
+            "type_expr_sha256": snapshot["type_expr_sha256"],
+            "binders": binders, "binder_count": len(binders)})
+    return {"declarations": declarations,
+        "head_records": [observed_type(by_name[name]) for name in sorted(referenced)],
+        "boundary": "Supplied metadata join only; no source, owner, instantiated type, premise role or witness acceptance"}

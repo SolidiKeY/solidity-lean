@@ -1,0 +1,8 @@
+name = "h62-cache-fixture"
+version = "0.1.0"
+defaultTargets = ["Fixture"]
+enableArtifactCache = true
+
+[[lean_lib]]
+name = "Fixture"
+weakLeanArgs = ["-j1", "--tstack=131072"]

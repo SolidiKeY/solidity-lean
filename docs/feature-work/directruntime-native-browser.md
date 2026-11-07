@@ -829,3 +829,30 @@ incremental cache stay off Git with hashes and indexes. Cache delivery remains
 coordinator-pending; no ship-cache or release-cache coherence claim is made.
 The local registration proposal covers the standalone MetadataControls driver;
 no generated root was edited.
+
+
+## Reviewable environment validation wrappers
+
+The P2 review note identified that private `.lake` wrapper locations were not
+reviewable from Git. The [wrapper index](../../tests/directruntime-20261104/native-browser/environment/wrapper-index.json)
+now maps twenty preserved source/configuration snapshots to repository paths,
+sealed archive members, sizes and SHA256 hashes. The
+[scripts README](../../tests/directruntime-20261104/native-browser/environment/scripts/README.md)
+explains the original preparation, failed/recovered continuation and bounds.
+A read-only verifier checks the tracked snapshots and optionally their sealed
+archive members; it executes no historical wrapper.
+
+The index records the original VM handoff locator and exact evidence/runtime/
+cache archive hashes for the existing coordinator retrieval channel. H71
+relayed the handoff metadata; bulk retrieval and recipient inspection remain
+coordinator-pending under H41. No public download or completed delivery is
+claimed. Generated fixtures, logs, binaries and caches remain outside Git.
+These snapshots retain historical paths and private prerequisites; they are
+review artifacts, not a turnkey or newly accepted runtime replay. All original
+stack, performance, storage-semantic and final-gate holds remain open.
+
+This increment adopts published master d7a1cbdf597826add5af3533fdaf6b8d91e28f66
+and changes no production Lean source, theorem, budget, trusted boundary or
+historical verdict. Syntax/identity controls and independent read-only reviews
+are recorded in the portable preservation receipt. No Lean build or unchanged
+stopped benchmark was rerun for these documentation/tooling changes.

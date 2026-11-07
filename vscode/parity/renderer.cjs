@@ -1,5 +1,5 @@
 'use strict';
-const {writeFileSync} = require('node:fs');
+const {writeFileSync,mkdirSync} = require('node:fs');
 const {join} = require('node:path');
 const {createServer} = require('node:net');
 const {performance} = require('node:perf_hooks');
@@ -89,26 +89,27 @@ async function captureTrace(client,directory,metadata){
  const menuDir=join(directory,'menu');require('node:fs').mkdirSync(menuDir,{recursive:true});observed.menu=await contextSubmenu(client,menuDir,{label:'Dafny',expected:'Build with Custom Arguments'});
  const rendered=await capture(client,directory,true);if(metadata.observeOnly){if(observed.activeUri!==metadata.binding.uri)throw Error('Native observation active URI mismatch');}else require('./trace-presentation.cjs').assertPresentation(observed,metadata);return{...rendered,tracePresentation:{...observed,binding:metadata.binding,asserted:!metadata.observeOnly,scope:metadata.observeOnly?'Native upstream state recorded without a lifecycle-success claim':'Exact content/style/disappearance/menu asserted'}};
 }
-async function buildKeybinding(client,{custom=false,input,cancel=false,directory}={}) {
+async function buildKeybinding(client,{custom=false,input,cancel=false,dismissOnSubmit=false,directory}={}) {
   const focused=await client.request('Runtime.evaluate',{expression:'(()=>{const editor=document.querySelector(".monaco-editor.focused")||document.querySelector(".monaco-editor");editor?.querySelector("textarea, [role=textbox], [contenteditable=true]")?.focus();return !!document.activeElement?.closest(".monaco-editor");})()',returnByValue:true});
   if(!focused.result.value)throw Error('No focused source editor for build keybinding');
-  const started=Date.now();
+  const started=Date.now(),keyEvents=[],inputEvents=[];
+  const send=async(method,params,editing=false)=>{const started=Date.now();await client.request(method,params);(editing?inputEvents:keyEvents).push({method,params,started,finished:Date.now()});};
   const key=custom?'F6':'B',code=custom?'F6':'KeyB',windowsVirtualKeyCode=custom?117:66,modifiers=custom?0:10;
-  for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode,modifiers});
+  for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode,modifiers});
   let prompt;
   if(custom){
     const query='(()=>{const roots=[document];for(let i=0;i<roots.length;i++){const root=roots[i];const input=[...root.querySelectorAll(".quick-input-widget input")].find(e=>e.getClientRects().length);if(input)return{value:input.value,focused:input===input.ownerDocument.activeElement||input.getRootNode().activeElement===input};for(const e of root.querySelectorAll("*"))if(e.shadowRoot)roots.push(e.shadowRoot);}return null;})()';
     const deadline=Date.now()+3000;let before;
     while(Date.now()<deadline){before=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(before?.focused)break;await new Promise(r=>setTimeout(r,20));}
     if(!before?.focused)throw Error('Actual F6 input prompt is not focused');
-    if(input!==undefined){for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});await client.request('Input.insertText',{text:input});}
+    if(input!==undefined){for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2},true);await send('Input.insertText',{text:input},true);}
     const submitted=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!submitted?.focused||input!==undefined&&submitted.value!==input)throw Error('F6 prompt contents did not match requested input');
     const rendered=await capture(client,directory,true);prompt={before,submitted,rendered};
     const key=cancel?'Escape':'Enter',code=key,windowsVirtualKeyCode=cancel?27:13;
-    for(const type of ['keyDown','keyUp'])await client.request('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode});
-    if(cancel){let visible;do{visible=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!visible)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);if(visible)throw Error('Cancelled F6 prompt remains visible');const hidden=join(directory,'cancelled');require('node:fs').mkdirSync(hidden,{recursive:true});prompt.cancelled={visible:false,rendered:await capture(client,hidden,true)};}
+    for(const type of ['keyDown','keyUp'])await send('Input.dispatchKeyEvent',{type,key,code,windowsVirtualKeyCode});
+    if(cancel||dismissOnSubmit){let visible;do{visible=(await client.request('Runtime.evaluate',{expression:query,returnByValue:true})).result.value;if(!visible)break;await new Promise(r=>setTimeout(r,20));}while(Date.now()<deadline);if(visible)throw Error('Submitted/cancelled F6 prompt remains visible');const hidden=join(directory,cancel?'cancelled':'dismissed');require('node:fs').mkdirSync(hidden,{recursive:true});prompt[cancel?'cancelled':'dismissed']={visible:false,rendered:await capture(client,hidden,true)};}
   }
-  return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':'ctrl+shift+b',prompt,scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
+  return {started,finished:Date.now(),focusedEditor:true,chord:custom?'f6':'ctrl+shift+b',keyEvents,inputEvents,prompt,scope:'Actual Linux renderer key dispatch; success requires the host to observe a fresh source-bound compiler artifact. Not proof or macOS key-dispatch evidence.'};
 }
 async function captureProofHover(client,directory,metadata){
  const checks=require('./proof-help.cjs');checks.popupExpected(metadata);
@@ -148,13 +149,36 @@ async function captureProofHelp(client,directory,metadata){
 }
 // Public output API presentation, observed from real renderer DOM/AX; no proof or full lifecycle equivalence.
 async function captureOutput(client,directory,metadata){
- const read=async()=>{const result=await client.request('Runtime.evaluate',{expression:`(()=>{const node=document.querySelector('.output-view')||document.getElementById('workbench.panel.output');if(!node)return null;const visible=e=>!!e&&[...e.getClientRects()].some(r=>r.width>0&&r.height>0)&&getComputedStyle(e).visibility!=='hidden';const panel=node.closest('.part')||node.parentElement;const selects=[...panel.querySelectorAll('.monaco-select-box')].filter(visible).map(e=>({tag:e.tagName,label:(e.selectedOptions?.[0]?.textContent??e.innerText??'').trim(),ariaLabel:e.getAttribute('aria-label'),title:e.title}));const viewport=(node.querySelector('.overflow-guard')||node).getBoundingClientRect();const geometry=[...node.querySelectorAll('.view-line')].map(e=>{const r=e.getBoundingClientRect();return{text:e.textContent,top:r.top,left:r.left,bottom:r.bottom,right:r.right,intersectsViewport:r.bottom>viewport.top&&r.top<viewport.bottom&&r.right>viewport.left&&r.left<viewport.right};});const segments=geometry.map(e=>e.text);return{visible:visible(node),text:node.innerText,segments,geometry,continuousText:segments.join('').replace(/\u00a0/g,' '),selects,selectedChannel:selects.length===1?selects[0].label:null};})()`,returnByValue:true});return result.result.value;};
+ const deadline=performance.now()+15000,visibility=require('./output-visibility.cjs');
+ const timeout=()=>Object.assign(Error('Output capture exhausted original15000ms deadline'),{code:'TIMEOUT'});
+ const boundedClient={request:async(...args)=>{const remaining=deadline-performance.now();if(remaining<=0)throw timeout();let timer;try{return await Promise.race([client.request(...args),new Promise((_,reject)=>{timer=setTimeout(()=>reject(timeout()),remaining);})]);}finally{clearTimeout(timer);}}};
+ const read=async()=>{const result=await boundedClient.request('Runtime.evaluate',{expression:`(()=>{const node=document.querySelector('.output-view')||document.getElementById('workbench.panel.output');if(!node)return null;const visible=e=>!!e&&[...e.getClientRects()].some(r=>r.width>0&&r.height>0)&&getComputedStyle(e).visibility!=='hidden';const panel=node.closest('.part')||node.parentElement;const selects=[...panel.querySelectorAll('.monaco-select-box')].filter(visible).map(e=>({tag:e.tagName,label:(e.selectedOptions?.[0]?.textContent??e.innerText??'').trim(),ariaLabel:e.getAttribute('aria-label'),title:e.title}));const viewport=(node.querySelector('.overflow-guard')||node).getBoundingClientRect();const geometry=[...node.querySelectorAll('.view-line')].map(e=>{const r=e.getBoundingClientRect();return{text:e.textContent,top:r.top,left:r.left,bottom:r.bottom,right:r.right,intersectsViewport:r.bottom>viewport.top&&r.top<viewport.bottom&&r.right>viewport.left&&r.left<viewport.right};});const segments=geometry.map(e=>e.text);return{visible:visible(node),text:node.innerText,segments,geometry,continuousText:segments.join('').replace(/\u00a0/g,' '),selects,selectedChannel:selects.length===1?selects[0].label:null};})()`,returnByValue:true});return result.result.value;};
  const valid=o=>typeof metadata.readinessLine==='string'&&metadata.readinessLine.length>0&&o?.visible&&o.selectedChannel===metadata.channel&&o.continuousText?.includes(metadata.readinessLine);
- const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);
- writeFileSync(join(directory,'output-visible-before.json'),JSON.stringify(before,null,2));
- if(!valid(before)){await capture(client,directory,true).catch(()=>{});throw Error('Actual visible output channel/owned readiness line did not match');}
- const captured=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'output-visible-after.json'),JSON.stringify(after,null,2));
- if(!valid(after)||before.continuousText!==after.continuousText)throw Error('Output content/channel changed during screenshot capture');
- return{...captured,output:{panelVisible:true,readinessVisibility:'not-certified',scope:'Visible panel/channel; full owned readiness is DOM-resident. Per-character clipping/visibility is unproved.',selectedChannel:before.selectedChannel,text:before.continuousText,before,after,readinessLine:metadata.readinessLine}};
+ const expression='('+visibility.probe.toString()+')('+JSON.stringify(metadata.readinessLine)+')',inspect=async()=>{const result=await boundedClient.request('Runtime.evaluate',{expression,returnByValue:true});return result.result.value;};
+ let samples=0,primary;
+ try{
+  // Initialize the actual AX/DOM inspection path before settling. This diagnostic
+  // image is not an accepted bracket; watcher epoch is never reset afterward.
+  const initial=await inspect();writeFileSync(join(directory,'output-preparation-initial.json'),JSON.stringify(initial,null,2));
+  const preparation=join(directory,'preparation');mkdirSync(preparation,{recursive:true});await capture(boundedClient,preparation,true);
+  const prepared=await visibility.prepare({read,inspect,valid,expected:metadata.readinessLine,channel:metadata.channel,deadline,now:()=>performance.now(),delay:ms=>new Promise(resolve=>setTimeout(resolve,ms)),record:async sample=>{writeFileSync(join(directory,'output-preparation-'+String(samples++).padStart(3,'0')+'.json'),JSON.stringify(sample,null,2));}});
+  const before=prepared.visible,glyphBefore=prepared.glyph;writeFileSync(join(directory,'output-visible-before.json'),JSON.stringify(before,null,2));writeFileSync(join(directory,'output-glyph-before.json'),JSON.stringify(glyphBefore,null,2));
+  // One screenshot bracket only: a failed bracket is never retried or selected away.
+  const captured=await capture(boundedClient,directory,true),after=await read(),glyphAfter=await inspect();writeFileSync(join(directory,'output-glyph-after.json'),JSON.stringify(glyphAfter,null,2));writeFileSync(join(directory,'output-visible-after.json'),JSON.stringify(after,null,2));
+  const glyphErrors=visibility.errors(glyphBefore,glyphAfter,metadata.readinessLine,metadata.channel);if(glyphErrors.length)throw Error('Output glyph geometry refused: '+glyphErrors.join('; '));
+  if(!valid(after)||before.continuousText!==after.continuousText)throw Error('Output content/channel changed during screenshot capture');
+  if(performance.now()>=deadline)throw timeout();
+  return{...captured,output:{panelVisible:true,readinessVisibility:'not-certified',preparationSamples:samples,glyphGeometry:{before:glyphBefore,after:glyphAfter,scope:'DOM Range geometry/hit-test coverage, not raster glyph identity or unobserved compositor ABA.'},scope:'Visible panel/channel; full owned readiness is DOM-resident. Per-character clipping/visibility is unproved.',selectedChannel:before.selectedChannel,text:before.continuousText,before,after,readinessLine:metadata.readinessLine}};
+ }catch(error){primary=error;writeFileSync(join(directory,'output-capture-failure.json'),JSON.stringify({message:error.message,code:error.code,at:performance.now()},null,2));throw error;
+ }finally{
+  const cleanup={requested:performance.now(),deadline,confirmed:false};let timer;
+  try{
+   const pending=client.request('Runtime.evaluate',{expression:'('+visibility.probe.toString()+')(null,true)',returnByValue:true}),remaining=deadline-performance.now();
+   if(remaining<=0){pending.catch(()=>{});throw timeout();}
+   const result=await Promise.race([pending,new Promise((_,reject)=>{timer=setTimeout(()=>reject(timeout()),remaining);})]);
+   if(result?.result?.value!==true)throw Error('Output observer cleanup was not confirmed');if(performance.now()>=deadline)throw timeout();cleanup.confirmed=true;
+  }catch(error){cleanup.error=error.message;cleanup.connectionRetired=typeof client.close==='function';client.close?.();if(!primary)throw error;
+  }finally{clearTimeout(timer);cleanup.finished=performance.now();writeFileSync(join(directory,'output-observer-cleanup.json'),JSON.stringify(cleanup,null,2));}
+ }
 }
 module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput};

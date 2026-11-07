@@ -1,5 +1,33 @@
 # H62 item 2: calculus / try-evidence empty-statement audit
 
+## H82 retirement: implementation stopped
+
+The human ordered stop-and-handoff to
+solidity-h28-sol-20261104/automation-benchmark. No automatic continuation is
+authorized. All later historical next-step instructions in this document are
+superseded for this worker. The successor integrates the final committed head.
+
+The final completed census has361 fresh mapped exports and5283 exact source
+signature matches, zero missing signatures,18633 kernel constants and13350
+additional unclassified cases. Partial provenance acceptance passes. Proof
+coverage remains123 mapped input-bearing witnesses,12 closed checks and one
+supporting check:136 verifications,126 distinct fixture theorems. All four
+assignment checkpoints remain incomplete.
+
+The requested PAUSED state cannot be applied: the exposed goal API supports
+only complete/blocked, with no pause or get_goal operation. Neither unsupported
+state substitution was attempted. Worker implementation is stopped and the
+coordinator must pause the existing goal externally.
+
+The complete original prompt, original queues, exact361-path scope manifest,
+subsequent steering and retirement state are committed under
+scripts/h62/item2/audit-calculus/handoff/. H44 bulk and unimplemented drafts
+remain off Git in the authenticated evidence archive. Coordinator-local paths
+are provenance, not assumed successor access. H71 push permission was not
+available, so no push was attempted. No new proof implementation occurred after
+the retirement instruction.
+
+
 Owner: solidity-h62-2-20261106/audit-calculus.
 Frozen base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
 Branch: codex/solidity-h62-2-20261106/audit-calculus.
