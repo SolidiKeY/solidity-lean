@@ -69,5 +69,6 @@
       "sha256": "289796a8584c4e2a661bf2087245c7e7f17bf35cf302000613a65b2c5ad18a71"
     }
   ],
-  "reviews": "Independent read-only finder/skeptic verified exact reached-state argument/encoding premises, full allocations and inherited-control boundaries; no findings, no reviewer scripts/tests/Lean/server."
+  "reviews": "Independent read-only finder/skeptic verified exact reached-state argument/encoding premises, full allocations and inherited-control boundaries; no findings, no reviewer scripts/tests/Lean/server.",
+  "source_binding_status": "Historical mixed-ABI-only test snapshot. Later typed-word additions and current checked bytes are in source-abi-word-joint-manifest.json; prior evidence/hashes retained unchanged."
 }

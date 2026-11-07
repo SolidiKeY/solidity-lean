@@ -67,6 +67,50 @@ theorem skipped_allocation_refused (pipeline : Roadmap.Pipeline) (static packed 
         SourceKeccak.afterLiteral populated (SourceAbiControls.data packed pipeline))) :=
   SourceAbiControls.wrong_skipped_hash pipeline static packed
 
+/-- Every typed word supplies the original bytes32 observation and encoder
+premise together, for arbitrary Source environments and caller contexts. -/
+theorem word_joint {E : Source.Env} {Γ : RCtx} (word : Roadmap.Word) :
+    ∃ value : Source.Val E.layout STy.bytes32, value.word = some word ∧
+      ∀ (frame : Source.Fr) (horizon : Nat) (packed : Bool),
+        (Source.encodeOne frame horizon packed (.val value) : Source.EM E Γ _) =
+          pure (false,Source.wordBytes word) := by
+  refine ⟨Source.mkBytes (n:=32) (h:=by decide +kernel) (Source.wordBytes word),
+    SourceAbi.word_bytes_field word, ?_⟩
+  intro frame horizon packed
+  exact SourceAbi.encode_fixed_bytes32 frame horizon packed _ word
+    (SourceAbi.word_bytes_field word)
+
+/-- Exact single-value encoder run retains arbitrary supplied locals/state.
+This does not assert that an outer ABI expression succeeds at zero horizon. -/
+theorem word_actual_run {E : Source.Env} {Γ : RCtx}
+    (word : Roadmap.Word) (frame : Source.Fr) (horizon : Nat) (packed : Bool)
+    (locals : Source.Locals E.layout Γ) (state : Source.St E) :
+    let value : Source.Val E.layout STy.bytes32 :=
+      Source.mkBytes (n:=32) (h:=by decide +kernel) (Source.wordBytes word)
+    (Source.encodeOne frame horizon packed (.val value) : Source.EM E Γ _).run (locals,state) =
+      (.ok (false,Source.wordBytes word),(locals,state)) := by
+  dsimp only
+  rw [SourceAbi.encode_fixed_bytes32 frame horizon packed _ word
+    (SourceAbi.word_bytes_field word)]
+  rfl
+
+/-- A different observed word cannot justify this same value's encoder premise. -/
+theorem other_word_refused {D : Source.Layout} (word other : Roadmap.Word)
+    (different : word ≠ other) :
+    ¬ ((Source.mkBytes (n:=32) (h:=by decide +kernel) (Source.wordBytes word) :
+      Source.Val D STy.bytes32).word = some other) := by
+  rw [SourceAbi.word_bytes_field]
+  intro same
+  exact different (Option.some.inj same)
+
+/-- The negative observation domain contains genuinely distinct typed words. -/
+theorem distinct_word_inputs : Source.toWord 0 ≠ Source.toWord 1 := by decide +kernel
+
+#print axioms word_joint
+#print axioms word_actual_run
+#print axioms other_word_refused
+#print axioms distinct_word_inputs
+
 #print axioms joint
 #print axioms actual
 #print axioms timeout_after_effects
