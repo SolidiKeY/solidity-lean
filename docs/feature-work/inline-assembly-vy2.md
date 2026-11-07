@@ -4370,3 +4370,17 @@ refinement, concrete V10/V11 agreements and actual source/Yul/calculus/compiler
 joint closure. Existing owner state/world/memory APIs are used, not replaced.
 The persistent goal is unchanged; this checkpoint does not resolve its precise
 producer/composition dependencies or claim full-lane completion.
+
+
+### Runtime hash identity refusal repair
+
+The saved physical-fixture checker now requires both deployment/runtime hashes
+to be lowercase, exactly 64-character hexadecimal strings before comparing
+identity. This closes the missing-both-fields (`undefined === undefined`)
+false acceptance. Controls also refuse equal null/numeric, empty, wrong-length,
+nonhexadecimal and newline/CRLF-suffixed values. All original fixture and
+storage-write assertions remain. Finder/skeptic reviewed read-only; the skeptic
+requested explicit length and newline controls, which were added. The existing
+eight positive variants and 153 negative controls pass, including actual SSTORE
+observation. This validates report checking only, not physical completeness.
+Evidence stays outside Git at `/workspace/vy2-evidence/runtime-hash-validation`.
