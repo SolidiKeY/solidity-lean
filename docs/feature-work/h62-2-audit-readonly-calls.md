@@ -889,3 +889,61 @@ identities, and continue supported joint witness/refutation work on independentl
 checkable inputs. Declared no-path is not a release of any timing hold. Live
 ownership still requires current authoritative evidence. Historical proof-cleanup
 fb0defdc remains UNVERIFIABLE; P20 owner repair still awaits integration/recheck.
+
+
+## Exact signature-drift review (2026-11-07)
+
+Fetched/rebased onto master 48ff6a2ebd9a6531a288c0d203c682c4075be25b before
+this item. The saved capture records its actual full source head separately;
+no prior native or witness proof is recertified by this source-only review.
+
+The new signature_drift driver preserves all 792 original identities and emits
+full original/current signatures, variable context, visibility, historical kernel
+name/owner, and unified diffs for every changed or absent declaration. Exact
+observed-pair pins classify the known 22 cases without rewriting statements or
+normalizing the frozen gate: eleven `.balance.val` to `.balance` observations,
+one Word-to-Monetary.Balance parameter change, seven added E.mapFree parameters,
+and three absent private run_bind declarations. Unrecorded pairs, residual
+premise/context changes, or later mutations remain unreviewed drift. A same-text
+pattern elsewhere is not enough. Hoare.run_bind is not a replacement identity.
+
+Pinned coordinator decision input 5e4335f38abb74a8864863577b04363980659e6b92a4a9835e8a0efa5bd833dd
+records H19's exact unbounded monetary representation and H60's Source typing
+repair. Those explain upstream evolution; they do not establish H57 statement
+transport, approve an added audit premise/exclusion, or prove correspondence.
+Monetary.Balance is Nat, so the domain change is not treated as a mere projection
+rename. Source Types/Typing/Machine/Monetary and the BalancesFit writer inventory
+are captured as read-only definition context. In particular the structural
+unbounded History.balance step is not automatically covered by Word range facts.
+No semantic weakening/equivalence verdict follows from lexical transformation.
+
+All 19 changed statements retain pending frozen/current transport and kernel
+fidelity; all three private identities remain absent and pending. A saved owner
+request asks the coordinator/H16 Source producers for exact versioned statement
+and consumer-proof references. H19/H60 decisions already authorize their model
+work; this is an evidence request, not a new human scope/permission question.
+No Source or original theorem file was edited.
+
+Seven external controls pass: extra premise/context stays visible even when a
+pair hash is altered, unrecorded patterns stay unreviewed, private aliases cannot
+close absence, original/duplicate/foreign identities are checked, raw diffs are
+retained, and observation pin parsing/hashing shares one byte buffer. Finder
+found a split snapshot between the initial pins-file hash and later parsed
+bytes. The one-buffer fix derives saved bytes, parser input and retained digest
+from the same read; both read-only finder and skeptic confirmed it. Neither ran
+Lean/server/tests or wrote files. The pre-fix final/ capture is historical only;
+sealed/ is the corrected accepted source capture. No Lean executed in this item.
+
+Raw dossiers, captured current source/definition bytes, decision context, Git
+history, reviews and owner request are under
+/workspace/h62-audit-readonly-calls/signature-drift/. Pins are in
+`tests/h62/item2/audit-readonly-calls/signature-drift.sha256`; the committed
+driver regenerates the bulk dossier. All 792 rows remain: 770 lexical headers
+retained, 19 drift, three private absences. Historical 451 ordinary pending and
+all other witness/refutation classifications remain unchanged; ZERO original
+obligations are discharged. Live ownership is unverified, not inferred from
+Git author history. No Lean declaration, frozen statement/definition/premise,
+exclusion, axiom, sorry/native_decide or proof budget changed. Full original and
+inherited acceptance, joint witnesses, H121 Source/world/native-frame adequacy,
+compiler success and runtime gates remain open; historical Premises
++80.254966536% STOP remains. No runtime pass, goal completion or publication.
