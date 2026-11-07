@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "7d3a2ce62a4d21f659ab56eea72553a6420c5f746907e86d1a561bc8d6a62d90",
+  "kind": "data-inhabitance",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/OperationPush.lean:20:operationPush_eq_push",
+      "theorem": "Solidity.Backend.StorageOps.operationPush_eq_push",
+      "signature": "theorem operationPush_eq_push {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (old : Value G (.array E)) : operationPush old = old.push",
+      "signature_sha256": "a4deaf5510a5256d60c70c8a097bb4ef8e3a789f65ca174095c2bce672e89d41",
+      "witness": "H62.StorageAudit.PushWitnesses.data_input",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/OperationPush.lean:25:operationPush_failure",
+      "theorem": "Solidity.Backend.StorageOps.operationPush_failure",
+      "signature": "theorem operationPush_failure {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (old : Value G (.array E)) : operationPush old = none \u2194 2 ^ 256 \u2264 old.length.val + 1",
+      "signature_sha256": "633f6af543901d822f63865c1588f24a6a7a03e3d4ed4642f1c2eb831ea68727",
+      "witness": "H62.StorageAudit.PushWitnesses.capacity_input",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}
