@@ -411,3 +411,240 @@ per-run premise. Generic recursive emitted selection, ordinary Source aggregate
 lifecycle and physical/P8/caller-world composition remain producer obligations.
 Existing intrinsic leaves and the 52-row audit reference ledger do not close
 G27-G30, the backfills or any consolidated proof/acceptance queue.
+
+
+### Checkpoints 225–226: interrupted diagnostic and rejected false-loop backfill
+
+C225 tested source head `139f09acbb231b26237fafd55a937ef79f9cc8f5`.
+The host monitor was lost across session restart while the capped runtime build
+continued. The verified task-owned runtime was stopped under the existing
+interruption policy. Build exit and complete resource measurements are unknown;
+this is not a passing full gate. Cache seeding had failed extraction with ENOSPC
+and installed no pack. Raw logs and interruption receipts remain off Git.
+
+Before C226, the existing lane fast-forwarded to published master
+`2a917f7329f06c3fa4b15ebea1608b4c2caa3826`. GitHub #71 authorized a shared
+false-loop success lemma and proof-only rewrites in the two allocation controls,
+conditional on checking being no slower. No existing statement or definition was
+changed. The candidate affected build passed; the baseline warm-up passed 222
+jobs. An initial timing prerequisite failed on an unmaterialized cache object;
+the repository restore helper corrected it before a fresh fixed measurement set.
+
+Three serial warm samples per file used identical H111 stack and H113 resource
+settings. Median seconds before/after were SimLemmas 7.89/7.94, mixed allocation
+2.42/2.43, and recursive allocation 3.02/3.01. The predefined per-file and summed
+median rule rejected the change. Every sample is retained; no sample was selected
+away. All three source files were restored byte-for-byte to the committed master
+version. This is a rejected bounded backfill attempt, not a completed production
+extraction or a general performance result. No unchanged retry is authorized.
+The rejected candidate was not accepted into the axiom inventory.
+
+Evidence: `/workspace/v10-storage-operations-evidence/checkpoint225-interruption.json`,
+`checkpoint225-interruption-last20.log`, `checkpoint226-plan.json`,
+`checkpoint226-timing.json`, `checkpoint226-restoration.json`, and
+`checkpoint226-rejected.patch` in the same directory. Original producer, physical
+adequacy, audit coverage, full validation and trust/documentation gate obligations
+remain open. Independent reviews are recorded in the checkpoint handoff.
+
+
+### Checkpoint 227: nonempty target write-sequence audit witnesses
+
+The additive audit module supplies simultaneous inputs for four exact frozen
+TargetDefaultInit laws: run_writes, context_writes, agreement_writes and
+outside_writes. One populated machine and the ordered writes root0:=7,
+root1:=23, root0:=0 expose overwrite order. Both covered roots agree with the
+captured store initially; a distinct outside root and complete non-store context
+frame. Actual execution and agreement reuse the frozen laws. Omitting the last
+write changes root0, and an always-reverting program disagrees with the actual
+successful sequence. No Source, schema compiler, physical hash, gas/fork or world
+adequacy is asserted.
+
+Exact source commit `f869a9173e50390a3f88f8444453b42fb73fb6ce` passed the bounded
+serial kernel check in 1.84 seconds, peak aggregate RSS 682602496 bytes, without a
+resource stop. All eleven measured local axiom guards use only propext,
+Classical.choice and Quot.sound. The first check failed on a local reduction
+before finite inequality checking; the corrected proof and subsequent exact-head
+guards pass. The mapping generator's initial wrong census-field lookup also
+failed and was corrected without changing the census or interfaces.
+
+The frozen registry now contains 56 mapped rows: 44 joint-premise bundles and
+12 data inhabitants; 3225 of 3281 conservative rows remain unmapped. Additional
+execution/negative controls do not increase that interface count. Registry tests
+include rejection of drift in this module and its source pin. Historical checked
+heads and the prior complete-validation marker remain historical; only the new
+module has a fresh exact-head receipt.
+
+The corrected repository trust wrapper reports 6614 sources, 289 inventoried
+sites and zero findings. Direct scanner invocation without its required file
+list failed and is retained. Strict axiom pins remain FAIL: 16411 pinned,
+zero errors, 251 unrecorded and 99 baselined changes. The eleven new declarations
+are all standard-only entries; no shared axiom inventory was written. Independent
+read-only finder and skeptic found no semantic fidelity issue; metadata review
+and sealed evidence accompany this checkpoint. Full lane validation and all
+previous producer, timing and documentation gate holds remain open.
+
+
+### Checkpoint 228: live-array access and retained refusal audit
+
+The additive ArrayAccessWitnesses module supplies six exact frozen premise
+bundles: TargetArrayRead.run_current and failure_matches, plus
+TargetArrayWrite.run_current, success, failure_matches and header_frame.
+One existing intrinsic Bool array has length 1 and retained extent 3, with true
+payloads; the populated symbolic-slot machine has the same current header.
+The successful index-0 write stores false. Actual read/write execution reuses
+the frozen laws, including the complete machine context and stack tail. The
+selected header representation is supplied jointly with actual adapter success.
+
+Retained index 1 has a raw present cell and permits raw save, while live access
+and the write adapter refuse it. Index 3 is separately out of extent and also
+reverts. The observations retain the header, untouched retained cell and outside
+slot. Reject-all disagrees with the successful read. These controls establish
+no Source lowering, numeric/physical hash, gas/fork or world adequacy.
+
+Source commit `c4484a7dc292c1cf547a99e8f48bcfeb1763e8d7` passed its exact-head
+serial check in 1.84 seconds, peak aggregate RSS 701554688 bytes, without a
+resource stop. Sixteen measured axiom guards pass: seven axiom-free and nine
+using only propext, Classical.choice and Quot.sound. Initial local extent
+construction, dependent record syntax, and header compatibility proof failures
+are retained; corrected definitions use the existing intrinsic types and
+explicit length/extent bounds, without producer statement or budget changes.
+
+The frozen registry now maps 62 rows: 50 joint-premise bundles and 12 data
+inhabitants. 3219 of the 3281 conservative rows remain unmapped. Six new rows
+are counted once; additional execution/refusal controls add no interface count.
+New source/pin corruption checks pass. Prior complete and per-source validation
+heads stay historical; only this additive module has a fresh receipt.
+
+The repository trust wrapper passes 6614 sources and 289 inventoried sites with
+zero findings. Strict pins remain FAIL: 16532 pinned, zero errors, 372 unrecorded
+and 99 baselined changes. The sixteen new declarations are standard-only;
+shared inventories and gate policies are unchanged. Independent read-only
+finder and skeptic found no source fidelity defects; metadata reviews and
+strict committed-tree documentation comparisons accompany the sealed handoff.
+All original producer, full-validation, timing and documentation holds remain.
+
+
+### Checkpoint 229: represented live-array numeric readback
+
+The existing ArrayAccessWitnesses fixture now jointly inhabits the exact frozen
+TargetArrayRead.represented_read and complete_read premises. Both use the same
+populated length-1/extent-3 array, machine and live index 0. Selected queries are
+nonempty: the current header and the live element. The index support bound,
+header compatibility bounds, logical representation and target observations are
+proved together. Numeric completion additionally supplies Transport over a
+nonempty header/child location list and selected-child coverage. Its constant
+true-word stores and explicit local hash satisfy that read-only interface; no
+finite-region injectivity, physical hash adequacy or Source compiler is inferred.
+
+Both successful conclusions apply the unchanged original laws. Negative controls
+show an all-false numeric store violates Transport and a zeroed target child
+violates initial target agreement. These are refused premise bundles, not new
+compiler or execution-totality claims. Existing definitions, statements and
+sixteen earlier guards remain unchanged.
+
+Exact source commit `3695698ee4e9806353038c773409dc0182e781c6` passed all 24 local
+guards in 2.42 seconds, peak aggregate RSS 710434816 bytes, without a resource
+stop. Eight new guards use only propext, Classical.choice and Quot.sound.
+The first check failed on a missing explicit support-bound proof and a local
+word-type mismatch; its rejected diagnostics are retained separately. The
+corrected and final guarded source passes without unfinished proof artifacts.
+
+The frozen registry maps 64 rows: 52 joint-premise bundles and 12 data
+inhabitants; 3217 of 3281 conservative rows remain unmapped. Only two new
+interface statements are counted. Source pin metadata retains the earlier
+ArrayAccessWitnesses identity and receipt in historical_checks; all unrelated
+and complete-validation receipts remain historical. Registry drift controls pass.
+
+Trust scanning passes 6614 sources and 289 inventoried sites with zero findings.
+Strict axiom pins remain FAIL: 16540 pinned, zero errors, 380 unrecorded and
+99 baselined changes. Only the eight new standard-only entries are classified
+for this increment; no shared inventory is written. Independent read-only
+finder/skeptic source and metadata reviews and strict committed-tree document
+comparisons accompany the handoff. Earlier producer, performance, documentation
+and full-validation holds remain open.
+
+
+### Checkpoint 230: complete numeric write with a retained frame
+
+After adopting published master, the existing ArrayAccessWitnesses module
+supplies every exact frozen TargetArrayWrite.complete_numeric premise together.
+The same populated array, successful index-0 false write and machine are used.
+The selected frame is nonempty: raw retained index 1, distinct from written
+index 0. Logical apartness and symbolic nonaliasing are proved. The explicit
+FiniteRun uses N=16, L=2, R=1, local hash 8, preimage data0 and covered locations
+root0, child0 and child1. Initial header/frame representation, Transport, key
+fitting and every covered target cell agree on these same inputs.
+
+The actual theorem destructs this joint bundle and applies the original law,
+retaining successful whole-machine execution, postrepresentation, numeric
+Transport and all covered target observations. Observations distinguish numeric
+addresses 0/8/9 and target header/written/retained cells as 1/0/1, preserving the
+outside slot and non-store context. A hash-zero negative control refutes the
+finite-run premise via two covered colliding addresses and the existing
+word_inj law. This is a finite-model premise refusal, not a physical hash
+collision or global injectivity claim. Source/compiler/world adequacy stays open.
+
+Corrected source commit `f2189455bb6c61b10022b6d81e5a49cb241c4461` passed all
+39 guards in 3.02 seconds, peak aggregate RSS 717266944 bytes, with no resource
+stop. Fifteen new proofs use two empty axiom sets, three propext-only sets and
+ten standard-three sets. Initial local hash/boundedness reductions failed and
+were corrected. Guard generation also matched a theorem-name prefix, nesting
+an accidental duplicate guard; commit 833a5ed14779235e3ffaae6abc09c6ce4e7ddaea
+and its exact-head check FAIL are retained. The corrected guard preserves all
+measured expectations and the passing receipt names only the corrected source.
+
+Only one new frozen statement is counted. The registry maps 65 rows: 53 joint
+bundles and 12 data inhabitants, with 3216 of 3281 conservative rows uncovered.
+Prior source identities remain in historical_checks; complete and unrelated
+source receipts remain historical. Registry corruption controls pass.
+
+Trust scanning passes 6616 sources and 289 inventoried sites with zero findings.
+Strict pins remain FAIL: 16559 pinned, zero errors, 384 unrecorded and zero
+baselined changes. The fifteen new entries are standard-only; no shared
+inventory or gate policy was edited by this increment. Independent read-only
+finder and skeptic reviews, exact committed-tree documentation comparisons and
+all rejected diagnostics accompany the sealed handoff. Original producer,
+performance, full-validation and documentation holds remain open.
+
+
+### Checkpoint 231: complete default initialization over dirty retained cells
+
+Three exact frozen laws now have simultaneous witnesses: TargetDefaultInit.complete,
+CopyDefaults.represented and CopyDefaults.numeric_transport. The same populated
+array fixture supplies a checked CopyPermit, nonempty supported header/child
+queries, a concrete finite run, numeric Transport, demand/selected coverage and
+all target agreements. Each law is applied directly to its corresponding bundle.
+The complete initializer retains all five conclusions, including successful
+selected SLOAD readback. Default logical element reads are None, while raw dirty
+child words remain 1; only the header becomes zero. A genuinely successful header
+read and noop/reject-all counterexamples prevent an empty success story. This is
+not a Source allocation or physical/world/compiler adequacy result.
+
+Exact source commit `e90ef087062dc975455b436c63b7b292329f7a2e` passed all 51 guards
+in 3.64 seconds, peak aggregate RSS 723103744 bytes, without a resource stop.
+Twelve new proofs use two propext-only and ten standard-three axiom sets. The
+initial check passed with an unused existential-binder warning; that binder was
+renamed without changing the proposition. Existing statements, definitions and
+39 previous guards remain unchanged apart from the added local import. This is
+new audit work, not a matched proof-refactor or whole-build timing comparison.
+
+The registry maps 68 rows: 56 joint bundles and 12 data inhabitants; 3213 of
+3281 conservative rows remain uncovered. Only three new interface statements
+are counted. Historical source identities/receipts and the complete-validation
+marker remain historical. Registry corruption controls pass.
+
+Trust scanning passes 6616 sources and 289 inventoried sites with zero findings.
+After adopting published inventory reconciliation, strict pins remain FAIL:
+16571 pinned, zero errors, 62 unrecorded and zero baselined changes. All 62 are
+new standard-only entries in the two guarded audit modules: nine axiom-free,
+five propext-only and 48 standard-three. Per-entry source/head/log classification
+is exported for coordinator integration; no shared inventory is written here.
+
+Checkpoint 230's oversized sealed HANDOFF.md remains unchanged. A separate
+1811-byte compact relay was locally verified against its original sealed manifest
+and its own checksum list. A first relative-checksum invocation used the wrong
+working directory and read no files; the corrected verification passes. New
+handoffs use a bounded checkpoint history summary while retaining the full
+original-base patch and bundle. Original scope and goal identity are unchanged.
+Read-only finder/skeptic reviews and raw strict/frozen documentation comparisons
+accompany the sealed packet. All broader producer and final-gate work remains.
