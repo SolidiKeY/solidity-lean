@@ -1171,3 +1171,27 @@ otherwise. Two unused forwarding aliases old_alias_source/wrong_root were
 removed at coordinator request; their original source_observation and
 default_root_refused statements and proofs remain in the defining rebind
 controls. Native execution and export-refusal proofs are retained.
+
+
+H124/H126 disposition supersedes the earlier ABI HOLD notes. H124 accepts the
+frame-free V13 p1_revert_bridge as delivered and closes Q-H68-PAYLOAD; its three
+documented deviations remain exact, with no P1-frame redesign. H126 confirms
+the earlier H87/H96 widening authority and approves head 85b3741d as-is. The
+exact approved Layout/SimLemmas and signed acceptance controls, ABI totality/
+P1-REVERT quartet, V13 pin additions and owned area/doc files are restored.
+All twelve restored source/doc/pin files are byte-identical to that head.
+Registration is regenerated. No versioned domain split or narrowing is added.
+
+The earlier counterexample concerned the then-restored unsigned-only backend;
+its receipt remains historical and does not refute the now-authorized wider
+compiler. Old signed_refused/signed_refusal controls are explicitly superseded
+by signed_accepted/signed_acceptance under H87/H126. Source/ExtCall and proof
+budgets are unchanged. The specific V13 pins are restored as authorized;
+central G07 pin/name reconciliation and V09 frozen inventory transition are
+provided as proposals for their owners, not silently rewritten or marked pass.
+
+The ancestry-only H124 merge had not restored the parked quartet in the current
+tree; this authorized content adoption supplies its exact accepted files.
+Full V12 P1 session/profile/origin and G42.04 adequacy remain separate owned
+work, with actual Source H24/library lifecycle, RO physical-frame and decoder
+producer waits retained. Original global/fidelity/performance STOPs remain open.
