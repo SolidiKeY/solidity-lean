@@ -83,7 +83,7 @@ theorem packed_step_plan_exists : (preparePackedSlot packedStepRegistry packedSt
 def packedStepPlan := (preparePackedSlot packedStepRegistry packedStepRegistry packedStepRequest).get packed_step_plan_exists
 
 def packedStepState : Source.EMState packedStepEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := packedStepEnv.layout) (packedStepEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := packedStepEnv.layout) (packedStepEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def packedStepResidual := initialPackedComplement packedStepRegistry packedStepRegistry (fun _ => packedZeroRaw)
 
 theorem packed_actual_static_refusal : packedSourceStep {packedStepFrame with static := true} packedStepPlan packedStepState packedStepResidual =

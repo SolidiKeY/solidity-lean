@@ -1,0 +1,16 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldNumeric.lean:SolidityBridge.AccessBridge.ByteWorldNumeric.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldNumeric.lean:SolidityBridge.AccessBridge.ByteWorldNumeric.paired_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/ByteWorldNumeric.lean:SolidityBridge.AccessBridge.ByteWorldNumeric.read_word_bytes": [
+  "Quot.sound",
+  "propext"
+ ]
+}

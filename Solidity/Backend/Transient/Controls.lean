@@ -20,11 +20,11 @@ def source : Source.EMState env [.bool] :=
   ⟨.cons (.bool true) .nil,
    ⟨⟨⟨fun _ => Source.Account.empty _⟩,Source.Transient.empty,[]⟩,
     (Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [0xa1,0,0xff]⟩).1,
-    [.call other ⟨3,by decide⟩ [0x12] false],[(owner,[0x99,0x42])],⟨[.bool],.cons (.bool false) .nil⟩⟩⟩
+    [.call other ⟨3,by decide⟩ [0x12] false],[(owner,[0x99,0x42])],⟨[.bool],.cons (.bool false) .nil⟩,Source.FailureExecution.Cursor.empty⟩⟩
 def prefixedSource : Source.EMState env [.bool] :=
   ⟨source.1,{ source.2 with ex := source.2.ex.run [
     .account owner (fun a => { a with
-      balance := ⟨93,by decide⟩
+      balance := 93
       nonce := 4
       code := some 0
       storage := a.storage.write saved (.bool true) }),
@@ -48,7 +48,7 @@ theorem actual_write :
 
 theorem nontrivial_prefix :
     prefixedSource.2.ex.journal.length=2 ∧ target.journal.length=1 ∧
-    prefixedSource.2.heap.next=1 ∧ (prefixedSource.2.ex.world.accounts owner).balance.val=93 ∧
+    prefixedSource.2.heap.next=1 ∧ (prefixedSource.2.ex.world.accounts owner).balance=93 ∧
     prefixedSource.2.fnLocals=⟨[.bool],.cons (.bool false) .nil⟩ ∧
     target.bank other slot.key=⟨0xcc,by decide⟩ := ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
 

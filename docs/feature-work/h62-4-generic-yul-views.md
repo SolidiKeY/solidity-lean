@@ -221,3 +221,55 @@ Implementation stopped for accepted successor `solidity-inline-assembly5-2026103
 Handoff files are in `scripts/h62/item4/generic-yul-views/handoff/`: original assignment transcription, scope manifest, full work/backfill queue and retirement limitations. The transcription is incomplete in its long owner-key paragraph; the exact original frozen rendered prompt has NOT been reproduced or hash-verified. Full ownership snapshot is exported off git. Successor needs exact original-thread export before new work.
 
 The exposed goal API cannot set PAUSED: its only outcomes are complete/blocked. No substitute completion or new goal was requested. No push was performed because H71 permission is not present in available inputs. Final cumulative patch, bundle, head and SHA256 manifest are recorded in the export handoff.
+
+## Explicit coordinator resume after integration
+
+The later coordinator instruction explicitly resumed this lane and authorized
+merging origin/master. The clean original branch fast-forwarded from
+67e0398f217da988605a7323efeabbfd44b1a84b to
+d96f2406d352de7e0b72ba6ac4ab29dc457582c6, which contains the reported
+20e492ee99a3fa8679aa526de0b6e731d85e4134 integration. The earlier stopped
+package is preserved as historical evidence; its pause text no longer describes
+the current authorized work. No push or new goal was requested.
+
+Independent backfill repaired the correspondence checker defect recorded by
+both retirement reviewers: comparison now retains literal and quoted-identifier
+contents and normalizes whitespace only outside them. Six external tests pass,
+including changed string values, internal string whitespace and quoted type
+identifiers. The current two selected type comparisons and all 3026 control
+theorem dispositions reproduce. This still supports only selected unquoted
+theorem names and is not a Lean parser or a semantic proof. Original-preservation
+claims continue to require the separate base-blob acceptance evidence.
+
+The integrated tree has no changes to the four previously failing dependency
+files relative to the stopped head; those known failures were not rerun.
+Roadmap axiom drift, Storage dependent elimination and Language migration remain
+waits. Independent queue work remains available; status is partial, not blocked.
+No original Lean source, axiom set, proof budget, interface or observation changed
+in this resumed checkpoint. Kernel fixture/refusal validation and matched timing
+remain open.
+
+## Repository-verifiable input pins after ac9d8db2a integration
+
+The coordinator reported the prior checkpoint integrated with passing gates and
+requested continuing from master. The original clean branch fast-forwarded to
+ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6. No prior stopped package was overwritten.
+
+Review minor addressed: the small committed source manifest is
+`scripts/h62/item4/generic-yul-views/checkpoint-manifest.json`. It records 12
+repository-relative source paths and SHA256 values, including both Lean
+candidates and the original ReadControls input. From the repository root run
+`python3 scripts/h62/item4/generic-yul-views/verify_manifest.py`; expected output
+is `SOURCE_MANIFEST_PASS files=12; source identity only`. The manifest lists
+reproduction commands. It is deliberately a source-input manifest, not a hash
+of itself or of VM-only bulk evidence. Future source edits require reviewed
+manifest regeneration; a changed file fails verification. Bulk H44 inventory
+and logs remain off git in separately checksummed exports.
+
+Three external controls pass for content mutation, escaping/absolute paths,
+and empty/duplicate inventories; six correspondence controls also pass.
+This establishes reproducibility of the selected source inputs, not semantic
+preservation of every original case, Lean validity, axiom acceptance or timings.
+The four known failing dependency files have not changed since the prior
+checkpoint; no known failing Lean gate was rerun unchanged. Roadmap, Storage
+and Language waits and all original proof/coverage/timing obligations remain.

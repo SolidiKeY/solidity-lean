@@ -1,0 +1,121 @@
+{
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.allowed_client": [],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.assignment_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.capture_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.cast_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.code_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.code_failure_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.condition_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.equal_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.failed_run_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.failed_value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.failure_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.guard_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.guard_negative_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.negative_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.operand_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.operand_failure_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.related_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.run_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.self_failure_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.uint_range_client": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/SignedEnumControls.lean:Solidity.Lowering.V07.SignedEnumControls.word_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

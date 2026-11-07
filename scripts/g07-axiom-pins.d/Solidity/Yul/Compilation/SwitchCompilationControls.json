@@ -1,0 +1,27 @@
+{
+ "Solidity/Yul/Compilation/SwitchCompilationControls.lean:Solidity.Yul.Compilation.SwitchCompilation.Controls.default_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchCompilationControls.lean:Solidity.Yul.Compilation.SwitchCompilation.Controls.default_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchCompilationControls.lean:Solidity.Yul.Compilation.SwitchCompilation.Controls.low_alias_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchCompilationControls.lean:Solidity.Yul.Compilation.SwitchCompilation.Controls.matching_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SwitchCompilationControls.lean:Solidity.Yul.Compilation.SwitchCompilation.Controls.matching_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
