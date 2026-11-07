@@ -179,3 +179,7 @@ Upstream `3c2734000413fb142b186e93387306bbb01fd181` provides the canonical `Soli
 ## Fail-closed panic occurrence follow-up
 
 The scanner now emits JSON and fails on zero or unmapped raw hits. The registered canonical helper is separately pinned to its upstream registration commit and contributes three supplemental navigation windows; the current tree has 45 raw matches and zero unmapped, while the original 474-header denominator is unchanged. Independent read-only finder and skeptic verified the locations and tests without Lean. Raw comments, strings, identifier suffixes and interval containment still prevent semantic attribution or proof claims.
+
+## Masked panic lexical-hint follow-up
+
+The occurrence mapper now reuses the original census mask, whose function body was moved unchanged into `lexical_mask.py`, and labels raw hits with a lexical-candidate hint. The current tree has 45 raw hits, 45 hints and zero unmapped. Synthetic controls cover nested comments, strings, attributes, identifier apostrophe prefixes and suffixes, and Unicode code-point columns. Independent read-only finder and skeptic reviewed without Lean; neither the mask nor the hint establishes Lean name resolution, semantic coverage, ownership or proof.

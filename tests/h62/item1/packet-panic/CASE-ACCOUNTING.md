@@ -139,3 +139,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## Fail-closed panic occurrence follow-up
 
 `panic_occurrence_windows.py` emits its JSON and exits 2 for zero raw matches or 3 for any unmapped match. Upstream registered the canonical `PanicBytes.lean` helper after the original 48-file census; its three headers receive separate navigation windows only after checking its bytes against registration commit `e9b89d553234b52e4ba9b38092ff691138c147c8`. The current scan has 45 raw matches, three supplemental helper windows and zero unmapped. The original 474-header ledger denominator is unchanged. Raw regex and lexical window limitations continue to apply; this is not semantic attribution or Lean proof.
+
+## Masked panic lexical hints
+
+The prior census comment/string/attribute mask was moved without changing its function body into `lexical_mask.py` and reused by the occurrence mapper. Every raw hit remains in output with a heuristic `lexical_candidate` flag; comments, strings, attributes and common identifier suffix/prefix cases are masked or rejected as candidates. On the current tree, 45 raw hits are all flagged candidates and zero are unmapped. Columns are one-based Python Unicode code-point offsets, not necessarily byte or UTF-16 offsets. The mask is not Lean name resolution: quoted identifiers, unusual syntax and conservative suffix rules may misclassify or miss cases, and current-tree files outside the pinned window set remain unverified. No semantic, ownership or proof claim follows.

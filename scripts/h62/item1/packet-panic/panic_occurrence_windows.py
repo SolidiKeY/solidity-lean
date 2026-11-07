@@ -1,17 +1,30 @@
 #!/usr/bin/env python3
 """Map raw panicData tokens to lexical source windows without claiming semantics."""
 import argparse, hashlib, json, pathlib, re, subprocess, sys
+from lexical_mask import mask_comments_and_strings
 
 DIRECTORY = pathlib.Path(__file__).resolve().parent
 TOKEN = re.compile(r"\bpanicData\b")
+LEXICAL_TOKEN = re.compile(r"(?<![\w'])panicData(?![\w'.!?])")
 HELPER_COMMIT = "e9b89d553234b52e4ba9b38092ff691138c147c8"
 HELPER_PATH = "Solidity/Backend/PrimitivePackets/PanicBytes.lean"
 HELPER_NAMES = ("exact_panic_bytes", "panic_not_truncated", "panic_not_empty")
 
 def occurrences(file, data):
     digest = hashlib.sha256(data).hexdigest()
-    return [{"file": file, "source_sha256": digest, "line": n, "column": m.start() + 1}
-            for n, line in enumerate(data.decode("utf-8").splitlines(), 1) for m in TOKEN.finditer(line)]
+    source = data.decode("utf-8")
+    masked = mask_comments_and_strings(source)
+    raw_lines = source.splitlines()
+    masked_lines = masked.splitlines()
+    if len(raw_lines) != len(masked_lines):
+        raise ValueError("mask changed line count")
+    result = []
+    for n, (raw, visible) in enumerate(zip(raw_lines, masked_lines), 1):
+        candidates = {m.start() for m in LEXICAL_TOKEN.finditer(visible)}
+        for match in TOKEN.finditer(raw):
+            result.append({"file": file, "source_sha256": digest, "line": n, "column": match.start() + 1,
+                "lexical_candidate": match.start() in candidates})
+    return result
 
 def link(rows, windows):
     mapping = []
@@ -61,7 +74,7 @@ def main():
         rows.extend(occurrences(path.relative_to(root).as_posix(), path.read_bytes()))
     mapping = link(rows, windows)
     unmapped = sum(row["window"] is None for row in mapping)
-    print(json.dumps({"method": "current-tree raw panicData regex matches across PrimitivePackets mapped to base-pinned lexical windows; includes comments, strings and identifier suffix false positives; the registered helper has separate upstream-snapshot windows; other files outside the window set are not base-verified; windows can contain unrelated or unscanned declarations; not Lean parsing, ownership or semantic case closure", "supplemental_helper_commit": HELPER_COMMIT, "supplemental_helper_windows": len(supplemental), "occurrences": len(mapping), "unmapped": unmapped, "rows": mapping}, ensure_ascii=False, indent=2))
+    print(json.dumps({"method": "current-tree raw panicData regex matches across PrimitivePackets mapped to base-pinned lexical windows; includes comments, strings and identifier suffix false positives; the registered helper has separate upstream-snapshot windows; other files outside the window set are not base-verified; windows can contain unrelated or unscanned declarations; lexical candidates mask comments, strings and attributes but are not Lean parsing, ownership or semantic case closure", "supplemental_helper_commit": HELPER_COMMIT, "supplemental_helper_windows": len(supplemental), "occurrences": len(mapping), "lexical_candidates": sum(row["lexical_candidate"] for row in mapping), "unmapped": unmapped, "rows": mapping}, ensure_ascii=False, indent=2))
     if not mapping:
         print("no raw panicData matches", file=sys.stderr)
         return 2

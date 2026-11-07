@@ -18,6 +18,10 @@ class OccurrenceWindowsTest(unittest.TestCase):
         self.assertEqual([(r["line"], r["column"]) for r in rows], [(1, 4), (1, 25)])
         # Raw word-boundary regex also matches an apostrophe identifier suffix.
         self.assertEqual(len(module.occurrences("x.lean", b"panicData'")), 1)
+        self.assertEqual(module.occurrences("x.lean", "λ panicData".encode())[0]["column"], 3)
+        sample = b"Source.panicData -- panicData\n/- outer /- panicData -/ -/\n\"panicData\"\n@[x panicData] panicData'\nfoo'panicData\n"
+        self.assertEqual([r["lexical_candidate"] for r in module.occurrences("x.lean", sample)],
+                         [True, False, False, False, False, False, False])
         w = {"file": "x.lean", "source_sha256": rows[0]["source_sha256"], "line": 1, "end_line": 1, "kind": "theorem", "name": "x", "ledger": "l", "window_sha256": "h"}
         self.assertEqual(len(module.link(rows, [w])), 2)
         self.assertIsNone(module.link(rows, [])[0]["window"])
@@ -55,6 +59,7 @@ class OccurrenceWindowsTest(unittest.TestCase):
                 payload = json.dumps({"windows": windows}).encode()
                 script = pathlib.Path(module.__file__).resolve()
                 wrapper = ("import importlib.util,subprocess,sys; "
+                           + "sys.path.insert(0," + repr(str(script.parent)) + "); "
                            + "spec=importlib.util.spec_from_file_location('scan'," + repr(str(script)) + "); "
                            + "m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m); "
                            + "m.canonical_helper_windows=lambda root: []; "
