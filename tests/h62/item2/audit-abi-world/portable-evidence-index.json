@@ -19,11 +19,12 @@
   },
   "full_lean_build_complete": true,
   "assignment_complete": false,
-  "final_acceptance": "Historical 902e snapshot: PIN-902e8776 required 247 standard-only registrations. Its P20 documentation wait is resolved on a282; current inventory was not rerun.",
+  "final_acceptance": "G07 blocked (open; count from 902e): historical PIN-902e8776 records 247 registrations. P20 is resolved upstream; no fresh c977 inventory result is claimed.",
   "owner_ticket": "/workspace/audit-abi-world-evidence/resume-902e-20261107/axiom-pin-owner-ticket.json",
   "normal_build_record": "resume-902e-20261107/full-resource.json",
   "boundary": "Portable byte integrity for historical 902e evidence: the 6654-job full gate and nine audit modules plus KeySort passed there. The P20 documentation wait is resolved on a282. No fresh a282 build or inventory claim. Archived external gas/fork observations apply to identical fixtures, not fresh EVM or formal gas/world/general compiler proofs. Transfer VM files before off-VM verification.",
   "bulk_manifest": "tests/h62/item2/audit-abi-world/bulk-artifacts.sha256",
-  "documentation_correction_base": "a282a282003a992eb334acefd1ef8f5490e0fe71",
-  "ticket_authentication": "The bulk manifest hashes the ticket containing the recorded 902e central-file SHA; no separate central-file entry is present."
+  "documentation_correction_base": "c97738bd5edac625ff696e3ce4480406810477ba",
+  "ticket_authentication": "The bulk manifest hashes the ticket containing the recorded 902e central-file SHA; no separate central-file entry is present.",
+  "g07_status": "blocked (open; count from 902e)"
 }
