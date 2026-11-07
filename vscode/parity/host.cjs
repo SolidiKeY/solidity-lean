@@ -105,7 +105,9 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(config.suite==='trace-unavailable'){
+    if(config.suite==='testing-symbols'){
+      await scenario('native-compiler-testing',()=>require('./hierarchy-lifecycle.cjs').runRendered({vscode,config,api,events,until}));
+    }else if(config.suite==='trace-unavailable'){
       await scenario('native-trace-unavailable',()=>require('./trace-presentation.cjs').runUnavailable({vscode,config,events,record,api,sessionFor,until}));
     }else if(config.suite==='dafny-command-output'){
       await scenario('native-dafny-command-output',()=>require('./dafny-command-output.cjs').run({vscode,config,events,keybindingRequest,until,observation}));

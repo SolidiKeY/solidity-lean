@@ -99,6 +99,13 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       if(!current())return;const validated=require('./testing-tree.cjs').currentSymbols(symbols,snapshot.text);snapshot.symbols=validated;testingTree.render(doc,report,validated);
     }).catch(error=>{if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED')output.appendLine('Testing symbols unavailable: '+error.message);});
   }
+  async function compilerTesting(doc){
+    if(!service?.request||disposed||doc.isClosed||!isSolidity(doc)||!vscode.workspace.isTrusted||reports.has(key(doc.uri))||!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true))return;
+    const id=key(doc.uri),previous=symbolSnapshots.get(id);if(previous?.compilerOnly&&previous.doc===doc&&previous.version===doc.version&&previous.text===doc.getText())return;
+    previous?.abort.abort();const snapshot={doc,version:doc.version,text:doc.getText(),compilerOnly:true,abort:new AbortController()};symbolSnapshots.set(id,snapshot);
+    const current=()=>!disposed&&!doc.isClosed&&!snapshot.abort.signal.aborted&&documents.get(id)===doc&&doc.version===snapshot.version&&doc.getText()===snapshot.text&&symbolSnapshots.get(id)===snapshot&&!reports.has(id)&&vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true);
+    try{const symbols=await service.request('textDocument/documentSymbol',doc,{}, {signal:snapshot.abort.signal});if(current())testingTree.renderCompiler(doc,symbols);}catch(error){if(current()&&![-32800,-32801].includes(error.code)&&error.code!=='CANCELLED'){symbolSnapshots.delete(id);output.appendLine('Compiler Testing symbols unavailable: '+error.message);}}
+  }
   function accept(doc, report, config, options = {}) {
     const identities=report.results.map(row=>require('./testing-tree.cjs').rowId(key(doc.uri),row));if(new Set(identities).size!==identities.length)throw new Error('Verifier report has duplicate obligation identities');
     if (report.results.some(row => resolve(row.source) !== resolve(doc.uri.fsPath))) throw new Error('Verifier report refers to a different source file');
@@ -174,9 +181,9 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       catch (error) { showError(error); }
     }
   }
-  controller.resolveHandler = async item => { if (!item) await discover(); };
+  controller.resolveHandler = async item => { if (!item){if(service?.request)await Promise.all([...documents.values()].map(compilerTesting));else await discover();} };
   controller.refreshHandler = discover;
-  controller.createRunProfile('Verify', vscode.TestRunProfileKind.Run, async (request, profileToken) => {
+  const verifyProfile=controller.createRunProfile('Verify', vscode.TestRunProfileKind.Run, async (request, profileToken) => {
     const run=controller.createTestRun(request),cancellation=new vscode.CancellationTokenSource();
     testRunCancellations.add(cancellation);
     const tokens=[profileToken,run.token].filter(Boolean);
@@ -224,6 +231,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       releaseAutomatic();registrations.forEach(registration=>registration.dispose());testRunCancellations.delete(cancellation);cancellation.dispose();run.end();
     }
   },true);
+  if(testingTree.obligationTag)verifyProfile.tag=testingTree.obligationTag;
   context.subscriptions.push(
     diagnostics, controller, outputOwner,
     vscode.commands.registerCommand('solidityLean.verify', () => activeCommand(false)),
@@ -233,7 +241,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     vscode.workspace.onDidChangeConfiguration(event=>{
       for(const doc of documents.values())if(event.affectsConfiguration('solidityLean.displayVerificationAsTests',doc.uri)){
         if(!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true)){automaticTests.visible(doc,false);clearTests(doc.uri,true);}
-        else {automaticTests.visible(doc,true);const report=reports.get(key(doc.uri));if(report&&!doc.isClosed)publish(doc,report);}
+        else {automaticTests.visible(doc,true);const report=reports.get(key(doc.uri));if(report&&!doc.isClosed)publish(doc,report);else compilerTesting(doc);}
       }
     }),
     vscode.workspace.onDidSaveTextDocument(doc => {
@@ -282,6 +290,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     const receiveStatus=params=>{
       const doc=documents.get(params.uri);if(disposed||!doc||doc.isClosed||doc.version!==params.version||hash(doc.getText())!==params.sourceHash)return;
       if(!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('displayVerificationAsTests',true))return;
+      if(params.state==='ready'&&!reports.has(key(doc.uri)))void compilerTesting(doc);
       if(!Array.isArray(params.functions)||params.functions.some(row=>!row||!model.validRange(row.range)||typeof row.status!=='string'||row.name!==undefined&&typeof row.name!=='string'))return;
       automaticTests.status(doc,params);
     };
