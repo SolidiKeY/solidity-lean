@@ -768,3 +768,363 @@ theorem tail_initial_size_mismatch_refused :
 #guard_msgs (whitespace := lax) in #print axioms raw_tail_method_reference_domain
 /-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.tail_initial_size_mismatch_refused' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms tail_initial_size_mismatch_refused
+
+
+private def oversizedInput : Solidity.AbiEntry.Input :=
+  {data := List.replicate 31 0 ++ [32] ++ List.replicate 23 0 ++ [1] ++ List.replicate 8 0, free := 0}
+private def shortOversizedInput : Solidity.AbiEntry.Input :=
+  {data := oversizedInput.data.take 63, free := 0}
+
+private theorem oversized_load_zero : Solidity.AbiEntry.load oversizedInput.data 0=32 := by decide
+private theorem oversized_load_length : Solidity.AbiEntry.load oversizedInput.data 32=2^64 := by decide
+private theorem oversized_length_large :
+    Solidity.AbiEntry.lim<Solidity.AbiEntry.load oversizedInput.data
+      (Solidity.AbiEntry.wrap (0+Solidity.AbiEntry.load oversizedInput.data 0)) := by
+  have address : Solidity.AbiEntry.wrap (0+32)=32 := by decide
+  simp only [oversized_load_zero, address, oversized_load_length]
+  decide
+
+/-- Guard dropping the length-check certificate self or protected frame. -/
+theorem length_certificate_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.correct := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, BitVec.ofNat 256 (2^64), [258,513], True.intro⟩
+
+/-- Guard vacuous room premises in the length-check capacity field. -/
+theorem length_certificate_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.capacity := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, [258,513], by decide, True.intro⟩
+
+/-- Tail-fit, prefix and oversized loaded length coexist with a valid head span. -/
+theorem length_certificate_lazy_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.LengthCheckCertificate.lazy_revert := by
+  exact ⟨LengthCheck.code, LengthCheck.certificate, oversizedInput, tailShape, 0, 0,
+    by decide, by decide, oversized_length_large, True.intro⟩
+
+theorem length_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.correct := by
+  exact ⟨BitVec.ofNat 256 (2^64), [258,513], True.intro⟩
+
+theorem length_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.capacity := by
+  exact ⟨[258,513], by decide, True.intro⟩
+
+theorem length_method_lazy_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.lazy_revert := by
+  exact ⟨oversizedInput, tailShape, 0, 0, by decide, by decide, oversized_length_large, True.intro⟩
+
+theorem length_method_eager_bytes_panic_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.eager_bytes_panic := by
+  exact ⟨oversizedInput, 0, 32, 0, by decide, by decide, True.intro⟩
+
+theorem length_method_eager_array_panic_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.LengthCheck.eager_array_panic := by
+  exact ⟨oversizedInput, (.word (.uint 256)), 0, 32, 0, by decide, by decide, True.intro⟩
+
+/-- Guard unrelated/vacuous failure fixtures: one well-formed head/tail input,
+certificate and code exhibit numeric boundary rejection, lazy revert and eager
+panic. A related one-byte truncation keeps the padded length but reverts at the
+head-span check; zero fuel takes priority. No charged/native behavior is claimed. -/
+theorem length_failure_joint :
+    ∃ _self : LengthCheckCertificate LengthCheck.code,
+      0+31<oversizedInput.size ∧ 32+31<oversizedInput.size ∧
+      Solidity.AbiEntry.load oversizedInput.data 0=32 ∧
+      Solidity.AbiEntry.load oversizedInput.data 32=2^64 ∧
+      Solidity.Backend.Scalar.run LengthCheck.code (0::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run LengthCheck.code (BitVec.ofNat 256 (2^64)::[258,513])=some (0::[258,513]) ∧
+      Solidity.AbiEntry.tailRef oversizedInput tailShape 0 0=.error .revert ∧
+      Solidity.AbiEntry.mdec oversizedInput 1 .bytes 32 0=.error .panic ∧
+      Solidity.AbiEntry.mdec oversizedInput 1 tailShape 32 0=.error .panic ∧
+      Solidity.AbiEntry.mdec oversizedInput 0 .bytes 32 0=.error .fuel ∧
+      Solidity.AbiEntry.load shortOversizedInput.data 32=2^64 ∧
+      Solidity.AbiEntry.mdec shortOversizedInput 1 .bytes 32 0=.error .revert ∧
+      Solidity.Backend.Scalar.stackBound LengthCheck.code 3=true ∧
+      Solidity.Backend.Scalar.stackBound LengthCheck.code 1024=false := by
+  have lazyFailure : Solidity.AbiEntry.tailRef oversizedInput tailShape 0 0=.error .revert :=
+    LengthCheck.certificate.lazy_revert oversizedInput tailShape 0 0 (by decide) (by decide) oversized_length_large
+  have bytesFailure : Solidity.AbiEntry.mdec oversizedInput 1 .bytes 32 0=.error .panic :=
+    LengthCheck.eager_bytes_panic oversizedInput 0 32 0 (by decide) (by decide)
+  have arrayFailure : Solidity.AbiEntry.mdec oversizedInput 1 tailShape 32 0=.error .panic :=
+    LengthCheck.eager_array_panic oversizedInput (.word (.uint 256)) 0 32 0 (by decide) (by decide)
+  have shortFailure : Solidity.AbiEntry.mdec shortOversizedInput 1 .bytes 32 0=.error .revert := rfl
+  exact ⟨LengthCheck.certificate, by decide, by decide, by decide, by decide,
+    LengthCheckControls.boundaries.1, LengthCheckControls.boundaries.2.2.1,
+    lazyFailure, bytesFailure, arrayFailure, rfl, by decide, shortFailure,
+    LengthCheck.certificate.capacity [258,513] (by decide),
+    LengthCheckControls.inhabited_frame.2.2⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_certificate_lazy_revert_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_certificate_lazy_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_lazy_revert_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_lazy_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_eager_bytes_panic_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_eager_bytes_panic_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_method_eager_array_panic_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms length_method_eager_array_panic_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.length_failure_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms length_failure_joint
+
+
+/-- Guard omission of either code parameter or the common certificate self. -/
+theorem offset_certificate_tail_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.tail_correct := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    68,4,32,32,[258,513],True.intro⟩
+
+theorem offset_certificate_region_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.region_correct := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    68,4,1,32,[258,513],True.intro⟩
+
+theorem offset_certificate_tail_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.tail_capacity := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    [258,513],by decide,True.intro⟩
+
+theorem offset_certificate_region_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.OffsetChecksCertificate.region_capacity := by
+  exact ⟨OffsetChecks.tailCode, OffsetChecks.regionCode, OffsetChecks.certificate,
+    [258,513],by decide,True.intro⟩
+
+/-- Signed relative offsets remain allowed; no unsigned-span premise is invented. -/
+theorem offset_method_tail_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_raw := by
+  exact ⟨68,4,BitVec.ofNat 256 (2^256-32),32,[258,513],True.intro⟩
+
+/-- Wrapped products remain legal raw operands rather than an added exclusion. -/
+theorem offset_method_region_raw_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_raw := by
+  exact ⟨0,BitVec.ofNat 256 (2^256-32),BitVec.ofNat 256 (2^255),2,[258,513],True.intro⟩
+
+theorem offset_method_tail_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_correct := by
+  exact ⟨68,4,32,32,[258,513],True.intro⟩
+
+theorem offset_method_region_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_correct := by
+  exact ⟨68,4,1,32,[258,513],True.intro⟩
+
+theorem offset_method_tail_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.tail_capacity := by
+  exact ⟨[258,513],by decide,True.intro⟩
+
+theorem offset_method_region_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.OffsetChecks.region_capacity := by
+  exact ⟨[258,513],by decide,True.intro⟩
+
+private theorem frame_witness_output (input output target : Solidity.Backend.Scalar.Stack)
+    (same : output=target) (code : Solidity.Backend.Program) (peak : Nat) :
+    (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate input output,
+      frame.code=code ∧ frame.peak=peak) →
+    (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate input target,
+      frame.code=code ∧ frame.peak=peak) := by
+  cases same
+  exact fun witness => witness
+
+/-- Guard canonicalization of signed offsets/wrapped products and conflation of
+predicate flags with full-reference admission. Both emitted codes retain the
+protected suffix, opposite boundary flags and actual frame/capacity behavior. -/
+theorem offset_predicate_joint :
+    ∃ _certificate : OffsetChecksCertificate OffsetChecks.tailCode OffsetChecks.regionCode,
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode (32::68::4::32::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode (32::68::4::33::[258,513])=some (0::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.tailCode
+        (32::68::4::BitVec.ofNat 256 (2^256-32)::[258,513])=some (1::[258,513]) ∧
+      68<(BitVec.ofNat 256 (2^256-32)).toNat ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode (1::32::68::4::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode (1::32::67::4::[258,513])=some (0::[258,513]) ∧
+      Solidity.Backend.Scalar.run OffsetChecks.regionCode
+        (BitVec.ofNat 256 (2^255)::2::0::BitVec.ofNat 256 (2^256-32)::[258,513])=some (1::[258,513]) ∧
+      (2^255 : Nat)*2=2^256 ∧
+      Solidity.Backend.Scalar.stackBound OffsetChecks.tailCode 1024=false ∧
+      Solidity.Backend.Scalar.stackBound OffsetChecks.regionCode 1024=true ∧
+      (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32] [1],
+        frame.code=OffsetChecks.tailCode ∧ frame.peak=1) ∧
+      (∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4] [1],
+        frame.code=OffsetChecks.regionCode ∧ frame.peak=1) := by
+  have tailFlag : Solidity.Backend.Scalar.flag
+      (Solidity.AbiEntry.tailFits (68 : Solidity.Backend.Scalar.Word).toNat
+        (4 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat
+        (32 : Solidity.Backend.Scalar.Word).toNat)=1 := by
+    have agreement : some (1::([258,513] : Solidity.Backend.Scalar.Stack))=
+        some (Solidity.Backend.Scalar.flag
+          (Solidity.AbiEntry.tailFits (68 : Solidity.Backend.Scalar.Word).toNat
+            (4 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat
+            (32 : Solidity.Backend.Scalar.Word).toNat)::[258,513]) :=
+      OffsetChecksControls.tail_edges.1.symm.trans (OffsetChecks.tail_correct 68 4 32 32 [258,513])
+    exact (List.cons.inj (Option.some.inj agreement)).1.symm
+  have regionFlag : Solidity.Backend.Scalar.flag
+      (Solidity.AbiEntry.regionFits (68 : Solidity.Backend.Scalar.Word).toNat
+        (4 : Solidity.Backend.Scalar.Word).toNat (1 : Solidity.Backend.Scalar.Word).toNat
+        (32 : Solidity.Backend.Scalar.Word).toNat)=1 := by
+    have agreement : some (1::([258,513] : Solidity.Backend.Scalar.Stack))=
+        some (Solidity.Backend.Scalar.flag
+          (Solidity.AbiEntry.regionFits (68 : Solidity.Backend.Scalar.Word).toNat
+            (4 : Solidity.Backend.Scalar.Word).toNat (1 : Solidity.Backend.Scalar.Word).toNat
+            (32 : Solidity.Backend.Scalar.Word).toNat)::[258,513]) :=
+      OffsetChecksControls.region_edges.1.symm.trans (OffsetChecks.region_correct 68 4 1 32 [258,513])
+    exact (List.cons.inj (Option.some.inj agreement)).1.symm
+  have tailFrame : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32] [1],
+      frame.code=OffsetChecks.tailCode ∧ frame.peak=1 := by
+    have original : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [32,68,4,32]
+        [Solidity.Backend.Scalar.flag (Solidity.AbiEntry.tailFits
+          (68 : Solidity.Backend.Scalar.Word).toNat (4 : Solidity.Backend.Scalar.Word).toNat
+          (32 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat)],
+        frame.code=OffsetChecks.tailCode ∧ frame.peak=1 :=
+      ⟨OffsetChecks.tailFrame 68 4 32 32,rfl,rfl⟩
+    exact frame_witness_output [32,68,4,32] _ [1]
+      (congrArg (fun value : Solidity.Backend.Scalar.Word => [value]) tailFlag)
+      OffsetChecks.tailCode 1 original
+  have regionFrame : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4] [1],
+      frame.code=OffsetChecks.regionCode ∧ frame.peak=1 := by
+    have original : ∃ frame : Solidity.Backend.Selection.V2.FrameCertificate [1,32,68,4]
+        [Solidity.Backend.Scalar.flag (Solidity.AbiEntry.regionFits
+          (68 : Solidity.Backend.Scalar.Word).toNat (4 : Solidity.Backend.Scalar.Word).toNat
+          (1 : Solidity.Backend.Scalar.Word).toNat (32 : Solidity.Backend.Scalar.Word).toNat)],
+        frame.code=OffsetChecks.regionCode ∧ frame.peak=1 :=
+      ⟨OffsetChecks.regionFrame 68 4 1 32,rfl,rfl⟩
+    exact frame_witness_output [1,32,68,4] _ [1]
+      (congrArg (fun value : Solidity.Backend.Scalar.Word => [value]) regionFlag)
+      OffsetChecks.regionCode 1 original
+  exact ⟨OffsetChecks.certificate,
+    OffsetChecksControls.tail_edges.1, OffsetChecksControls.tail_edges.2,
+    OffsetChecksControls.signed_relative.1, OffsetChecksControls.signed_relative.2,
+    OffsetChecksControls.region_edges.1, OffsetChecksControls.region_edges.2,
+    OffsetChecksControls.wrapped_product.1, OffsetChecksControls.wrapped_product.2,
+    OffsetChecksControls.height_boundaries.1, OffsetChecksControls.height_boundaries.2,
+    tailFrame, regionFrame⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_tail_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_tail_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_region_correct_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_region_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_tail_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_tail_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_certificate_region_capacity_domain' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_certificate_region_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_raw_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_raw_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_correct_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_tail_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_tail_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_method_region_capacity_domain' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms offset_method_region_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.offset_predicate_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms offset_predicate_joint
+
+
+private def headShortInput : Solidity.AbiEntry.Input := {data := List.replicate 35 0, free := 0}
+private def headDirtyInput : Solidity.AbiEntry.Input := {data := List.replicate 35 0 ++ [2], free := 0}
+private def hugeHeadParameters : List Solidity.AbiEntry.Param :=
+  [{shape := .fixed (.word (.uint 256)) (2^256),loc := .memory}]
+
+/-- Preserve the emitted function, common global self, parameters and frame. -/
+theorem head_check_certificate_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.correct := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,sampleParameters,35,[258,513],True.intro⟩
+
+theorem head_check_certificate_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.capacity := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,sampleParameters,[258,513],by decide,True.intro⟩
+
+/-- Size representation is an actual initial fact, not successful decoding. -/
+theorem head_check_certificate_classified_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.classified := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,headShortInput,sampleParameters,35,[258,513],by decide,True.intro⟩
+
+theorem head_check_certificate_early_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.Interface.HeadCheckCertificate.early_revert := by
+  exact ⟨HeadCheck.code,HeadCheck.certificate,headShortInput,0,sampleParameters,by decide,True.intro⟩
+
+theorem head_check_method_correct_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.correct := by
+  exact ⟨sampleParameters,35,[258,513],True.intro⟩
+
+theorem head_check_method_capacity_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.capacity := by
+  exact ⟨sampleParameters,[258,513],by decide,True.intro⟩
+
+theorem head_check_method_classified_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.classified := by
+  exact ⟨headShortInput,sampleParameters,35,[258,513],by decide,True.intro⟩
+
+theorem head_check_method_early_revert_domain :
+    hypotheses_of% Solidity.Backend.AbiEntry.HeadCheck.early_revert := by
+  exact ⟨headShortInput,0,sampleParameters,by decide,True.intro⟩
+
+/-- Guard conflating a passed short-head predicate with full entry admission.
+Actual size representation, boundary flags, early-before-fuel failure, dirty
+payload refusal, huge METADATA saturation and physical capacity coexist.
+No huge buffer is allocated and no native/gas/Source behavior is certified. -/
+theorem head_check_joint :
+    ∃ _certificate : HeadCheckCertificate HeadCheck.code,
+      headShortInput.size=35 ∧ headDirtyInput.size=36 ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code sampleParameters) (35::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code sampleParameters) (36::[258,513])=some (0::[258,513]) ∧
+      Solidity.AbiEntry.entry headShortInput 0 sampleParameters=.error .revert ∧
+      Solidity.AbiEntry.entry headDirtyInput 2 sampleParameters=.error .revert ∧
+      Solidity.Backend.Scalar.run (HeadCheck.code hugeHeadParameters) (36::[258,513])=
+        some (Solidity.Backend.Scalar.flag true::[258,513]) ∧
+      (HeadCheck.frameCertificate sampleParameters 35).peak=1 ∧
+      Solidity.Backend.Scalar.run (HeadCheck.frameCertificate sampleParameters 35).code
+        (35::[258,513])=some (1::[258,513]) ∧
+      Solidity.Backend.Scalar.stackBound (HeadCheck.code sampleParameters) 3=true ∧
+      Solidity.Backend.Scalar.stackBound (HeadCheck.code sampleParameters) 1024=false := by
+  have early : Solidity.AbiEntry.entry headShortInput 0 sampleParameters=.error .revert :=
+    HeadCheck.certificate.early_revert headShortInput 0 sampleParameters (by decide)
+  exact ⟨HeadCheck.certificate,by decide,by decide,
+    HeadCheckControls.one_word_boundary.1,HeadCheckControls.one_word_boundary.2,
+    early,HeadCheckControls.passed_head_not_entry.2,HeadCheckControls.huge_is_short 36,
+    rfl,HeadCheckControls.one_word_boundary.1,
+    HeadCheck.certificate.capacity sampleParameters [258,513] (by decide),
+    HeadCheckControls.height_refusal⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_correct_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_capacity_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_classified_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_classified_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_certificate_early_revert_domain' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_certificate_early_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_correct_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_correct_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_capacity_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_capacity_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_classified_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_classified_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_method_early_revert_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms head_check_method_early_revert_domain
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.head_check_joint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms head_check_joint
