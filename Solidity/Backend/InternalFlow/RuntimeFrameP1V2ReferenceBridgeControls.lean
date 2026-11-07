@@ -2,11 +2,11 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceBridge
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindExecutionControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefTupleControls
 
-/-! Regression: a generic native bridge must have simultaneous actual compiler,
-physical admission and both outcome witnesses, not separate near-vacuous premise
-examples. Old-graph rebinding and checked mixed-tuple families supply the joint witnesses
-and construct the full six-duty native certificate without an assumed producer.
-Approved provenance and full production sessions remain open. -/
+/-! Regression: native memory and mixed-tuple instantiations must retain real
+compiler and both physical-entry witnesses. The test profile is chosen to be
+the physical predicate: physical_profile proves only its reflexivity. These
+native premise conjunctions are not joint-input evidence for external Approved,
+Source origin or the full production P1/G42.04 factory. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.P1V2ReferenceBridgeControls
 open Evm Evm.Memory P1LangV2 V3CallProducerRef.StructDefault.RebindControls
 open Solidity.Roadmap.G49Final (BridgeGoal)
@@ -76,11 +76,13 @@ theorem rejecting_substitute_refused (approved : InterfaceV3.Admission C Γ) :
   with_reducible exact (P1V2ReferenceBridge.always_revert_refused (ps := P1V2ReferenceRebindAgreement.psCheck) (rs := P1V2ReferenceRebindAgreement.rsCheck) (Γf := P1V2ReferenceRebindAgreement.finalCheck) (f := "structAlias") (args := args) (ret := ret) (body := bodyCheck) program 16 16 approved
     successfulCheck)
 
-/-- All original make premises hold simultaneously for this one actual selected
-program and its physical native profile, not for unrelated premise examples. -/
+/-- Reflexivity of the chosen native predicate only; no external Approved
+agreement or Source-origin evidence is established. -/
 theorem physical_profile : InterfaceV3.AdmissionAgreement physical physical :=
   fun _ _ _ _ _ _ => Iff.rfl
 
+/-- Form, alias flags and real dual-entry witnesses for this native program.
+The profile conjunct is reflexive and does not authenticate external approval. -/
 theorem joint_premises :
     V3CallProducerRef.Form Γ ret scope ∧
     InterfaceV1.NoAliasPromotion F program.checked.frag scope ∧
@@ -144,9 +146,12 @@ noncomputable def certificate (approved : InterfaceV3.Admission C Γ)
     (body := bodyCheck) (scope := scope)
     form program 16 16 approved profile flags successful_entry reverting_entry)
 
+/-- Native predicate reflexivity only, not external Source approval. -/
 theorem physical_profile : InterfaceV3.AdmissionAgreement physical physical :=
   fun _ _ _ _ _ _ => Iff.rfl
 
+/-- Form, alias flags and real dual-entry witnesses for this native program.
+The profile conjunct is reflexive and does not authenticate external approval. -/
 theorem joint_premises :
     V3CallProducerRef.Form Γ (.rets binders) scope ∧
     InterfaceV1.NoAliasPromotion F program.checked.frag scope ∧
