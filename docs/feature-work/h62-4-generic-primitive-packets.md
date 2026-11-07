@@ -784,3 +784,21 @@ seconds, sampled workload peak 828948 KiB, with existing standard axioms.
 Independent read-only finder/skeptic confirmed the final changes and found no
 defect; neither used Lean/server/build/edit. Full C4/H68, original fidelity drift
 and prior timing STOPs remain open.
+
+### Populated integer constant correspondence
+
+`ConstantCorrespondence.lean` adds five laws covering every intrinsic integer
+type/sign/width and in-range literal. The published actual Source conversion,
+public PUSH selection, typed value relation and canonical word execution are
+instantiated on populated aliasing memory. The exact output retains StateRepr
+and every saved target stack; Source globals/frame/state and local context remain
+general. Below/above-bound controls prove actual Source constVal and conversion
+admission refusal, not fabricated target failure. Reject-all and fuel-zero
+controls preserve distinct outcomes. The current mapFree-aware interface is
+used explicitly; this does not resolve original frozen-file fidelity findings.
+
+The five-law kernel check passes in 1.153 seconds, sampled workload peak
+794436 KiB, with existing standard axioms. Independent read-only finder/skeptic
+found no defect and used no Lean/server/build/edit. Original controls/census
+remain unchanged. No arbitrary heap/world/session/gas or fetched-EVM adequacy,
+full C4/H68 acceptance or timing STOP clearance is claimed.
