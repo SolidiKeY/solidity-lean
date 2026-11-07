@@ -1,25 +1,5 @@
 {
- "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.mixed_shadows_reach_two_fresh_copies": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.final_cursor_observation": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.shallow_cursor_refuted": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.first_capacity_refusal": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
- "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.second_refusal_retains_first": [
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.boundary_cursor_observations": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -29,17 +9,37 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.final_cursor_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.first_capacity_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.long_empty_children_run": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.boundary_cursor_observations": [
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.long_parent_only_demand_refuted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.mixed_shadows_reach_two_fresh_copies": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.long_parent_only_demand_refuted": [
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.second_refusal_retains_first": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/NestedLivePipelineControls.lean:Solidity.Backend.MemoryCopies.NestedLivePipelineControls.shallow_cursor_refuted": [
+  "Classical.choice",
   "Quot.sound",
   "propext"
  ]
