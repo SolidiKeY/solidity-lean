@@ -123,3 +123,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## CheckedMul Populated
 
 `checked_mul_populated_ledger.py` records fourteen base-pinned literal headers for the two-array heap, its aliases, concrete machine, ArrayRepr, HeapRepr and StateRepr. Base-map arguments 0 and 1 yield addresses 16 and 20. The two private helpers were separately recorded. The original G25 fixture remains read-only. Reconciliation describes 473 of 474 observed lexical headers; one original header remains. These observations do not prove Lean statements or complete semantic coverage.
+
+## SignedDiv Contract
+
+`signed_div_contract_ledger.py` records the full checked-contract literal declaration: original Source/target reads and StateRepr, saved finite words, and all three numeric zero-test, overflow-test and SDIV-body capacity premises remain explicit. Its Source mapped result, symbolic ValOutT and numeric outcome remain distinct. After registration, the reconciliation describes all 474 currently observed literal headers, including nine private headers; no original census row is unclassified. This is textual row accounting with manually reviewed prose, not complete Lean parsing, semantic case/dependency closure, proof validation, target payload correspondence or a runtime gate.

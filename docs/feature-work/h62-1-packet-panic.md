@@ -153,3 +153,7 @@ The base-pinned 40-row controls ledger distinguishes same-named Seed and outer d
 ## CheckedMul Populated continuation
 
 The base-pinned fourteen-row populated-fixture ledger accounts for the read-only heap, aliases, machine and representation statements. Negative controls pass. Independent read-only finder and skeptic matched all observations without Lean; both requested clarification of base-map indices versus addresses, which was corrected and rechecked. The G25 original was not edited.
+
+## SignedDiv Contract continuation
+
+The base-pinned checked-contract ledger records the quantified Source/target reads, StateRepr, saved finite words and all three numeric capacity premises alongside the separate Source, symbolic and numeric conclusions. Negative controls pass. Independent read-only finder and skeptic matched the declaration without Lean. All 474 currently observed lexical headers now have descriptions; broader semantic and proof obligations remain open.
