@@ -552,3 +552,47 @@ The final exporter review found a concurrent-writer integrity risk. It now holds
 the repository writer lock throughout export, anchors patch/diff/metadata reads to
 the captured committed head, and rechecks branch/head/clean status before sealing.
 Historical full gate scripts/results stay off Git with a committed hash index.
+
+## Coordinator resume on 2026-11-07
+
+Explicit coordinator instruction resumed the original queue after retirement.
+Fetched origin/master, verified exact merge5da4771e63a4278ed53932ac39a032e3d7aea6ed
+and ancestry of original base and final handoff6f3479cdf82761013b09a66d1dcf47c71445b0df,
+then fast-forwarded the clean original lane without discarding history or pushing.
+No new goal or VM was created. Earlier retirement artifacts remain immutable
+historical records; this resume does not claim the whole assignment complete.
+
+The directory now contains five G49 modules outside the original assignment.
+The census derives its original fifteen targets from pinned-base Git paths and
+reports new files separately. The assigned dependency closure is now379modules,
+with five new Source dependencies; old374-module timing is historical only.
+The merged Source/Ctor proof repair has arrived; its old missing-patch wait is
+withdrawn. Current-tree Lean validation is still pending. Contracts and Evm
+remain byte-identical to the original base.
+
+The H78 generator consolidates all2077original exports, including33private-encoded
+names, across15modules. Existing Evm exports cover392old/391newdeclarations:
+325unchangeddebugtypes,45alpha-only,9bindervisibility,10structural,3missingnames,
+and2newnames. All64deltas retain individual old/new signatures, ordered universe
+parameters and structured Evm binder domains/kinds. Every original row remains
+visible. Public/protected visibility and non-theorem subkinds were not exported;
+they are explicitly unknown. The14othernewmodule exports and compiled shim
+signature exports remain absent. Candidate source is tied to a successful
+archived exact-source fixture run; implemented production shims remain empty.
+No syntactic classification grants an API exclusion or semantic equivalence.
+
+Bulk data stays under /workspace/migrate-roadmap-evidence/resume-20261107/, with
+reviewed data in public-api-reviewed and a committed manifest/hash index in
+tests/h62/item6/migrate-roadmap/resumed/checkpoint.json. Historical compiled heads,
+result paths, source fingerprints and current input differences are retained;
+current_tree_compiled=false. Static controls pass, deterministic regeneration
+is byte-identical, and existing sealed outputs are refused without modification.
+An integrated generator check caught a helper-name shadowing bug; fixed before
+the reviewed successful export. Finder/skeptic findings about exact alias names
+and historical provenance were fixed and independently confirmed.
+
+No Lean run, producer edit, guard/pin/budget/statement change or push occurred.
+The supplemental inspection STOP and PublicCorrectness.transfer empty-axiom
+guard remain binding. H82 withdraws proof-only exact-file permission waits, but
+does not waive performance or frozen interfaces. All current waits and original
+queue/backfill remainders are explicit in the committed resumed checkpoint.
