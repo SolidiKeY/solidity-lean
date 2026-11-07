@@ -1042,3 +1042,35 @@ The accepted H71 address handoff still lacks local payload bytes; its transport
 route is not duplicated. Existing environment qualification, H118-held CR relay,
 importer migration, ReadBounds production-owner resolution and all original
 source/physical/performance obligations remain open.
+
+
+### Address handoff metadata integrity
+
+`verify-handoff-metadata.py` authenticates the delivered native-browser a14d56c9
+handoff and its committed manifest, then verifies the two explicit Translate and
+Compose source pins at sourceBuild0eb39db1. It checks declared 16-address counts
+(10 proved, 2 refuted, 4 unsupported, plus two guards), 24 unique gate receipts
+(23 pass, one failure), pending runtime status and retained performance STOPs.
+This is metadata consistency, not inspection of receipt contents, the reported
+343-module runtime index, 206 selected objects, binaries or request results.
+All six referenced address archives/indexes are absent locally at capture.
+Presence alone never changes the verifier's `payloadInspected: false` result.
+
+Three external controls include twelve rejecting mutations for independent drift,
+coordinated false acceptance, erased failures/STOPs, duplicate gate/artifact
+identities and unsafe locators. Read-only finder and skeptic found no confirmed
+checkpoint defect; neither used Lean/server/builds or writes. Four lightweight
+checks pass, including the unchanged extraction/trust audit and whitespace check.
+There are no production Lean changes or new checking/runtime measurements.
+The ownership audit now pins adopted published master d93f6839c explicitly;
+its scope allowlists are unchanged.
+
+`address-metadata-manifest.json` records portable archive/tool/Git pins and exact
+commands. Restore its H44 archive under `artifacts/address-metadata`, then run
+`python3 tests/directruntime-20261104/shared-translator/verify-handoff-metadata.py
+--handoff tests/directruntime-20261104/shared-translator/artifacts/address-metadata/handoff.ticket`.
+The external controls use the original coordinator inbox ticket. The archive
+contains that ticket and report, not native-browser's missing runtime payloads.
+No duplicate delivery ticket was issued. Fresh environment qualification,
+CR fixture/importer migration, ReadBounds production-owner resolution and the
+original stack/cost/performance holds remain open.

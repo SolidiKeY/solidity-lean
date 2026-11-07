@@ -1,8 +1,8 @@
 {
-  "commit": "f83a7016e867e2bc270198688b50b8054980e9f6",
+  "commit": "d93f6839c613468610ea488356b174cd183e3772",
   "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
   "authority": "H82b authenticated translator scope and H90 reader extension; explicit published-master adoption",
-  "publication": "Immutable pre-proof starting head f83a7016, already containing published05d2c2587; preserves inherited README-only bookkeeping636fc9880 unchanged.",
+  "publication": "Immutable published-master adoption after coordinator e0f4251ff merge; fetched d93f6839c before metadata-only intake work. No scope allowlist change.",
   "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref.",
   "exclusiveFiles": [
     "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
@@ -42,7 +42,7 @@
     "tests/directruntime-20261104/shared-translator/**",
     "tests/h62/item1/binding-fixtures/**"
   ],
-  "publishedAncestor": "05d2c25872c4bb963a0ca7f605905e6e1e99eedc",
+  "publishedAncestor": "d93f6839c613468610ea488356b174cd183e3772",
   "preservedInheritedWork": [
     {
       "commit": "636fc9880a8480a921abc7a328efc85222394981",
