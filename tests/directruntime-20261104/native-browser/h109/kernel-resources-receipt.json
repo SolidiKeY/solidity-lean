@@ -1,0 +1,64 @@
+{
+  "guardedRegression": "H127 resource evidence must not infer a process group from namespace root or confuse CPU quota rate with concurrency.",
+  "scope": "Read-only kernel resource observer, not an authenticated controller/worker or measurement acceptance.",
+  "baseObserved": "6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f",
+  "sources": [
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/kernel-resources.py",
+      "sha256": "1afb573e6dd56ea5698803239e5226c6558bad6815268fc8bb9fe05c70bc9740"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/test-kernel-resources.py",
+      "sha256": "9427c2a027a67bae58476b71d7621e3015adbc03ed52b3d2ed2ec0ffdd0698ce"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/measurement-clock.py",
+      "sha256": "a48db1974a3c2b02f1fe8b34bdb86642f5c13656715ec8b8e739cd56358c4c86"
+    }
+  ],
+  "gates": [
+    {
+      "command": "TMPDIR=/workspace/scratch PYTHONDONTWRITEBYTECODE=1 python3 tests/directruntime-20261104/native-browser/h109/test-kernel-resources.py",
+      "status": "pass",
+      "output": "12 methods pass, including parser/mapping/refusal/descriptor-leak/configuration-drift/process-identity controls. Synthetic fixtures are not actual cgroup authentication."
+    },
+    {
+      "command": "kernel-resources.py read-only host observation",
+      "status": "pass",
+      "output": "Observation collected, not worker authorization. Namespace path /; mount root /..; PID-derived group /init; visible16GiB ancestor, unbounded leaf/swap; cpuset5/configured quota ratio4."
+    },
+    {
+      "command": "Journal16 and clock5 regression methods; Python AST; git diff --check",
+      "status": "pass",
+      "output": "21 reused component methods pass; syntax/whitespace pass. No new Lean files, axioms, theorem statements, budgets or production behavior."
+    }
+  ],
+  "actualObservation": {
+    "path": "/workspace/scratch/h127-resources/actual-host-observation.json",
+    "sha256": "e21776c96df8e1d6d0146436db80a56ac31dc7ba17b19ccf8de3651c8aab5f18",
+    "completeHostLineageAuthenticated": false,
+    "dockerOwnershipAuthenticated": false
+  },
+  "reviews": {
+    "initialFinding": "Both reviewers: quota/period is configured sustained fair-class rate, not instantaneous or finite-interval concurrency; burst/period effects must not imply serial execution.",
+    "fix": "Separate cpuset concurrent upper bound and configured sustained quota ratios; leader affinity/policy recorded separately; burst and scheduling limitations explicit. Regression quota1/cpuset5 retainsconcurrency5.",
+    "finderFinal": "No new concrete finding. Actual16GiB/unbounded swap/cpuset5/configuredrate4 snapshot is clearly not the required worker scope. Mapping and incomplete-authentication flags explicit. No tests/Lean/Docker/workloads in review.",
+    "skepticFinal": "Scoped review PASS. Namespace path differs from PID-derived membership; quota rate is not concurrency; cgroup memory is not RSS. Ownership/full lineage/containment/measurement remain unauthenticated. No probes/tests/workloads during review."
+  },
+  "artifacts": [
+    {
+      "path": "/workspace/solidity-lean/.lake/h127-kernel-resources-evidence.tar.gz",
+      "sha256": "486b4aa0e150bb5faa836116b304be60467ab285d247ae239d87f213ab4b18ce",
+      "bytes": 2257,
+      "members": 7,
+      "delivery": "VM-retained/coordinator-pending pull"
+    }
+  ],
+  "limitations": [
+    "No Docker probe, prover, cgroup creation/modification, budget authorization or cleanup executed.",
+    "Point-in-time non-atomic data; hidden ancestors/per-thread policy/future changes are not authenticated.",
+    "Charged cgroup memory is not aggregate process RSS.",
+    "Full H127 controller/worker, sealed inputs/cache/image, authenticated CI, continuous monitoring, deadline enforcement, cleanup/offline verifier, five-module A/B and pin relocation remain unfinished.",
+    "All original runtime/performance/default-RowsNine STOPs, four storage-diamond cases and VX1 owner-first publication hold remain."
+  ]
+}
