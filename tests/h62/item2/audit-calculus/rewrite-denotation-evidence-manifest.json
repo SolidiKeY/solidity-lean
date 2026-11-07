@@ -1,0 +1,52 @@
+{
+  "scope": "Complete11 RewriteSyntax denotation roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1046,
+    "pending": 4237,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-denotation-roles-v89/evidence.tar.gz",
+      "bytes": 273211,
+      "sha256": "4367d9dfdfa18b2d18c16815191d8a130f801c1fbfeae165f75b1bddd9674e49"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-denotation-roles-v89/inputs.json",
+      "bytes": 777,
+      "sha256": "dafb622a2c882b75a53325943fb57651eaa6c64eced31577ec04eab1a6090f27"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-denotation-roles-v89/gates.json",
+      "bytes": 2858,
+      "sha256": "3fc721248153e0e1e726f3381b8f814c46861c28114646be815cf37f4af4ea05"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-denotation-roles-v89/reviews.md",
+      "bytes": 532,
+      "sha256": "82b3ec1b8dc1348bc321fad282de0b8510396242cca90649958783b884eaa70a"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-denotation-roles-v89/case-rosters.json",
+      "bytes": 1276,
+      "sha256": "e0ff67d403c4c9f697e864a61c948bbaa5df9111260684d2144442d4ba888f33"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-denotation-roles-v89/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "4117820cbfadf99719a0ff191fc013d55257ba84a9f2a2c271f81c681b8d8e20"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-denotation-roles-v89/external-retention.json",
+      "bytes": 283250,
+      "sha256": "ba7e5aaedf965d37a395169f43c170524a535ebe04673ec3416d250c2013126e"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/rewrite-denotation-roles-v89/semantic-roles-reviewed.json",
+      "bytes": 2796024,
+      "sha256": "8f9ccc6bd75c0cb9616d51dc23932e9b4374099e7416aa360c181585c39f7ab5"
+    }
+  ]
+}

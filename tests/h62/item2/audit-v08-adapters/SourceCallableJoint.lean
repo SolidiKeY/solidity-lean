@@ -1,0 +1,245 @@
+import Solidity.Lowering.V08.SourceCallableControls
+
+/-! Regression: separately inhabited body/frame/execution facts must refer to
+one actual Source call and its reached state. The existing resolved program
+supplies all completion premises jointly, for every pipeline/extra horizon and
+both argument values. The full heap effect is retained; this manually supplied
+Source program is not a parser/body/admission or target compiler certificate. -/
+namespace H62.AuditV08Adapters.SourceCallableJoint
+open Solidity Source
+open Solidity.Lowering.V08
+open SourceCallableControls
+
+/-- Original completion premises plus explicit argument-to-frame identity. -/
+def Joint (pipeline : Roadmap.Pipeline) (extra : Nat) (first second : Bool) : Prop :=
+  (global pipeline).prog.body ((global pipeline).dispatchFn callerFrame.contract functionDecl) =
+    some bodyFirst ∧
+  ([.bool] : List STy).reverseAux (([.bool,.bool] : List STy).reverseAux []) = bodyFirst.locals ∧
+  (Source.Vals.cons (.bool false) .nil).onto ((params first second).onto (Source.L0 E)) =
+    initial first second ∧
+  (Source.zeroVals (extra+24) [.bool] : Source.EM E [] _).run (Source.L0 E,populated) =
+    (.ok (.cons (.bool false) .nil),(Source.L0 E,populated)) ∧
+  (Source.runMods (global pipeline) {callerFrame with checked:=true} (extra+24)
+    bodyFirst bodyFirst.mods (initial first second)).run (Source.L0 E,populated) =
+    (.ok (returned first second),(Source.L0 E,SourceKeccak.afterLiteral populated binary)) ∧
+  Source.retVals (returned first second) 0 [.bool] =
+    .ok (.cons (.val (.bool first)) .nil)
+
+theorem joint (pipeline : Roadmap.Pipeline) (extra : Nat) (first second : Bool) :
+    Joint pipeline extra first second :=
+  ⟨selected pipeline, rfl, reached_frame first second, zero_returns extra,
+    body_execute pipeline extra first second, rfl⟩
+
+/-- Exact original full Source result/state, using every joint premise. -/
+theorem actual (pipeline : Roadmap.Pipeline) (extra : Nat) (first second : Bool) :
+    (Source.callInternal (global pipeline) callerFrame (extra+25) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) =
+    (.ok (.val (.bool first)),(Source.L0 E,SourceKeccak.afterLiteral populated binary)) := by
+  have h := joint pipeline extra first second
+  exact SourceCallable.complete (global pipeline) callerFrame (extra+24) functionDecl
+    (params first second) bodyFirst h.1 (.cons (.bool false) .nil) h.2.1
+    (returned first second) (.cons (.val (.bool first)) .nil) populated populated _
+    h.2.2.2.1 (by simpa only [h.2.2.1] using h.2.2.2.2.1) h.2.2.2.2.2
+
+/-- Returning the right value cannot justify silently discarding the heap effect. -/
+theorem stale_state_refused (pipeline : Roadmap.Pipeline) (extra : Nat) (first second : Bool) :
+    (Source.callInternal (global pipeline) callerFrame (extra+25) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) ≠
+    (.ok (.val (.bool first)),(Source.L0 E,populated)) := by
+  rw [actual]
+  intro same
+  have heapSame := congrArg (fun result => result.2.2.heap.next) same
+  change 2 = 1 at heapSame
+  cases heapSame
+
+/-- All failure-law premises use the same actually failing return body. -/
+def FailureJoint (pipeline : Roadmap.Pipeline) : Prop :=
+  (failingGlobal pipeline).prog.body
+    ((failingGlobal pipeline).dispatchFn callerFrame.contract functionDecl) = some failingBody ∧
+  ([.bool] : List STy).reverseAux (([.bool,.bool] : List STy).reverseAux []) = failingBody.locals ∧
+  (Source.zeroVals 24 [.bool] : Source.EM E [] _).run (Source.L0 E,populated) =
+    (.ok (.cons (.bool false) .nil),(Source.L0 E,populated)) ∧
+  (Source.runMods (failingGlobal pipeline) {callerFrame with checked:=true} 24
+    failingBody failingBody.mods (initial false false)).run (Source.L0 E,populated) =
+    (.error (.revert (Source.panicData .arithmetic)),
+      (Source.L0 E,SourceKeccak.afterLiteral populated binary))
+
+theorem failure_joint (pipeline : Roadmap.Pipeline) : FailureJoint pipeline :=
+  ⟨rfl, rfl, zero_returns 0, failing_return_body pipeline⟩
+
+/-- Error propagation retains reached heap/state; it does not roll back here. -/
+theorem actual_body_failure (pipeline : Roadmap.Pipeline) :
+    (Source.callInternal (failingGlobal pipeline) callerFrame 25 functionDecl
+      (params false false) [.bool]).run (Source.L0 E,populated) =
+    (.error (.revert (Source.panicData .arithmetic)),
+      (Source.L0 E,SourceKeccak.afterLiteral populated binary)) := by
+  have h := failure_joint pipeline
+  exact SourceCallable.body_failure (failingGlobal pipeline) callerFrame 24 functionDecl
+    (params false false) failingBody h.1 (.cons (.bool false) .nil) h.2.1
+    populated populated _ (.revert (Source.panicData .arithmetic)) h.2.2.1 h.2.2.2
+
+/-- Actual argument and callee steps coexist for the expression failure law. -/
+theorem actual_body_expression (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (failingGlobal pipeline) callerFrame 26 expression).run (locals,populated) =
+    (.error (.revert (Source.panicData .arithmetic)),
+      (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) :=
+  SourceCallable.expression_failure (failingGlobal pipeline) callerFrame 25 functionDecl
+    signature arguments locals (.cons (.bool false) .nil) (params false false)
+    populated populated _ (.revert (Source.panicData .arithmetic))
+    (arguments_execute (failingGlobal pipeline) 0) (actual_body_failure pipeline)
+
+/-- Same program/frame/state, but the real division failure prevents body entry. -/
+theorem argument_step_same_program (pipeline : Roadmap.Pipeline) :
+    (Source.evalConvArgs (failingGlobal pipeline) callerFrame 25 failingArguments).run
+      (locals,populated) =
+    (.error (.revert (Source.panicData .divZero)),(.cons (.bool false) .nil,populated)) := by
+  cases pipeline <;> rfl
+
+theorem actual_argument_failure (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (failingGlobal pipeline) callerFrame 26
+      (.call functionDecl signature failingArguments)).run (locals,populated) =
+    (.error (.revert (Source.panicData .divZero)),(.cons (.bool false) .nil,populated)) :=
+  SourceCallable.argument_failure (failingGlobal pipeline) callerFrame 25 functionDecl
+    signature failingArguments locals (.cons (.bool false) .nil) populated populated
+    (.revert (Source.panicData .divZero)) (argument_step_same_program pipeline)
+
+/-- Equal caller locals do not make distinct failure phases or reached heaps equal. -/
+theorem failure_boundaries_differ (pipeline : Roadmap.Pipeline) :
+    (Source.evalE (failingGlobal pipeline) callerFrame 26 expression).run (locals,populated) ≠
+    (Source.evalE (failingGlobal pipeline) callerFrame 26
+      (.call functionDecl signature failingArguments)).run (locals,populated) := by
+  rw [actual_body_expression, actual_argument_failure]
+  intro same
+  have heapSame := congrArg (fun result => result.2.2.heap.next) same
+  change 2 = 1 at heapSame
+  cases heapSame
+
+/-- Signature, actual argument step and actual callee step coexist. -/
+theorem expression_steps (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    functionDecl.fnSig E = some ([.bool,.bool],[.bool]) ∧
+    (Source.evalConvArgs (global pipeline) callerFrame (extra+25) arguments).run
+      (locals,populated) =
+      (.ok (params false false),(.cons (.bool false) .nil,populated)) ∧
+    (Source.callInternal (global pipeline) callerFrame (extra+25) functionDecl
+      (params false false) [.bool]).run (Source.L0 E,populated) =
+      (.ok (.val (.bool false)),(Source.L0 E,SourceKeccak.afterLiteral populated binary)) :=
+  ⟨signature, arguments_execute (global pipeline) extra, actual pipeline extra false false⟩
+
+theorem actual_expression (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    (Source.evalE (global pipeline) callerFrame (extra+26) expression).run (locals,populated) =
+      (.ok (.val (.bool false)),
+        (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) := by
+  have h := expression_steps pipeline extra
+  exact SourceCallable.expression_complete (global pipeline) callerFrame (extra+25)
+    functionDecl h.1 arguments locals (.cons (.bool false) .nil) (params false false)
+    (.val (.bool false)) populated populated _ h.2.1 h.2.2
+
+/-- Source argument order is retained before the same selected body executes. -/
+theorem actual_reordered_expression (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    (Source.evalE (global pipeline) callerFrame (extra+26) reorderedExpression).run
+      (locals,populated) =
+      (.ok (.val (.bool true)),
+        (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) :=
+  SourceCallable.expression_complete (global pipeline) callerFrame (extra+25)
+    functionDecl signature reorderedArguments locals (.cons (.bool false) .nil)
+    (params true false) (.val (.bool true)) populated populated _
+    (reordered_arguments_execute (global pipeline) extra) (actual pipeline extra true false)
+
+/-- Same caller update and heap do not erase the observable argument order. -/
+theorem expression_order_refused (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    (Source.evalE (global pipeline) callerFrame (extra+26) expression).run (locals,populated) ≠
+    (Source.evalE (global pipeline) callerFrame (extra+26) reorderedExpression).run
+      (locals,populated) := by
+  rw [actual_expression, actual_reordered_expression]
+  intro same
+  have resultSame := congrArg Prod.fst same
+  cases resultSame
+
+/-- Caller restoration must retain argument effects, not the pre-argument local. -/
+theorem original_caller_refused (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    (Source.evalE (global pipeline) callerFrame (extra+26) expression).run (locals,populated) ≠
+      (.ok (.val (.bool false)),(locals,SourceKeccak.afterLiteral populated binary)) := by
+  rw [actual_expression]
+  intro same
+  have localsSame := congrArg (fun result => result.2.1) same
+  cases localsSame
+
+/-- Intentional negative body-table model; not SourceSpec admission. -/
+def FrameMismatchJoint (pipeline : Roadmap.Pipeline) (extra : Nat) : Prop :=
+  (mismatchedGlobal pipeline).prog.body
+    ((mismatchedGlobal pipeline).dispatchFn callerFrame.contract functionDecl) = some mismatchedBody ∧
+  ([.bool] : List STy).reverseAux (([.bool,.bool] : List STy).reverseAux []) ≠
+    mismatchedBody.locals ∧
+  (Source.zeroVals (extra+24) [.bool] : Source.EM E [] _).run (Source.L0 E,populated) =
+    (.ok (.cons (.bool false) .nil),(Source.L0 E,populated))
+
+theorem frame_mismatch_joint (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    FrameMismatchJoint pipeline extra := ⟨rfl, by decide +kernel, zero_returns extra⟩
+
+/-- The exact wrong-frame law, with real initialization and arbitrary arguments. -/
+theorem actual_wrong_frame (pipeline : Roadmap.Pipeline) (extra : Nat) (first second : Bool) :
+    (Source.callInternal (mismatchedGlobal pipeline) callerFrame (extra+25) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) =
+      (.error (.stuck "call frame"),(Source.L0 E,populated)) := by
+  have h := frame_mismatch_joint pipeline extra
+  exact SourceCallable.wrong_frame (mismatchedGlobal pipeline) callerFrame (extra+24)
+    functionDecl (params first second) mismatchedBody h.1 (.cons (.bool false) .nil)
+    h.2.1 populated populated h.2.2
+
+/-- Missing-body selection is witnessed, not supplied as an unproved assumption. -/
+theorem missing_selected (pipeline : Roadmap.Pipeline) :
+    (missingGlobal pipeline).prog.body
+      ((missingGlobal pipeline).dispatchFn callerFrame.contract functionDecl) = none := rfl
+
+theorem actual_missing_body (pipeline : Roadmap.Pipeline) (horizon : Nat)
+    (first second : Bool) :
+    (Source.callInternal (missingGlobal pipeline) callerFrame (horizon+1) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) =
+      (.error (.stuck "function without a body"),(Source.L0 E,populated)) :=
+  SourceCallable.missing_body (missingGlobal pipeline) callerFrame horizon functionDecl
+    (params first second) populated (missing_selected pipeline)
+
+/-- Zero horizon applies to an actual selected-body program with nonempty arguments. -/
+theorem actual_zero_horizon (pipeline : Roadmap.Pipeline) (first second : Bool) :
+    (Source.callInternal (global pipeline) callerFrame 0 functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) =
+      (.error .timeout,(Source.L0 E,populated)) :=
+  SourceCallable.zero_horizon (global pipeline) callerFrame functionDecl (params first second) populated
+
+/-- Both errors retain the original state but their exact stuck reasons differ. -/
+theorem missing_wrong_frame_differ (pipeline : Roadmap.Pipeline) (extra : Nat)
+    (first second : Bool) :
+    (Source.callInternal (missingGlobal pipeline) callerFrame (extra+25) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) ≠
+    (Source.callInternal (mismatchedGlobal pipeline) callerFrame (extra+25) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) := by
+  rw [actual_missing_body pipeline (extra+24), actual_wrong_frame]
+  intro same
+  have statuses := congrArg Prod.fst same
+  have messages := Source.Halt.stuck.inj (Except.error.inj statuses)
+  exact (by decide +kernel : ("function without a body" : String) ≠ "call frame") messages
+
+#print axioms frame_mismatch_joint
+#print axioms actual_wrong_frame
+#print axioms missing_selected
+#print axioms actual_missing_body
+#print axioms actual_zero_horizon
+#print axioms missing_wrong_frame_differ
+
+#print axioms expression_steps
+#print axioms actual_expression
+#print axioms actual_reordered_expression
+#print axioms expression_order_refused
+#print axioms original_caller_refused
+
+#print axioms failure_joint
+#print axioms actual_body_failure
+#print axioms actual_body_expression
+#print axioms argument_step_same_program
+#print axioms actual_argument_failure
+#print axioms failure_boundaries_differ
+
+#print axioms joint
+#print axioms actual
+#print axioms stale_state_refused
+end H62.AuditV08Adapters.SourceCallableJoint

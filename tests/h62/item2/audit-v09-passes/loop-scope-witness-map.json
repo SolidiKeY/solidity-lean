@@ -1,0 +1,113 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/LoopScopeControls.lean",
+  "interface_sha256": "dc64415f345ba574e650a494aecc81bf393e545b8007e62e6c241aed77bb0bf0",
+  "joint_witness": "Solidity.Backend.Passes.AuditLoopScope.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditLoopScope",
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.LoopScopeControls.0.",
+  "checked_private_names": [
+    "source_get"
+  ],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.source_get",
+      "signature_sha256": "c73092ca5e5bf31aad39d57e161f2b995fb9ef1bc8048d041d75fbc4a401ddb9",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditLoopScope.extraction_premise"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.prepared_source",
+      "signature_sha256": "14bc630049cb5b16d9f42d46d2187b261036032b01c8a27de9f4ecfd44c8eba9",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.body_source",
+      "signature_sha256": "041216596366e398e4f05cc1b0fbb634982e03c496be9e54af3d82dbc459bac9",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.body_stops",
+      "signature_sha256": "e3a1e2227ca7a312aef431c44fb7e084e7a0d4069765cf5d474d22661d91f46d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.condition_initial",
+      "signature_sha256": "c6569a07d10ba8a8c4af2b22d34f50fcda3219e737ecddf145e8ab0d819392ce",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.condition_final",
+      "signature_sha256": "6cf96e2b36e6a3259eb24af0f0e927e2f9e5f40c811b3dd9915646d079ef86d2",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.iteration_source",
+      "signature_sha256": "b16230cb4a6f2282ffdd07d3fdeeece5c8761087a77b3ad2cc3ef768e7967f20",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.wrapped_source",
+      "signature_sha256": "b71eacc6b976be5c66741ba62689730fd79286603b3621c1536e0d2bc2464ebe",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.final_source",
+      "signature_sha256": "d9fafdb0fd84dd9556f8ebf82020a824402fd4ba92a9a1594a389fe0aa5b99dc",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.costs",
+      "signature_sha256": "aa102659a4f502a8ff502acd21936dee96596875789d8903cb4af37d7559fa78",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.body_cost",
+      "signature_sha256": "3e5dc934e22dec99776c2109544a432390d881f5cb3ee12dd2e1d77dcbb6ff0f",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.public_recognizer",
+      "signature_sha256": "32195f1ab6328bd3427e9ed3c939180b68db379e3b6804b26ea32f5dd41ad419",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.frames",
+      "signature_sha256": "7704433cb8091e8c142ecaaa1d2b8fafccccf95e4e14f0609aa1277475663358",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.iteration_stmt_source",
+      "signature_sha256": "e2edf0f10b491c65f43450995f73d648edd2d534e6bc804969778393ea5b3b7d",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.block_stmt_source",
+      "signature_sha256": "b4bb9b21dfa12901efa5afa06e7b53b4e14ec7891bb03b526ebcc8fa2c1d49f0",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.reached_prefix",
+      "signature_sha256": "609b350482a855650ca2921ef33279c86a6e22c194d3f4481baed14252986bea",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.actual_cost",
+      "signature_sha256": "c0cd6ebe8a117f144f8d78897f2c8471643f871b9d2ff097c85c63cb6295b6e6",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopScopeControls.legacy_metric_zero",
+      "signature_sha256": "6c7ec934a5c603282a5a03b7004714507ba97427675ee0b86165a1c78e7de651",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 431,
+  "aggregate_remaining": 828,
+  "joint_contract": "actual-input-public-loop-recognition-source-body-and-positive-cost-with-distinct-zero-legacy-metric",
+  "limits": "Seventeen public and one private original loop-scope controls. Finite source loop witnesses remain distinct from target execution; positive Cost 3 and zero legacy metric are different observations. No native ByteWorld/emission, gas/session resource or full Source/G24 adequacy.",
+  "private_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ]
+}

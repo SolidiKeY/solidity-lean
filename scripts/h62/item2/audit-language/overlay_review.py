@@ -6,6 +6,7 @@ checks imply neither owner agreement, edit permission nor Lean validation.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -15,6 +16,20 @@ from classify import declaration_index
 TRUSTED={
  "collision-bound":{"path":"Solidity/Hash/CollisionBound.lean","sha256":"3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff","owner":"solidity-h62-6-20261106/migrate-hash","ticket":"a3f49ee0ec1829e63022c90194048d5a1ffe0d22","source":"2a18afcdba00a85645b0b3079704f78ffcd78860"},
  "fixedpoint":{"path":"Solidity/Language/FixedPoint.lean","sha256":"a3cbeea6c8a243df761166dd558825898f2bbda8c8fa7d8a74850cd27cb8ad82","owner":"solidity-h62-6-20261106/migrate-language","ticket":"479f6e0079409a1867483dbffe5051932b8fa754","source":"d8e1d9721455d3671882f19aa7155fbbd2d91415"}}
+
+def receipt_patch_path(receipt):
+    """Resolve provenance by default, or strictly within relocated evidence."""
+    evidence = os.environ.get("H62_EVIDENCE")
+    if not evidence:
+        return Path(receipt["path"])
+    relative = Path(receipt["path_relative_to_evidence"])
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError("receipt path must be relative to evidence")
+    root = Path(evidence).resolve()
+    path = (root / relative).resolve()
+    if not path.is_relative_to(root):
+        raise ValueError("receipt path escapes evidence root")
+    return path
 
 def blob(data): return hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
 
@@ -70,7 +85,7 @@ def review(row):
     if trusted is None:raise ValueError("unregistered owner receipt")
     for supplied,key in (("owner","owner"),("expected_sha256","sha256"),("reported_ticket_head","ticket"),("reported_source_head","source")):
         if row.get(supplied)!=trusted[key]:raise ValueError("receipt metadata differs from coordinator identity")
-    patch=Path(row["path"]).read_bytes();actual=hashlib.sha256(patch).hexdigest()
+    patch=receipt_patch_path(row).read_bytes();actual=hashlib.sha256(patch).hexdigest()
     if actual!=trusted["sha256"]:raise ValueError("patch SHA256 mismatch")
     original=subprocess.check_output(["git","show",f"{BASE}:{trusted['path']}"])
     updated,hunks,old_id,new_id=reconstruct(patch,original,trusted["path"])

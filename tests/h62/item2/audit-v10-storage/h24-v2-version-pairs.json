@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "regression": "H57/H128: v2 local refusal never silently replaces frozen v1 refusal or program admission",
+  "source_checkpoint": "1b3ab0676e24620af56e1408c1aabde9cb4bbdb7",
+  "source_module_sha256": "ccfaee52e9891284f5e4bd71687fd9c09f8db9fd7af00df72bd0bd6c5f4b1de2",
+  "published_notes_sha256": "d390a1ad784039b7ad1501bd8e621a23e3f79565dc8c93c91dd34638b2708a3e",
+  "source_hashes": {
+    "Solidity/Source/Typing.lean": "ab96b9090dd4b4790f34c572f9c8a82db3f980e44a4ab3662dceefb2cfb6e5c6",
+    "Solidity/Source/TypingV2.lean": "ccfaee52e9891284f5e4bd71687fd9c09f8db9fd7af00df72bd0bd6c5f4b1de2",
+    "Solidity/Lowering/V07/LocationGraphInterface.lean": "194293fb1cd0a64e9760951f757a825839977c570d14dd3a5cf3ab82dccbbce6",
+    "Solidity/Lowering/V07/GraphAdmissionAssembly.lean": "1abed888a138c2c58c21bed309a0a9369d48a1e7ea5e211f761b70ca42dc362c",
+    "Solidity/Lowering/V07/SourceRefusal.lean": "2b7ed2b93dd8064086673b198d12c426931b01c9ca2a080fd9bf8cfe0cd5c0a0",
+    "Solidity/Lowering/P8/DeclarationGraphAdmission.lean": "ea55250d3304b568715d3500668343bb81277e51a9692224c816c10b2f790b03",
+    "Solidity/Lowering/P8/DeclarationGraphAdmissionV2.lean": "5d7dd0735be9b75060550f0d6db14774b267bd7ad0fca486ecb6e52efe283e2e",
+    "Solidity/Lowering/P8/ConditionalAssembly.lean": "b66d177e1464b00e8e445c4868e30cbe016396f5b4adb2051fe09e5ba443e814",
+    "Solidity/Lowering/V08/LibraryPremises.lean": "86484a5c96218cf088cc97e5dd877a57ecf8ad3f7c8c410dae06101909c5a749"
+  },
+  "pairs": [
+    {
+      "v1": "Solidity.Lowering.V07.LocationGraphInterface.SourceRefusesNonAdmissible",
+      "v2": "Solidity.Lowering.P8.DeclarationGraphAdmissionV2.SourceRefusesNonAdmissible",
+      "change": "Source.StmtD to Source.V2.StmtD only; all context/stores/type/location/initializer quantifiers retained",
+      "proof": "Solidity.Lowering.P8.DeclarationGraphAdmissionV2.source_refuses"
+    },
+    {
+      "v1": "Solidity.Lowering.V07.GraphAdmissionAssembly.EnvAdmission",
+      "v2": "Solidity.Lowering.P8.DeclarationGraphAdmissionV2.EnvAdmission",
+      "change": "same graph certificates and environment; separately versioned local refusal",
+      "construction": "Solidity.Lowering.P8.DeclarationGraphAdmissionV2.of_premises"
+    },
+    {
+      "v1": "Solidity.Lowering.V07.LocationGraphInterface.Admission",
+      "v2": "Solidity.Lowering.P8.DeclarationGraphAdmissionV2.Admission",
+      "change": "same base producer and exact acceptedSource/input/artifact/location; separately versioned refusal"
+    },
+    {
+      "v1": "Solidity.Lowering.P8.DeclarationGraphAdmission.Producer",
+      "v2": "Solidity.Lowering.P8.DeclarationGraphAdmissionV2.Producer",
+      "change": "same base producer/origins/roots; new tagged admission field; no coercion into v1"
+    }
+  ],
+  "refusal_v2_to_v1": "not valid in general; no_refusal_backtransport retains existing v1 counterexample",
+  "derivation_v2_to_v1": "published Source.V2.StmtD.toV1",
+  "derivation_v1_to_v2": "published ofV1 only under actual CompatibleAt; not supplied by new environment contract",
+  "unchanged_consumers": [
+    "Solidity.Lowering.P8.ConditionalAssembly",
+    "Solidity.Lowering.V08.LibraryPremises.Inputs"
+  ],
+  "retirement": false,
+  "actual_source_program_or_origin_producer_supplied": false,
+  "scope_limit": "Local declaration refusal and existing graph certificates, not parameter/return/whole-program typing or accepted artifact/lifecycle adequacy."
+}

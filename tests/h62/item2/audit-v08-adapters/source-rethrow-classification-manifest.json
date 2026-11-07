@@ -1,0 +1,80 @@
+{
+  "status": "REMAINING_SEVEN_RETHROW_SIGNATURE_CLASSIFICATION",
+  "targets": [
+    {
+      "id": "Solidity/Lowering/V08/SourceRethrow.lean:21:allocated_object",
+      "name": "Solidity.Lowering.V08.SourceRethrow.allocated_object",
+      "type_sha256": "63a166fe98fe2c582219a915b0cb6fda585d3b7e78946665cff40ebd0ac345a4",
+      "classification": "allocation lookup identity",
+      "boundary": "Same newly allocated pointer and heap; no evaluator or canonical admission claim.",
+      "new_producer_for_stated_local_law": false
+    },
+    {
+      "id": "Solidity/Lowering/V08/SourceRethrow.lean:27:reached_rethrow",
+      "name": "Solidity.Lowering.V08.SourceRethrow.reached_rethrow",
+      "type_sha256": "9e765971e1710cff6daae74f42410f88f0f89ebcb323ba3e7793a7252424476e",
+      "classification": "reached-reference Source execution",
+      "boundary": "Positive statement horizon and local reference to same newly allocated heap; no compiler-selected local/layout claim.",
+      "new_producer_for_stated_local_law": false
+    },
+    {
+      "id": "Solidity/Lowering/V08/SourceRethrow.lean:37:literal_rethrow",
+      "name": "Solidity.Lowering.V08.SourceRethrow.literal_rethrow",
+      "type_sha256": "3f85ffb8fbe2975853610f1615b463092408c70df2720de28dfd0f6ea8849f3e",
+      "classification": "Source composition",
+      "boundary": "Independent allocationFuel+4 and statementFuel+1 horizons; exact revert bytes and full post-allocation state.",
+      "new_producer_for_stated_local_law": false
+    },
+    {
+      "id": "Solidity/Lowering/V08/SourceRethrow.lean:50:statement_timeout",
+      "name": "Solidity.Lowering.V08.SourceRethrow.statement_timeout",
+      "type_sha256": "07e0b5a0d71c61ae6ccf7ded6c532bf04d8cf4714e6ea64279a9ab3fcdd0235f",
+      "classification": "Source timeout after allocation",
+      "boundary": "Statement horizon zero; actual successful allocation retained in final state.",
+      "new_producer_for_stated_local_law": false
+    },
+    {
+      "id": "Solidity/Lowering/V08/SourceRethrow.lean:64:allocation_timeout",
+      "name": "Solidity.Lowering.V08.SourceRethrow.allocation_timeout",
+      "type_sha256": "a327d122b427948645a2899aa426dbcae04b49eca8dc9a39a684608bce387004",
+      "classification": "Source timeout before allocation",
+      "boundary": "Allocation horizon zero; arbitrary later horizon; full initial state retained.",
+      "new_producer_for_stated_local_law": false
+    },
+    {
+      "id": "Solidity/Lowering/V08/SourceRethrow.lean:72:intrinsic_rethrow",
+      "name": "Solidity.Lowering.V08.SourceRethrow.intrinsic_rethrow",
+      "type_sha256": "e40ced22086b1b80fca26cd366b1a13d6d765ae2d3eef3816a4335448b4e9bc0",
+      "classification": "independent intrinsic execution",
+      "boundary": "Explicitly chosen revertData statement and arbitrary typed target state; empty/nonempty THalt.ofData distinction retained.",
+      "new_producer_for_stated_local_law": false
+    },
+    {
+      "id": "Solidity/Lowering/V08/SourceRethrow.lean:81:execution_transport",
+      "name": "Solidity.Lowering.V08.SourceRethrow.execution_transport",
+      "type_sha256": "d9d317cab567e86f0c8d25516c55a3c6cf76c7c81e7bac76e278b0729cc798ad",
+      "classification": "conjunction of independent executions",
+      "boundary": "Exact same payload parameter, but separate Source and target states; no compiler selection, physical relation or canonical endpoint binding.",
+      "new_producer_for_stated_local_law": false
+    }
+  ],
+  "source_binding": {
+    "path": "/workspace/v08-world-lowering-published/Solidity/Lowering/V08/SourceRethrow.lean",
+    "sha256": "30fb23f7648f6df727f26940e4277f8af2146f48b45e11d2540e9b507cb31262"
+  },
+  "new_witnesses": 0,
+  "fidelity_acceptances": 0,
+  "limitations": "All seven remain pending full parameter/joint feasibility and statement fidelity. No new producer needed for the stated local law; canonical transport still needs actual Source admission/origin/lifecycle and production body/frame correspondence, including the actual revert bridge. execution_transport is an independent-run conjunction, not compiler adequacy.",
+  "artifacts": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-effects-hypotheses-20261107/accounting.json",
+      "bytes": 816651,
+      "sha256": "e5c19064a255b350cdacb46a6e19c3bbfc250e72eb4cc074d8c7b38400f8e516"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-rethrow-classification-20261107/classification.json",
+      "bytes": 144071,
+      "sha256": "f7408cd15a23caa97ca023bd28f8392e9c9966b4493c57c40e79d89d4c61b879"
+    }
+  ]
+}

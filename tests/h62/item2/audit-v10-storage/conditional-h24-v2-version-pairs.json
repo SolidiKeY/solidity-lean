@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "regression": "H57: checked receipt uses one exact program/origin/artifact/graph; no v1 field replacement or actual Source claim",
+  "source_hashes": {
+    "Solidity/Lowering/P8/ConditionalAssembly.lean": "b66d177e1464b00e8e445c4868e30cbe016396f5b4adb2051fe09e5ba443e814",
+    "Solidity/Lowering/P8/ConditionalAssemblyV2.lean": "9267d2b0a0b04f805c3c4d9392c3dbcdd9993f35712efc186fd8ccf2ffc0fd8c",
+    "Solidity/Lowering/P8/DeclarationGraphAdmission.lean": "ea55250d3304b568715d3500668343bb81277e51a9692224c816c10b2f790b03",
+    "Solidity/Lowering/P8/DeclarationGraphAdmissionV2.lean": "5d7dd0735be9b75060550f0d6db14774b267bd7ad0fca486ecb6e52efe283e2e",
+    "Solidity/Lowering/V07/P8Bindings.lean": "6e7bb55b97964519f7dd9bfc1a29b78a525372eca91ade5d0a5ea615a2124ec5",
+    "Solidity/Lowering/V08/LibraryPremises.lean": "86484a5c96218cf088cc97e5dd877a57ecf8ad3f7c8c410dae06101909c5a749"
+  },
+  "pairs": [
+    {
+      "v1": "Solidity.Lowering.P8.ConditionalAssembly.withGraphs",
+      "v2": "Solidity.Lowering.P8.ConditionalAssemblyV2.withGraphs",
+      "change": "Same checked/extraction/model/failure/realization arguments and base assembly; separately tagged v2 graph/refusal field."
+    },
+    {
+      "v1": [
+        "Solidity.Lowering.P8.ConditionalAssembly.checked_graphs",
+        "Solidity.Lowering.P8.ConditionalAssembly.checked_source_refuses"
+      ],
+      "v2": "Solidity.Lowering.P8.ConditionalAssemblyV2.checked_contract",
+      "change": "Joint full-program identity plus same artifact/location graph and v2 refusal, consuming existing program_origin law."
+    }
+  ],
+  "unchanged_origin_law": "Solidity.Lowering.V07.P8Bindings.program_origin",
+  "rejection": "Fixed refused certificate is not produced; no other valid certificate is excluded.",
+  "graphs_only_transport": "from_v1_graphs preserves base/certificates, not whole-program v1-to-v2 typing.",
+  "test_scope": "Existing PlanWitness empty-program model; joint premise/receipt satisfiability only.",
+  "actual_source_admission_or_lifecycle_supplied": false,
+  "v1_retirement": false
+}

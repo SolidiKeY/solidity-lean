@@ -1,0 +1,75 @@
+{
+  "status": "PROVED_SOURCE_CALL_COMPONENT_JOINT_MODEL",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceCallableJoint.lean": "cab6ea58290fd5608528510082e0658929e5c298dffdad66e9f7be07dc7271bf",
+    "Solidity/Lowering/V08/SourceCallable.lean": "4b76b7f19609592d7eb816df9d3e6df27a151624996d40e2d641c1e044580a6a",
+    "Solidity/Lowering/V08/SourceCallableControls.lean": "f1c63dc4e4b491bfe5c4c0f53652f7c779fe41b3e42085215a2b2ff9558094df"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceCallable.complete"
+  ],
+  "domain": "Every Pipeline and extra sufficient horizon, arbitrary first/second Bool arguments, one existing populated Source state and selected manually supplied program.",
+  "joint_premises": [
+    "same dispatched body selection",
+    "original return/argument frame type fit",
+    "actual arguments-to-frame identity",
+    "actual return-value initialization",
+    "actual runMods with checked=true override",
+    "actual return extraction"
+  ],
+  "result": "Full original callInternal status/result and complete final locals/state pair; preserves SourceKeccak.afterLiteral heap effect.",
+  "negative_control": "Same successful value with stale original state is impossible: actual heap.next=2, original heap.next=1. General over pipeline/extra/both argument values.",
+  "new_joint_model_families": 1,
+  "new_body_fixtures": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceCallableJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.267,
+    "peak_sampled_aggregate_rss": 732733440,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Reuses existing SourceCallableControls body and evaluator proofs; no new body producer or canonical syntax-to-body linkage.",
+    "Not independent SourceSpec admission or general source/target compiler/body/frame preservation.",
+    "Not all-outcome/session adequacy or full H68 certificate.",
+    "Single component witness, no full family timing or complete audit acceptance."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-callable-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "96908aef68710b709f500a58b04e7387bacf40c0550376fc299b869fad922c86"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-callable-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-callable-joint-20261107/first/results.json",
+      "bytes": 399,
+      "sha256": "3214b801973ebfc6ad929945e1dfd73f056d368bb423841f4819af8ba75afb1c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-callable-joint-20261107/first/gates/1.log",
+      "bytes": 27452,
+      "sha256": "b27d7e7d5ae67cb049f8176196bdb0aa124c5dc0414071980d880123a1af1561"
+    }
+  ],
+  "reviews": "Independent read-only finder and skeptic: no findings on joint original premises, full-state preservation and genuine heap-effect refusal; no reviewer scripts/tests/Lean/server.",
+  "source_binding_status": "Historical success-only test snapshot. Additive failure consumers are checked in source-call-failure-joint-manifest.json; retained old hashes identify original evidence, not current test bytes."
+}

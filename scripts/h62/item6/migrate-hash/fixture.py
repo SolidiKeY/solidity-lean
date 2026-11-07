@@ -11,10 +11,9 @@ for name in ("CollisionBound", "Adaptive"):
         for predicate in ("Near N L a b", "Covers N L a r"):
             keyword = predicate.split()[0]
             s = s.replace(f"    simp only [decide_eq_true_eq, {keyword}] at hn", f"    have hn' : {predicate} := of_decide_eq_true hn\n    unfold {keyword} at hn'")
-        s = s.replace("if_true", "ite_true").replace("if_pos", "ite_eq_left").replace("if_neg", "ite_eq_right")
+        s = s.replace("if_true", "ite_true")
     else:
         s = s.replace("import Solidity.Hash.CollisionBound", "import tests.h62.item6.«migrate-hash».CollisionBound")
         for event, premise in (("eagerCollides", "CollisionFree"), ("eagerRegionsFail", "RegionsDisjoint")):
             s = s.replace(f"simp only [{event}, eagerQueries, decide_eq_true_eq, Classical.not_not]\n      exact {premise}.nil", f"simp only [{event}, eagerQueries]\n      exact fun h => (of_decide_eq_true h) {premise}.nil")
-        s = s.replace("if_pos", "ite_eq_left").replace("if_neg", "ite_eq_right")
     (root/f"{name}.lean").write_text(s)
