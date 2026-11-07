@@ -902,3 +902,37 @@ not Lean proofs; this increment changes no Lean statement, proof, budget or axio
 The separate address-local draft remains uncommitted and incomplete: source MCP
 checks pass, but its end-to-end sender control fails with `unknown name msg`.
 Neither that control nor address parity is claimed passing by this intake.
+
+### H90 explicit nonpayable address locals (2026-11-07)
+
+`localValueTypeName` dispatches explicit `ElementaryTypeName/address/nonpayable`
+nodes to the existing `.named "address"` marker. Both executable statement paths
+use it. Parameters, state, payable and missing metadata retain their refusals.
+`localValueTypeName_of_address` is a general decoder equation, closed with only
+`propext`, `Classical.choice`, `Quot.sound`. No production module/import was added.
+The guarded `msg.sender` bridge requires the compiler magic-message identifier,
+negative builtin reference and address result type; user/missing identities stay
+ordinary fields. Base decoding still precedes member-name validation.
+
+Nine owned module builds and all 30 affected per-file gates pass, including
+KeySort and the axiom inventory. The 16 address box/diamond requests yield
+10 proved, two refuted and four unsupported outcomes. These are model/checker
+controls, not source/ABI/environment adequacy proofs. The initial combined command
+exited 1 only at the static ownership audit because its MCP config overlay was
+visible to Git. The audit and downstream controls pass without that overlay;
+no allowlist was broadened. Both runs are retained.
+
+The matched78-file census remains 245 admitted/1,486 existing printed out of
+1,655 functions: this increment adds no whole-function admission. Four address
+refusals reach later unsupported constructs. The incremental eight-profile
+transition has two refusal refinements; the occurrence matrices change at10
+default/14composed rows. Both readers replay all55,218 occurrences, preserving
+observed decoded outcomes and45,711 unknown-root refusals per reader. These
+counts do not assert decoded-term equality or importer parity.
+
+Finder/skeptic read-only reviews found no remaining blocker after the diagnostic
+order repair. `address-manifest.json` records commands, resource measurements,
+source hashes, reviews and the H44 bulk archive path/hash; generated AST/logs
+remain outside Git. Full source/semantic closure, other H90 forms/contexts,
+CR H68/H102 landing/importer migration, native/WASM qualification and timing
+acceptance remain open. Historical STOPs were not rerun.

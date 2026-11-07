@@ -30,6 +30,13 @@ class Integrity(unittest.TestCase):
    with self.assertRaisesRegex(AssertionError,'identity'):m.compare([row],[bad],[c])
    m.cache.clear();c['fixtureSha256']='0'*64
    with self.assertRaisesRegex(AssertionError,'fixture hash'):m.compare([row],[row],[c])
+ def test_address_witness_metadata(self):
+  def declaration(metadata):
+   return {'nodeType':'VariableDeclarationStatement','declarations':[{'typeName':metadata}]}
+  self.assertTrue(m.address_witness(declaration({'name':'address','stateMutability':'nonpayable'})))
+  for metadata in [{'name':'address'},{'name':'address','stateMutability':'payable'}]:
+   self.assertFalse(m.address_witness(declaration(metadata)))
+  self.assertFalse(m.address_witness({'nodeType':'TupleExpression','components':[{'typeDescriptions':{'typeString':'address payable'}}]}))
  def test_prior_decoded_behavior(self):
   with tempfile.TemporaryDirectory(dir=O/'artifacts') as tmp:
    c,row=self.fixture(tmp);bad={**row,'natural':{'status':'refused','reason':'changed'}}

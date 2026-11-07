@@ -33,7 +33,7 @@ locals retain source narrow spellings through Shared.localTypeName. -/
 partial def executableStatements (j : Json) : Except String (List RawStmt) := do
   if (← node j) == "VariableDeclarationStatement" && memoryLocal j then
     return ← Memory.statementsStep executableExpression executableStatements Memory.typeName j
-  ControlTuple.statementsStep executableExpression executableStatements Shared.localTypeName j
+  ControlTuple.statementsStep executableExpression executableStatements Shared.localValueTypeName j
 
 /-- Canonical executable reader for runtime entrypoints and producer migration.
 Reference parameters and returns retain the existing Shared refusal gates. -/

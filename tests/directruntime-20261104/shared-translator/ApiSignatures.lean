@@ -44,3 +44,5 @@ open Solidity.Frontend.ExecutableAst.Shared
 #check Solidity.Frontend.ExecutableAst.Shared.primitiveReturnObligation
 
 #check Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_fixedBytes
+
+#check Solidity.Frontend.ExecutableAst.Shared.localValueTypeName_of_address

@@ -191,3 +191,11 @@ Pinned78-file comparison:236→245 canonical admissions,9gains/12refined refusal
 Primitive-return repair: `Shared.primitiveReturnObligation : BodyLoopLowerer → PlainEntryPre → Contract → FunDecl → Bool → Except String (Fml C [])` is called by the existing assertion boundary for returning functions. Only primitive/empty-width declarations enter it; reference/width-bearing return refusals stay. Fresh slots plus existing lowerers preserve evaluation/early-exit handling in the checked model. No-return branch is exact under the pinned audit; Reader/callback signatures unchanged. See committed primitive-return-manifest.json for source hashes, compiler receipts, finite/trusted-checker evidence and limits. Native/WASM revalidation remains consumer work.
 
 Fixed-byte locals: existing localTypeName/localPrim now admit canonicalbytes1..32 only in primitive-local/tuple contexts while retaining raw spelling for existing byte markers. New general decoder theorem localTypeName_of_fixedBytes; no Reader signature change. Parameters/state/reference refusals remain.20box/diamond requests give12proved/4refuted/4unsupported; positive.length proof/backendgap explicit.78-file function admission remains245 with3refinedrefusals. See fixed-byte-manifest.json for exact baseline/source/data hashes and limits.
+
+H90 address increment: `Shared.localValueTypeName : Json → Except String (Ty × RawTy)`
+is the shape-dispatched local callback used by both statement paths. Explicit
+nonpayable addresses retain `.named "address"`; original `localTypeName` and
+Reader signatures remain intact. The guarded `msg.sender` bridge uses `.env
+.msgSender`; malformed/user identities keep field decoding and error order.
+See address-manifest.json for exact source hashes,30passing file gates and
+245/1486matched census boundary. This is not full address or importer parity.

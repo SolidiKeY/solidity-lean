@@ -35,7 +35,7 @@ Parameter decoding deliberately keeps `prim`, since Ty alone erases width. -/
 def localPrim (j : Json) : Except String Ty := do
   let spelling ← str (← field j "typeDescriptions") "typeString"
   if let some (p, _) := narrowTy? spelling then return .prim p
-  if (bytesTy? spelling).isSome then return .prim .uint
+  if (bytesTy? spelling).isSome || spelling == "address" then return .prim .uint
   prim j
 
 def typeNameStep (read : Json → Except String (Ty × RawTy)) (j : Json) : Except String (Ty × RawTy) := do
@@ -99,6 +99,26 @@ theorem localTypeName_of_fixedBytes (j : Json) (name : String) (size : Nat)
     localTypeName j = .ok (.prim .uint, .named name) := by
   simp only [localTypeName, hkind, beq_self_eq_true, ↓reduceIte, hname, hnarrow, hbytes]
 
+/-- One local-type dispatch: explicitly nonpayable addresses retain their marker;
+other shapes use the existing narrow/fixed-byte local reader. This is a shape
+choice, not retrying a failed translation. Missing/payable metadata stays refused. -/
+def localValueTypeName (j : Json) : Except String (Ty × RawTy) :=
+  if (node j).toOption == some "ElementaryTypeName" &&
+      (str j "name").toOption == some "address" then
+    if (str j "stateMutability").toOption == some "nonpayable" then
+      .ok (.prim .uint, .named "address")
+    else typeName j
+  else localTypeName j
+
+/-- Explicit nonpayable address metadata retains its exact marker-bearing spelling.
+This general decoder equation is not a source/ABI adequacy theorem. -/
+theorem localValueTypeName_of_address (j : Json)
+    (hkind : node j = .ok "ElementaryTypeName") (hname : str j "name" = .ok "address")
+    (hmut : str j "stateMutability" = .ok "nonpayable") :
+    localValueTypeName j = .ok (.prim .uint, .named "address") := by
+  simp only [localValueTypeName, hkind, hname, hmut, Except.toOption,
+    beq_self_eq_true, Bool.and_self, ↓reduceIte]
+
 def expressionStep (read : Json → Except String RawExpr) (j : Json) : Except String RawExpr := do
   let kind ← node j
   let type := ((j.getObjVal? "typeDescriptions").toOption.bind fun d => (d.getObjValAs? String "typeString").toOption).getD ""
@@ -122,7 +142,19 @@ def expressionStep (read : Json → Except String RawExpr) (j : Json) : Except S
     let base ← read (← field j "baseExpression")
     let key ← read (← field j "indexExpression")
     return .index base key
-  | "MemberAccess" => return .field (← read (← field j "expression")) (← str j "memberName")
+  | "MemberAccess" =>
+    let base ← field j "expression"
+    let decoded ← read base
+    let member ← str j "memberName"
+    -- H90: only the compiler's magic message builtin has this environment meaning.
+    -- A user declaration named `msg`, or absent identity metadata, stays a field.
+    let magic := ((base.getObjVal? "typeDescriptions").toOption.bind fun d =>
+      (d.getObjValAs? String "typeIdentifier").toOption) == some "t_magic_message"
+    if (node base).toOption == some "Identifier" &&
+        (str base "name").toOption == some "msg" && magic &&
+        (J.ref? base).any (· < 0) && member == "sender" && type == "address" then
+      return .env .msgSender
+    return .field decoded member
   | "BinaryOperation" =>
     let some op := BinOp.ofSym? (← str j "operator") | throw "binary operator"
     return .binop op (← read (← field j "leftExpression")) (← read (← field j "rightExpression"))
@@ -327,7 +359,7 @@ def statementsStep
 
 
 partial def statements (j : Json) : Except String (List RawStmt) :=
-  statementsStep expression statements localTypeName j
+  statementsStep expression statements localValueTypeName j
 
 def params (j : Json) (returns : Bool) (fresh : String) : Except String (List (String × Ty)) := do
   (← arr j "parameters").toList.zipIdx.mapM fun (p, i) => do

@@ -1,4 +1,4 @@
-"""Guards H90 fixed-byte-only observation transitions and preserves earlier admissions.
+"""Guards H90 fixed-byte/address observation transitions and earlier admissions.
 Finite decoder observations and source pointers are not semantic/source proofs.
 """
 from pathlib import Path
@@ -17,6 +17,21 @@ def byte_witness(node):
   if n.get('nodeType')=='TupleExpression':
    if any(isinstance(c,dict) and re.fullmatch(r'bytes(?:[1-9]|[12][0-9]|3[0-2])',c.get('typeDescriptions',{}).get('typeString','')) for c in n.get('components',[])):return True
  return False
+def address_witness(node):
+ todo=[node]
+ while todo:
+  n=todo.pop()
+  if isinstance(n,list):todo.extend(n)
+  if not isinstance(n,dict):continue
+  todo.extend(n.values())
+  if n.get('nodeType')=='VariableDeclarationStatement':
+   if any(isinstance(d,dict) and d.get('typeName',{}).get('name')=='address' and
+          d.get('typeName',{}).get('stateMutability')=='nonpayable' for d in n.get('declarations',[])):return True
+  if n.get('nodeType')=='TupleExpression':
+   if any(isinstance(c,dict) and c.get('typeDescriptions',{}).get('typeString')=='address' for c in n.get('components',[])):return True
+ return False
+WITNESS=byte_witness
+FAMILY='fixed-byte'
 def read_profiles(pack,manifest):
  assert pack.stat().st_size==manifest['archive']['bytes'] and sha(pack)==manifest['archive']['sha256'],'prior profile archive hash'
  result={}
@@ -38,7 +53,7 @@ def fixture_node(c):
  assert isinstance(n,dict) and n.get('nodeType')==c['nodeType'],'fixture pointer kind mismatch'
  return n
 def witness(c):
- assert byte_witness(fixture_node(c)),'changed observation lacks fixed-byte local/tuple witness'
+ assert WITNESS(fixture_node(c)),'changed observation lacks '+FAMILY+' local/tuple witness'
 def compare(old,new,cases):
  assert len(old)==len(new)==len(cases);changes=[]
  for a,b,c in zip(old,new,cases,strict=True):
@@ -53,6 +68,10 @@ def compare(old,new,cases):
   witness(c);changes.append({'caseId':c.get('caseId'),'fixture':c['fixture'],'pointer':c['pointer'],'before':a['natural'],'after':b['natural']})
  return changes
 def main():
+ global OUT, BEFORE, WITNESS, FAMILY
+ parser=argparse.ArgumentParser();parser.add_argument('--capture-report',action='store_true');parser.add_argument('--family',choices=['fixed-byte','address'],default='fixed-byte');args=parser.parse_args()
+ FAMILY=args.family
+ if FAMILY=='address':OUT=O/'artifacts/address';BEFORE=OUT/'before';WITNESS=address_witness
  base=(OUT/'base-head.txt').read_text().strip();assert re.fullmatch('[0-9a-f]{40}',base)
  for name in ['h90-census-manifest.json','h90-reader-profile-manifest.json','h90-occurrence-manifest.json']:
   raw=subprocess.check_output(['git','show',base+':'+str((O/name).relative_to(ROOT))],cwd=ROOT);assert hashlib.sha256(raw).hexdigest()==sha(BEFORE/name)
@@ -68,7 +87,7 @@ def main():
  for old,new in zip(a['rows'],b['rows'],strict=True):
   assert {k:v for k,v in old.items() if k!='canonical'}=={k:v for k,v in new.items() if k!='canonical'}
   if old==new:continue
-  assert re.fullmatch(r'compact verifier: unsupported type bytes(?:[1-9]|[12][0-9]|3[0-2])',old['canonical'])
+  assert re.fullmatch(r'compact verifier: unsupported type '+('address' if FAMILY=='address' else r'bytes(?:[1-9]|[12][0-9]|3[0-2])'),old['canonical'])
   census.append({'identity':{k:old[k] for k in ['fixture','contract','function','sourceId']},'before':old['canonical'],'after':new['canonical']})
  occ=json.loads((BEFORE/'h90-occurrence-manifest.json').read_text());pack=ROOT/occ['archive']['archiveRelative'];assert sha(pack)==occ['archive']['sha256']
  casepath=O/'artifacts/occurrence-readers/cases.json'
@@ -81,8 +100,7 @@ def main():
    old=json.load(t.extractfile(entry));new=json.loads((O/'artifacts/occurrence-readers'/entry.name).read_text());occChanges[entry.name]=compare(old,new,cases)
  for chunk in iter(lambda:p.stdout.read(1048576),b''):pass
  assert p.wait()==0 and len(occChanges)==2
- result={'regression':'H90 fixed-byte local observation transition','base':base,'profileChanges':len(profile),'profileTransitions':dict(collections.Counter(x['before']['status']+'->'+x['after']['status'] for x in profile)),'censusBefore':a['summary'],'censusAfter':b['summary'],'censusChanges':census,'occurrenceChanges':{k:len(v) for k,v in occChanges.items()},'priorDecodedBehaviorPreserved':True,'unknownRootRefusalsPreserved':True,'boundary':'Fixed-byte source witness/decoder transition checks, not causal semantic or source adequacy proof.'}
- parser=argparse.ArgumentParser();parser.add_argument('--capture-report',action='store_true');args=parser.parse_args()
+ result={'regression':'H90 '+FAMILY+' local observation transition','base':base,'profileChanges':len(profile),'profileTransitions':dict(collections.Counter(x['before']['status']+'->'+x['after']['status'] for x in profile)),'censusBefore':a['summary'],'censusAfter':b['summary'],'censusChanges':census,'occurrenceChanges':{k:len(v) for k,v in occChanges.items()},'priorDecodedBehaviorPreserved':True,'unknownRootRefusalsPreserved':True,'boundary':FAMILY+' source witness/finite outcome checks, not decoded term equivalence, causal semantic or source adequacy proof.'}
  if args.capture_report:(OUT/'transition.json').write_text(json.dumps(result,indent=2)+'\n')
  else:assert json.loads((OUT/'transition.json').read_text())==result,'transition report mismatch'
  print(json.dumps(result))
