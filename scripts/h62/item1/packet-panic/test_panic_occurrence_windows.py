@@ -28,6 +28,12 @@ class OccurrenceWindowsTest(unittest.TestCase):
         with self.assertRaises(ValueError): module.link(rows, [w, dict(w)])
         with self.assertRaises(ValueError): module.link(rows, [dict(w, source_sha256="wrong")])
 
+    def test_lf_line_alignment_with_non_lf_separators_in_comments(self):
+        sample = "-- comment\r\f\u2028 panicData\nSource.panicData\r\n"
+        rows = module.occurrences("x.lean", sample.encode("utf-8"))
+        self.assertEqual([(r["line"], r["lexical_candidate"]) for r in rows], [(1, False), (2, True)])
+        self.assertEqual(rows[1]["column"], 8)
+
     def test_registered_helper_snapshot_and_header_controls(self):
         root = pathlib.Path(__file__).resolve().parents[4]
         data = (root / module.HELPER_PATH).read_bytes()
