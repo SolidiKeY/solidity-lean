@@ -2,9 +2,11 @@
 
 ## External evidence and coordinator intake
 
-Under H145, lane evidence indexes are archived in the [private coordination repository](https://github.com/SolidiKeY/solidity-lean-coord/tree/de649e9c9648443622f3fc35b24999c15ecfb27a/evidence/solidity-h28-sol-20261104/automation-benchmark/h145-code-evidence). The archive preserves 110 removed index files byte-for-byte, the current classification dataset and frozen census, and the prior sealed handoff. The checker still reads its retained bulk-input manifest; historical verifier fixtures remain intact. Other bulk bytes referenced by those indexes stay on the VM and are not claimed privately retrieved. Historical statements below about committed evidence manifests describe earlier checkpoints; their indexes now live in the private archive.
+Current exact V123/V124 payload publication: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. The current manifest is private and the loader pins this commit. Earlier preparation/pending-publication wording below is historical and superseded for these exact payloads; unrelated bulk retrieval and semantic acceptance remain pending.
 
-For coordinator-side review, census claims are bound by hash only until the coordinator pulls the referenced bytes and verifies the committed manifests. Classification inputs and bulk evidence remain off Git on this VM under H44, with absolute paths, sizes and SHA256 identities. Local accounting/tests and local finder/skeptic review do not establish coordinator delivery, independent semantic acceptance or proof validation. Delivery remains coordinator-pending; the checkpoint evidence includes the actual local retention/hash audit. Regenerated or transcribed material does not establish identity with unavailable historical bytes.
+Under H145, lane evidence indexes are archived in the [private coordination repository](https://github.com/SolidiKeY/solidity-lean-coord/tree/de649e9c9648443622f3fc35b24999c15ecfb27a/evidence/solidity-h28-sol-20261104/automation-benchmark/h145-code-evidence). The archive preserves 110 removed index files byte-for-byte, the current classification dataset and frozen census, and the prior sealed handoff. The default checker now reads its checksum manifest and exact payloads from immutable private Git objects as documented in tests/h62/item2/audit-calculus/BULK-INPUTS.md; historical verifier fixtures remain intact. Other bulk bytes referenced by those indexes stay on the VM and are not claimed privately retrieved. Historical statements below about committed evidence manifests describe earlier checkpoints; their indexes now live in the private archive.
+
+For coordinator-side review, census claims are bound by hash only until the coordinator pulls the referenced bytes and verifies the privately archived manifests. Classification inputs and bulk evidence remain off Git on this VM under H44, with absolute paths, sizes and SHA256 identities. Local accounting/tests and local finder/skeptic review do not establish coordinator delivery, independent semantic acceptance or proof validation. Delivery remains coordinator-pending; the checkpoint evidence includes the actual local retention/hash audit. Regenerated or transcribed material does not establish identity with unavailable historical bytes.
 
 ## H82 retirement: implementation stopped
 
@@ -28,7 +30,7 @@ coordinator must pause the existing goal externally.
 The original prompt, queues, steering and retirement notes are retained under
 scripts/h62/item2/audit-calculus/h28-inherited-handoff/. The exact361-path scope inventory
 is external under H44; its absolute path, size and SHA256 are in
-tests/h62/item2/audit-calculus/bulk-inputs-manifest.json. Other bulk and unimplemented drafts
+tests/h62/item2/audit-calculus/BULK-INPUTS.md. Other bulk and unimplemented drafts
 remain off Git in the authenticated evidence archive. Coordinator-local paths
 are provenance, not assumed successor access. H71 push permission was not
 available, so no push was attempted. No new proof implementation occurred after
@@ -2050,3 +2052,7 @@ BodyCompletedAt requires both natural store bounds, first value evaluation at th
 original_completed requires capacity at least36 for the stores at0 and4 plus the actual sizeSlot value fitting capacity. It constructs the existing plan's derivation with selectorWord/codeWord and the actual local length, generic n rather than n=36. original_completed_length derives snapshot length from that local evaluation and span equality; it is not an independent reply length premise.
 
 This is proof-side finite-plan interpretation, not a new source statement, admitted program, native evaluator or compiled-EVM execution theorem. Missing range evidence is not a halt outcome. No source/statements/definitions/interfaces/budgets/axioms/exclusions/toolchain changes, no fresh Lean/kernel/replay acceptance. H28 pauses and all STOPs remain. H145 evidence is prepared for private archival, publication awaits receipt. Historical unavailable bytes remain UNVERIFIABLE; exact archive-backed duplicate evictions remain restorable.
+
+## H145 pinned private input route
+
+The held V123 and current V124 exact payloads and checksum manifests are published privately: evidence: bbfdd31172bf0ab028bd4967e50d63e7f8a91357 evidence/solidity-h28-sol-20261104/automation-benchmark/. The default loader uses this immutable private Git packet through tests/h62/item2/audit-calculus/BULK-INPUTS.md, without VM-local fallback. This transport repair adds no witness or proof acceptance.

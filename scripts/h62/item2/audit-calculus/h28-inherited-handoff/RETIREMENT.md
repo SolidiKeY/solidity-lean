@@ -17,7 +17,7 @@ Mandatory authenticated source files:
 - SCOPE-MANIFEST.json: original scope, H82 standing authorization, all361 exact
   mapped paths/hashes and portable evidence references. Successor H44 handling
   preserves this inventory externally; see
-  tests/h62/item2/audit-calculus/bulk-inputs-manifest.json for its path and hash.
+  tests/h62/item2/audit-calculus/BULK-INPUTS.md for its pinned private path and authenticated loader route.
 - STEERING.md: subsequent supplied coordinator instructions, including H82 stop.
 
 Original repository: /workspace/solidity-lean.
