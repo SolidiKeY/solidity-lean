@@ -909,3 +909,51 @@ pass. Global pins remain RED with0errors,31unrecorded and99baselined changes;
 twenty scoped records are proposals. The prior twelve external core-to-non-core
 layer edges and five off-scope citation failures remain unresolved; neither
 unchanged failure was repeated or waived.
+
+
+## Exact head-guard success domain
+
+Published master95d1e9cb was already adopted at cc687d67 before this checkpoint;
+previous proof heads and seals remain ancestors/preserved. The unchanged public
+HeadGate and HeadGateCertificate are reused for arbitrary parameter layouts.
+head_gate_actual_success_iff proves that an actual selected compilation with a
+joint certificate/represented frame/successful output exists exactly when the
+semantic required head extent fits in a target word. This classifies per-input
+feasibility separately from the globally inhabited certificate. It is head-span
+guarding, not payload decoding, native loading or Source admission.
+
+The forward proof derives the bound from selected execution and the existing
+rejection characterization; it requires no additional execution oracle. The reverse
+constructs size equal to the required extent and proves selected IR success.
+A nonempty Boolean layout supplies a joint positive witness. Generic oversized
+refusal and a concrete fixed-W-array metadata witness supply the negative side:
+W≤need, need%W=4 and actual refusal for every FinW size coexist with the global
+certificate. Small modular remainder never substitutes for the semantic bound.
+The oversized metadata is not a Source-admitted or allocated calldata layout.
+No producer, frozen theorem, premise or exclusion changed; no family was copied.
+
+The initial three-lemma check passed in61.994s, exceeding the60s reporting
+threshold; its source-bound result is retained in check-1. Both independent
+read-only reviews requested the explicit oversized-domain/no-wrap witness.
+The final four-lemma source passes in14.197s with empty diagnostics and24exact
+standard-only guards. These are separate validation runs over changed sources,
+not paired performance evidence or a performance PASS. Full matched/package
+performance remains pending. Both final runtime monitors pass. The same active
+generic epoch/deadline01:11:01.069665→05:11:01.069665UTC is reused unchanged;
+no prerequisite rebuild, PowerBounds retry, heartbeat raise or new proof window.
+
+The twenty-four scoped pins remain a coordinator registration proposal. No new
+Lean module or shared registry changes. No full703/190core/37Bridge census,
+source/type/private/inherited linkage, witness-ledger coverage, Source/native,
+gas/fork, Bridge/package validation or RUNTIME_GATE_PASS follows.
+Evidence: /workspace/parallel-20261103/executable-bytecode/head-success-domain/.
+
+Both independent read-only final reviews pass after adding the oversized
+control and clarifying that the iff forward direction consumes its stated
+success hypothesis but requires no additional execution oracle. All63 audit
+tests, trust/reachability, roots/fragments and whitespace checks pass. The
+refreshed documentation-path gate now passes (132 ambiguous but resolving
+references); prior missing-citation failures remain historical receipts. The
+current lightweight layer check still reports12 external core-to-non-core
+edges. Global pins report0errors,196unrecorded and99baselined changes;24scoped
+records remain proposals. These red/pending gates are not waived.

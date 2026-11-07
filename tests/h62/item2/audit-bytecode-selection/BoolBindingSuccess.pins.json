@@ -54,6 +54,26 @@
   "Quot.sound",
   "propext"
  ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_actual_success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_nonempty_jointWitness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_oversized_jointWitness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_unrepresentable_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "tests/h62/item2/audit-bytecode-selection/BoolBindingSuccess.lean:Solidity.H62.BytecodeSelection.BoolBindingFixture.reject_all_fails_selection": [
   "Classical.choice",
   "Quot.sound",

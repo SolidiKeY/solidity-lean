@@ -419,4 +419,92 @@ theorem fuel_boundary_input_inhabited :
 /-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.fuel_boundary_input_inhabited' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms fuel_boundary_input_inhabited
 
+/-- Exact success feasibility for the generic head guard, including its
+actual selected program and a jointly represented frame. A global certificate
+alone does not make an unrepresentable semantic extent feasible. -/
+theorem head_gate_actual_success_iff (C : Solidity.Contract) (base : Nat)
+    (parameters : List Solidity.AbiEntry.Param) (label : Fin W) (machine : Machine) :
+    (∃ (_certificate : HeadGateCertificate HeadGate.program)
+      (result : Compiler.Compilation base (Frag.init RouteCtx)
+        (HeadGate.program C parameters label)) (prepared : Machine) (size : Fin W),
+      Compiler.compile base (Frag.init RouteCtx) (HeadGate.program C parameters label) = some result ∧
+      prepared = seeded base (wmod 0) size machine ∧
+      prepared.mem (base + 1) = .val size ∧
+      run result.code prepared =
+        .ok {prepared with mem := upd prepared.mem (base + 1) (.val label)} 0) ↔
+      HeadCheck.need parameters < W := by
+  constructor
+  · rintro ⟨certificate, result, prepared, size, selected, initialFrame, initialSize, executed⟩
+    have full : ¬ size.val < HeadCheck.need parameters := by
+      intro short
+      have rejected : run result.code prepared = .revert :=
+        (HeadGate.rejected_iff C base parameters label result selected prepared size initialSize).2 short
+      rw [rejected] at executed
+      cases executed
+    exact Nat.lt_of_le_of_lt (Nat.le_of_not_gt full) size.isLt
+  · intro fits
+    let size : Fin W := ⟨HeadCheck.need parameters, fits⟩
+    let prepared : Machine := seeded base (wmod 0) size machine
+    refine ⟨HeadGate.certificate, HeadGate.compiled C base parameters label, prepared, size,
+      HeadGate.selected C base parameters label, rfl,
+      seeded_size base (wmod 0) size machine, ?_⟩
+    rw [HeadGate.executed C base parameters label _ (HeadGate.selected C base parameters label)
+      prepared size (seeded_size base (wmod 0) size machine)]
+    have full : ¬ size.val < HeadCheck.need parameters := Nat.lt_irrefl _
+    simp only [headGateOutcome, if_neg full]
+
+/-- Every represented target size refuses a semantic head extent beyond the
+word range. The required size does not wrap into an admissible immediate. -/
+theorem head_gate_unrepresentable_refuses (C : Solidity.Contract) (base : Nat)
+    (parameters : List Solidity.AbiEntry.Param) (label size : Fin W) (machine : Machine)
+    (large : W ≤ HeadCheck.need parameters) :
+    run (HeadGate.compiled C base parameters label).code
+      (seeded base (wmod 0) size machine) = .revert := by
+  exact (HeadGate.rejected_iff C base parameters label _ (HeadGate.selected C base parameters label)
+    (seeded base (wmod 0) size machine) size (seeded_size base (wmod 0) size machine)).2
+      (Nat.lt_of_lt_of_le size.isLt large)
+
+/-- A concrete nonempty parameter layout inhabits the complete head-guard
+certificate/selection/frame/success domain, rather than only a numeric bound. -/
+theorem head_gate_nonempty_jointWitness :
+    ∃ (_certificate : HeadGateCertificate HeadGate.program)
+      (result : Compiler.Compilation 7 (Frag.init RouteCtx)
+        (HeadGate.program {vars := []} (singleWordParams .bool) (wmod 13)))
+      (prepared : Machine) (size : Fin W),
+      Compiler.compile 7 (Frag.init RouteCtx)
+        (HeadGate.program {vars := []} (singleWordParams .bool) (wmod 13)) = some result ∧
+      prepared = seeded 7 (wmod 0) size Machine.init ∧ prepared.mem 8 = .val size ∧
+      run result.code prepared =
+        .ok {prepared with mem := upd prepared.mem 8 (.val (wmod 13))} 0 := by
+  exact (head_gate_actual_success_iff {vars := []} 7 (singleWordParams .bool)
+    (wmod 13) Machine.init).2 (by decide)
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_actual_success_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_gate_actual_success_iff
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_unrepresentable_refuses' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_gate_unrepresentable_refuses
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_nonempty_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_gate_nonempty_jointWitness
+
+/-- Modeled oversized fixed-array metadata inhabits the negative domain.
+Its low-word remainder is small, yet every represented frame still refuses;
+this neither admits a Source layout nor allocates its semantic extent. -/
+theorem head_gate_oversized_jointWitness (C : Solidity.Contract) (base : Nat)
+    (label : Fin W) (machine : Machine) :
+    ∃ parameters : List Solidity.AbiEntry.Param,
+      HeadGateCertificate HeadGate.program ∧ W ≤ HeadCheck.need parameters ∧
+      HeadCheck.need parameters % W = 4 ∧
+      ∀ size : Fin W,
+        run (HeadGate.compiled C base parameters label).code
+          (seeded base (wmod 0) size machine) = .revert := by
+  let parameters : List Solidity.AbiEntry.Param :=
+    [{shape := .fixed (.word (.uint 256)) W, loc := .memory}]
+  have large : W ≤ HeadCheck.need parameters := by decide
+  have remainder : HeadCheck.need parameters % W = 4 := by decide
+  exact ⟨parameters, HeadGate.certificate, large, remainder,
+    fun size => head_gate_unrepresentable_refuses C base parameters label size machine large⟩
+
+/-- info: 'Solidity.H62.BytecodeSelection.BoolBindingFixture.head_gate_oversized_jointWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms head_gate_oversized_jointWitness
+
 end Solidity.H62.BytecodeSelection.BoolBindingFixture
