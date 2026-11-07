@@ -76,3 +76,32 @@ it is outside this core checkpoint tree and still needs dependency validation.
 Full checkpoint gates run after the core commit so their receipts identify the
 exact tested head. The original G40/G46 queues and inherited audit validation
 remain open; component success does not establish whole-lane completion.
+
+## Completed local checkpoint and master adoption
+
+The checkpoint on 6c5b823616dc0738216536f23edcf19bb7d9410b has finished.
+The library build passed in 22044 seconds; layers, affected-module compilation,
+trust, reachability and generated roots passed. The overall checkpoint exited
+one: README fragment ordering was stale; the unrelated audit-evm-compiler
+check_scope.py cited two missing synthetic paths; the central axiom inventory
+reported 91 unrecorded changes with zero axiom errors. These are retained
+failures, not a full gate pass. The earlier Node PATH failure is also retained.
+No unchanged heavy gate is rerun, and no RUNTIME_GATE_PASS is asserted.
+
+After the job released its writer lock, the assigned branch fast-forwarded to
+published master 7ab10c15f81e0f3fec56a34f7ab996a9b755e498. Regenerating library
+roots made no changes. These local gate results identify the earlier tested
+head; they are not relabelled as validation of the adopted master.
+
+The coordinator again authorized the three dedicated StorageInterface,
+Storage and StorageControls modules under AccessBridge. The authorization is
+recorded as an additive scope amendment; the missing authenticated full live
+manifest is not reconstructed. The signature proposal remains preserved in
+stash 300c05142654e541924567516f7e659c5e4444d7 and an exported bundle, awaiting
+pinned Mathlib cache restoration before elaboration and registration delivery.
+
+The four standalone census tests and four portable checksum regression tests
+pass. They do not authenticate the missing inherited archive. The broad Python
+discovery failure is retained because artifact-dependent acceptance scripts
+require their original inputs and CLI arguments. Historical missing bytes and
+performance receipts are not recreated or reassigned to the current head.

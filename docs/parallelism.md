@@ -50,7 +50,7 @@ The list is meant to be closed under imports. The architecture audit
 found 95 direct core-to-non-core boundary edges. Those exact edges are pinned in
 `scripts/core-import-baseline.json`, SHA256
 `d202b21ddde800b40237b9c4a95482c17b8d5ea8d2c78c1b42e4bad7344ac80b`
-(also recorded in `scripts/core-import-baseline.sha256`). Reproduce the audited
+(enforced by `scripts/core-import-closure.mjs`). Reproduce the audited
 bytes with `python3 -B scripts/h62/item5/statement-graph/audit_core_baseline.py`.
 They are existing debt, not proof that the core is already closed.
 

@@ -104,7 +104,13 @@ jobs:
       - name: Seed Lake cache from master
         run: bash scripts/ci/fetch-lake-cache.sh
       - name: Build
-        run: lake build Solidity SolidityExamples SoliditySlowExamples
+        run: lake build Solidity SolidityExamples
+      # H109/newest H: the slow library stays out of default checkpoints and
+      # retains a separate 600 s CI budget; regular/default budgets are unchanged.
+      - name: Build H109 slow examples
+        env:
+          LEAN_NUM_THREADS: '1'
+        run: timeout --kill-after=10s 600s lake build SoliditySlowExamples
       # Fetched modules stay in Lake's cache; tools that run Lean themselves
       # need them in .lake/build (scripts/ci/restore-lake-artifacts.py).
       - name: Restore fetched artifacts

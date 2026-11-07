@@ -3,11 +3,14 @@
 
 --inventory-only checks source, theorem and fixture coverage without trusting
 saved kernel receipts. Default also checks fresh-source-bound kernel evidence.
+SOLIDITY_LANE_EVIDENCE_ROOT may point to the private archive lane directory;
+source/fixture paths and every evidence acceptance condition stay unchanged.
 Run tests/precompile-agreement/verify.py in Bridge to regenerate that evidence.
 """
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -17,6 +20,7 @@ import shlex
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = ROOT / "Bridge/tests/precompile-agreement/inventory.json"
 TESTS = ROOT / "Bridge/tests/precompile-agreement"
+EVIDENCE_DIR = Path(os.environ.get("SOLIDITY_LANE_EVIDENCE_ROOT", str(ROOT))) / "Bridge/tests/precompile-agreement/evidence"
 PROOFS = ROOT / "Bridge/SolidityBridge/PrecompileAgreement"
 NAMESPACE = "SolidityBridge.PrecompileAgreement."
 COVERAGE = json.loads((TESTS / "required-coverage.json").read_text())
@@ -275,7 +279,7 @@ def evidence_errors(data, receipt):
     if set(receipt.get("logs", {})) != expected_logs:
         errors.append("kernel log coverage mismatch")
     for name, digest in receipt.get("logs", {}).items():
-        path = TESTS / "evidence" / name
+        path = EVIDENCE_DIR / name
         content = path.read_text() if path.is_file() else ""
         if hashlib.sha256(content.encode()).hexdigest() != digest:
             errors.append("stale kernel gate: " + name)
@@ -285,10 +289,10 @@ def evidence_errors(data, receipt):
         errors.append("axiom pin coverage mismatch")
     if any(not set(value) <= {"propext", "Classical.choice", "Quot.sound"} for value in pins.values()):
         errors.append("nonstandard axiom pin")
-    audit = (TESTS / "evidence/AllDeclarations-kernel.log").read_text()
+    audit = (EVIDENCE_DIR / "AllDeclarations-kernel.log").read_text()
     if not re.search(r"ALL_DECLARATIONS_PASS count=[1-9][0-9]*", audit):
         errors.append("all-declaration axiom audit missing")
-    build = (TESTS / "evidence/pinned-input-build.log").read_text()
+    build = (EVIDENCE_DIR / "pinned-input-build.log").read_text()
     errors.extend(input_build_errors(data, build))
     if receipt.get("input_build_sha256") != hashlib.sha256(build.encode()).hexdigest():
         errors.append("pinned input build receipt mismatch")
@@ -309,9 +313,9 @@ def main():
     if args.inventory_only:
         print("Mapping only; no saved kernel receipt or native/cryptographic equality claim")
         return 0
-    path = TESTS / "evidence/kernel-receipt.json"
+    path = EVIDENCE_DIR / "kernel-receipt.json"
     if not path.is_file():
-        print("FAIL: kernel receipt absent; run the serial verify.py gate")
+        print("FAIL: kernel receipt absent; set SOLIDITY_LANE_EVIDENCE_ROOT to the private lane archive or run the serial verify.py gate")
         return 1
     errors = evidence_errors(json.loads(INVENTORY.read_text()), json.loads(path.read_text()))
     if errors:

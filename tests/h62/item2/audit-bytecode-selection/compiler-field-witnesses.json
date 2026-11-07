@@ -1,0 +1,14 @@
+{
+  "compiler_v2_inhabited_joint_domain": {
+    "target": "Solidity.Backend.Selection.V2.CompilerPremise.inhabited",
+    "proof": "⟨Unit, (fun _ => ()), [], (fun _ initial final => final = initial), Solidity.Backend.Selection.V2.Controls.identityCompiler, True.intro⟩"
+  },
+  "compiler_v2_preserves_joint_domain": {
+    "target": "Solidity.Backend.Selection.V2.CompilerPremise.preserves",
+    "proof": "by\n  let caller : Solidity.Evm.Machine := { Solidity.Evm.Machine.init with stack := Solidity.Backend.Selection.irStack [11] }\n  exact ⟨Unit, (fun _ => ()), [], (fun _ initial final => final = initial), Solidity.Backend.Selection.V2.Controls.identityCompiler, 0, caller, caller, rfl, True.intro⟩"
+  },
+  "compiler_v1_preserves_joint_domain": {
+    "target": "Solidity.Backend.Selection.CompilerPremise.preserves",
+    "proof": "by\n  let producer : Solidity.Backend.Selection.CompilerPremise Unit (fun _ => ()) []\n      (fun _ initial final => final = initial) :=\n    ⟨Solidity.Backend.Selection.V2.Controls.identityCompiler.preserves⟩\n  let caller : Solidity.Evm.Machine := { Solidity.Evm.Machine.init with stack := Solidity.Backend.Selection.irStack [11] }\n  exact ⟨Unit, (fun _ => ()), [], (fun _ initial final => final = initial), producer, 0, caller, caller, rfl, True.intro⟩"
+  }
+}

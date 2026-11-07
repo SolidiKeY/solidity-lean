@@ -38,7 +38,7 @@ inventory. The refreshed source snapshot has **99 changes**, not the older
 approximate 4,500: zero policy errors were present when it was captured.
 `scripts/g07-unrecorded-baseline.json` is immutable, SHA256
 `4d98b1810853c54992feb064f1a7b028e23d8212fd2aad8b8b65e81895d7c701`
-(also in `scripts/g07-unrecorded-baseline.sha256`). Reproduce its exact bytes from
+(enforced by `scripts/axiom-pin-drift-baseline.mjs`). Reproduce its exact bytes from
 its pinned Git source with
 `python3 -B scripts/h62/item5/statement-graph/reproduce_pin_drift.py`.
 The active subset, `scripts/g07-unrecorded-allowlist.json`, may only shrink.
