@@ -7,15 +7,18 @@ rejected drafts, their findings, latest result/waits and scope-binding scripts.
 The drafts are historical inputs and are not executed. The older H82 handoff
 is superseded for intake. H127 transfers this runner, not the whole H55–H58 lane.
 
-H109 already has a non-default SoliditySlowExamples library containing fourteen
-modules: DecisionGaps and its eleven example importers, OpenLoops and RevertData.
-The current generated roots and statements stay unchanged. Every module is
+H109 already has a non-default SoliditySlowExamples library containing fifteen
+modules: DecisionGaps and its eleven example importers, OpenLoops, its explicit
+RowsNine child and RevertData. Roots are regenerated from the source list;
+existing theorem statements stay unchanged. Every module is
 re-elaborated serially; cache admission or a cached root build cannot replace
 these checks. CI and lane-end/full validation keep the slow root. Ordinary
 checkpoint selection keeps its current exclusion. The authenticated H116 intake limits 600 seconds to the cumulative original
 Derived17 replay in CI (300 seconds on VM/local). It grants no general H109
-600-second allowance. The separate H55 module-time maximum stays 300 seconds
-for each measurement invocation in either context. No proof heartbeat or other
+600-second allowance. The newest explicit human decision extends H116 to the entire H109 slow
+library in CI at600seconds, including the594second RowsNine member. The default/VM STOP and300second maximum
+remain. Non-slow module measurement budgets are unchanged. The slow-library CI
+deadline is not multiplied by its fifteen members. No proof heartbeat or other
 module budget changes. The earlier provisional general-600 plan is superseded.
 No unchanged stopped timing workload is authorized by this plan.
 
@@ -23,11 +26,15 @@ No unchanged stopped timing workload is authorized by this plan.
 
 The implementation must have separate controller, container worker and offline
 receipt verifier. A plan cannot execute arbitrary argv. The only execution
-recipe is the repository per-file gate with a reviewed Lake shim enforcing
-`-j1` and `LEAN_NUM_THREADS=1`, followed by the slow-library/root and existing
+recipe is the repository per-file gate with reviewed serial enforcement and
+`LEAN_NUM_THREADS=1`/Lean `-j1`, followed by the slow-library/root and existing
 required audit checks. Inspect the gate's current timeout before integration:
-keep the existing 300-second per-module maximum; do not substitute the unrelated
-Derived17 CI calibration.
+keep the existing300second default/VM module maximum and the explicit H109
+slow-CI600 allowance; do not generalize the unrelated Derived17 calibration.
+The actual pinned Lake5.0.0 help has no global-j1 option: a setup attempt with
+that option failed before diagnostics. Lean-thread flags alone do not establish
+Lake job serialism; the production runner must enforce external compiler
+serialization or an otherwise proven serial fixed recipe.
 Dependency preparation is a separately timed stage, never part of a fake
 cached-verdict pass. Direct re-elaboration of each selected file is required.
 
@@ -136,7 +143,7 @@ output-path collisions, truncated/missing logs and false cached success. They
 are containment/validator tests, never Lean measurement acceptance.
 
 Then run a bounded lightweight toolchain/KeySort prerequisite and one actual
-slow module, inspect its full receipt, and proceed serially through all fourteen
+slow module, inspect its full receipt, and proceed serially through all fifteen
 and the root/audits only if it passes. CI and lane-end hooks require an explicit
 integration patch and actual gate evidence; existing hooks alone do not prove
 the new runner ran. Matched before/after measurements need identical source,

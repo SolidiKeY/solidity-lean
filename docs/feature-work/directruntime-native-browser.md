@@ -959,3 +959,38 @@ unchanged300second module maximum. This is producer-reported data, not a fresh
 measurement here. No unchanged STOP rerun or H116600exception is permitted.
 Classification does not repair the proof cost, authorize deletion or certify
 producer source; central registration and real validation remain pending.
+
+
+### Authorized RowsNine integration on this branch
+
+The coordinator explicitly directed this lane to apply the exact generator
+addition, regenerate roots/maps, add the fragment and push, with atomic merge
+pre-gates handling the combined tree. The exact committed ee8 parent/RowsNine
+pair is adopted because this checkout did not yet contain the child. The
+existing theorem statement/name remains; the producer proof uses chunk64.
+No heartbeat or premise changes. The generator and runner inventory now list
+fifteen slow modules. register.sh and fragments.sh generated their outputs;
+the map fragment corrects the old parent description and names the child.
+
+The coordinator also explicitly accepts the reported594second RowsNine member
+in slow CI at600seconds. This scoped instruction supersedes the earlier claim
+that no RowsNine CI allowance existed. It does not raise the VM/default300
+budget or grant other modules a new allowance. The default STOP stays open;
+no unchanged RowsNine VM timing/proof attempt was made. Actual CI/full proof
+and axiom results are still required; policy acceptance is not execution.
+
+Bounded parent diagnostics initially failed because the new shim used a global
+Lake-j1 option unsupported by pinned Lake5.0.0. The failed receipt is retained.
+The supported repository shim recovered zero-error parent MCP diagnostics and
+KeySort377/131/131, within12GiB/no-swap/oneCPU and the reserve. The production
+H127 runner still needs real serial enforcement; invalid flags are not evidence
+of concurrency control. GitHub CLI authentication was unavailable, so remote
+CI dispatch is not claimed from this VM. The requested non-forced lane push
+and all exact artifacts are recorded separately from pending CI validation.
+
+
+Newest human decision: the H109 slow library as a whole now receives600seconds
+in CI, extending H116 beyond Derived17. This supersedes the interim RowsNine-only
+CI exception. All fifteen slow members have that CI planning budget; VM/default
+checkpoint and non-slow module budgets remain300. Reported594seconds is accepted
+in that CI category; fresh proof/axiom/CI execution is still a separate gate.

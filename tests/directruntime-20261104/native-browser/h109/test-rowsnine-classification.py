@@ -26,7 +26,9 @@ class Classification(unittest.TestCase):
     def test_current_leak_and_exact_central_proposal(self):
         source = (ROOT / "scripts/coord-tools/register.sh").read_text()
         old = next(line for line in source.splitlines() if line.startswith("SLOW_EXAMPLES = "))
-        baseline = ast.literal_eval(old.split("=", 1)[1])
+        registered = ast.literal_eval(old.split("=", 1)[1])
+        self.assertIn(CHILD, registered)
+        baseline = [module for module in registered if module != CHILD]
         proposal = json.loads((AREA / "rowsnine-registration.json").read_text())
         self.assertEqual(set(proposal["proposedSlowMembers"]), set(baseline) | {CHILD})
         self.assertEqual(len(proposal["proposedSlowMembers"]), 15)
@@ -40,14 +42,14 @@ class Classification(unittest.TestCase):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("-- source-tree metadata fixture; never elaborated\n")
             script = root / "register.sh"
-            script.write_text(source)
+            # Reproduce the old exact-14 generator without changing live code.
+            script.write_text(source.replace(old, "SLOW_EXAMPLES = " + repr(baseline), 1))
             subprocess.run(["bash", str(script)], cwd=root, check=True)
             self.assertIn(CHILD, imports(root / "SolidityExamples.lean"))
             self.assertNotIn(CHILD, imports(root / "SoliditySlowExamples.lean"))
             self.assertNotIn(PARENT, imports(root / "SolidityExamples.lean"))
             # Apply only the proposed exact-list addition, in this fixture.
-            new = "SLOW_EXAMPLES = " + repr(baseline + [CHILD])
-            script.write_text(source.replace(old, new, 1))
+            script.write_text(source)
             subprocess.run(["bash", str(script)], cwd=root, check=True)
             slow = imports(root / "SoliditySlowExamples.lean")
             default = imports(root / "SolidityExamples.lean")
@@ -64,6 +66,9 @@ class Classification(unittest.TestCase):
         gate = (ROOT / "scripts/coord-tools/gate.sh").read_text()
         self.assertIn('run_gate run-lean bash run-lean.sh', gate)
         self.assertIn('out.difference_update(slow)', gate)
+        ci = (ROOT / ".github/workflows/lean.yml").read_text()
+        self.assertIn("run: lake build Solidity SolidityExamples\n", ci)
+        self.assertIn("run: timeout --kill-after=10s 600s lake build SoliditySlowExamples", ci)
 
 
 if __name__ == "__main__":
