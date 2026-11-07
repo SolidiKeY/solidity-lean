@@ -1,7 +1,0 @@
-{
-  "copied_only_missing_files": 3338,
-  "source": "/workspace/solidity-lean/.lake/build",
-  "destination": "/workspace/solidity-lean/tests/h28-sol/solkey-ports/runtime/build",
-  "existing_clean_artifacts_preserved": true,
-  "validation": "normal Lake build trace checks; no --old/--no-build bypass"
-}

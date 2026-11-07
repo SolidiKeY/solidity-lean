@@ -1,4 +1,0 @@
-Pinned modality fixture generated through existing compiler normalization.
-PASS six source/AST identities, three byte-identical body pairs, exact compiler binary and observed modal tags; no source/native proof claim.
-{"childMaxRssKiB": 169496, "command": ["bash", "-c", "set -e; before=$(sha256sum tests/directruntime-20261104/shared-translator/ModalityControls.ast.json); node tests/directruntime-20261104/shared-translator/modality-fixture.mjs; after=$(sha256sum tests/directruntime-20261104/shared-translator/ModalityControls.ast.json); test \"$before\" = \"$after\"; python3 tests/directruntime-20261104/shared-translator/preflight-modality.py"], "exit": 0, "scopeMemoryPeakBytes": "157827072", "wallSeconds": 2.149609431013232}
-{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 6112866304, "outerWallSeconds": 8.292894124009763}

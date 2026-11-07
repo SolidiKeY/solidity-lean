@@ -1,2 +1,0 @@
-/workspace/.setup/tools/lean-4.24.0-linux/bin/lean --server -Dserver.reportDelayMs=0 -j1 -M11264 --tstack=131072
-/workspace/.setup/tools/lean-4.24.0-linux/bin/lean --worker -Dserver.reportDelayMs=0 -j1 -M11264 -s131072 file:///workspace/solidity-lean/Bridge/tests/precompile-agreement/AllDeclarations.lean
