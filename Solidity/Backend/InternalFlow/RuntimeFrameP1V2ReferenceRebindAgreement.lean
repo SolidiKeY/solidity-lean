@@ -2,13 +2,14 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CallProducerRefStructRebindControls
 
 /-! Regression: whole-struct return rebinding must return the old graph, not
-the newly allocated default graph. The initial nested graph is constructed by
-an actual checked allocation prefix; the call is selected by the existing
-compiler. Typed body/selection aliases avoid eager compiler conversion during theorem
-application. Generic V2 agreement covers every index, while actual graph snapshots
-and missing-export/default-root controls distinguish the old aliases. Separate direct-failure and positive target-snapshot importing controls are
-in RuntimeFrameP1V2ReferenceRebindExecutionControls. Neither module claims
-full session adequacy. -/
+its newly allocated default. The checked seed constructs the initial graph;
+the selected reference plan retains caller restoration and old aliases.
+Typed aliases bound conversion in the all-index V2 agreement proof. Source-only
+observations remain in RuntimeFrameV3CallProducerRefStructRebindControls;
+no duplicate forwarding declarations are needed here. Missing-export refusal
+is operational. Separate direct-failure and positive target-snapshot controls
+are in RuntimeFrameP1V2ReferenceRebindExecutionControls. No full session
+adequacy is claimed. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.P1V2ReferenceRebindAgreement
 open Evm Evm.Memory V3CallProducerRef.StructDefault.RebindControls
 
@@ -35,12 +36,6 @@ theorem all_indices (n : Fin W) (journal : List CallRec) (buffer : List UInt8) :
     ⟨1,64,caller n,bases n,{base := machine n,calls := journal,returndata := buffer},20⟩
     (entered n))
 
-/-- Both returned and old caller roots are the same old object (id3); three
-new default objects still exist and are accounted for in the reached heap. -/
-theorem old_alias_source : sourceObservation (wmod 0) = some [3,3,2,1,0,7,0,1] :=
-  source_observation
-
-
 theorem missing_export (journal : List CallRec) (buffer : List UInt8) :
     targetObservation (runV2 (lift missingExport) (input (wmod 0) journal buffer).machine).forget ≠
       some [77,140,128,0,133,133,20,99,1,0,0,0,130,131,0,0,0,135,136,0,0] := by
@@ -48,10 +43,5 @@ theorem missing_export (journal : List CallRec) (buffer : List UInt8) :
     ((congrArg targetObservation (forget_run_lift missingExport
       {base := machine (wmod 0),calls := journal,returndata := buffer})).symm.trans claimed)
     V3CallProducerRef.StructDefault.RebindControls.missing_export_refused)
-
-/-- Returning the fresh default instead would break the actual old alias. -/
-theorem wrong_root : sourceObservation (wmod 0) ≠ some [6,3,5,4,0,7,0,1] :=
-  default_root_refused
-
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.P1V2ReferenceRebindAgreement
