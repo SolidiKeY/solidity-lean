@@ -1,0 +1,70 @@
+{
+  "status": "EXISTING_SOURCE_CALL_COMPONENT_EXTENDED_WITH_FAILURES",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceCallableJoint.lean": "f6bea4b6f3e1abe1257932df1df899452da56a6b23b08c5ff8932757aaa04fb0",
+    "Solidity/Lowering/V08/SourceCallable.lean": "4b76b7f19609592d7eb816df9d3e6df27a151624996d40e2d641c1e044580a6a",
+    "Solidity/Lowering/V08/SourceCallableControls.lean": "f1c63dc4e4b491bfe5c4c0f53652f7c779fe41b3e42085215a2b2ff9558094df"
+  },
+  "original_targets": [
+    "Solidity.Lowering.V08.SourceCallable.body_failure",
+    "Solidity.Lowering.V08.SourceCallable.expression_failure",
+    "Solidity.Lowering.V08.SourceCallable.argument_failure"
+  ],
+  "joint_premises": "Actual selected failing return body, exact frame fit, actual initialization and runMods failure; actual evaluated arguments and propagated callee failure for expression; actual failing arguments for argument_failure.",
+  "same_model": "Both expression variants use failingGlobal pipeline, callerFrame, horizon26, same locals/populated state and declaration signature. Only argument syntax differs.",
+  "full_results": "Body runs to arithmetic panic with afterLiteral heap; division-by-zero in arguments prevents body entry and retains populated heap. Both caller locals become false. No automatic rollback assumed.",
+  "negative_control": "failure_boundaries_differ compares complete actual runs; heap.next2 versus1 proves inequality despite matching caller-local update.",
+  "new_joint_model_families": 0,
+  "additional_original_target_applications": 3,
+  "new_body_fixtures": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceCallableJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 2.749,
+    "peak_sampled_aggregate_rss": 753491968,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axiom_union": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "Existing manually supplied Source program/body reused; no canonical origin/admission/target body/frame producer.",
+    "No arbitrary-horizon/all-outcome/session completeness or H68 certificate.",
+    "Error occurs during real return-expression evaluation, not an assumed impossible retVals extraction failure.",
+    "Expanded audit coverage is not a matched proof-refactor timing comparison; no prior STOP released."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-call-failure-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "b201ce8da825f2745d4e9fcfcabf1703911dd2c9de7c97c9165c3782c3e5f591"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-call-failure-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-call-failure-joint-20261107/check/results.json",
+      "bytes": 399,
+      "sha256": "ae2ccbd44b1e3aa79dad869a5baabad22f53fc9635a03828cf6deef5b1be80cf"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-call-failure-joint-20261107/check/gates/1.log",
+      "bytes": 28208,
+      "sha256": "a09e072c784cea7a02d417d9077499619b189ec608a60e82f486521c441203e5"
+    }
+  ],
+  "reviews": "Independent read-only finder/skeptic: no findings on same-program failure premises, exact full outcomes and distinct reached heaps. No reviewer scripts/tests/Lean/server."
+}
