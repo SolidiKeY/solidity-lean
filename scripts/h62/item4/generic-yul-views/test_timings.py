@@ -32,6 +32,23 @@ class TimingControls(unittest.TestCase):
         self.assertEqual(r["status"],"TIMING_STOP")
         self.assertTrue(r["rows"]["aggregate"]["stop"])
         self.assertFalse(r["rows"]["module:aggregate"]["stop"])
+    def test_serial_metadata_refuses_overrides_and_wrong_types(self):
+        # Guard recorded serial acceptance against conflicting CLI options and
+        # Python's bool/int equality; these records do not establish a run.
+        for args in (["-j1", "-j8"], ["-j1", "-j", "8"],
+                     ["-j1", "--threads=8"], ["-j1", "--threads", "8"],
+                     ["-j1", "-j1"], "-j1", ["-j1", 8], []):
+            with self.subTest(args=args):
+                a = self.record(); a["conditions"]["lean_args"] = args
+                with self.assertRaises(ValueError): compare(a, a)
+        for key in ("lean_threads", "heavy_jobs"):
+            for value in (True, 1.0, "1", 2, None):
+                with self.subTest(key=key, value=value):
+                    a = self.record(); a["conditions"][key] = value
+                    with self.assertRaises(ValueError): compare(a, a)
+    def test_serial_metadata_keeps_non_thread_arguments(self):
+        a = self.record(); a["conditions"]["lean_args"] += ["--tstack=131072"]
+        self.assertEqual(compare(a,a)["status"], "RECORDED_TIMING_ACCEPTANCE_PASS")
     def test_nonfinite_timing_refused(self):
         a=self.record();b=copy.deepcopy(a);b["trials"][0]["wall_seconds"]="NaN"
         with self.assertRaises(ValueError):compare(a,b)
