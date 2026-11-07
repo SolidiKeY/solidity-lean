@@ -6,6 +6,30 @@ repetition. Independent Source evaluation and emitted loops are not supplied. -/
 namespace Solidity.Backend.StorageOps.RuntimeCopyComposition
 open TypeGraph Solidity.Storage Solidity.Storage.Representation Solidity.Storage.Representation.Graph NumericCopyCommutation
 
+/-- The next actual runtime-generated footprint inherits this run's exact
+region evidence. OLD coverage suffices; no new intermediate coverage oracle,
+length bound or global hash premise is assumed. Exact self aliases are retained. -/
+theorem next_footprint_run {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
+    {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}
+    (run : FiniteRun N L R hash P locations) (dst src : Solidity.Storage.Loc) (initial : WordStore)
+    (covered : ∀ l ∈ writeSet N hash dst src initial ++ (readSet N hash dst src initial).tail,
+      l ∈ locations)
+    (safe : dst = src ∨ ∀ w ∈ writeSet N hash dst src initial,
+      ∀ r ∈ (readSet N hash dst src initial).tail, w ≠ r) :
+    FiniteRun N L R hash P
+      (writeSet N hash dst src (NumericTraversal.copy N hash dst src initial) ++
+        (readSet N hash dst src (NumericTraversal.copy N hash dst src initial)).tail) := by
+  apply run.restrict
+  rcases safe with same | separate
+  · subst dst
+    simpa only [NumericCopyCommutation.copy_self] using covered
+  · have facts := RuntimeCopyRepeat.headers_and_footprint run dst src initial covered separate
+    intro location member
+    rcases List.mem_append.mp member with written | read
+    · exact covered location (List.mem_append.mpr (Or.inl (facts.2.2.2 location written)))
+    · rw [facts.2.2.1] at read
+      exact covered location (List.mem_append.mpr (Or.inr read))
+
 /-- BOTH actual runtime-copy transports and whole-store repetition follow from
 OLD evidence. No intermediate owner/transport/header stability/coverage oracle.
 All symbolic locations and all numeric words are covered by the equalities. -/
@@ -104,4 +128,6 @@ theorem complete {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
 
 /-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms complete
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.next_footprint_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms next_footprint_run
 end Solidity.Backend.StorageOps.RuntimeCopyComposition

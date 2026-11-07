@@ -168,6 +168,18 @@ private theorem sourceCovered : ∀ i<source.length.val,s i∈locations := by
  have cases : i=0 ∨ i=1 := by change i<2 at inside; omega
  rcases cases with rfl|rfl <;> decide
 
+/-- Regression: the actual shrinking copy generates a smaller next footprint
+whose finite-run evidence follows from OLD coverage, without a new oracle. -/
+theorem next_generated_run :
+    FiniteRun 128 16 2 hash [.data 0, .data 1]
+      (writeSet 128 hash dst src num1 ++ (readSet 128 hash dst src num1).tail) :=
+  RuntimeCopyComposition.next_footprint_run run dst src initial covered safe
+
+/-- Regression: stale-tail writes do not recur in the next runtime-generated footprint. -/
+theorem next_generated_footprint :
+    writeSet 128 hash dst src num1 ++ (readSet 128 hash dst src num1).tail =
+      [dst, d 0, d 1] ++ [src, s 0, s 1] := rfl
+
 /-- OLD inputs inhabit every premise; BOTH current-input transports and whole
 Store equalities are conclusions, not assumed middle certificates. -/
 theorem certificate : Transport 128 hash locations sym1 num1 ∧ Transport 128 hash locations sym2 num2 ∧ sym2=sym1 ∧ num2=num1 :=
@@ -314,4 +326,8 @@ theorem bad_rejected :
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms bad_rejected
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.next_generated_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms next_generated_run
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.next_generated_footprint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms next_generated_footprint
 end Solidity.Backend.StorageOps.RuntimeCopyCompositionControls

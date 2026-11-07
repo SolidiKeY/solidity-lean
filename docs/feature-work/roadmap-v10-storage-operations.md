@@ -1980,3 +1980,30 @@ or edited. Requested disk cleanup restored over 2 GB free using regenerable
 build output only. No whole-Backfill or actual Source/P8 adequacy claim. Original
 and consolidated queues, 3209 uncovered rows, strict pins/docs and full gates
 remain open. External library-try/Y04/separate 4.35 waits remain distinct.
+
+### C280: Backfill B next runtime-generated footprint certificate
+
+RuntimeCopyComposition.next_footprint_run derives FiniteRun for the NEXT actual
+copy write/read footprint from the original run, OLD generated coverage and
+unchanged self-or-disjoint safety. The separated branch reuses the derived
+unchanged source reads and write subset; the self branch uses actual copy
+identity. The original hash parameters, complete preimages and regions are
+retained through restrict. No intermediate coverage oracle, length cap, global
+hash injectivity, liveness filter or new cryptographic premise is introduced.
+Existing definitions, statements, Source interfaces and budgets are unchanged.
+
+Existing shrinking-copy controls now derive the next run and pin its shorter
+footprint; stale-tail writes do not recur. Existing self-alias, unsafe overlap,
+raw/default and live/retained controls remain unchanged. Three exact guards use
+the standard trio. Initial adjacent docstrings failed syntax; original comment
+attachment was restored, with raw failure preserved. Final bounded controls
+pass in 4.26 s, sampled peak RSS 718344192 bytes, no resource stop. Cache-fetched
+outputs were restored before direct Lean. No matched speed comparison or prior
+STOP release. Independent read-only finder/skeptic confirmed no findings and
+ran no Lean/server/builds or edits.
+
+Published private-evidence policy was adopted before this item; raw receipts
+and bundles remain off Git. Original/consolidated queues, actual emitted-access
+alignment, H121b Source/P8 admission/origin/session/lifecycle, 3209 uncovered
+rows, strict pins/docs and full gates remain open. External library-try/Y04/
+separate 4.35 waits remain distinct. No whole-Backfill completion is claimed.
