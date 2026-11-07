@@ -20084,7 +20084,7 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.signed_refusal": [
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.signed_acceptance": [
   "Quot.sound",
   "propext"
  ],
@@ -28900,6 +28900,10 @@
  ],
  "Solidity/Backend/PrimitivePackets/BitNot/Target.lean:Solidity.Backend.PrimitivePackets.BitNot.value_success": [
   "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Bitwise/Selected.lean:Solidity.Backend.PrimitivePackets.Bitwise.signed_accepted": [
   "Quot.sound",
   "propext"
  ],

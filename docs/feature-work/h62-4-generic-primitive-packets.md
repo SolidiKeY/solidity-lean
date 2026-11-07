@@ -1195,3 +1195,7 @@ tree; this authorized content adoption supplies its exact accepted files.
 Full V12 P1 session/profile/origin and G42.04 adequacy remain separate owned
 work, with actual Source H24/library lifecycle, RO physical-frame and decoder
 producer waits retained. Original global/fidelity/performance STOPs remain open.
+
+### Dated signed-bitwise transition
+
+On 2026-11-06, H87 authorized signed bitwise `&`, `|`, `^`, aliases and storage compound assignments; H96 covered storage aliases through array indices. H126 (2026-11-07) confirms that authority and accepts the widening as delivered. The former `signed_refused` / `signed_refusal` results describe the historical unsigned-only implementation; `signed_accepted` / `signed_acceptance` now guard the authorized implementation. Historical refusal accounting above remains history, not a current refusal requirement. The coordinator authorized local pin reconciliation for these names without new axioms or allowance widening.

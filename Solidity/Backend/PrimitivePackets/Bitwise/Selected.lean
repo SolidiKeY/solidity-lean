@@ -100,4 +100,8 @@ theorem evalE_selected {E : Source.Env} (G : Source.Glob E) (F : Source.Fr)
   ⟨evalE_operand G F n w op hop x y hx hy s,
     (source_selected (D := E.layout) C F.checked base op hop w x y hx hy m left right).2⟩
 
+/-- info: 'Solidity.Backend.PrimitivePackets.Bitwise.signed_accepted' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms signed_accepted
+
 end Solidity.Backend.PrimitivePackets.Bitwise
