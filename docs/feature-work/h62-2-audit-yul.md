@@ -228,3 +228,11 @@ all final gates. The current isolated resolver supports core and quoted audit
 module paths; Bridge package-root/dependency handling still requires a scoped
 tooling extension before Bridge can be claimed covered. Keep all producer files
 read-only and coordinate any exact-file change through the current coordinator.
+
+### Y04 Source-to-graph path identity audit
+
+`tests/h62/item2/audit-yul/SourceGraphEndpoints.lean` instantiates the public StorageOps path endpoint for arbitrary finite word-key chains in the existing checked persistent nested-mapping family. The graph key encoding and recursive location equality are proved; the slot image is derived from those laws, rather than assumed. A joint witness constructs a two-key declaration through the existing intrinsic Source syntax and derives its ordinary Source path. A negative control rejects certifying that nested path as the untouched root slot. This is symbolic path/slot metadata correspondence at the existing root0 placement, not Source liveness, graph-value adequacy, numeric-store agreement, compiler selection or ReachedEndpoint. No new witness is counted against the frozen theorem census.
+
+The attempted production import raised NestedMappingLayout checking from median 0.40 seconds to 0.83 seconds. The performance STOP was honored: the exact production source was restored, with a restoration check of 0.40 seconds; the slowed version was not rerun unchanged. The checked prototype is isolated in the authorized additive audit scope. Production integration needs an isolated module boundary, requested through coordinator question VY2-Y04-MODULE. No production producer readiness or full runtime pass is claimed. Independent read-only finder/skeptic found no defects; kernel, axiom exports, raw failed attempts and timing evidence are retained at `/workspace/vy2-evidence/y04-path-endpoint/`.
+
+The current NestedMappingControls execution fixture fails against the available cache at its migrated FailureExecution cursor field. That failed check is retained; Source/Horizon is not rebuilt unchanged. The path audit avoids that execution fixture, so no checked execution adequacy is inferred from stale fixture artifacts.
