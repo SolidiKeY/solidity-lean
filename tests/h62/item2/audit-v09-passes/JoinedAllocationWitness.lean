@@ -12,6 +12,7 @@ namespace Solidity.Backend.Passes.AuditJoinedAllocation
 open Evm Evm.Memory Evm.Compiler
 open Solidity.Backend.Passes
 
+/-- Legacy prefix/cost/constructor tuple; whole admission is checked below. -/
 theorem joint :
     (Compilation.memory AllocatingControls.allocationStage).Input 1 6
       AllocatingControls.initialBase (State.init Controls.Fixture.C)
@@ -21,6 +22,29 @@ theorem joint :
     (∃ machine : Machine, machine = AllocatingControls.initialMachine) :=
   ⟨AllocatingControls.prefix_input, MemoryJoinCost.Controls.total_cost,
     AllocatingControls.initialMachine, rfl⟩
+
+/-- Actual public whole selection, full Input, cost and successful source run
+share one fixed concrete tuple; constructor self-equality supplies no admission. -/
+theorem joint_admission :
+    Memory.compileProg 1 (Frag.init [])
+      (ReachabilityControls.populatedBuilder.join MemoryJoinCost.Controls.appendAllocation) =
+      some MemoryJoinedAllocation.Controls.wholeCode ∧
+    (Compilation.memory MemoryJoinedAllocation.Controls.wholeCode).Input 1 6
+      AllocatingControls.initialBase (State.init Controls.Fixture.C) AllocatingControls.initialMachine ∧
+    Memory.allocationCostProg (ReachabilityControls.populatedBuilder.join
+      MemoryJoinCost.Controls.appendAllocation) (State.init Controls.Fixture.C) = 9 ∧
+    (∃ out : Solidity.Out Controls.Fixture.C (State.init Controls.Fixture.C).H
+      (.mem (.array (.prim .uint)) :: Controls.Fixture.Γ),
+      (ReachabilityControls.populatedBuilder.join MemoryJoinCost.Controls.appendAllocation).run
+        (State.init Controls.Fixture.C) = .ok out) :=
+  ⟨MemoryJoinedAllocation.Controls.whole_public,ReturnedMemoryCapture.Controls.whole_input,
+    MemoryJoinCost.Controls.total_cost,_,MemoryJoinedAllocation.joined_source⟩
+
+/-- info: 'Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission
 
 -- Retain the original jointly selected middle state/map and every-tail suffix input.
 def reached_joint := MemoryJoinCost.Controls.reached_budget
