@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/unwind-controls-roles-v117/semantic-roles-reviewed.json",
-    "bytes": 3997676,
-    "sha256": "7a78491c824bb2cdc9a86793a9cdbe4534a4cb7a390626c1b7d0c4c660478f22"
+    "path": "/workspace/h62-successor-bulk/slice-controls-roles-v118/semantic-roles-reviewed.json",
+    "bytes": 4016859,
+    "sha256": "37a32b46486943286e393810b43e59a3a9142aa17d9868afc9b3c73aedcb33a1"
   }
 }
