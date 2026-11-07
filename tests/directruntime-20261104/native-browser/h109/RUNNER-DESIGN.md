@@ -113,12 +113,12 @@ detect disagreement/suspension. Start timing before the measured command;
 enforce the 300-second module-measurement deadline independently of exits.
 Each dependency preparation/check invocation has its own identified stage;
 separate stage times may not be combined into a fictitious within-budget check.
-Only the existing Derived17 replay receives H116's cumulative CI600/local300
-policy, with its original workload denominator and CI provenance.
-Source/toolchain preparation before that invocation is recorded separately and
-runs no Lean. The exact delivered H116 scope above supersedes the earlier
-provisional interpretation. Report setup,
-dependency preparation, check and cleanup separately. Record exact command,
+VM/default invocations retain the 300-second policy. H134 permits 600 seconds
+for the whole H109 slow-library CI invocation; Derived17 retains its separate
+H116 cumulative CI600/local300 policy. Context and workload denominator must be
+authenticated; neither allowance grants another module or this VM 600 seconds.
+Source/toolchain preparation is recorded separately and runs no Lean. Report
+setup, dependency preparation, check and cleanup separately. Record exact command,
 exit/signal, compiler provenance, per-file logs and hashes; post-verify source,
 toolchain and input identities before sealing an exclusive new output path.
 Advance to the next module only after the current receipt is sealed.
@@ -177,3 +177,39 @@ not provide sealed snapshots, image/cache authentication, complete lifecycle
 cleanup or whole-job RSS. The controller, worker, offline verifier and original
 five-module A/B remain open. H134 retains 600 seconds for slow-library CI,
 300 seconds for VM/default checks and the default RowsNine STOP.
+
+## Durable intent and precise clock components
+
+`lifecycle-journal.py` now provides one-time lease provisioning, descriptor-relative
+private storage, an external locator pinning both directory and lease inodes plus
+a random lease-content hash, and a nonblocking controller lease. Reservation and
+intent publication use file/directory fsync with atomic replacement. Canonical
+event records bind nonce, plan/image identifier syntax, boot identity and ordered
+monotonic observations. Inherited-fork API leases and replaced/corrupt stores are
+refused. Sixteen tests include real process death and controller contention.
+
+Only an abort before any published create intent can release this component's
+barrier, after its receipt is durable. Post-create states remain blocked, even
+when a caller supplies apparent drain observations. This is not authenticated
+Docker cleanup or hostile-host protection. The controller still must persist
+the returned locator outside the store before creation, exclude other writers,
+close journal descriptors before worker execution and integrate a real drain
+verifier. No production worker is exposed or run by these components.
+
+`measurement-clock.py` brackets BOOTTIME with MONOTONIC nanosecond reads and
+compares conservative elapsed bounds against an already approved budget.
+Deadline equality and overruns are ineligible regardless of a process exit.
+Observable disagreement requires stopping and reports no remaining time.
+Consistency does not prove an unsuspended host. Five tests and a read-only
+actual Linux clock observation cover this arithmetic. It grants neither a
+budget nor CI status, and does not enforce a running process deadline itself.
+
+Both components passed independent read-only finder/skeptic source reviews.
+The first review found a replaceable lease inode; one-time provisioning and
+external inode/content pins fix it. The initial test-child quoting failure is
+retained separately from the recovered controls. There are no new Lean files,
+theorem/axiom changes, proof-budget changes or slow-proof runs. R1/R3/R5/R6
+end-to-end obligations remain open: fixed controller/worker recipe, sealed source
+and cache/image inputs, actual per-stage resources, deadline enforcement, whole
+job measurement, verified cleanup, offline verification and the five-module A/B.
+H134's slow-library CI allowance remains 600 seconds; VM/default remains 300.

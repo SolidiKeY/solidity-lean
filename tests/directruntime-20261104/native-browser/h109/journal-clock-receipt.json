@@ -1,0 +1,81 @@
+{
+  "guardedRegression": "H127 controller death must not lose create intent or allow a speculative next worker; rounded/zero-exit timing must not mask deadline failure.",
+  "scope": "Durable journal and clock arithmetic primitives; not the full H127 authenticated runner.",
+  "baseObserved": "7ab10c15f81e0f3fec56a34f7ab996a9b755e498",
+  "source": [
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/lifecycle-journal.py",
+      "sha256": "405eac32c20966408d4f4577b04d64cf0643b9b7ae1c4cbf1680654db3189483"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/test-lifecycle-journal.py",
+      "sha256": "0d91efa91be95b856a42682b2c69d73ffee5855fffac09fbe2f044977f4db42d"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/measurement-clock.py",
+      "sha256": "a48db1974a3c2b02f1fe8b34bdb86642f5c13656715ec8b8e739cd56358c4c86"
+    },
+    {
+      "path": "tests/directruntime-20261104/native-browser/h109/test-measurement-clock.py",
+      "sha256": "a784c862bc5232d3efc4c3c38c60e2d53ec16a77b929da55ec9c670ffda027cc"
+    }
+  ],
+  "gates": [
+    {
+      "command": "TMPDIR=/workspace/scratch PYTHONDONTWRITEBYTECODE=1 python3 tests/directruntime-20261104/native-browser/h109/test-lifecycle-journal.py",
+      "status": "pass",
+      "decisiveOutput": "16 methods pass; real SIGKILL/lease-contention/atomic-publication/privateFS/fork/boot/clock/IOfailure controls.",
+      "output": "/workspace/scratch/h127-lifecycle/exact-source-journal-tests.log"
+    },
+    {
+      "command": "TMPDIR=/workspace/scratch PYTHONDONTWRITEBYTECODE=1 python3 tests/directruntime-20261104/native-browser/h109/test-measurement-clock.py",
+      "status": "pass",
+      "decisiveOutput": "5 methods pass; nsbounds, exactdeadline/overrun, observableclockdisagreement, malformed/missing/boot/reversed data.",
+      "output": "/workspace/scratch/h127-lifecycle/exact-source-clock-tests.log"
+    },
+    {
+      "command": "ast.parse four new Python files; git diff --check",
+      "status": "pass",
+      "decisiveOutput": "Syntax/whitespace pass; no new Lean files or theorem/axiom/budget changes."
+    },
+    {
+      "command": "./scripts/check-doc-paths.sh",
+      "status": "pass",
+      "decisiveOutput": "Every backticked Lean reference resolves;143 ambiguous references remain, none unique.",
+      "output": "/workspace/scratch/h127-lifecycle/doc-paths.log"
+    }
+  ],
+  "failuresRetained": "Initial child-script quoting setup failure:4 of 12 methods failed; repaired 12 pass. Finder lease-replacement blocker fixed byone-timeprovision plus external inode/content pins; final 16 pass. All earlier records retained.",
+  "actualObservation": {
+    "path": "/workspace/scratch/h127-lifecycle/actual-clock-observation.json",
+    "sha256": "6781a5f2a337bc2810ed865a18af1dd2f7b76c594c2ca000e604e633eae2b4a3",
+    "boundary": "Linux clock reads only; no measured worker or Docker operation."
+  },
+  "reviews": {
+    "finder": "No new blocking static finding. Provisioned external directory/lease inode and random-content pins detect replacement/in-place corruption. Clock bounds expire at equality and reject observable disagreement. No budget or execution/cleanup verdict. No tests/Lean/Docker executed by reviewer.",
+    "skeptic": "Scoped static PASS. Private cooperative-host/external durable locator assumptions remain; hash chaining is not hostile-host authentication. Clock consistency cannot prove an unsuspended host. No worker/controller enforcement, cleanup/RSS/CI authorization established. No tests/Lean/Docker/build/writes."
+  },
+  "artifacts": [
+    {
+      "path": "/workspace/solidity-lean/.lake/h127-journal-clock-evidence.tar.gz",
+      "sha256": "1627593f1458bebf8c7d3387fac635c0f6135e45d8216c9e4e7710af0096ff8d",
+      "bytes": 2335,
+      "members": 12,
+      "delivery": "VM-retained/coordinator-pending pull"
+    },
+    {
+      "path": "/workspace/scratch/h127-lifecycle/doc-paths.log",
+      "sha256": "568624ba81161885e10e17fa2a76065fc863f5d0c858eef1d40fe463cb08ccb5",
+      "bytes": 14748,
+      "delivery": "VM-retained/coordinator-pending pull"
+    }
+  ],
+  "limitations": [
+    "No Docker creation/containment/cleanup executed; no post-create barrier release implemented.",
+    "External locator durability and exclusion of other writers/worker access remain controller obligations.",
+    "No sealed source/cache/image authentication, resource/kernel collector or deadline enforcement on a running worker.",
+    "No complete RSS/measurement/offline verifier, five-module A/B or pin-relocation window.",
+    "H134: 600 s slow-library CI versus 300 s VM/default unchanged; RowsNine and all runtime/performance STOPs retained.",
+    "VX1 owns OpenLoops proof files; no push pending owner-first integration."
+  ]
+}
