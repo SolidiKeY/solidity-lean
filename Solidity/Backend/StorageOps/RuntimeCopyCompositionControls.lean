@@ -193,6 +193,20 @@ theorem all_repeated_footprints (count : Nat) :
       (writeSet 128 hash dst src after ++ (readSet 128 hash dst src after).tail) :=
   RuntimeCopyComposition.repeated_footprint_run run dst src initial covered safe count
 
+/-- Regression: every positive repetition preserves the whole symbolic store,
+including older retained cells beyond the new live length. -/
+theorem all_repeated_symbolic_stores (count : Nat) :
+    Nat.repeat (CopyTransport.symbolicCopy dst src) (count + 1) captured = sym1 :=
+  RuntimeCopyComposition.symbolic_positive_repetitions run dst src captured initial before covered safe count
+
+/-- Regression: original raw/default and retained observation locations remain
+transported at the SAME count on both sides, not just within the smaller next footprint. -/
+theorem all_repeated_transport (count : Nat) :
+    Transport 128 hash locations
+      (Nat.repeat (CopyTransport.symbolicCopy dst src) (count + 1) captured)
+      (Nat.repeat (NumericTraversal.copy 128 hash dst src) (count + 1) initial) :=
+  RuntimeCopyComposition.repeated_transport run dst src captured initial before covered safe count
+
 /-- OLD inputs inhabit every premise; BOTH current-input transports and whole
 Store equalities are conclusions, not assumed middle certificates. -/
 theorem certificate : Transport 128 hash locations sym1 num1 ∧ Transport 128 hash locations sym2 num2 ∧ sym2=sym1 ∧ num2=num1 :=
@@ -347,4 +361,8 @@ theorem bad_rejected :
 #guard_msgs (whitespace := lax) in #print axioms all_repeated_stores
 /-- info: 'Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_footprints' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms all_repeated_footprints
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_symbolic_stores' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms all_repeated_symbolic_stores
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms all_repeated_transport
 end Solidity.Backend.StorageOps.RuntimeCopyCompositionControls

@@ -163,6 +163,48 @@ theorem complete {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
     · exact dstHeader
  exact ⟨first,second,symbolicEq,numericEq⟩
 
+/-- Whole symbolic-store repetition follows from OLD composition evidence,
+including exact self aliases, without an assumed intermediate relation. -/
+theorem symbolic_positive_repetitions {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
+    {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}
+    (run : FiniteRun N L R hash P locations) (dst src : Solidity.Storage.Loc)
+    (captured : Store) (initial : WordStore)
+    (before : Transport N hash locations captured initial)
+    (covered : ∀ l ∈ writeSet N hash dst src initial ++ (readSet N hash dst src initial).tail,
+      l ∈ locations)
+    (safe : dst = src ∨ ∀ w ∈ writeSet N hash dst src initial,
+      ∀ r ∈ (readSet N hash dst src initial).tail, w ≠ r)
+    (count : Nat) :
+    Nat.repeat (CopyTransport.symbolicCopy dst src) (count + 1) captured =
+      CopyTransport.symbolicCopy dst src captured := by
+  induction count with
+  | zero => rfl
+  | succ count ih =>
+    change CopyTransport.symbolicCopy dst src
+      (Nat.repeat (CopyTransport.symbolicCopy dst src) (count + 1) captured) = _
+    rw [ih]
+    exact (complete run dst src captured initial before covered safe).2.2.1
+
+/-- The same finite original observation set is transported after any positive
+number of symbolic and numeric copies at the same count. Retained queries are
+not discarded when the generated live footprint shrinks. -/
+theorem repeated_transport {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
+    {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}
+    (run : FiniteRun N L R hash P locations) (dst src : Solidity.Storage.Loc)
+    (captured : Store) (initial : WordStore)
+    (before : Transport N hash locations captured initial)
+    (covered : ∀ l ∈ writeSet N hash dst src initial ++ (readSet N hash dst src initial).tail,
+      l ∈ locations)
+    (safe : dst = src ∨ ∀ w ∈ writeSet N hash dst src initial,
+      ∀ r ∈ (readSet N hash dst src initial).tail, w ≠ r)
+    (count : Nat) :
+    Transport N hash locations
+      (Nat.repeat (CopyTransport.symbolicCopy dst src) (count + 1) captured)
+      (Nat.repeat (NumericTraversal.copy N hash dst src) (count + 1) initial) := by
+  rw [symbolic_positive_repetitions run dst src captured initial before covered safe count,
+    positive_repetitions run dst src initial covered safe count]
+  exact (complete run dst src captured initial before covered safe).1
+
 /-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms complete
 /-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.next_footprint_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -171,4 +213,8 @@ theorem complete {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
 #guard_msgs (whitespace := lax) in #print axioms positive_repetitions
 /-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.repeated_footprint_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms repeated_footprint_run
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.symbolic_positive_repetitions' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms symbolic_positive_repetitions
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.repeated_transport' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms repeated_transport
 end Solidity.Backend.StorageOps.RuntimeCopyComposition

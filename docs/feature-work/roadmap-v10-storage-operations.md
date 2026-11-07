@@ -2008,51 +2008,37 @@ alignment, H121b Source/P8 admission/origin/session/lifecycle, 3209 uncovered
 rows, strict pins/docs and full gates remain open. External library-try/Y04/
 separate 4.35 waits remain distinct. No whole-Backfill completion is claimed.
 
-### C281: rejected next-input certificate candidate — timing STOP
+### C281: rejected next-input certificate candidate
 
-A candidate extracted next-footprint coverage and paired the derived next-run
-certificate with store Transport at that exact actual post-copy footprint.
-Kernel checks and standard-trio guards passed; independent read-only finder and
-skeptic found no semantic defect and ran no Lean/server/builds or edits.
+The candidate coverage extraction and joint next-input certificate were reverted
+under the required timing STOP. They are not available APIs. Production source
+was restored exactly; the rejected patch and validation evidence are archived
+privately under H145. The STOP remains binding independently of later work.
 
-The required unchanged-control timing pair was 4.21 s before and 4.93 s after
-(+17.1021%). The candidate is rejected under the greater-than-10% STOP rule.
-Its patch, source bytes and raw receipts are preserved off Git; all candidate
-source changes were restored byte-for-byte to the prior committed source.
-There was no unchanged timing rerun and no new accepted Lean declaration,
-coverage credit or certificate delivery. This STOP is not released by the
-kernel pass or semantic reviews. A distinct optimized candidate remains local
-unfinished work; no dependency is assigned to a retired producer.
+### C282: arbitrary positive finite copy repetitions
 
-Initial baseline setup failed because requested cleanup removed the target of
-the existing build symlink. The regenerable directory was recreated, fetched
-objects restored, and the fresh valid before measurement above then passed.
-Those setup failures remain separate from both valid timing observations.
-No post-reversion Lean rerun is claimed; production bytes match the original
-baseline. Original/consolidated queues, prior strict pins/docs/full-gate holds,
-actual H121b Source/P8 duties and library-try/Y04/separate 4.35 waits remain open.
+positive_repetitions reuses the existing whole-store copy equality for every
+positive finite repetition of the original numeric copy. repeated_footprint_run
+then reuses the accepted next-footprint certificate at that same store. No new
+evaluator, iteration cap, intermediate oracle or alias exclusion. The populated
+shrinking fixture covers arbitrary counts rather than a fixed table. C281 stays
+rejected; no Source/P8 or whole-Backfill completion follows. Validation records
+are archived privately under H145.
 
-### C282: Backfill B arbitrary positive finite copy repetitions
+### C283: symbolic repetition and same-count full-location transport
 
-This distinct increment reuses the accepted whole-store copy_repeat law and
-next_footprint_run. positive_repetitions proves Nat.repeat of the original copy
-for count+1 equals the first actual whole numeric store, for every natural
-count. repeated_footprint_run rewrites through that equality and reuses the
-original next-footprint certificate. No new evaluator, repetition cap, fresh
-intermediate oracle, alias exclusion, crypto premise or Source representation.
-Existing definitions, proofs and statements are unchanged. C281 extraction and
-joint-input candidate remain absent, with their timing STOP still binding.
+symbolic_positive_repetitions reuses the original complete theorem to preserve
+the whole symbolic store for every positive finite count. repeated_transport
+combines it with numeric repetition at the same count over the ORIGINAL finite
+location set, including retained observations beyond the smaller live footprint.
+Original OLD run/transport/generated coverage and self-or-disjoint safety are
+unchanged. No intermediate oracle, crypto premise, liveness filter or Source
+semantics change. Existing definitions, proofs, budgets and interfaces remain.
 
-Existing populated shrinking controls instantiate both laws for arbitrary
-counts. Four exact guards use the standard trio. Fresh unchanged-control pair
-before/after passed at 4.28/4.26 s (about -0.47%); this focused pair is no stable
-whole-build speed claim. Final guarded extended controls passed at 4.18 s,
-sampled peak RSS 719740928 bytes, no resource stop. The regenerable build target
-was recreated and fetched artifacts restored before the baseline. Independent
-read-only finder/skeptic found no defect; neither ran Lean/server/builds/edits.
-
-Requested cleanup restored over 2 GB free while preserving seals. Evidence is
-off Git and archived privately under H145. No whole-Backfill or actual Source/P8
-adequacy claim. Original/consolidated queues, H121b production, 3209 uncovered
-rows, strict pins/docs and full gates remain open. External library-try/Y04/
-separate 4.35 waits and C281/prior STOPs stay distinct and unreleased.
+The existing populated shrinking fixture instantiates both laws for arbitrary
+counts. Existing self-alias, unsafe-overlap and raw/default/live-retained
+controls remain intact. Validation and independent reviews are archived under
+H145; the evidence and timing figures are kept out of this code-branch summary.
+Actual emitted-access alignment, H121b Source/P8 admission/origin/lifecycle,
+original/consolidated queues and final gates remain open. C281 and prior STOPs
+are not released by these separate transport laws.
