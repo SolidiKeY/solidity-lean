@@ -350,7 +350,7 @@ theorem countP_or_le {γ : Type _} (l : List γ) (p r : γ → Bool) :
   | cons a l ih =>
     simp only [List.countP_cons]
     cases p a <;> cases r a <;> simp only [Bool.or_self, Bool.or_true, Bool.or_false,
-      if_true] <;> omega
+      ite_true] <;> omega
 
 theorem countP_le_of_imp {γ : Type _} (l : List γ) {p r : γ → Bool}
     (h : ∀ a ∈ l, p a = true → r a = true) : l.countP p ≤ l.countP r := by
