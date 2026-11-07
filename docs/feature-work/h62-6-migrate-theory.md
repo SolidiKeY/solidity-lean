@@ -127,7 +127,8 @@ eta shape. That negative fixture is intentionally excluded from library roots.
 
 An additional, uncommitted positive-suffix experiment did **not** prove its
 statement. Its exact initial source/hash and failed attempts remain off git as
-the artifact named StringApiWitness.original-unproved.lean and associated logs. It is excluded
+the artifact named "StringApiWitness.original-unproved.lean" and associated logs
+(not a repository file citation). It is excluded
 from accepted coverage, is not a replacement or weakening of a frozen theorem,
 and is not claimed successful. No original Theory statement changed.
 

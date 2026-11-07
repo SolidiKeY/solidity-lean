@@ -268,9 +268,10 @@ uses `[propext]`. This covers only the additive shared module, not either
 inferencer, the other candidates, import migration or full validation.
 
 `propose_migration.py` emits `migration-proposal.patch` deterministically from
-the current originals and the shared module. The proposal adds
-module `Solidity.Source.InferHelpers`, imports it from the two inferencers and
-keeps each existing helper name and type while changing its definition body
+the current originals and the shared module. The proposal would add the
+not-yet-created module
+`Solidity.Source.InferHelpers`, import it from the two inferencers and
+keep each existing helper name and type while changing its definition body
 to call the shared definition. It was not applied; `git apply --check` passes
 on this tree. It is a review artifact, not a checked migration: changed
 definition bodies require the H55 owner, and theorem definitional equality,
@@ -280,7 +281,9 @@ owner-approved adoption. No inference or relation merge is proposed.
 Suggested owner registration fragment, subject to the final destination and
 owner approval, for `docs/module-map/source-definitions.d/<lane>.md`:
 
-`| Source/InferHelpers.lean | Shared top-level mapping, payable-argument and elementary conversion-location helpers. |`
+The proposed Source-area row would name module `InferHelpers` and describe it
+as shared top-level mapping, payable-argument and elementary conversion-location
+helpers. Its destination file does not exist in this checkout.
 
 The owner/coordinator must integrate the module registration and generated
 roots according to repository policy; this lane has not edited them. The
@@ -362,3 +365,26 @@ A first test attempt in the read-only sandbox failed because no writable
 scratch directory was available; that attempt is not counted as a pass.
 Owner agreement, independent reviews of any new changes, full affected gates,
 axiom comparison, acceptance and timing remain outstanding.
+
+## Proposal live-anchor control
+
+The lane fast-forwarded to the coordinator-reported master
+`cc1ea1c9c99522bff459dcc57e41339e1f347243`, which contains the previous lane
+head. The relevant inferencer, Source/Ctor, language and hash files did not
+change from the last diagnostic tree, so the earlier failed 4.35 source
+inferencer check was not rerun unchanged.
+
+An author review found that the proposal generator counted exact anchors even
+when their only occurrence was inside a block comment. It now requires each
+import and declaration anchor to be live according to the existing limited
+Lean text mask before emitting any patch. Negative controls comment out each
+of the six helper definitions and the import; all are rejected without output.
+The generated patch remains byte-identical on the current tree and passes
+`git apply --check`. This is a lexical safeguard, not a Lean parser, semantic
+proof, independent review, or permission to apply the proposal. Unsupported
+syntax and ambiguous anchors continue to fail the generator.
+
+The coordinator reported touched-gate success and finder/skeptic reviews for
+the integrated prior head. Independent review of this new control remains
+pending. H55 agreement, Source/Infer 4.35 repair, migration gates, full
+compatibility checks, axiom comparison and before/after timings remain open.

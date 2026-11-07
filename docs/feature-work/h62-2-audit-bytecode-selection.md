@@ -616,3 +616,24 @@ merge-5da4771e63a4 in the existing evidence directory.
 Independent read-only finder and skeptic confirmed the exact-upstream resolution
 retains H82 and the proposal's unregistered/unvalidated status and pending gates,
 without Lean, tests, jobs or writes.
+
+
+## Coordinator-requested ba3c0f1539c8 merge resolution
+
+The coordinator requested merging published masterba3c0f1539c8 into this same
+audit branch. Both conflicts were documentation citations. This lane had named
+the proposed InferHelpers module without claiming a file existed and identified
+the failed String experiment as an off-Git artifact. Upstream incorporates both
+intents with clearer wording and adds its newer proposal live-anchor report.
+The resolution takes both exact upstream documents. The proposal remains
+unapplied, its new control still awaits independent review, and the experiment
+remains unproved and outside accepted coverage. No migration, registration,
+proof, adoption or exclusion decision follows from resolving the citations.
+No Lean source or proof was edited by the resolution. All original audit
+checkpoints remain partial. Exact parents, conflict blobs and validation are
+preserved off Git under merge-ba3c0f1539c8 in the existing evidence directory.
+
+Independent read-only finder and skeptic confirmed both exact-upstream
+resolutions and the retained limits. Their conflict review does not validate the
+new upstream proposal control or satisfy its pending independent implementation
+review. Neither used Lean, tests, jobs or writes.

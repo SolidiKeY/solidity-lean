@@ -21,11 +21,26 @@ export function edgeSet(rows) {
 export function requireSubset(next, previous) {
   for (const edge of next) if (!previous.has(edge)) throw Error(`allowlist can only shrink: ${edge}`);
 }
+export const CURRENT_BASELINE_SHA256 = "880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d";
 export function loadAllowlist() {
   const raw = readFileSync("scripts/core-import-baseline.json");
   if (createHash("sha256").update(raw).digest("hex") !== BASELINE_SHA256) throw Error("audit baseline SHA256 mismatch");
   const baseline = edgeSet(JSON.parse(raw));
   if (baseline.size !== 95) throw Error("audit baseline must contain 95 edges");
+  const currentRaw = readFileSync("scripts/core-import-current-baseline.json");
+  if (createHash("sha256").update(currentRaw).digest("hex") !== CURRENT_BASELINE_SHA256) throw Error("current baseline SHA256 mismatch");
+  const snapshot = JSON.parse(currentRaw);
+  if (snapshot.schema !== 1 || snapshot.sourceCommit !== "fea090bf9fec1a372ad32952a5e72eb4d7015888" ||
+      snapshot.previousBaselineSha256 !== BASELINE_SHA256 || snapshot.additions.length !== 12) throw Error("invalid authorized baseline epoch");
+  const all = edgeSet(snapshot.edges), additions = edgeSet(snapshot.additions.map(row=>[row.source,row.target]));
+  if (all.size !== 107 || additions.size !== 12 || [...baseline].some(edge=>!all.has(edge)) ||
+      [...additions].some(edge=>!all.has(edge)||baseline.has(edge))) throw Error("authorized107baseline is not original95 plus exact12");
+  // Independent components preserve all removals in the original95 history.
+  // A removed original edge cannot be smuggled into the new12 component.
+  return new Set([...loadSubset(activePath,baseline),
+    ...loadSubset("scripts/core-import-additions-allowlist.json",additions)]);
+}
+function loadSubset(activePath, baseline) {
   const active = edgeSet(JSON.parse(readFileSync(activePath, "utf8")));
   requireSubset(active, baseline);
   const git = (...args) => execFileSync("git", ["--no-replace-objects", ...args], {encoding:"utf8", stdio:["ignore","pipe","pipe"]});
@@ -53,7 +68,7 @@ export function loadAllowlist() {
     }
     requireSubset(current, baseline);
     const prior = parents.map(at).filter(Boolean);
-    if (!prior.length && current.size !== 95) throw Error("initial allowlist must equal audited baseline");
+    if (!prior.length && current.size !== baseline.size) throw Error("initial allowlist must equal pinned component baseline");
     for (const previous of prior) requireSubset(current, previous);
   }
   return active;
