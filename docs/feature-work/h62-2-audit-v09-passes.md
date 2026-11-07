@@ -1383,3 +1383,20 @@ observer definitions and supplemental rows add no credit. Seven axiom reports
 are guarded. Evidence: `/workspace/vy3-evidence/stateful-capture-20261107`.
 No native ByteWorld/emission, ABI/gas or full Source/G24 adequacy is inferred.
 Existing transition/producer waits, STOPs and original final obligations remain.
+
+
+Shift-capture target checkpoint: fifteen original `ShiftCaptureControls` target
+and control rows have exact frozen signature accounting and checked aliases in
+`ShiftCaptureWitness.lean`. Its general joint uses the existing generic
+shift/capture application for both directions and all finite values/counts to
+inhabit the actual represented state and whole captureInput. Original saturated
+zero success, old-count clearing, full observations, wrong recapture/modulo/order
+and insufficient-frame refusals retain their full statements. The public
+`source_expression` row is explicitly uncovered pending its concrete Source
+metadata/state/fuel tuple; target witnesses receive no Source credit. Census
+accounting distinguishes uncovered public rows from private helpers.
+Selected537/1259,722open; definitions/supplemental rows add no credit. Sixteen
+reports are guarded, including axiom-free insufficient_frame. Evidence:
+`/workspace/vy3-evidence/shift-capture-20261107`. No native ByteWorld/emission,
+ABI/gas or full Source/G24 adequacy is inferred. Existing transition/producer
+waits, STOPs and all original final acceptance obligations remain open.

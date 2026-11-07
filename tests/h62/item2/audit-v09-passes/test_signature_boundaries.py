@@ -166,7 +166,8 @@ class HeaderBoundaries(unittest.TestCase):
                     ('reference-call-capture-failure',6,0,'Solidity.Backend.Passes.AuditReferenceCallCaptureFailure.joint'),
                     ('runtime-return-capture',10,0,'Solidity.Backend.Passes.AuditRuntimeReturnCapture.joint'),
                     ('runtime-void-capture',11,0,'Solidity.Backend.Passes.AuditRuntimeVoidCapture.joint'),
-                    ('stateful-capture',6,0,'Solidity.Backend.Passes.AuditStatefulCapture.joint')]
+                    ('stateful-capture',6,0,'Solidity.Backend.Passes.AuditStatefulCapture.joint'),
+                    ('shift-capture',15,0,'Solidity.Backend.Passes.AuditShiftCapture.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
@@ -182,7 +183,7 @@ class HeaderBoundaries(unittest.TestCase):
                 self.assertEqual(row['signature_sha256'],selected[key]['legacy_signature_sha256'])
                 self.assertEqual(row['kind'],'private-exact-kernel-signature' if visibility[row['name']]=='private' else 'public-original-proof-reuse')
                 keys.add(key)
-            uncovered = {(mapping['interface'],name) for name in mapping.get('uncovered_private_names',[])}
+            uncovered = {(mapping['interface'],name) for name in mapping.get('uncovered_private_names',[])+mapping.get('uncovered_public_names',[])}
             self.assertFalse(keys & uncovered)
             self.assertEqual(keys|uncovered,{key for key in selected if key[0]==mapping['interface']})
             if stem == 'triple-admission':
@@ -251,12 +252,16 @@ class HeaderBoundaries(unittest.TestCase):
                 for row in mapping['rows']:
                     if row['kind']=='private-exact-kernel-signature':
                         self.assertEqual(row['simultaneous_witness'],mapping['joint_witness'])
+            if stem == 'shift-capture':
+                self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'source_expression'})
+                self.assertEqual(mapping['uncovered_public_names'],['Solidity.Backend.Passes.ShiftCaptureControls.source_expression'])
+                self.assertEqual(mapping['auxiliary_definition_credit'],0)
             self.assertEqual(len(keys),total)
             self.assertEqual(sum(r['kind']=='private-exact-kernel-signature' for r in mapping['rows']),private_count)
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(522,737))
+        self.assertEqual((len(seen),1259-len(seen)),(537,722))
 
 
 
