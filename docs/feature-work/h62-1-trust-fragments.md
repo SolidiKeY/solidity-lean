@@ -64,3 +64,58 @@ These are author-reviewed external acceptance safeguards, not an independent fin
 The latest isolated fixture adds a generated lane import and theorem: its module build and positive generated audit passed under the pinned Lean 4.35 binary, while a missing import, missing declaration and non-allowlisted dependency were rejected. This is a small external fixture, not the project audit. The strict installed gate also checks lane paths and bytes against committed HEAD and rejects a lane-root symlink or gitlink in prior history. Independent finder and skeptic reviews remain outstanding.
 
 Human instruction requests retirement and handoff to `solidity-h62-5-20261106/statement-graph`. The complete original rendered prompt bytes were not available through any exposed tool or located file; `tests/h62/item1/trust-fragments/handoff/original-prompt-provenance.md` records the missing SHA-verified artifact. The scope manifest and coordinator-provided decisions, audit and toolchain pin are committed under that handoff directory; the full ownership snapshot remains outside Git in the evidence directory, with checksums. H71 is absent from the available decisions snapshot, and the original explicit no-push rule remains in force. No push was made.
+
+## H82b successor: snapshot and resource hardening
+
+The survivor verified the authenticated full assignment/scope and stopped/head
+receipt and integrated exact final head 8dc693e46409928791b2eeb89650fe0eaf46149a
+before member work. Metadata waits are resolved; the historical missing-prompt
+note above is superseded by the H82b authoritative assignment envelope. No legacy
+rendered-wrapper byte equivalence is asserted.
+
+Independent read-only finder identified a prior-preservation race: generation,
+coverage and preservation reparsed different live inputs. They now derive from
+one captured byte map; validated lane types/paths and raw fragment bytes are
+rechecked before acceptance returns. Strict mode additionally requires that the
+generated central audit is committed in HEAD. A controlled change-and-restore
+regression checks the former false acceptance, and raw mutation, same-byte
+symlink replacement and uncommitted-central cases are rejected. Sorting remains
+by owner then filename, including prefix-related owners a/a-b. Both independent
+reviews found no remaining static blocker and used no Lean/server.
+
+Skeptic confirmed inherited resource gaps. Isolated fixture and timing runners
+now share an 8 GiB process bound, official archive/path/version validation and
+process-group cancellation/reaping on timeout or reserve failure. Mocked guards
+exercise timeout and headroom aborts. The real audit/timing was not run; central
+TrustAudit.lean, its allowlists and H58's held generated audit remain untouched.
+
+Actual final external controls: 21 tests, exit 0. Official Lean 4.35.0 fixture
+addon compilation and seven positive/negative controls pass under -j1,
+LEAN_NUM_THREADS=1, 8 GiB limit, zero swap and 4 GiB available reserve.
+Preflight reproduces the original 106217 audit bytes; strict installed mode
+correctly exits 1 because migration is absent. Timing of the external preflight
+CLI, one warmup and seven serial runs on unchanged zero-lane inputs, measured
+median 57.532156 ms before and 60.022572 ms after (+4.3287%, below 10%). This
+is not a real Lean audit timing result; child RSS is cumulative high-water,
+not isolated per-command RSS. Output, source/evidence hashes and review findings
+are recorded in h82-successor-evidence.json and the off-git evidence directory.
+A source-manifest path error occurred after successful gates and was corrected
+without repeating those gates.
+
+All original checkpoint obligations remain partial until real audit elaboration,
+authoritative prior/owner registration inputs, controlled real-audit timings,
+full affected/final gates and coordinator integration are complete. The syntax
+migration dependency is retained. These checks do not prove actual production
+declarations, authorize owners or install the proposed central marker patch.
+
+## H70 queued coverage backfill
+
+Current-source deterministic census records 44 blocks, all 1380 headline
+occurrences (1373 distinct), 77 imports and 17 print commands. Two outputs match;
+concatenated fragments equal the unchanged central bytes and pinned digest.
+Evidence: /workspace/h62-statement-graph-evidence/h70-trust-coverage/ and the
+committed h70-controls-evidence.json in the surviving statement-graph tests.
+No declaration existence, real project audit or unavailable original runtime
+receipt is inferred. H58 generated-audit HOLD remains intact. The coordinator's
+latest consolidated compatibility route is migrate-root-gate for Syntax.Raw and
+Contracts:1104; earlier route names above are historical, no stale owner contact.

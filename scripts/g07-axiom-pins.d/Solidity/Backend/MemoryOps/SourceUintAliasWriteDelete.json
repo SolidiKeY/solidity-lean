@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintAliasWriteDelete.lean:Solidity.Backend.MemoryOps.source_uint_alias_write_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintAliasWriteDelete.lean:Solidity.Backend.MemoryOps.source_uint_delete_objects_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

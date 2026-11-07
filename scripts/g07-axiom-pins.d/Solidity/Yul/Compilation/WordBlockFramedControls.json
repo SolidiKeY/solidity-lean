@@ -1,0 +1,52 @@
+{
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.body_underflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.boundaryCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.endless_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.loop_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.nested_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.nestedCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.rootCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.shiftedCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.two_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordBlockFramedControls.lean:Solidity.Yul.Compilation.WordBlockFramed.Controls.zero_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

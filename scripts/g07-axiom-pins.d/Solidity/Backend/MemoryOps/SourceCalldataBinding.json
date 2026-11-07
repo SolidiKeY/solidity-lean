@@ -1,0 +1,33 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataBinding.lean:Solidity.Backend.MemoryOps.source_cd_bool_bind_low": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBinding.lean:Solidity.Backend.MemoryOps.source_cd_bool_bind_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBinding.lean:Solidity.Backend.MemoryOps.source_locals_get_set_other": [],
+ "Solidity/Backend/MemoryOps/SourceCalldataBinding.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.bind_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBinding.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.eval_local_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBinding.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.eval_local_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBinding.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.bind_cd_bool_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

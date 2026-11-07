@@ -19,7 +19,7 @@ def frame : Source.Fr :=
    static := false, contract := "fixture", cd := [17,34]}
 
 def state (c : Solidity.Backend.Aggregates.ScalarMapping.Controls.Sample) : Source.St (E c) :=
-  {ex := ⟨⟨fun a => ⟨⟨(a.val+17) % 2^256, Nat.mod_lt _ (by decide)⟩, 3, some 9, storage c⟩⟩, Source.Transient.empty, [.account ⟨99,by decide⟩ (Source.Account.empty _)]⟩,
+  {ex := ⟨⟨fun a => ⟨((a.val+17) % 2^256), 3, some 9, storage c⟩⟩, Source.Transient.empty, [.account ⟨99,by decide⟩ (Source.Account.empty _)]⟩,
    heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,
    events := [], logs := [(⟨13,by decide⟩,[1,2])],
    fnLocals := ⟨[.bool],.cons (.bool false) .nil⟩}
