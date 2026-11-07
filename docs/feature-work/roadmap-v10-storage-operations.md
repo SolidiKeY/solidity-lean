@@ -1254,28 +1254,32 @@ accepted-artifact binding and full final gates remain open.
 
 ### C251 — remaining supported literal values
 
-Adopted published7de6f66ad29488d70e3c31c6b2a4798b72a0a209, preserving in-flight
-work. SourceAstLiteralCorrespondence proves supported ordinary/Unicode/hex
-string constructor and byte preservation, canonical integer value under all
-three existing no-unit field encodings, both Boolean values and exact literal
-expression wrapping. All four measured guards use propext+Quot.sound. Input
-field/decoder premises describe existing reader behavior; they are not Source
-feasibility assumptions, independent compiler fidelity or provenance evidence.
-No reader, Source file, existing statement/interface/premise/budget/exclusion,
-axiom declaration, trust policy or resource limit was changed.
+Adopted published 7de6f66ad29488d70e3c31c6b2a4798b72a0a209, preserving
+in-flight work. SourceAstLiteralCorrespondence proves supported
+ordinary/Unicode/hex string constructor and byte preservation, canonical integer
+value under all three existing no-unit field encodings, both Boolean values and
+exact literal expression wrapping. All four measured guards use propext and
+Quot.sound. Input field/decoder premises describe existing reader behavior;
+they are not Source feasibility assumptions, independent compiler fidelity or
+provenance evidence. No reader, Source file, existing statement/interface/premise/
+budget/exclusion, axiom declaration, trust policy or resource limit was changed.
 
-Existing expression controls keep all37actual expressions per pipeline and
+Existing expression controls keep all 37 actual expressions per pipeline and
 all previous boundary checks. Generic controls add string-kind byte distinctions,
 both Booleans, each no-unit spelling, malformed Boolean and noncanonical-number
-refusals. No per-case Source fixture copies or new phase folders. Initial and
-guarded focused checks pass. Finder and skeptic reviewed code read-only without
-Lean/server/build and found no findings. The literal laws do not supply actual
-Source origin/H24/lifecycle/S03-PANIC41 or artifact binding; those H121b duties
-remain local and open. The C246 elaboration probe remains historical manual
-failure evidence outside automated gates. Protected inference/typing/elaboration/
-resolved files have no published changes releasing its hold. H16 exact try
-support, separate mapping-bearing H24, Y04 physical and4.35 trust/timing waits,
-all prior STOPs, inherited proofs/coverage and full final gates remain open.
+refusals. No per-case Source fixture copies or new phase folders were added.
+C251 initial and guarded focused checks passed. Lane history records read-only
+finder and skeptic reviews for C251 with no findings; neither reviewer used
+Lean, its server or build commands. This records that checkpoint's review,
+not a new review or validation result for later heads.
+
+The literal laws do not supply actual Source origin/H24/lifecycle/S03-PANIC41
+or artifact binding; those H121b duties remain local and open. The C246
+elaboration probe remains historical manual failure evidence outside automated
+gates. At C251, protected inference/typing/elaboration/resolved files had no
+published changes releasing its hold. H16 exact try support, separate
+mapping-bearing H24, Y04 physical and 4.35 trust/timing waits, all prior STOPs,
+inherited proofs/coverage and full final gates remain open.
 
 ### C252 — parameter and array structural correspondence
 
