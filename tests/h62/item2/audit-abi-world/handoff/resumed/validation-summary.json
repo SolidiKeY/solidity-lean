@@ -48,7 +48,7 @@
   "waits": [
     {
       "lane": "coordinator/G07 inventory owners",
-      "item": "Historical PIN-902e8776: 247 existing standard-only registrations at 902e; revalidate the central-file hash and inventory before applying on another integration."
+      "item": "G07 blocked (open; count from 902e): historical PIN-902e8776 records 247 registrations. Revalidate the central-file SHA and inventory before applying on another integration."
     }
   ],
   "questions": [],
@@ -134,8 +134,8 @@
     "resource_receipt": "resume-master-20261107-2/full-resource.json",
     "stdout_sha256": "3d4261604c593902a3b4dc54681d36f67d718836820e6ff346ab89c2f737acaa"
   },
-  "validation_scope": "Historical worker validation on 902e; documentation corrected on a282a282003a992eb334acefd1ef8f5490e0fe71. No fresh Lean build or inventory claim on a282.",
-  "documentation_correction_base": "a282a282003a992eb334acefd1ef8f5490e0fe71",
+  "validation_scope": "Historical worker validation on 902e; documentation corrected on c97738bd5edac625ff696e3ce4480406810477ba. No fresh c977 Lean build or inventory claim.",
+  "documentation_correction_base": "c97738bd5edac625ff696e3ce4480406810477ba",
   "resolved_waits": [
     {
       "lane": "audit-v09-passes / P20 interface owner",
@@ -150,5 +150,6 @@
     "source": "docs/feature-work/h62-2-audit-v09-passes.md",
     "missing": "SelectedHeapBoundaryWitness.lean",
     "p20_missing": false
-  }
+  },
+  "g07_status": "blocked (open; count from 902e)"
 }
