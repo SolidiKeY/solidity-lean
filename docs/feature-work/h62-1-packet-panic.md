@@ -137,3 +137,7 @@ The base-pinned twenty-one-row controls ledger records checked and unchecked min
 ## Duplicate-input test correction
 
 Twelve per-file ledger tests now restore the removed census row at its original index before inserting one adjacent duplicate. This isolates duplicate input from row reordering. All 16 ledger tests passed. Independent read-only finder and skeptic reviews confirmed the change without Lean; duplicate input is rejected by the ordered-header check, so this does not establish that a separate duplicate-specific branch ran. The older SignedMod Source test still has no dedicated forged-line or forged-kind fixture.
+
+## Mechanically reconciled ledger totals
+
+`ledger_totals.py` checks a fresh ordered census, regenerates all sixteen ledgers and rejects overlapping, duplicate or unmatched rows. The actual totals remain 465 original, nine private, 419 described and 55 unclassified original headers. Independent read-only finder confirmed the current reconciliation; skeptic identified that an unclassified census row could be omitted or invented, so fresh-census validation and CLI negative controls were added and rechecked without Lean. Manual observation prose is not mechanically checked against theorem statements; the result is not proof or semantic closure.
