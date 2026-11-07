@@ -386,6 +386,45 @@ class ScannerControls(unittest.TestCase):
             b = scanner.scan(root / "B.lean", root, changed.encode())[1]
             self.assertNotEqual(a["context_hash"], b["context_hash"], keyword)
 
+    def test_set_option_context_and_body_boundaries(self):
+        root = Path("/virtual")
+        template = ("def marker : Nat := 0\nset_option autoImplicit {value}\n"
+                    "theorem same (x : Nat) : x = x := by rfl\n")
+        def rows(value):
+            return scanner.scan(root / "A.lean", root, template.format(value=value).encode())
+        a, b = rows("true"), rows("false")
+        self.assertEqual(a[0]["body"], ["0"])
+        self.assertNotEqual(a[1]["context_hash"], b[1]["context_hash"])
+        scoped = b"set_option autoImplicit false in\ntheorem next : True := by trivial\n"
+        self.assertEqual(scanner.scan(root / "B.lean", root, scoped)[0]["name"], "next")
+        nested = b"def outer : Nat := by\n  set_option autoImplicit false in\n  exact 0\ndef next : Nat := 1\n"
+        self.assertEqual(scanner.scan(root / "C.lean", root, nested)[0]["body_reject_reason"], "indented-command-boundary")
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "D.lean", root, b"set_option autoImplicit false in theorem hidden : True := by trivial\n")
+        multiline = b"set_option autoImplicit\n  false in theorem hidden : True := by trivial\ndef visible : Nat := 0\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "F.lean", root, multiline)
+        modified = b"set_option autoImplicit\n  false in @[foo [bar]] public theorem hidden : True := by trivial\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "H.lean", root, modified)
+        split_modifier = b"set_option autoImplicit false in public\n  theorem hidden : True := by trivial\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "J.lean", root, split_modifier)
+        split_attribute = b"set_option autoImplicit false in @[foo]\n  private def hidden : Nat := 0\n"
+        with self.assertRaisesRegex(ValueError, "unsupported same-line scoped set_option declaration"):
+            scanner.scan(root / "K.lean", root, split_attribute)
+        other = b"set_option autoImplicit false\n#guard_msgs in #eval 1\ndef next : Nat := 0\n"
+        self.assertEqual(scanner.scan(root / "I.lean", root, other)[0]["name"], "next")
+        with tempfile.TemporaryDirectory() as directory:
+            temp = Path(directory)
+            (temp / "A.lean").write_bytes(multiline)
+            (temp / "B.lean").write_text("def visible : Nat := 0\n")
+            report = subprocess.run([sys.executable, "-B", str(SCRIPT), str(temp), "*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(report.returncode, 0)
+            self.assertEqual(json.loads(report.stdout)["incremental"]["comparison_status"], "current-incomplete")
+        clean = b'def a : String := "set_option x in theorem fake"\ndef b : Nat := 0\n'
+        self.assertEqual(len(scanner.scan(root / "E.lean", root, clean)), 2)
+
     def test_equal_context_does_not_prove_local_definition_equivalence(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

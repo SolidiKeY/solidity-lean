@@ -299,7 +299,7 @@ def scan(path, root, source=None):
             if re.fullmatch(r"\s*(?:(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\s+)*", between):
                 start = min(start, prefix_start)
         declaration_starts.append(start)
-    context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
+    context_commands = list(re.finditer(r"(?m)^[ \t]*(?:(?:import|namespace|section|end|open|variable|universe|set_option)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b[^\n]*", skeleton))
     # Preserve literal bytes and continuation lines until the next recognized
     # boundary. This remains a lexical approximation of the Lean environment.
     boundaries = sorted([m.start() for m in context_commands] + declaration_starts)
@@ -307,6 +307,11 @@ def scan(path, root, source=None):
     for command in context_commands:
         index = bisect.bisect_right(boundaries, command.start())
         stop = boundaries[index] if index < len(boundaries) else len(text)
+        # A scoped command may place `in` on a later line. Refuse an inline
+        # declaration that the line-initial recognizer would silently miss.
+        if (re.match(r"[ \t]*set_option\b", command.group()) and
+            re.search(r"\bin[ \t]+(?:@\[|(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe|theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)\b)", skeleton[command.start():stop])):
+            raise ValueError("unsupported same-line scoped set_option declaration")
         context_spans.append((command.start(), text[command.start():stop].strip()))
     rows = []
     relative_path = path.relative_to(root).as_posix()
@@ -320,7 +325,7 @@ def scan(path, root, source=None):
         end = declaration_starts[i+1] if i+1 < len(matches) else len(text)
         content = text[match.end():end]
         content_skeleton = skeleton[match.end():end]
-        command = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", content_skeleton)
+        command = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", content_skeleton)
         command_inside = False
         if command:
             prefix = re.match(r"[ \t]*", command.group()).group()
@@ -354,7 +359,7 @@ def scan(path, root, source=None):
         body_skeleton = content_skeleton[len(header) + (2 if body_form == "assignment" else 0):]
         if re.search(r"\bwhere\b", body_skeleton):
             body_reject_reason = "body-may-have-local-helpers"
-        boundary = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", body_skeleton)
+        boundary = re.search(r"(?m)^[ \t]*(?:(?:import|end|namespace|section|open|variable|universe|set_option|attribute|#\w+)|(?:(?:local|scoped)[ \t]+)*(?:notation|infixl|infixr|infix|prefix|postfix))\b", body_skeleton)
         if boundary:
             prefix = re.match(r"[ \t]*", boundary.group()).group()
             if len(prefix.expandtabs(8)) > indent(match):

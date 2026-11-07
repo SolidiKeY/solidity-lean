@@ -1061,3 +1061,29 @@ from 4,481 to 4,412 as modifier distinctions were retained; body-group
 counts stayed 5,516. Counts do not establish group membership or signature
 semantics. Reports and controls are outside Git under
 `/workspace/h62-duplication-scanner-evidence/declaration-modifiers/`.
+
+## Scoped option lexical boundaries
+
+Line-initial `set_option` commands now contribute context spans and terminate
+preceding bodies; an indented boundary rejects the body fingerprint. Within
+recognized option spans, an `in` followed on the same line by a declaration
+keyword, modifier or attribute prefix makes the file incomplete, including
+split option headers and modifiers continued on a later line. This prevents
+the demonstrated hidden or misqualified declaration cases. The check is a
+conservative lexical heuristic: it can refuse ambiguous text, does not model
+the exact lifetime of scoped options, and does not handle every wrapper or
+macro form. Candidate signature and ownership rejection reasons remain.
+
+Independent finder and skeptic reviews without Lean identified and rechecked
+the split-header and split-modifier cases. The final Python suite passed 42
+tests. An initial overly broad guard caused a full-tree scan to exit 1 with
+eight file refusals, and one intermediate split-modifier test failed; both
+are retained as failed evidence. The refined implementation's matched pair
+on the same tree and input took 109.784 seconds before and 119.423 seconds
+after (+8.78%), within the 10% threshold. Both used the same 7,273 inputs,
+recognized 122,960 declarations and reported no file errors or unmatched
+globs. Statement-group counts changed from 4,412 to 4,413; body-group counts
+remained 5,516. Counts do not establish equal group membership, intrinsic
+signatures or complete declaration coverage. Reports, failed attempts,
+controls and timings are outside Git under
+`/workspace/h62-duplication-scanner-evidence/set-option-context/`.
