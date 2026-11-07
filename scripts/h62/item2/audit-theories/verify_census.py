@@ -97,6 +97,16 @@ WITNESSES.update({
  'Solidity.SFields.Mirrors.get': ('MirrorWitnesses', 'mirror_fields_get_joint_witness'),
  'Solidity.SVec.Mirrors.getElem': ('MirrorWitnesses', 'mirror_vec_getElem_joint_witness'),
 })
+WITNESSES.update({
+ 'Solidity.Storage.obs_len_ref_some': ('BridgeWitnesses', 'bridge_obs_len_joint_witness'),
+ 'Solidity.Storage.obs_word_ref_some': ('BridgeWitnesses', 'bridge_obs_word_joint_witness'),
+ 'Solidity.Storage.full_of_push': ('BridgeWitnesses', 'bridge_full_push_joint_witness'),
+ 'Solidity.Storage.full_of_pushPlace': ('BridgeWitnesses', 'bridge_full_pushPlace_joint_witness'),
+ 'Solidity.Op0.denote_eval': ('BridgeWitnesses', 'bridge_op0_joint_witness'),
+ 'Solidity.Op1.denote_eval': ('BridgeWitnesses', 'bridge_op1_joint_witness'),
+ 'Solidity.Op2.denote_eval': ('BridgeWitnesses', 'bridge_op2_joint_witness'),
+ 'Solidity.Op3.denote_eval': ('BridgeWitnesses', 'bridge_op3_joint_witness'),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),

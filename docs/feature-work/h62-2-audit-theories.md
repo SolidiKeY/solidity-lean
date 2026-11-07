@@ -1,5 +1,16 @@
 # H62 item 2: audit-theories — continuing audit
 
+RESUMPTION OVERRIDE (coordinator2026-11-07): explicitly rebaseline on
+origin/master and continue this original queue. This supersedes the historical
+retirement notices below. Same VM/branch/existing goal retained; no new goal.
+Current continuation base5da4771e63a4278ed53932ac39a032e3d7aea6ed; original
+frozen statement reference remainsc6f550e281a7e5affa9a99bc2cdaed556dec00e4.
+Latest evidence: /workspace/h62-audit-theories-resumed-20261107-evidence.
+Current validated unchanged-file subset:62 explicit joint inputs. Historical
+60-witness/95-proof results below remain version-scoped, not relabeled as a
+passing current full census. Eight new Bridge proofs are checked on this base.
+
+
 This is a reviewable partial audit, not completion of the frozen assignment.
 
 RETIREMENT OVERRIDE (latest human H82 stop-and-handoff): this worker is stopped.
@@ -521,3 +532,83 @@ Lean/server/build jobs. The skeptic found obsolete continuation guidance in
 this document; the explicit top and final retirement notices resolve it.
 Final head, clean status, artifact/manifest hashes and validation commands are
 recorded in /workspace/h62-audit-theories-retirement-evidence/handoff.json.
+
+## Resumed checkpoint: unchanged Bridge inputs on merged master
+
+The coordinator explicitly resumed this assignment on2026-11-07. Inspection
+found a clean local fa4b9dec2194f2b1d084ff6e2c2e31128de185dd checkout already
+containing coordinator merges. Fresh fetch established it and the final prior
+c1f72a60f retirement head as ancestors of origin/master. The assigned branch
+fast-forwarded to5da4771e63a4278ed53932ac39a032e3d7aea6ed without resetting or
+discarding work. rebaseline.json records the commands and exact authorization.
+The original branch/VM/goal and all immutable prior evidence are preserved.
+H82 standing agreements remain in effect for statement-preserving work.
+
+BridgeWitnesses proves all8 joint-input packets for the unchanged frozen
+Solidity/Theory/Bridge/Denote.lean statements. A concrete two-root contract
+contains a bool array and bool primitive. Actual lookup, push and pushPlace
+success equations hold simultaneously with every state/root/callback/result
+input. Unary/binary/ternary packets retain each entire BridgeO premise and
+use SOME inputs with successful outputs (uint0→int0,2+3→5 and the bool
+conditional true/true/false→true); no premise is discharged only by NONE.
+All8 interface signatures are printed by Lean beside the axiom reports.
+The final check passes1.204s/591,405,056 sampled peak RSS, exit0, no diagnostics
+or resource stop, standard axioms only. Earlier failed attempts are historical
+and not accepted receipts; dependent simplification uses existing list/view
+equations without altering representations or proof budgets. Four fixture
+definitions and one private type abbreviation are new; no new axiom/sorry/
+native_decide, original statement change or generated-root registration.
+
+A genuine version-fidelity issue was found independently of this checkpoint:
+five Progress files differ from the original frozen base. Four explicit
+headers change slotsFit by adding mapFree: Solidity.Theory.Progress.pushVals_ns,
+Solidity.Theory.Progress.declTuple_ns, Solidity.Theory.Progress.StmtD.declTuple_frag
+and Solidity.Theory.Progress.Controls.slotsOK_refuses_reference. Fragment's
+SFrag.declTuple and Leaves' BuiltinNode.mk also depend on changed slotsFit/callTy
+definitions. No worker edit caused these changes. Exact old/new headers, hashes
+and diffs are in frozen-fidelity-delta.json. The full original census correctly
+refuses changed source and is not loosened or relabeled as passing.
+
+ESCALATE: action H62.audit_theories.frozen_rebaseline — current5da4771e6 changes four frozen Progress headers and dependent definitions versus c6f550e281a7; evidence frozen-fidelity-delta.json and bridge-gate-2.log. Options: keep original obligations and report current-version coverage separately with a fidelity blocker; provide owner-approved H57 versioned pairs so both versions are accounted for. Q-FROZEN-REBASE is pending; no exclusion or new premise is recommended.
+
+Independent unchanged work proceeds while that question is pending. New
+verify_subset.py validates only selected original-map files whose bytes equal
+the frozen version, requires a checked joint certificate for EVERY explicit
+declaration, validates source/helper/transitive/artifact/log receipts and
+rejects duplicates. Its boundary is explicit: no equivalence claim for changed
+definitions elsewhere, no generated-candidate disposition and no whole-goal
+acceptance. Existing full-census guards/pins remain untouched. Current subset
+passes Paths41 + MemMirror13 + Bridge8 =62 unique statements/certificates.
+Controls reject changed Tuple, uncovered Mem, outside-map paths and duplicate
+module selections. These subset gates do not erase any remaining original
+record or classify generated candidates by implication.
+
+Milestone validation:11 Python tests pass, all four subset rejection controls
+pass, register/fragments pass as recorded in bridge-gates.json. Layers fail
+with12 new core→non-core edges already present on merged master; no Solidity
+or layer-checker source was changed by this checkpoint. Full paths are in
+bridge-gate-3.log (Roadmap.G49Final.BridgeGoal and Yul.Composition roots). No
+allowance/exclusion pin was edited. Original
+full census fails as expected on changed Tuple source. Fresh bounded KeySort
+passes1.605s/258,060,288 sampled peak RSS. Actual Lean4.24.0/797c613 and
+Lake5.0.0-src+797c613; this remains the frozen audit lane, not a4.35 migration.
+One Lean job at a time, explicit-j1/LEAN_NUM_THREADS=1,12GiB virtual cap/no swap,
+4GiB available reserve and300s/module; no limits or heartbeat budgets raised.
+No census timing STOP was rerun; the prior authorized pair remains historical.
+No RUNTIME_GATE_PASS or full run-lean/full acceptance is claimed.
+
+Finder and skeptic independently confirmed all8 frozen telescopes/premises,
+actual successful packets,62 exact mappings and complete source/import/artifact/
+log provenance. They reviewed the new scoped gate and rejection controls:
+no residual findings; no reviewer edits or Lean/server/build jobs.
+
+Checkpoint handoff: eight new joint packets,68 cumulative historical-plus-new
+joint names (60 historical +8 Bridge),103 additive proof declarations across
+versioned checkpoints. Only62 unchanged-file joints are validated together on
+this new base; historical Progress proofs are not silently promoted. Original
+unwitnessed records reduce by8 to408 public +3 private +986 generated =1,397,
+with the separate rebaseline-fidelity issue still open. Continue independent
+unchanged files such as Progress/Outcome while retaining the four-checkpoint
+queue, full target ABI/gas/fork obligations and pending final gates. Fetch and
+inspect master before each next item. No missing producer is asserted beyond
+the specific H57/frozen-version interpretation question; no new goal or push.
