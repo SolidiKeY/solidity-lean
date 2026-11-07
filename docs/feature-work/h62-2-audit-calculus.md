@@ -2,6 +2,8 @@
 
 ## External evidence and coordinator intake
 
+Under H145, lane evidence indexes are archived in the [private coordination repository](https://github.com/SolidiKeY/solidity-lean-coord/tree/de649e9c9648443622f3fc35b24999c15ecfb27a/evidence/solidity-h28-sol-20261104/automation-benchmark/h145-code-evidence). The archive preserves 110 removed index files byte-for-byte, the current classification dataset and frozen census, and the prior sealed handoff. The checker still reads its retained bulk-input manifest; historical verifier fixtures remain intact. Other bulk bytes referenced by those indexes stay on the VM and are not claimed privately retrieved. Historical statements below about committed evidence manifests describe earlier checkpoints; their indexes now live in the private archive.
+
 For coordinator-side review, census claims are bound by hash only until the coordinator pulls the referenced bytes and verifies the committed manifests. Classification inputs and bulk evidence remain off Git on this VM under H44, with absolute paths, sizes and SHA256 identities. Local accounting/tests and local finder/skeptic review do not establish coordinator delivery, independent semantic acceptance or proof validation. Delivery remains coordinator-pending; the checkpoint evidence includes the actual local retention/hash audit. Regenerated or transcribed material does not establish identity with unavailable historical bytes.
 
 ## H82 retirement: implementation stopped
