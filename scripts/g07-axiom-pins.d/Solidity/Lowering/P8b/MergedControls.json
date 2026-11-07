@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/P8b/MergedControls.lean:Solidity.Lowering.P8b.MergedControls.merged_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8b/MergedControls.lean:Solidity.Lowering.P8b.MergedControls.plan_ignoring_reference_no_realization": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8b/MergedControls.lean:Solidity.Lowering.P8b.MergedControls.toySource_no_producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8b/MergedControls.lean:Solidity.Lowering.P8b.MergedControls.wrong_reference_no_realization": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
