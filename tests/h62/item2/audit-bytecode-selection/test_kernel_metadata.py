@@ -56,6 +56,46 @@ class MetadataSchemaTests(unittest.TestCase):
         self.assertEqual(entry["binder_count"],2)
         self.assertEqual([x["index"] for x in entry["binders"]],[0,1])
 
+    def source_candidate(self, row, start=0):
+        signature="theorem t : True "
+        return {"name_candidate":row["user_name"],"kind":"theorem","name_line":1,"name_column":0,"byte_start":start,"byte_end":start+20,"signature":signature,"signature_sha256":hashlib.sha256(signature.encode()).hexdigest(),"kernel_names":[row["name"]],"match_count":1,"mapping_status":"unique"}
+    def ranged_row(self):
+        row=self.row();row["declaration_range"].update(selection_column=0,selection_end_line=1,selection_end_column=1,position_units="one-based lines; zero-based Unicode codepoint columns")
+        return row
+    def test_source_graph_preserves_both_sides_and_private_candidates(self):
+        row=self.ranged_row();other=self.row();other.update(name="unmatched",user_name="unmatched")
+        source=self.source_candidate(row);missing=self.source_candidate(row,50);missing.update(name_candidate="absent",kernel_names=[],match_count=0,mapping_status="unmatched")
+        result=source_candidate_graph([row,other],{"M":[source,missing]})
+        self.assertEqual(len(result["records"]),2);self.assertEqual(len(result["sources"]),2)
+        self.assertEqual([r["accounting_status"] for r in result["sources"]],["one_to_one_candidate","unmatched"])
+        self.assertTrue(result["records"][0]["private"])
+        self.assertFalse(any(r["statement_correspondence_established"] or r["joint_witness_established"] for r in result["records"]))
+        before=copy.deepcopy(result);source["kernel_names"].append("changed");self.assertEqual(result,before)
+        result["sources"][0]["source"]["signature"]="mutated";self.assertNotEqual(source["signature"],"mutated")
+    def test_source_graph_detects_shared_target_and_is_deterministic(self):
+        row=self.ranged_row();a=self.source_candidate(row);b=self.source_candidate(row,30)
+        result=source_candidate_graph([row],{"M":[b,a]})
+        self.assertEqual(result,source_candidate_graph([row],{"M":[a,b]}))
+        self.assertTrue(all(r["accounting_status"]=="ambiguous_candidate" for r in result["sources"]))
+        self.assertEqual(result["records"][0]["accounting_status"],"ambiguous_candidate")
+    def test_source_graph_refuses_stale_or_forged_edges_and_duplicate_identity(self):
+        row=self.ranged_row();source=self.source_candidate(row)
+        for changes in ({"signature_sha256":"0"*64},{"kernel_names":["missing"]},{"match_count":True},{"name_column":1},{"mapping_status":"unmatched"}):
+            bad=dict(source,**changes)
+            with self.subTest(changes=changes),self.assertRaises(ValueError):source_candidate_graph([row],{"M":[bad]})
+        with self.assertRaises(ValueError):source_candidate_graph([row],{"M":[source,source]})
+        with self.assertRaises(ValueError):source_candidate_graph([row,row],{"M":[source]})
+
+    def test_source_graph_one_source_multiple_records_and_non_theorem_refusal(self):
+        row=self.ranged_row();other=copy.deepcopy(row);other["name"]="different_kernel_identity"
+        source=self.source_candidate(row);source.update(kernel_names=sorted([row["name"],other["name"]]),match_count=2,mapping_status="ambiguous")
+        result=source_candidate_graph([row,other],{"M":[source]})
+        self.assertEqual(result["sources"][0]["accounting_status"],"ambiguous_candidate")
+        self.assertTrue(all(r["accounting_status"]=="ambiguous_candidate" for r in result["records"]))
+        row.update(original_kind="Lean.ConstantKind.defn",is_theorem=False,kind="constant",body_status="no available value")
+        self.assertEqual(validate_record(row)["kind"],"constant")
+        with self.assertRaises(ValueError):source_candidate_graph([row],{"M":[self.source_candidate(row)]})
+
     def test_complete_row(self):
         self.assertEqual(validate_record(self.row())["user_name"], "N.t")
     def test_schema_and_flag_corruption(self):
