@@ -77,9 +77,8 @@ theorem observations : ordered := by
  rfl
 
 theorem world_equal : forward.2.2.ex.world=reverse.2.2.ex.world := by
- unfold forward reverse
- rw [forward_certificate,reverse_certificate]
- exact world_certificate
+ exact (SourceWordCommutation.complete frame left v flag w locals seed rfl rfl rfl
+   (by decide)).2.2.1
 
 theorem journals_differ : forward.2.2.ex.journal≠reverse.2.2.ex.journal := by
  intro same
