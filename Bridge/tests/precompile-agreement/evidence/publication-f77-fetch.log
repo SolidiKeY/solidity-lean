@@ -1,4 +1,0 @@
-COMMAND: timeout 120 git fetch --no-tags origin master
-From https://github.com/SolidiKeY/solidity-lean
- * branch              master     -> FETCH_HEAD
-   8495f1de..f77cf60d  master     -> origin/master
