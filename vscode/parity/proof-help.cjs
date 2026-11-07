@@ -42,4 +42,33 @@ function verificationHoverOrder(records,start,binding,position,observedHover,obs
  return {binding,proofRequestId:proof.r.message.id,hoverRequestId:hover.r.message.id,proofRequestIndex:proof.index,hoverRequestIndex:hover.index,hoverResponseIndex:hoverResponse,terminalIndex:terminals[0].index,proofResponseIndex:proofResponse,scope:'Observed provider response before native verification-request terminal/response; no inferred internal proof stage or rendered hover popup.'};
 }
 
-module.exports={synchronizedBinding,sourceBinding,sameSource,assertCertifiedFailureObservation,currentFailureStatus,menuObservation,proofHoverExpected,verificationHoverOrder};
+// This fixture has a single Markdown paragraph and one Solidity code block.
+// It is deliberately not a general Markdown renderer or proof-state inference.
+function popupExpected(metadata){
+ const {binding,expectedHover,status}=metadata;
+ assert.equal(status?.uri,binding.uri);assert.equal(status.version,binding.version);assert.equal(status.sourceHash,binding.textHash);assert.equal(status.synchronizationId,binding.synchronizationId);assert.equal(status.state,'running');
+ assert.equal(status.functions?.length,1);assert.deepEqual(status.functions[0].range,expectedHover.range);
+ const lines=expectedHover.text.split('\n');assert.equal(lines.length,4);assert.equal(lines[1],'```solidity');assert.equal(lines[3],'```');
+ return [[{kind:'paragraph',text:lines[0]},{kind:'code',text:lines[2]}],[{kind:'paragraph',text:require('../src/model.cjs').status(status.functions[0])}]];
+}
+function popupObservation(observed,metadata,hidden=false){
+ assert.equal(observed?.activeUri,metadata.binding.uri,'popup active source URI');assert.ok(Number.isFinite(observed.at),'actual renderer observation time');assert.ok(Array.isArray(observed.widgets));
+ if(hidden){assert.equal(observed.widgets.length,0,'Escape must remove every visible hover');return;}
+ assert.equal(observed.widgets.length,1,'one visible native hover');assert.equal(observed.widgets[0].fullyVisible,true,'hover fully inside viewport');assert.deepEqual(observed.widgets[0].rows,popupExpected(metadata),'exact ordered native Markdown/code/decoration rows');
+}
+function verificationPopupOrder(records,start,binding,position,hover,report){
+ // Preserve the existing one-provider assertion unchanged, then validate the
+ // additional UI request independently. Never discard extra requests silently.
+ const matching=records.map((r,index)=>({r,index})).filter(({r,index})=>index>=start&&r.direction==='client'&&r.message?.method==='textDocument/hover'&&r.message.params?.textDocument?.uri===binding.uri&&r.message.params.position?.line===position.line&&r.message.params.position?.character===position.character);
+ assert.equal(matching.length,2,'exactly API and native popup hover requests');const [api,popup]=matching;assert.notEqual(api.r.message.id,popup.r.message.id);
+ for(const query of matching)assert.equal(records.filter(r=>r.direction==='server'&&r.message?.id===query.r.message.id&&(Object.hasOwn(r.message,'result')||Object.hasOwn(r.message,'error'))).length,1,'one response per actual hover request');
+ const replies=records.map((r,index)=>({r,index})).filter(({r,index})=>index>popup.index&&r.direction==='server'&&r.message?.id===popup.r.message.id&&(Object.hasOwn(r.message,'result')||Object.hasOwn(r.message,'error')));assert.equal(replies.length,1,'one popup reply');const reply=replies[0];assert.ok(!reply.r.message.error);assert.deepEqual(reply.r.message.result,hover);
+ const {wireDocument}=require('./trace-presentation.cjs'),wire=wireDocument(records,popup.index,binding.uri);assert.equal(popup.r.message.params.textDocument.version,binding.version);assert.equal(wire.version,binding.version);assert.equal(wire.textHash,binding.textHash);assert.equal(wire.openIndex,binding.protocolOpenIndex);assert.equal(records[wire.openIndex].message.params.textDocument.synchronizationId,binding.synchronizationId);
+ // Replacing the popup pair with inert records retains all original indices,
+ // source changes, terminal messages and every other query for the old check.
+ const single=records.map((r,index)=>index===popup.index||index===reply.index?{}:r),base=verificationHoverOrder(single,start,binding,position,hover,report);
+ assert.ok(base.hoverResponseIndex<popup.index&&popup.index<reply.index&&reply.index<base.terminalIndex,'both real hover replies precede the current terminal');
+ return {...base,popupRequestId:popup.r.message.id,popupRequestIndex:popup.index,popupResponseIndex:reply.index,scope:'Two exact real provider replies before actual current verification terminal; rendered popup and dismissal checked separately.'};
+}
+
+module.exports={synchronizedBinding,sourceBinding,sameSource,assertCertifiedFailureObservation,currentFailureStatus,menuObservation,proofHoverExpected,verificationHoverOrder,popupExpected,popupObservation,verificationPopupOrder};

@@ -1,0 +1,47 @@
+{
+  "artifact": {
+    "bytes": 245627,
+    "lines": 7427,
+    "path": "/workspace/h62-audit-language-evidence/h44/scope-manifest.full.json",
+    "portable_archive_member": "evidence/h44/scope-manifest.full.json",
+    "sha256": "4d3584480a4529e16c96314c92049a9fde4d4204bee764c06a1ed454c93d15c5"
+  },
+  "boundary": "Generated per-file census/ownership inventory is off Git under H44. Full original scope remains preserved and authenticated; no proof, gate, budget or scope changes.",
+  "generator": "scripts/h62/item2/audit-language/scope_manifest.py",
+  "kind": "H44-external-bulk-manifest",
+  "reproduce": "python3 scripts/h62/item2/audit-language/scope_manifest.py --census /workspace/h62-audit-language-evidence/census-final/census.json --output /workspace/h62-audit-language-evidence/h44/scope-manifest.reproduced.json",
+  "schema_version": 1,
+  "scope": {
+    "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+    "batch": "solidity-h62-2-20261106",
+    "branch": "codex/solidity-h62-2-20261106/audit-language",
+    "frozen_exact_manifest": "/workspace/h62-audit-language-evidence/census-final/census.json",
+    "frozen_exact_manifest_sha256": "aa09183317cc9cd143bd39b6815d2e507466681ce02c7f32235ce9927b33a293",
+    "frozen_manifest_generator": "scripts/h62/item2/audit-language/census.py",
+    "frozen_module_maps": {
+      "docs/module-map/language.md": "95f9dae9a77985c80079bafc983b1cbcfc51be141830c8e25fe58cbafd20d778",
+      "docs/module-map/source-definitions.md": "66d6defd64930a4266243b48a136a794664ff7d04657b4e51245ace392150191"
+    },
+    "generated_roots_module_maps_axiom_pins": "unchanged; no registration performed",
+    "h82_supersession": "Statement-preserving edits no longer require exact-file owner agreement. Existing statements, dependent definition bodies, interfaces, budgets, axiom sets and exclusions still require owner authorization; frozen interfaces use H57 pairs.",
+    "handoff_to": "solidity-sol2-20261104/numeric-literals",
+    "historical_read_only_originals": true,
+    "mapped_files": 389,
+    "original_audit_areas": [
+      "language",
+      "source-definitions"
+    ],
+    "original_exclusive_write_scope": [
+      "tests/h62/item2/audit-language/**",
+      "scripts/h62/item2/audit-language/**",
+      "docs/feature-work/h62-2-audit-language.md"
+    ],
+    "registration_fragment": "tests/h62/item2/audit-language/registration-fragment.md",
+    "repository": "/workspace/solidity-lean",
+    "retirement_overrides_continuation": "Worker explicitly stopped by human; H82 does not authorize implementation after retirement.",
+    "schema_version": 1,
+    "slug": "audit-language",
+    "source_candidates": 4146,
+    "source_file_edits_this_turn": []
+  }
+}
