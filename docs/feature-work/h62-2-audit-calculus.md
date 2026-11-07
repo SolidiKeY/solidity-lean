@@ -290,3 +290,13 @@ The review separates model recipient/oracle acceptance from funding, physical di
 
 
 The payment slice's repository-wide documentation check fails exit1 on the same5missing references in citing sources unchanged from inspected master. Full diagnostics/source comparisons are in payment-classification-v10/doc-gate.json. Owned accounting/control success is not a passing documentation or full acceptance gate.
+
+
+## Successor capture/private-closing source-role slice (2026-11-06)
+
+After fresh master inspection at8dbbb58e6eda3d7a8e7e55fbb31e24acf5eb5990, classified all7CapturePayments and5private PaymentClose theorems against exact frozen/current source identities. Prior119rows and owners unchanged. Ledger now131roles reviewed,5152pending;3746owners confirmed,1537unresolved. No new simultaneous witness or runtime acceptance.
+
+Exact callback selection, evaluation-result equalities (including errors), supplied original outcomes, fixed-state conditional evaluation laws, mapped halt/violation outcomes and CapturesAs universal guards/disjunction remain explicit. Private helper frame/root typing, nonself/paid, implicit state typing/read and P-implication/presence/branch premises are retained. No capture equivalence/unconditional execution, compiler correctness or closer completeness/performance follows. Read-only audit only: closer/default/budget/source untouched, no original H28 excluded tactic work. Both independent reviews pass without Lean/server/writes;89Python controls pass; complete CLI acceptance still FAILS exit1. Full bulk evidence remains off Git in capture-close-classification-v11 and its small manifest; all original queues/pauses/STOPs remain binding.
+
+
+Capture/private-helper classification was also checked with fresh per-command measurements: accounting exit0,0.266966s,71376KiB maximum child RSS; complete acceptance exit1,0.276756s,72464KiB;89 controls exit0,0.138679s,15240KiB. Measured and initial accounting outputs are identical. These are static gate measurements, not matched tactic-performance comparisons. Documentation check still fails exit1 on the same5missing references in unchanged citing sources; exact diagnostics are archived and its RSS was not captured. No whole-gate pass is claimed.
