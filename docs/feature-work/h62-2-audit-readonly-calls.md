@@ -809,3 +809,83 @@ c9cf710a8459581006150a462b69ae8c4f0d13e0. It is not on this master; the reposito
 documentation gate remains failing until adoption and recheck. The exact retired
 proof-cleanup object fb0defdca5c5fe9baa7fd8c1e1271a91d255e1c9 remains unavailable;
 its historical acceptance stays UNVERIFIABLE, without rebaselining or revival.
+
+
+## Fresh original-obligation dependency census (2026-11-07)
+
+After fetching master 32d810f1dae86d884f9799b0444af959dd291bda, the previous
+native/frame checkpoint rebased from e4d0e8e1dba10ac26a8cb15065c92fd794facd39
+to e96d96705245031cdf16c33a3db9ee047685c001. Its saved proof evidence remains
+at its original source revision; this census adds no current-tree proof claim.
+
+The new current_dependencies driver joins all 792 original statements in all
+129 original modules to a FRESH compiler-parsed declared-header capture. Existing
+SDK-only header tooling treats tracked core source as inert strings: no
+inventoried project import/body executes, including held Premises. All 6663
+captured core nodes parsed successfully; eight real header controls passed.
+Separate-package/test/unregistered paths outside the configured core roots are
+not promoted to coverage. Dynamic references and body elaboration remain unknown.
+
+The driver verifies the reviewed historical ledger's exact source signatures,
+variable context and visibility against original c6f550e Git blobs and the frozen
+module map. It retains every original row, historical owner and reviewed status.
+For each original module it fingerprints the complete observed declared source
+closure: full source hashes, module identity, header hashes, exact import flags,
+resolutions and observed SDK artifact digests. Cycles terminate; unresolved and
+missing sources remain explicit. A complete declared observation says nothing
+about whether a dependency cycle compiles or whether the bodies are adequate.
+Committed changed/added dependency paths are compared against original Git blobs;
+127 of 129 original module closures contain such byte changes. These include
+proof/comments/import changes; they are not semantic weakening findings.
+
+Final observations: 770 lexical headers retained, 19 header/context drift, three
+absent private declarations. Those exact private identities remain
+CaptureFailures.run_bind, CapturePhases.run_bind and EnvironmentCredit.run_bind;
+their historical RO owner is retained, never silently mapped to shared Hoare
+helpers. Twenty-five original modules have declared paths to held Premises;
+104 have no declared path. Neither result grants compilation permission or
+clears the historical +80.254966536% timing STOP. All rows retain pending current
+kernel fidelity and unverified live ownership. No exact current type/body
+correspondence, global premise inhabitance or joint witness follows.
+
+Nine external controls pass, including unchanged signature/changed dependency
+body, private omission, cycles, SDK digest/import-flag drift, missing/unresolved
+inputs, forged paths, duplicate nodes and zero-theorem modules. Independent
+read-only finder and skeptic found the same child-receipt provenance gap: the
+first driver sampled the receipt file's hash after capture rather than deriving
+it from the successful returned receipt. The fix authenticates exact serialized
+live-result bytes before reading the file and rechecks that digest after
+accounting; a new substitution/failed-child control covers it. Both reviewers
+confirmed the fix without executing Lean/tests/server or writing files.
+
+The final fresh capture passed after that fix. The earlier pre-fix result is
+historical only; its ledger output is byte-identical to the final same-head
+capture, which supports deterministic observation, not acceptance of the old
+receipt chain. Current source/head/configuration, tools, source closures, child
+receipts, process logs and observed SDK artifacts are checked before success.
+The actual inert-header parser command took 9.657428673 seconds at 635973632 bytes
+peak aggregate RSS, exit 0. Lean 4.24.0, explicit -j1 --tstack=131072,
+LEAN_NUM_THREADS=1, capped memory with 4 GiB reserve and no swap; no proof budget
+change. No KeySort/runtime/full-proof gate is inferred from metadata parsing.
+
+Raw captures/receipts, the lossless ledger, refusal controls and reviews are under
+/workspace/h62-audit-readonly-calls/current-dependencies/. Content pins are in
+`tests/h62/item2/audit-readonly-calls/current-dependencies.sha256`. The committed
+driver is the deterministic generator; bulk records remain off Git. Receipt
+paths are VM-specific; content verification is not independent SDK certification.
+
+All original classifications remain: 35 joint, three target-failure joint,
+45 intentional impossibility, 256 without top-level input hypotheses, two V1
+refutation/migration cases and 451 ordinary pending. ZERO original obligations
+are discharged here, and coverage.json remains unchanged. No Lean declaration,
+frozen statement/definition/premise/exclusion, axiom or budget changed. All
+original/inherited proof acceptance, owner/compiler-success work, nineteen
+current lexical drifts, three private gaps and the full H121 Source/world/native
+frame producer remain unfinished. No RUNTIME_GATE_PASS, goal completion or push.
+
+Next independent work: use this explicit census to inspect the nineteen current
+header/context changes and their original statements, preserve the three private
+identities, and continue supported joint witness/refutation work on independently
+checkable inputs. Declared no-path is not a release of any timing hold. Live
+ownership still requires current authoritative evidence. Historical proof-cleanup
+fb0defdc remains UNVERIFIABLE; P20 owner repair still awaits integration/recheck.
