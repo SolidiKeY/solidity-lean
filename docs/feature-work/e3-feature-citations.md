@@ -1,4 +1,4 @@
-# E3 feature citations — schema checkpoint, blocked
+# E3 feature citations — schema and checker checkpoints
 
 Base: `a0a9ca15ba35fd6e8d9a9be10e4b6b45dbf45d3e`.
 Branch: `codex/plan-e3-feature-citations-1107/e3-feature-citations`.
@@ -6,8 +6,10 @@ Checkout: `/workspace/e3-feature-citations`.
 
 ## Scope and rules
 
-Only the manifest, `scripts/check-feature-citations*`, coverage plan and
-`docs/feature-work/e3-*.md` may change. No Lean statements, premises, axioms or
+The initial lease covers the manifest, `scripts/check-feature-citations*`, coverage
+plan and `docs/feature-work/e3-*.md`. Coordinator answer E3-Q1 (#167) extends
+it to only the schemaVersion assertion in `scripts/solidity-feature-audit.py`
+and its compatibility test; all other reader validation remains unchanged. No Lean statements, premises, axioms or
 proofs change. H112 requires end-to-end reuse of generic interfaces; H117
 requires studying hard problems rather than patching them here. H44 keeps bulk
 resolution/census output off git with SHA256 manifests and a deterministic
@@ -151,3 +153,15 @@ Artifacts are at `/workspace/e3-feature-citations-evidence`: `original.patch`,
 `handoff.md`, `e3-feature-citations.bundle`, and `SHA256SUMS` describe the exact
 committed checkpoint. No task branch was pushed or merged. The only push was
 the explicitly required question ref. Bulk evidence is outside git.
+
+## E3-Q1 resolved — coordinator answer #167
+
+The coordinator selected A: the lease now includes the reader's schemaVersion
+assertion and a compatibility test; no other validation may change. The reader
+accepts versions 1 and 2 via a single assertion change. The compatibility test
+`python3 -I scripts/check-feature-citations-compat.test.py` validates the exact
+base version-1 manifest and current version-2 manifest, verifies unchanged
+rendering for the citation extension, rejects unsupported versions, and confirms
+missing evidence still fails both versions. No other reader logic changed.
+Earlier blocked-checkpoint sections above record historical results; E3-Q1 is
+resolved. Citation population and its final gates remain pending.
