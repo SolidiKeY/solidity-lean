@@ -641,3 +641,18 @@ checked-success tuples report propext, Classical.choice and Quot.sound through
 imported definitions. Both read-only reviews pass. These are local feasibility
 certificates, not complete compiler-success, statement-coverage or timing gates.
 Detailed logs, axiom output, resources and source bindings are archived privately.
+
+Sixteen additional result-observation, truncation and rescaling laws now have
+full joint tuples in the same witness module (37 distinct law targets total).
+The decimal product uses scale 10 and a nonzero discarded remainder; exact
+product/division tuples satisfy their actual divisibility premises. Downscale
+exactness and rescaling composition exercise active digit-dropping branches.
+An explicit branch check rules out a scale-one truncation example. Every target
+still has an identical frozen/current source signature.
+
+The bounded serial Lean check passes in 2.569 seconds after KeySort. Imported
+standard axiom dependencies are printed per witness; no new axiom, assumption
+or proof budget is introduced. Independent read-only finder/skeptic reviews
+pass. The expanded witness check is not a matched migration timing comparison,
+compiler-success theorem, complete audit coverage or full acceptance. Validation
+logs, source bindings and resource records remain in the private H145 archive.
