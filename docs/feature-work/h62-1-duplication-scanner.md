@@ -920,3 +920,52 @@ remain. This text-scanner timing does not clear the original +80.254966536% Lean
 STOP. Full original/inherited acceptance, owner RO v2 migration, actual V13
 compiler success with fixed V15/P10 outcomes, and exact retired proof-cleanup
 object recovery remain outstanding. No RUNTIME_GATE_PASS is claimed.
+
+
+## General project declaration accounting
+
+The shared `declaration_ledger.py` now accounts for every recorded constant and
+lexical row for the admitted unchanged KeySort, AST and Scope sources. The new
+`account_project_declarations.py` defaults to KeySort; AST and Scope require an
+explicit target. It always runs the existing fresh producer, verifies its returned
+receipt and exact staged source, recomputes the source-range join, and rechecks
+child metadata, bindings, receipts, logs and source before sealing the ledger.
+Saved receipts cannot authorize a run. Dependency artifact identities remain in
+the referenced completed-child capture; the parent does not recertify its runtime.
+
+Fresh captures retain these per-target observations, without creating links:
+
+| Target | Lexical rows | Observed constants | Existing direct links | Legacy metadata refusals |
+|---|---:|---:|---:|---:|
+| KeySort | 32 | 161 | 16 | 0 |
+| AST | 135 | 781 | 98 | 0 |
+| Scope | 37 | 312 | 25 | 26 |
+
+The table is per imported observation, not a global declaration census. Every
+unmatched range, missing range, constructor/generated record, type refusal and
+ownership uncertainty remains explicit. Matching a range fragment never creates
+a source link. The existing Scope metadata wrapper reuses the same core and
+retains its byte-identical ledger, including the separate v2 domain. A fresh
+wrapper run also passes all fourteen Lean controls and preserves all 26 V1
+refusals while recording 312 separate v2 types.
+
+All 189 Python controls pass, including generic target/count/refusal, omitted-row,
+module/path mismatch, post-child mutation, replay and shared-core provenance
+controls. A warned matched comparison on identical saved Scope inputs gives
+0.010005347s before and 0.010100444s after per accounting call (+0.95%); full output
+is equal. Five alternating pairs follow a warmup, fifteen calls per sample in
+the same process, capped at 512 MiB address space and 30 seconds CPU. Observed
+whole-process peak RSS is 37008 KiB, not independent per-version peaks. Fresh
+producer timings are observations, not matched performance comparisons.
+
+Finder review caught the missing shared-core hash in the existing Scope receipt;
+the fix records its initial hash just as the new driver does. Final finder and
+skeptic reviews found no remaining issue; neither executed tests or used a Lean
+server. Initial tool hashes and completed-child checks are not remote attestation.
+Actual versions remain Lean 4.24.0 and Lake 5.0.0-src+797c613; all fresh bounded
+KeySort prerequisites pass. No Lean source, statement, budget or axiom changed.
+All 792 obligations, original +80.254966536% Lean STOP, live ownership limits,
+producer waits and unfinished original/inherited acceptance remain. This adds no
+feasibility, compiler-success, body-equivalence or RUNTIME_GATE_PASS claim.
+Evidence and deterministic reproduction commands are saved on the original VM
+under `/workspace/h62-audit-readonly-calls/project-accounting/`.

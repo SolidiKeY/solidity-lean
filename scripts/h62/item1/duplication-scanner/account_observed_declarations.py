@@ -13,63 +13,32 @@ from pathlib import Path
 import subprocess
 
 import observe_metadata_types as observer
+import declaration_ledger as common
 closure=observer.closure
 binder=observer.binder
 SOURCE="Solidity/Scope.lean"
 
 
-def keyed(rows):
-    result={}
-    for row in rows:
-        key=closure.leaf.kernel.name_key(row["declaration"])
-        if key in result:raise ValueError("duplicate declaration identity")
-        result[key]=row
-    return result
+keyed=common.keyed
 
 
 def account(source,lexical,legacy,bindings,observation):
-    """Structural accounting only; saved packets do not authenticate execution."""
+    """Preserve the separate metadata observation and the original ledger format."""
     observer.validate(observation,legacy)
-    expected=closure.leaf.source_binding.join_locations(source,lexical,legacy["census"],legacy["locations"],closure.profile("scope")["module"])
-    if expected!=bindings:raise ValueError("source binding correspondence drift")
-    known=keyed(legacy["census"]["rows"]);locations=keyed(legacy["locations"]["rows"]);versions=keyed(observation["census"]["rows"])
-    linked={};sources=[]
-    for index,(row,bound) in enumerate(zip(lexical,bindings["rows"])):
-        if row["path"]!=SOURCE:raise ValueError("foreign lexical source")
-        sources.append({"index":index,"lexical":row,"legacy_binding":bound,"ownership":"unverified","body_equivalence":"unproved"})
-        if bound["status"]=="direct-source-signature-link":
-            key=closure.leaf.kernel.name_key(bound["declaration"])
-            if key in linked:raise ValueError("multiple source rows claim one declaration")
-            linked[key]=index
-    constants=[]
-    for key,row in known.items():
-        selection=locations[key]["selection"];fragment=None
-        if key in linked:
-            state="existing-direct-source-link"
-        elif selection is None:
-            state="no-compiler-range"
-        else:
-            fragment=closure.leaf.source_binding.source_slice(source,selection)
-            if key[-1]!=("str",fragment):state="range-name-differs"
-            else:state="direct-range-without-legacy-link"
-        constants.append({"legacy":row,"metadata_v2":versions[key]["metadata_v2"],"selection":selection,
-                          "source_evidence":{"status":state,"lexical_index":linked.get(key),"selected_fragment":fragment},
-                          "ownership":"unverified","unloaded_private_coverage":"unproved"})
-    if len(constants)!=bindings["visible_kernel_total"] or len(sources)!=bindings["lexical_total"]:raise ValueError("accounting cardinality drift")
-    return {"schema":1,"kind":"lossless-observed-declaration-ledger","source_path":SOURCE,"source_sha256":bindings["source_sha256"],
-            "lexical_total":len(sources),"kernel_total":len(constants),"legacy_links":len(linked),"sources":sources,"constants":constants,
-            "source_evidence_counts":dict(Counter(r["source_evidence"]["status"] for r in constants)),
-            "lexical_binding_statuses":dict(Counter(r["legacy_binding"]["status"] for r in sources)),
-            "legacy_type_statuses":dict(Counter(r["legacy"]["status"] for r in constants)),
-            "metadata_v2_type_statuses":dict(Counter(r["metadata_v2"]["status"] for r in constants)),
-            "boundary":"Every observed imported constant and selected lexical row counted once. Range categories are observations, not generated-identity inference, global/private completeness, signature promotion, ownership, feasibility or body equivalence. Original792 obligations and Lean timing STOP unchanged."}
+    result=common.account(source,lexical,legacy,bindings,SOURCE,closure.profile("scope")["module"])
+    versions=keyed(observation["census"]["rows"])
+    for row in result["constants"]:
+        row["metadata_v2"]=versions[closure.leaf.kernel.name_key(row["legacy"]["declaration"])]["metadata_v2"]
+    result["kind"]="lossless-observed-declaration-ledger"
+    result["metadata_v2_type_statuses"]=dict(Counter(r["metadata_v2"]["status"] for r in result["constants"]))
+    return result
 
 
 def run(output):
     """Caller owns writer lease through fresh observation and final seals."""
     if not output.is_absolute():raise ValueError("output must be absolute")
     output.mkdir(mode=0o700,exist_ok=False)
-    receipt={"schema":1,"status":"failed","kind":"fresh-observed-declaration-ledger","steps":[],"driver_sha256":binder.sha(Path(__file__))}
+    receipt={"schema":1,"status":"failed","kind":"fresh-observed-declaration-ledger","steps":[],"driver_sha256":binder.sha(Path(__file__)),"core_sha256":binder.sha(Path(common.__file__))}
     try:
         live=observer.run(output/"observed")
         live_hash=hashlib.sha256((json.dumps(live,indent=2)+"\n").encode()).hexdigest()

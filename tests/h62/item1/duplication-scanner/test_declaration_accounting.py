@@ -1,5 +1,6 @@
 """Guard dropped kernel/source declarations and guessed range-based identities."""
 import copy
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -76,6 +77,15 @@ class DeclarationAccountingControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'correspondence drift'):self.run_ledger()
         self.setUp();self.source='-- inserted\n'+self.source
         with self.assertRaises(ValueError):self.run_ledger()
+
+    def test_failure_receipt_identifies_shared_accounting_core(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output=Path(tmp)/'new'
+            with mock.patch.object(ledger.observer,'run',side_effect=ValueError('producer failure')):
+                with self.assertRaisesRegex(ValueError,'producer failure'):ledger.run(output)
+            receipt=json.loads((output/'receipt.json').read_text())
+            self.assertEqual(receipt['core_sha256'],ledger.binder.sha(Path(ledger.common.__file__)))
+            self.assertEqual(receipt['status'],'failed')
 
     def test_saved_ledger_directory_does_not_trigger_observation(self):
         with tempfile.TemporaryDirectory() as tmp:
