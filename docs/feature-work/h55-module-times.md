@@ -1651,3 +1651,20 @@ current result. The new log is checksum-bound by
 `tests/h55/module-times/pin-integration-evidence.sha256`. This static checker
 does not replace Lean guarded-print verification or the full proof gate, and
 does not authorize or perform H109 pin relocation.
+
+## Storage audit candidates from the later drift snapshot
+
+`storage_audit_controls.py` records eleven supplied source-hashed new
+candidates. TargetInputWitnesses supplies data inhabitance for laws with no
+logical hypotheses, not joint logical premises or totality. The selected
+finite, source and target fixtures do not establish global hash injectivity,
+physical EVM gas/fork adequacy or a world rollback bridge. Their guarded
+axiom diagnostics are expected to elaborate successfully.
+
+The historical validator checks prerequisites and selected dependencies; it
+is not established as a driver for these eleven files. Its monitor has no
+wall deadline, and RLIMIT_AS is not an RSS cap. A historical KeySort comparison
+stopped at +12.163%; no unchanged rerun or current timing pass is inferred.
+Current inputs and outcomes remain unresolved. Independent read-only finder
+and skeptic reviewed these boundaries without Lean, server or builds. This
+subset does not establish full census or production acceptance.
