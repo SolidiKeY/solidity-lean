@@ -231,3 +231,11 @@ Master `7de6f66ad29488d70e3c31c6b2a4798b72a0a209` changes the Hash proof regions
 At diagnostic commit `7ca224b4f7976aa26da556c10cbd4c95aabe6cd8`, with the tracked `Solidity` tree equal to source baseline `7de6f66ad29488d70e3c31c6b2a4798b72a0a209`, the fresh Lean 4.35 MCP build failed before the helper. `Solidity.Hash.CollisionBound` built with deprecation warnings, then `Solidity/Roadmap/Contracts.lean:1104` expected `PublicCorrectness.transfer` to have no axioms while Lean reported `[propext, Classical.choice, Quot.sound]`. Source.Const and Source.Types also emitted deprecation warnings. The copied helper `.olean` is absent and its per-file diagnostic was not reached. The raw log is `current-consumer-attempt1.log` off Git. This reproduces the guard mismatch against the current-source baseline, not a helper, equivalence, runtime or timing pass; no guard or pin was changed.
 
 The run used Lean 4.35.0 and Lake 5.0.0-src+eb6cafb with the official archive SHA-256 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`, explicit `-j1`, no swap, sampled cgroup peak 8,404,975,616 bytes and sampled reserve 8,774,893,568 bytes. Archive comparison returned only recorded mode/uid/gid differences. Sampling is not a hard aggregate memory cap; the address-space limit is per process. Independent read-only finder and skeptic verified the log and missing helper artifact without Lean. The ignored project copy, cache and logs remain preserved; do not rerun unchanged.
+
+The partial current-consumer project is retained off Git. The deterministic
+`scripts/h62/item1/packet-panic/project_artifact_manifest.py` inventories its
+regular files by sorted relative path, size and SHA-256; its generated JSON is
+in the handoff evidence directory. It rejects symlinks and detects ordinary
+changes during each file read. It does not record empty directories, modes or
+ownership, and is not a race-proof snapshot against concurrent writers. The
+inventory records artifacts, not successful Lean checking.
