@@ -936,3 +936,41 @@ source hashes, reviews and the H44 bulk archive path/hash; generated AST/logs
 remain outside Git. Full source/semantic closure, other H90 forms/contexts,
 CR H68/H102 landing/importer migration, native/WASM qualification and timing
 acceptance remain open. Historical STOPs were not rerun.
+
+### H77 fixed-byte recipient inspection (2026-11-07)
+
+The five delivered files from native-browser head `14a39effa376` are now inspected,
+resolving their missing-byte wait. `verify-fixed-byte-intake.py` authenticates
+875 evidence payloads and five runtime payloads against both pinned outer hashes
+and embedded/external indexes. All 343 unique source records match Git build head
+1b2bdb490054293c86cddb5e4b7fa15736bae25b. The eight executable-boundary modules
+(five Shared modules, ControlTuple.Adapter, Memory.Reader, DirectRuntime) also match producer
+2738af99661d7ba582c92519b20d47bcba34a5a4. This is a boundary-subset comparison
+against 2738, not an entire producer-tree comparison. Native/WASM/JS bytes match
+their recorded build manifests. Nothing was extracted or executed.
+
+Saved native/browser projections agree after removing browser boot and reply
+timing fields; unique case identities and actual WASM boot hashes are checked.
+Box/diamond fixed-byte inventories contain 11 requests each, including one guard
+each; A 9, B 84, C 14 and functional 83 inventories also match. B remains 64 proved,
+16 refuted and 4 pending. The four mandatory Identity box/diamond x IR/non-IR rows
+are proved and correctly tagged in these saved observations. This is not a
+new execution, source-mode adequacy proof or qualification of the newer address
+reader. The 206 selected module records are counted; actual C/object bytes are
+not independently verified.
+
+All 19 handoff gate receipts match their indexed bytes and commands:18 exit 0 and
+one exit 1. The invariantCountsToBound browser stack failure remains; its 10 saved
+frames fall inside the delivered WASM's indexed bodies. No function-name/cause
+repair is inferred. Native cost/browser startup STOPs remain reported holds;
+no stopped benchmark or build was rerun.
+
+Four new external negative controls and three shared archive controls pass.
+Finder found an omitted Memory.Reader comparison; it is now included and both
+reviewers confirm no remaining static-intake blocker. An initial incorrect
+assumption of nine runtime modules and the intermediate report of the seven-module subset
+are preserved outside Git. Nine is the development cache count, not this runtime
+boundary count. `fixed-byte-intake.json` records provenance, counts, saved gate
+commands and limits. No production Lean, theorem, axiom or budget changed.
+CR relay remains held under H118; full importer parity/migration, address-native
+qualification, authorized stack/cost repair and whole-goal acceptance remain open.

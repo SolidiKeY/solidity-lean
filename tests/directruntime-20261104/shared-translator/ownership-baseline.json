@@ -1,8 +1,8 @@
 {
-  "commit": "5da4771e63a4278ed53932ac39a032e3d7aea6ed",
+  "commit": "ba3c0f1539c8b64ac0c6c89e729481d3d398ee83",
   "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
   "authority": "H82b authenticated translator scope and H90 reader extension; explicit published-master adoption",
-  "publication": "Fetched/adopted exact5da4771e6 publication before H90 address-local continuation.",
+  "publication": "Fetched and rebased onto exact ba3c0f153 publication before H77 fixed-byte recipient intake; this increment changes no production Lean.",
   "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref.",
   "exclusiveFiles": [
     "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
