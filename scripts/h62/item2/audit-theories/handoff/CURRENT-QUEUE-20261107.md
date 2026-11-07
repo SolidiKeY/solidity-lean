@@ -1,138 +1,87 @@
-# Current same-goal continuation handoff (2026-11-07)
+# Current disposition handoff — same original goal, 2026-11-07
 
-Latest explicit coordinator resumption supersedes historical retirement files.
-No new/reset/replacement/completed goal. Three reviewed work items completed;
-fresh thread is coordinator-managed for SAME VM/branch/goal, not self-launched.
-Repository: /workspace/audit-theories.
-Branch: codex/solidity-h62-2-20261106/audit-theories.
-Frozen assignment base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
-Rebase/delivery base: a8f684928fa085d8976ead33e3d0db30208e7a4f.
-VM: ccarenv_b64_Y2NhcmVudl8yZmZkMjNiNDVmNTg4MTkxOTI3MDI3NGVhZWM4N2E1ZA.
-No push/PR/master merge; goal-tool inspection unavailable, not a blocker.
+Repository /workspace/audit-theories; branch
+codex/solidity-h62-2-20261106/audit-theories; same original VM and unfinished goal.
+Frozen assignment base c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
+Delivery/rebase base a8f684928fa085d8976ead33e3d0db30208e7a4f.
+No push/PR/master merge, new/reset/replacement/complete/pause goal. Fresh thread
+is coordinator-managed after three reviewed items, not a self-launch/retirement.
 
-## Complete original scope
+## Complete original authority and scope
 
-original-frozen-assignment.txt contains the complete original visible assignment.
-original-work-and-backfill-queue.md preserves BOTH original queues verbatim.
-scope-manifest.json freezes all25 original theory source hashes, owner keys,
-original scope and prohibitions. Those files and old retirement evidence are
-preserved as historical, not assertions that retirement remains in force.
-All worker edits remain in the original tests/scripts audit subtrees and feature
-doc. H82 standing permission for statement-preserving changes is retained;
-statement/dependent-definition/interface/budget/axiom/exclusion changes require
-owner approval, frozen ones H57 versioned pairs. No pending proof-only exact-file
-agreement request. No producer source/root/map/axiom pin/toolchain edits.
+original-frozen-assignment.txt and original-work-and-backfill-queue.md preserve
+the COMPLETE original visible assignment and BOTH queues verbatim. scope-manifest
+pins original25files/ownerkeys/write scope/prohibitions; its retirement notes are
+historical and superseded by explicit resumption. New decisions are VERBATIM in
+COORDINATOR-ANSWERS-20261107.json. Original task writes remain audit tests/scripts
+and feature doc only. Detached original worktree is validation, not a new lane.
+No original source/interface/premise/definition/exclusion/axiom/budget change.
 
-## Full original queue, current obligations
+## Both scope decisions resolved
 
-1. Inventory: all500 original typed signatures and25 files reconciled historically;
-  44 global-structure/per-input role records reviewed,456 still need review.
-  Live producer owner confirmation remains incomplete, informational under H82.
-2. Simultaneous inputs:103 joint certificates available on current dependencies;
-  version fidelity separate.83 current full-file subset records,8 selected Pure records and6 additional
-  Payable packets validated.3 intentional H69 impossibilities accepted;18
-  no-input telescopes explicitly historical.373public+3private ordinary witnesses
-  pending, all986 original generated candidates retained pending. Exact1362
-  names/source/owners in final evidence remaining-original-records.json.
-  Static enter input is impossible and still ordinary-pending, not autoH69.
-3. Totality/controls:26 compiler helper proofs give actual core admission/bool
-  success/full public Input+Rep+stack and trivial reject/revert/noop compiler
-  refutations. Three new positive Payable model API controls include external
-  call execution/settlement. Broader supported compiler branches, physical target
-  ABI failure bytes, target gas/Fitted/Enforced and physical forks remain unproved.
-  Source fuel/stipend/fork boundaries do not discharge physical target obligations.
-  Preserve H68 full PassCorrect bridge requirements; don't duplicate H55 work.
-4. Acceptance:148 helpers/37fixture defs/7private abbreviations have current
-  provenance, no sorry/customaxiom/trust shortcuts. Full original census refuses
-  five changed Progress files; no frozen guard weakening. Full ./run-lean.sh and
-  full final gates pending; NO RUNTIME_GATE_PASS. Optional root/module placement
-  remains coordinator-reviewed fragment only. Old doc-path failure not rechecked:
-  absent Bridge mathlib MathlibTest/SplitIfs reference after-roadmap-va1.md.
+Q-FROZEN-REBASE option1: CLOSED by history-based original audit. Exactc6/tree
+checked, tracked sources clean, additive audit overlay from107cb28, all148helpers
+checked ORIGINAL dependencies and25file/500statement census passes. Report rebased
+coverage separately, not original/current definition equivalence. No auditor H57
+versioned pairs created. Original checkout preserved at
+/workspace/h62-audit-theories-frozen-c6-20261107.
+Q-STATIC-VALUE option3: enter_static explicitly intentional H69 separation
+boundary; payable_static_inputs_impossible is its audit result. Static nonzero
+value excluded on purpose. Operational refusal coverage=false. No ordinary joint
+witness claimed or invented. Four accepted H69 certificates; PENDING empty.
+No scope questions/owner approval waits remain; questions=[].
 
-## Real waits and scope questions
+## Entire original queue — unfinished obligations
 
-Q-FROZEN-REBASE [originalfidelity]: coordinator/H57 owners must disposition five
-upstream changed Progress files; four original signatures changed and dependent
-slotsFit/callTy definitions changed. Options: retain original obligations and
-separate current coverage with blocker; supply owner-approved H57 versioned pairs
-and audit their relationship. No statement/premise/exclusion approval recommended.
-Q-STATIC-VALUE [Payable]: Solidity.Theory.Mutability.ContractWorld.World.enter_static
-has incompatible ctx.isStatic=true/ctx.value!=0 under original Context.Mode.
-Checked full-telescope refutation; ordinary witness obligation pending. Options:
-retain blocker; owner-approved H57 versioned statement/model repair; explicit
-human H69 intentional-boundary disposition, not operational refusal coverage.
-No answer received; don't auto-promote it or change the frozen statement.
+1. Inventory: historical original500typed signatures/25files exact, original
+   source history confirmed.44premise roles reviewed,456remaining; live owner
+   confirmation incomplete, informational under H82 for statement-preserving work.
+2. Joint input/classification:103joint+4acceptedH69+18originaltyped empty telescopes;
+  372public+3private ordinary witnesses pending;986originalgenerated candidates
+   retained pending, no exclusions. Total1,361unique pending names/owners in final
+   original/current remaining-original-records.json. Pure26=8joint/17pending/
+   1historicalempty.83currentfull-file joints+6Payable+8selectedPure separately
+   verified. Generated classification and remaining cases must not be dropped.
+3. Totality:26compiler proofs in BOTH contexts cover actual bool-family admission/
+   success/fullInput/Rep/stack and trivial compiler refutations. Existing model
+   payable,write and terminating-loop controls add meaningful source observations.
+   Broader supported compiler branches, physical target ABI failure bytes,
+   gas/Fitted/Enforced and physical fork execution remain unproved. Do not count
+   source fuel or H69 static impossibility as physical operational coverage.
+   Preserve H68 full PassCorrect bridges; don't duplicate H55 producer work.
+4. Verification:148helpers/37defs/7privateabbrevs current+original receipts checked.
+   Originalcensus passes25/500; current source drift is separate version data,
+   not original fidelity blocker.44role/all25module snapshots and seven disposition
+   controls pass. Portable paired archive independent of oldVMpaths; positive+
+   five corruption controls pass. Full ./run-lean.sh and remaining final gates
+   PENDING, NO RUNTIME_GATE_PASS/full goal acceptance. Optional registration
+   fragments unapplied. Old offscope Mathlib doc-path failure not rechecked.
 
-## Independent queue/backfill remains available
+## Backfill and next work
 
-Fetch/log/code-inspect master before the next item, consume landed prerequisites.
-More unchanged Mutability/View/Pure, Typed/Obs/Values/Ops/Mem/Leaves,
-Segs, Progress/Calls and CallerModel/Reachable original statements need real joint
-packets (check exact names in ledger; do not pad or steal an owner scope).
-Continue remaining456 premise-role inventories and986 generated classifications,
-meaningful success/negative controls and deterministic receipt acceptance cases.
-Resource/timing tooling can be optimized with a matched before/after pair; do not
-rerun unchanged known STOP. Historic authorized pair30.298344s→30.926679s
-(+2.073826%, within10%) is evidence for that tool/tree only, not new proofs.
-No additional unassigned audit candidate claimed. Every milestone needs independent
-read-only finder/skeptic reviews; neither reviewer runs Lean/server/build.
+Continue genuine remaining17Pure/other ordinary witnesses,3private cases,
+986generated classifications,456role records/live owner census; stronger compiler
+success/negative controls and deterministic evidence/reproduction tooling within
+scope. Do not pad cases, weaken statements or steal new candidate ownership.
+Fetch/log/code-inspect master before new item; consume landed prerequisites.
+Latest fetch failed authentication twice (username for https://github.com);
+last successful65e69b6426a9a4fc3fb5541f41726a4bfefda5d0, newest remote unknown.
+Restore origin auth before next new implementation increment. Existing history/
+paired packaging completed using already verified local commits; no network or
+credential bypass. Real infrastructure wait: GitHub origin authentication.
 
-## Runtime and artifacts
+## Checks/resources/provenance
 
-Actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
-Lake5.0.0-src+797c613. Migration-only official4.35 pin does not change this audit
-lane's tracked toolchain. Serial explicit -j1,LEAN_NUM_THREADS=1, bounded12GiB AS,
-4GiB available reserve,no host swap,300s/file; preserve existing proof budgets.
-Fresh KeySort prerequisite passed in a8-rebase evidence,1.404s/245633024RSS.
-Current layer gate PASS with107 upstream pinned allowances, no worker exclusion
-changes; not a physical-edge repair. Per-file Lean MCP unavailable; bounded direct
-Lean used. No heavy jobs remain running at handoff. All bulk H44 evidence off Git;
-final absolute paths, actual final head and SHA256SUMS in final handoff.json.
-Full original text/queue/scope copies accompany cumulative patch/bundle exports.
-
-## Latest completed checkpoints and exact handoff
-
-This continuation completed/reviewed Assignable8 joint packets plus real write/
-emptyclause controls;8 Assignable premise inventories (36total); and acceptance
-snapshot combining136helper receipts,500original signatures/owners,1370remaining
-names/owners and36role reports. All5 snapshot corruptions rejected; 83full-file
-subset records and6 additional Payable packets checked separately.3accepted H69
-certificates unchanged; enter_static remains ordinarypending with refutation.
-Requested e0rebase verified contains full prior315a659a985 head. Fetched later
-origin/master fab1149c378e84ca69abacbe68e18620dfe871bc before final item; no
-relevant original Theory/owned audit duplicate, so no unrelated rebase applied.
-Final exact head/base/branch, clean status, all gate commands/outputs and hashes:
-/workspace/h62-audit-theories-e0-handoff-20261107-evidence/handoff.json.
-No push or master merge. No goal reset/create/complete/pause. Coordinator manages
-fresh-thread continuation on same VM/branch/existing goal after3revieweditems.
-
-## Latest a8 continuation supersedes earlier checkpoint counts
-
-Actual clean f0801b2192c6ddfa6f0730995679f3deb815616e merge head and full previous
-c8f38c779c6eb3186fc9fc093272f402f49e9bf2 delivery were verified ancestors of
-coordinator a8f684928fa085d8976ead33e3d0db30208e7a4f; actual rebase succeeded.
-All unexpected committed work preserved; same VM/branch/goal, no reset/push.
-Three reviewed items: Pure8 joint packets+4support controls;8Pure role inventories
-(44total); all25-original-module acceptance snapshot including2zero-decl files.
-148current helpers/103joint/1362originalpending/44roles456pending. Pure26 remains
-8joint/17ordinarypending/1historicalempty; full Pure subset refuses18 registry
-missing, which includes historicalempty. No new H69 disposition or generated
-exclusion. Current layer gate904core with107upstream allowances, no worker edits.
-
-Rebase invalidated oldSource/failure-boundary dependency receipts. Refreshed
-serially:296checks,62fresh/234cache,389.163freshseconds,1878937600peakRSS,0stops;
-all148helpers current. These are rebuild observations, not matched timing data.
-Seven snapshot corruption controls reject, including latePurebudget loss and
-universal-law relabeling. Independent finder/skeptic passed every milestone.
-Current snapshot protects the original25-file map, all500 original declarations,
-all remaining names/owners,44role interpretations, pending scopes and H69 reasons.
-Originalfidelity and fullruntime remain separate pending gates.
-
-Continue the17remaining ordinary Pure input witnesses (plus its historicalempty
-version boundary), remaining original witnesses/private cases, all986generated
-classifications and456role inventories. Broader supported compiler successes and
-physicalABI/gas/fork gates remain open. Two existing scope questions unchanged.
-Final actual head,base,branch,cleanstatus,gates/limits/reviews and SHA256SUMS:
-/workspace/h62-audit-theories-a8-handoff-20261107-evidence/handoff.json.
-Coordinator owns fresh-thread continuation after3revieweditems, sameoriginal
-VM/branch/existingunfinishedgoal. No new/reset/replacement/complete/pause goal.
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake5.0.0-src+797c613, tracked audit toolchain unchanged. Serial -j1 and
+LEAN_NUM_THREADS=1,12GiBASlimit,4GiBavailable reserve,300s/module,nohostswap;
+no maxHeartbeats increases. KeySort passes in both contexts. Reserve guard once
+stopped BEFORELean due owned artifact page cache; POSIX_FADV_DONTNEED released
+only owned evidence pages, no files deleted/process killed/limits relaxed; retry
+passed. No matched timing claim; historic authorized+2.073826% pair unchanged.
+Independent finder/skeptic reviews required each future milestone, no Lean/server/
+build by reviewers. All prior VM/evidence/checkouts preserved. Final exact head,
+base/branch/clean status, gates/reviews/limits and artifact SHA256SUMS:
+/workspace/h62-audit-theories-disposition-handoff-20261107-evidence/handoff.json.
+Portable paired archive includes artifact/source/log blobs and authority/scope;
+verification is integrity/coherence, NOT another kernel proof or equivalence.

@@ -1,3 +1,14 @@
+LATEST DISPOSITION HANDOFF: both coordinator questions RESOLVED. Original
+fidelity CLOSED by checked c6 history; static nonzero value accepted as the
+fourth intentional H69 boundary, NO operational refusal coverage. Original and
+rebased contexts each verify148helpers/103joint/4H69,1,361remaining original
+records.44roles/456remaining. Full goal remains unfinished, questions=[].
+Three reviewed items complete: policy decisions, original-history kernel audit,
+portable paired evidence. Same original VM/branch/goal; coordinator owns fresh
+thread. Final export: /workspace/h62-audit-theories-disposition-handoff-20261107-evidence.
+Origin refresh failed authentication twice; last successfully fetched65e69b642,
+recorded as a separate next-increment dependency, never a fidelity/scope blocker.
+
 LATEST ORIGINAL-HISTORY VALIDATION PASS: detached source tree is EXACT
 c6f550e281a7e5affa9a99bc2cdaed556dec00e4, tracked sources unchanged. All148audit
 helpers checked against ORIGINAL dependencies;25mapped files/500original names,
@@ -1387,3 +1398,57 @@ Original proofs still need1,361remaining witness/classification records and456ro
 inventories, live-owner inventory, broader compiler/physicalABI/gas/fork and full
 final gates. Continue the same original VM/branch/unfinished goal; do not reset,
 replace, complete or pause it. Portable original/current handoff is next item.
+
+## Portable paired-context checkpoint and final disposition handoff
+
+paired_evidence.py exports content-addressed original AND rebased source/import
+closures, compiled artifacts, raw receipt metadata/logs, typed census/reports,
+verbatim decisions and complete original assignment/queues/scope. Absolute VM
+paths are provenance only; archive verification never opens those paths. Original
+context is pinned to c6 commit/tree/history/typed census/scope, and its tracked
+sources stayed clean. Same15audit helper modules are byte-identical across both
+contexts; original291 and rebased296dependency modules are kept distinct.
+
+Verifier recomputes source/import fingerprints, every referenced blob/artifact/
+log hash and148helper declaration/axiom receipts per context. It reconciles
+500original typed/source metadata,103joint/4H69,1,361exact gaps/owners including
+986generated,44roles/certificates, authority hashes, fixed intentional labels
+and both static role/Payable rows with operational coverage=false. All25mapped
+files/counts and frozen scope source hashes are checked, including two zero-
+declaration files. Mapped source blobs must equal proof-import source blobs
+where applicable. These are portable integrity/coherence checks, not a kernel
+rerun, original/current definition equivalence or full assignment acceptance.
+
+Independent reviews caught missing referenced-olean and crossreport/mapped-source
+coherence gaps; all fixed. check_paired_evidence.py passes positive plus5meaningful
+refusals: corrupt blob, missing olean, self-consistently rehashed snapshot count,
+rehashed static operational row and rehashed mapped/proof source mismatch. All
+run under a Python audit hook denying EVERY other workspace path;0oldVMpaths
+opened. Exact tested input is preserved and SHA-pinned so final repacking does
+not overwrite test provenance. No reviewer edits/Lean/server/build; both final
+reviews pass with no residual findings. Evidence and controls are under
+/workspace/h62-audit-theories-decisions-20261107-evidence.
+
+This completes three reviewed work items for this continuation: explicit scoped
+coordinator decisions; all148helper proofs in exact original c6 context; portable
+paired original/current handoff. Under3–5-item rule coordinator continues the SAME
+original VM/branch/unfinished goal in fresh thread. No goal reset/replacement/
+completion/pause, self-launched replacement, push/PR/master merge. All four full
+original checkpoints remain partial. Original full assignment/queue/scope and
+verbatim new decisions accompany authenticated patch/bundle/portable archive.
+
+Both prior scope questions are closed, questions=[]: no H57 pair requested or
+created, no original statement/premise/exclusion/model/axiom/budget changed.
+Remaining372public+3private witnesses,986generated classifications,456role
+inventories/live owners, broader compiler successes and physicalABI/gas/fork/full
+runtime gates remain work. Literal joint-all for intentional static boundary is
+inapplicable, not blocked; ordinary Payable coverage passes. No operational static
+refusal or RUNTIME_GATE_PASS/full completion is claimed.
+
+The required pre-handoff fetch failed with GitHub username/authentication error;
+one fresh noninteractive retry after current/enforced environment status failed
+likewise. Last successful origin/master65e69b6426a9a4fc3fb5541f41726a4bfefda5d0.
+Known local deliverybasea8/historyc6 and all existing proof evidence remain valid;
+newest remote is unknown. No credentials changed/exposed or network policy
+bypassed. Restore origin authentication before future new implementation work;
+this is a typed infrastructure wait, not either resolved scope question.
