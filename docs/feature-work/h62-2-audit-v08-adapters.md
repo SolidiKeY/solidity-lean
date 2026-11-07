@@ -615,3 +615,11 @@ The off-Git index reproduces byte-identically under normal and optimized Python.
 ### Current pin/layer gate refresh
 
 After adopting master `e286f1843`, the actual pin gate at integrated head `3adf13b6efc0b47616361be9d38c7a7e0af3434c` exits1: zero axiom errors, 435 unrecorded changes. All thirteen WORLD-G07-13 entries remain explicitly listed as new; both pending request source hashes still match. No inventory was edited and no pin waiver or pass is claimed. The separate layer check passes: 903 core modules, zero new forbidden edges, 107 pinned allowances. Exact logs/results and hashes are retained through `tests/h62/item2/audit-v08-adapters/current-pin-layer-manifest.json`. These are static gate results, not full build or producer/session acceptance.
+
+### Typed-byte bounds and fixed Keccak joint model
+
+`TypedKeccakJoint.typed_bytes` proves the original per-member Nat-byte bound for every `List UInt8`, without an input-length restriction. The same input jointly inhabits that premise and the published complete `toyFixed.Keccak` pin, including its Sane conjunct. The original strict fold bound applies to arbitrary initial accumulators, and the two exact fixed-hash word/byte observations share the same pin and input. Nat input `[256]` genuinely refutes boundedness; it is not a collision or Source failure claim.
+
+The bounded serial check passed in 50.138 seconds including import builds, one Lean, peak sampled aggregate RSS 2,206,543,872 bytes and no STOP. This cold elapsed is not a matched timing result. Trust and registration passed. One component family, zero full statement-fidelity acceptances. The toy model's ledger/precompile mocks are not certified; no hash injectivity, Source expression execution, admission or H68 adequacy follows. Exact bindings are in `tests/h62/item2/audit-v08-adapters/typed-keccak-joint-manifest.json`.
+
+After coordinator master `32d810f1d` was adopted, the same module passed again in 0.946 seconds (one Lean, peak sampled aggregate RSS 687,300,608 bytes, no STOP). This cached revalidation is not compared with the earlier cold import build as a speed result. Independent read-only finder/skeptic reviews found no issues.
