@@ -10,6 +10,7 @@ const {workload,symbolPosition,verificationOutcomes,servicesWorkload,assertServi
 async function run() {
   const vscode = require('vscode');
   const config = JSON.parse(readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));
+  config.hostFilesystemCapability=require('./filesystem.cjs').recursiveCapability(config.dir);writeFileSync(join(config.dir,'host-filesystem-capability.json'),JSON.stringify(config.hostFilesystemCapability));
   // Desktop VS Code may resolve a login-shell PATH. Preserve the explicitly
   // selected backend toolchain rather than silently switching installations.
   Object.assign(process.env,config.runtimeEnvironment||{});
@@ -104,7 +105,9 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
-    if(config.suite==='compiler-output'){
+    if(config.suite==='dafny-compiler-output'){
+      await scenario('native-dafny-output-configuration',()=>require('./dafny-output.cjs').run({vscode,config,events,keybindingRequest,until,observation}));
+    }else if(config.suite==='compiler-output'){
       await scenario('native-compiler-output-configuration',()=>require('./compiler-output.cjs').run({vscode,config,events,keybindingRequest,until}));
     }else if(config.suite==='output-lifecycle'){
       await scenario('native-output-restart',async()=>{

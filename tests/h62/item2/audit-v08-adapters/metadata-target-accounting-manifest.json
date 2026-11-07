@@ -1,0 +1,63 @@
+{
+  "status": "ACCOUNTING_ONLY",
+  "indexed_targets": 10,
+  "new_joint_witnesses": 0,
+  "full_statement_fidelity_acceptances": 0,
+  "fresh_kernel_checks": 0,
+  "script": "scripts/h62/item2/audit-v08-adapters/index_components.py",
+  "script_sha256": "544c416225fa10c9c0cfab4900912911d09a7fbfdd386d75bfcf5cf3b2ac67e4",
+  "inputs": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/master-traceability-20261106/census/census.json",
+      "sha256": "e1b0fb122c16b9d0f2a9713a936e4a8dcfd11c8847098685098bd50fc579fa03"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/callable-kernel-census-20261107/inventory.json",
+      "sha256": "2440a4983aee1f3e582cbf3961cdc12f68dbfbcefeb60f33317235675ac55a3a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/observation-kernel-census-20261107/inventory.json",
+      "sha256": "7ee4da89fc28a8121e00a2b44ac85347f475aa69190edeff22ca09f60d3854ca"
+    },
+    {
+      "path": "tests/h62/item2/audit-v08-adapters/callable-metadata-joint-manifest.json",
+      "sha256": "ba594de7b096522bca41d0175f06f16b9665fc036066d091689295ae2c47dba7"
+    },
+    {
+      "path": "tests/h62/item2/audit-v08-adapters/inherited-nonpayable-joint-manifest.json",
+      "sha256": "ec13fffa75a19984925bd38f1ceb938e3d27128adbaa020538822d3e7bc65bd1"
+    },
+    {
+      "path": "tests/h62/item2/audit-v08-adapters/payable-guard-joint-manifest.json",
+      "sha256": "f5c289307cf4c2d977a3aaff2202254a4febb3a2a7b1e42b96d911ae41fe62cf"
+    },
+    {
+      "path": "tests/h62/item2/audit-v08-adapters/role-attachment-joint-manifest.json",
+      "sha256": "d87c8c6deadab6109ff6b83cbf92c8933e6f69a743ae2e7badf902126b92a7d4"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/metadata-target-accounting-20261107/checks.json",
+      "bytes": 217,
+      "sha256": "725db09113b8726becb2e37b69bdcb07ca71a4fa1339aa8d5fafe83b8b61abc6"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/metadata-target-accounting-20261107/index-optimized.json",
+      "bytes": 9076,
+      "sha256": "00d02ae5612a83ba51bc5ee829ddade458f7d4f5f5d45e2ed5aa11861b775b2e"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/metadata-target-accounting-20261107/index.json",
+      "bytes": 9076,
+      "sha256": "00d02ae5612a83ba51bc5ee829ddade458f7d4f5f5d45e2ed5aa11861b775b2e"
+    }
+  ],
+  "limitations": [
+    "Ten original public target names linked once to frozen lexical IDs and saved snapshot-qualified kernel types; not full semantic fidelity.",
+    "Kernel type hashes checked for internal consistency, not fresh source elaboration or complete import closure.",
+    "Inherited refusal applications are proof components, not newly discovered execution behavior.",
+    "Full original mapped inventory, producer witnesses and H68 remain unfinished."
+  ],
+  "reviews": "Independent read-only finder/skeptic: no findings. Input hashes identify snapshots, not semantic provenance; exclusive output creation does not enforce an off-Git destination. No reviewer tests/Lean/server."
+}

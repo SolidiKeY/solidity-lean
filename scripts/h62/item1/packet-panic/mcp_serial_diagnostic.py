@@ -14,7 +14,7 @@ from pathlib import Path
 import signal
 import sys
 import time
-from diagnostic_policy import validated_target
+from diagnostic_policy import validated_target, validate_fresh_project
 
 root = Path(__file__).resolve().parents[4]
 parser = argparse.ArgumentParser()
@@ -24,6 +24,7 @@ args = parser.parse_args()
 project = args.project.resolve(strict=True)
 allowed_projects = {
     root / "tests/h62/item1/packet-panic/closure-project-retry",
+    root / "tests/h62/item1/packet-panic/closure-project-current",
     Path("/workspace/h62-packet-panic-overlay-2a18/tests/h62/item1/packet-panic/closure-project-overlay"),
     Path("/workspace/h62-packet-panic-overlay-2a18-snapshot-v1/tests/h62/item1/packet-panic/closure-project-overlay"),
 }
@@ -33,8 +34,7 @@ target = validated_target(project, args.diagnostic) if args.diagnostic else None
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import get_default_environment, stdio_client
 print(f"isolated project: {project}", flush=True)
-if (project / ".lake").exists():
-    raise SystemExit("isolated cache already exists; preserve it and use a fresh isolated project")
+validate_fresh_project(project)
 resource.setrlimit(resource.RLIMIT_AS, (12 * 1024**3, 12 * 1024**3))
 shim = Path("/workspace/h62-packet-panic-postmerge-evidence/serial-toolchain")
 if not (shim / "bin/lean").is_file():
