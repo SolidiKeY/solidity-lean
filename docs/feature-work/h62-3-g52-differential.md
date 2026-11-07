@@ -1000,3 +1000,59 @@ Coordinator merge receipt during this checkpoint: published master
 65e69b6426a9a4fc3fb5541f41726a4bfefda5d0 was fetched, verified against origin,
 and fast-forwarded before committing. Reviewed transaction edits were preserved;
 no reset, discard or push. Evidence:transaction-latest-rebaseline.json.
+
+
+## RLP envelope binding: supersedes the four unsupported classifications
+
+Before this item, origin/master was fetched and its log/code inspected. Published
+master65e69b642 had no transaction_admission.mjs; existing owned checkpoint3927e347
+was reused. No duplicate upstream implementation was created.
+
+The immutable fixture-pinned EEST test at commit6824474c2ae99e6a67be6093e9a1edc1c82091ea
+explicitly assigns TYPE_4_INVALID_AUTHORIZATION_FORMAT to two whole-type4-envelope
+mutations: rlp()+0x00 and rlp()[:-1] (test_invalid_tx_invalid_rlp_encoding,
+lines601–633). Exact source SHA256:
+838423a917650eb9282911b6a66c034f2d96e76572cd4b92cb8b216010683770.
+This is a versioned upstream category binding, not a claim that a generic RLP
+message identifies an authorization-list location. Pinned client mappings were
+also inspected; no broader authorization/RLP mapping is inferred.
+
+The adapter recognizes only those exact diagnostics and byte transformations.
+Removing one trailing zero or appending one zero must produce a transaction
+accepted by native createTx/basic validation/outer sender recovery, and native
+serialization must reproduce the repaired bytes exactly. No expected fixture
+label or case ID is consulted to construct the witness. All other RLP failures
+remain unsupported. The append-zero witness establishes existence of a canonical
+one-byte repair; it does not recover the original missing byte, original signer,
+or validate authority signatures generally. These remain context-free checks.
+
+All53native rejections now have category matches; only indices6–9 require these
+repair witnesses. Two bounded runs exit0 with identical results/summary,1.007s
+first run (see transaction-rlp-admission-runs.json for both actual measurements).
+fixture_admission_complete is true for this pinned53invalid-case set only.
+execution_complete and differential_complete remain false; all53source adapters
+unsupported. No EVM/world, storage/log/rollback/executiongas or source match added.
+New result SHA256:
+7524b84caa4881147f7d322821fba30feb12e12b9375eb80ee8c87b6847bf2d2.
+The previous49+4result/summary and source are preserved as before-rlp snapshots;
+old digest4c396db7 remains historical, not the current result. No old witness is
+padded into a new fixture count.
+
+Five classifier/envelope controls pass, including wrong type/tail/diagnostic,
+failed/thrown native validator and mismatched witness/category negatives.
+Read-only finder/skeptic cleared code and exact upstream binding; their limits
+above are preserved. Neither reran native/archive/Lean jobs. Evidence:
+transaction-rlp-controls.log,transaction-rlp-checks.json,transaction-rlp-reviews.json.
+Only the two canonical result paths changed among prior sealed H44entries; exact
+prior hashes are retained in snapshots. Strict block acceptance still exits1
+for the original six reference mismatches. No new owner ticket or exclusion.
+
+Reproduction requires the pinned source at
+$BULK/evidence/transaction-category-sources/test_invalid_tx.py, retrievable from
+https://raw.githubusercontent.com/ethereum/execution-spec-tests/6824474c2ae99e6a67be6093e9a1edc1c82091ea/tests/prague/eip7702_set_code_tx/test_invalid_tx.py
+and verified by the adapter's fixed SHA before classification. Then run the
+same node transaction_admission.mjs command from the prior checkpoint.
+No Lean statement, dependent definition, interface, budget, axiom or exclusion
+changed. Full H121b/H121c producer/world/source obligations remain open. Next
+independent item is real native Engine payload/history support, after fetching
+and inspecting master again. No RUNTIME_GATE_PASS or full-assignment completion.

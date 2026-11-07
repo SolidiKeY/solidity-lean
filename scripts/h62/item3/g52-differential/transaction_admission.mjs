@@ -9,6 +9,19 @@ import {createInterface} from 'node:readline';
 import {createHash} from 'node:crypto';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
+// Pinned upstream test_invalid_tx_invalid_rlp_encoding explicitly assigns
+// TYPE_4_INVALID_AUTHORIZATION_FORMAT to these two envelope mutations. No
+// arbitrary decoder failure or expected record label supplies the witness.
+export const RLP_CATEGORY_SOURCE={commit:'6824474c2ae99e6a67be6093e9a1edc1c82091ea',sha256:'838423a917650eb9282911b6a66c034f2d96e76572cd4b92cb8b216010683770',path:'tests/prague/eip7702_set_code_tx/test_invalid_tx.py'};
+export function envelopeRepairFacts(bytes,message,validateCanonical) {
+ if(!(bytes instanceof Uint8Array)||bytes[0]!==4)return {};
+ let candidate,kind;
+ if(message==='invalid RLP: remainder must be zero'&&bytes.length>1&&bytes.at(-1)===0){candidate=bytes.slice(0,-1);kind='trailing_single_zero';}
+ else if(message==='invalid RLP: total length is larger than the data'){candidate=new Uint8Array(bytes.length+1);candidate.set(bytes);kind='truncated_single_byte';}
+ else return {};
+ try{if(validateCanonical(candidate)!==true)return {};}catch{return {};}
+ return {kind,canonical_repair_validated:true,repaired_bytes:'0x'+Buffer.from(candidate).toString('hex')};
+}
 export function admissionCategories(message,facts={}) {
  if(facts.stage!=='decode'||facts.transaction_type!==4)return [];
  const formatMessages=new Set([
@@ -23,8 +36,9 @@ export function admissionCategories(message,facts={}) {
  if(facts.authorization_validator && /^(chainId|nonce) cannot have leading zeroes, received: 0x[0-9a-f]+$/.test(message))return ['TransactionException.TYPE_4_INVALID_AUTHORIZATION_FORMAT'];
  if(['Invalid EIP-7702 transaction: r exceeds 2^256 - 1','Invalid EIP-7702 transaction: s exceeds 2^256 - 1','Invalid EIP-7702 transaction: yParity should be fit within 1 byte (0 - 255)'].includes(message))return ['TransactionException.TYPE_4_INVALID_AUTHORITY_SIGNATURE'];
  if(message==='Invalid EIP-7702 transaction: authorization list is empty')return ['TransactionException.TYPE_4_EMPTY_AUTHORIZATION_LIST'];
- // Generic RLP decoder diagnostics do not locate an authorization failure.
- // They stay unsupported until an independent structural binding exists.
+ const repair=facts.envelope_repair;
+ if(repair?.canonical_repair_validated===true && ((repair.kind==='trailing_single_zero'&&message==='invalid RLP: remainder must be zero')||(repair.kind==='truncated_single_byte'&&message==='invalid RLP: total length is larger than the data')))return ['TransactionException.TYPE_4_INVALID_AUTHORIZATION_FORMAT'];
+ // Unwitnessed generic RLP failures remain unsupported.
  return [];
 }
 export function classifyAdmission(expected,message,facts={}) {
@@ -40,6 +54,7 @@ export async function main(bulk) {
  const receipt=json('evidence/transaction-export.json'),census=json('evidence/archive-census.json');
  if(receipt.archive_sha256!=='5dd08fee0fb41bc2a59bc4ab1dc75b19723fc71fe6af2f855454d3283fba09b9'||receipt.stream_sha256!==await digest(bulk+'/transaction-inputs.jsonl.gz')||receipt.census_sha256!==await digest(bulk+'/evidence/archive-census.json')||census.inventory_sha256!==await digest(bulk+'/archive-inventory.jsonl.gz'))throw new Error('transaction export provenance mismatch');
  const lock=readFileSync(bulk+'/reference/package-lock.json');if(!lock.equals(readFileSync(new URL('../../../../tests/h62/item3/g52-differential/package-lock.json',import.meta.url))))throw new Error('installed/committed lock mismatch');
+ const categorySource=bulk+'/evidence/transaction-category-sources/test_invalid_tx.py';if(await digest(categorySource)!==RLP_CATEGORY_SOURCE.sha256)throw new Error('upstream RLP category source pin mismatch');
  const require=createRequire(bulk+'/reference/package.json');const loaded=[];
  for(const name of ['@ethereumjs/tx','@ethereumjs/common','@ethereumjs/util'])loaded.push(await import(pathToFileURL(require.resolve(name)).href));
  const nativeVersions={},nativeSources={};
@@ -58,6 +73,7 @@ export async function main(bulk) {
   catch(e){error=e;}
   const expected=record.expected.exception;
   const facts={stage,transaction_type:Number.parseInt(f.txbytes.slice(2,4),16),authorization_validator:/verifyAuthorizationList.*\/capabilities\/eip7702\.js/.test(error?.stack??'')};
+  if(error&&stage==='decode')facts.envelope_repair=envelopeRepairFacts(util.hexToBytes(f.txbytes),error.message,candidate=>{const repaired=txModule.createTxFromRLP(candidate,{common:new Common({chain:Mainnet,hardfork:Hardfork.Osaka})});if(repaired.getValidationErrors().length)return false;repaired.getSenderAddress();return util.bytesToHex(repaired.serialize())===util.bytesToHex(candidate);});
   if(error){outcome=expected?classifyAdmission(expected,error.message,facts):{status:'unsupported',reason:'valid-fixture-native-error-unclassified'};outcome.engine_reason=error.message;outcome.engine_error_name=error.name;outcome.engine_stack=error.stack?.slice(0,5000);}
   else if(expected)outcome={status:'reference_mismatch',fields:['serialized_transaction_admission'],reason:'expected-invalid serialized transaction accepted'};
   else outcome={status:'unsupported',reason:'valid-transaction-fixture-profile-pending'};
@@ -65,7 +81,7 @@ export async function main(bulk) {
  }
  if(rows.length!==receipt.cases)throw new Error('incomplete transaction coverage');
  const output=rows.map(r=>JSON.stringify(r)+'\n').join('');writeFileSync(bulk+'/evidence/transaction-admission.jsonl.partial',output);renameSync(bulk+'/evidence/transaction-admission.jsonl.partial',bulk+'/evidence/transaction-admission.jsonl');
- const summary={native_versions:nativeVersions,native_source_sha256:nativeSources,cases:rows.length,counts,native_rejected:rows.filter(r=>r.native_admission==='rejected').length,fixture_admission_complete:counts.reference_match===rows.length,execution_complete:false,differential_complete:false,source_semantics_unsupported:rows.length,export_sha256:await digest(bulk+'/evidence/transaction-export.json'),reference_lock_sha256:createHash('sha256').update(lock).digest('hex'),adapter_sha256:await digest(fileURLToPath(import.meta.url)),results_sha256:createHash('sha256').update(output).digest('hex')};
+ const summary={rlp_category_source:RLP_CATEGORY_SOURCE,native_versions:nativeVersions,native_source_sha256:nativeSources,cases:rows.length,counts,native_rejected:rows.filter(r=>r.native_admission==='rejected').length,fixture_admission_complete:counts.reference_match===rows.length,execution_complete:false,differential_complete:false,source_semantics_unsupported:rows.length,export_sha256:await digest(bulk+'/evidence/transaction-export.json'),reference_lock_sha256:createHash('sha256').update(lock).digest('hex'),adapter_sha256:await digest(fileURLToPath(import.meta.url)),results_sha256:createHash('sha256').update(output).digest('hex')};
  writeFileSync(bulk+'/evidence/transaction-admission-summary.json.partial',JSON.stringify(summary,null,2)+'\n');renameSync(bulk+'/evidence/transaction-admission-summary.json.partial',bulk+'/evidence/transaction-admission-summary.json');console.log(JSON.stringify(summary));
  return counts.reference_mismatch?1:summary.fixture_admission_complete?0:2;
 }
