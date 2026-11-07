@@ -47,7 +47,7 @@ run_gate() {
 build_touched() {
   local base=${GATE_BASE:-origin/master}; local targets
   rm -f "$logs/core"
-  targets=$(GATE_CORE_FILE="$logs/core" python3 - "$base" <<'PY'
+  targets=$(GATE_CORE_FILE="$logs/core" GATE_MODE="$mode" python3 - "$base" <<'PY'
 import os,pathlib,subprocess,sys
 base=sys.argv[1]
 def git(*args): return subprocess.check_output(["git",*args],text=True).splitlines()
@@ -79,6 +79,10 @@ while stack:
     for m in rev.get(stack.pop(),()):
         if leaf(m) and m not in leafs: leafs.add(m); stack.append(m)
 out={m for m in out if wide or m in leafs or not leaf(m)}
+# H109: checkpoint never builds the slow library, including transitive importers.
+if os.environ.get("GATE_MODE") == "checkpoint":
+    slow={line.split()[1] for line in pathlib.Path("SoliditySlowExamples.lean").read_text().splitlines() if line.startswith("import ")}
+    out.difference_update(slow)
 print(" ".join(sorted(m for m in out if pathlib.Path(m.replace(".","/")+".lean").is_file())))
 open(os.environ["GATE_CORE_FILE"],"w").write("core" if core else "")
 PY

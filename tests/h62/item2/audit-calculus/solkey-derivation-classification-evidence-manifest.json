@@ -1,0 +1,47 @@
+{
+  "scope": "Complete10 ported-rule derivation theorem roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 731,
+    "pending": 4552,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-derivation-roles-v66/evidence.tar.gz",
+      "bytes": 203176,
+      "sha256": "c9405224313295f05bac05ad4d61db9e7ef597d109d562e5e3791d88fc2a2de9"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-derivation-roles-v66/inputs.json",
+      "bytes": 911,
+      "sha256": "651a94062200b432f101868ca68e91951be6179c486ea6127ee2b223b94eca28"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-derivation-roles-v66/gates.json",
+      "bytes": 2877,
+      "sha256": "72fd37869d16d0c6c4f1f294c9a8a74ff6c77afe49f08874346c30cc97258e1e"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-derivation-roles-v66/reviews.md",
+      "bytes": 747,
+      "sha256": "d49b8393707b7eeb71b17f94a54959541c01c2ebb95a1fbadaeddb672f1c0f7d"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-derivation-roles-v66/case-rosters.json",
+      "bytes": 1153,
+      "sha256": "66cbeacd00745c62e99b6c3ab5ce39ee38ea6fc3ef66d42c8abae3ed26a99818"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/solkey-derivation-roles-v66/doc-master-repair-binding.json",
+      "bytes": 416,
+      "sha256": "19979bd6d0223b14c15a8e0987143f1bef781fe72596e4109b90ff817c506c91"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/solkey-derivation-roles-v66/semantic-roles-reviewed.json",
+      "bytes": 1939287,
+      "sha256": "410da2f92a12700f6308b413a035b45942eec037d42d54dfbd2cc86e2d5e7f80"
+    }
+  ]
+}

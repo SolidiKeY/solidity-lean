@@ -38,8 +38,8 @@ Commands (from this checkout):
 ```sh
 python3 -B tests/h62/item4/generic-v08/test_census.py
 python3 -B scripts/h62/item4/generic-v08/accept.py
-python3 -B scripts/h62/item4/generic-v08/census.py --revision c6f550e281a7e5affa9a99bc2cdaed556dec00e4 --write /workspace/generic-v08-evidence/inventory.json
-python3 -B scripts/h62/item4/generic-v08/census.py --check /workspace/generic-v08-evidence/inventory.json
+python3 -B scripts/h62/item4/generic-v08/census.py --revision c6f550e281a7e5affa9a99bc2cdaed556dec00e4 --write "${GENERIC_V08_EVIDENCE:?set an external evidence directory}/inventory.json"
+python3 -B scripts/h62/item4/generic-v08/census.py --check "${GENERIC_V08_EVIDENCE:?set an external evidence directory}/inventory.json"
 ```
 
 Twelve mutation/parser and acceptance tests pass. They cover nested comments and strings,
@@ -173,7 +173,10 @@ release and bounded wrapper. It neither consumes the old master cache nor edits
 an owned source file:
 
 ```sh
-python3 -B scripts/h62/item4/generic-v08/reproduce-width.py --toolchain /workspace/generic-v08-tools/lean-4.35.0-linux --archive /workspace/generic-v08-evidence/lean-4.35.0-linux.tar.zst --output /workspace/generic-v08-evidence/reproduce-width
+python3 -B scripts/h62/item4/generic-v08/reproduce-width.py \
+  --toolchain "${GENERIC_V08_TOOLCHAIN:?set the pinned toolchain directory}" \
+  --archive "${GENERIC_V08_ARCHIVE:?set the verified release archive}" \
+  --output "${GENERIC_V08_EVIDENCE:?set an external evidence directory}/reproduce-width"
 ```
 
 Proposed registration for coordinator review only, contingent on exact-file
@@ -204,6 +207,33 @@ patch, bundle, evidence archive, final committed head and SHA256 manifest are
 recorded in `/workspace/generic-v08-export/HANDOFF.md`. Overall status remains
 blocked with all four original queue obligations preserved; no full completion
 or runtime-gate pass is asserted.
+
+## Successor lexical drift accounting (2026-11-06)
+
+The acknowledged final member head `4a78ae839e026e1a9f8f575cd10fec4478e52305`
+was merged only after the captured assignment and scope/retirement hashes were
+verified. This is source adoption, not independent validation of external gates.
+`drift.py` retains all 4428 baseline and 4430 current declaration rows plus both
+full file-hash inventories. It reports 4355 equal lexical-header groups, 2 added
+groups, 5 unpaired anonymous groups and 27 ambiguous duplicate-name groups. Group
+counts are not declaration counts. Named keys omit namespace/section context;
+no lexical equality establishes elaborated statement or semantic preservation.
+
+Independent read-only finder and skeptic reviewed without Lean/server/builds.
+Finder identified unstable anonymous-ordinal pairing; anonymous rows now remain
+unpaired, and an insertion regression checks ordinal reuse. Both reviewers
+confirmed the fix. Five tests pass in normal and optimized Python. A file-only
+hash-change control preserves imports/body/context drift visibility. Original
+and corrected reports remain separately under the successor evidence directory.
+These checks do not close execution correspondence, semantic refusal acceptance,
+complete family census, proof validation or same-condition Lean timing. No Lean
+source, theorem, admission, toolchain, resource guard or frozen pin changed.
+
+### Checked execution consumers in the existing test module
+
+The original execution draft is preserved off Git. Its six additive declarations now live in `tests/h62/item4/generic-v08/IntrinsicWidths.lean`, avoiding an unregistered `tests` import prefix under the approved per-file Lake gate. Existing width declarations remain unchanged. `source_execution` consumes the actual published evaluator law; `joint_execution` consumes the complete actual-client result and reached local relation. Binary/maximal equalities are proof-term instance identities, with separate fixture field equations; they are not independent target-run proofs. Full generic-family correspondence, refusal coverage, migration-overlay acceptance and matched performance measurements remain open. Cache seeding was skipped; the environment toolchain was activated with one thread.
+
+Actual axiom reports retain the five original axiom-free width declarations. The new source/joint execution consumers and two instance identities depend on `propext`, `Classical.choice`, and `Quot.sound` through the existing producers; both input-field equations are axiom-free. No new axiom declaration is introduced. The preserved standalone draft has the same qualified names and must remain unregistered; do not import both copies. The final focused run took 2.245 seconds with one Lean process and 812314624 bytes sampled aggregate peak RSS. These are focused-check observations, not matched full-family performance acceptance or a full gate.
 
 ## Explicit resume after coordinator integration
 
@@ -240,3 +270,73 @@ and runtime/elaborated validation of step 1 remain unfinished. Waits continue
 for the SortCheck migration and the axiom-preserving Roadmap prerequisite fix.
 H82 removes the former proof-only exact-file agreement wait. No automatic
 completion or passing family runtime gate is inferred from the merged work.
+
+Successor merge note: both independent documentation updates are retained as historical reports. This merge does not resume any retired goal or alter the H82 chain ownership supplied by coordinator messages.
+
+## Scheduled rebaseline and portable invocation (2026-11-07)
+
+Coordinator-reported merged lane head `f050ca921ad94ff44b0378f28838f989a5fd0398`
+is an ancestor of fetched `origin/master` at
+`4f0a2d6abe3a920d8c5a20c8c06d373a1014824d`. The original lane fast-forwarded
+cleanly to that published baseline; no reset, rebase, push or master write.
+Coordinator's touched-gate PASS/review MERGE is upstream evidence, not a new
+local runtime result.
+
+Live examples above accept caller-supplied toolchain/archive/evidence locations.
+Set all three variables to absolute paths, with the evidence directory outside
+the checkout; create that directory before the census write command. Commands
+in those examples run from the checkout root. The scripts themselves locate
+that root from their own files. Existing absolute paths in historical prose are
+original VM evidence coordinates and are retained for retrieval; frozen prompt,
+scope and retirement captures are unchanged.
+
+The portability checks launch the real audit CLI from an unrelated temporary
+working directory using a relative external output path, and launch reproducer
+help there without installing or running Lean. They verify root discovery and
+complete output accounting; they do not certify that the checkout was relocated,
+or claim Lean validation. They accept a genuine original-integrity refusal as
+exit 1 rather than masking it as success.
+
+No generic semantic proof or frozen interface changes accompany this portability
+backfill. The source axiom-guard STOP in Roadmap remains unresolved in the
+published migration notes; it is not rerun unchanged. Original execution,
+correspondence, semantic negative/refusal gates and family timing comparison
+remain required; no RUNTIME_GATE_PASS.
+
+
+The preservation audit at this **2026-11-07 baseline fails**, as intended for
+unreconciled drift: 61 original files differ, none are removed; the current
+inventory has 221 files and 4,433 declarations. Header multiset comparison finds
+73 original lexical headers absent in their exact old form and 78 additional
+current headers. Those counts preserve multiplicity for repeated written names.
+Complete original and current headers, file hashes and checksums are exported
+beside `current-audit.json`; the frozen manifest and strict acceptance are not
+rewritten. The unchanged-original claims in the earlier 20e492ee9 section apply
+only to that historical baseline, not this one.
+
+Examples of inherited drift: `CallableMetadata.argsFit_length` now has a map-free
+parameter; `EnvironmentProjection.fundsOf` and associated statements now use
+`liftBalance` rather than `liftWord`. These are not edits made by this resumed
+checkpoint. No equivalence, original-statement preservation or validation in the
+current type/definition context is asserted. Passing comparison/portability unit
+tests mean the reporting and refusal behavior work; they do not pass the failing
+source-preservation gate.
+
+Scope question **Q-FROZEN-RECONCILE** is pending. Sources: original frozen
+checkpoints 1–3 at c6f550e281a7e5affa9a99bc2cdaed556dec00e4, and integrated
+4f0a2d6abe3a920d8c5a20c8c06d373a1014824d. How should the original obligations
+be retained alongside current API changes? Options are (1) owning lanes supply
+versioned compatibility declarations preserving the original statements while
+current-master validation remains separate, or (2) validate original obligations
+in an isolated frozen-source checkout and prove a separate transport bridge to
+current master. Neither option approves weakened premises/exclusions, changed
+axiom sets or replacement of frozen hashes. No option has been selected.
+
+Independent read-only finder and skeptic reviews pass the audit implementation
+and confirm the reported failure counts/checksums. The skeptic requested these
+explicit failure/context qualifications; they are now recorded. No Lean process
+or server was used in these reviews. Seven comparison tests pass normally and
+optimized; two real CLI unrelated-CWD checks and twelve original scanner tests
+pass. Current integrity audit exits 1 and remains an unmet gate. Known semantic
+STOPs and the scope question remain recorded while independent audit work is
+preserved as a reviewable checkpoint.

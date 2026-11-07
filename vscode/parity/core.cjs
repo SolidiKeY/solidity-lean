@@ -164,25 +164,50 @@ function protocol(tracePath) {
   let records;try{records=readFileSync(tracePath,'utf8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l));}
   catch(error){return {status:'unexamined',reason:error.message};}
   const methods={},errors=[],states=new Map(),queueMs=[],executionMs=[];
-  let messages=0,framingErrors=0;const finalized=new Set();
-  for(const record of records) {
+  let messages=0,framingErrors=0,statusErrors=0;const finalized=new Set();
+  for(const [recordIndex,record] of records.entries()) {
     if(record.framingFinalized)finalized.add(record.direction);
     if(record.error){errors.push(record.error);framingErrors++;continue;}
     const message=record.message,method=message?.method;
     if(message)messages++;
     if(method)methods[record.direction+':'+method]=(methods[record.direction+':'+method]||0)+1;
     if(message?.error)errors.push(message.error);
+    if(method==='dafny/textDocument/symbolStatus') {
+      const params=message.params,position=p=>p&&Number.isInteger(p.line)&&p.line>=0&&Number.isInteger(p.character)&&p.character>=0;
+      const range=r=>position(r?.start)&&position(r?.end)&&(r.start.line<r.end.line||r.start.line===r.end.line&&r.start.character<=r.end.character);
+      const valid=record.direction==='server'&&params&&typeof params.uri==='string'&&(params.version===undefined||Number.isInteger(params.version))&&Array.isArray(params.namedVerifiables)&&Number.isFinite(record.time)&&params.namedVerifiables.every(symbol=>symbol&&[0,1,2,4,5].includes(symbol.status)&&range(symbol.nameRange));
+      if(!valid){errors.push({kind:'malformed-symbol-status',recordIndex});statusErrors++;continue;}
+      if(params.namedVerifiables.some(symbol=>{const previous=states.get(JSON.stringify([params.uri,params.version,symbol.nameRange]));return previous?.last!==undefined&&record.time<previous.last;})){errors.push({kind:'nonmonotonic-symbol-status',recordIndex});statusErrors++;continue;}
+    }
     if(method==='dafny/textDocument/symbolStatus')for(const symbol of message.params.namedVerifiables) {
       const key=JSON.stringify([message.params.uri,message.params.version,symbol.nameRange]),previous=states.get(key)||{};
       if(symbol.status===1&&previous.queued===undefined)previous.queued=record.time;
       if(symbol.status===2&&previous.running===undefined){previous.running=record.time;if(previous.queued!==undefined)queueMs.push(record.time-previous.queued);}
       if(symbol.status>=4&&!previous.done){previous.done=true;if(previous.running!==undefined)executionMs.push(record.time-previous.running);}
-      states.set(key,previous);
+      previous.last=record.time;states.set(key,previous);
     }
   }
-  return {status:framingErrors?'broken':!messages?'unexamined':finalized.size===2?'observed':'partial',messageCount:messages,methods,errors,queueMs:statistics(queueMs),symbolExecutionMs:statistics(executionMs),
+  return {status:framingErrors||statusErrors?'broken':!messages?'unexamined':finalized.size===2?'observed':'partial',messageCount:messages,methods,errors,queueMs:statistics(queueMs),symbolExecutionMs:statistics(executionMs),
     framingFinalized:[...finalized],
     scope:'Native status notification intervals include transport and notification throttling; they do not isolate pure solver or VC time.'};
+}
+function outputLifecycleErrors(o,target){
+ const errors=[],name=target==='local'?'Solidity Lean':'Dafny VSCode',command=target==='local'?'solidityLean.restartServer':'dafny.restartServer';
+ if(!o||typeof o.uri!=='string'||!Number.isInteger(o.version)||!/^([a-f0-9]{64})$/.test(o.sourceHash||''))return ['missing output source identity'];
+ const id=o.channel?.data?.channelId;
+ if(o.channel?.kind!=='output.create'||o.channel?.data?.channel!==name||!Number.isInteger(id))errors.push('missing owned output channel');
+ if(!Array.isArray(o.channels)||o.channels.length!==1||o.channels[0]?.kind!=='output.create'||o.channels[0]?.data?.channelId!==id||o.channels[0]?.data?.channel!==name)errors.push('output channel replaced or disposed');
+ const text=again=>target==='local'?`Solidity Lean is ready${again?' again':''} for ${o.uri} (`:again?'Dafny is ready again.':'Dafny is ready';
+ const owned=e=>e?.kind==='output'&&e.data?.channelId===id&&e.data.channel===name;
+ if(!owned(o.startup)||!o.startup.data.text?.startsWith(text(false)))errors.push('missing owned initial readiness');
+ const events=Array.isArray(o.events)?o.events:[],termination=events.findIndex(e=>owned(e)&&e.data.text?.startsWith('Terminating')),ready=events.findIndex(e=>owned(e)&&e.data.text?.startsWith(text(true)));
+ if(termination<0||ready<=termination)errors.push('missing ordered owned restart output');
+ const starts=events.filter(e=>e?.kind==='command.start'&&e.data?.id===command),ends=events.filter(e=>e?.kind==='command.end'&&e.data?.id===command);
+ if(!Number.isFinite(o.channel?.ms)||!Number.isFinite(o.startup?.ms)||!Number.isFinite(starts[0]?.ms)||!(o.channel.ms<=o.startup.ms&&o.startup.ms<starts[0].ms))errors.push('missing initial output phase order');
+ if(!(events.indexOf(starts[0])<termination&&termination<ready&&ready<events.indexOf(ends[0])))errors.push('output outside restart invocation');
+ const source=s=>s&&s.uri===o.uri&&s.version===o.version&&s.textHash===o.sourceHash&&typeof s.session==='string'&&s.trusted===true&&!s.closed;
+ if(starts.length!==1||ends.length!==1||starts[0]?.data.invocationId!==ends[0]?.data.invocationId||!source(starts[0]?.data.source)||!source(ends[0]?.data.source)||starts[0]?.data.source?.session!==ends[0]?.data.source?.session)errors.push('missing source-owned restart invocation');
+ return errors;
 }
 function terminalSdkIdentity(output,executable,version){
  const lines=require('node:util').stripVTControlCharacters(output).split(/\r?\n/).map(line=>line.trim()).filter(Boolean),fs=require('node:fs');
@@ -191,13 +216,34 @@ function terminalSdkIdentity(output,executable,version){
  if(resolved!==selected)throw Error('Terminal SDK canonical executable differs from selected SDK');
  return{executable:resolved,sha256,version,lines};
 }
+// Preserve rejected observations for diagnosis; they never become accepted metrics.
+function scenarioFailure(id,elapsedMs,error){return{id,status:error.code==='TIMEOUT'?'timeout':'broken',elapsedMs,error:error.stack||String(error),...(error.observation?{observation:error.observation}:{})};}
+function validateHostResult(result,config){const validationErrors=hostEvidenceErrors(result,config);return validationErrors.length?{rejectedResult:result,validationErrors,error:'Host evidence is stale, incomplete or inconsistent: '+validationErrors.join('; ')}:{result};}
 function hostEvidenceErrors(result,config) {
   const errors=[];
   if(result?.runId!==config.runId||result?.target!==config.target||result?.schemaVersion!==1)errors.push('stale or foreign identity');
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(['proof-help','proof-hover'].includes(config.suite)){
+  if(config.suite==='testing-symbols'){errors.push(...require('./hierarchy-lifecycle.cjs').renderedErrors(result.scenarios.find(s=>s.id==='native-compiler-testing')?.observation,config.runId));
+  }else if(config.suite==='trace-unavailable'){errors.push(...require('./trace-presentation.cjs').unavailableErrors(result.scenarios.find(s=>s.id==='native-trace-unavailable')?.observation,config.runId));
+  }else if(config.suite==='dafny-command-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-command-output')?.observation;errors.push(...require('./dafny-command-output.cjs').errors(o,config.runId));
+  }else if(config.suite==='dafny-compiler-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-output-configuration')?.observation;errors.push(...require('./dafny-output.cjs').errors(o,config.runId));
+  }else if(config.suite==='compiler-output'){const o=result.scenarios.find(s=>s.id==='native-compiler-output-configuration')?.observation;errors.push(...require('./compiler-output.cjs').errors(o,config.runId));
+  }else if(config.suite==='output-lifecycle'){
+    const observation=result.scenarios.find(s=>s.id==='native-output-restart')?.observation;errors.push(...outputLifecycleErrors(observation,config.target));
+    const outputEvents=Array.isArray(observation?.events)?observation.events:[],panel=observation?.panel,readinessPrefix=config.target==='local'?'Solidity Lean is ready again':'Dafny is ready again.',metadata={uri:observation?.uri,version:observation?.version,sourceHash:observation?.sourceHash,sourceSession:outputEvents.find(e=>e.kind==='command.end'&&e.data?.id===(config.target==='local'?'solidityLean.restartServer':'dafny.restartServer'))?.data?.source?.session,channelId:observation?.channel?.data?.channelId,channel:config.target==='local'?'Solidity Lean':'Dafny VSCode',readinessPrefix,readinessLine:outputEvents.find(e=>e?.kind==='output'&&e.data?.channelId===observation?.channel?.data?.channelId&&e.data?.text?.startsWith(config.target==='local'?`Solidity Lean is ready again for ${observation.uri} (`:'Dafny is ready again.'))?.data.text.split('\n')[0]};
+    if(panel?.runId!==config.runId||panel?.phase!=='output-channel'||panel?.status!=='captured'||panel?.metadataHash!==require('node:crypto').createHash('sha256').update(JSON.stringify(metadata)).digest('hex')||!panel?.capture?.captured||!panel?.capture?.screenshot||!panel?.capture?.output?.panelVisible||panel?.capture?.output?.selectedChannel!==metadata.channel||!metadata.readinessLine||!panel?.capture?.output?.text?.includes(metadata.readinessLine)||panel?.capture?.output?.readinessVisibility!=='not-certified'||!['before','after'].every(stage=>panel?.capture?.output?.[stage]?.visible&&panel.capture.output[stage].selectedChannel===metadata.channel&&panel.capture.output[stage].continuousText===panel.capture.output.text))errors.push('missing output panel/source DOM evidence');
+    if(require('./output-visibility.cjs').errors(panel?.capture?.output?.glyphGeometry?.before,panel?.capture?.output?.glyphGeometry?.after,metadata.readinessLine||'',metadata.channel).length)errors.push('missing output character geometry/interval evidence');
+    if(config.target==='local'){
+      const feedback=observation?.feedback,expected=require('../src/status-summary.cjs').issueURL(feedback?.identity);
+      if(!expected||feedback?.url!==expected||!outputEvents.some(event=>event?.kind==='output'&&event.data?.channelId===observation?.channel?.data?.channelId&&event.data?.text?.startsWith(`Solidity Lean is ready again for ${observation?.uri} (`)&&event.data.text.endsWith('\n'+expected)))errors.push('missing current restart issue draft');
+      const lifecycle=observation?.resourceLifecycle,owned=e=>e?.kind==='output'&&e.data?.channel==='Solidity Lean'&&e.data?.channelId===observation?.channel?.data?.channelId,failures=Array.isArray(lifecycle?.failureEvents)?lifecycle.failureEvents:[],recovery=Array.isArray(lifecycle?.recoveryEvents)?lifecycle.recoveryEvents:[],reopen=lifecycle?.reopen;
+      if(!lifecycle?.runtimeBefore||lifecycle.runtimeBeforeReported?.configuredPath!==lifecycle.runtimeBefore||lifecycle.runtimeRecoveredReported?.configuredPath!==lifecycle.runtimeBefore||!lifecycle.runtimeBeforeReported?.version||lifecycle.runtimeRecoveredReported?.version!==lifecycle.runtimeBeforeReported.version||typeof lifecycle?.rejectedRuntime!=='string'||!lifecycle.rejectedRuntime||lifecycle.runtimeBefore!==lifecycle.runtimeRestored||lifecycle.runtimeBefore===lifecycle.rejectedRuntime||!failures.some(e=>owned(e)&&e.data?.text?.startsWith(`Language server startup failed for ${observation?.uri}:`)&&e.data.text.includes(lifecycle.rejectedRuntime))||failures.some(e=>owned(e)&&e.data?.text?.startsWith('Solidity Lean is ready'))||!recovery.some(e=>owned(e)&&e.data?.text?.startsWith(`Solidity Lean is ready again for ${observation?.uri} (`))||typeof reopen?.beforeSynchronizationId!=='string'||!reopen.beforeSynchronizationId||typeof reopen?.afterSynchronizationId!=='string'||!reopen.afterSynchronizationId||reopen.beforeSynchronizationId===reopen.afterSynchronizationId||reopen.beforeOpenRecord?.direction!=='client'||reopen.beforeOpenRecord?.message?.method!=='textDocument/didOpen'||reopen.beforeOpenRecord?.message?.params?.textDocument?.uri!==observation?.uri||reopen.beforeOpenRecord?.message?.params?.textDocument?.version!==observation?.version||require('node:crypto').createHash('sha256').update(reopen.beforeOpenRecord?.message?.params?.textDocument?.text||'').digest('hex')!==observation?.sourceHash||reopen.beforeOpenRecord?.message?.params?.textDocument?.synchronizationId!==reopen.beforeSynchronizationId||reopen.openRecord?.message?.params?.textDocument?.synchronizationId!==reopen.afterSynchronizationId||!reopen?.beforeSession||!reopen?.afterSession||reopen.beforeSession===reopen.afterSession||!Number.isSafeInteger(reopen.openIndex)||!Number.isSafeInteger(reopen.closeIndex)||!(reopen.openIndex>reopen.closeIndex)||reopen.closeRecord?.direction!=='client'||reopen.openRecord?.direction!=='client'||reopen.closeRecord?.message?.method!=='textDocument/didClose'||reopen.closeRecord?.message?.params?.textDocument?.uri!==observation?.uri||reopen.openRecord?.message?.method!=='textDocument/didOpen'||reopen.openRecord?.message?.params?.textDocument?.uri!==observation?.uri||reopen.openRecord?.message?.params?.textDocument?.version!==observation?.version||require('node:crypto').createHash('sha256').update(reopen.openRecord?.message?.params?.textDocument?.text||'').digest('hex')!==observation?.sourceHash)errors.push('missing native runtime recovery/reopen ownership');
+      const shutdown=observation?.shutdown,events=Array.isArray(shutdown?.events)?shutdown.events:[],disposed=events.map((event,index)=>({event,index})).filter(({event})=>event?.kind==='output.dispose'&&event.data?.channelId===observation?.channel?.data?.channelId&&event.data?.channel==='Solidity Lean');
+      if(!Number.isSafeInteger(shutdown?.ownerPid)||!Array.isArray(shutdown?.children)||!shutdown.children.length||disposed.length!==1||!shutdown.children.every(child=>child.confirmedClose===true&&/^[0-9]+$/.test(child.birth||'')&&child.before?.birth===child.birth&&child.before?.ppid===shutdown.ownerPid&&child.before?.group===child.pid&&child.before?.session===child.pid&&Array.isArray(child.afterGroup)&&!child.afterGroup.length&&Array.isArray(child.workers)&&child.workers.every(worker=>Array.isArray(worker.afterGroup)&&!worker.afterGroup.length)&&events.some((event,index)=>index<disposed[0].index&&event?.kind==='output.shutdown.close'&&event.data?.pid===child.pid&&event.data?.birth===child.birth)))errors.push('missing confirmed local output retirement');
+    }
+  }else if(['proof-help','proof-hover'].includes(config.suite)){
     if(config.target!=='local'||!ids.includes('native-certified-proof-help'))errors.push('missing native certified proof-help observation');
     if(config.suite==='proof-hover'){
       const observation=result.scenarios.find(s=>s.id==='native-certified-proof-help')?.observation?.observations,popup=observation?.hoverPopup?.capture?.hoverPopup;
@@ -209,6 +255,19 @@ function hostEvidenceErrors(result,config) {
     if(config.target!=='dafny'||!ids.includes('native-trace-light-show-hide'))errors.push('missing native light trace observation');
   }else if(config.suite==='trace-visibility'){
     if(config.target!=='dafny'||!ids.includes('native-trace-tab-visibility-theme'))errors.push('missing native trace visibility observation');
+  }else if(config.suite==='custom-import-actions'){
+    if(!ids.includes('command-custom-import-actions'))errors.push('missing native compiler-only custom-import scenario');
+    const o=result.scenarios?.find(s=>s.id==='command-custom-import-actions')?.observation;
+    if(o?.request?.runId!==result.runId||!o?.request?.observation?.contextMenu?.rendered?.screenshot||!o.request.observation.prompt?.rendered?.screenshot||typeof o.request.observation.prompt.before?.value!=='string'||!o.request.observation.prompt.before.value||o.request.observation.prompt.before?.value!==o.request.observation.prompt.submitted?.value)errors.push('missing actual custom import menu/default prompt');
+    if(config.target==='local'){
+      const hash=require('node:crypto').createHash('sha256').update(o?.source||'').digest('hex'),a=o?.commandOwnership?.started,b=o?.commandOwnership?.completed;
+      if(o?.report?.operation!=='buildCustomArgs'||o.report.kind!=='compiler-ast'||o.report.verification!=='not-run'||o.report.sourceHash!==hash||!a||!b||a.phase!=='started'||b.phase!=='completed'||a.operation!=='buildCustomArgs'||a.sourceHash!==hash||a.version!==o.version||b.commandId!==a.commandId||b.sourceSession!==a.sourceSession||b.artifact!==o.report.artifact||typeof o.report.source!=='string'||a.uri!==require('node:url').pathToFileURL(o.report.source).href||b.uri!==a.uri||b.version!==a.version||b.sourceHash!==a.sourceHash)errors.push('missing exact custom Build artifact/session ownership');
+      const expectedOptions={includePaths:['vendor with spaces'],remappings:['alias/=lib/']};
+      if(JSON.stringify(o?.report?.compilerOptions)!==JSON.stringify(expectedOptions)||o?.request?.observation?.prompt?.before?.value!==JSON.stringify(expectedOptions))errors.push('missing actual resource import defaults');
+      const cancel=result.observations?.customCancellation;
+      if(cancel?.request?.runId!==result.runId||!cancel?.request?.observation?.prompt?.cancelled?.rendered?.screenshot||typeof cancel.source!=='string'||cancel.sourceHash!==require('node:crypto').createHash('sha256').update(cancel.source).digest('hex')||cancel.version>=o?.version||cancel.sourceHash===hash||cancel.trusted!==true)errors.push('missing real custom prompt cancellation');
+      const refusals=result.observations?.customInputRefusals;if(!Array.isArray(refusals)||refusals.length!==2||refusals[0]?.case!=='syntax'||refusals[1]?.case!=='options'||refusals.some(r=>r.uri!==a?.uri||r.version>=a?.version||r.sourceHash===hash||r.outputDirectory!==o?.report?.outputDirectory||require('./custom-input.cjs').refusalErrors(r,result.runId).length))errors.push('missing exact native custom input refusal observations');
+    }else if(o?.terminal?.exitCode!==0||!o?.request?.observation?.prompt?.submitted?.value?.startsWith('build ')||o.request.observation.prompt.submitted.value.includes('--no-verify'))errors.push('missing authentic upstream custom Build terminal exit/profile');
   }else if(config.suite==='custom-default-commands'){
     if(!ids.includes('command-custom-default-build-keybinding'))errors.push('missing native default custom command scenario');
     if(config.target==='dafny'){for(const id of ['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action','native-trace-lifecycle'])if(!ids.includes(id))errors.push('missing native observation '+id);}
@@ -234,4 +293,4 @@ function hostEvidenceErrors(result,config) {
   if(result.status!==status&&!(['broken','timeout'].includes(result.status)&&result.error))errors.push('aggregate status contradicts scenarios');
   return errors;
 }
-module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity};
+module.exports = {scenarioFailure,validateHostResult,LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity,outputLifecycleErrors};

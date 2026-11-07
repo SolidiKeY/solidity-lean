@@ -1,0 +1,47 @@
+{
+  "scope": "twelve static roles incl five private helpers; no tactic/proof/runtime acceptance",
+  "counts": {
+    "role_reviewed": 131,
+    "role_pending": 5152,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/capture-close-classification-v11/evidence.tar.gz",
+      "bytes": 1645228,
+      "sha256": "b96fc3d4998ef04e1f8488bed4a5d9bc5bfa391db3ff614a51928d940dc21d88"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-close-classification-v11/inputs.json",
+      "bytes": 1075,
+      "sha256": "a6f0c84d93af2dca5054df06f51132dc2fc9d1458a082891b932fad8740b1c32"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-close-classification-v11/gates.json",
+      "bytes": 1372,
+      "sha256": "35dd550355a3b4b573198ad1672fadbc5603fd159f95b3a4929e15aef7f84432"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-close-classification-v11/measured-gates.json",
+      "bytes": 2798,
+      "sha256": "9e7708abea3238668ebb500719e27bf5585acbbd6822237d3070a0a9bb3e1dc4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-close-classification-v11/reviews.md",
+      "bytes": 1310,
+      "sha256": "08310101036d16c6198578c9e5c6dbcb78fa96f4d679143074c7839590c6333f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/capture-close-classification-v11/doc-gate.json",
+      "bytes": 1068,
+      "sha256": "6ba235cb7b83b4e3c93229d7a9e9931240a3b5baa08f840bf5eb52798e4b48fa"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/capture-close-classification-v11/semantic-roles-reviewed.json",
+      "bytes": 409313,
+      "sha256": "ad838bf71de5f6085590b19956d4ffb6ceabfbcf3b872af06f5ecbee90843aa4"
+    }
+  ]
+}

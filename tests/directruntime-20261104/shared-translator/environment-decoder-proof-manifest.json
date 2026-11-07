@@ -1,0 +1,209 @@
+{
+  "guardedRegression": "Environment metadata proofs must preserve decoder bodies, existing guard statement and checking budgets",
+  "checkpointBase": "88a946c78971ef2fadc6d4ff72d7020092e6dfb6",
+  "source": {
+    "repositoryRelative": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+    "sha256": "29ad41e9204addcadfccb42c71fe344f9cba7690e870be57400aadc35e08658e"
+  },
+  "addedTheorems": [
+    "environmentMember?_guards",
+    "environmentMember?_of_metadata",
+    "environmentMember?_resultType"
+  ],
+  "existingStatementPreserved": "environmentMember?_guard",
+  "axioms": {
+    "environmentMember?_guards": [
+      "propext",
+      "Quot.sound"
+    ],
+    "environmentMember?_of_metadata": [
+      "propext",
+      "Quot.sound"
+    ],
+    "environmentMember?_resultType": [
+      "propext",
+      "Quot.sound"
+    ],
+    "environmentMember?_guard": [
+      "propext",
+      "Quot.sound"
+    ]
+  },
+  "definitionComparison": {
+    "base": "88a946c78971ef2fadc6d4ff72d7020092e6dfb6",
+    "source": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+    "baseSha256": "35d64218f2156a209f0d9873e7c55e9568de9e1393304ebe02faa50a2928fcd3",
+    "strippedCurrentSha256": "35d64218f2156a209f0d9873e7c55e9568de9e1393304ebe02faa50a2928fcd3",
+    "executableDefinitionsByteIdentical": true,
+    "addedTheorems": [
+      "environmentMember?_guards",
+      "environmentMember?_of_metadata",
+      "environmentMember?_resultType"
+    ],
+    "existingGuardStatementByteIdentical": true,
+    "existingGuardProof": "projection of the shared inversion; statement unchanged",
+    "boundary": "Source text equality after removing additive proofs and restoring the old guard proof, with its statement checked byte-identical; not source/world or binary adequacy."
+  },
+  "tooling": [
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/environment-decoder-validate.sh",
+      "sha256": "63013930141900ee73eaa6f66a1c0194835a9f66fcc94ec6ee268ba190834720"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/AxiomInventory.lean",
+      "sha256": "f14a3d130a33b13bdca2a00b42e4055ba80b64d9d52aa2b29abe333092ad6ad0"
+    }
+  ],
+  "archive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/environment-decoder-proof-evidence.tar.zst",
+    "path": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/environment-decoder-proof-evidence.tar.zst",
+    "sha256": "3a7fe44c15e3a35ba1317d4624b9f3f64ab144aa650c8a3696365353746a8e6f",
+    "bytes": 28776,
+    "regularMembers": 44
+  },
+  "affectedGate": {
+    "childMaxRssKiB": 1261764,
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/shared-translator/environment-decoder-validate.sh"
+    ],
+    "exit": 0,
+    "scopeMemoryPeakBytes": "230342656",
+    "wallSeconds": 39.91177900099865
+  },
+  "outerScope": {
+    "outerExit": 0,
+    "resourceStop": false,
+    "minimumOuterAvailableBytes": 11480817664,
+    "outerWallSeconds": 41.98174421599833
+  },
+  "resources": {
+    "memoryMaxBytes": 12884901888,
+    "memorySwapMaxBytes": 0,
+    "cpus": 1,
+    "LEAN_NUM_THREADS": 1,
+    "leanJobs": 1
+  },
+  "checkingComparison": {
+    "initialStop": {
+      "baseMedianSeconds": 3.9614842909941217,
+      "headMedianSeconds": 6.362594024001737,
+      "changePercent": 60.61136575667361,
+      "sourceSnapshot": "slow-proof-source.lean.txt",
+      "sourceSha256": "ce55552c85b5ad56859498c46b25fa3a652ab1a83b3a6977d76b69ad69564c63",
+      "retained": true
+    },
+    "optimized": {
+      "sourceSha256": {
+        "base": "35d64218f2156a209f0d9873e7c55e9568de9e1393304ebe02faa50a2928fcd3",
+        "head": "29ad41e9204addcadfccb42c71fe344f9cba7690e870be57400aadc35e08658e"
+      },
+      "rows": [
+        {
+          "round": 0,
+          "label": "base",
+          "command": [
+            "lake",
+            "lean",
+            "tests/directruntime-20261104/shared-translator/artifacts/environment-decoder-proof/checking-input.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "exit": 0,
+          "wallSeconds": 3.928155756002525
+        },
+        {
+          "round": 0,
+          "label": "head",
+          "command": [
+            "lake",
+            "lean",
+            "tests/directruntime-20261104/shared-translator/artifacts/environment-decoder-proof/checking-input.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "exit": 0,
+          "wallSeconds": 4.167483554003411
+        },
+        {
+          "round": 1,
+          "label": "base",
+          "command": [
+            "lake",
+            "lean",
+            "tests/directruntime-20261104/shared-translator/artifacts/environment-decoder-proof/checking-input.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "exit": 0,
+          "wallSeconds": 3.900333921003039
+        },
+        {
+          "round": 1,
+          "label": "head",
+          "command": [
+            "lake",
+            "lean",
+            "tests/directruntime-20261104/shared-translator/artifacts/environment-decoder-proof/checking-input.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "exit": 0,
+          "wallSeconds": 4.1776081989955856
+        },
+        {
+          "round": 2,
+          "label": "base",
+          "command": [
+            "lake",
+            "lean",
+            "tests/directruntime-20261104/shared-translator/artifacts/environment-decoder-proof/checking-input.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "exit": 0,
+          "wallSeconds": 4.308809504000237
+        },
+        {
+          "round": 2,
+          "label": "head",
+          "command": [
+            "lake",
+            "lean",
+            "tests/directruntime-20261104/shared-translator/artifacts/environment-decoder-proof/checking-input.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "exit": 0,
+          "wallSeconds": 4.192634874998475
+        }
+      ],
+      "medianSeconds": {
+        "base": 3.928155756002525,
+        "head": 4.1776081989955856
+      },
+      "headChangePercent": 6.3503704661374005,
+      "stop": false,
+      "boundary": "Paired serial checking of pre-work/current Translate source at one artifact pathname with identical imports and command, three interleaved rounds. Not whole-build, source/runtime performance or release of existing native/browser STOPs."
+    },
+    "method": "Three interleaved base/head checks at the same artifact pathname; imported modules and command unchanged. Pure local checking comparison; not a runtime or whole-build acceptance comparison."
+  },
+  "retainedCensus": {
+    "fixtures": 78,
+    "functions": 1655,
+    "existingPrinted": 1486,
+    "canonicalAdmitted": 245,
+    "both": 241,
+    "freshCapture": false,
+    "change": "Only Translate proof-source SHA refreshed; executable definitions unchanged."
+  },
+  "reviews": {
+    "finder": "Read-only: shared inversion/projections and exact old statement/normalization checked; no confirmed proof defect. No Lean/server/build/writes.",
+    "skeptic": "Read-only: no confirmed proof/normalization defect; local timing recovery must stay separate from native/browser holds. No Lean/server/build/writes."
+  },
+  "limits": [
+    "No executable body, Reader interface, entry premise, existing theorem statement, custom axiom, exclusion or budget change.",
+    "Initial +60.61% proof-checking STOP retained; changed proof passes local +6.35% threshold. Native median/build, browser startup and browser stack holds remain open.",
+    "Original H90 source/importer parity, inherited Binding/ControlTuple queues, producer dependencies and final gates remain incomplete."
+  ]
+}

@@ -66,3 +66,16 @@ with the pinned base runtime entrypoint separately. -/
 #print axioms Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_fixedBytes
 
 #print axioms Solidity.Frontend.ExecutableAst.Shared.localValueTypeName_of_address
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.environmentMember?
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.environmentMember?_guard
+
+-- Guard valid environment metadata and result-type inversion; no source adequacy claim.
+#check Solidity.Frontend.ExecutableAst.Shared.environmentMember?_of_metadata
+#print axioms Solidity.Frontend.ExecutableAst.Shared.environmentMember?_of_metadata
+#check Solidity.Frontend.ExecutableAst.Shared.environmentMember?_resultType
+#print axioms Solidity.Frontend.ExecutableAst.Shared.environmentMember?_resultType
+
+#check Solidity.Frontend.ExecutableAst.Shared.environmentMember?_guards
+#print axioms Solidity.Frontend.ExecutableAst.Shared.environmentMember?_guards

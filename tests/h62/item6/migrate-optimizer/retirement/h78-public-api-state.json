@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "policy": "H78: preserve original public generated shapes; no blanket generated exclusion or consumer-only rewrite. No shim implemented or new Lean validation on this retired lane.",
+  "implemented_shims": [],
+  "original_public_constants_recorded": 59,
+  "original_explicit_declarations": 35,
+  "original_new_toolchain_export": "unavailable: full original module imports fail; no full compatibility verdict",
+  "records": [
+    {
+      "name": "Solidity.Optimizer.Pass.pipeline.match_1",
+      "old_signature": {
+        "file": "old-audit/interface-records.json",
+        "key": "Solidity.Optimizer.Pass.pipeline.match_1",
+        "provenance": "Full original v4.24.0, ordered universe parameters plus kernel Expr repr"
+      },
+      "old_fixture_signature": {
+        "file": "generic-old/interface-records.json",
+        "key": "Solidity.Optimizer.Pass.pipeline.match_1",
+        "provenance": "Relocated exact-source generic fixture v4.24.0"
+      },
+      "new_signature": {
+        "file": "generic-new/interface-records.json",
+        "key": "Solidity.Optimizer.Pass.pipeline.match_1",
+        "provenance": "Relocated generic fixture v4.35.0, not full original new export"
+      },
+      "shim_signature": null,
+      "status": "pending survivor assessment/shim; no excluded declaration"
+    },
+    {
+      "name": "Solidity.Optimizer.Validator._sizeOf_1",
+      "old_signature": {
+        "file": "old-audit/interface-records.json",
+        "key": "Solidity.Optimizer.Validator._sizeOf_1",
+        "provenance": "Full original v4.24.0, ordered universe parameters plus kernel Expr repr"
+      },
+      "old_fixture_signature": {
+        "file": "generic-old/interface-records.json",
+        "key": "Solidity.Optimizer.Validator._sizeOf_1",
+        "provenance": "Relocated exact-source generic fixture v4.24.0"
+      },
+      "new_signature": {
+        "file": "generic-new/interface-records.json",
+        "key": "Solidity.Optimizer.Validator._sizeOf_1",
+        "provenance": "Relocated generic fixture v4.35.0, not full original new export"
+      },
+      "shim_signature": null,
+      "status": "pending survivor assessment/shim; no excluded declaration"
+    },
+    {
+      "name": "Solidity.Optimizer.Validator._sizeOf_inst",
+      "old_signature": {
+        "file": "old-audit/interface-records.json",
+        "key": "Solidity.Optimizer.Validator._sizeOf_inst",
+        "provenance": "Full original v4.24.0, ordered universe parameters plus kernel Expr repr"
+      },
+      "old_fixture_signature": {
+        "file": "generic-old/interface-records.json",
+        "key": "Solidity.Optimizer.Validator._sizeOf_inst",
+        "provenance": "Relocated exact-source generic fixture v4.24.0"
+      },
+      "new_signature": {
+        "file": "generic-new/interface-records.json",
+        "key": "Solidity.Optimizer.Validator._sizeOf_inst",
+        "provenance": "Relocated generic fixture v4.35.0, not full original new export"
+      },
+      "shim_signature": null,
+      "status": "pending survivor assessment/shim; no excluded declaration"
+    },
+    {
+      "name": "Solidity.Optimizer.Validator.mk.inj",
+      "old_signature": {
+        "file": "old-audit/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.inj",
+        "provenance": "Full original v4.24.0, ordered universe parameters plus kernel Expr repr"
+      },
+      "old_fixture_signature": {
+        "file": "generic-old/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.inj",
+        "provenance": "Relocated exact-source generic fixture v4.24.0"
+      },
+      "new_signature": {
+        "file": "generic-new/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.inj",
+        "provenance": "Relocated generic fixture v4.35.0, not full original new export"
+      },
+      "shim_signature": null,
+      "status": "pending survivor assessment/shim; no excluded declaration"
+    },
+    {
+      "name": "Solidity.Optimizer.Validator.mk.noConfusion",
+      "old_signature": {
+        "file": "old-audit/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.noConfusion",
+        "provenance": "Full original v4.24.0, ordered universe parameters plus kernel Expr repr"
+      },
+      "old_fixture_signature": {
+        "file": "generic-old/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.noConfusion",
+        "provenance": "Relocated exact-source generic fixture v4.24.0"
+      },
+      "new_signature": {
+        "file": "generic-new/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.noConfusion",
+        "provenance": "Relocated generic fixture v4.35.0, not full original new export"
+      },
+      "shim_signature": null,
+      "status": "pending survivor assessment/shim; no excluded declaration"
+    },
+    {
+      "name": "Solidity.Optimizer.Validator.mk.sizeOf_spec",
+      "old_signature": {
+        "file": "old-audit/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.sizeOf_spec",
+        "provenance": "Full original v4.24.0, ordered universe parameters plus kernel Expr repr"
+      },
+      "old_fixture_signature": {
+        "file": "generic-old/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.sizeOf_spec",
+        "provenance": "Relocated exact-source generic fixture v4.24.0"
+      },
+      "new_signature": {
+        "file": "generic-new/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.mk.sizeOf_spec",
+        "provenance": "Relocated generic fixture v4.35.0, not full original new export"
+      },
+      "shim_signature": null,
+      "status": "pending survivor assessment/shim; no excluded declaration"
+    },
+    {
+      "name": "Solidity.Optimizer.Validator.noConfusion",
+      "old_signature": {
+        "file": "old-audit/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.noConfusion",
+        "provenance": "Full original v4.24.0, ordered universe parameters plus kernel Expr repr"
+      },
+      "old_fixture_signature": {
+        "file": "generic-old/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.noConfusion",
+        "provenance": "Relocated exact-source generic fixture v4.24.0"
+      },
+      "new_signature": {
+        "file": "generic-new/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.noConfusion",
+        "provenance": "Relocated generic fixture v4.35.0, not full original new export"
+      },
+      "shim_signature": null,
+      "status": "pending survivor assessment/shim; no excluded declaration"
+    },
+    {
+      "name": "Solidity.Optimizer.Validator.noConfusionType",
+      "old_signature": {
+        "file": "old-audit/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.noConfusionType",
+        "provenance": "Full original v4.24.0, ordered universe parameters plus kernel Expr repr"
+      },
+      "old_fixture_signature": {
+        "file": "generic-old/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.noConfusionType",
+        "provenance": "Relocated exact-source generic fixture v4.24.0"
+      },
+      "new_signature": {
+        "file": "generic-new/interface-records.json",
+        "key": "Solidity.Optimizer.Validator.noConfusionType",
+        "provenance": "Relocated generic fixture v4.35.0, not full original new export"
+      },
+      "shim_signature": null,
+      "status": "pending survivor assessment/shim; no excluded declaration"
+    }
+  ],
+  "generated_added": [
+    "Solidity.Optimizer.Pass.pipeline._f",
+    "Solidity.Optimizer.Pass.pipeline.eq_def"
+  ],
+  "bulk_records": "All referenced JSON files are in the portable evidence archive at the relative paths shown; not on a coordinator host. Binder hygiene from fixture relocation retained.",
+  "full_h78_owner_request": "h78-owner-requests.json"
+}

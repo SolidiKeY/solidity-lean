@@ -23,14 +23,15 @@ class LedgerTest(unittest.TestCase):
             self.assertEqual(len(json.loads(good.stdout)["declarations"]), 11)
             original = json.loads(census.read_text())
             source_rows = [r for r in original["declarations"] if r["file"] == SOURCE]
-            removed = original["declarations"].pop(original["declarations"].index(source_rows[0]))
+            index = original["declarations"].index(source_rows[0])
+            removed = original["declarations"].pop(index)
             census.write_text(json.dumps(original))
             self.assertNotEqual(run().returncode, 0)
-            original["declarations"].append(removed)
-            original["declarations"].append(dict(removed))
+            original["declarations"].insert(index, removed)
+            original["declarations"].insert(index + 1, dict(removed))
             census.write_text(json.dumps(original))
             self.assertNotEqual(run().returncode, 0)
-            original["declarations"].pop()
+            original["declarations"].pop(index + 1)
             # Restore original ordering before testing a forged name.
             original = json.loads(subprocess.check_output(["python3", str(CENSUS)], cwd=ROOT, text=True))
             source_rows = [r for r in original["declarations"] if r["file"] == SOURCE]

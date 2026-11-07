@@ -1,7 +1,8 @@
 /-!
 Isolated arithmetic backfill for the seven original CheckedSub target cases.
 This dependency-free fixture layer does not claim EVM/Source correspondence;
-that bridge waits for the pinned-v4.35 import closure to check. In particular,
+the separate SubCorrespondence module supplies a live intrinsic bridge; the
+pinned-v4.35 migration checks remain separate. In particular,
 Except Unit is a local arithmetic classification, not a replacement for Evm.Out.
 -/
 namespace H62.PrimitivePackets
@@ -22,12 +23,12 @@ theorem subtract_success {bound : Nat} (f : SubFixture bound)
     (enough : f.rhs.val ≤ f.lhs.val) :
     subtract f = .ok ⟨f.lhs.val - f.rhs.val,
       Nat.lt_of_le_of_lt (Nat.sub_le _ _) f.lhs.isLt⟩ := by
-  simp only [subtract, dite_eq_left enough]
+  exact dif_pos enough
 
 /-- Failure is retained instead of silently wrapping or truncating. -/
 theorem subtract_refusal {bound : Nat} (f : SubFixture bound)
     (underflow : ¬ f.rhs.val ≤ f.lhs.val) : subtract f = .error () := by
-  simp only [subtract, dite_eq_right underflow]
+  exact dif_neg underflow
 
 /-- The result is the exact natural difference, with no table-based decision. -/
 theorem subtract_exact {bound : Nat} (f : SubFixture bound)

@@ -26,3 +26,10 @@ test('production LanguageClient disposal retires inherited transport pipes after
  catch(error){evidence.failure=error.message;throw error;}
  finally{if(client){try{await client.dispose();}catch(error){evidence.cleanupFailure=error.message;}if(client.child){terminateTree(client.child);await client.closed;evidence.finalGroup=groupMembers(client.child);}}if(process.env.DAFNY_CLIENT_PIPE_EVIDENCE)fs.writeFileSync(process.env.DAFNY_CLIENT_PIPE_EVIDENCE,JSON.stringify(evidence,null,2));fs.rmSync(directory,{recursive:true,force:true});}
 });
+
+// Guard regression: quiescent owned groups must not spend closure budget on duplicate global proc scans.
+test('confirmed empty owned group needs one final process-table readback (actual process)',{skip:process.platform!=='linux'},async()=>{
+ const fs=require('node:fs'),child=spawn(process.execPath,['-e','process.exit(0)'],{detached:true,stdio:'ignore'});child.ownedGroup=true;const closed=trackChild(child);await closed;const read=fs.readdirSync;let scans=0;
+ fs.readdirSync=function(directory,...args){if(directory==='/proc')scans++;return read.call(this,directory,...args);};
+ try{await require('../src/child-lifetime.cjs').waitForGroup(child);assert.equal(scans,1,'one fresh empty-group readback is sufficient; avoid consuming retirement budget twice');assert.equal(child.exitCode,0);}finally{fs.readdirSync=read;terminateTree(child);await closed;}
+});

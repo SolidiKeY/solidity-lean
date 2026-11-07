@@ -48,7 +48,7 @@ def validate_receipts(repo, cache, toolchain, required_evidence=None, targets=No
                   if line.startswith("import ") for name in line[7:].split()]
         data={"source":census.digest(source.read_bytes()),"compiler":compiler,
               "flags":["-j1","--tstack=131072"],
-              "resource_policy":"vm-hard-cgroup-16GiB-reserve4GiB-rss12GiB-no-system-swap",
+              "resource_policy":bounded_lean.RESOURCE_POLICY,
               "imports":{name:fingerprints.get(name,compiler) for name in imported}}
         expected=census.digest(json.dumps(data,sort_keys=True).encode())
         fingerprints[module]=expected

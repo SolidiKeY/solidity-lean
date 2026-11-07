@@ -168,8 +168,22 @@ def g2Discount : List Nat := [
   537, 536, 535, 535, 534, 533, 532, 532, 531, 530, 530, 529, 528, 528, 527, 526, 526, 525,
   524, 524]
 
-theorem g1Discount_length : g1Discount.length = 128 := rfl
-theorem g2Discount_length : g2Discount.length = 128 := rfl
+theorem g1Discount_length : g1Discount.length = 128 := by decide +kernel
+theorem g2Discount_length : g2Discount.length = 128 := by decide +kernel
+
+/-- Structural lookup without the unused proof fields of an indexing instance. -/
+private def msmLookup (table : List Nat) (index cap : Nat) : Nat :=
+  List.casesOn table cap fun a tail =>
+    Nat.casesOn index a fun i => msmLookup tail i cap
+
+private theorem msmLookup_eq_getD (table : List Nat) (index cap : Nat) :
+    msmLookup table index cap = table.getD index cap := by
+  induction table generalizing index with
+  | nil => rfl
+  | cons a table ih =>
+    cases index with
+    | zero => rfl
+    | succ i => exact ih i
 
 /-- The MSM gas of `k` pairs with base cost `c`, the discount table and its
 cap. -/

@@ -1,0 +1,47 @@
+{
+  "scope": "Complete10 joined-sequence execution theorem roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 661,
+    "pending": 4622,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/joined-execution-roles-v60/evidence.tar.gz",
+      "bytes": 161813,
+      "sha256": "fb1877526735f4379ee2e9094528f63154bdc5973f4c19d052c7db9e0a555b55"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/joined-execution-roles-v60/inputs.json",
+      "bytes": 903,
+      "sha256": "8131793415306241a946f7645abc989ba15d188a1bef47c17f26306f4646e0bd"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/joined-execution-roles-v60/gates.json",
+      "bytes": 2866,
+      "sha256": "c87252b06c571a73886b60903e201d8a3c1209d9f42639ee44224c05abd4b3bd"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/joined-execution-roles-v60/reviews.md",
+      "bytes": 741,
+      "sha256": "b827503cbac124d2f0111477e59482fe74da58c9e711676636cb87bfe9abc72b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/joined-execution-roles-v60/case-rosters.json",
+      "bytes": 1058,
+      "sha256": "51a9d7f0e34a505966e4b5aa870e52e09f7941e504cd1b992ed0b4e9561aa9ef"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/joined-execution-roles-v60/doc-master-repair-binding.json",
+      "bytes": 432,
+      "sha256": "9c38bfc8bb977d50d7f573049877c7c4441aaf16681bb89c65ca159a58b19ecc"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/joined-execution-roles-v60/semantic-roles-reviewed.json",
+      "bytes": 1753984,
+      "sha256": "f97b58b91d8028cb9d4c4d6e3c697070ac4385fcdc8ccfe4ba3e83a6b92aa922"
+    }
+  ]
+}

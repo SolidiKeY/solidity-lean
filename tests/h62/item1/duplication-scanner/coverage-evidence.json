@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "guarded_regression": "Five linked fixture records must not imply complete selected lexical signature coverage",
+  "predecessor_head": "211135dc1ce1f9e23fa26f111e4d9c43f216ad4c",
+  "observed_origin_master": "71c5963f3cd9da2eb2989be1e19c810def6ff019",
+  "coverage": {
+    "selected_lexical_rows": 20,
+    "locally_linked": 5,
+    "unresolved": 15,
+    "complete": false,
+    "generated_kernel_declarations_enumerated": false
+  },
+  "tests": 73,
+  "reviews": "independent read-only finder and skeptic: no substantive findings; no Lean/server/tests/benchmarks/writes",
+  "proof_boundary": "External tooling checks and trusted isolated fixture execution only; no production theorem, ownership or complete kernel census claim",
+  "performance": "No matched whole-tree performance gate; original +80.254966536% timing STOP retained and workload not rerun",
+  "doc_gate": {
+    "exit": 1,
+    "inherited_missing_references": 4
+  },
+  "sha256": {
+    "evidence/baseline-scan.py": "e0c0d35f42f77e9b37e3e427c30c5c5f70e063d2d54ce33ea52e0be98417adeb",
+    "evidence/coverage-gate.json": "8b47efddd19c99bd1855f28b39ee8689da733de67e712b6029bf86c1b8ed98a0",
+    "evidence/default-differential.json": "5c8b655c6da7b9eb15c87472012d7445ffcb07cc62ca474c27a0733822d56f61",
+    "evidence/doc-paths.log": "9b9d1eeb362a394a3d960c0c3f6d76786217dd8cde0bd81d7345a051bdf769e0",
+    "evidence/live-scan.json": "e0dbf556f26550aa9e714e44fb4e8f3db58bf7bb663d589fe4c3b9e85d81d2b3",
+    "evidence/reviews.md": "d25557068eefa408a0dbd78bd5c77b9c2ad2ccf1b003ac70ef57e38f941477a3",
+    "evidence/tests.log": "2cddde690692928452f84e303e5143159170e7108b0f8c39cf33a0b825528329"
+  },
+  "live_receipt_sha256": "60edd26c3032ebc5ce1d1c81f1bd9fcb160972424c2f49a408eee4a44b6e57c4",
+  "scanner_sha256": "bde238a798e59ba087b83613585b4b068882a41407c179d48f3fe695378ab215",
+  "tests_sha256": "6b3c4bc676a587aa918743003310a27d87e5edff7bb5af7f6e3ced3f9c68c999"
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "checkpoint_base": "2a43bf4fcdaf24750265afc8f8be5b420d1d22b0",
+  "checkpoint_base": "cc1ea1c9c99522bff459dcc57e41339e1f347243",
   "boundary": "Source input identities only. No Lean proof, preservation of all original cases, axiom audit or performance claim.",
   "reproduce": [
     "python3 scripts/h62/item4/generic-yul-views/verify_manifest.py",
@@ -9,6 +9,10 @@
     "python3 scripts/h62/item4/generic-yul-views/test_timings.py"
   ],
   "files": [
+    {
+      "path": "Solidity/Storage/HashedLayout.lean",
+      "sha256": "9ac3cd0d246769c84330e724e5326446d57ce2fe408d5dcce652fdaf5f62e507"
+    },
     {
       "path": "Solidity/Yul/Views/ReadControls.lean",
       "sha256": "6b36935fc4e3d7483cd9a54f54be9f557fd83034733d93dd0ecfc414e6b883b8"

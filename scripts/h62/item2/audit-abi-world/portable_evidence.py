@@ -40,8 +40,7 @@ def verify(archive,manifest):
 def pack(evidence,archive,manifest):
  root=Path(__file__).resolve().parents[4]
  evidence=evidence.resolve();archive=archive.resolve();manifest=manifest.resolve()
- if not manifest.is_relative_to(root/"tests/h62/item2/audit-abi-world"):raise ValueError("manifest outside owned scope")
- if evidence.resolve().is_relative_to(root) or archive.resolve().is_relative_to(root):raise ValueError("H44 bulk must stay outside Git")
+ if any(p.is_relative_to(root) for p in (evidence,archive,manifest)):raise ValueError("H44 bulk and per-member manifests must stay outside Git")
  with open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","a") as lock:
   fcntl.flock(lock,fcntl.LOCK_EX)
   files=[]

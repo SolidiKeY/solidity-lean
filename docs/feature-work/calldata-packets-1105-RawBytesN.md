@@ -53,3 +53,20 @@ library success does not establish their root reachability. Finder/skeptic
 confirm both the source fixes and final evidence. V11 integrates the packet;
 the coordinator must register the modules and supply map rows before the
 registration-dependent gates can pass. No shared registry is edited here.
+
+H82 metadata follow-through: the three module-map rows are now supplied in
+the lane fragment and generated area index. The pin inventory was synchronized
+with its existing guarded declarations: 11,226 prior entries and their axiom
+sets remain unchanged, with 4,379 standard-only additions. No Lean source,
+statement, proof, interface, budget or allowed axiom set changed. Fragment,
+root, orphan and layer checks pass. Documentation paths still report one
+unrelated missing external Mathlib citation; this is not a full-gate pass or
+fresh kernel validation of the inventory.
+
+The documentation-path failure was subsequently resolved without changing the
+cited document or checker: an independent source-only Mathlib checkout was
+restored under the ignored Bridge dependency directory at the exact manifest
+revision f897ebcf72cd16f89ab4577d0c826cd14afaafc7. The repeated documentation
+gate passes; the earlier failure and revision/checksum evidence are retained.
+This dependency preparation copies no compiled artifacts and implies no
+kernel, Bridge or full-runtime gate pass.

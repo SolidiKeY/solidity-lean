@@ -12,7 +12,9 @@ Typed uint-array views below reuse the raw reader and V11 packer. The mixed
 view regression keeps same-byte dynamic/fixed references distinct, preserves
 duplicate identities, checks unequal decoded words and preserves an older
 destination prefix during transfer; entry guards and
-compiler/native execution remain separate obligations. -/
+compiler/native execution remain separate obligations. Lazy uint traversal
+below retains typed byte-derived contents and exact fuel failures, separately
+from entry span guards. -/
 namespace Solidity.Backend.AbiEntry.Consumers
 
 def rejection : Interface.RejectionConsumer EntryTransport.rejection where
@@ -198,6 +200,162 @@ theorem mixed_transfer :
 #guard_msgs (whitespace := lax) in #print axioms mixed_values
 /-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.mixed_transfer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms mixed_transfer
+/-- Typed sequence observation using an index-generalising recursor. -/
+def sequenceElements {shape : Solidity.AbiEntry.Shape} {length : Nat}
+    (values : Solidity.AbiEntry.Seq shape length) : List (Solidity.AbiEntry.Val shape) :=
+  Solidity.AbiEntry.Seq.casesOn
+    (motive_2 := fun shape _ _ => List (Solidity.AbiEntry.Val shape)) values
+    (fun {_} => [])
+    (fun {_ _} value rest => value :: sequenceElements rest)
+termination_by structural values
+
+private theorem sequenceElements_nil (shape : Solidity.AbiEntry.Shape) :
+    sequenceElements (@Solidity.AbiEntry.Seq.nil shape)=[] := rfl
+
+private theorem sequenceElements_cons {shape : Solidity.AbiEntry.Shape} {length : Nat}
+    (value : Solidity.AbiEntry.Val shape) (rest : Solidity.AbiEntry.Seq shape length) :
+    sequenceElements (.cons value rest)=value::sequenceElements rest := rfl
+
+private def semanticUintWord (input : Solidity.AbiEntry.Input) (address : Nat) :
+    Solidity.AbiEntry.Word (.uint 256) where
+  val := Solidity.AbiEntry.load input.data address
+  lt := Solidity.AbiEntry.load_lt _ _
+  valid := by
+    change decide (Solidity.AbiEntry.load input.data address<2^256)=true
+    apply decide_eq_true_eq.mpr
+    rw [←Solidity.AbiEntry.W_eq]
+    exact Solidity.AbiEntry.load_lt _ _
+
+/-- Exact word contents at the semantic traversal's wrapped addresses. -/
+def semanticUintValues (input : Solidity.AbiEntry.Input) (base index count : Nat) :
+    List (Solidity.AbiEntry.Val (.word (.uint 256))) :=
+  (List.range' index count).map fun i => .word
+    (semanticUintWord input (Solidity.AbiEntry.wrap (base+i*32)))
+
+private theorem semantic_uint_word (input : Solidity.AbiEntry.Input)
+    (fuel address length : Nat) :
+    Solidity.AbiEntry.cval input (fuel+1) (.word (.uint 256)) address length=
+      .ok (.word (semanticUintWord input address)) := by
+  simp only [Solidity.AbiEntry.cval]
+  split
+  · rfl
+  · rename_i bad
+    exact False.elim (bad (semanticUintWord input address).valid)
+
+private theorem semantic_uint_element (input : Solidity.AbiEntry.Input)
+    (fuel base address : Nat) :
+    Solidity.AbiEntry.celem input (fuel+2) (.word (.uint 256)) base address=
+      .ok (.word (semanticUintWord input address)) := by
+  change Solidity.AbiEntry.cval input (fuel+1) (.word (.uint 256)) address 0=_
+  exact semantic_uint_word input fuel address 0
+
+/-- Standalone lazy uint traversal derives all typed contents from bytes and
+retains the exact fuel failure. Entry span/offset checks are separate; no
+canonical-layout, buffer-bound or successful-run premise is introduced. -/
+theorem semantic_uint_sequence (input : Solidity.AbiEntry.Input)
+    (base index count : Nat) :
+    ∃ values : Solidity.AbiEntry.Seq (.word (.uint 256)) count,
+      sequenceElements values=semanticUintValues input base index count ∧
+      ∀ fuel, Solidity.AbiEntry.cseq input fuel (.word (.uint 256)) base index count=
+        if count=0 ∨ count+2≤fuel then .ok values else .error .fuel := by
+  induction count generalizing index with
+  | zero =>
+    refine ⟨.nil,?_,?_⟩
+    · rfl
+    · intro fuel
+      rw [if_pos (Or.inl rfl)]
+      cases fuel <;> rfl
+  | succ count ih =>
+    obtain ⟨tail,contents,execution⟩ := ih (index+1)
+    refine ⟨.cons (.word (semanticUintWord input
+      (Solidity.AbiEntry.wrap (base+index*32)))) tail,?_,?_⟩
+    · rw [sequenceElements_cons,contents]
+      simp only [semanticUintValues,List.range'_succ,List.map_cons]
+    · intro fuel
+      cases fuel with
+      | zero =>
+        have short : ¬(count+1=0 ∨ count+1+2≤0) := by omega
+        rw [if_neg short]
+        rfl
+      | succ fuel =>
+        cases fuel with
+        | zero =>
+          have short : ¬(count+1=0 ∨ count+1+2≤1) := by omega
+          rw [if_neg short]
+          rfl
+        | succ fuel =>
+          cases fuel with
+          | zero =>
+            have short : ¬(count+1=0 ∨ count+1+2≤2) := by omega
+            rw [if_neg short]
+            rfl
+          | succ fuel =>
+            rw [Solidity.AbiEntry.cseq,semantic_uint_element,execution]
+            by_cases enough : count=0 ∨ count+2≤fuel+2
+            · have enough' : count+1=0 ∨ count+1+2≤fuel+3 := by omega
+              simp only [if_pos enough,if_pos enough',Solidity.AbiEntry.Shape.headSize]
+            · have short : ¬(count+1=0 ∨ count+1+2≤fuel+3) := by omega
+              rw [if_neg enough,if_neg short]
+
+
+/-- Empty standalone sequences succeed even at zero fuel; no entry admission
+or empty-calldata head check is inferred from this observation. -/
+theorem semantic_uint_empty (input : Solidity.AbiEntry.Input)
+    (base index fuel : Nat) :
+    (Solidity.AbiEntry.cseq input fuel (.word (.uint 256)) base index 0).map
+      sequenceElements=.ok [] := by
+  obtain ⟨values,contents,execution⟩ := semantic_uint_sequence input base index 0
+  rw [execution,if_pos (Or.inl rfl)]
+  change Except.ok (sequenceElements values)=_
+  rw [contents]
+  rfl
+
+/-- Insufficient fuel remains a fuel failure, rather than an empty-data
+revert or a successful zero-padded traversal. -/
+theorem semantic_uint_fuel (input : Solidity.AbiEntry.Input)
+    (base index count fuel : Nat) (nonempty : 0<count) (short : fuel<count+2) :
+    Solidity.AbiEntry.cseq input fuel (.word (.uint 256)) base index count=
+      .error .fuel := by
+  obtain ⟨values,contents,execution⟩ := semantic_uint_sequence input base index count
+  have insufficient : ¬(count=0 ∨ count+2≤fuel) := by omega
+  rw [execution,if_neg insufficient]
+
+/-- Regression: an unaligned read after a nonempty prefix observes unequal
+words 7 and 42. This is standalone traversal, not ABI entry admission. -/
+theorem semantic_uint_unequal :
+    (Solidity.AbiEntry.cseq ⟨sampleFrame.cd,0⟩ 4 (.word (.uint 256)) 1 0 2).map
+      sequenceElements=.ok [.word ⟨7,by decide,by decide⟩,.word ⟨42,by decide,by decide⟩] := by
+  obtain ⟨values,contents,execution⟩ := semantic_uint_sequence ⟨sampleFrame.cd,0⟩ 1 0 2
+  rw [execution,if_pos (Or.inr (by decide))]
+  change Except.ok (sequenceElements values)=_
+  rw [contents]
+  rfl
+
+/-- Regression: empty input still supplies zero-padded words to standalone
+reads at every starting address and index; entry span checks are separate. -/
+theorem semantic_uint_zero_padding (free base index : Nat) :
+    (Solidity.AbiEntry.cseq ⟨[],free⟩ 4 (.word (.uint 256)) base index 2).map
+      sequenceElements=.ok [.word ⟨0,by decide,by decide⟩,.word ⟨0,by decide,by decide⟩] := by
+  obtain ⟨values,contents,execution⟩ := semantic_uint_sequence ⟨[],free⟩ base index 2
+  rw [execution,if_pos (Or.inr (by decide))]
+  change Except.ok (sequenceElements values)=_
+  rw [contents]
+  simp only [semanticUintValues,List.range'_succ,List.range'_zero,List.map_cons,List.map_nil,
+    semanticUintWord,Solidity.AbiEntry.load,Solidity.AbiEntry.byteAt,List.getElem?_nil,Option.getD_none]
+  rfl
+
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.sequenceElements' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms sequenceElements
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_sequence' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_uint_sequence
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_empty' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_uint_empty
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_fuel' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_uint_fuel
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_unequal' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_uint_unequal
+/-- info: 'Solidity.Backend.AbiEntry.Consumers.UIntViews.semantic_uint_zero_padding' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_uint_zero_padding
 end UIntViews
 
 end Solidity.Backend.AbiEntry.Consumers

@@ -9,6 +9,7 @@ import os
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "scripts/h62/item2/audit-bytecode-selection"))
+from census import declarations
 import inventory_report as report
 import verify
 import witness_ledger
@@ -106,6 +107,40 @@ class InventoryTests(unittest.TestCase):
             self.assertIsNone(journal[0]["output_sha256"])
             self.assertNotIn("AUDIT_FILES_SOURCE_CHECK_PASS", result.stdout)
 
+    def test_private_unicode_source_mapping_and_generated_auxiliary(self):
+        source = "namespace M\nprivate theorem café (n : Nat) : True := True.intro\nend M\n"
+        candidate = declarations(source)[0]
+        self.assertEqual(candidate["name_line"], 2)
+        self.assertEqual(candidate["name_column"], len("private theorem "))
+        row = {"kind": "theorem", "is_theorem": True, "private": True,
+               "name": "_private.M.0.M.café", "user_name": "M.café",
+               "declaration_range": {"selection_line": candidate["name_line"], "selection_column": candidate["name_column"]}}
+        auxiliary = dict(row, name="_private.M.0.M.café._proof_1", user_name="M.café._proof_1")
+        result = report.source_links([row, auxiliary], [candidate])
+        self.assertEqual(result[0]["mapping_status"], "unique")
+        self.assertEqual(row["source_origin"], "private_source_theorem")
+        self.assertEqual(auxiliary["source_match_count"], 0)
+        duplicate = dict(row, name="_private.M.1.M.café")
+        result = report.source_links([row, duplicate], [candidate])
+        self.assertEqual(result[0]["mapping_status"], "ambiguous")
+        self.assertTrue(all(r["source_origin"] == "ambiguous_source_match" for r in [row, duplicate]))
+        with self.assertRaisesRegex(ValueError, "duplicate source candidate"):
+            report.source_links([row], [candidate, candidate])
+
+    def test_multibyte_attribute_before_name_uses_codepoint_columns(self):
+        source = "@[café] theorem t : True := True.intro"
+        candidate = declarations(source)[0]
+        self.assertEqual(candidate["name_column"], len("@[café] theorem "))
+        self.assertNotEqual(candidate["name_column"], len("@[café] theorem ".encode()))
+
+    def test_wrong_selection_position_stays_unmatched(self):
+        candidate = declarations("theorem t : True := True.intro")[0]
+        row = {"kind": "theorem", "is_theorem": True, "name": "t", "user_name": "t",
+               "declaration_range": {"selection_line": 1, "selection_column": candidate["name_column"] + 1}}
+        result = report.source_links([row], [candidate])
+        self.assertEqual(result[0]["mapping_status"], "unmatched")
+        self.assertEqual(row["source_match_count"], 0)
+
     def test_writer_exclusion_honored(self):
         path = "Solidity/Backend/Selection/Interface.lean"
         item = {"id": "fixture", "owner": "fixture-owner", "writeScope": "Solidity/Backend/**", "writeExclusions": path}
@@ -130,6 +165,9 @@ class WitnessLedgerTests(unittest.TestCase):
             self.assertEqual(sum(row["coverage"].startswith("simultaneous") for row in rows), 4)
             self.assertEqual(sum(row["coverage"].startswith("intentional") for row in rows), 1)
             self.assertTrue(all(not row["witness"]["establishes_original_conclusion"] for row in rows))
+            group = (witness_ledger.HELPER_PATH, witness_ledger.NAMESPACE, witness_ledger.LINKS)
+            with self.assertRaisesRegex(ValueError, "duplicate witness target across groups"):
+                witness_ledger.link(inventory, [check], ROOT, groups=[group, group])
             original_mask = witness_ledger.mask
             for target, helper, negative in witness_ledger.LINKS:
                 for operator in [" → True", " ∨ True"]:

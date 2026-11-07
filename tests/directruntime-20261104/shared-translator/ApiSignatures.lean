@@ -46,3 +46,7 @@ open Solidity.Frontend.ExecutableAst.Shared
 #check Solidity.Frontend.ExecutableAst.Shared.localTypeName_of_fixedBytes
 
 #check Solidity.Frontend.ExecutableAst.Shared.localValueTypeName_of_address
+
+#check Solidity.Frontend.ExecutableAst.Shared.environmentMember?
+
+#check Solidity.Frontend.ExecutableAst.Shared.environmentMember?_guard
