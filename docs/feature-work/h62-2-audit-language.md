@@ -580,3 +580,18 @@ passed. Both independent read-only reviews accepted these boundaries; a dangling
 symlink refusal and exclusive output creation address the skeptic's robustness
 suggestion. This is source recovery, not elaborated interface coverage or final
 acceptance. Bulk output and validation evidence remain private under H145.
+
+Fresh source-role recovery uses
+`scripts/h62/item2/audit-language/source_roles.py`, reusing the existing classifier
+without its historical ownership acceptance path. All 4,146 candidates remain in
+scope: 3,525 have source-classified header/referenced-context domains and 621
+retain unresolved domains; there are zero parse errors or exclusions. Source
+signatures, section variables and lexical directive histories are retained even
+when classification fails. These are lexical roles, not Lean telescope membership,
+joint witnesses or compiler feasibility. Historical owners remain UNVERIFIABLE.
+
+Both independent read-only reviews pass after correcting a string/bytes hashing
+boundary and retaining premise text on error rows. Three negative controls cover
+source drift, duplicate candidate accounting and parse-error premise retention.
+The original ownership-bound classifier and acceptance checker remain unchanged.
+Fresh bulk classification and reproduction evidence are archived privately.
