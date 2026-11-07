@@ -1206,3 +1206,25 @@ line in CollisionBound changed from the name `EagerAdaptiveBound.` to
 Equal group counts do not prove equal memberships or semantics. This single
 measurement is not a Lean runtime gate. Evidence is outside Git under
 `/workspace/h62-duplication-scanner-evidence/universe-names/`.
+
+### Universe-name report replay
+
+Two bounded scans with the same tree, scanner, selection, registry and
+caller-pinned previous report took 124.977 and 117.117 seconds and produced
+byte-identical reports, SHA256
+`55fbe28e339cbdb0e2c6e693fd0d58c1bd2cf0810e1ce8b7a4a886b49b540ea3`.
+Both selected 7,321 files and recognized 123,559 declarations, with no file
+errors, unmatched globs or reported aliases; all recognized owners remain
+unknown. Relative to the older caller-pinned report, 18 inputs were added,
+20 changed and none removed. The scanner and tree both changed from that
+baseline, so group deltas combine tool and input effects. The prior pin
+identifies bytes, not an authenticated producer.
+
+The first after time was +9.91% against the recorded 113.712-second before
+sample; the repeat was +2.99% against that same before sample. Both are
+reported separately and neither crossed the 10% stop threshold. The pair of
+matching reports demonstrates repeatability for these runs, not a robust
+performance bound, complete census, signature equivalence or live ownership.
+No opt-in fixture or project signature binding was invoked. Independent
+finder and skeptic reviewed the replay without Lean. Full reports and timings
+are outside Git in the universe-names evidence directory.
