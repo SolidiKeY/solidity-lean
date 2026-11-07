@@ -733,3 +733,217 @@ RO-DOC-P20-REF routes this exact docstring repair to the live Yul/original vy3
 owner through the coordinator. That source remains read-only here. The global
 documentation gate is failing, not waived; native source/object bindings and
 proof results remain unchanged. Original/inherited full acceptance is pending.
+
+
+## Native caller execution with the checked void-call frame (2026-11-07)
+
+On coordinator master 902e87762e5c3fb863bc3a592892f2dc09dfa979, additive audit
+modules ExecutionCall and CheckedExecutionCall connect the earlier native reply
+adapter to the actual stores/pushes/CALLIN/POP caller image. Generic proofs keep
+the caller stack/storage, the written input window and every memory word outside
+that window; funded and poor cases remain separate. The caller prefix returns
+normally even for child revert; its journal retains the actual child flag and
+raw bytes. It remains a precomputed, single-input adapter for frozen CALLIN.
+
+The checked composition uses the existing Mutation.compileCall-selected void
+family and classifies its actual typed-core Stmt.run outcome. It keeps the entire
+InterfaceV1.Returned certificate, including representation, stack, base extension,
+allocator growth, cursor and older words, alongside actual native child execution.
+No desired source outcome or target-run premise replaces that proof. Existing
+compiler-selected success and write-before-OOB bare-revert fixtures supply both
+branches. Entry.capacity survives the stack-only preparation lemma.
+
+This is typed-core compiler/frame composition, not resolved Source callee
+selection or Source/world adequacy. Generic physical Entry is required AFTER
+input preparation; only empty byte input has concrete entry-preserving fixtures.
+There is no ABI bytes-to-typed-arguments theorem, arbitrary-input preparation
+frame, child state commit, world/code selection, nested-call, gas/fork or general
+P1/G42.02 result. No approved Source profile is introduced. The original compiler
+success/G42.04 producer remains memory-reference-structs work. These helpers are
+unregistered audit modules under the tests directory, not a published core API.
+
+The final sealed check passed in 708.784 seconds at 1666904064 bytes peak
+aggregate RSS: 214 fresh project dependencies, 17 authenticated native parent
+objects, two new modules, 17 theorem axiom sets and five canonical module identity
+controls. The dependency union contains 230 project modules, plus three audit
+helpers. The current source/import graph, staged bytes, objects, tools and logs
+are verified before success. No held Premises import is allowed; a new negative
+control rejects such drift. The authenticated parent includes the passing bounded
+KeySort prerequisite. Actual Lean 4.24.0 / Lake 5.0.0-src+797c613, explicit -j1,
+12 GiB virtual-memory cap, 4 GiB reserve, no swap. Only propext, Classical.choice
+and Quot.sound occur in the 17 axiom sets. Eight external refusal/inventory
+controls pass; they are tooling tests, not proofs of original audit coverage.
+
+Failed attempts remain in the evidence: resource stop; deliberate module-root
+correction; TermSize thread-creation failure; global async=false triggering
+Evm/Correct's unchanged 11000-heartbeat limit; and two local elaboration errors.
+The last two proof errors were fixed without changing statements. A bounded
+TermSize diagnostic passed with async=false, reducing peak virtual memory from
+about 10.9 GiB (44 observed threads) to about 2.8 GiB (five threads). The first
+thread diagnostic had a log/data filename collision and lost its detailed
+samples; the corrected diagnostic uses distinct files. Final scheduling disables
+asynchronous elaboration ONLY for TermSize; all proof budgets remain unchanged.
+This additive check is not a before/after rebaseline and does not clear the
+historical Premises +80.254966536% STOP.
+
+Read-only finder and skeptic found no further defect after the log/root fixes,
+held-module fence and proof repairs; neither used Lean/server/tests or wrote
+files. Final kernel evidence is separate from those source reviews. Raw evidence,
+failed attempts and handoff are under
+/workspace/h62-audit-readonly-calls/execution-call/; portable content pins are in
+`tests/h62/item2/audit-readonly-calls/execution-call.sha256`. Internal receipt
+paths remain VM-specific; no independent off-VM acceptance is claimed.
+
+All 792 original obligations and coverage classifications remain byte-identical:
+35 joint, three target-failure joint, 45 intentional impossibility, 256 without
+top-level input hypotheses, two refuted-V1 migration cases and 451 ordinary
+pending. Three current private-identity gaps remain. This checkpoint discharges
+ZERO original rows, changes no frozen statement/definition/premise/exclusion or
+budget and adds no sorry, axiom or native_decide. New fixture delta: two audit
+modules, 339 Lean lines; zero production modules changed. Full inherited work,
+Source-selected compiler/world binding and scope-complete acceptance remain open.
+No RUNTIME_GATE_PASS, goal completion or master publication is claimed.
+
+RO-DOC-P20-REF now has an owner repair at
+c9cf710a8459581006150a462b69ae8c4f0d13e0. It is not on this master; the repository
+documentation gate remains failing until adoption and recheck. The exact retired
+proof-cleanup object fb0defdca5c5fe9baa7fd8c1e1271a91d255e1c9 remains unavailable;
+its historical acceptance stays UNVERIFIABLE, without rebaselining or revival.
+
+
+## Fresh original-obligation dependency census (2026-11-07)
+
+After fetching master 32d810f1dae86d884f9799b0444af959dd291bda, the previous
+native/frame checkpoint rebased from e4d0e8e1dba10ac26a8cb15065c92fd794facd39
+to e96d96705245031cdf16c33a3db9ee047685c001. Its saved proof evidence remains
+at its original source revision; this census adds no current-tree proof claim.
+
+The new current_dependencies driver joins all 792 original statements in all
+129 original modules to a FRESH compiler-parsed declared-header capture. Existing
+SDK-only header tooling treats tracked core source as inert strings: no
+inventoried project import/body executes, including held Premises. All 6663
+captured core nodes parsed successfully; eight real header controls passed.
+Separate-package/test/unregistered paths outside the configured core roots are
+not promoted to coverage. Dynamic references and body elaboration remain unknown.
+
+The driver verifies the reviewed historical ledger's exact source signatures,
+variable context and visibility against original c6f550e Git blobs and the frozen
+module map. It retains every original row, historical owner and reviewed status.
+For each original module it fingerprints the complete observed declared source
+closure: full source hashes, module identity, header hashes, exact import flags,
+resolutions and observed SDK artifact digests. Cycles terminate; unresolved and
+missing sources remain explicit. A complete declared observation says nothing
+about whether a dependency cycle compiles or whether the bodies are adequate.
+Committed changed/added dependency paths are compared against original Git blobs;
+127 of 129 original module closures contain such byte changes. These include
+proof/comments/import changes; they are not semantic weakening findings.
+
+Final observations: 770 lexical headers retained, 19 header/context drift, three
+absent private declarations. Those exact private identities remain
+CaptureFailures.run_bind, CapturePhases.run_bind and EnvironmentCredit.run_bind;
+their historical RO owner is retained, never silently mapped to shared Hoare
+helpers. Twenty-five original modules have declared paths to held Premises;
+104 have no declared path. Neither result grants compilation permission or
+clears the historical +80.254966536% timing STOP. All rows retain pending current
+kernel fidelity and unverified live ownership. No exact current type/body
+correspondence, global premise inhabitance or joint witness follows.
+
+Nine external controls pass, including unchanged signature/changed dependency
+body, private omission, cycles, SDK digest/import-flag drift, missing/unresolved
+inputs, forged paths, duplicate nodes and zero-theorem modules. Independent
+read-only finder and skeptic found the same child-receipt provenance gap: the
+first driver sampled the receipt file's hash after capture rather than deriving
+it from the successful returned receipt. The fix authenticates exact serialized
+live-result bytes before reading the file and rechecks that digest after
+accounting; a new substitution/failed-child control covers it. Both reviewers
+confirmed the fix without executing Lean/tests/server or writing files.
+
+The final fresh capture passed after that fix. The earlier pre-fix result is
+historical only; its ledger output is byte-identical to the final same-head
+capture, which supports deterministic observation, not acceptance of the old
+receipt chain. Current source/head/configuration, tools, source closures, child
+receipts, process logs and observed SDK artifacts are checked before success.
+The actual inert-header parser command took 9.657428673 seconds at 635973632 bytes
+peak aggregate RSS, exit 0. Lean 4.24.0, explicit -j1 --tstack=131072,
+LEAN_NUM_THREADS=1, capped memory with 4 GiB reserve and no swap; no proof budget
+change. No KeySort/runtime/full-proof gate is inferred from metadata parsing.
+
+Raw captures/receipts, the lossless ledger, refusal controls and reviews are under
+/workspace/h62-audit-readonly-calls/current-dependencies/. Content pins are in
+`tests/h62/item2/audit-readonly-calls/current-dependencies.sha256`. The committed
+driver is the deterministic generator; bulk records remain off Git. Receipt
+paths are VM-specific; content verification is not independent SDK certification.
+
+All original classifications remain: 35 joint, three target-failure joint,
+45 intentional impossibility, 256 without top-level input hypotheses, two V1
+refutation/migration cases and 451 ordinary pending. ZERO original obligations
+are discharged here, and coverage.json remains unchanged. No Lean declaration,
+frozen statement/definition/premise/exclusion, axiom or budget changed. All
+original/inherited proof acceptance, owner/compiler-success work, nineteen
+current lexical drifts, three private gaps and the full H121 Source/world/native
+frame producer remain unfinished. No RUNTIME_GATE_PASS, goal completion or push.
+
+Next independent work: use this explicit census to inspect the nineteen current
+header/context changes and their original statements, preserve the three private
+identities, and continue supported joint witness/refutation work on independently
+checkable inputs. Declared no-path is not a release of any timing hold. Live
+ownership still requires current authoritative evidence. Historical proof-cleanup
+fb0defdc remains UNVERIFIABLE; P20 owner repair still awaits integration/recheck.
+
+
+## Exact signature-drift review (2026-11-07)
+
+Fetched/rebased onto master 48ff6a2ebd9a6531a288c0d203c682c4075be25b before
+this item. The saved capture records its actual full source head separately;
+no prior native or witness proof is recertified by this source-only review.
+
+The new signature_drift driver preserves all 792 original identities and emits
+full original/current signatures, variable context, visibility, historical kernel
+name/owner, and unified diffs for every changed or absent declaration. Exact
+observed-pair pins classify the known 22 cases without rewriting statements or
+normalizing the frozen gate: eleven `.balance.val` to `.balance` observations,
+one Word-to-Monetary.Balance parameter change, seven added E.mapFree parameters,
+and three absent private run_bind declarations. Unrecorded pairs, residual
+premise/context changes, or later mutations remain unreviewed drift. A same-text
+pattern elsewhere is not enough. Hoare.run_bind is not a replacement identity.
+
+Pinned coordinator decision input 5e4335f38abb74a8864863577b04363980659e6b92a4a9835e8a0efa5bd833dd
+records H19's exact unbounded monetary representation and H60's Source typing
+repair. Those explain upstream evolution; they do not establish H57 statement
+transport, approve an added audit premise/exclusion, or prove correspondence.
+Monetary.Balance is Nat, so the domain change is not treated as a mere projection
+rename. Source Types/Typing/Machine/Monetary and the BalancesFit writer inventory
+are captured as read-only definition context. In particular the structural
+unbounded History.balance step is not automatically covered by Word range facts.
+No semantic weakening/equivalence verdict follows from lexical transformation.
+
+All 19 changed statements retain pending frozen/current transport and kernel
+fidelity; all three private identities remain absent and pending. A saved owner
+request asks the coordinator/H16 Source producers for exact versioned statement
+and consumer-proof references. H19/H60 decisions already authorize their model
+work; this is an evidence request, not a new human scope/permission question.
+No Source or original theorem file was edited.
+
+Seven external controls pass: extra premise/context stays visible even when a
+pair hash is altered, unrecorded patterns stay unreviewed, private aliases cannot
+close absence, original/duplicate/foreign identities are checked, raw diffs are
+retained, and observation pin parsing/hashing shares one byte buffer. Finder
+found a split snapshot between the initial pins-file hash and later parsed
+bytes. The one-buffer fix derives saved bytes, parser input and retained digest
+from the same read; both read-only finder and skeptic confirmed it. Neither ran
+Lean/server/tests or wrote files. The pre-fix final/ capture is historical only;
+sealed/ is the corrected accepted source capture. No Lean executed in this item.
+
+Raw dossiers, captured current source/definition bytes, decision context, Git
+history, reviews and owner request are under
+/workspace/h62-audit-readonly-calls/signature-drift/. Pins are in
+`tests/h62/item2/audit-readonly-calls/signature-drift.sha256`; the committed
+driver regenerates the bulk dossier. All 792 rows remain: 770 lexical headers
+retained, 19 drift, three private absences. Historical 451 ordinary pending and
+all other witness/refutation classifications remain unchanged; ZERO original
+obligations are discharged. Live ownership is unverified, not inferred from
+Git author history. No Lean declaration, frozen statement/definition/premise,
+exclusion, axiom, sorry/native_decide or proof budget changed. Full original and
+inherited acceptance, joint witnesses, H121 Source/world/native-frame adequacy,
+compiler success and runtime gates remain open; historical Premises
++80.254966536% STOP remains. No runtime pass, goal completion or publication.

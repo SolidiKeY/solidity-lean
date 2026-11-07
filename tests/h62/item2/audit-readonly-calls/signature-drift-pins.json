@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "purpose": "Exact observed lexical pairs only; no statement normalization, equivalence, owner approval or original obligation credit.",
+  "original_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "observed_head": "6f7002ca9cf9e41c1885d8717d4b382acca48f45",
+  "cases": [
+    {
+      "file": "Solidity/Backend/WorldCalls/SourceCallHistoryControls.lean",
+      "source_name": "Solidity.Backend.WorldCalls.SourceCallHistoryControls.funding_balances",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "d399cb7cbfdbd16d8941ebea1750850c110a64adb5621adcc5ce23715b248d23",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "8ed4e09eedecc692cf076e4cab7de552d5ee69011546cc992d03754f238e98fd",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Backend/WorldCalls/SourceCallHistoryControls.lean",
+      "source_name": "Solidity.Backend.WorldCalls.SourceCallHistoryControls.nonpayable_balance_rollback",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "bfbcd53032a8f086e0ef1672931d171a4c63d0be70761930a7464a5ebe7ae14b",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "492488d79518d32a61f73eff811221d3b92a4ac0fe140cf762dd3f6713a31386",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Backend/WorldCalls/SourceSelfDispatch.lean",
+      "source_name": "Solidity.Backend.WorldCalls.SourceSelfDispatch.enter",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "2adeb92f3cd59062e67f71376fde49f5ea20c3dbc0b180728ccccbcedb5bfd76",
+      "original_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520",
+      "observed_signature_sha256": "a73eb8012ad780baa84bebaeca298ae6680a0f34c542f495626fc3c4769f9b9f",
+      "observed_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520"
+    },
+    {
+      "file": "Solidity/Backend/WorldCalls/SourceSelfDispatch.lean",
+      "source_name": "Solidity.Backend.WorldCalls.SourceSelfDispatch.funded_self",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "f20fd8808317f74f923c3064dcf4a9d8ede9313cd2e5e74d71fce4660e421c2b",
+      "original_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520",
+      "observed_signature_sha256": "bc74d68d559327716f6d4521ba8870f84e70e22d65fa9b925bdc785948852321",
+      "observed_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520"
+    },
+    {
+      "file": "Solidity/Backend/WorldCalls/SourceSelfDispatch.lean",
+      "source_name": "Solidity.Backend.WorldCalls.SourceSelfDispatch.halted",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "19287b67b2d5d6ba04c52a5892e2da5171e9e3deb37552eadb7cc8c0fd7952d5",
+      "original_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520",
+      "observed_signature_sha256": "223f986adedbde5e3ddf1c1909e8a7925d986e9be2266fc03000e9441c3e2423",
+      "observed_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520"
+    },
+    {
+      "file": "Solidity/Backend/WorldCalls/SourceSelfDispatch.lean",
+      "source_name": "Solidity.Backend.WorldCalls.SourceSelfDispatch.reverted",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "12a1cc1e8cda64e18398edeb7c255f77654967f73109f6cd72756d4ab3e2edb5",
+      "original_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520",
+      "observed_signature_sha256": "10ecde3b43a15ab98c9a371c563e95f1f38fe061348ab1adddb02a359880de83",
+      "observed_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520"
+    },
+    {
+      "file": "Solidity/Backend/WorldCalls/SourceSelfDispatch.lean",
+      "source_name": "Solidity.Backend.WorldCalls.SourceSelfDispatch.success",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "43b35b19f92af104fb8bd55a50176c4ebf959fa2af9c506d9ff40d52e821269c",
+      "original_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520",
+      "observed_signature_sha256": "81255237d5f87011e766915330c7cd4c3cf3dc3e31b05841c4fe1b260ec53310",
+      "observed_context_sha256": "a51bd5b7fff21f5c22eb66728b39e9a9c0db0402479a722853aae64212548520"
+    },
+    {
+      "file": "Solidity/Backend/WorldCalls/UnknownRevertControls.lean",
+      "source_name": "Solidity.Backend.WorldCalls.UnknownRevertControls.observations",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "b45d164f782228ce43e58b975688ecca4545410cd4a15e23e2976c8cdb535648",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "d98924d1062202247da844f72500bf4cf6c0c89b855c36f5c779ace4f214947d",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/CaptureFailures.lean",
+      "source_name": "Solidity.Lowering.Readonly.CaptureFailures.run_bind",
+      "kind": "removed-private-identity",
+      "original_signature_sha256": "f2d973844eb329c5c43aae9977b94f76106276734bf66102070ecdbd0720ad3b",
+      "original_context_sha256": "5f96581aad70b29c3fbe087d7d259a3463cc014c0539323cdadbd7418c5cde40",
+      "observed_signature_sha256": null,
+      "observed_context_sha256": null
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/CapturePhases.lean",
+      "source_name": "Solidity.Lowering.Readonly.CapturePhases.run_bind",
+      "kind": "removed-private-identity",
+      "original_signature_sha256": "f2d973844eb329c5c43aae9977b94f76106276734bf66102070ecdbd0720ad3b",
+      "original_context_sha256": "5f96581aad70b29c3fbe087d7d259a3463cc014c0539323cdadbd7418c5cde40",
+      "observed_signature_sha256": null,
+      "observed_context_sha256": null
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/Controls.lean",
+      "source_name": "Solidity.Lowering.Readonly.Controls.balance_changes",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "6d26162d9978951d9e42722fa190b78a1842103263884dff0a77370546d71979",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "b2e2f61885e19c4c8040f8852559b40a65a1f0b39fbe97ff4c94085d685e3e0d",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/EnvironmentCredit.lean",
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentCredit.run_bind",
+      "kind": "removed-private-identity",
+      "original_signature_sha256": "f2d973844eb329c5c43aae9977b94f76106276734bf66102070ecdbd0720ad3b",
+      "original_context_sha256": "af17d9bd2d9d33178bc695691556a306a455d5fd8e4d7115582c2a8d446efe0c",
+      "observed_signature_sha256": null,
+      "observed_context_sha256": null
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/EnvironmentCreditControls.lean",
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentCreditControls.static_balance_changes",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "2981ae42c9d10cbc05e8edfc4ddea13af020c00c66e2009fee8be875ea618213",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "16e6638b3da0ae3e0917c6d75b5d6e9ae8ed9333173ba1e0b7bb619175904a9d",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/SourceExpressionParts/Part2.lean",
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.evalE_convExplicit_succ",
+      "kind": "H60-typing-parameter",
+      "original_signature_sha256": "945f1089a6ecef23b21c88467e3747f06ed615f332ff2bcf00196e5b7968b634",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "3f2af881ac4c85db93354982b5a991dc78b2837170ce9acb8c63894d3790ef02",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/SourceExpressionParts/Part2.lean",
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.evalE_conv_succ",
+      "kind": "H60-typing-parameter",
+      "original_signature_sha256": "1b41feb88a62fde5875fec97c43fe9870c259928c3156a724916f3b0d3c7691f",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "1ea7625a4b0f8e487b66c8be8743d31ba4079c379de964c43e209ddb94968f30",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/SourceExpressionParts/Part3.lean",
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.evalE_compound_succ",
+      "kind": "H60-typing-parameter",
+      "original_signature_sha256": "6166a27a1716e2c5aa26fde1632881e6334482b8c9358d5aeae498e061857dc8",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "6ec67c2b496f7fdd2c901b630813a4adbf4227b8830cd0c630d9639045ff6e3e",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/SourceExpressionParts/Part5.lean",
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.evalE_builtin_succ",
+      "kind": "H60-typing-parameter",
+      "original_signature_sha256": "4a7f668b662ca87860eba944a62837cec5fdbc9e617273e03b1282149eac18a7",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "571d10a2bcdf91307de200c92f4d64486808155bfc9dbda5df47227f7a66019f",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/SourceStatementParts/Part1.lean",
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.execS_declInit_succ",
+      "kind": "H60-typing-parameter",
+      "original_signature_sha256": "d5812c6fc0ad45e246a1fad7f7a1486ac0418f8991b70e3c50455bb2cdf4a162",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "78a1f369c6d9f2472f2bb6229f4b27665d1b84b92d85d07a3a6b2a36d0025e8d",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/SourceStatementParts/Part3.lean",
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.execS_declTuple_succ",
+      "kind": "H60-typing-parameter",
+      "original_signature_sha256": "5ead83c64a7ce981fbcb6a8d56283274d822b71f429295b1d57576489b10b5de",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "a0ca0dc02b9085c961b8de485b2fae3a771b065343003b6bb98b071f864b6a31",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/SourceStatementParts/Part3.lean",
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.execS_retVal_succ",
+      "kind": "H60-typing-parameter",
+      "original_signature_sha256": "bbff5a0fb0c839468860c5216dc573a20ee322ddfa60c9613cfa7c7633f889de",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "83c91240889a4cd8e244d63a52204bec38b4d9cf0c0c031beb6a096dbb63726f",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    },
+    {
+      "file": "Solidity/Lowering/Readonly/StaticJournal.lean",
+      "source_name": "Solidity.Lowering.Readonly.StaticJournal.balance_storage",
+      "kind": "H19-balance-domain",
+      "original_signature_sha256": "ebefc6947536654fbe442111dd0dc58d7b1620d72ec296649b63f07c3ecc7739",
+      "original_context_sha256": "a27d11fca267c750a7d54f2fcf2fd08cb8561619fc9cbb3949eb4f3a1b2b3b53",
+      "observed_signature_sha256": "3181d9930adbb48bedc6b4342331ea7fff36625b9ddff9872db468e4f1018c49",
+      "observed_context_sha256": "a27d11fca267c750a7d54f2fcf2fd08cb8561619fc9cbb3949eb4f3a1b2b3b53"
+    },
+    {
+      "file": "Solidity/Lowering/V08/SourceClockTransactions.lean",
+      "source_name": "Solidity.Lowering.V08.SourceClockTransactions.source_vector",
+      "kind": "H19-balance-projection",
+      "original_signature_sha256": "17936f08de88eb74babfeb87c1972147a9ea7243afaa6c3abe9fc2cb22ad1ae4",
+      "original_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb",
+      "observed_signature_sha256": "749d47e861c178e202c0c01b5fadd34b92404446d165c1636f694e9177d9f35a",
+      "observed_context_sha256": "37e44270d9fdc635ffc2d6f852cd66e588d2a48486485ecfc1fe210222fd4ccb"
+    }
+  ]
+}
