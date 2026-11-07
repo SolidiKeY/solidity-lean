@@ -2274,3 +2274,23 @@ checked roles, hashes and history preservation without Lean or a server. The
 finder identified the exporter file effects above; they were added and rechecked.
 Evidence hashes are in `tests/h55/module-times/yul-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Inference helper candidate observations
+
+`inference_helper_controls.py` records three previously unreferenced candidate
+modules with source hashes and the inference-helper document hash. They cover
+case specifications, compatibility statements and provisional unregistered
+shared definitions. The handoff distinguishes a historical per-file Shared
+diagnostic from unavailable CaseSpecifications diagnostics and incomplete full
+validation. Current invocation, inputs, effects and outcomes remain unresolved;
+this supplied subset does not establish an inferencer merge or production
+compatibility.
+
+At merge head `a915c7f512dd6a0750a4bd16de1d90c11fcd2408`, the refreshed static
+index has 775 candidates, 560 with supplied current references and 215 without;
+seven retain historical references for review. Three candidates were added and
+none changed or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, hashes and history preservation without Lean
+or a server. Evidence hashes are in
+`tests/h55/module-times/inference-helper-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
