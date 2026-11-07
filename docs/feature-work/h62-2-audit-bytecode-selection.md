@@ -577,3 +577,22 @@ migration and owner/adoption requirements. No proposal or definition was applied
 
 Both independent reviewers also confirmed the InferHelpers citation-only fix
 retains its unapplied/unvalidated status and owner/adoption boundaries.
+
+
+## Coordinator-requested 2a43bf4fcdaf merge resolution
+
+The coordinator requested merging published master2a43bf4fcdaf into this same
+audit branch. The sole conflict was the ABI-world scanner duplicate-row fixture.
+Both sides replaced the same synthetic filename with an existing module path;
+this branch used ValueGate and upstream used Interface. The resolution takes the
+exact upstream file. The duplicate assertion, all other regression cases and
+frozen scanner expectations remain byte-identical. No scanner implementation,
+Lean source, proof, interface or ownership scope was changed by the resolution.
+Original four-checkpoint audit work remains partial; merge-resolution checks do
+not establish proof, runtime, gas/fork or whole-package performance gates.
+Exact parents, conflict blobs and validation are preserved off Git under
+merge-2a43bf4fcdaf in the existing evidence directory.
+
+Independent read-only finder and skeptic confirmed the exact-upstream fixture
+resolution preserves the assertion and all other cases, without running tests
+or Lean or writing files.

@@ -1,0 +1,33 @@
+{
+  "4.24.0": {
+    "explicit_header_footprint": {
+      "Init.Data.String.Basic": {
+        "modules": 26,
+        "source_bytes": 836645
+      },
+      "Init.Data.String.Lemmas": {
+        "modules": 137,
+        "source_bytes": 2983955
+      }
+    },
+    "missing_sources": 0,
+    "source_record_count": 137,
+    "archive_member": "static-backfill.tar.gz!/old-sdk-imports.json"
+  },
+  "4.35.0": {
+    "explicit_header_footprint": {
+      "Init.Data.String.Basic": {
+        "modules": 181,
+        "source_bytes": 4144004
+      },
+      "Init.Data.String.Lemmas": {
+        "modules": 361,
+        "source_bytes": 6907184
+      }
+    },
+    "missing_sources": 0,
+    "source_record_count": 361,
+    "archive_member": "static-backfill.tar.gz!/new-sdk-imports.json"
+  },
+  "boundary": "Static source-header imports, not measured memory or causal attribution; STOP unchanged."
+}
