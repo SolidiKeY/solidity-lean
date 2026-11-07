@@ -1,0 +1,52 @@
+{
+  "scope": "Complete15 ProvesDerive roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1252,
+    "pending": 4031,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-walk-roles-v100/evidence.tar.gz",
+      "bytes": 323892,
+      "sha256": "57158b839e3f1df40acc40bd61370e3e7db6ca281e176ca9f2d11a066681ccb6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-walk-roles-v100/inputs.json",
+      "bytes": 768,
+      "sha256": "eff35c720f44910c2ba2e574bea967169921331035044e106051e2958d5481a4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-walk-roles-v100/gates.json",
+      "bytes": 2815,
+      "sha256": "a765a92900559dc23d438f8bb5bee0c7855436c37b18fe75029d3330ac3042d4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-walk-roles-v100/reviews.md",
+      "bytes": 1359,
+      "sha256": "120dd77e06a5047505fef4248b82eb47103c2c422a78644419b0a420b72315d0"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-walk-roles-v100/case-rosters.json",
+      "bytes": 2388,
+      "sha256": "0ef1222d24ca80eddccfb48288227eed8a9ad519d3b2d2024a1013fa1fa78199"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-walk-roles-v100/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "3f5f0779620b4f8c2c12fc33b304012b3e7786210f799ab918e7a81423b939ba"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/sequent-walk-roles-v100/external-retention.json",
+      "bytes": 320494,
+      "sha256": "1314b1d57aade8d1205990f49f1fd028717f35f1d8bcfd31f9f16735425fad26"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/sequent-walk-roles-v100/semantic-roles-reviewed.json",
+      "bytes": 3343304,
+      "sha256": "02610915ab563f8b54da2709c70ec2df0990e2c81aca511afaa362e1fa220f4b"
+    }
+  ]
+}

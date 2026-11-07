@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/scope-absorb-roles-v99/semantic-roles-reviewed.json",
-    "bytes": 3300591,
-    "sha256": "cab5e6175e2697db291eacde08e94eec4ea1d137855cdedd25a4d75caea918b8"
+    "path": "/workspace/h62-successor-bulk/sequent-walk-roles-v100/semantic-roles-reviewed.json",
+    "bytes": 3343304,
+    "sha256": "02610915ab563f8b54da2709c70ec2df0990e2c81aca511afaa362e1fa220f4b"
   }
 }
