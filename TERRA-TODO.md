@@ -201,14 +201,15 @@ end Solidity.Lowering.StorageOps.SourceWordCommutation
 
 The historical twelve adapters remain in the preserved original checkout and prior handoffs; they are not resubmitted here. C157 is closed; the other historical adapters remain open.
 
-## C159 routine captured failure adapter
+## C159 captured failure adapter — completed
 
 Module: `Solidity/Lowering/StorageOps/SourceWriteRollback.lean`.
 Lemma: `Solidity.Lowering.StorageOps.SourceWriteRollback.run_refused`.
 Why routine: unfold the existing pair, use checked `SourceWordWrite.source_write`
 for the first operation and `static_write` for the second through `Hoare.run_bind`.
 The producer arguments and actual complete controls are checked separately.
-This statement is uncompiled; no stub, admission or implicit rollback claim.
+The exact statement below is compiled as `SourceWriteRollback.run_refused` and
+consumed by the existing outcome control; no implicit rollback is claimed.
 
 ```lean
 namespace Solidity.Lowering.StorageOps.SourceWriteRollback
@@ -225,7 +226,7 @@ end Solidity.Lowering.StorageOps.SourceWriteRollback
 ```
 
 These two routine adapters were originally recorded alongside twelve historical
-adapters. C157 is now compiled; C159 and the twelve historical adapters remain
+adapters. C157 and C159 are now compiled; the twelve historical adapters remain
 pending. Later subtotal statements below record their checkpoint history.
 
 ## C166: complete primitive-copy fuel classification

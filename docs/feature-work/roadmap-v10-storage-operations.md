@@ -67,7 +67,10 @@ show that a failed bind skips its rollback continuation, and invoke rollback
 separately. A wrong mark loses older journal/log prefixes; a wrong payload type
 fails before static refusal. Heap/events/locals survive because these writes
 never changed them. This does not prove general frame or compiler rollback.
-The routine generic pair adapter remains uncompiled in TERRA-TODO.
+The compiled `run_refused` adapter retains the exact first-write poststate on
+static refusal; the existing outcome control consumes it. This closes only C159
+in TERRA-TODO. Lane-history finder and skeptic reviews found no semantic or
+statement-preservation issue in this adapter.
 
 `SourceStorageCopyPrefix.prepared` proves the actual distinct-path Source
 `storeVal(storRef)` result for primitive integer arrays at original fuel
