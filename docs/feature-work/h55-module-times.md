@@ -2103,3 +2103,24 @@ removed since the previous snapshot. Independent read-only finder and skeptic
 checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/compiler-followup-evidence.sha256`.
 This non-atomic static observation does not establish runtime acceptance.
+
+## Roadmap migration helper observations
+
+`roadmap_migration_controls.py` records four previously unreferenced migration
+helpers with source, audit document and historical driver hashes. The driver
+source maps CanonicalEvm to classify, ExportAll to api, and ExportEvm and
+HashContainsFixture to fixtures; api additionally requires a successful
+full-closure result. The actual current invocation, workspace, inputs, effects
+and outcomes remain unresolved. These structural inspections and versioned
+debug fingerprints do not establish cross-version kernel or semantic equivalence;
+the isolated Hash fixture does not repair its owner module. This is supplied
+subset evidence and does not authorize any H58-held change.
+
+At `fcbbf364d0c0cb45758e0073f9801562c18dcee8`, the refreshed static index
+has 766 candidates, 531 with supplied current references and 235 without; six
+retain historical references for review. No candidates were added, changed or
+removed since the previous snapshot. Independent read-only finder and skeptic
+checked roles, driver mapping, hashes and history preservation without Lean or a
+server. Evidence hashes are in
+`tests/h55/module-times/roadmap-migration-evidence.sha256`. This non-atomic
+static observation does not establish runtime acceptance.
