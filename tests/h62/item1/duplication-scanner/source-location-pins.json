@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "guarded_regression": "Namespace guesses, ambiguous source ranges and generated parent aliases promoted to source binding",
+  "probe_sha256": "f77817ebc6bc099f17f429a705c89fa924fbfa4127cf2b5ffaff3beb10501320",
+  "kernel_census_pins_sha256": "eefa0afe0e36269f26ec97af0fbd1209ce6f80318565f0c47cf33a631fee0c28"
+}

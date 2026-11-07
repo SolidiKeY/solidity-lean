@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "guarded_regression": "Generated and same-spelling constants omitted by lexical/five-record fixture census",
+  "probe_sha256": "40e964a287830ae5eba415d2069877e976fa39214788d2a9bc203b22c2cf34a2",
+  "local_rebuild_pins_sha256": "fbbf557d615e7475e6993e5fd1d24586bd925560e3082c5d20a2954a8d587077"
+}
