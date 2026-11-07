@@ -1231,3 +1231,19 @@ successful checks are retained outside Git at
 `/workspace/vy3-evidence/loop-call-controls-20261107`. No native ByteWorld,
 Source dispatch/admission or full-lane adequacy is claimed. Existing producer
 waits, STOPs and full validation/timing obligations remain open.
+
+
+Reframed loop-failure checkpoint: fifteen public original
+`LoopReframedFailureControls` rows have exact frozen signature accounting and
+checked aliases in `LoopReframedFailureWitness.lean`. Its joint uses the actual
+shared prefix maps and original shrinking link to inhabit the failing suffix
+Input at5; the same source guard succeeds before rebinding and reverts after it.
+Wrong ordering, saved-tail corruption, insufficient frame and stale alias
+refusal retain their original statements. Selected473/1259,786open; the three
+private `guard_code`, `before_value` and `stale_pointer` helpers remain explicitly
+uncovered. In particular the contradictory stale-pointer premises receive no
+joint-witness credit. Supplemental counts stay separate. No native ByteWorld,
+public ABI/gas or full Source/G24 adequacy is inferred. Resource logs, proof
+checks and reviews are external at
+`/workspace/vy3-evidence/loop-reframed-failure-20261107`. Existing producer waits,
+STOPs, full affected/final validation and paired-timing obligations remain open.
