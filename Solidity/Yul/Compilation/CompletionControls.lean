@@ -106,4 +106,33 @@ theorem completion_iff_zero {c : Control} {n : Nat} (stmt : Stmt [] [] c n)
     simpa only [empty, List.nil_append] using backward locals m final caller skip ran
   simpa only [Vector.toList_empty, List.nil_append] using
     completion_iff stmt profile code forward' backward' locals out #v[] m caller
+/-- Full completed-source transport specializes to normal-success equivalence
+without repeating output/frame injectivity in each family. -/
+theorem completion_iff_of_transport {c : Control} {n depth : Nat} (stmt : Stmt [] [] c n)
+    (profile : StmtWordP stmt) (code : List Evm.Instr)
+    (forward : ∀ (horizon : Nat) (locals : Vector Scalar.Word n) (result : Outcome c n),
+      evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) = some result →
+      ∀ (newer : Vector Scalar.Word depth) (m : Evm.Machine) (caller : List Evm.Word),
+      ∃ out : Vector Scalar.Word n, result = ⟨sourceLocals out, .normal⟩ ∧
+      Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+        .ok {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller} 0)
+    (backward : ∀ (locals : Vector Scalar.Word n) (newer : Vector Scalar.Word depth)
+      (m final : Evm.Machine) (caller : List Evm.Word) (skip : Nat),
+      Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} = .ok final skip →
+      ∃ (horizon : Nat) (out : Vector Scalar.Word n),
+      evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+        some ⟨sourceLocals out, .normal⟩ ∧ skip = 0 ∧
+        final = {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller})
+    (locals out : Vector Scalar.Word n) (newer : Vector Scalar.Word depth)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    (∃ horizon, evalStmt horizon .nil True.intro stmt profile (sourceLocals locals) =
+      some ⟨sourceLocals out, .normal⟩) ↔
+    Evm.run code {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+      .ok {m with stack := (newer.toList ++ out.toList).map coreWord ++ caller} 0 := by
+  apply completion_iff stmt profile code ?_ backward locals out newer m caller
+  intro horizon locals out ran newer m caller
+  obtain ⟨actual, same, target⟩ := forward horizon locals ⟨sourceLocals out, .normal⟩ ran newer m caller
+  have equal : out = actual := sourceLocals_injective (congrArg Outcome.vars same)
+  cases equal
+  exact target
 end Solidity.Yul.Compilation.CompletionControls
