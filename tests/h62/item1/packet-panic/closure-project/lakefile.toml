@@ -1,0 +1,14 @@
+# Isolated helper/closure diagnostic only; not the repository runtime gate.
+name = "h62-packet-panic-closure"
+defaultTargets = ["PanicBytes"]
+enableArtifactCache = false
+
+[[lean_lib]]
+name = "Solidity"
+srcDir = "../../../../.."
+weakLeanArgs = ["--tstack=131072", "-j1"]
+
+[[lean_lib]]
+name = "PanicBytes"
+srcDir = ".."
+weakLeanArgs = ["--tstack=131072", "-j1"]
