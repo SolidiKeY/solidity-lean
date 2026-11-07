@@ -52,7 +52,7 @@ function mock() {
     },
     workspace: {
       isTrusted: true, getConfiguration: (_,uri) => ({ get: (key, fallback) => documentConfigs.get(uri?.toString())?.[key] ?? config[key] ?? fallback }),
-      getWorkspaceFolder: () => ({ uri: { fsPath: '/workspace/solidity-lean' } }), asRelativePath: uri => uri.fsPath,
+      getWorkspaceFolder: () => ({ uri: { fsPath: require('node:path').resolve(__dirname,'../..') } }), asRelativePath: uri => uri.fsPath,
       findFiles: async () => [doc.uri], openTextDocument: async () => doc,
       onDidSaveTextDocument(fn) { return subscribe('save',fn); },
       onDidChangeTextDocument(fn) { return subscribe('change',fn); },
