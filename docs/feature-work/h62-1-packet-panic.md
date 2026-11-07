@@ -145,3 +145,15 @@ Twelve per-file ledger tests now restore the removed census row at its original 
 ## Attributed-header scan follow-up
 
 The original census omits same-line attributed declarations. `attributed_header_scan.py` checks only a narrow single-simple-attribute pattern across the 48 base-validated files and found zero raw candidates. Independent read-only finder and skeptic independently matched this result without Lean. The scanner deliberately does not mask comments or cover nested/multiple attributes, multiline headers or other syntax; its synthetic controls demonstrate a block-comment false positive. This does not establish absence of attributed declarations or full coverage.
+
+## SignedSub Controls continuation
+
+The base-pinned 40-row controls ledger distinguishes same-named Seed and outer declarations by line. Its negative controls pass. Independent read-only finder and skeptic matched the statements without Lean; the checked overflow `revertOf` observation was corrected to specify `some` panic data and rechecked. No original proof or guard changed.
+
+## CheckedMul Populated continuation
+
+The base-pinned fourteen-row populated-fixture ledger accounts for the read-only heap, aliases, machine and representation statements. Negative controls pass. Independent read-only finder and skeptic matched all observations without Lean; both requested clarification of base-map indices versus addresses, which was corrected and rechecked. The G25 original was not edited.
+
+## SignedDiv Contract continuation
+
+The base-pinned checked-contract ledger records the quantified Source/target reads, StateRepr, saved finite words and all three numeric capacity premises alongside the separate Source, symbolic and numeric conclusions. Negative controls pass. Independent read-only finder and skeptic matched the declaration without Lean. All 474 currently observed lexical headers now have descriptions; broader semantic and proof obligations remain open.

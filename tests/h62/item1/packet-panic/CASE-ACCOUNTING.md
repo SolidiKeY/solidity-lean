@@ -115,3 +115,15 @@ The original census matches only unmodified line-start headers and omitted priva
 ## Same-line attribute candidate scan
 
 `attributed_header_scan.py` examines the same 48 base-validated files for a single simple `@[...]` attribute and declaration on one line, a form the original census skips. The current raw textual scan found zero candidates for that narrow pattern. It does not mask comments or parse nested/multiple attributes, multiline headers or other Lean syntax, and zero candidates does not show that attributed declarations are absent. Its synthetic fixture includes both matching examples and a deliberate block-comment false positive. The separately recorded private-header ledger covers nine private declarations; neither scan is full declaration or semantic closure.
+
+## SignedSub Controls
+
+`signed_sub_controls_ledger.py` describes forty base-pinned literal headers, identifying repeated Seed and outer namespace names by original line and name. The observations separate unchecked Source execution, symbolic target outcomes and projections, the checked Source overflow projection, initial fixture memory, low-horizon timeout and refusal cases. Existing axiom guards were not edited. After registering this ledger, reconciliation covers 459 of 474 observed lexical headers; 15 original headers remain unclassified. Manual prose and lexical headers are not Lean proof or complete semantic coverage.
+
+## CheckedMul Populated
+
+`checked_mul_populated_ledger.py` records fourteen base-pinned literal headers for the two-array heap, its aliases, concrete machine, ArrayRepr, HeapRepr and StateRepr. Base-map arguments 0 and 1 yield addresses 16 and 20. The two private helpers were separately recorded. The original G25 fixture remains read-only. Reconciliation describes 473 of 474 observed lexical headers; one original header remains. These observations do not prove Lean statements or complete semantic coverage.
+
+## SignedDiv Contract
+
+`signed_div_contract_ledger.py` records the full checked-contract literal declaration: original Source/target reads and StateRepr, saved finite words, and all three numeric zero-test, overflow-test and SDIV-body capacity premises remain explicit. Its Source mapped result, symbolic ValOutT and numeric outcome remain distinct. After registration, the reconciliation describes all 474 currently observed literal headers, including nine private headers; no original census row is unclassified. This is textual row accounting with manually reviewed prose, not complete Lean parsing, semantic case/dependency closure, proof validation, target payload correspondence or a runtime gate.
