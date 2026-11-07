@@ -215,7 +215,7 @@ def run(output):
         data.chmod(0o444);input_hash=binder.sha(data)
         live=binder.rebuild(output/"fixtures");live_hash=hashlib.sha256((json.dumps(live,indent=2)+"\n").encode()).hexdigest();binding.read_bound_json(output/"fixtures/receipt.json",live_hash)
         compiler_pins=json.loads(binder.PINS.read_text());compiler=binder.check_inputs(compiler_pins)
-        old,_,_=binder.observer.read_log(output/"fixtures/logs/consumer.log");before=binder.observer.capture_environment(old)
+        old,_,_=binder.observer.read_log(output/"fixtures/logs/consumer.log",binder.expected_log_hash(live["steps"],output/"fixtures/logs/consumer.log"));before=binder.observer.capture_environment(old)
         if binder.observer.canonical(before["artifacts"])!=binder.observer.canonical(live["compiled_artifacts"]):raise ValueError("fixture artifact drift")
         runtime=binder.runtime_files(compiler);companions=binder.companion_artifacts(before["artifacts"])
         staged=output/PROBE.name;staged.write_bytes(PROBE.read_bytes());staged.chmod(0o444)
@@ -224,8 +224,7 @@ def run(output):
         binder.checked_process([str(compiler),"-j1","--tstack=131072","--root="+str(output),"--run",str(staged),str(data)],env,log,receipt["steps"])
         records=[];observed=None;summary=None
         if binder.regular(log)["sha256"]!=receipt["steps"][-1]["log_sha256"]:raise ValueError("parser log artifact changed")
-        with log.open("rb") as stream:raw_log=stream.read(MAX_LOG+1)
-        if len(raw_log)>MAX_LOG or hashlib.sha256(raw_log).hexdigest()!=receipt["steps"][-1]["log_sha256"]:raise ValueError("parser log bytes/hash mismatch")
+        raw_log=binder.observer.read_log_bytes(log,binder.expected_log_hash(receipt["steps"],log),max_bytes=MAX_LOG)
         for line in raw_log.decode().splitlines():
             if line.startswith(binder.observer.PREFIX):
                 if observed is not None:raise ValueError("duplicate parser environment")
@@ -252,6 +251,7 @@ def run(output):
         binder.check_inputs(compiler_pins);binding.read_bound_json(output/"fixtures/receipt.json",live_hash)
         if binder.regular(log)["sha256"]!=receipt["steps"][-1]["log_sha256"] or binder.sha(CONTROLS)!=pins["controls_sha256"]:raise ValueError("parser log/control drift")
         if git("rev-parse","HEAD").decode().strip()!=source_head or hashlib.sha256((ROOT/"lakefile.toml").read_bytes()).hexdigest()!=scope["config_sha256"]:raise ValueError("source head/config changed during inventory")
+        binder.verify_process_logs(receipt["steps"]); binder.verify_process_logs(live["steps"])
         receipt.update(status="pass",input_sha256=input_hash,fixture_receipt_sha256=live_hash,inventory_sha256=binder.sha(output/"inventory.json"),nodes=len(nodes),parsed=len(records)-len(cases),controls=control_results,target_statuses=report["target_statuses"],node_statuses=report["node_statuses"],inventoried_body_execution=False,inventoried_project_modules_loaded=False)
     except Exception as exc:receipt["error"]=str(exc);raise
     finally:(output/"receipt.json").write_text(json.dumps(receipt,indent=2)+"\n")

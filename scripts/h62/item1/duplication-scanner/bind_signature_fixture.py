@@ -114,6 +114,32 @@ def checked_process(command,env,log,steps,timeout=120):
     if reason or process.returncode:raise ValueError("fresh process failed or timed out: "+log.name)
 
 
+def expected_log_hash(steps, path):
+    """Use exactly one successful in-memory step as the log's byte authority."""
+    if not isinstance(steps,list) or any(not isinstance(row,dict) for row in steps):
+        raise ValueError("malformed completed log steps")
+    rows=[row for row in steps if row.get("log")==str(path)]
+    if len(rows)!=1:
+        raise ValueError("missing or ambiguous completed log step")
+    row=rows[0]
+    if type(row.get("exit")) is not int or row["exit"]!=0 or row.get("timed_out") is not False or row.get("stop_reason","missing") is not None:
+        raise ValueError("log step did not complete successfully")
+    digest=row.get("log_sha256")
+    if not isinstance(digest,str) or not re.fullmatch(r"[0-9a-f]{64}",digest):
+        raise ValueError("malformed completed log hash")
+    return digest
+
+
+def verify_process_logs(steps):
+    """Guard persistent log replacement after parsing, including child logs."""
+    if not isinstance(steps,list) or any(not isinstance(row,dict) or not isinstance(row.get("log"),str) for row in steps):
+        raise ValueError("malformed completed log steps")
+    for row in steps:
+        path=Path(row["log"]);expected=expected_log_hash(steps,path)
+        if regular(path)["sha256"]!=expected:
+            raise ValueError("checked process log changed after execution")
+
+
 def fresh_output(path):
     try:path.lstat()
     except FileNotFoundError:return
@@ -126,8 +152,8 @@ def compile_module(compiler,source,output,env,logs,steps,label):
     if regular(target)["size"]==0:raise ValueError("empty fresh compiler output")
 
 
-def snapshot(log):
-    env,signatures,_=observer.read_log(log)
+def snapshot(log, expected_sha256=None):
+    env,signatures,_=observer.read_log(log,expected_sha256)
     if signatures:raise ValueError("probe unexpectedly contains signatures")
     return observer.capture_environment(env)
 
@@ -213,7 +239,7 @@ def rebuild(output):
                 compile_module(compiler,source/(name+".lean"),dest,env,logs,steps,phase+"-"+name)
             probe=logs/(phase+"-probe.log")
             checked_process([str(compiler),"-j1","--tstack=131072","--root="+str(source),str(source/"SignatureEnvironmentProbe.lean")],env,probe,steps)
-            phases[phase]=snapshot(probe)
+            phases[phase]=snapshot(probe,expected_log_hash(steps,probe))
             closure=standard_closure(phases[phase],toolchain)
             if phase=="discovery":
                 before_closure=closure
@@ -226,7 +252,7 @@ def rebuild(output):
                 raise ValueError("bundled dependency changed across canonical rebuild")
         consumer=logs/"consumer.log"
         checked_process([str(compiler),"-j1","--tstack=131072","--root="+str(source),str(source/"SignatureObservedConsumer.lean")],env,consumer,steps)
-        observed,lines,_=observer.read_log(consumer)
+        observed,lines,_=observer.read_log(consumer,expected_log_hash(steps,consumer))
         checker=module_from(source/"check_signature_records.py","bound_record_checker")
         records=checker.validate("\n".join(lines))
         after=observer.capture_environment(phases["compiled"]["environment"])
@@ -236,6 +262,7 @@ def rebuild(output):
         if before_companions!=companion_artifacts(standard_closure(after,toolchain)):
             raise ValueError("bundled dependency companion changed during execution")
         check_inputs(pins)
+        verify_process_logs(steps)
         receipt.update(status="pass",sources=source_manifest,bundled_dependencies=before_closure,
                        runtime=runtime,bundled_companions=before_companions,compiled_artifacts=after["artifacts"],records=records,
                        source_bindings=[{"source_path":"tests/h62/item1/duplication-scanner/SignatureFingerprint.lean",

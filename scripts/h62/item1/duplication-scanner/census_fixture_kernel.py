@@ -10,10 +10,11 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+from types import SimpleNamespace
 
 from bind_signature_fixture import (ROOT, FIXTURES, module_from, sha, regular,
     check_inputs, rebuild, writer_lease, clean_environment, checked_process,
-    runtime_files, companion_artifacts, observer)
+    runtime_files, companion_artifacts, observer, scanner, expected_log_hash, verify_process_logs)
 
 PINS = FIXTURES / "kernel-census-pins.json"
 PREFIX = "H62_KERNEL_CENSUS "
@@ -94,10 +95,8 @@ def verify_fixture_controls(value, known_records):
             "original_records": len(known_records)}
 
 
-def read_log(path):
-    raw = path.read_bytes()
-    if len(raw) > observer.MAX_LOG:
-        raise ValueError("census log exceeds byte limit")
+def read_log(path, expected_sha256=None):
+    raw = observer.read_log_bytes(path, expected_sha256)
     lines = raw.decode("utf-8").splitlines()
     env = [line for line in lines if line.startswith(observer.PREFIX)]
     census = [line for line in lines if line.startswith(PREFIX)]
@@ -124,10 +123,11 @@ def run(output):
                "boundary": "Trusted live fixture enumeration only; no source-line mapping, general project coverage, ownership or remote attestation."}
     try:
         live = rebuild(output / "rebuild")
-        receipt["rebuild_receipt_sha256"] = sha(output / "rebuild/receipt.json")
+        # Reuse the existing receipt seal with its minimal regular-file capability.
+        receipt["rebuild_receipt_sha256"] = scanner.live_receipt_hash(SimpleNamespace(regular=regular),output / "rebuild",live)
         compiler_pins = json.loads((FIXTURES / "local-rebuild-pins.json").read_text())
         compiler = check_inputs(compiler_pins)
-        original_env, _, _ = observer.read_log(output / "rebuild/logs/consumer.log")
+        original_env, _, _ = observer.read_log(output / "rebuild/logs/consumer.log",expected_log_hash(live["steps"],output / "rebuild/logs/consumer.log"))
         before = observer.capture_environment(original_env)
         if observer.canonical(before["artifacts"]) != observer.canonical(live["compiled_artifacts"]):
             raise ValueError("rebuild artifacts changed before census")
@@ -141,7 +141,7 @@ def run(output):
         log = output / "census.log"
         checked_process([str(compiler), "-j1", "--tstack=131072", "--root="+str(output), str(staged)],
                         env, log, receipt["steps"])
-        observed, census = read_log(log)
+        observed, census = read_log(log,expected_log_hash(receipt["steps"],log))
         old, current = dict(original_env), dict(observed)
         if observer.name_parts(old.pop("main_module")) != ("SignatureObservedConsumer",):
             raise ValueError("unexpected rebuild main module")
@@ -161,6 +161,8 @@ def run(output):
         counts = {status: sum(row["status"] == status for row in census["rows"])
                   for status in ("serialized", "unsupported")}
         (output / "census.json").write_text(json.dumps(census, sort_keys=True, indent=2)+"\n")
+        verify_process_logs(receipt["steps"]); verify_process_logs(live["steps"])
+        scanner.live_receipt_hash(SimpleNamespace(regular=regular),output / "rebuild",live)
         receipt.update(status="pass", total=census["total"], counts=counts, controls=controls,
                        census_sha256=sha(output / "census.json"),
                        original_five_record_contract_unchanged=True,

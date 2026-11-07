@@ -35,9 +35,8 @@ def admitted_sources(pins):
         raise ValueError("project leaf is no longer import-free")
 
 
-def read_log(path):
-    with path.open("rb") as stream:raw=stream.read(binder.observer.MAX_LOG+1)
-    if len(raw)>binder.observer.MAX_LOG:raise ValueError("project probe log exceeds byte limit")
+def read_log(path, expected_sha256=None):
+    raw = binder.observer.read_log_bytes(path, expected_sha256)
     lines=raw.decode().splitlines()
     env=[x for x in lines if x.startswith(binder.observer.PREFIX)]
     records=[x for x in lines if x.startswith(PREFIX)]
@@ -89,7 +88,7 @@ def run(output):
         source_binding.read_bound_json(output/"fixtures/receipt.json",live_hash)
         receipt["fixture_receipt_sha256"]=live_hash
         compiler_pins=json.loads(binder.PINS.read_text());compiler=binder.check_inputs(compiler_pins)
-        original,_,_=binder.observer.read_log(output/"fixtures/logs/consumer.log")
+        original,_,_=binder.observer.read_log(output/"fixtures/logs/consumer.log",binder.expected_log_hash(live["steps"],output/"fixtures/logs/consumer.log"))
         before=binder.observer.capture_environment(original)
         if binder.observer.canonical(before["artifacts"])!=binder.observer.canonical(live["compiled_artifacts"]):
             raise ValueError("fixture artifacts changed before project compile")
@@ -110,7 +109,7 @@ def run(output):
         sidecars=project_sidecars(artifact)
         log=output/"probe.log"
         binder.checked_process([str(compiler),"-j1","--tstack=131072","--root="+str(source_root),str(probe)],env,log,receipt["steps"])
-        observed,record=read_log(log)
+        observed,record=read_log(log,binder.expected_log_hash(receipt["steps"],log))
         if binder.observer.name_parts(observed["main_module"])!=("KeySortSourceBinding",):raise ValueError("wrong project probe module")
         after=binder.observer.capture_environment(observed);verify_closure(before["artifacts"],after["artifacts"],project_artifact)
         if runtime!=binder.runtime_files(compiler) or companions!=binder.companion_artifacts(before["artifacts"]):raise ValueError("project runtime/companion drift")
@@ -122,6 +121,7 @@ def run(output):
         source_binding.read_bound_json(output/"fixtures/receipt.json",live_hash)
         if binder.regular(staged)["sha256"]!=pins["source_sha256"] or binder.regular(probe)["sha256"]!=pins["probe_sha256"] or binder.regular(artifact)!=project_artifact:
             raise ValueError("staged project source/artifact drift")
+        binder.verify_process_logs(receipt["steps"]); binder.verify_process_logs(live["steps"])
         (output/"metadata.json").write_text(json.dumps(record,sort_keys=True,indent=2)+"\n")
         (output/"source-bindings.json").write_text(json.dumps(joined,sort_keys=True,indent=2)+"\n")
         receipt.update(status="pass",keysort_gate="pass",project_artifact=project_artifact,

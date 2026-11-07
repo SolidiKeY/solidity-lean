@@ -102,11 +102,8 @@ def join_locations(source, lexical, census, locations, expected_module=kernel.MO
             "ownership_verified": False, "unloaded_private_artifacts_covered": False}
 
 
-def read_log(path):
-    with path.open("rb") as stream:
-        raw = stream.read(binder.observer.MAX_LOG+1)
-    if len(raw) > binder.observer.MAX_LOG:
-        raise ValueError("location log exceeds byte limit")
+def read_log(path, expected_sha256=None):
+    raw = binder.observer.read_log_bytes(path, expected_sha256)
     lines = raw.decode().splitlines()
     env = [line for line in lines if line.startswith(binder.observer.PREFIX)]
     data = [line for line in lines if line.startswith(PREFIX)]
@@ -152,7 +149,7 @@ def run(output):
         children = {path:read_bound_json(path,digest) for path,digest in child_hashes.items()}
         receipt["kernel_receipt_sha256"] = live_hash
         compiler_pins = json.loads(binder.PINS.read_text()); compiler = binder.check_inputs(compiler_pins)
-        old_env, _, _ = binder.observer.read_log(output / "kernel/rebuild/logs/consumer.log")
+        old_env, _, _ = binder.observer.read_log(output / "kernel/rebuild/logs/consumer.log",binder.expected_log_hash(children[output / "kernel/rebuild/receipt.json"]["steps"],output / "kernel/rebuild/logs/consumer.log"))
         before = binder.observer.capture_environment(old_env)
         rebuild = children[output / "kernel/rebuild/receipt.json"]
         if binder.observer.canonical(before["artifacts"]) != binder.observer.canonical(rebuild["compiled_artifacts"]):
@@ -164,7 +161,7 @@ def run(output):
         env = dict(binder.clean_environment(compiler),LEAN_PATH=str(output / "kernel/rebuild/compiled"))
         log = output / "locations.log"
         binder.checked_process([str(compiler),"-j1","--tstack=131072","--root="+str(output),str(staged)],env,log,receipt["steps"])
-        observed, locations = read_log(log)
+        observed, locations = read_log(log,binder.expected_log_hash(receipt["steps"],log))
         a, b = dict(old_env), dict(observed)
         if binder.observer.name_parts(a.pop("main_module")) != ("SignatureObservedConsumer",) or binder.observer.name_parts(b.pop("main_module")) != ("SignatureSourceLocations",):
             raise ValueError("unexpected location probe module")
@@ -185,6 +182,8 @@ def run(output):
         if binder.regular(probe)["sha256"] != pins["probe_sha256"] or binder.regular(staged)["sha256"] != pins["probe_sha256"]:
             raise ValueError("location probe source drift")
         (output / "source-bindings.json").write_text(json.dumps(joined,sort_keys=True,indent=2)+"\n")
+        binder.verify_process_logs(receipt["steps"]); binder.verify_process_logs(live["steps"])
+        binder.verify_process_logs(children[output / "kernel/rebuild/receipt.json"]["steps"])
         receipt.update(status="pass",lexical_total=joined["lexical_total"],linked=joined["linked"],unresolved=joined["unresolved"],
                        source_sha256=joined["source_sha256"],bindings_sha256=binder.sha(output / "source-bindings.json"),
                        boundary="Trusted live pinned fixture source/name/type linkage only. No ownership, unloaded/private levels, global coverage, proof-body equality or remote attestation.")

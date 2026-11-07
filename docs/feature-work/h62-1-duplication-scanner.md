@@ -744,3 +744,40 @@ remain open as previously classified. General dependency admission, live ownersh
 private/unloaded coverage and full original/inherited acceptance remain unfinished.
 Raw evidence and manifests are retained at
 `/workspace/h62-audit-readonly-calls/scanner-closure-binding/` on the original VM.
+
+## Completed-process log provenance
+
+Live fixture, kernel, source-location, KeySort, AST and header metadata readers
+now share a bounded byte reader. Each live parse checks the exact buffer against
+the hash from its successful in-memory process step, then parses that buffer.
+Missing, duplicate, failed, timed-out or malformed step records refuse. Final
+seals recheck parent and child logs, including the intermediate kernel probe.
+The kernel reuses the existing live receipt seal rather than accepting the hash
+of potentially replaced child receipt bytes. Offline parser calls without a
+hash remain explicitly unbound and retain their prior behavior.
+
+Eight new controls cover log substitution, byte limits, nonregular live inputs,
+completed-step authority and parent failure after an intermediate log changes.
+All 152 controls pass. Independent read-only finder and skeptic reviews found
+the missing intermediate-child seal; it was fixed and covered by a positive and
+negative parent-orchestration control. Final reviews are clear. Development
+failures remain recorded; the census validator was never weakened to accept an
+incorrect empty synthetic fixture.
+
+Fresh serial source, KeySort, AST and header captures pass with unchanged
+signature/range outputs and coverage. This is tooling provenance under a trusted
+local process model, not remote attestation, malicious-ABA exclusion, body equality,
+verified ownership or a theorem witness. The same-checkout canonical fixture
+profile retained all five records; after one warmup and three measured runs per
+cohort, medians were 24.851651143 s before and 20.499273840 s after (-17.51%).
+Baseline measured runs ranged from 21.31 to 51.69 s, so this difference is not
+attributed to code speed. The measurement covers the fixture producer, not all
+binding modes or the held model proof workload.
+
+No production Lean files, lines or declarations changed. Actual tools remain
+Lean 4.24.0 and Lake 5.0.0-src+797c613; fresh bounded KeySort prerequisites pass.
+All 792 original audit obligations retain their previous classifications. The
++80.254966536% Lean timing STOP, owner compiler-success dependencies and full
+original/inherited acceptance remain open. Raw evidence, baseline variation and
+reproduction commands are retained under
+`/workspace/h62-audit-readonly-calls/checked-probe-logs/` on the original VM.

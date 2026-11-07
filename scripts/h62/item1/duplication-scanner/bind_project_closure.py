@@ -61,9 +61,7 @@ def staged_bytes(source_root,row):
 
 
 def checked_probe(log,expected_sha):
-    with log.open("rb") as stream:raw=stream.read(binder.observer.MAX_LOG+1)
-    if len(raw)>binder.observer.MAX_LOG:raise ValueError("probe log exceeds byte limit")
-    if hashlib.sha256(raw).hexdigest()!=expected_sha:raise ValueError("probe log differs from checked process output")
+    raw=binder.observer.read_log_bytes(log,expected_sha)
     lines=raw.decode().splitlines()
     env=[x for x in lines if x.startswith(binder.observer.PREFIX)]
     records=[x for x in lines if x.startswith(leaf.PREFIX)]
@@ -85,7 +83,7 @@ def run(output):
         live_hash=hashlib.sha256((json.dumps(live,indent=2)+"\n").encode()).hexdigest()
         leaf.source_binding.read_bound_json(output/"fixtures/receipt.json",live_hash)
         compiler_pins=json.loads(binder.PINS.read_text());compiler=binder.check_inputs(compiler_pins)
-        original,_,_=binder.observer.read_log(output/"fixtures/logs/consumer.log")
+        original,_,_=binder.observer.read_log(output/"fixtures/logs/consumer.log",binder.expected_log_hash(live["steps"],output/"fixtures/logs/consumer.log"))
         before=binder.observer.capture_environment(original)
         if binder.observer.canonical(before["artifacts"])!=binder.observer.canonical(live["compiled_artifacts"]):raise ValueError("fixture closure drift")
         companions=binder.companion_artifacts(before["artifacts"]);runtime=binder.runtime_files(compiler)
@@ -123,6 +121,7 @@ def run(output):
         admitted_sources(pins);binder.check_inputs(compiler_pins)
         if binder.regular(probe)["sha256"]!=pins["probe_sha256"]:raise ValueError("staged probe changed")
         leaf.source_binding.read_bound_json(output/"fixtures/receipt.json",live_hash)
+        binder.verify_process_logs(receipt["steps"]); binder.verify_process_logs(live["steps"])
         (output/"metadata.json").write_text(json.dumps(record,sort_keys=True,indent=2)+"\n")
         (output/"source-bindings.json").write_text(json.dumps(joined,sort_keys=True,indent=2)+"\n")
         receipt.update(status="pass",keysort_gate="pass",fixture_receipt_sha256=live_hash,fresh_project_closure=fresh,
