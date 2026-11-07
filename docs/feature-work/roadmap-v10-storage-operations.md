@@ -1633,3 +1633,119 @@ check or timing retry run. This is concrete consumption preparation only, not
 producer delivery or consumer integration. Original H121b actual Source/H24/
 origin/lifecycle/P8/S03-PANIC41 work, exact-19 transport proofs, proof/backfill/
 coverage/final gates and Y04/separate 4.35 waits remain open.
+
+### C266 — successful path components and compound leaf agreement
+
+path_components now derives the exact qualified-name split and successful
+nonempty-component guard from a successful path conversion. compound_leaf_exact
+connects both supported leaf node kinds to the unchanged compound reader at
+positive fuel. Each new measured axiom guard is propext only. Existing leaf
+controls are parameterized and reused for both typeNameLeaf and typeName at
+fuel 4; no duplicated cases, reader changes or new Source representation. Both
+actual pipeline fixtures still convert all 12 parameters/results. These are
+syntax laws, not declaration resolution or accepted-source/artifact evidence.
+
+The coordinator disk helper ran first with sealed evidence protected. More
+than 2 GB remained free. The previously deleted build target was recreated;
+bounded KeySort passed before further Lean work. Resource cap, swap, reserve,
+threads, stack and H113 accounting are unchanged. The initial proof supplied an
+equality already rewritten by case analysis; corrected proof passes, and the
+failed receipt remains. Finder/skeptic read-only review found no semantic issue;
+both noted guard installation pending, and the measured guards were installed.
+Neither reviewer used Lean, its server or builds.
+
+The initial master fetch succeeded at 65e69b6426a9a4fc3fb5541f41726a4bfefda5d0.
+A later refresh failed with Git's could-not-read-Username diagnostic. This
+checkpoint uses that already fetched baseline and claims no newer publication
+state. H125/H128 Source continuation is released, but draft integration still
+awaits vy1-words' published checkpoint head and actual gate/hash evidence. No
+TypingV2 import, Source migration or held timing retry occurred. Historical
+C246 manual full-elaboration failure remains; v1 H24 negatives stay frozen.
+
+H121b actual Source/H24/origin/lifecycle/P8/S03-PANIC41 and artifact binding,
+exact-19 H57/transport proofs, original/consolidated proof/backfill/coverage and
+all final gates remain open. Y04 physical, separate 4.35 disposition and all
+unrelated STOPs remain. Coverage stays 72 mapped / 3281 rows, 3209 uncovered;
+no syntax-control witness credit or whole-lane completion claim.
+
+### C268 — published H128 v2 H24 local refusal consumed
+
+Merged the published Source checkpoint through master f5038bc02, including
+1b3ab0676e24620af56e1408c1aabde9cb4bbdb7. TypingV2 matches published module SHA
+ccfaee52e9891284f5e4bd71687fd9c09f8db9fd7af00df72bd0bd6c5f4b1de2. The released
+migration notes now hash d390a1ad784039b7ad1501bd8e621a23e3f79565dc8c93c91dd34638b2708a3e,
+distinct from the historical draft notes. No draft or unpublished Source code
+was used, and no v1 Source file was edited.
+
+DeclarationGraphAdmissionV2 is an additive H57/H128 pair: local declaration
+refusal quantifies over actual Source.V2.StmtD with all original context/store/
+type-resolution/location/initializer indices. source_refuses directly consumes
+the published declaration_admissible theorem, with no mapping-free or
+CompatibleAt assumption. location_policy_eq ties the promoted Source Boolean
+to the existing H24 formula. Separate EnvAdmission, Admission and Producer
+contracts preserve graph certificate types, graph structural premises, exact
+acceptedSource/input/artifact/location indices and base/origin/root identity.
+No coercion into frozen v1 consumers. from_v1_graphs reuses certificates only;
+it does not lift an actual v1 derivation or supply program typing.
+
+H24V2Controls reuses the existing mixed mapping-bearing environment's computed
+certificates at storage, memory and calldata, retaining physical IDs. A negative
+control uses the unchanged v1 refusal_missing to refute generic v2-refusal-to-v1
+transport. Published TypingV2Controls separately passes its exact initialized
+storage, memory refusal and compatible Bool cases; none was copied here. Six
+production and three consumer axiom guards use the standard trio. Version-pair
+JSON records all four named contracts, exact source hashes and explicit limits.
+Initial consumer syntax/qualification and missing explicit-location arguments
+failed; corrected controls pass, with failures retained and no recovery proof
+accepted. Upstream dependency linter warnings are retained, not suppressed.
+C268 lane history records independent read-only finder/skeptic reviews and
+follow-up controls/hash reviews with no findings; neither used Lean/server/builds.
+
+No actual Source Env/SrcProg, accepted-source/artifact binding, graph structural
+premises for the library program, origin/compiler/lifecycle/S03-PANIC41 producer
+or v1 LibraryPremises.Inputs inhabitant is delivered. V1 predicates, EnvAdmission
+characterization, Producer, ConditionalAssembly and LibraryPremises remain
+unchanged. Separate paired consumer migrations still need actual reproof and
+H57/interface-owner coordination. The H128 producer wait for local typing is
+resolved here; library try/Error(string memory) remains a separate incoming
+Source checkpoint, so C246's historical manual full-elaboration failure remains.
+Original/consolidated proof/backfill/coverage/final gates, exact-19 transport
+proofs, Y04 physical, separate 4.35 disposition and unrelated STOPs stay open.
+Coverage remains 72 mapped / 3281 rows, 3209 uncovered; this interface is not
+whole-program witness coverage or whole-lane completion.
+
+### C269 — joint checked receipt/program/graph v2 consumer
+
+ConditionalAssemblyV2 reuses the existing conditional base assembly unchanged.
+Its separately versioned withGraphs keeps the checked frontend, extraction,
+ModelFacts, failure projection and realization arguments; only the tagged H24
+field uses the v2 contract. from_v1_graphs preserves base and certificates only,
+never converting whole-program typing. The generic checked_contract binds a
+genuinely produced receipt jointly to full realized/accepted SourceProgram
+identity, the exact artifact/location graph and v2 local refusal. It consumes
+existing checked_frontend_agrees and program_origin, not a new origin oracle.
+rejected_receipt excludes the specified refused receipt, not a different valid
+certificate. Four production guards retain the standard axiom trio.
+
+Controls reuse the existing PlanGraphAdmission/PlanWitness, parameterized over
+all toy shapes/pipelines and artifacts/locations, without new Source cases.
+These are MODEL-only joint receipt/graph premise satisfiability; their empty
+Source program/model reference supplies no actual Source adequacy. A malformed
+receipt refusal uses the unchanged checker. Three guards use the standard trio.
+An initial receipt proof left a reduced True branch; the exact simp lemma was
+corrected, retaining the failure receipt. Read-only finder/skeptic review found
+no semantic issues and noted pending test guards, which were then installed;
+neither used Lean/server/builds. Version-pair metadata records unchanged frozen
+consumers, exact source hashes and all conditional/model limits.
+
+The build target was restored before bounded KeySort and consumer checking.
+No runtime Node was needed; its recorded restoration remains necessary before
+container-side Node use. Existing Source/v1 consumer statements, definitions,
+interfaces, budgets, axioms and exclusions are unchanged. LibraryPremises.Inputs
+stays v1. This proves no new concrete checked frontend, actual library Source
+program, graph premises, origin/frame/session/lifecycle/S03-PANIC41 or accepted
+artifact binding. Those H121b duties remain local, alongside the exact-19
+transport proofs and original/consolidated proof/backfill/coverage/final gates.
+Incoming library-try/Error Source support, Y04 physical and separate 4.35 waits
+remain; unrelated STOPs stay binding. Coverage is still 72 mapped / 3281 rows,
+3209 uncovered. No model-control witness credit or whole-lane completion.

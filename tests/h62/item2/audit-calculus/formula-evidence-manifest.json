@@ -1,0 +1,52 @@
+{
+  "scope": "Complete18 Fml scoped-formula roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 1019,
+    "pending": 4264,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/formula-roles-v86/evidence.tar.gz",
+      "bytes": 273493,
+      "sha256": "1e743b0bb5e08637267ffdb128548f035e50f8f0f85a5b0df2ce558b8be71159"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/formula-roles-v86/inputs.json",
+      "bytes": 754,
+      "sha256": "9f3b8f86ae7eb3fe763f3a9fe6051dbd2dc4a02700187130d758195ee940a9fd"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/formula-roles-v86/gates.json",
+      "bytes": 2772,
+      "sha256": "232e5d55410a58f00e4a2a0584cbc18c53f6bd8b3dbea5beed7ccea54f199ffe"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/formula-roles-v86/reviews.md",
+      "bytes": 463,
+      "sha256": "13d603826a6cb61a326b96e0ff43e3a7a0c6ba16216c02f1780b4cddeee805c0"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/formula-roles-v86/case-rosters.json",
+      "bytes": 1830,
+      "sha256": "431799a441a2ab1b59c76b3a6a0d3545eb6635c52187665af0d0c3987ab35405"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/formula-roles-v86/doc-master-repair-binding.json",
+      "bytes": 184,
+      "sha256": "4117820cbfadf99719a0ff191fc013d55257ba84a9f2a2c271f81c681b8d8e20"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/formula-roles-v86/external-retention.json",
+      "bytes": 274170,
+      "sha256": "a4808909b7dc01e79eee5ed1cafb6a708ce6fbe443af79de105ee9434fb2586c"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/formula-roles-v86/semantic-roles-reviewed.json",
+      "bytes": 2726530,
+      "sha256": "7f0f7660cfbfb93445a08ec2e54440067b311099556a90083cf80d6a55dfd679"
+    }
+  ]
+}
