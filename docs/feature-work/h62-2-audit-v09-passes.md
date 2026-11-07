@@ -6,6 +6,19 @@ The19 earlier supplemental instances and4 unselected ClosedValues instances do n
 Earlier subtraction counts are withdrawn; see Coverage membership correction.
 Supplemental proof validity and resolved private identities are retained.
 
+## External selected-heap fixture availability
+
+`SelectedHeapBoundaryWitness.lean` is an H44 bulk artifact, deliberately absent
+from a clean checkout. Historical references below name this external fixture,
+not a published in-tree Lean module. Its intended materialization target is
+`tests/h62/item2/audit-v09-passes/SelectedHeapBoundaryWitness.lean`.
+The tracked [artifact manifest](../../tests/h62/item2/audit-v09-passes/selected-heap-artifacts.json)
+records its exact bytes/hash and those of the companion ledger. The
+[verification/materialization tool](../../scripts/h62/item2/audit-v09-passes/selected_heap_artifacts.py)
+is in-tree. See [H44 selected-heap bulk split](#h44-selected-heap-bulk-split)
+for staging, mandatory external acceptance and the unchanged Lean gate.
+No missing file should be reconstructed from the compact source inventory.
+
 ## Frozen scope and setup
 
 Repository: `/workspace/solidity-lean`.
@@ -506,7 +519,8 @@ This result is source accounting only, not an elaborated census or proof.
 
 ## First selected-census HeapBoundary instance
 
-`SelectedHeapBoundaryWitness.lean` witnesses the selected frozen
+The external `SelectedHeapBoundaryWitness.lean` fixture (see availability above)
+witnesses the selected frozen
 `Solidity.Backend.Passes.objects_memory_link` declaration. Membership is checked
 against the actual179-file/1259-row selection before counting it. Checked
 object/memory nil-program certificates, capacity and nonallocation align with
@@ -652,7 +666,8 @@ not a global layer-gate pass. No control statement or proof changed.
 
 ### Closed-value generic application validation
 
-`SelectedHeapBoundaryWitness.ClosedApplication` instantiates existing
+The external fixture namespace `Solidity.Backend.Passes.AuditSelectedHeap.ClosedApplication`
+instantiates existing
 ClosedValues application, prefix capacity, byte roundtrip and represented-word
 APIs with the actual literal-5 certificate, empty saved stack, real capacity
 and the existing full represented symbolic input. The prefix split is only
@@ -1016,9 +1031,38 @@ proof/census/gate obligations and producer waits remain open.
 
 ### H44 selected-heap bulk split
 
-The exact held checkpoint at `2e1dd272c6d89d5883956791a26315bf0a67bc0b` is retained outside Git in `/workspace/vy3-evidence/h44-selected-heap-20261107`. The committed `selected-heap-artifacts.json` records absolute paths, byte sizes and SHA-256 hashes. The selected count remains 225, with 1,034 rows open; supplemental counts stay separate. The unfinished joined-memory draft is saved separately and adds no accepted rows.
+The exact held checkpoint at `2e1dd272c6d89d5883956791a26315bf0a67bc0b`
+is retained outside Git. On the producing VM its artifact root is
+`/workspace/vy3-evidence/h44-selected-heap-20261107`; this is an export location,
+not a path expected on consumer machines. The tracked artifact manifest linked
+above contains relative artifact names, byte sizes and SHA-256 hashes. This
+historical checkpoint contains 225 selected rows (1,034 then open); later
+increments below account separately for subsequent progress. The unfinished
+joined-memory draft is preserved separately and adds no accepted rows.
 
-Run `python3 scripts/h62/item2/audit-v09-passes/selected_heap_artifacts.py` to verify both checkpoint artifacts. The source accounting tests read the verified external ledger and fail if it is missing or changed. To run the unchanged Lean per-file gate, first run that script with `--materialize` under the writer lock, then run the original `gate.sh per-file tests/h62/item2/audit-v09-passes/SelectedHeapBoundaryWitness.lean` with the existing serial/resource wrapper and frozen toolchain. Materialized bulk must remain untracked and must not be committed. This relocation changes no theorem, gate, budget or acceptance claim. Coordinator pull must include the external artifacts before validation on another machine.
+Obtain both unchanged manifest-listed files through the approved artifact
+channel and stage them together in a local directory. Set `VY3_AUDIT_ARTIFACTS`
+to that directory, or use the checkout-relative default
+`.audit-artifacts/selected-heap`. Run:
+
+```sh
+python3 scripts/h62/item2/audit-v09-passes/selected_heap_artifacts.py
+python3 scripts/h62/item2/audit-v09-passes/selected_heap_artifacts.py --acceptance
+```
+
+The first command checks both files' sizes and hashes. The second is mandatory
+full accounting acceptance: it runs portable source tests and the original
+external-ledger assertions. Missing or changed artifacts fail this gate;
+portable source tests alone do not establish external witness acceptance.
+
+For the unchanged Lean per-file gate, run the verifier with `--materialize`
+under the repository writer lock, then run the original
+`gate.sh per-file tests/h62/item2/audit-v09-passes/SelectedHeapBoundaryWitness.lean`
+with the existing serial/resource wrapper and frozen toolchain. This temporarily
+creates the absent target from verified bytes and refuses to overwrite different
+local work. Keep materialized bulk untracked and do not commit it. Relocation
+changes no theorem, gate, budget or acceptance claim. Consumers must stage the
+external artifacts before attempting this validation.
 
 ### Small joined-memory public certificate witness
 
