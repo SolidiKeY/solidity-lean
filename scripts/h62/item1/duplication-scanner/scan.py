@@ -686,6 +686,7 @@ def main():
     files = sorted({f for paths in matched.values() for f in paths})
     rows, errors, inputs, aliases = [], selection_errors, [], []
     resolved_inputs = {}
+    file_identities = {}
     owners = json.loads(args.owners.read_text()) if args.owners else {}
     if not isinstance(owners, dict) or not all(isinstance(k, str) and isinstance(v, str) and v for k, v in owners.items()):
         parser.error("owners must be a path-to-owner JSON object")
@@ -714,9 +715,18 @@ def main():
                 raise ValueError("selected Lean path resolves outside root")
             if not resolved.is_file():
                 raise ValueError("selected Lean path is not a regular file")
-            source = path.read_bytes()
+            with path.open("rb") as stream:
+                before = os.fstat(stream.fileno())
+                source = stream.read()
+                after = os.fstat(stream.fileno())
+            fields = lambda info: (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+            if (not stat.S_ISREG(before.st_mode) or fields(before) != fields(after) or
+                len(source) != before.st_size or path.resolve(strict=True) != resolved or
+                fields(resolved.stat()) != fields(after)):
+                raise ValueError("selected Lean file changed during read")
             target = resolved.relative_to(root).as_posix()
             resolved_inputs[rel] = target
+            file_identities[rel] = (after.st_dev, after.st_ino)
             if target != rel:
                 aliases.append(dict(path=rel, resolved_path=target))
             inputs.append(dict(path=rel, sha256=hashlib.sha256(source).hexdigest()))
@@ -819,8 +829,12 @@ def main():
             parser.error("live project binding: "+str(exc))
     def alias_reasons(group):
         paths = {row["path"] for row in group}
-        return (["shared-resolved-source"]
-                if len({resolved_inputs[path] for path in paths}) < len(paths) else [])
+        reasons = []
+        if len({resolved_inputs[path] for path in paths}) < len(paths):
+            reasons.append("shared-resolved-source")
+        if len({file_identities[path] for path in paths}) < len(paths):
+            reasons.append("shared-file-identity")
+        return reasons
     groups = {}
     for row in rows:
         if row["statement"] is not None:

@@ -1463,3 +1463,28 @@ system caches or continuous system-wide reserve. Matching group counts do not
 prove equal group members. Evidence, including two superseded intermediate
 measurements, is outside Git in
 `/workspace/h62-duplication-scanner-evidence/guard-msgs/`.
+
+
+## Shared physical file warning
+
+Selected paths retain their independent names. The reader observes descriptor
+metadata before and after reading and compares the resolved target afterward;
+when two distinct paths in a candidate group share the observed device and
+inode, the group receives `shared-file-identity`. Existing resolved-path,
+signature and ownership refusal reasons remain. This is a local observation,
+not proof of ownership, provenance or race-free confinement; adversarial ABA
+replacement is not ruled out.
+
+Finder and skeptic reviewed without Lean. Hard-link, independent identical
+file, replacement and repeat-output controls passed, as did the full 206-test
+Python suite. An earlier run failed because the preexisting simulated read
+failure control still mocked `read_bytes` after the reader switched to an open
+descriptor; that control was updated and the suite passed. Matched bounded
+scans on the same 7,544 input hashes took 115.082 seconds before and 115.588
+after (+0.44%), with no file errors, unmatched patterns or sampled resource
+stop. Both used the same 8 GiB cap and 4 GiB sampled cgroup and zero-swap
+guard. These observations do not establish equal cache state or continuous
+system-wide reserve. Evidence is in
+`/workspace/h62-duplication-scanner-evidence/guard-msgs/`. The documentation
+path gate failed on an unrelated missing `ExecutionTransport.lean` reference
+in `docs/feature-work/h62-4-generic-v08.md`; see `doc-paths.log` there.

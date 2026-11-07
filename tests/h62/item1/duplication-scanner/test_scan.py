@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -693,12 +694,12 @@ class ScannerControls(unittest.TestCase):
             root = Path(directory)
             source = root / "A.lean"
             source.write_text("def a : Nat := 0\n")
-            original = Path.read_bytes
-            def checked_read(path):
+            original = Path.open
+            def checked_open(path, *args, **kwargs):
                 if path == source: raise OSError("simulated read failure")
-                return original(path)
+                return original(path, *args, **kwargs)
             output = io.StringIO()
-            with mock.patch.object(Path, "read_bytes", checked_read), mock.patch.object(sys, "argv", [str(SCRIPT), str(root), "*.lean"]), contextlib.redirect_stdout(output):
+            with mock.patch.object(Path, "open", checked_open), mock.patch.object(sys, "argv", [str(SCRIPT), str(root), "*.lean"]), contextlib.redirect_stdout(output):
                 result = scanner.main()
             data = json.loads(output.getvalue())
             self.assertTrue(result)
@@ -745,6 +746,24 @@ class ScannerControls(unittest.TestCase):
             self.assertIn("shared-resolved-source", report["candidates"][0]["reject_reasons"])
             self.assertIn("shared-resolved-source", report["body_candidates"][0]["reject_reasons"])
             self.assertEqual(subprocess.check_output(cmd), subprocess.check_output(cmd))
+
+    def test_hard_links_are_flagged_without_losing_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text("theorem same : True := by trivial\n")
+            os.link(root / "A.lean", root / "B.lean")
+            (root / "C.lean").write_text("theorem same : True := by trivial\n")
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]
+            report = json.loads(subprocess.check_output(cmd))
+            self.assertEqual([row["path"] for row in report["inputs"]], ["A.lean", "B.lean", "C.lean"])
+            self.assertIn("shared-file-identity", report["candidates"][0]["reject_reasons"])
+            self.assertIn("shared-file-identity", report["body_candidates"][0]["reject_reasons"])
+            self.assertNotIn("shared-resolved-source", report["candidates"][0]["reject_reasons"])
+            self.assertEqual(subprocess.check_output(cmd), subprocess.check_output(cmd))
+            (root / "B.lean").unlink()
+            (root / "B.lean").write_text("theorem same : True := by trivial\n")
+            separate = json.loads(subprocess.check_output(cmd))
+            self.assertNotIn("shared-file-identity", separate["candidates"][0]["reject_reasons"])
 
     def test_alias_selection_uses_alias_extension(self):
         with tempfile.TemporaryDirectory() as directory:
