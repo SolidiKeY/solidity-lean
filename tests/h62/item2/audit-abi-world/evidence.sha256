@@ -158,7 +158,7 @@ e9f7574243ae9f6c3eef3b0da20fc37fdf01753b35cead22caf0b09401a49d3e  /workspace/aud
 13bd9794af50cba45d395209709d2db94826751b46fdf89aad8a6b39ad96edfc  /workspace/audit-abi-world-evidence/checkpoints/retirement-final/committed-manifest-check.log
 cdd7a13dc0012488c252072531086fdb9e586df721a82b64324eae35d08b478d  /workspace/audit-abi-world-evidence/checkpoints/retirement-final/completeness-gate.log
 5e4335f38abb74a8864863577b04363980659e6b92a4a9835e8a0efa5bd833dd  /workspace/audit-abi-world-evidence/checkpoints/retirement-final/coordinator-inputs/decisions-20261102.md
-7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce  /workspace/audit-abi-world-evidence/checkpoints/retirement-final/coordinator-inputs/ownership.json
+49fa4e0ef45307428a026b414efc6a99efcbf4911dd23e9574e806be54dbfefe  /workspace/audit-abi-world-evidence/checkpoints/retirement-final/coordinator-inputs/ownership.json
 31ab16906906a9b22fd28700aacc72d2ee0ffe81cea723ae209eb28e5299286a  /workspace/audit-abi-world-evidence/checkpoints/retirement-final/coordinator-inputs/refactor-audit-20261106.md
 70536627583321681afb0b061a115698b66fe0e7656537707f621814e386ef05  /workspace/audit-abi-world-evidence/checkpoints/retirement-final/coordinator-inputs/sha256.json
 704921c6659544cb9eb968030f1d93b98cccff598ae41b5d34bf1a47196b31b9  /workspace/audit-abi-world-evidence/checkpoints/retirement-final/coordinator-inputs/toolchain-pin.json

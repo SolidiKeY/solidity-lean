@@ -14,7 +14,7 @@ SHA256: 24587e1ae5f27f1c56de497d0647a2455d928bd0384c77a16893e7229e3cdd5d
 
 The local archive hash and all 128 members verify: 126 artifacts and metadata
 for 42 mappings covering all 42 owned modules. The coordinator reports receipt:
-/home/guilherme/.local/state/cloudvm-coord/receipts/numeric-literals-cache-received-20261105T020358Z.json
+$XDG_STATE_HOME/cloudvm-coord/receipts/numeric-literals-cache-received-20261105T020358Z.json
 and reports that its received hash matches. That host receipt was not read on
 this VM; evidence/h41-cache-handoff.json records this provenance accurately.
 

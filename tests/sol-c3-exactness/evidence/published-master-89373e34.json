@@ -69,6 +69,6 @@
   ],
   "proof_checkpoint_scope_patch": "/workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/integration-89373e34-to-a7f4755c.patch",
   "proof_checkpoint_scope_patch_sha256": "16e300b4c637913fdebe2252cbd30dbdaec1c289cd062081eb319c53886c2a4a",
-  "coordinator_reported_receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261104T182351Z",
+  "coordinator_reported_receipt": "$XDG_STATE_HOME/cloudvm-coord/receipts/sched-20261104T182351Z",
   "boundary": "Remote source/ancestry independently verified; coordinator gate receipt is reported external evidence, not read locally or substituted for remaining lane gates. Remaining patch ends at a7f4755c; final packet regenerates delta through its exact committed head."
 }

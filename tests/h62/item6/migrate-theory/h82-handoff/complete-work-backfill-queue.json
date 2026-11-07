@@ -97,23 +97,23 @@
     },
     {
       "lane": "COORD",
-      "item": "DELIVER160530-1: staged input not delivered in this VM; provenance-only host path /home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392-HANDOFF.md; expected SHA256 9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392; bytes 17276. Static review only, no new run/application/acceptance."
+      "item": "DELIVER160530-1: staged input not delivered in this VM; provenance-only host path $XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392-HANDOFF.md; expected SHA256 9316e94cd180297bf36d6e31e9e3631b3d2dceac0a0c729611afa81b41f61392; bytes 17276. Static review only, no new run/application/acceptance."
     },
     {
       "lane": "COORD",
-      "item": "DELIVER160530-2: staged input not delivered in this VM; provenance-only host path /home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c-HANDOFF.md; expected SHA256 dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c; bytes 15154. Static review only, no new run/application/acceptance."
+      "item": "DELIVER160530-2: staged input not delivered in this VM; provenance-only host path $XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-syntax/dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c-HANDOFF.md; expected SHA256 dd67a6cbba9c5ab94715ae17ab28496722f7bceaed93bd1d222a7ee6c98fac9c; bytes 15154. Static review only, no new run/application/acceptance."
     },
     {
       "lane": "COORD",
-      "item": "DELIVER160530-3: staged input not delivered in this VM; provenance-only host path /home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72-source-full.patch; expected SHA256 c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72; bytes 75555. Static review only, no new run/application/acceptance."
+      "item": "DELIVER160530-3: staged input not delivered in this VM; provenance-only host path $XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72-source-full.patch; expected SHA256 c00c6698be9c948b7a8df049784703fdb687bb2f02fcc6f71f63ac12a24d1e72; bytes 75555. Static review only, no new run/application/acceptance."
     }
   ],
   "implemented_shims": [],
   "retirement_override": "Resolved: KEEP RETIREMENT/HANDOFF. Generic broadcasts/tickets do not revoke stop. Worker finishes preservation and stops; coordinator will pause the existing goal after final head report and idle turn. No new implementation/goal/reset.",
   "root_owner_requests_provenance": {
     "reported_head": "16d7e371a1e013f492784b596397cf500dbd7543",
-    "expected_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
-    "actual_inline_file_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+    "expected_sha256": "9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10",
+    "actual_inline_file_sha256": "9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10",
     "matches": true,
     "requirements_path_is_cross_vm_provenance": "/workspace/solidity-lean-migrate-root-gate/scripts/h62/item6/migrate-root-gate/h78-public-api-requirements.json",
     "implemented_shims": []

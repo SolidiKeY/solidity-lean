@@ -20,7 +20,7 @@
   "ticket_head_verification": "coordinator-reported receipt only",
   "initial_ticket_head": "78c110f83dc1a30700acd1b5bd34b19f61da6ccd",
   "latest_ticket_head": "a3f49ee0ec1829e63022c90194048d5a1ffe0d22",
-  "host_only_receipt_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
+  "host_only_receipt_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/router-20261106T160530Z/solidity-h62-6-20261106__migrate-hash/3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff-collision-bound-overlay.patch",
   "host_receipt_path_retrieved": false,
   "latest_payload_status": "Same supplied patch bytes/checksum; no new validation or compatible bundle implied"
 }
