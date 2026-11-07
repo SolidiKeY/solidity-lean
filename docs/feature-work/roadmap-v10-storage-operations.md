@@ -1389,3 +1389,59 @@ outside automated gates, not replaced by these structural laws. H16 exact try
 support, separate mapping-bearing H24, Y04 physical and 4.35 trust/timing waits
 and every STOP remain. Original/consolidated proof/backfill/coverage and full
 final gates remain open; no semantic producer or whole-lane completion claimed.
+
+### C257 — try success and ordered handlers
+
+SourceAstTryCorrespondence proves exact converted call, success returns/body,
+mandatory first catch and every remaining catch in order through Each/build.
+The success header is explicit. A second law proves the existing short-clause
+conversion error after call conversion succeeds; no new Source exclusion or
+execution-success premise is introduced. One measured guard uses the standard
+trio, the other propext and Quot.sound. Both pass. No reader, protected Source,
+frozen statement/interface/premise/budget/exclusion, axiom declaration or trust
+policy changed. Initial proofs passed; an unused simp argument was removed
+without disabling the linter.
+
+Existing controls retain all four actual bodies per pipeline and prior checks.
+Added generic success/named Error/plain handler ordering and success-only clause
+refusal guard construction boundaries, not Source validity. No Source case
+copies or phase folders. C257 lane history records read-only finder/skeptic
+reviews with no findings; neither used Lean, its server or build commands.
+
+Actual Source origin/H24/lifecycle/S03-PANIC41 and artifact binding remain local
+H121b duties, undelivered here. The historical C246 manual failed probe is outside
+automated gates, not replaced by these laws. H16 exact try support, separate
+mapping-bearing H24, Y04 physical and 4.35 trust/timing waits and all STOPs remain.
+Original/consolidated proof/backfill/coverage and full final gates remain open;
+no semantic producer or whole-lane completion claimed.
+
+### C259 — declaration correspondence and shared nonempty traversal
+
+SourceAstDeclarationCorrespondence proves exact struct member types/names,
+nonempty struct order through Each, and using-library path/type/global fields.
+A generic nonempty traversal law now serves both structs and the existing tuple
+proof, whose public statement and axiom guard are unchanged. Same-runtime checks
+of the old and refactored tuple proofs both took 1.26 seconds; this is a focused
+comparison, not whole-build timing evidence. No reader or protected Source body
+changed. New guards retain only the measured standard axioms.
+
+Regression controls preserve ordered Bool/uint members, empty-struct refusal,
+typed/untyped using directives and both actual eight-declaration resolutions.
+Existing expression controls still convert 37 expressions in each pipeline.
+Initial control checks rejected reserved local identifiers; those attempts are
+retained, and corrected checks pass. No error-recovery proof is accepted.
+
+Actual Source admission/origin/lifecycle and S03-PANIC41 remain undelivered local
+H121b duties. H125/H126 assigns the environment-aware typing repair and actual
+library try/Error(string memory) support to vy1-words; consume the published
+repair without changing frozen interfaces. C246's failed full-elaboration probe
+remains historical manual evidence outside automated gates. The unchanged V07
+packet is already integrated. No new issue is filed for these answered requests.
+The RO-DRIFT-H19H60-TRANSPORT evidence request is retained: exact 19 signature
+pairs and consumer proof references are not supplied by this syntax checkpoint.
+
+Lane history records C259 read-only finder/skeptic reviews; neither uses Lean or
+a build. Coverage remains 72 mapped of 3281 conservative rows, 3209 uncovered;
+these conversion laws add no audit witness rows. Original/consolidated queues,
+Y04 physical and separate 4.35 trust/timing waits, all prior STOPs and required
+full final gates remain open. No Source adequacy or whole-lane completion claim.

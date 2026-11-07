@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "source_module": "Solidity/Yul/Views/WordMemory.lean",
+  "proof_module": "tests/h62/item2/audit-yul/DefaultWitnessControls.lean",
+  "boundary": "Eight public imported theorem telescopes; not global census acceptance or execution adequacy. Private division_byte is outside this public-interface batch.",
+  "statements": [
+    {
+      "source": "Solidity.Yul.Views.readBE_lt",
+      "proof": "Solidity.Yul.Views.H62.word_window_joint",
+      "frozen_signature_sha256": "1a9844d9b5ae4a417838796db0f5b66691b54db3757d9d9e38ced31827705b9a"
+    },
+    {
+      "source": "Solidity.Yul.Views.readBE_congr",
+      "proof": "Solidity.Yul.Views.H62.word_read_congr_joint",
+      "frozen_signature_sha256": "dbfb7f59cd8dad1950e1cae08926f2a443236675e90b9d040f9260633dda3af1"
+    },
+    {
+      "source": "Solidity.Yul.Views.mload_congr",
+      "proof": "Solidity.Yul.Views.H62.word_load_congr_joint",
+      "frozen_signature_sha256": "5ad4be5eb4ddcaf6d0a07bd54004c04d2b48239a91d65cc6f27bfb2724394579"
+    },
+    {
+      "source": "Solidity.Yul.Views.readBE_mstore_prefix",
+      "proof": "Solidity.Yul.Views.H62.word_prefix_joint",
+      "frozen_signature_sha256": "86d6f5eb5651731cec2a8cfc4b959d249175a6fb0d3fcc03e953c196f1163c3a"
+    },
+    {
+      "source": "Solidity.Yul.Views.mload_mstore",
+      "proof": "Solidity.Yul.Views.H62.word_store_joint",
+      "frozen_signature_sha256": "c42874758512477d08870617b973928f715455b266f99e25a35b7a511b003a75"
+    },
+    {
+      "source": "Solidity.Yul.Views.readBE_div",
+      "proof": "Solidity.Yul.Views.H62.word_div_joint",
+      "frozen_signature_sha256": "1d8e0e8735b726e9d30d3d6ac262a8d373b8d4aae578e664c4241407ceb0c36c"
+    },
+    {
+      "source": "Solidity.Yul.Views.wordByte_mload",
+      "proof": "Solidity.Yul.Views.H62.word_byte_joint",
+      "frozen_signature_sha256": "51952525d8aef930d407a820e63ec6e244001e7ffd1b5eb52bd8ef72370cef7b"
+    },
+    {
+      "source": "Solidity.Yul.Views.mstore_mload",
+      "proof": "Solidity.Yul.Views.H62.word_writeback_joint",
+      "frozen_signature_sha256": "14fcb4f29254c051491ba7c4b0c30f01d9cdc88d513220196993346e1e91c3bc"
+    }
+  ]
+}

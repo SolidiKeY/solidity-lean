@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "sourceHead": "99d454f42ffe83a84fbf782452ed0a2ca7b47f49",
+  "nativeRuns": [
+    {
+      "name": "trace",
+      "head": "09cb6af77f11e7ff9190e208eb2d7eb54af34999",
+      "directory": "/workspace/dafny-trace-unavailable-native-20261107",
+      "exitCode": 0,
+      "status": "passed-with-gaps",
+      "error": null,
+      "cleanup": {
+        "observedOwnedSurvivors": [],
+        "terminatedOwnedSurvivors": [],
+        "identityRefusals": [],
+        "remaining": []
+      }
+    },
+    {
+      "name": "testing-before",
+      "head": "3fc97e537f7d3de60881a2fed128305fbcb8e600",
+      "directory": "/workspace/dafny-testing-symbols-native-20261107",
+      "exitCode": 1,
+      "status": "broken",
+      "error": "Host evidence is stale, incomplete or inconsistent: incomplete compiler Testing renderer evidence: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n    'visible',\n-   'hidden',\n-   'restored'\n  ]\n",
+      "cleanup": {
+        "observedOwnedSurvivors": [],
+        "terminatedOwnedSurvivors": [],
+        "identityRefusals": [],
+        "remaining": []
+      }
+    },
+    {
+      "name": "testing-readiness",
+      "head": "0b39bad88625fd1e319ab33bb9897ebca6293c23",
+      "directory": "/workspace/dafny-testing-symbols-ready-native-20261107",
+      "exitCode": 1,
+      "status": "broken",
+      "error": "Host evidence is stale, incomplete or inconsistent: incomplete compiler Testing renderer evidence: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n    'visible',\n-   'hidden',\n-   'restored'\n  ]\n",
+      "cleanup": {
+        "observedOwnedSurvivors": [
+          {
+            "pid": 275698,
+            "start": "9750721",
+            "name": "code"
+          }
+        ],
+        "terminatedOwnedSurvivors": [
+          {
+            "pid": 275698,
+            "start": "9750721",
+            "name": "code"
+          }
+        ],
+        "identityRefusals": [],
+        "remaining": []
+      }
+    },
+    {
+      "name": "testing-label",
+      "head": "62abafbad0c522dc5acb15df9b9bf477caac9487",
+      "directory": "/workspace/dafny-testing-symbols-label-native-20261107",
+      "exitCode": 1,
+      "status": "broken",
+      "error": "Host evidence is stale, incomplete or inconsistent: incomplete compiler Testing renderer evidence: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n    'visible',\n    'hidden',\n-   'restored'\n  ]\n",
+      "cleanup": {
+        "observedOwnedSurvivors": [],
+        "terminatedOwnedSurvivors": [],
+        "identityRefusals": [],
+        "remaining": []
+      }
+    },
+    {
+      "name": "testing-welcome",
+      "head": "5291aec403886a0c1df0c3b67f9291f349c8c49e",
+      "directory": "/workspace/dafny-testing-symbols-welcome-native-20261107",
+      "exitCode": 0,
+      "status": "passed-with-gaps",
+      "error": null,
+      "cleanup": {
+        "observedOwnedSurvivors": [],
+        "terminatedOwnedSurvivors": [],
+        "identityRefusals": [],
+        "remaining": []
+      }
+    }
+  ],
+  "fileCount": 369,
+  "uncompressedBytes": 21926786,
+  "boundaries": [
+    "Trace native seven-phase Linux F7/F8 unavailable path0; source09cb before compiler-only tree repair; provider remains null. No actual positioned data, proof/trace request or clipboard write.",
+    "Testing native source5291 visible/hidden/restored matrix0 with current compiler-only Base[f,f]/Derived[g], no obligation tags/outcomes/proof requests. Real raw button attributes show More Filters only; no native verification action inferred.",
+    "Three prior native Testing failures retained with their exact heads and raw phases/API/DOM/AX/PNG, restored settings and no owned survivors.",
+    "Later ignored-abort cancellation regression1 and repaired tests0 retained; no replay of successful native matrices claimed at final metadata head.",
+    "No macOS, full paired lifecycle/negative/performance/scaling or paired row judges; no kernel/compiler-EVM/runtime equivalence. All489 rows/frozen270 remain."
+  ],
+  "archive": {
+    "path": "/workspace/dafny-native-trace-testing-evidence-20261107/bulk.tar.gz",
+    "bytes": 3991751,
+    "sha256": "f4e66248bb6a54c388a26a42b32cdd4407723ab629f3969ac4718550e1334222"
+  },
+  "index": {
+    "path": "/workspace/dafny-native-trace-testing-evidence-20261107/files.json",
+    "bytes": 89116,
+    "sha256": "ace29e7105ed1bc478c49af00b5058158fad5e2277b9b2beb7e457a68179d922"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-native-trace-testing-evidence-manifest.json --restore"
+}

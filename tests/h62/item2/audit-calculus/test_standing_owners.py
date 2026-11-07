@@ -36,3 +36,7 @@ class StandingOwnerControls(unittest.TestCase):
     def test_nonempty_partial_scope_list_cannot_confirm_ownership(self):
         with self.assertRaisesRegex(ValueError,'authenticated package'):
             classify_files([self.file],[self.scope('migration-overlay/v4.35',['Solidity/**'])])
+
+
+if __name__ == "__main__":
+    unittest.main()

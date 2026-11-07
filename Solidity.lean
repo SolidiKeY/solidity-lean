@@ -3263,6 +3263,7 @@ import Solidity.Lowering.P8.SourceAllSettings
 import Solidity.Lowering.P8.SourceAstBranchCorrespondence
 import Solidity.Lowering.P8.SourceAstCompoundTypes
 import Solidity.Lowering.P8.SourceAstCorrespondence
+import Solidity.Lowering.P8.SourceAstDeclarationCorrespondence
 import Solidity.Lowering.P8.SourceAstExpressionCorrespondence
 import Solidity.Lowering.P8.SourceAstExpressions
 import Solidity.Lowering.P8.SourceAstLiteralCorrespondence
@@ -3270,6 +3271,7 @@ import Solidity.Lowering.P8.SourceAstParameterCorrespondence
 import Solidity.Lowering.P8.SourceAstParameters
 import Solidity.Lowering.P8.SourceAstStatementCorrespondence
 import Solidity.Lowering.P8.SourceAstStatements
+import Solidity.Lowering.P8.SourceAstTryCorrespondence
 import Solidity.Lowering.P8.SourceAstTupleCorrespondence
 import Solidity.Lowering.P8.SourceAstTypeCorrespondence
 import Solidity.Lowering.P8.SourceAstTypes
@@ -4797,6 +4799,7 @@ import Solidity.Yul.Compilation.ArithmeticVisitorShapes
 import Solidity.Yul.Compilation.ArithmeticVisitorShapesControls
 import Solidity.Yul.Compilation.ArityShapes
 import Solidity.Yul.Compilation.Artifact
+import Solidity.Yul.Compilation.ArtifactPreparation
 import Solidity.Yul.Compilation.BitExpressions
 import Solidity.Yul.Compilation.BitMachineExecution
 import Solidity.Yul.Compilation.BitMachineExecutionControls
@@ -5424,7 +5427,10 @@ import Solidity.Yul.Views.DynamicHeaderSelection
 import Solidity.Yul.Views.DynamicInventory
 import Solidity.Yul.Views.DynamicInventoryControls
 import Solidity.Yul.Views.DynamicInventoryWriteback
+import Solidity.Yul.Views.DynamicJournalCaller
+import Solidity.Yul.Views.DynamicJournalChild
 import Solidity.Yul.Views.DynamicJournalControls
+import Solidity.Yul.Views.DynamicJournalPrepare
 import Solidity.Yul.Views.DynamicLengthCodec
 import Solidity.Yul.Views.DynamicLengthWorld
 import Solidity.Yul.Views.DynamicNegativeControls
@@ -5623,8 +5629,14 @@ import Solidity.Yul.Views.MemberArrayControls
 import Solidity.Yul.Views.MemberComputedStorage
 import Solidity.Yul.Views.MemberDynamicBoundaryControls
 import Solidity.Yul.Views.MemberDynamicControls
+import Solidity.Yul.Views.MemberDynamicGrowth
+import Solidity.Yul.Views.MemberDynamicInitial
+import Solidity.Yul.Views.MemberDynamicLayout
 import Solidity.Yul.Views.MemberDynamicReadControls
 import Solidity.Yul.Views.MemberDynamicSequence
+import Solidity.Yul.Views.MemberDynamicSequenceClear
+import Solidity.Yul.Views.MemberDynamicSequencePrefix
+import Solidity.Yul.Views.MemberDynamicSequenceRegrow
 import Solidity.Yul.Views.MemberDynamicSnapshot
 import Solidity.Yul.Views.MemberHeaderTrace
 import Solidity.Yul.Views.MemberOwnershipBanks

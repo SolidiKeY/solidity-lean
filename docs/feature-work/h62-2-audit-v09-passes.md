@@ -506,7 +506,8 @@ This result is source accounting only, not an elaborated census or proof.
 
 ## First selected-census HeapBoundary instance
 
-`SelectedHeapBoundaryWitness.lean` witnesses the selected frozen
+The H44 external `SelectedHeapBoundaryWitness` source (materialization
+instructions below) witnesses the selected frozen
 `Solidity.Backend.Passes.objects_memory_link` declaration. Membership is checked
 against the actual179-file/1259-row selection before counting it. Checked
 object/memory nil-program certificates, capacity and nonallocation align with
