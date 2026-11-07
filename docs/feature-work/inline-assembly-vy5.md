@@ -3510,3 +3510,63 @@ library, trust, orphans, layers, roots, fragments, doc-paths, axiom-pins
 unpinned `../solkey` (167 mismatches); with the pinned rules
 (`SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key`) it
 reports `OK — annotations match`.
+
+### Dirty LOCAL readback for vy1-words (H109, 2026-11-06)
+
+Coordinator ticket (H16 owner): vy1-words waits on "dirty-local readback".
+User decision H109 (relayed answer to this lane's DirtyRead question):
+clean like solc, per pipeline, keeping Source values intrinsic and the
+refusal for anything solc's cleanup here does not cover.
+
+Delivered (new module `Solidity/Yul/DirtyReadback.lean`; no existing
+statement changed):
+
+- `DirtyReadback.cleanWord : Pipeline → (ty : STy) → Word → Option (Val D ty)`:
+  `.int t` ↦ `Source.intWrap t w.val` (mask / sign extension), `.bool` ↦
+  `w.val != 0`, otherwise `none`; `cleanWord_int`, `cleanWord_bool`,
+  `cleanWord_pipelines`, `cleanWord_u8_key` (the existing
+  `RawFrame.U8ReturnD` reading).
+- `DirtyReadback.readValue`, `readback` (LocalValues → Source locals;
+  `readback_ofClean`, `readback_of_clean?`: it extends `LocalValues.clean?`).
+- `DirtyReadback.readLocal`, `readbackFrom`, `frame : Pipeline →
+  RawFrame.State ctx → Option (Locals × St)`: a raw frame read back against
+  its clean backup (untouched locals keep their value, dirty int/bool locals
+  are cleaned, a dirty local of another type refuses);
+  `readLocal_clean`, `readbackFrom_ofClean`.
+
+Evidence: `scripts/evm-reference/dirty-locals.mjs` (pinned soljson
+`6c74ffba…`, verified; `@ethereumjs/evm`, Osaka, optimizer off) →
+`tests/evm-reference/dirty-locals.json`, 33 probes per pipeline. Every
+Solidity-level read cleans, identically in both pipelines; later assembly
+reads (and reads of Solidity copies) see the raw word, so `frame` agrees
+with solc only when no later assembly block reads the local before it is
+rewritten (recorded in the module docstring and `solc-alignment.md`). The
+recorded H3 unchecked-add difference reappears (`u8_unchecked_add_widen`).
+
+Controls (`Solidity/Yul/Checks/DirtyReadbackControls.lean`, kernel `decide`,
+both pipelines): `uint_masked`, `int_sign_extended`, `bool_nonzero`
+(each cites its probes), `other_refused`; frames `dirtyTwo_read` (258 → 2),
+`boolTwo_read` (2 → true), `dirtyFalse_read` (a changed, clean word),
+`clean_read`, `dirtyByte_refused`, `coherence_kept` (vy1's
+`RawCoherent.coherent` refusals stay: coherence is not cleaning).
+
+Reviews (read-only, without the Lean server):
+
+- **Skeptic.** Claims survived for Solidity-level reads; refuted "cleans on
+  every read" (later assembly reads see raw bits) — added the probes and
+  recorded the limit. Confirmed and fixed: `dirtyFalse` is not dirty
+  (re-described; `boolTwo_read` now covers both pipelines); probe gaps
+  (added narrow arithmetic, division, shifts, ordering, `if`/`&&`/`!=` on
+  `bool`, storage writes); no law for `readbackFrom` (added
+  `readbackFrom_ofClean`); docs claimed Source applies it (now: no Source
+  semantics calls it yet).
+- **Finder.** Confirmed and fixed: `int8 0x1ff → -1` rested on an ABI-return
+  probe (added `i8_eq_neg1`, `i16_widen`, `u32_widen`, `b_eq_b`); bool
+  probes `b_not`/`b_cond` do not separate cleaned from raw (no longer
+  cited); the refused-type list missed udvt, contracts and fixed point;
+  the raw-bit limit (as above). Checked clean: `wrapBits` equals solc's
+  mask/`signextend` for all widths; the `unchanged` fallback accepts no
+  dirty `bytesN` or changed function value; `readbackFrom` pairs each local
+  with its own backup; statements preserved. Low, kept: the module-map rows
+  sit in this lane's `yul.d` fragment (the module is this lane's H16
+  delivery, not `Yul/Composition`).

@@ -1,0 +1,518 @@
+{
+  "version": 1,
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "sourceSha256": "b8116361a56788ee2c6d42f22c55fdffbc7a4bed4854595ada08e9295893bab6",
+  "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity 0.8.38;\ncontract Dirty {\n  uint8 s8; bool sb;\n  function u8_widen() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } r = x; }\n  function u8_add() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } r = uint256(x) + 0; }\n  function u8_eq() external returns (bool r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } r = (x == 0xff); }\n  function u8_ret() external returns (uint8 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } r = x; }\n  function u16_widen() external returns (uint256 r) { uint16 x; assembly (\"memory-safe\") { x := 0xabcd1234 } r = x; }\n  function i8_widen_neg() external returns (int256 r) { int8 x; assembly (\"memory-safe\") { x := 0x80 } r = x; }\n  function i8_widen_pos() external returns (int256 r) { int8 x; assembly (\"memory-safe\") { x := 0x17f } r = x; }\n  function i8_lt() external returns (bool r) { int8 x; assembly (\"memory-safe\") { x := 0xff } r = (x < 0); }\n  function i8_ret() external returns (int8 r) { int8 x; assembly (\"memory-safe\") { x := 0x1ff } r = x; }\n  function b_cond() external returns (uint256 r) { bool x; assembly (\"memory-safe\") { x := 2 } r = x ? 1 : 0; }\n  function b_eq_true() external returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } r = (x == true); }\n  function b_not() external returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } r = !x; }\n  function b_ret() external returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } r = x; }\n  function b_widen() external returns (uint256 r) { bool x; assembly (\"memory-safe\") { x := 2 } r = x ? 7 : 9; }\n  function u8_checked_add() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1fe } r = x + 1; }\n  function u8_unchecked_add() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1fe } unchecked { r = uint256(x + 1); } }\n  function u8_unchecked_add_widen() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } uint8 y; unchecked { y = x + 1; } assembly { r := y } }\n  function u8_div() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1fe } r = x / 2; }\n  function u8_lt() external returns (bool r) { uint8 x; assembly (\"memory-safe\") { x := 0x101 } r = (x < 2); }\n  function u8_shr() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1f0 } r = x >> 4; }\n  function u8_store() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } s8 = x; r = s8; }\n  function u8_asm_reread() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } uint8 y = x; assembly { r := y } }\n  function i8_div() external returns (int256 r) { int8 x; assembly (\"memory-safe\") { x := 0x1fc } r = x / 2; }\n  function b_if() external returns (uint256 r) { bool x; assembly (\"memory-safe\") { x := 2 } if (x) { r = 5; } else { r = 6; } }\n  function b_and() external returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } r = x && true; }\n  function b_ne_false() external returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } r = (x != false); }\n  function b_store() external returns (uint256 r) { bool x; assembly (\"memory-safe\") { x := 2 } sb = x; assembly { r := sload(sb.slot) } }\n  function i8_eq_neg1() external returns (bool r) { int8 x; assembly (\"memory-safe\") { x := 0x1ff } r = (x == -1); }\n  function u32_widen() external returns (uint256 r) { uint32 x; assembly (\"memory-safe\") { x := 0x1234567890 } r = x; }\n  function i16_widen() external returns (int256 r) { int16 x; assembly (\"memory-safe\") { x := 0x18000 } r = x; }\n  function b_eq_b() external returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } bool t = true; r = (x == t); }\n  function u8_asm_direct() external returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } assembly { r := x } }\n  function b_asm_direct() external returns (uint256 r) { bool x; assembly (\"memory-safe\") { x := 2 } assembly { r := x } }\n}\n",
+  "probes": [
+    {
+      "name": "u8_widen",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint256",
+      "read": "r = x;"
+    },
+    {
+      "name": "u8_add",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint256",
+      "read": "r = uint256(x) + 0;"
+    },
+    {
+      "name": "u8_eq",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "bool",
+      "read": "r = (x == 0xff);"
+    },
+    {
+      "name": "u8_ret",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint8",
+      "read": "r = x;"
+    },
+    {
+      "name": "u16_widen",
+      "ty": "uint16",
+      "dirty": "0xabcd1234",
+      "ret": "uint256",
+      "read": "r = x;"
+    },
+    {
+      "name": "i8_widen_neg",
+      "ty": "int8",
+      "dirty": "0x80",
+      "ret": "int256",
+      "read": "r = x;"
+    },
+    {
+      "name": "i8_widen_pos",
+      "ty": "int8",
+      "dirty": "0x17f",
+      "ret": "int256",
+      "read": "r = x;"
+    },
+    {
+      "name": "i8_lt",
+      "ty": "int8",
+      "dirty": "0xff",
+      "ret": "bool",
+      "read": "r = (x < 0);"
+    },
+    {
+      "name": "i8_ret",
+      "ty": "int8",
+      "dirty": "0x1ff",
+      "ret": "int8",
+      "read": "r = x;"
+    },
+    {
+      "name": "b_cond",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "uint256",
+      "read": "r = x ? 1 : 0;"
+    },
+    {
+      "name": "b_eq_true",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "r = (x == true);"
+    },
+    {
+      "name": "b_not",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "r = !x;"
+    },
+    {
+      "name": "b_ret",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "r = x;"
+    },
+    {
+      "name": "b_widen",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "uint256",
+      "read": "r = x ? 7 : 9;"
+    },
+    {
+      "name": "u8_checked_add",
+      "ty": "uint8",
+      "dirty": "0x1fe",
+      "ret": "uint256",
+      "read": "r = x + 1;"
+    },
+    {
+      "name": "u8_unchecked_add",
+      "ty": "uint8",
+      "dirty": "0x1fe",
+      "ret": "uint256",
+      "read": "unchecked { r = uint256(x + 1); }"
+    },
+    {
+      "name": "u8_unchecked_add_widen",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint256",
+      "read": "uint8 y; unchecked { y = x + 1; } assembly { r := y }"
+    },
+    {
+      "name": "u8_div",
+      "ty": "uint8",
+      "dirty": "0x1fe",
+      "ret": "uint256",
+      "read": "r = x / 2;"
+    },
+    {
+      "name": "u8_lt",
+      "ty": "uint8",
+      "dirty": "0x101",
+      "ret": "bool",
+      "read": "r = (x < 2);"
+    },
+    {
+      "name": "u8_shr",
+      "ty": "uint8",
+      "dirty": "0x1f0",
+      "ret": "uint256",
+      "read": "r = x >> 4;"
+    },
+    {
+      "name": "u8_store",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint256",
+      "read": "s8 = x; r = s8;"
+    },
+    {
+      "name": "u8_asm_reread",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint256",
+      "read": "uint8 y = x; assembly { r := y }"
+    },
+    {
+      "name": "i8_div",
+      "ty": "int8",
+      "dirty": "0x1fc",
+      "ret": "int256",
+      "read": "r = x / 2;"
+    },
+    {
+      "name": "b_if",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "uint256",
+      "read": "if (x) { r = 5; } else { r = 6; }"
+    },
+    {
+      "name": "b_and",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "r = x && true;"
+    },
+    {
+      "name": "b_ne_false",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "r = (x != false);"
+    },
+    {
+      "name": "b_store",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "uint256",
+      "read": "sb = x; assembly { r := sload(sb.slot) }"
+    },
+    {
+      "name": "i8_eq_neg1",
+      "ty": "int8",
+      "dirty": "0x1ff",
+      "ret": "bool",
+      "read": "r = (x == -1);"
+    },
+    {
+      "name": "u32_widen",
+      "ty": "uint32",
+      "dirty": "0x1234567890",
+      "ret": "uint256",
+      "read": "r = x;"
+    },
+    {
+      "name": "i16_widen",
+      "ty": "int16",
+      "dirty": "0x18000",
+      "ret": "int256",
+      "read": "r = x;"
+    },
+    {
+      "name": "b_eq_b",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "bool t = true; r = (x == t);"
+    },
+    {
+      "name": "u8_asm_direct",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint256",
+      "read": "assembly { r := x }"
+    },
+    {
+      "name": "b_asm_direct",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "uint256",
+      "read": "assembly { r := x }"
+    }
+  ],
+  "pipelines": [
+    {
+      "pipeline": "legacy",
+      "creationSha256": "c19cd6e164fef5a47de8d16db2b0dbd27a97a99bde9a37328d3cdf5200635f29",
+      "results": {
+        "u8_widen": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_add": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_eq": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u8_ret": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u16_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000001234"
+        },
+        "i8_widen_neg": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80"
+        },
+        "i8_widen_pos": {
+          "failed": false,
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000007f"
+        },
+        "i8_lt": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "i8_ret": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "b_cond": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_eq_true": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_not": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "b_ret": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000007"
+        },
+        "u8_checked_add": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_unchecked_add": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_unchecked_add_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000200"
+        },
+        "u8_div": {
+          "failed": false,
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000007f"
+        },
+        "u8_lt": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u8_shr": {
+          "failed": false,
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000f"
+        },
+        "u8_store": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_asm_reread": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000001ff"
+        },
+        "i8_div": {
+          "failed": false,
+          "returnData": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"
+        },
+        "b_if": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000005"
+        },
+        "b_and": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_ne_false": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_store": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000001ff"
+        },
+        "i8_eq_neg1": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u32_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000034567890"
+        },
+        "i16_widen": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8000"
+        },
+        "b_eq_b": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u8_asm_direct": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000001ff"
+        },
+        "b_asm_direct": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        }
+      }
+    },
+    {
+      "pipeline": "viaIR",
+      "creationSha256": "f91982b09e094449147671cd90e302709ead9818dfbd2764e0533fb62aeba624",
+      "results": {
+        "u8_widen": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_add": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_eq": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u8_ret": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u16_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000001234"
+        },
+        "i8_widen_neg": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80"
+        },
+        "i8_widen_pos": {
+          "failed": false,
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000007f"
+        },
+        "i8_lt": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "i8_ret": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "b_cond": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_eq_true": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_not": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "b_ret": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000007"
+        },
+        "u8_checked_add": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_unchecked_add": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_unchecked_add_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "u8_div": {
+          "failed": false,
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000007f"
+        },
+        "u8_lt": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u8_shr": {
+          "failed": false,
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000f"
+        },
+        "u8_store": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_asm_reread": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000001ff"
+        },
+        "i8_div": {
+          "failed": false,
+          "returnData": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"
+        },
+        "b_if": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000005"
+        },
+        "b_and": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_ne_false": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_store": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000001ff"
+        },
+        "i8_eq_neg1": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u32_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000034567890"
+        },
+        "i16_widen": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8000"
+        },
+        "b_eq_b": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u8_asm_direct": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000001ff"
+        },
+        "b_asm_direct": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        }
+      }
+    }
+  ]
+}
