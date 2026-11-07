@@ -522,3 +522,43 @@ shared inventories and gate policies are unchanged. Independent read-only
 finder and skeptic found no source fidelity defects; metadata reviews and
 strict committed-tree documentation comparisons accompany the sealed handoff.
 All original producer, full-validation, timing and documentation holds remain.
+
+
+### Checkpoint 229: represented live-array numeric readback
+
+The existing ArrayAccessWitnesses fixture now jointly inhabits the exact frozen
+TargetArrayRead.represented_read and complete_read premises. Both use the same
+populated length-1/extent-3 array, machine and live index 0. Selected queries are
+nonempty: the current header and the live element. The index support bound,
+header compatibility bounds, logical representation and target observations are
+proved together. Numeric completion additionally supplies Transport over a
+nonempty header/child location list and selected-child coverage. Its constant
+true-word stores and explicit local hash satisfy that read-only interface; no
+finite-region injectivity, physical hash adequacy or Source compiler is inferred.
+
+Both successful conclusions apply the unchanged original laws. Negative controls
+show an all-false numeric store violates Transport and a zeroed target child
+violates initial target agreement. These are refused premise bundles, not new
+compiler or execution-totality claims. Existing definitions, statements and
+sixteen earlier guards remain unchanged.
+
+Exact source commit `3695698ee4e9806353038c773409dc0182e781c6` passed all 24 local
+guards in 2.42 seconds, peak aggregate RSS 710434816 bytes, without a resource
+stop. Eight new guards use only propext, Classical.choice and Quot.sound.
+The first check failed on a missing explicit support-bound proof and a local
+word-type mismatch; its rejected diagnostics are retained separately. The
+corrected and final guarded source passes without unfinished proof artifacts.
+
+The frozen registry maps 64 rows: 52 joint-premise bundles and 12 data
+inhabitants; 3217 of 3281 conservative rows remain unmapped. Only two new
+interface statements are counted. Source pin metadata retains the earlier
+ArrayAccessWitnesses identity and receipt in historical_checks; all unrelated
+and complete-validation receipts remain historical. Registry drift controls pass.
+
+Trust scanning passes 6614 sources and 289 inventoried sites with zero findings.
+Strict axiom pins remain FAIL: 16540 pinned, zero errors, 380 unrecorded and
+99 baselined changes. Only the eight new standard-only entries are classified
+for this increment; no shared inventory is written. Independent read-only
+finder/skeptic source and metadata reviews and strict committed-tree document
+comparisons accompany the handoff. Earlier producer, performance, documentation
+and full-validation holds remain open.
