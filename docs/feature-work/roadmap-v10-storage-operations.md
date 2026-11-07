@@ -966,3 +966,116 @@ raw strict docs at8e7f0883c83d15862f3e42e1f961ff788e65cc6d retain1missing/139amb
 identical to published3a5b9de412b84a13777b6fbf8c8f310e10b3448e (0new/0removed).
 Frozen comparison remains FAIL137new/9removed. No raw failure or historical
 timing STOP is waived. Entire original/consolidated queues remain incomplete.
+
+
+## Checkpoint 241: compiler leaf types into intrinsic Source syntax
+
+Rebased the existing lane on published7265ee136d8eef49b969934d250a536edc97f1df
+after verifying accepted bf7695fa485a ancestry. Existing untracked runtime files
+and historical seals are preserved. Source.elaborate already constructs typed
+programs with derivation evidence; the new P8 SourceAstTypes component prepares
+its existing Syn type/parameter inputs instead of introducing another AST or
+a hand-written resolved program. Source implementation files remain untouched.
+
+The generic leaf converter preserves written qualified struct paths, explicit
+storage/memory/calldata locations, anonymous names and string types. Integer
+and fixed-byte widths are constructed only with the original intrinsic bounds;
+noncanonical leading zeros are refused. Non-leaf conversion is unfinished: its
+errors are component gaps, not Source/profile exclusions or parser admission.
+No Env, complete syntax unit, resolution, program, origin, failure-resource
+realization or reached-state witness is supplied by this leaf component.
+
+Runtime checks reuse the unchanged LibraryTry legacy/via-IR fixtures: all12
+parameters/results per fixture convert, including the actual S-storage formal
+and anonymous string-memory return. These IO checks are not Source semantic
+proofs. Four separate malformed-width/location propositions are kernel proved
+and axiom-free. The three main definitions have exact measured guards: elementary
+axiom-free; typeNameLeaf and parameter use propext only. No native_decide, new
+axiom, statement weakening or heartbeat increase is introduced.
+
+Initial diagnostics found the Lean4.24 String.drop API mismatch. Subsequent
+concrete rfl/decide attempts encountered opaque string operations; failed
+receipts, including rejected recovery sorryAx reports, remain retained. Width
+reading now uses finite character lists, so all four original rejection
+statements reduce in the kernel. No failing artifact or forbidden pin is
+accepted. Independent finder and skeptic reviewed the final algorithm and
+controls without Lean/server and found no findings.
+
+Exact source814ba88f86307e36677cc6e8ae29ea1ce6ee4112 checks pass: definitions
+1.90s/330522624bytes aggregate RSS; controls1.23s/320888832bytes, no resource stop.
+Affected import build and generated registration/layers pass. Trust reports
+6648sources/289sites/0findings. Strict pins remain FAIL:16795pins,0errors,
+205unrecorded,0baselined; inventory is not rewritten. The audit ledger remains
+72mapped/3209uncovered; these new conversion controls are not frozen-row
+witness additions. All original Source/program/lifecycle, physical, coverage
+and final-gate requirements and historical STOPs remain open.
+
+### C242 — ordered Source parameter containers
+
+SourceAstParameters converts compiler ParameterList children through the existing
+leaf converter into intrinsic Source lists. A generalized-index proof-only
+eliminator avoids fixed-index matching: its roundtrip is axiom-free; the exact
+mapM order/error theorem and parameterList have measured propext-only guards.
+The executable converter does not depend on the noncomputable proof eliminator.
+Both unchanged LibraryTry AST fixtures pass input/result container checks and
+retain all 12 leaf conversions each, storage formals and string-memory returns.
+This supplies no declarations, Env/SrcProg, resolution, admission or lifecycle
+adequacy. Recursive types and expression/statement/declaration conversion remain
+local implementation work; the mapped audit ledger remains 72/3281.
+
+Prior generated-cache cleanup left a dangling build target; the original target
+was recreated and the repository artifact restorer placed four fetched objects.
+Failed fixed-index, generic-match, recursive-unfold and executable-recursor
+attempts are retained in checkpoint242 evidence. Only the final noncomputable
+specification plus executable conversion passes; rejected recovery sorryAx and
+compiler panic artifacts are not accepted. No statement, premise, axiom policy,
+exclusion or budget was changed. H111 stack and H113 accounting remain unchanged.
+Independent read-only finder and skeptic reviewed the final code without Lean
+or its server and reported no findings. Registration, fragments, orphans and
+layers pass; trust has 6649 sources, 289 sites and zero findings. Shared strict
+pin drift and full lane/final-gate requirements remain open; no pin rewrite.
+
+### C243 — existing-body expression syntax conversion
+
+SourceAstExpressions reuses the indexed Source expression/list constructors and
+Checked.Lexer hexBody/canonNat for compiler literal bytes and canonical integer
+values. Member receivers, positional calls, assignment operands and tuple
+components (including holes) retain their syntax and order. Unsupported forms
+and finite traversal exhaustion produce conversion errors; these do not change
+Source exclusions or resource semantics. No existing definition or statement
+was edited. Three exact propext-only guards pin the reader and zero-depth law.
+
+Runtime controls convert all 37 recognized expression nodes in each unchanged
+LibraryTry AST. They check delegated receiver t.stru, t.x = 9, successful tuple
+order and failure string bytes; malformed hex, separators, compound assignment,
+named arguments and numeric units fail explicitly. An initial test precedence
+error and rejected recovery diagnostic are retained; the corrected test passes.
+These are runtime syntax checks, not resolution, Source execution, artifact
+binding, H24 admission or lifecycle adequacy. No independent compiler rerun is
+claimed. Both read-only finder and skeptic found no findings, without Lean or
+its server. All original program, admission, resource, physical, audit coverage
+and final-gate obligations remain open, as do prior STOPs and shared pin drift.
+
+### C244 — recursive compound type syntax
+
+SourceAstCompoundTypes preserves recursive array bounds, optional mapping names
+and function-type signatures using existing Source constructors. Recursive
+parameter conversion shares its structure through parameterWith; its exact
+leaf instantiation equals the unchanged original parameter converter by rfl.
+Arrays reuse SourceAstExpressions for fixed bounds; mappings reuse MapKey and
+its existing non-payable key grammar restriction. Function parameter/result
+lists retain names, locations, visibility and mutability. Conversion fuel is
+not an execution resource, accepted-source premise or new Source exclusion.
+All three measured guards use propext only; no axiom declaration or budget was
+added. The initial optional-bound monadic typing failure and rejected recovery
+diagnostic are retained; typed Option syntax mapping fixes the implementation.
+
+Structural runtime controls pass for named mapping/fixed bounds and a nested
+function parameter, with depth, payable-key and malformed-bound refusals.
+These synthetic conversion controls are not compiler tests or Source acceptance
+proofs. Existing LibraryTry leaves remain supported without modifying their
+reader. Independent read-only finder and skeptic found no findings, without
+Lean or its server. Actual Source unit/declarations/statements, resolution,
+elaboration, artifact origin, H24 admission, lifecycle/resource and consumer
+correspondence remain unfinished local work. General mapping-bearing H24,
+physical Y04 and separate 4.35 trust/timing waits and every prior STOP remain.
