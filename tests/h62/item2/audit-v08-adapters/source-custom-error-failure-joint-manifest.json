@@ -1,0 +1,118 @@
+{
+  "status": "CUSTOM_ERROR_ACTUAL_FAILURE_JOINT_COMPONENTS",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceCustomErrorFailureJoint.lean": "92c3568a1c7abb0f9cecd8b1b07b6fbee8d002a41d9e798505dd255f77332d41",
+    "Solidity/Lowering/V08/SourceCustomErrorFailures.lean": "4c578a01c4634f2516f3360771b30e06366f77092233a9cc8a136c23f1eafa1f",
+    "Solidity/Lowering/V08/SourceCustomErrorFailureControls.lean": "15f56dcaf60fa7fe5c3515b909c8443cde16b585fb9ff5c87c25644f49712ed3",
+    "Solidity/Lowering/V08/SourceCustomErrorControls.lean": "9dd4c65999c53ed2609f8db7f0b703933f004e83ef5fe05f81495572e53bf297"
+  },
+  "target_links": [
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:9:arguments_failure",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.arguments_failure",
+      "component": "actual",
+      "fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:40:converted_tail_failure",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.converted_tail_failure",
+      "component": "prefix_failure",
+      "fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceCustomErrorFailures.lean:65:attempt_failure",
+      "target": "Solidity.Lowering.V08.SourceCustomErrorFailures.attempt_failure",
+      "component": "observed",
+      "fidelity": "PENDING"
+    }
+  ],
+  "new_body_fixtures": 0,
+  "fidelity_acceptances": 0,
+  "joint_model": "Existing converted hash head yields digest and reached allocation; failing tail starts from that exact locals/heap, changes Bool local and returns actual divZero panic. Both premises coexist for each pipeline/static flag; conversion/declaration typing supplied by actual reflexive bindings.",
+  "negative": "EM.attempt successful outer observation still carries inner error; complete result differs from normal recovered execution, with same reached state retained.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceCustomErrorFailureJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 5.916,
+    "peak_sampled_aggregate_rss": 808034304,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axioms": {
+    "joint": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "prefix_failure": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "actual": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "observed": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "observation_not_recovery": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "limitations": [
+    "Reuses existing fixture/control executions and generic laws; application wrappers are not new body models or producer semantics.",
+    "Three original conditional targets linked; other three CustomErrorFailures targets,19target full audit and101residual accounting remain open.",
+    "EM.attempt is observation, not Solidity try/catch selection, admitted Source success or rollback.",
+    "No actual Source admission/origin/lifecycle, production body/frame/session/world/H68 bridge. No full-root or matched timing acceptance or prior STOP release."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-joint-20261107/check/console.log",
+      "bytes": 183,
+      "sha256": "e3ac311560ae3bfa47f0c753f8dc122f6d30ec51815d5b7469b722b3282948be"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-joint-20261107/check/gates/1.log",
+      "bytes": 31949,
+      "sha256": "6e1caec36163730e9cebbd252278d6bbd4aafdcf177394283d3b14ce82c6db75"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-joint-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "8d0f39b4bfbce540d4d51bbd1ff4909520c426e5add7706ebae48aa5be1b13fe"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-joint-20261107/check/gates/gates.tsv",
+      "bytes": 282,
+      "sha256": "df4e1bb676bc55a62af29f2917d8e6033145e0d0c5fd29a6ebd2be200611b33b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-joint-20261107/check/results.json",
+      "bytes": 409,
+      "sha256": "79a83b2b618b2c7ddcb372a359147ea9245a82e389b2ae3f2be976f405534820"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-custom-error-failure-joint-20261107/trust.json",
+      "bytes": 405,
+      "sha256": "d78438eb0d6811efcf5a61a53a8d2f7b3a55442413bf5d6a365f1b7f098c2070"
+    }
+  ]
+}

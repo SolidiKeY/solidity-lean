@@ -1127,3 +1127,31 @@ open. Bulk captures/types remain off Git, sealed through source-failure-census-m
 Read-only finder and skeptic found no issue in the original bindings, sort-only
 derivation, record/binder counts or unfinished acceptance boundaries. Neither
 ran Lean or a server; their receipt remains with the off-Git evidence.
+
+### Converted-head/tail failure joint and observation (2026-11-07)
+
+SourceCustomErrorFailureJoint supplies the original converted_tail_failure
+premises together: the existing actual hash head returns its digest and reached
+allocation, and the actual tail starts from exactly that locals/heap, changes
+the Bool local and panics. Reflexive conversion/declaration bindings retain the
+original typing obligations. The prefix result supplies arguments_failure, then
+the exact statement result supplies attempt_failure, for both pipelines and
+static flags. Three original conditional target links are added without new
+body fixtures or a replacement evaluator/payload producer.
+
+The full EM.attempt result is proved unequal to normal recovered execution.
+Its outer success contains the original inner panic and retains the reached
+state; no catch dispatch, Source admission or rollback is inferred. The other
+three CustomErrorFailures targets, full19-target feasibility/fidelity audit and
+all101 residual records remain open, as do production Source/body/frame/world/H68
+obligations. Existing control applications are not recounted as new models.
+
+The serial per-file gate passed in 5.916 seconds with one Lean, peak sampled
+aggregate RSS 808,034,304 bytes and no STOP. All five declarations retain only
+the existing standard axioms; registration passed. No full-root/matched timing
+acceptance or STOP release. Exact bindings: source-custom-error-failure-joint-manifest.json;
+bulk proof receipts remain off Git.
+
+Read-only finder and skeptic found no issue in the shared head/tail state,
+original typing/execution premises, complete attempted-result negative or
+limited target acceptance. Neither ran Lean or a server; receipt retained off Git.
