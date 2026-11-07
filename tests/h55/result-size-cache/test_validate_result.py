@@ -1,3 +1,7 @@
+"""Guard H97 minimal envelopes, version-fallback bypasses and stale schema caches.
+
+Synthetic reports do not establish real host metadata or producer adoption.
+"""
 import ast
 import importlib.util
 import shutil
@@ -20,18 +24,114 @@ def valid():
                 artifacts=dict(original_patch=None, handoff=None, evidence=None, checksums=None))
 
 
+def h97():
+    return dict(schema_version=1, batch="batch", slug="slug", status="partial",
+                branch="branch", head="b"*40, gates=[], reviews="pending",
+                limitations="synthetic H97 control", questions=[], waits=[])
+
+
 def wrap(body):
     return "context\nCLOUDVM-RESULT\n" + body + "\nEND-CLOUDVM-RESULT\n"
 
 
 class ResultValidation(unittest.TestCase):
+    def test_h97_minimal_and_optional_metadata(self):
+        for value in (h97(), dict(h97(), owner_tickets=[]),
+                      dict(h97(), artifacts={}), dict(h97(), artifacts={"bundle":"/fixture"})):
+            with self.subTest(value=value):
+                self.assertEqual(validator.validate(wrap(json.dumps(value))), value)
+        unversioned = h97(); unversioned.pop("schema_version")
+        self.assertEqual(validator.validate(wrap(json.dumps(unversioned))), unversioned)
+
+    def test_h97_requires_every_authoritative_field(self):
+        for key in set(h97()) - {"schema_version"}:
+            value = h97(); value.pop(key)
+            with self.subTest(missing=key), self.assertRaises(validator.ResultError):
+                validator.validate(wrap(json.dumps(value)))
+        for update in ({"status":"complete"}, {"extra":1}, {"waits":["text"]}):
+            with self.subTest(update=update), self.assertRaises(validator.ResultError):
+                validator.validate(wrap(json.dumps(dict(h97(), **update))))
+
+    def test_h97_cannot_fall_back_to_nullable_legacy_head(self):
+        for head in (None, "b"*39, "g"*40, "b"*40+"\n"):
+            value = dict(valid(), schema_version=1, head=head)
+            with self.subTest(head=head), self.assertRaises(validator.ResultError):
+                validator.validate(wrap(json.dumps(value)))
+        for version in (True, False, "v1", 2, None):
+            value = dict(valid(), schema_version=version)
+            with self.subTest(version=version), self.assertRaises(validator.ResultError):
+                validator.validate(wrap(json.dumps(value)))
+
+    def test_h97_question_option_objects(self):
+        question = dict(id="Q-H97", question="Which implementation?", options=[
+            {"label":"First", "consequence":"Preserve first behavior."},
+            {"label":"Second", "consequence":"Preserve second behavior."}])
+        value = dict(h97(), questions=[question])
+        self.assertEqual(validator.validate(wrap(json.dumps(value))), value)
+        for options in (["First", "Second"], [{"label":"First"}, {"label":"Second", "consequence":"Effect"}],
+                        [{"label":" ", "consequence":"Effect"}, {"label":"Second", "consequence":"Effect"}]):
+            invalid = dict(value, questions=[dict(question, options=options)])
+            with self.subTest(options=options), self.assertRaises(validator.ResultError):
+                validator.validate(wrap(json.dumps(invalid)))
+        # Versioned legacy-shaped options cannot escape through legacy validation.
+        invalid = dict(valid(), schema_version=1, head="b"*40, questions=[
+            dict(id="Q1", sources=["fixture"], question="Which?", options=["First", "Second"])])
+        with self.assertRaises(validator.ResultError): validator.validate(wrap(json.dumps(invalid)))
+
+    def test_h97_done_keeps_completion_guards_without_optional_fields(self):
+        value = dict(h97(), status="done", gates=[{"command":"control", "status":"pass", "evidence":"fixture"}])
+        self.assertEqual(validator.validate(wrap(json.dumps(value))), value)
+        for update in ({"gates":[]}, {"gates":[{"command":"control", "status":"pending", "evidence":"fixture"}]},
+                       {"waits":[{"lane":"fixture", "item":"missing"}]},
+                       {"checkpoints":[{"name":"fixture", "status":"partial"}]},
+                       {"artifacts":{"original_patch":None}}):
+            with self.subTest(update=update), self.assertRaises(validator.ResultError):
+                validator.validate(wrap(json.dumps(dict(value, **update))))
+
+    def test_changed_schema_contents_cannot_reuse_cached_acceptance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            schema = Path(tmp)/"schema.json"
+            schema.write_text('{"type":"object"}')
+            self.assertEqual(validator.validate(wrap(json.dumps(h97())), schema), h97())
+            schema.write_text('{"type":"integer"}')
+            with self.assertRaises(validator.ResultError): validator.validate(wrap(json.dumps(h97())), schema)
+            schema.write_text('{"type":"object", "type":"integer"}')
+            with self.assertRaisesRegex(validator.ResultError, "schema unavailable or invalid: duplicate JSON key"):
+                validator.validate(wrap(json.dumps(h97())), schema)
+            schema.unlink()
+            with self.assertRaisesRegex(validator.ResultError, "schema unavailable or invalid"):
+                validator.validate(wrap(json.dumps(h97())), schema)
+
+    def test_opaque_metadata_cannot_introduce_non_json_numbers(self):
+        prefix = json.dumps(h97())[:-1] + ', "owner_tickets": '
+        for raw in ('NaN', 'Infinity', '1e999', '1' * 5000):
+            with self.subTest(raw=raw[:20]), self.assertRaises(validator.ResultError):
+                validator.validate(wrap(prefix + raw + '}'))
+        value = dict(h97(), owner_tickets={"value":1.5})
+        self.assertEqual(validator.validate(wrap(json.dumps(value))), value)
+
+    def test_profile_diagnostics_never_change_union_acceptance(self):
+        schema = json.loads(validator.SCHEMA.read_text())
+        direct = validator.jsonschema.Draft202012Validator(schema)
+        values = [h97(), valid(), dict(valid(), schema_version=1), dict(h97(), head=None),
+                  dict(h97(), owner_tickets=[]), dict(h97(), status="done"), dict(h97(), extra=1)]
+        for value in values:
+            with self.subTest(value=value):
+                expected = direct.is_valid(value)
+                try: validator.validate(wrap(json.dumps(value)))
+                except validator.ResultError: actual = False
+                else: actual = True
+                self.assertEqual(actual, expected)
+        with self.assertRaisesRegex(validator.ResultError, r"^\$\.head:"):
+            validator.validate(wrap(json.dumps(dict(valid(), schema_version=1))))
+
     def test_valid_report(self):
         self.assertEqual(validator.validate(wrap(json.dumps(valid()))), valid())
 
     def test_v1_version_and_legacy_compatibility(self):
         legacy = valid()
         self.assertEqual(validator.validate(wrap(json.dumps(legacy))), legacy)
-        versioned = dict(legacy, schema_version=1)
+        versioned = dict(legacy, schema_version=1, head="b"*40)
         self.assertEqual(validator.validate(wrap(json.dumps(versioned))), versioned)
         for bad in (True, False, None, "v1", "1", 0, 2, 1.5, {}, []):
             with self.subTest(version=bad):

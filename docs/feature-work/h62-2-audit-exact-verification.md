@@ -301,3 +301,40 @@ Coordinator retrieval paths: `/workspace/h62-audit-evidence/original.patch`,
 `/workspace/h62-audit-evidence/evidence.tar.gz`, and
 `/workspace/h62-audit-evidence/SHA256SUMS`. No push, merge, PR, pre-gate or
 publication was performed. Large census/toolchain/cache outputs remain off git.
+
+## Successor census partition controls
+
+The additive `scripts/h62/item2/audit-exact-verification/census_partition.py`
+checks complete saved/raw name sets, exact retained kernel-field metadata,
+an independently supplied source-census digest and coverage membership derived
+from source candidate names. Six synthetic host-only tests in
+`tests/h62/item2/audit-exact-verification/test_partition.py` pass. These tests
+reject equal-count coverage swaps, substituted/duplicate names, field drift,
+unknown labels, corrupt digests and malformed JSON. Historical witness labels
+are checked for consistency only; they supply no witness evidence.
+
+This helper is not yet wired into the historical Core-dependent runner.
+Original raw artifacts remain UNVERIFIABLE; actual census replay and proof
+validation remain pending. No Lean or timing STOP was rerun, no Core change
+was made, and no original obligation or release row is closed.
+
+The `partition_pinned` byte-input wrapper additionally requires exact external
+SHA256 inventory roles for compiler rows, annotations and source census before
+strict JSON parsing. Ten synthetic host controls pass, including coordinated
+compiler/annotation edits with stale pins. Pins must originate in an independent
+authenticated inventory; this helper cannot certify their provenance or turn
+matching bytes into historical execution evidence. Actual replay remains open.
+
+The helper now exposes a reproduction CLI: provide `--compiler`,
+`--annotations`, `--source` and a corresponding `--compiler-sha256`,
+`--annotations-sha256`, `--source-sha256` from an authenticated inventory.
+Successful metadata comparison prints JSON and exits zero; missing inputs,
+digest drift or inconsistent metadata exit two without a success JSON record.
+The eleventh host test covers CLI roundtrip, changed bytes and missing files.
+A zero exit certifies metadata consistency only. The CLI does not run producers,
+load Lean artifacts, discharge hypotheses or authenticate the supplied inventory.
+
+CLI inputs must be regular files of at most 16 MiB each. Nonblocking, no-follow
+opens reject FIFOs and symlinks; bounded reads also reject growth past the cap.
+A twelfth host test rejects oversized, FIFO, symlink and directory inputs. This
+intake bound does not change any historical proof or timing budget.
