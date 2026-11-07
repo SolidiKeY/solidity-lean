@@ -4888,6 +4888,8 @@ import Solidity.Yul.Compilation.OpenExpressions
 import Solidity.Yul.Compilation.OpenStatements
 import Solidity.Yul.Compilation.P20InterfaceV1
 import Solidity.Yul.Compilation.P20InterfaceV1Controls
+import Solidity.Yul.Compilation.P20InterfaceV2
+import Solidity.Yul.Compilation.P20InterfaceV2Controls
 import Solidity.Yul.Compilation.PhysicalCombination
 import Solidity.Yul.Compilation.PhysicalHash
 import Solidity.Yul.Compilation.PhysicalHashControls
