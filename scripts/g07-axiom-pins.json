@@ -28420,6 +28420,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Payments/EntrySuccess.lean:Solidity.Evm.Compiler.compile_core_some": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Payments/EntrySuccess.lean:Solidity.Evm.Compiler.compile_core_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/PrimitivePackets/BitNot/Agreement.lean:Solidity.Backend.PrimitivePackets.BitNot.success": [
   "Classical.choice",
   "Quot.sound",
@@ -65930,6 +65940,26 @@
   "propext"
  ],
  "tests/calldata-packets-1105/RawInt/Axioms.lean:Solidity.Backend.CalldataPackets.RawInt.values_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean:Solidity.Assurance.NonVacuityH28.actual_entry_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean:Solidity.Assurance.NonVacuityH28.checked_v2_family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean:Solidity.Assurance.NonVacuityH28.closed_actual_entry_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/FamiliesV2.lean:Solidity.Assurance.NonVacuityH28.correct_v2_success": [
   "Classical.choice",
   "Quot.sound",
   "propext"
