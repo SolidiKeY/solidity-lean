@@ -1145,3 +1145,22 @@ The documentation-path gate still fails on the two upstream scope-test
 references noted above. The first containment-check run also flagged two
 references in this document's description of that failure; those descriptions
 were corrected and the rerun reports only the two upstream failures.
+
+### Integrated scanner report replay
+
+Two bounded default-mode scans using the same tree, scanner, selection,
+registry and caller-pinned previous report took 113.029 and 112.626 seconds
+and produced byte-identical reports, SHA256
+`88402b7207ab6655e5b48ce066f13c168eb68fdefac431a254a38a068260beb2`.
+Both selected 7,303 files and recognized 123,314 declarations, with no file
+errors, unmatched globs or reported aliases; all recognized owners remain
+unknown. Relative to the older caller-pinned report, 30 inputs were added,
+four changed and none removed. The scanner and tree both changed from that
+baseline, so candidate deltas combine tool and input effects. The prior pin
+identifies bytes, not an authenticated producer.
+
+The scans did not invoke the upstream opt-in fixture or project
+signature-binding paths. Independent finder and skeptic reviewed the replay
+without Lean. These runs demonstrate repeatability for this snapshot, not
+complete census, signature equivalence or live ownership. Full reports and
+timing records are outside Git in the alias-containment evidence directory.
