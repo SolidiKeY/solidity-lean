@@ -1603,3 +1603,85 @@ checks remain required. Fullbuild/TestSuite/timedstrict/trust, source-bound
 failed-postcondition/positioned-trace producers, paired rendered phases,
 macOS and the entire original performance/adversarial/scaling/judgment queue
 remain open; unchanged resource/timing STOPs are not retried.
+
+
+### Handoffs — confirmed transport closure and kernel split-slot foundation (2026-11-07)
+
+The retained original concurrent CI failure remains unattributed. A small
+actual owned-process fixture demonstrates a concrete failure family: root exit
+leaves a same-session descendant holding stdout; waiting for close before
+retiring the group exhausts the original1000ms. Both low-level and production
+LanguageClient regressions fail before1 and pass after0. The repair responds
+to actual root exit, retires only its owned private group and still requires
+physicalclose/group quiescence. It does not equate exit with close. Real ordered
+shutdownrequest/reply/exitnotification/process-exit/close observations and PID
+birth/group readback are retained. The server is explicitly injected, not a
+real verifier. Zombies remain visible, so this is not full entry-retention parity.
+
+Fixture cleanup now attempts and settles every admitted disposal before
+reporting aggregate errors. Ownership readback/receipt failures cannot pass or
+prevent other cleanup, and unconfirmed fixtures remain on disk. The bounded
+three-version-case replay passes with all three actual exit/close sequences;
+this does not reproduce original whole-run contention or prove its cause fixed.
+
+New owned module Solidity/Tools/VerifierMetadata.lean adds conditional kernel
+facts for exact typed postFails slots and final run states. Per-file MCP
+diagnostics0 and isolated214job modulebuild0; both lemmas depend only on
+propext/Classical.choice/Quot.sound. No new axioms/sorry/options/budget changes.
+Generated roots and modulemap were updated through required scripts. Canonical
+n/split provenance remains essential: conjN's last slot may contain a remaining
+conjunction. These lemmas do not identify a source ensures/span, associate the
+candidate/original obligation/entry premises, emit verifier metadata or drive
+a postcondition decoration. Producer-owned hooks remain required.
+
+Finder/skeptic source reviews for lifecycle and Lean foundation found no
+concrete defect. Initial unsolved proof/MCP-retirement failures are retained;
+the off-git wrapper now forwards EOF and confirms owned MCP retirement within
+the existing5s shutdown bound. No resource gate is weakened. Exact follow-up
+head checks remain required. [H44 evidence](dafny-child-closure-evidence-manifest.json)
+is off git. Only two existing assessments change and remain partial; all489
+ordered obligations, frozen270, expected observations, pairedjudge contracts
+and budgets remain. Firstfailed submenus:dafny.context still needs actual
+positioned producer/trace actions and paired rendered lifecycle evidence. Full
+build/TestSuite/timedstrict/kerneltrust, macOS, original proof/performance/
+adversarial/scaling matrices and every paired judgment remain unfinished. No
+unchanged stopped heavy command, goal status mutation, checkout creation,
+push, merge or PR occurs in this recovery.
+
+
+### Handoffs — refreshed master and canonical clause-count facts (2026-11-07)
+
+Fetched actual master94f9862b6 and then announced master5da4771e6 before new
+work. The latest closure/metadata commit was not in that master tree, so it
+is retained locally after rebase as d7c9f22418bfe7d09baaea96737ed0b4021a5f04.
+Originalec16 and firstrebased9569 heads remain under checkpoint refs; exact WIP
+bytes/patch and retainedstash survive refresh. Editor code is byte-identical
+across rebases. Duplicate upstream patches were omitted only after empty-index
+readback or Git's patch-equivalence check. An initial combined command was
+rejected by automaticreview for skip-risk; nothing ran, and safer staged
+resolution/readback/explicit continuation completed. No push/masterchange or
+goal mutation.
+
+New general facts in Tools/VerifierMetadata prove that canonicalcount
+clauses.length recovers exactly the original typed list, even when its last
+clause is itself a conjunction. The canonical slot equivalence retains exact
+index/member identity and falsity in the same typed state. Earlier definitions
+and statements remain unchanged. Per-fileMCP0, isolated214job build0; actual
+axiom output uses only the existing allowedset. Finder/skeptic read-only source
+reviews found no defect.
+
+This is conditional on the actual canonical construction/count. Connecting
+that supplied list to source ensures, originalcandidate/obligation/entrypremises
+and exact locations remains a producer task; no JSON metadata or decoration is
+emitted. One existing related-diagnostics assessment changes and stayspartial.
+All489 IDs/order/expected observations, frozen270 and gate/judge/budgets remain.
+[Checksum-bound proof/rebase evidence](dafny-canonical-slot-evidence-manifest.json)
+stays off git. Exact committed-head checks remain required.
+
+Read-only upstream comparison found all334TestSuite sources/closure and24fresh
+replay modules unchanged. Horizon body is unchanged; a dependency proof change
+has no boundedcost-repair receipt. No stopped heavy gate is retried. Current
+Frontend proofhelper changes need independent validation for later native work.
+Full library/checkpoint/build/TestSuite/timedstrict/kerneltrust, actual source
+metadata/positionedtrace, paired rendering/macOS, full performance/adversarial/
+scaling matrices and both judgments per row remain mandatory and unfinished.
