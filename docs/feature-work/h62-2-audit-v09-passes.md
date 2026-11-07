@@ -306,3 +306,48 @@ witness coverage, supported-success totality or timing acceptance. All four
 checkpoints remain unfinished. Raw migration and reported axiom-growth review
 holds remain in force; the failed runtime baseline was not rerun unchanged.
 No original producer, frozen statement, proof budget or trust policy changed.
+
+## Explicit reactivation and published re-baseline, 2026-11-07
+
+The coordinator's new user instruction explicitly reactivates this lane after
+its recorded retirement. The existing VM/branch/goal are preserved; no goal was
+created/reset. Published master 5da4771e63a4278ed53932ac39a032e3d7aea6ed contains
+retirement head 521196a3a78cd6cce22a7f14dd4364493b16cdbc. The clean lane was
+fast-forwarded to that exact published head, preserving earlier local merges.
+The ownership snapshot remains dated; no new per-file producer claim is inferred.
+All new writes remain in the original additive audit scope.
+
+Every frozen census file (179) is byte-identical to the original c6f550e2 base;
+all 1,259 source signatures retain their original identity. The local Raw source
+is also unchanged, and tracked lean-toolchain still names v4.24.0. The supplied
+fleet instruction still pins the verified official v4.35.0 release. Therefore
+no v4.24 cache is reused, and the known failing Raw import is not retried.
+B-MIGRATION-SYNTAX-RAW and B-RAW-TRUST-REVIEW remain waits. A touched gate/review
+reported for the published merge is not a new Lean witness or trust disposition.
+
+Independent backfill now maps all 27 macro-return rows to source dependency
+candidates. macro_dependencies.py checks that each selected frozen callee is in
+the caller's frozen import closure, captures its complete source signature,
+source-written telescope and available section-variable groups. All 27 current
+callee signatures and section-context texts match their frozen counterparts.
+The 44 available section groups retain exact frozen source spans. Namespace,
+macro application typing and actual implicit inclusion remain pending Lean.
+
+The callee telescope is reference evidence only. Applied macro arguments may
+already discharge inputs; no callee hypothesis is added to any caller and no
+witness is counted. All 27 caller_new_premises lists are empty. All rows remain
+uncovered. PrimitivePackets dependency ownership is explicitly unconfirmed;
+V09 dependency ownership is an area candidate, not a per-file agreement.
+
+Independent read-only finder/skeptic review found an inherited owner-label bug
+and a missing callee-context field. Both were fixed, with regressions. Final
+reviews report no remaining concrete finding and used no Lean/server or writes.
+Source acceptance now covers 18 tests, including exact macro-row coverage,
+source signature/context spans, import reachability and no-extra-premise/owner
+controls. Evidence is under rebaseline-20261107/; original retirement exports
+remain preserved. No Lean declaration, axiom, sorry, budget or interface changed.
+
+All four original checkpoints remain unfinished. The next independent source
+item is an applied-argument ledger for these 27 macro cases; resolved types and
+simultaneous witnesses still wait on the same runtime/trust dependencies. This
+checkpoint does not complete the work/backfill queue or authorize scope takeover.
