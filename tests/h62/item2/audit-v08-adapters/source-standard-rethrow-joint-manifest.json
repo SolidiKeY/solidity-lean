@@ -1,0 +1,113 @@
+{
+  "status": "STANDARD_RETHROW_ALLOCATION_TIMEOUT_JOINT",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/SourceStandardRethrowJoint.lean": "cc1a99d281064a41c7bc22fa663a63882ff50f257fb794e70da0477fc247d7c0",
+    "Solidity/Lowering/V08/SourceStandardRethrow.lean": "77fc194271a175f1d88e5d23b83667d8b04d48427f1dd8ffb84da823968087e2",
+    "Solidity/Lowering/V08/SourceAbi.lean": "99a01f9fae81a81801245c32e177e05ae0b7fd090bca5727df3a7c8e60465d62",
+    "Solidity/Lowering/V08/SourceCustomErrorControls.lean": "9dd4c65999c53ed2609f8db7f0b703933f004e83ef5fe05f81495572e53bf297"
+  },
+  "target_links": [
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceStandardRethrow.lean:15:literal_execution",
+      "target": "Solidity.Lowering.V08.SourceStandardRethrow.literal_execution",
+      "component": "raw_payload_refused: consumes existing full execution law",
+      "fidelity": "PENDING"
+    },
+    {
+      "lexical_id": "Solidity/Lowering/V08/SourceStandardRethrow.lean:28:expression_statement_timeout",
+      "target": "Solidity.Lowering.V08.SourceStandardRethrow.expression_statement_timeout",
+      "component": "statement_timeout: actual expression premise supplied",
+      "fidelity": "PENDING"
+    }
+  ],
+  "new_body_fixtures": 0,
+  "fidelity_acceptances": 0,
+  "joint_model": "Existing populated model supplies actual standard ABI literal expression and same reached object for arbitrary bytes,pipeline/static flags and sufficient allocation fuel. Statement horizon0 retains encoded allocation.",
+  "negative": "Full timeout cannot use prestate; heap.next2vs1. Existing binary input standardABI bytes differ from raw and errorData bytes; full successful-rethrow run with correct finalheap still cannot substitute raw payload.",
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/SourceStandardRethrowJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.514,
+    "peak_sampled_aggregate_rss": 739815424,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axioms": {
+    "joint": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "statement_timeout": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "timeout_not_prestate": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "payload_distinctions": [],
+    "raw_payload_refused": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "limitations": [
+    "One conditional target application and one consumption of existing total execution law; other five original StandardRethrow target links/full joint/fidelity audit remain open.",
+    "Binary payload distinction is concrete, not a global input/admission exclusion or general noncollision claim. Arbitrary bytes retained in joint/timeout laws.",
+    "Existing generic producer laws/control model reused; no new allocator,encoder,evaluator,emitter or body fixture.",
+    "No Source admission/origin/lifecycle,compiler/catch selection,production body/frame/session/world/H68 transport. No full-root/matched timing or prior STOP release."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-standard-rethrow-joint-20261107/check/console.log",
+      "bytes": 176,
+      "sha256": "2a2f325b69ab3422f10fd890d581654998b971e5cf678428e11f26bacaa6d3ca"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-standard-rethrow-joint-20261107/check/gates/1.log",
+      "bytes": 32896,
+      "sha256": "0f32a946264e6fb1d345874468ea488f757df62efff926e9b964785232213872"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-standard-rethrow-joint-20261107/check/gates/HEAD",
+      "bytes": 41,
+      "sha256": "a9cf042523bbf965c9a633df67350bc56c480185e682baa3c8e239d0f463471a"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-standard-rethrow-joint-20261107/check/gates/gates.tsv",
+      "bytes": 272,
+      "sha256": "2289ef149afacab45b085d779030ebad2ad397466aad138fb8e10276a36145e7"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-standard-rethrow-joint-20261107/check/results.json",
+      "bytes": 406,
+      "sha256": "4f5e9cf48aa69128ee902911f659e0b82923904782c8568dc93eb1cbd3bfc6df"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-standard-rethrow-joint-20261107/private-paths.log",
+      "bytes": 18,
+      "sha256": "4390a0b89e2fcf258a7cd56ecb53a36dc78839cbdefcfea4cb7398062b3ce3c0"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-standard-rethrow-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/source-standard-rethrow-joint-20261107/trust.json",
+      "bytes": 370,
+      "sha256": "471852e49c6946fe5985e97c7c5a17514b88e70974ee2c93b550634c1f05457e"
+    }
+  ]
+}

@@ -1155,3 +1155,40 @@ bulk proof receipts remain off Git.
 Read-only finder and skeptic found no issue in the shared head/tail state,
 original typing/execution premises, complete attempted-result negative or
 limited target acceptance. Neither ran Lean or a server; receipt retained off Git.
+
+### Standard ABI rethrow reached-expression joint (2026-11-07)
+
+SourceStandardRethrowJoint supplies the original expression_statement_timeout
+premise with an actual standard ABI literal run and the same reached-object
+lookup. Arbitrary bytes, both pipelines/static flags and all sufficient allocation
+fuel remain supported in the existing populated model. Zero statement horizon
+retains the encoded allocation; a full-result inequality rejects the prestate
+through heap.next 2 versus 1. No allocator/encoder/evaluator is replaced.
+
+On the existing binary input, standard ABI bytes differ from raw bytes and
+Error(string) data. A full successful-rethrow run with the correct final heap
+still refuses the raw payload substitution, consuming the original literal_execution
+law. These concrete payload distinctions add no admission exclusion or generic
+noncollision claim. One conditional target and one existing execution-law
+consumption link are recorded; five other StandardRethrow target links and all
+full feasibility/fidelity remain pending. No new body fixture is counted.
+
+After adopting master dcf33632c, the serial per-file check passed in 1.514 seconds,
+one Lean, peak sampled RSS 739,815,424 bytes and no STOP. Four declarations use
+only the existing standard axioms; the concrete payload fact is axiom-free.
+Registration and the new private-path check passed. No full-root/matched timing
+acceptance, Source/catch/compiler/session/body/frame/H68 certificate or STOP
+release. Exact bindings: source-standard-rethrow-joint-manifest.json; logs remain
+off Git.
+
+Read-only finder and skeptic found no issue in the actual standard-expression
+premise, reached object, full-state/payload negatives or limited target claims.
+Neither ran Lean or a server; review receipt retained off Git.
+
+The newly routed MRS status at 6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f
+explicitly reports LibraryPremises.Inputs.g42_body not implemented/delivered.
+Available native/frame-free bridges and local v2 refusal do not supply that
+actual delegated-frame duty or complete session/origin/physical transport.
+No H124 redesign or frozen-v1 substitution is requested. The earlier generic-v08
+citation correction remains recorded at 361ab3e4ac8b2b247d157d600d9f4d18b4a7b436;
+it is a documentation fix, not execution acceptance.
