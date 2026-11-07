@@ -1071,3 +1071,33 @@ H68 bridge remain open; no held timing or trust requirement is relaxed.
 Independent read-only finder and skeptic found no issue in the full residual
 partition, source-line/type/hash bindings or unresolved-provenance boundaries.
 Neither ran Lean or a server; the review receipt remains off Git.
+
+### Thirty-two Source-effect component links, fresh serial checks (2026-11-07)
+
+The four current SourceEnvironmentJoint, SourceHashJoint, SourceEmitJoint and
+SourceRethrowJoint modules passed serial bounded per-file checks against the
+same stable four audit-source/four original-source hashes. Total elapsed was
+116.393 seconds including rebuilt imports, peak sampled aggregate RSS
+1,412,104,192 bytes, one Lean per check and no STOP. All 19 printed audit
+declarations retain only the existing standard axiom set; registration passed.
+These are four separate checks, not one combined kernel import/census, full-root
+gate or matched before/after timing. No earlier STOP is released.
+
+The consolidated index accounts for all32 original lexical IDs exactly once:
+14 checked component applications, 17 existing-law references and one pending
+private helper. Applications/reference roles do not recalculate existing models
+as new fixtures or establish whole-domain feasibility, source-owner acceptance
+or statement fidelity. The malformed encoding control remains a genuine local
+typed-domain model, not canonical Source admission; no scope is narrowed around
+successful runs. Saved type hashes remain archival bindings rather than claims
+of equivalence across changed dependent modules.
+
+All349 residual provenance/owner/feasibility/fidelity obligations remain explicit
+in their separate ledger. No global SourceSpec, actual program/session/origin,
+production delegated body/frame or H68 certificate follows from the32 links.
+All original/consolidated full audit and final gates remain open. Bulk receipts,
+index and trust output are off Git, bound by source-effects-component-index-manifest.json.
+
+Read-only finder and skeptic found no issue in the32-link partition, fresh
+serial receipts, stable bindings, trust reports or unresolved global/residual
+boundaries. Neither ran Lean or a server; review receipt remains off Git.
