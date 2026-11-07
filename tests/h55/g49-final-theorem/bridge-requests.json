@@ -96,7 +96,75 @@
       "status": "pending",
       "deliveredDeclaration": null,
       "adapterStatus": "pending until delivery is verified",
-      "h121Collector": "solidity-h62-3-20261106/g52-differential"
+      "h121Collector": "solidity-h62-3-20261106/g52-differential",
+      "h121cOwner": "solidity-h62-3-20261106/g52-differential",
+      "h121cOwnership": {
+        "authority": "H121c user decision: frozen Claude V15 full p10_execution_bridge transfers to this lane",
+        "owner": "solidity-h62-3-20261106/g52-differential",
+        "frozen_implementation": "90153461127d8d0f1f188021e79bc1ccb256e1e5",
+        "fetched_remote_tip": "0db48c0a48a8aef8dd6dc6ccbeababf409d67c2d",
+        "integration_head": "3b5528fdf6284b4b6a88bc2b99a8459e51bc3e76",
+        "general_goal_state": "paused; adoption task only",
+        "former_v15_provider_wait": "superseded; full bridge is owned unfinished work",
+        "full_bridge_delivered": false,
+        "complete_producing_files": null,
+        "complete_producing_head": null,
+        "external_inputs": [
+          {
+            "lane": "VY1",
+            "required": "Concrete admitted assembly SourceSpec/frontend and raw session dispatch/semantics."
+          },
+          {
+            "lane": "VY4",
+            "required": "Unified log/emit Event observations and raw world/frame coupling."
+          },
+          {
+            "lane": "VY2",
+            "required": "Physical allocation/layout/MemOK and representation refinement."
+          },
+          {
+            "lane": "VY3",
+            "required": "Concrete lowering/compilation/opcode/pass certificates."
+          },
+          {
+            "lane": "V13",
+            "required": "WorldCalls callee/world execution producers for the actual entered Theta run; no separate ownership of the core/reference representation is inferred."
+          },
+          {
+            "lane": "executable-bytecode",
+            "required": "P10 body/signature application and exact emitted-code, PC and Site/source-origin binding; no lowering ownership is reassigned by this receipt."
+          },
+          {
+            "lane": "Original V14/V11/PAR dependencies",
+            "required": "Existing bytecode/execution, memory/resource and ABI-entry obligations remain with their owners."
+          }
+        ],
+        "owned_open_obligations": [
+          "Same-artifact canonical assembly-session Lang and pinned Osaka EvmSpec construction/integration from actual inputs, including session/failure-point/hash-preimage observations",
+          "Full independently approved opcode domain, exact code/load and operational observation binding",
+          "Fixed uniform public environment map and independent executable resource bound",
+          "Two-sided transport for all failure/resource/hash-guarded prefixes, retaining the entire original Local_opcode",
+          "Missing InstrV2 memory/CALL/data macro lowering and execution correspondence remain open implementation gaps; coordinate with body/signature and original dependency owners, do not assume frozen Instr encoding covers them",
+          "Core/reference CALL operand/state representation and flag/balance/journal/gas correspondence remain owned bridge integration with actual provider inputs; not assigned to V13 by proximity."
+        ],
+        "local_law_limits": [
+          "CodeLayout handles frozen Instr push/pop/relative jump/jumpi/loop; StorageMacros is a separate subset, not a full InstrV2 encoder",
+          "callIn_agrees assumes non-erroring reference call, entry/depth agreement and exact callee reply for entered calls; operands/flag/balances/journal/gas are not all related",
+          "depth_disagreement and existing arity obstructions remain; vendored CLZ-to-INVALID discrepancy is not an approved Osaka exclusion"
+        ],
+        "proof_source_sha256": {
+          "Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean": "d57a9013a5a2aca6683e7ead412115b77b9647097e21bae876b0812561e87742",
+          "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean": "4d58a680c0ac557f55c27d698a85b03d9796f8e1d9ff916d035e5c04c79e5821",
+          "Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean": "c03909837d563a6ebfefbd01c442767873aac5f63d7d64f39ad323f59d988b08",
+          "Bridge/SolidityBridge/RoadmapV15/P10/FrozenInterface.lean": "9560a674e2be7f4efeb9601cc25a36f5e93387335c3f023c0c5866b7d7cb3ee6"
+        },
+        "unchanged_h68_approved_and_frozen_requirements": true,
+        "public_obligations_open": 15,
+        "new_lean_run": false,
+        "new_proof_or_axiom_or_budget_edits": false,
+        "contact_frozen_claude": false,
+        "acceptance_claim": false
+      }
     }
   ],
   "leanDeclaration": {
