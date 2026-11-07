@@ -1,0 +1,17 @@
+# Local assignment and receiver-capture premise roles
+
+Guarded regression: capture soundness must retain typed evaluation order, exact selected/refused premises and operator/type guards; quantified receiver laws at one supplied state must not become laws over every initial state.
+
+Fetched/inspected master 254c60df6a3467ff636c1fdac27c82083a169b2f, already adopted as ancestor. Complete frozen-selected SoundLocal (373 lines) matches frozen/current bytes and all21 named signatures. Static rosters retain all ten Val forms, both ARhs forms and all six OpLoc forms, including local/root refusals. Supporting SoundCapture is frozen-equal and adds no role/witness credit. SoundControl remains pending.
+
+Environment/state same-index writes overwrite, and reading that same index after write returns the value; neither is distinct-index commutation. runSt assignment equality includes RHS errors. shortT_none requires the non-short-circuit flag and means no short-circuit result, not evaluation failure.
+
+Right binary capture retains a SIMPLE left operand, acceptance/return proofs and shortCircuits=false. Left/unary capture retains typing but adds no such flag. Storage/memory length capture retains result uint and memory mapFree where stated; push/rebind capture keeps defaultOkS. Compound/increment keeps eligibility/numericity. Context shifts, fresh names, alias/memory types and original operand/receiver order remain exact, without target-independence or success premises.
+
+Short-AND/OR preserve their exact ordered if unfoldings, including RHS errors and lazy branches. Dispatcher lemmas retain exact selected-premise equations and both branch choices. Unsupported shortStep shapes retain done FALSE refusal; sound refusal is not successful proof-search or compilation. Premise.Runs remains its original shape-specific correspondence/simulation/satisfaction relation under both modalities, not a universal normal-return promise.
+
+OpLoc.unfoldRecv_sound retains successful some-q selection plus hpush and four storage/memory field/index error-propagation laws. These quantify every relevant value/receiver/error witness at FIXED supplied sigma; they are per-input universally quantified operational facts, not assumptions about all initial states. Generic operation families remain data. No receiver success, new global law or physical/compiler adequacy is inferred.
+
+Prior335 rows and all owners unchanged. All5283 candidates retained:356 reviewed roles/4927 pending; owners3746 confirmed/1537 unresolved, zero fresh audit witnesses. Generated/kernel cases remain separate. Bulk snapshots, complete static rosters and measured gates stay off Git under /workspace/h62-successor-evidence/local-premises-classification-v31 and /workspace/h62-successor-bulk/local-premises-classification-v31, bound by a small hash manifest. Independent read-only finder/skeptic review uses no Lean/server.
+
+The whole assignment and four audit-calculus checkpoints remain incomplete. No fresh simultaneous witnesses, axiom audit, kernel replay, compiler success/negative controls or source/physical/world/gas/fork adequacy. Historical missing bytes remain UNVERIFIABLE. H28 actualCallerFields/extractionActuallyChanges/replay pause on Raw compatibility and Context Classical.choice audit remains; no duplicate notice or unchanged STOP rerun. No statement/dependent-definition/budget/axiom/exclusion/toolchain edits or new runtime/cache/performance acceptance/RUNTIME_GATE_PASS.
