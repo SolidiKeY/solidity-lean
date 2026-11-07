@@ -497,3 +497,56 @@ No Lean theorem/proof changed in this checkpoint; no new axioms/sorry/native_dec
 All remaining original/inherited queues, full acceptance, broader binding/live
 ownership and RO source/callee plus physical-frame adequacy remain open. The
 historical +80.254966536% Premises STOP is unchanged; no RUNTIME_GATE_PASS.
+
+
+## Known, unknown and failed credit joint witnesses (2026-11-07)
+
+Three additional original interfaces now have explicit simultaneous input
+witnesses: EnvironmentCredit.known, EnvironmentCredit.unknown and
+EnvironmentCredit.failed. CreditJointControls checks choice, post-record instance
+lookup and actual successful/failed credit at the same state sequence; the
+unknown case supplies its two hypotheses without inventing a credit equation.
+Clients apply the unchanged laws and verify success bytes[7], skipped unknown
+credit or overflow halt. Further observations check the model's permitted static
+balance credit with storage preservation and the unknown case's unchanged
+execution state. Eight supplementary theorems cover three original obligations.
+No compiler/EVM/gas/fork, constructor reachability or whole-world claim follows.
+
+The new checker admits only the exact executed frozen/current parent receipts.
+Frozen mode rechecks all57 Git-base source/snapshot hashes and58 parent objects;
+current mode checks its77-module source graph and80 objects. Parent logs, trusted
+compiler/toolchain input pins, SDK root and the new source/object/probe/logs are
+checked before and after. Authenticated parent and original792 artifact digests
+are retained, never resampled after authentication. This is checked dependency
+artifact reuse, not a fresh rebuild or independent SDK source certification.
+
+The frozen gate passed in5.028s at796049408bytes peak aggregate RSS; the separate
+current gate passed in4.524s at795627520bytes. Each checked eight theorem axiom
+sets (only propext, Classical.choice, Quot.sound) and exported the three original
+interface types with module/name/kind checks. Frozen and current results remain
+separate: equal source or type hashes would not prove model-definition equality.
+Their balance representations differ; a kernel-checked closed calculation proves
+the same balance equality in both models, without changing the statement.
+Initial representation-specific proof failures are retained separately.
+
+Six external refusal controls passed for parent profile/byte binding, frozen
+source/object/log mutation and missing objects, flat extra-module aliases,
+forged census data, unauthorized/missing/duplicate axioms and retained digest
+substitution. Five existing census tests passed. Independent read-only finder
+and skeptic confirmed the final proofs and exactly three-row integration; neither
+executed Lean or wrote files. Nine raw evidence pins are committed in
+`tests/h62/item1/readonly-bind/credit-joints.sha256`.
+
+All792 rows remain accounted once. The retained semantic ledger now has29 joint,
+3 target-failure joint,45 impossibility,256 no-top-level-input,2 frozen-V1-refuted
+migration and457 pending ordinary rows. Exactly three records changed; other789
+retain prior evidence and all three current private-ID gaps remain. The strict
+original source census separately reports755 pending because it does not replay
+the retained semantic classification; it is not a replacement for that ledger.
+The whole original/inherited assignment is unfinished. Historical Premises
++80.254966536%STOP remains; no held workload rerun, rebaseline or runtime pass.
+Actual tools remain Lean4.24.0/Lake5.0.0-src+797c613 with -j1,12GiB cap,4GiB
+reserve,no swap; passing KeySort evidence is retained in the admitted parents.
+No original statement, definition, premise, exclusion, axiom or budget changed;
+no new sorry/native_decide. Evidence and handoff are under
+`/workspace/h62-audit-readonly-calls/credit-joints/`.

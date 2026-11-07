@@ -371,6 +371,51 @@
       "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
       "frozen_type_sha256": "dc5988b8ee54ad5dde4ddd956004b6a109a52cf0848ed946384fd22a1eb39af8",
       "boundary": "Frozen source-model premise satisfiability and instantiated run, not EVM gas/fork, constructor reachability or compiler/source-callee/frame adequacy"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentCredit.known",
+      "signature_sha256": "84bb71806e8fa677e12be24d823304875b9bcf9f4ed30182dbc9769ebe839f9d",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyBind.CreditJointControls.known_inputs",
+      "client": "Solidity.H62.ReadonlyBind.CreditJointControls.known_success",
+      "global_premises": "Same explicit Glob EB/program/strategy and typed state for every conjunct; no separate structure-inhabitance inference",
+      "per_input": "One sB->recorded knownStart->funded state sequence; knownGlobal,known thisC,word5,code C,n1,depth1,static mode; actual choice+lookup+successful credit",
+      "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "frozen_type_sha256": "4284b909b7a2ab52dbece5986103602834f6826a3b9ad6563c168d2b2a920e4f",
+      "evidence": "credit-joints/frozen-final/probe.log",
+      "evidence_manifest": "tests/h62/item1/readonly-bind/credit-joints.sha256",
+      "current_evidence": "credit-joints/current-final/probe.log",
+      "boundary": "Joint source-model inputs and actual clients, not EVM gas/fork, constructor reachability, model-definition equivalence or compiler/source-callee/frame adequacy"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentCredit.unknown",
+      "signature_sha256": "d2a44ef60ae7dfc60bc384d2a57233abca61e3659a01df3cbebfff111d062d44",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyBind.CreditJointControls.unknown_inputs",
+      "client": "Solidity.H62.ReadonlyBind.CreditJointControls.unknown_success",
+      "global_premises": "Same explicit Glob EB/program/strategy and typed state for every conjunct; no separate structure-inhabitance inference",
+      "per_input": "One sB->recorded unknownStart state; unknownGlobal,unknown ext,word5,n1,depth1,static mode; actual choice+none lookup, no assumed credit",
+      "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "frozen_type_sha256": "8757a79a5b267d006f43bfd94cdefa63689fd4c735d32ccf87c449736d80081a",
+      "evidence": "credit-joints/frozen-final/probe.log",
+      "evidence_manifest": "tests/h62/item1/readonly-bind/credit-joints.sha256",
+      "current_evidence": "credit-joints/current-final/probe.log",
+      "boundary": "Joint source-model inputs and actual clients, not EVM gas/fork, constructor reachability, model-definition equivalence or compiler/source-callee/frame adequacy"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.EnvironmentCredit.failed",
+      "signature_sha256": "7c2da12117943f214a6f367ab352ef2e0ead09bbaea11ee8b6d2586f4a624c45",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyBind.CreditJointControls.failed_inputs",
+      "client": "Solidity.H62.ReadonlyBind.CreditJointControls.credit_failure",
+      "global_premises": "Same explicit Glob EB/program/strategy and typed state for every conjunct; no separate structure-inhabitance inference",
+      "per_input": "One rich->recorded failedStart state; failedGlobal,known thisC,word1,code C,n1,depth1,static mode; actual choice+lookup+overflow credit failure",
+      "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "frozen_type_sha256": "ddc0a7878e7b86a835c98ee09bc511dc1f717518d88b8f261c53dc809e1568a1",
+      "evidence": "credit-joints/frozen-final/probe.log",
+      "evidence_manifest": "tests/h62/item1/readonly-bind/credit-joints.sha256",
+      "current_evidence": "credit-joints/current-final/probe.log",
+      "boundary": "Joint source-model inputs and actual clients, not EVM gas/fork, constructor reachability, model-definition equivalence or compiler/source-callee/frame adequacy"
     }
   ]
 }
