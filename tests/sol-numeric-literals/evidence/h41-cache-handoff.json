@@ -7,7 +7,7 @@
   "local_archive_verified": true,
   "coordinator_reported_received": true,
   "coordinator_reported_sha_verified": true,
-  "coordinator_receipt_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/numeric-literals-cache-received-20261105T020358Z.json",
+  "coordinator_receipt_path": "$XDG_STATE_HOME/cloudvm-coord/receipts/numeric-literals-cache-received-20261105T020358Z.json",
   "receipt_provenance": "Coordinator message; host receipt not read locally.",
   "prepared_manifest": "tests/sol-numeric-literals/evidence/h35-owned-cache-manifest.json",
   "question_resolved": "Q-H35-SHIP1",

@@ -30,7 +30,7 @@ but lacks authoritative per-declaration public visibility and a validated new
 counterpart; this gap is handed off explicitly.
 
 The root-owner-requests.json supplied in the thread matches its owner SHA256
-749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5.
+9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10.
 It includes all eight requests, including three undelivered staged artifacts.
 Their coordinator-local paths are provenance only. The verified partial Hash
 patch is copied into the portable retirement archive; it was only dry-run checked,

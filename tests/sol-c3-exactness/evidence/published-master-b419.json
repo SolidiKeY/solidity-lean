@@ -90,6 +90,6 @@
     "Solidity/Yul/Interfaces/P16.lean",
     "Solidity/Backend/MemoryCopies/InterfaceV2Roots.lean"
   ],
-  "external_coordinator_receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261104T122441Z",
+  "external_coordinator_receipt": "$XDG_STATE_HOME/cloudvm-coord/receipts/sched-20261104T122441Z",
   "boundary": "Coordinator-reported full master gates/reviews are not this lane completion. Cache/Mathlib shipment remains separately pending. No merge/rebase/reset/push or producer duplication."
 }

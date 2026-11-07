@@ -20,7 +20,7 @@
     "tests/sol-numeric-literals/h35/prepare-owned-cache.py": "b5a3f208f29d7697626b5a4780fbb9994128cafed82fb0c3b615cc81561d7904",
     "tests/sol-numeric-literals/h35/PrintAxioms.lean": "cd06f8dcadb53a715b5c9260306ed0090f09989adb5f208b30dbc1e8dc3d1139",
     "tests/sol-numeric-literals/h35/PrintAllAxioms.lean": "4a94b3c555cdbbcc9633da8beaccbb19fef33319280a2ec8080ec98188a725ec",
-    "tests/sol-numeric-literals/h35/expected.json": "328705b0446aa2b8bb617392d34e6407908199c49c894d3ab361016c4eec5cd9",
+    "tests/sol-numeric-literals/h35/expected.json": "75981703ab0b9921af0c0f83fba73f9f5d2fa05325106c60928e83bfb51df6ce",
     "tests/sol-numeric-literals/h35/test-h41.py": "a6bc79d648644c09aeb0137dad275d7e52b95276938d5dfc5e03c662c1062349"
   },
   "finder": "PASS: ancestry, 42 unchanged proofs, seven pins, 553 exact foreign paths, dual-base guard and 37/38 proposals verified; read-only, no Lean server.",

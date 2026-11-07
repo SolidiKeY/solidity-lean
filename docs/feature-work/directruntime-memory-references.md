@@ -272,7 +272,7 @@ H41 amends H35: leave verified packs on the VM with absolute path and SHA256;
 the coordinator pulls them. Never run ship-cache.sh on the VM. Future packs
 remain coordinator-pending until receipt. The coordinator now reports receiving
 this existing pack and verifying its SHA256 against our report. Its receipt is
-`/home/guilherme/.local/state/cloudvm-coord/receipts/memory-references-cache-received-20261105T025513Z.json`.
+`$XDG_STATE_HOME/cloudvm-coord/receipts/memory-references-cache-received-20261105T025513Z.json`.
 That host file is not directly accessible here; the evidence records the
 coordinator message as provenance. The local archive was freshly rehashed and
 matches `067205b0b4c324f18b8c643ad5745f63311278e842aff1ebb05d2f3c1c16fa78`.

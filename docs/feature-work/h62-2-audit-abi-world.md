@@ -49,7 +49,7 @@ The verified ownership snapshot identifies
 `H30-WRITER-solidity-v12-v17-20261031--v13-abi-world`, owner
 `solidity-v12-v17-20261031/v13-abi-world`, status `coordination-only`, covering
 `Solidity/Backend/AbiWorld/**`. Snapshot SHA256:
-`7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce`.
+`49fa4e0ef45307428a026b414efc6a99efcbf4911dd23e9574e806be54dbfefe`.
 Git authorship is recorded separately and is not ownership authority. No original
 owned file was edited; the audit's exclusive additive scope was sufficient.
 

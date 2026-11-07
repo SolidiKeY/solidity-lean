@@ -76,7 +76,7 @@
 
 import {compilerCode} from "./solc-code.mjs";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { join, dirname, isAbsolute, resolve } from "node:path";
+import { join, dirname, isAbsolute, resolve, relative } from "node:path";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
@@ -357,7 +357,8 @@ let fixture = {
     solcVersion: version,
     sourceSha256: sha256(bytes),
     solkeyCommit,
-    source: SOURCE,
+    // a path inside the repository is recorded relative to it (no home directories)
+    source: isAbsolute(SOURCE) && !relative(ROOT, SOURCE).startsWith('..') ? relative(ROOT, SOURCE) : SOURCE,
     ...(!legacyFixture ? {
       provenanceVersion: 1,
       compilerFile: pin.file,

@@ -1,7 +1,7 @@
 {
   "policy": "H41 amends H35: Leave verified packs on the VM and record the path and sha; the coordinator pulls them; never run ship-cache.sh on a VM. Mark delivery coordinator-pending and continue.",
   "source": "Coordinator user message 2026-11-05",
-  "coordinatorReceipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/shared-translator-cache-received-20261105T025521Z.json",
+  "coordinatorReceipt": "$XDG_STATE_HOME/cloudvm-coord/receipts/shared-translator-cache-received-20261105T025521Z.json",
   "receiptReadOnVM": false,
   "coordinatorReportedReceived": true,
   "coordinatorReportedShaVerified": true,

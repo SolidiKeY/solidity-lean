@@ -14,7 +14,7 @@ MANDATORY HANDOFF CONTENTS: include the complete original frozen rendered prompt
 
 H78 owner request governing the current static inventory checkpoint:
 Requester solidity-h62-6-20261106/migrate-root-gate, reported head 16d7e371a1e013f492784b596397cf500dbd7543.
-Referenced owner-requests file SHA256 749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5; original bytes not delivered here, not claimed verified.
+Referenced owner-requests file SHA256 9d7cf3a2683451f72f6554ef265a4e8a06a4a67228f33a81fee691b7c4fb5a10; original bytes not delivered here, not claimed verified.
 H78-COMPLETE-PUBLIC-INVENTORY: source base c6f550e281a7e5affa9a99bc2cdaed556dec00e4. Families noConfusion, recOn, casesOn, match_ matchers, all other original public generated declarations. Consolidate existing old/new public API exports with visibility/signature provenance. Require every actual shim name/old_signature/new_signature/shim_signature in result reports. Four known names are not an exhaustive census. Holds unchanged; no new command or source permission implied.
 Requirements provenance path /workspace/solidity-lean-migrate-root-gate/scripts/h62/item6/migrate-root-gate/h78-public-api-requirements.json is unavailable on this VM. It is not an authenticated local artifact.
 No new Lean run or scope expansion authorized by the root request. Scope: coordination and existing evidence only; performance/trust holds retained.
