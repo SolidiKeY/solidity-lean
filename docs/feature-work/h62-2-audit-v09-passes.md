@@ -1699,3 +1699,14 @@ sufficiency reuses the previously checked scope theorem. All eleven axiom
 guards pass. This numeric-only equivalence adds no selected-row credit or
 native/Source acceptance; all existing holds remain. Private H145 records:
 `evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-scope-exact-publish-20261107/`.
+
+
+The existing scope-capacity companion also supplies `stackBound_append_iff`
+and `Slice.comp_bound_iff`. The former retains the exact accumulated opcode
+height; the latter derives the intermediate arity from an actual successful
+slice execution. Thus a composed check is equivalent to both component
+checks at their actual heights, rather than checking the suffix at entry.
+All thirteen axiom guards pass. No production, selected-row or native/Source
+claim changes. Private H145 records:
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-composed-bound-publish-20261107/`.
+Existing holds and producer waits remain.

@@ -19,6 +19,30 @@ theorem stackBound_suffix (p q : Program) (height : Int)
     have rest := ih (height + stackDelta i) bounded.2
     simpa only [List.map_cons, List.sum_cons, Int.add_assoc] using rest
 
+/-- Splitting a capacity check retains the exact accumulated height, rather
+than rechecking the suffix at the caller's original height. -/
+theorem stackBound_append_iff (p q : Program) (height : Int) :
+    stackBound (p ++ q) height = true ↔
+    stackBound p height = true ∧
+      stackBound q (height + (p.map stackDelta).sum) = true :=
+  ⟨fun bound => ⟨stackBound_prefix p q height bound,
+    stackBound_suffix p q height bound⟩,
+    fun bounds => stackBound_comp bounds.1 bounds.2⟩
+
+/-- Actual slice execution fixes the intermediate arity in both directions of
+the composed capacity check; no model-tail or final-height shortcut is used. -/
+theorem Slice.comp_bound_iff {a b c : Nat} (f : Slice a b) (g : Slice b c)
+    (xs : Vector Word a) (tail : Stack) :
+    stackBound (f.comp g).code ((a + tail.length : Nat) : Int) = true ↔
+    stackBound f.code ((a + tail.length : Nat) : Int) = true ∧
+    stackBound g.code ((b + tail.length : Nat) : Int) = true := by
+  obtain ⟨middle, executed⟩ := f.correct xs tail
+  have shifted : ((a + tail.length : Nat) : Int) + (f.code.map stackDelta).sum =
+      ((b + tail.length : Nat) : Int) := by
+    simpa only [List.length_append, Vector.length_toList] using (run_height executed).symm
+  change stackBound (f.code ++ g.code) _ = true ↔ _
+  rw [stackBound_append_iff, shifted]
+
 theorem pushPrefix_delta (xs : Stack) :
     ((pushPrefix xs).map stackDelta).sum = (xs.length : Int) := by
   have sizes := run_height (pushPrefix_run xs [])
@@ -217,4 +241,10 @@ theorem empty_scope_full (tail : Stack) (full : tail.length = 1024) :
 /-- info: 'Solidity.Yul.Compilation.scope_bound_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms scope_bound_iff
+/-- info: 'Solidity.Yul.Compilation.stackBound_append_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms stackBound_append_iff
+/-- info: 'Solidity.Yul.Compilation.Slice.comp_bound_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Slice.comp_bound_iff
 end Solidity.Yul.Compilation
