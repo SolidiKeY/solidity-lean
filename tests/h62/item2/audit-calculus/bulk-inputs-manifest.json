@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/fixed-shape-copy-roles-v120/semantic-roles-reviewed.json",
-    "bytes": 4071003,
-    "sha256": "1a751d7d382ffcdd45254806a3b07205a79bc75cdb7b98627676b808c2300404"
+    "path": "/workspace/h62-successor-bulk/fixed-shape-laws-v121/semantic-roles-reviewed.json",
+    "bytes": 4082725,
+    "sha256": "7c681caddbd7f0053aaa33eb0ebeee1e0f75e1a6b0beea4ea6de5ca9c9340531"
   }
 }
