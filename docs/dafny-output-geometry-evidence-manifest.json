@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "obligation": "callsite:src/extension.ts:21:24:createOutputChannel",
+  "sourceHead": "bf22b5e10b2a7f8060d514796888bb729500b9f1",
+  "fileCount": 287,
+  "uncompressedBytes": 11005099,
+  "boundaries": [
+    "All three paired native attempts exit1; first local environment omission and native observer indexing defect retained.",
+    "Repaired attempt: local171/173 ranges covered at before endpoint; Dafny21/21. Both refuse interval mutations. No glyph/raster/ABA/full-row certification.",
+    "Raw API/LSP/DOM/AX/PNG, source/session/config and owned resource cleanup preserved; no proof or EVM equivalence.",
+    "Serial465pass4skip; static checks pass; parity exit1 zero489. Reviews not paired per-row judges."
+  ],
+  "archive": {
+    "path": "/workspace/dafny-output-geometry-evidence-20261107/bulk.tar.gz",
+    "bytes": 2199148,
+    "sha256": "be096a31e411419315c8f023cad07f8cd132b2af09a505d35da08452028ea8f9"
+  },
+  "index": {
+    "path": "/workspace/dafny-output-geometry-evidence-20261107/files.json",
+    "bytes": 65208,
+    "sha256": "a631d4ca655e1331b277c7e18400ff553618b82e9f9049a8b8a4c20c9862dd73"
+  },
+  "reviews": {
+    "path": "/workspace/dafny-output-geometry-evidence-20261107/REVIEWS.json",
+    "bytes": 370,
+    "sha256": "5c2f11758e9dcf81ea5b1e21f7f9551511ba8c00be3a84762dfb746ea06263f2"
+  }
+}

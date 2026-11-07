@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "status": "partial",
+  "obligations": [
+    "callsite:src/extension.ts:21:24:createOutputChannel",
+    "setting:dafny.compilerOutputDir"
+  ],
+  "sourceHead": "8334572cae0dc9793af79db56776d4cbb6a15abf",
+  "nativePanelHead": "9ed9fd239c1af0e9a866b5d6ee6cce41a154d258",
+  "fileCount": 216,
+  "uncompressedBytes": 16895275,
+  "boundaries": [
+    "One fresh paired native run exits1: local preparation reaches original15s deadline; sibling detected-link hit ownership refusal retained.",
+    "Upstream prepares then its sole screenshot bracket fails mutation epoch307to771. No failed bracket retry/filter/reset.",
+    "Local expired observer cleanup is explicitly unconfirmed and CDP connection retired; physical owned process cleanup remaining[] both targets.",
+    "Actual compiler default/relative/absolute artifact observations at8334572ca; AST only, not Dafny runtime/EVM/kernel proof.",
+    "All489 IDs/frozen270 preserved; no completed row or paired judge fabricated."
+  ],
+  "archive": {
+    "path": "/workspace/dafny-output-preparation-evidence-20261107/bulk.tar.gz",
+    "bytes": 1586533,
+    "sha256": "6b748d9491659751d9c740b0913047357086e86b6e3cc17b9f818bf296e7bc31"
+  },
+  "index": {
+    "path": "/workspace/dafny-output-preparation-evidence-20261107/files.json",
+    "bytes": 51111,
+    "sha256": "181c4d525d3206e7f3c11555723e9e6b5be19ea54218e39bcea5efae6b3f2e16"
+  },
+  "restore": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-output-preparation-evidence-manifest.json --restore"
+}
