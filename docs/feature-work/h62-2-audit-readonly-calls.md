@@ -1036,3 +1036,63 @@ Receipt paths remain VM-specific; content verification is not independent SDK
 source certification. Next: continue remaining joint witnesses/refutations and
 live owner/type/source binding without treating these ten effect-algebra inputs
 as full compiler totality or the full H121 producer. No goal completion or push.
+
+
+### Primitive value and nonempty local transport inputs (2026-11-07)
+
+Rebased the prior checkpoint onto master 65e69b6426a9a4fc3fb5541f41726a4bfefda5d0;
+the proof-run head is e6a0ec767f081273fab6ebce82a53f8775414bb0. The two original
+primitive interface files remain byte-identical to C6. The additive
+`tests/h62/item2/audit-readonly-calls/PrimitiveTransportWitnesses.lean` supplies
+inhabited inputs for all four PrimitiveValues statements and all four
+PrimitiveLocals statements. Its bool/uint/int/bool locals contain true/9/-3/false;
+the last index really reads false while the first reads true. Both local round
+trips and both variable-read correspondences use these same inputs. The primitive
+round trips use actual nondefault numeric values; default transport is applied to
+Bool. Injectivity includes the concrete true/true image-equality premise jointly
+with the original theorem application. A separate checked refutation rejects a
+constant Bool translator. Eleven new audit theorems and eight input definitions;
+no original declaration, definition, premise, exclusion, axiom or budget changed.
+
+The SAME final client passed fresh isolated exact-C6 and current dependency
+closures: 43/47 project modules, eight exact original raw kernel type hashes,
+and eleven helper axiom sets containing only propext/Classical.choice/Quot.sound
+(or no axioms). Frozen:315.859 seconds,1688174592 bytes peak aggregate RSS;
+current:309.074 seconds,1623326720 bytes. Explicit -j1,LEAN_NUM_THREADS=1,
+12GiB address cap,16GiB VM,no swap,4GiB reserve; Lean4.24.0 commit797c613,
+Lake5.0.0-src+797c613. Both include a passing bounded KeySort step. These are
+independent model checks, NOT a timing comparison or release of the historical
+Premises +80.254966536% STOP. No held import, cache fallback, full runtime pass,
+SDK-library certification or whole-model definition equivalence is claimed.
+
+The initial frozen run passed before the injectivity inputs were strengthened;
+it is historical only. The strengthened per-file check passed in1.010 seconds.
+Final frozen/current receipts are admitted by exact SHA256 before parsing, and
+sources, toolchain, objects and actual query logs are rechecked. Eight external
+controls pass for captured-interface substitution, imports/inventory, trust,
+missing/duplicate/changed types, mode/client substitution, lost originals and
+collateral baseline drift. A self-found copied receipt field still said ten;
+it was corrected to derive the actual change count, with pre-fix metadata kept.
+The accepted receipt and delta both report eight. Synthetic controls are not
+Lean proofs. Independent read-only finder and skeptic confirmed the strengthened
+logical inputs and negative control, with final accounting review recorded in
+the exported handoff; neither ran Lean/server/tests or wrote files.
+
+Coverage changes EXACTLY eight pending original statements, preserving every
+other784 row and all53 prior entries: joint45→53 and pending441→433. All792
+identities remain, including three private-identity gaps and all nineteen
+H19/H60 statement-transport waits. Credit means inhabited inputs and original
+applications, not ABI decoding, callee selection, compiler totality or Source/
+world/native-frame adequacy. The full H121 producer and inherited queue remain
+unfinished. Stage3 still waits on memory-reference-structs; H19/H60 transport
+still waits on v10-storage-operations; historical proof-cleanup fb0defdc remains
+UNVERIFIABLE. No new owner ticket or scope question, no push or goal completion.
+
+Evidence: /workspace/h62-audit-readonly-calls/primitive-transport/; committed
+pins: `tests/h62/item2/audit-readonly-calls/primitive-transport.sha256`.
+`check_primitive_transport.py` regenerates proofs in fresh output directories;
+`primitive_coverage.py` reproduces accounting from its immutable Git baseline and
+admitted raw receipts. It requires the exported canonical prior ledger and raw
+VM artifact paths; no off-VM independent acceptance is implied. Next independent
+work: remaining433 original joint witnesses/refutations and precise input/type/
+source/owner binding under all existing holds.
