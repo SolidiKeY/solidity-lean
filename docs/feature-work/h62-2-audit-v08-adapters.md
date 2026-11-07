@@ -815,3 +815,30 @@ receipt hashes are in source-rethrow-joint-manifest.json; bulk logs remain off G
 Independent read-only finder and skeptic found no issue in the same-pointer/heap
 premises, existing concrete fixture, complete timeout-state inequality or limited
 acceptance claims. Neither ran Lean or a server; receipt retained with evidence.
+
+### Source event joint premises (2026-11-07)
+
+SourceEmitJoint links three original conditional targets using the existing
+populated event fixture: parameter-type identity, actual argument evaluation and
+encoding from the same reached allocation. Both static and nonstatic flags are
+supplied, and actual argument panic supplies the original argument-failure
+premise. The applications reuse existing controls; no new body fixture, encoder
+or producer law is counted.
+
+A new complete-result comparison proves that argument divZero panic differs
+from the empty-payload static refusal despite retaining the same reached heap.
+Static refusal follows successful argument/encoding effects; the panic precedes
+that refusal. The dangling-reference encoding countermodel is not recounted as
+an ordinary admitted-source witness; exec_encoding_failure and four other
+original event targets remain pending, along with residual/fidelity accounting.
+
+The serial per-file gate passed in 5.337 seconds, one Lean, peak sampled RSS
+823,803,904 bytes and no STOP. All five declarations retain only the existing
+standard axioms; registration passed. This is independent Source component
+execution, not admission/origin/session/lifecycle, selected target emitter,
+production body/frame correspondence or H68/full-root/matched timing acceptance.
+Exact bindings and off-Git evidence: source-emit-joint-manifest.json.
+
+Independent read-only finder and skeptic found no issue in the joint premises,
+full-run payload distinction, bindings or limited acceptance claims. Neither ran
+Lean or a server; their receipt remains with the off-Git evidence.
