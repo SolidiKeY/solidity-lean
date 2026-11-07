@@ -1119,3 +1119,34 @@ or none. Read-only finder and skeptic independently found no domain narrowing,
 near-vacuous joint witness, semantic weakening or full-production overclaim.
 The original broad root/full gates and timing STOPs remain open; no unchanged
 Source.Horizon/Derived17/OpenLoops failure was rerun or relabeled a pass.
+
+
+Mixed-tuple constructor coverage extends the existing ReferenceBridgeControls
+module rather than creating another control module. The sibling tuple namespace
+uses the existing certified tuple emitter over its PUBLIC compiled expansion;
+it does not claim direct public selection of the outer tuple call. Its return
+contains both primitive uint256 seven and the old array reference, after a real
+default allocation and rebinding. Form.tuple, alias flags, original profile and
+both genuine entry witnesses hold simultaneously for this one selected image.
+A closed nonempty native physical certificate retains all six original Local
+duties and admits every legal index with arbitrary prior journal/returndata.
+
+Actual source observation [7,0,0,2,1] and native target word snapshot are proved;
+index two produces actual lifted bare failure. Omitting tuple result compaction/
+export is an intentional wrong-image countercontrol that loses primitive and
+pointer result words. Snapshots are not substituted for StateRepr; native
+physical profiles are not external Approved/Source-origin evidence. Both Form
+constructors now have joint importing coverage. Existing rebinding declarations
+and proof bodies are byte-identical after removing imports/module docstring.
+First extension checks pass in 0.882/0.907 seconds; no proof/resource budget was
+raised or old global/performance STOP cleared. Full production P1/G42.04 and
+all existing actual-Source, RO-frame, decoder and original acceptance waits
+remain open. Separate read-only finder/skeptic found no weakening or overclaim.
+
+Final tuple-extended importer check passes in 1.031 seconds with 832128 KiB
+sampled workload RSS. The unchanged legacy tuple controls rebuilt in 5.976
+seconds; no affected module exceeded 60 seconds. Cached MCP reports zero errors
+in 1.856 seconds. All 26 new tuple declarations were axiom-audited (existing
+standard axioms or none). Existing rebinding declaration/proof-body preservation
+check passes. These are native importing controls, not external Source/profile
+provenance, complete pipeline adequacy or an original-baseline timing comparison.
