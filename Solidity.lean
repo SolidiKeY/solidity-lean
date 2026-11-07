@@ -2340,6 +2340,8 @@ import Solidity.Evm.Expr
 import Solidity.Evm.Interpreter
 import Solidity.Evm.Layout
 import Solidity.Evm.Machine
+import Solidity.Evm.MachineV2
+import Solidity.Evm.MachineV2Controls
 import Solidity.Evm.Memory
 import Solidity.Evm.MemoryAlloc
 import Solidity.Evm.MemoryAllocExamples

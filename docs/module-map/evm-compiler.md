@@ -139,6 +139,8 @@
 | `Backend/PrimitivePackets/Bitwise/Source.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/SolcJson/TryPanicCallMetadata.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Evm/MachineV2.lean` | Versioned pair (H57) of the frozen machine: `OutV2` with `revert data`/`ret m data`, `MachineV2` with return buffer, callee reply oracle and call journal, `InstrV2` (`REVERT`/`RETURN` with data, `RETURNDATASIZE`, `RETURNDATACOPY`, `CALLIN` with input bytes); migration to the frozen run (`forget_run_lift`, `callIn_forget`) and the return-buffer law `callIn_returndata`. |
+| `Evm/MachineV2Controls.lean` | Kernel-checked joint witness (call, buffer, copy, revert with data), `RETURN` with data, and negative controls (reply-dependent revert data, blind frozen projection, slot window, copy past buffer, unentered call). |
 | `Evm/MemoryLoopHorizonObjectHeapGrowth.lean` | Actual allocating-body heap extension and exact initial-length-plus-count growth through scope exit. |
 | `Evm/MemoryLoopHorizonObjectHeapControls.lean` | Existentially witnessed selected-loop execution with matched object count and cursor observations. |
 | `Evm/MemoryLoopHorizonObjectHeapKeeps.lean` | Original typed objects survive actual empty-array allocation prefixes. |

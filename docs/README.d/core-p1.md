@@ -1,0 +1,1 @@
+- [Core EVM revert/return data (machine V2)](feature-work/evm-machine-v2.md): versioned `OutV2`/`MachineV2` with revert/return data, return buffer and CALL input bytes; migration to the frozen machine.
