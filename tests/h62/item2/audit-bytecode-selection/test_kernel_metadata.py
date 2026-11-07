@@ -96,6 +96,37 @@ class MetadataSchemaTests(unittest.TestCase):
         self.assertEqual(validate_record(row)["kind"],"constant")
         with self.assertRaises(ValueError):source_candidate_graph([row],{"M":[self.source_candidate(row)]})
 
+    def test_snapshot_bindings_keep_utf8_offsets_and_legacy_positions(self):
+        from census import declarations
+        raw="-- α prefix\nnamespace N\nprivate theorem π (h : True) : True := h\nend N\n".encode()
+        candidate=declarations(raw.decode())[0]
+        self.assertGreater(candidate['byte_start'],len(raw[:candidate['byte_start']].decode()))
+        self.assertEqual(candidate['name_column'],raw.decode().splitlines()[2].index('π'))
+        result=source_snapshot_bindings({'M':[candidate]},{'M':raw})
+        bound=result['modules'][0]['candidates'][0]
+        self.assertEqual(bound['name_position_status'],'supplied_and_reproduced')
+        self.assertFalse(bound['statement_correspondence_established'])
+        legacy=copy.deepcopy(candidate);legacy.pop('name_line');legacy.pop('name_column')
+        old=source_snapshot_bindings({'M':[legacy]},{'M':raw})['modules'][0]['candidates'][0]
+        self.assertEqual(old['name_position_status'],'reproduced_from_snapshot')
+        self.assertEqual((old['name_line'],old['name_column']),(candidate['name_line'],candidate['name_column']))
+        saved=copy.deepcopy(result);candidate['signature']='changed';self.assertEqual(result,saved)
+    def test_snapshot_bindings_refuse_forged_hashes_and_context(self):
+        from census import declarations
+        raw=b'theorem t : True := True.intro\n';candidate=declarations(raw.decode())[0]
+        for changes in ({'signature':'theorem t : False ','signature_sha256':hashlib.sha256(b'theorem t : False ').hexdigest()},{'preceding_context_sha256':'0'*64},{'name_column':True},{'byte_start':False},{'name_line':2}):
+            with self.subTest(changes=changes),self.assertRaises(ValueError):source_snapshot_bindings({'M':[dict(candidate,**changes)]},{'M':raw})
+        with self.assertRaises(ValueError):source_snapshot_bindings({'M':[candidate]},{'M':b'-- different context\n'+raw})
+    def test_snapshot_bindings_require_complete_unique_membership(self):
+        from census import declarations
+        raw=b'theorem a : True := True.intro\ntheorem b : True := True.intro\n';rows=declarations(raw.decode())
+        with self.assertRaises(ValueError):source_snapshot_bindings({'M':rows[:1]},{'M':raw})
+        with self.assertRaises(ValueError):source_snapshot_bindings({'M':rows+[rows[0]]},{'M':raw})
+        with self.assertRaises(ValueError):source_snapshot_bindings({'M':rows},{'N':raw})
+        self.assertEqual(source_snapshot_bindings({'M':rows[::-1]},{'M':raw}),source_snapshot_bindings({'M':rows},{'M':raw}))
+        empty=source_snapshot_bindings({'Empty':[]},{'Empty':b'namespace Empty\nend Empty\n'})
+        self.assertEqual(empty['modules'][0]['candidates'],[])
+
     def test_complete_row(self):
         self.assertEqual(validate_record(self.row())["user_name"], "N.t")
     def test_schema_and_flag_corruption(self):
