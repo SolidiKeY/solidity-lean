@@ -1247,3 +1247,16 @@ public ABI/gas or full Source/G24 adequacy is inferred. Resource logs, proof
 checks and reviews are external at
 `/workspace/vy3-evidence/loop-reframed-failure-20261107`. Existing producer waits,
 STOPs, full affected/final validation and paired-timing obligations remain open.
+
+
+Private reframed-loop checkpoint: exact kernel identities for `guard_code` and
+`before_value` are now exercised through explicit unchanged types, including
+the private `beforeValue` definition in the code-equality signature. Both
+original helper theorems have no hypotheses; their common joint remains the
+actual source/map/Input witness rather than an added feasibility assumption.
+The two original kernel axiom reports and both alias reports are guarded;
+ordered axiom lists are recorded separately. Selected475/1259,784open.
+`stale_pointer` alone remains uncovered in this family; its contradictory
+premises receive no positive witness credit. No private definition adds a row.
+Logs and reviews: `/workspace/vy3-evidence/loop-reframed-private-20261107`.
+Original production/acceptance obligations and producer waits remain open.

@@ -4,10 +4,11 @@
   "interface_sha256": "96d3d98e65098eabb0cf4c3452bd8fa4129a8bf04e4517ac41df3caeadb792b3",
   "joint_witness": "Solidity.Backend.Passes.AuditLoopReframedFailure.joint",
   "exercised_public_namespace": "Solidity.Backend.Passes.AuditLoopReframedFailure",
-  "checked_private_names": [],
+  "checked_private_names": [
+    "guard_code",
+    "before_value"
+  ],
   "uncovered_private_names": [
-    "Solidity.Backend.Passes.LoopReframedFailureControls.guard_code",
-    "Solidity.Backend.Passes.LoopReframedFailureControls.before_value",
     "Solidity.Backend.Passes.LoopReframedFailureControls.stale_pointer"
   ],
   "rows": [
@@ -85,15 +86,40 @@
       "name": "Solidity.Backend.Passes.LoopReframedFailureControls.ordinary_revert_separate",
       "signature_sha256": "d42eaf0e0e4cd543ac0bb800c15565eee57d700af88026557832da014b42c87d",
       "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.guard_code",
+      "signature_sha256": "a71d0b49ed817f36ecefb9bfe75ea04130c3e18f18ce3bfeee7c2a713a9881fa",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditLoopReframedFailure.joint"
+    },
+    {
+      "name": "Solidity.Backend.Passes.LoopReframedFailureControls.before_value",
+      "signature_sha256": "da9e40d9289d28c85900f8f0d6725d3a02fc0d80be5a779660b37d9631682c35",
+      "kind": "private-exact-kernel-signature",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditLoopReframedFailure.joint"
     }
   ],
-  "aggregate_selected": 473,
-  "aggregate_remaining": 786,
+  "aggregate_selected": 475,
+  "aggregate_remaining": 784,
   "joint_contract": "actual-shared-loop-output-and-shrinking-suffix-input-at-five-with-source-before-after",
-  "limits": "Fifteen original public controls. Three private helpers remain uncovered, including stale_pointer refutation: no simultaneous-witness credit for contradictory premises. Before success and after ordinary revert remain distinct; no failure output machine. No native ByteWorld/emission, gas/ABI or full Source/G24 adequacy.",
+  "limits": "Fifteen public and two exact private original controls; both private helpers have no hypotheses, and the common joint retains actual Input/source/map obligations. The private stale_pointer refutation remains uncovered; no contradictory-premise witness credit. No native ByteWorld/emission, gas/ABI or full Source/G24 adequacy.",
   "checked_axioms": [
     "propext",
     "Classical.choice",
     "Quot.sound"
-  ]
+  ],
+  "private_kernel_prefix": "_private.Solidity.Backend.Passes.LoopReframedFailureControls.0.",
+  "private_axioms_by_name": {
+    "guard_code": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ],
+    "before_value": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  }
 }

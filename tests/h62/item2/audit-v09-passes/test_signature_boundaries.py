@@ -160,7 +160,7 @@ class HeaderBoundaries(unittest.TestCase):
                     ('loop-scope',18,1,'Solidity.Backend.Passes.AuditLoopScope.joint'),
                     ('loop-prefix',18,0,'Solidity.Backend.Passes.AuditLoopPrefix.joint'),
                     ('loop-call',9,0,'Solidity.Backend.Passes.AuditLoopCall.joint'),
-                    ('loop-reframed-failure',15,0,'Solidity.Backend.Passes.AuditLoopReframedFailure.joint')]
+                    ('loop-reframed-failure',17,2,'Solidity.Backend.Passes.AuditLoopReframedFailure.joint')]
         for stem, total, private_count, joint in families:
             mapping = load(stem)
             source = subprocess.check_output(['git','show',sb.BASE+':'+mapping['interface']],cwd=ROOT)
@@ -236,14 +236,18 @@ class HeaderBoundaries(unittest.TestCase):
                 row, = [r for r in mapping['rows'] if r['kind']=='private-exact-kernel-signature']
                 self.assertEqual(row['simultaneous_witness'],'Solidity.Backend.Passes.AuditLoopScope.extraction_premise')
             if stem == 'loop-reframed-failure':
-                self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'guard_code','before_value','stale_pointer'})
-                self.assertEqual(mapping['checked_private_names'],[])
+                self.assertEqual({name.rsplit('.',1)[-1] for _,name in uncovered},{'stale_pointer'})
+                self.assertEqual(mapping['checked_private_names'],['guard_code','before_value'])
+                self.assertEqual(mapping['private_axioms_by_name'],{'guard_code':['propext','Quot.sound','Classical.choice'],'before_value':['propext','Classical.choice','Quot.sound']})
+                for row in mapping['rows']:
+                    if row['kind']=='private-exact-kernel-signature':
+                        self.assertEqual(row['simultaneous_witness'],mapping['joint_witness'])
             self.assertEqual(len(keys),total)
             self.assertEqual(sum(r['kind']=='private-exact-kernel-signature' for r in mapping['rows']),private_count)
             if private_count:
                 self.assertEqual(mapping['private_kernel_prefix'],'_private.Solidity.Backend.Passes.'+Path(mapping['interface']).stem+'.0.')
             seen.update(keys)
-        self.assertEqual((len(seen),1259-len(seen)),(473,786))
+        self.assertEqual((len(seen),1259-len(seen)),(475,784))
 
 
 

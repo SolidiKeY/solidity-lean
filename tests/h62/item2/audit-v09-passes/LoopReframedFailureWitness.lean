@@ -138,4 +138,38 @@ def ordinary_revert_separate := @Solidity.Backend.Passes.LoopReframedFailureCont
  Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Backend.Passes.AuditLoopReframedFailure.ordinary_revert_separate
+
+macro "loopReframedPrivate%" n:ident : term =>
+  pure (Lean.mkIdentFrom n ((Lean.Name.num `_private.Solidity.Backend.Passes.LoopReframedFailureControls 0) ++
+    `Solidity.Backend.Passes.LoopReframedFailureControls ++ n.getId))
+
+def guard_code : LoopReframedFailureControls.beforeCheck.code =
+    (loopReframedPrivate% beforeValue).code ++ assertTop :=
+  loopReframedPrivate% guard_code
+
+def before_value : LoopReframedFailureControls.oldValue.evalT LoopScopeControls.prepared.st =
+    .ok true := loopReframedPrivate% before_value
+
+/-- info: 'Solidity.Backend.Passes.AuditLoopReframedFailure.guard_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.AuditLoopReframedFailure.guard_code
+/-- info: 'Solidity.Backend.Passes.AuditLoopReframedFailure.before_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.AuditLoopReframedFailure.before_value
+/-- info: _private.Solidity.Backend.Passes.LoopReframedFailureControls.0.Solidity.Backend.Passes.LoopReframedFailureControls.guard_code: [propext,
+ Quot.sound,
+ Classical.choice]
+---
+info: _private.Solidity.Backend.Passes.LoopReframedFailureControls.0.Solidity.Backend.Passes.LoopReframedFailureControls.before_value: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+run_cmd do
+  for short in [`guard_code, `before_value] do
+    let name := (Lean.Name.num `_private.Solidity.Backend.Passes.LoopReframedFailureControls 0) ++
+      `Solidity.Backend.Passes.LoopReframedFailureControls ++ short
+    let axes ← Lean.collectAxioms name
+    Lean.logInfo m!"{name}: {axes}"
 end Solidity.Backend.Passes.AuditLoopReframedFailure
