@@ -22,7 +22,7 @@ SPEC.loader.exec_module(MODULE)
 
 class CoverageControls(unittest.TestCase):
     def test_real_disjoint_native_ranges(self):
-        result = MODULE.coverage(REPO, BULK, ['review-final-0-20', 'review-final-20-40', 'review-final-40-60', 'review-final-60-80'])
+        result = MODULE.coverage(REPO, BULK, ['review-bound-0-20', 'review-bound-20-40', 'review-bound-40-60', 'review-bound-60-80'])
         self.assertEqual(result['processed_unique_cases'], 80)
         self.assertEqual(result['counts'], {'payload_reference_match': 80})
         self.assertEqual(result['unprocessed_ranges'], [[80, 21124]])
@@ -30,14 +30,14 @@ class CoverageControls(unittest.TestCase):
         self.assertEqual(result['source_matches'], 0)
 
     def test_duplicate_overlap_and_binding_only_rejected(self):
-        for labels, error in [(['review-final-0-20', 'review-final-0-20'], 'duplicate'),
-                              (['review-final-0-20', 'review-final-overlap'], 'overlapping'),
+        for labels, error in [(['review-bound-0-20', 'review-bound-0-20'], 'duplicate'),
+                              (['review-bound-0-20', 'review-bound-overlap'], 'overlapping'),
                               (['engine-x-bindings'], 'not a native')]:
             with self.subTest(labels=labels), self.assertRaisesRegex(ValueError, error):
                 MODULE.coverage(REPO, BULK, labels)
 
     def test_known_rpc_profile_is_not_a_payload_pass(self):
-        result = MODULE.coverage(REPO, BULK, ['review-final-profile-856'])
+        result = MODULE.coverage(REPO, BULK, ['review-bound-profile-856'])
         self.assertEqual(result['counts'], {'unsupported':1})
         self.assertEqual(result['validated_blocks'], 0)
         self.assertEqual(result['retryable_cases'], 0)
@@ -47,7 +47,7 @@ class CoverageControls(unittest.TestCase):
             for name in ['evidence','reference','upstream']:(root/name).mkdir()
             for name in ['engine-x-inputs.jsonl.gz','archive-inventory.jsonl.gz','engine-x-allocations.jsonl','engine-x-allocations-index.json','reference/package.json','reference/package-lock.json','reference/node_modules','upstream/fixtures_develop-v5.3.0.tar.gz']:(root/name).symlink_to(BULK/name)
             for name in ['engine-x-export.json','archive-census.json']:shutil.copyfile(BULK/'evidence'/name,root/'evidence'/name)
-            summary=json.loads((BULK/'evidence/review-final-profile-856-summary.json').read_text());command=json.loads((BULK/'evidence/review-final-profile-856-command.json').read_text());row=json.loads((BULK/'evidence/review-final-profile-856.jsonl').read_text());row['fields']=['state_root'];data=(json.dumps(row)+'\n').encode();summary['results_sha256']=hashlib.sha256(data).hexdigest();command['command'][3]=str(root);command['command'][5]='profile-evidence-control'
+            summary=json.loads((BULK/'evidence/review-bound-profile-856-summary.json').read_text());command=json.loads((BULK/'evidence/review-bound-profile-856-command.json').read_text());row=json.loads((BULK/'evidence/review-bound-profile-856.jsonl').read_text());row['fields']=['state_root'];data=(json.dumps(row)+'\n').encode();summary['results_sha256']=hashlib.sha256(data).hexdigest();command['command'][3]=str(root);command['command'][5]='profile-evidence-control'
             (root/'evidence/profile-evidence-control.jsonl').write_bytes(data);(root/'evidence/profile-evidence-control-summary.json').write_text(json.dumps(summary));(root/'evidence/profile-evidence-control-command.json').write_text(json.dumps(command))
             with self.assertRaisesRegex(ValueError,'retains failure/execution evidence'):MODULE.coverage(REPO,root,['profile-evidence-control'])
 
@@ -57,7 +57,7 @@ class CoverageControls(unittest.TestCase):
             for name in ['evidence','reference','upstream']:(root/name).mkdir()
             for name in ['engine-x-inputs.jsonl.gz','archive-inventory.jsonl.gz','engine-x-allocations.jsonl','engine-x-allocations-index.json','reference/package.json','reference/package-lock.json','reference/node_modules','upstream/fixtures_develop-v5.3.0.tar.gz']:(root/name).symlink_to(BULK/name)
             for name in ['engine-x-export.json','archive-census.json']:shutil.copyfile(BULK/'evidence'/name,root/'evidence'/name)
-            summary=json.loads((BULK/'evidence/review-final-0-20-summary.json').read_text());command=json.loads((BULK/'evidence/review-final-0-20-command.json').read_text());rows=[json.loads(line) for line in (BULK/'evidence/review-final-0-20.jsonl').read_text().splitlines()]
+            summary=json.loads((BULK/'evidence/review-bound-0-20-summary.json').read_text());command=json.loads((BULK/'evidence/review-bound-0-20-command.json').read_text());rows=[json.loads(line) for line in (BULK/'evidence/review-bound-0-20.jsonl').read_text().splitlines()]
             rows[0].update(status='engine_error',retryable=True,reason='native-worker-timeout');summary['counts']={'engine_error':1,'payload_reference_match':19};command['exit']=1;command['command'][3]=str(root);command['command'][5]='retry-control';data=''.join(json.dumps(row)+'\n' for row in rows).encode();summary['results_sha256']=hashlib.sha256(data).hexdigest()
             (root/'evidence/retry-control.jsonl').write_bytes(data);(root/'evidence/retry-control-summary.json').write_text(json.dumps(summary));(root/'evidence/retry-control-command.json').write_text(json.dumps(command))
             result=MODULE.coverage(REPO,root,['retry-control']);self.assertEqual(result['attempted_unique_cases'],20);self.assertEqual(result['processed_unique_cases'],19);self.assertEqual(result['retryable_ranges'],[[0,1]]);self.assertEqual(result['unprocessed_ranges'],[[0,1],[20,21124]])
@@ -111,6 +111,8 @@ class CoverageControls(unittest.TestCase):
             ('coordinated-input-result', lambda s,c,r:r[0]['blocks'][0].update(state_root='0x'+'00'*32), 'pinned archive'),
             ('missing-stop', lambda s, c, r: c.pop('stopped'), 'stopped/incomplete'),
             ('stopped-job', lambda s, c, r: c.update(stopped='resource guard'), 'stopped/incomplete'),
+            ('missing-observation-pin', lambda s,c,r:s.pop('native_observation_sha256'), 'changed validator'),
+            ('wrong-observation-pin', lambda s,c,r:s.update(native_observation_sha256='0'*64), 'changed validator'),
             ('wrong-validator', lambda s, c, r: s.update(native_worker_sha256='0'*64), 'changed validator'),
             ('wrong-wrapper', lambda s, c, r: s.update(adapter_sha256='0'*64), 'unbound wrapper'),
             ('truncated', lambda s, c, r: r.pop(), 'truncated native range'),
@@ -142,9 +144,9 @@ class CoverageControls(unittest.TestCase):
                     (root/p).symlink_to(BULK/p)
                 for p in ['engine-x-export.json', 'archive-census.json']:
                     shutil.copyfile(BULK/'evidence'/p, root/'evidence'/p)
-                summary = json.loads((BULK/'evidence/review-final-0-20-summary.json').read_text())
-                command = json.loads((BULK/'evidence/review-final-0-20-command.json').read_text())
-                rows = [json.loads(line) for line in (BULK/'evidence/review-final-0-20.jsonl').read_text().splitlines()]
+                summary = json.loads((BULK/'evidence/review-bound-0-20-summary.json').read_text())
+                command = json.loads((BULK/'evidence/review-bound-0-20-command.json').read_text())
+                rows = [json.loads(line) for line in (BULK/'evidence/review-bound-0-20.jsonl').read_text().splitlines()]
                 command['command'][3] = str(root)
                 command['command'][5] = 'negative-control'
                 mutate(summary, command, rows)
@@ -170,6 +172,27 @@ class CoverageControls(unittest.TestCase):
                 (root/'evidence/negative-control-command.json').write_text(json.dumps(command))
                 with self.assertRaisesRegex(ValueError, error):
                     MODULE.coverage(REPO, root, ['negative-control'])
+
+
+    def test_z_changed_observation_module_refuses_captures(self):
+        with tempfile.TemporaryDirectory(prefix='observation-source-control-', dir=BULK) as temporary:
+            repo = Path(temporary)
+            (repo/'.git').symlink_to(REPO/'.git', target_is_directory=True)
+            source = repo/'scripts/h62/item3/g52-differential'
+            source.mkdir(parents=True)
+            for original in (REPO/'scripts/h62/item3/g52-differential').iterdir():
+                if original.is_file():
+                    if original.name == 'eest_observation.mjs':
+                        text = original.read_text().replace("export function validateConfig(config) {", "export function validateConfig(config) { return false;")
+                        self.assertNotEqual(text, original.read_text())
+                        (source/original.name).write_text(text)
+                    else:
+                        (source/original.name).symlink_to(original)
+            lock = repo/'tests/h62/item3/g52-differential/package-lock.json'
+            lock.parent.mkdir(parents=True)
+            lock.symlink_to(REPO/'tests/h62/item3/g52-differential/package-lock.json')
+            with self.assertRaisesRegex(ValueError, 'changed validator'):
+                MODULE.coverage(repo, BULK, ['review-bound-0-20'])
 
 
 if __name__ == '__main__':

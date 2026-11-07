@@ -175,14 +175,26 @@ def coverage(repo, bulk, labels):
     require(labels and len(labels) == len(set(labels)), 'duplicate or empty run labels')
     require(all(re.fullmatch('[a-z0-9-]+', x) for x in labels), 'invalid run label')
     source = repo/'scripts/h62/item3/g52-differential'
+    early_modules = {'native_worker_sha256': 'eest_reference.mjs',
+                     'native_observation_sha256': 'eest_observation.mjs',
+                     'native_block_adapter_sha256': 'blockchain_adapter.mjs',
+                     'rejection_adapter_sha256': 'eest_rejection.mjs',
+                     'resource_guard_sha256': 'host_resource_guard.mjs'}
+    early_pins = {key: digest(source/name) for key, name in early_modules.items()}
     # Reject deficient current-run receipts before expensive archive work; the
     # original checks still run again at admission after archive verification.
     for label in labels:
         early = json.loads((bulk/('evidence/'+label+'-summary.json')).read_text())
-        if early.get('adapter_sha256') == digest(repo/WRAPPER) and early.get('payload_execution_only') is True:
+        if early.get('original_format') == 'blockchain_test_engine_x' and early.get('binding_only') is False and early.get('payload_execution_only') is True:
+            require(early.get('adapter_sha256') == digest(repo/WRAPPER), 'unbound wrapper version: '+label)
+            require(all(early.get(k) == v for k,v in early_pins.items()), 'changed validator: '+label)
+            require(type(early.get('expected')) is int and type(early.get('selected')) is int, 'noncanonical summary count')
+            require(isinstance(early.get('counts'), dict) and all(type(n) is int and n >= 0 for n in early['counts'].values()), 'noncanonical status count')
+            require(early.get('differential_complete') is False and early.get('engine_rpc_complete') is False, 'conflated conformance flags')
             command = json.loads((bulk/('evidence/'+label+'-command.json')).read_text())
             require('stopped' in command and command['stopped'] is None, 'stopped/incomplete native run')
             external_bounds(command, source)
+            require(type(command.get('exit')) is int and command['exit'] in (1,2), 'wrong native exit')
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from eest_export import verify_engine_x_inputs
     archive_binding = verify_engine_x_inputs(bulk)
@@ -233,7 +245,7 @@ def coverage(repo, bulk, labels):
     subprocess.run(['git', 'merge-base', '--is-ancestor', HISTORICAL_WRAPPER, 'HEAD'], cwd=repo, check=True, capture_output=True)
     old = subprocess.check_output(['git', 'show', HISTORICAL_WRAPPER+':'+WRAPPER], cwd=repo)
     wrapper_pins.add(hashlib.sha256(old).hexdigest())
-    modules = {'native_worker_sha256': 'eest_reference.mjs', 'native_block_adapter_sha256': 'blockchain_adapter.mjs',
+    modules = {'native_worker_sha256': 'eest_reference.mjs', 'native_observation_sha256': 'eest_observation.mjs', 'native_block_adapter_sha256': 'blockchain_adapter.mjs',
                'rejection_adapter_sha256': 'eest_rejection.mjs', 'resource_guard_sha256': 'host_resource_guard.mjs'}
     pins = {key: digest(source/name) for key, name in modules.items()}
     lock = digest(bulk/'reference/package-lock.json')

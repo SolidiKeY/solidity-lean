@@ -1555,7 +1555,9 @@ private SolidiKeY/solidity-lean-coord repository under
 `evidence/solidity-h62-3-20261106/g52-differential/`. The prior public test-directory
 manifest and reference ticket report were archived before removal. Historical
 references above describe the original locations; consult that private archive
-and the current VM handoff for their preserved bytes and subsequent validation.
+for their preserved bytes. Current owner-test fixtures have the immutable packet
+and restoration procedure below; a directory or current VM handoff alone is not
+a retrieval reference.
 The deterministic generators, executable tests and dependency pins remain here.
 New bulk results and their checksum manifest remain outside this code checkout;
 no replacement evidence manifest is registered under tests.
@@ -1609,3 +1611,61 @@ or execution evidence. Attempted indices remain disjoint: retry by replacing the
 failed ranged label with its freshly executed replacement, rather than combining
 an overlapping single-case retry with the old range. These checks do not provide
 Source/runtime correspondence or discharge production Bridge obligations.
+
+
+## Immutable owner-test fixture retrieval
+
+The current `test_engine_execution_coverage.py` and
+`engine_payload_reference.test.mjs` use packet **engine-coverage-fixtures-v2** in
+private repository **SolidiKeY/solidity-lean-coord**, commit
+**a0e3142388aca8b1dbdf7cb43486d2ee717f50e4**, exact directory
+`evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v2/`.
+Its `artifact-sha256.json` SHA256 is
+`86518321e67dec60992911acd2f31072a64fca45c59a181dfd8c6f1f6f8ea768`.
+These are immutable fixture coordinates, not a directory tip or a runtime claim.
+Earlier `review-final-*` artifacts describe the prior checker and are not the
+current test packet. No public checksum manifest is restored under tests.
+
+From the lane code checkout, retrieve the exact private bytes:
+
+```sh
+g52_store=$(mktemp -d)
+git -C "$g52_store" init -q
+git -C "$g52_store" remote add origin https://github.com/SolidiKeY/solidity-lean-coord.git
+git -C "$g52_store" fetch --depth=1 origin a0e3142388aca8b1dbdf7cb43486d2ee717f50e4
+git -C "$g52_store" checkout FETCH_HEAD -- evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v2
+g52_packet="$g52_store/evidence/solidity-h62-3-20261106/g52-differential/engine-coverage-fixtures-v2"
+(cd "$g52_packet" && sha256sum -c SHA256SUMS)
+```
+
+Follow the pinned packet's `RESTORE.md`: obtain the official EEST v5.3.0 develop
+archive, verify SHA256
+`5dd08fee0fb41bc2a59bc4ab1dc75b19723fc71fe6af2f855454d3283fba09b9`, then run
+`python3 "$g52_packet/restore.py" --repo "$PWD" --archive /absolute/path/to/fixtures_develop-v5.3.0.tar.gz --check`.
+The helper verifies packet membership, source and installed-reference hashes,
+restores exact small fixtures and regenerates oversized inputs with the existing
+committed exporter. Each generator and owner command uses the unchanged serial
+external resource guard. Captured receipts bind the exact bulk path
+`/workspace/h44/g52-differential`; do not relocate or rewrite their metadata.
+Existing differing files, packet additions and generator staging collisions are
+refused. `--verify-only` checks existing bytes and runs no tests. A clean-VM
+restoration has not been executed here; absent private access or bulk bytes is
+UNVERIFIABLE, never a passing skip.
+
+## Archive admission and transitive validator identity
+
+Ordinary Engine execution now uses the same archive-derived verification as the
+Engine-X qualifier and transaction admission. Verification precedes execution
+and derives expectations from the pinned archive rather than mutually supplied
+receipts. The coordinated-substitution control first obtains a real native match
+for a numerically equivalent nonce encoding, then requires archive refusal of its
+changed expectation bytes. This witnesses byte provenance, not acceptance of a
+different semantic state. Bad genesis and payload hashes also remain CLI refusal
+controls at the archive-first boundary.
+
+Run summaries and coverage bind `eest_observation.mjs` alongside the worker,
+block/rejection adapters and resource guard. Changing configuration admission
+therefore invalidates old observations. Early metadata refusals avoid expensive
+archive work for already-invalid receipts; all archive, ancestry and admission
+checks still run for qualifying records. These external checks add no Source
+agreement, full producer, public-obligation proof or runtime-gate claim.

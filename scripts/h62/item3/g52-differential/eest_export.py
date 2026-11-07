@@ -199,7 +199,7 @@ def _archive_input_expectations(archive_name, archive_sha, generator_pins, kind)
 
 def verify_archive_inputs(root, kind):
     """Guard coordinated fixture/expectation/receipt substitutions against the archive."""
-    if kind not in ("blockchain_test_engine_x", "transaction_test"):
+    if kind not in ("blockchain_test_engine", "blockchain_test_engine_x", "transaction_test"):
         raise ValueError("unsupported archive verification format")
     archive = (root/"upstream/fixtures_develop-v5.3.0.tar.gz").resolve()
     actual = file_sha(archive)
