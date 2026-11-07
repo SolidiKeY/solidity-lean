@@ -1042,3 +1042,81 @@ The accepted H71 address handoff still lacks local payload bytes; its transport
 route is not duplicated. Existing environment qualification, H118-held CR relay,
 importer migration, ReadBounds production-owner resolution and all original
 source/physical/performance obligations remain open.
+
+
+### Address handoff metadata integrity
+
+`verify-handoff-metadata.py` authenticates the delivered native-browser a14d56c9
+handoff and its committed manifest, then verifies the two explicit Translate and
+Compose source pins at sourceBuild0eb39db1. It checks declared 16-address counts
+(10 proved, 2 refuted, 4 unsupported, plus two guards), 24 unique gate receipts
+(23 pass, one failure), pending runtime status and retained performance STOPs.
+This is metadata consistency, not inspection of receipt contents, the reported
+343-module runtime index, 206 selected objects, binaries or request results.
+All six referenced address archives/indexes are absent locally at capture.
+Presence alone never changes the verifier's `payloadInspected: false` result.
+
+Three external controls include twelve rejecting mutations for independent drift,
+coordinated false acceptance, erased failures/STOPs, duplicate gate/artifact
+identities and unsafe locators. Read-only finder and skeptic found no confirmed
+checkpoint defect; neither used Lean/server/builds or writes. Four lightweight
+checks pass, including the unchanged extraction/trust audit and whitespace check.
+There are no production Lean changes or new checking/runtime measurements.
+The ownership audit now pins adopted published master d93f6839c explicitly;
+its scope allowlists are unchanged.
+
+`address-metadata-manifest.json` records portable archive/tool/Git pins and exact
+commands. Restore its H44 archive under `artifacts/address-metadata`, then run
+`python3 tests/directruntime-20261104/shared-translator/verify-handoff-metadata.py
+--handoff tests/directruntime-20261104/shared-translator/artifacts/address-metadata/handoff.ticket`.
+The external controls use the original coordinator inbox ticket. The archive
+contains that ticket and report, not native-browser's missing runtime payloads.
+No duplicate delivery ticket was issued. Fresh environment qualification,
+CR fixture/importer migration, ReadBounds production-owner resolution and the
+original stack/cost/performance holds remain open.
+
+
+### Shared environment decoder proofs
+
+`environmentMember?_guards` performs one general successful-decoder inversion
+for the existing map entry, negative builtin reference and result spelling.
+The existing `environmentMember?_guard` keeps its exact statement and projects
+its first two facts; `environmentMember?_resultType` projects the type fact.
+`environmentMember?_of_metadata` proves successful decoding from the explicit
+root/name/map/magic/reference/result guards for arbitrary JSON. These are
+metadata decoder facts, not compiler identity authentication, source/world
+adequacy or intrinsic semantics transport. All four theorem axiom reports are
+only `propext` and `Quot.sound`.
+
+The initial independent proofs checked correctly but failed the paired local
+checking limit: baseline median3.9615s, head6.3626s (+60.61%). That STOP, its
+source snapshot, failed proof attempts and tactic trials remain in the H44
+archive. Sharing guard inversion and replacing the positive proof's `simp_all`
+with explicit rewrites preserves all existing statements and brings three
+interleaved same-path checking medians to3.9282s/4.1776s (+6.35%, below10%).
+This local proof-checking result releases no native/browser performance hold.
+
+The final serial12GiB/no-swap gate passes nine requested owned module builds
+and six affected per-file checks, including 32 existing environment/address
+model requests, axiom/signature inventories and KeySort. Gate wall time39.9118s,
+child maximum RSS1261764KiB, cgroup peak230342656bytes, minimum outer available
+memory11480817664bytes. Lean4.24.0/Lake5.0.0-src+797c613 and threads1/-j1 remain
+unchanged. Final source and inventory MCP diagnostics report zero errors.
+Inherited dependency warnings are retained. This is checking evidence, not
+matched whole-build or runtime performance acceptance.
+
+Normalization verifies the old guard statement byte for byte, removes only
+three added theorem/doc blocks and restores its former proof; the resulting
+Translate file exactly matches immutable pre-work88a946c78971. Executable
+bodies, imports, Reader signatures, entry premises and exclusions are unchanged.
+Historical census/profile outcomes are retained, with only the proof-source
+SHA refreshed; no fresh census capture is claimed. The pre-work head preserves
+the existing clean published3a5b9de41 merge and prior66268454b intake checkpoint.
+The ownership allowlists are unchanged.
+
+Manifest: `environment-decoder-proof-manifest.json`; bulk logs, source snapshots,
+paired checking script/results and checksums are outside Git in its recorded
+archive. Independent read-only finder/skeptic found no confirmed proof or
+normalization defect; neither used Lean/server/builds or writes. Original H90
+forms/importer migration, inherited queues, absent address runtime payloads,
+environment qualification and all stack/native/browser holds remain open.
