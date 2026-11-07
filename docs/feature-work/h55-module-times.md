@@ -1720,3 +1720,19 @@ continuously monitor the four-GiB reserve during each command. Its virtual
 limit is not an RSS cap or H55 runner attestation. Current inputs and outcomes
 remain unresolved. Independent read-only finder and skeptic reviewed the
 fixtures without Lean, server or builds; no runtime acceptance is inferred.
+
+## Bytecode-selection standalone candidates
+
+`bytecode_selection_controls.py` records five supplied source-hashed rows.
+The hypothesis-domain audit replaces the conclusion with True and checks
+premise feasibility, not the original conclusion. The runtime witness uses
+a local self-adapter, not external Bridge agreement. Literal and value-gate
+controls cover supported intrinsic execution without general gas/fork or
+source/native adequacy. Reject-push impossibility and guarded negative
+diagnostics remain distinct from positive joint witnesses.
+
+The source verifier lists all five as default roots, requires a writer lock
+and writes private oleans, logs and verification JSON; it does not replace
+the final gate. Current inputs, invocation and results remain unresolved.
+Independent read-only finder and skeptic reviewed these boundaries without
+Lean, server or builds. No runtime acceptance is inferred.
