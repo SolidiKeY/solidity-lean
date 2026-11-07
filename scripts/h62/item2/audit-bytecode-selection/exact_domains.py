@@ -515,14 +515,112 @@ theorem false_domain_impossible : ¬ (hypotheses_of% falseToy) := by
     return checker
 
 
-def data_render(repo, rows, source_candidate_names, expectations=None, *, decide_premises=False):
+SAMPLED_DATA = r'''
+-- Bounded typed input search. Constructors retain Fin bounds; no premise is
+-- supplied by an oracle and no failed sample is classified as impossible.
+private def sampledDataValue (type : Lean.Expr) (seed : Nat) : MetaM (Except String Lean.Expr) := do
+  let type ← whnf type
+  if type.isConstOf ``Nat then return .ok (mkNatLit seed)
+  if type.isConstOf ``Bool then
+    return .ok (mkConst (if seed % 2 == 0 then ``Bool.false else ``Bool.true))
+  if type.isAppOfArity ``Fin 1 then
+    let bound := type.appArg!
+    let condition ← mkAppM ``NeZero #[bound]
+    match ← synthInstance? condition with
+    | some nonzero =>
+      let value ← mkAppOptM ``Fin.ofNat #[some bound,some nonzero,some (mkNatLit seed)]
+      return .ok (← instantiateMVars value)
+    | none =>
+      let nonzeroGoal ← mkAppM ``Ne #[bound,mkNatLit 0]
+      match ← decidablePremiseProof nonzeroGoal with
+      | .error _ => return .error "finite sample constructor unsupported at chosen values"
+      | .ok proof =>
+        let nonzero : Lean.Expr ← mkAppM ``NeZero.mk #[proof]
+        let value ← mkAppOptM ``Fin.ofNat #[some bound,some nonzero,some (mkNatLit seed)]
+        return .ok (← instantiateMVars value)
+  let level ← getLevel type
+  let some inhabitant ← synthInstance? (mkApp (mkConst ``Inhabited [level]) type)
+    | return .error "default instance synthesis unsupported at chosen values"
+  return .ok (← instantiateMVars (mkAppN (mkConst ``default [level]) #[type,inhabitant]))
+'''
+
+
+def sampled_checker():
+    """Extend the generic checked-decisions policy with four typed samples."""
+    checker=decidable_checker()
+    first=checker.index('private partial def defaultDomainProof')
+    last=checker.index('private def dataTarget',first)
+    domain=checker[first:last]
+    old='''    else do
+      let level ← getLevel alpha
+      let instanceType := mkApp (mkConst ``Inhabited [level]) alpha
+      let some inhabitant ← synthInstance? instanceType
+        | return .error "default instance synthesis unsupported at chosen values"
+      pure (.ok (← instantiateMVars (mkAppN (mkConst ``default [level]) #[alpha,inhabitant])))'''
+    if domain.count(old)!=1:
+        raise ValueError("sample constructor policy splice changed")
+    domain=domain.replace('defaultDomainProof','sampledDomainProof')
+    domain=domain.replace('(goal : Lean.Expr) :','(goal : Lean.Expr) (seed : Nat) :')
+    domain=domain.replace(old,'    else sampledDataValue alpha seed')
+    domain=domain.replace('sampledDomainProof (mkApp predicate value) with','sampledDomainProof (mkApp predicate value) seed with')
+    target=checker[last:checker.index('elab "default_domain_witness% ',last)]
+    target=target.replace('dataTarget','sampledTarget')
+    old_attempt='''  let proof ← defaultDomainProof domain
+  return (← instantiateMVars domain,proof)'''
+    new_attempt='''  let mut reason := "bounded sample search unsupported"
+  for seed in [0,1,4,32] do
+    match ← sampledDomainProof domain seed with
+    | .ok proof => return (← instantiateMVars domain,.ok proof)
+    | .error failure => reason := failure
+  return (← instantiateMVars domain,.error reason)'''
+    if target.count(old_attempt)!=1:
+        raise ValueError("sample target policy splice changed")
+    target=target.replace(old_attempt,new_attempt)
+    insertion=checker.index('declare_syntax_cat dataEntry')
+    checker=checker[:insertion]+SAMPLED_DATA+domain+target+checker[insertion:]
+    checker=checker.replace('Lean.Elab.Command.liftTermElabM (dataTarget name)',
+                            'Lean.Elab.Command.liftTermElabM (sampledTarget name)')
+    checker += r'''
+elab "sampled_domain_witness% " id:ident : term => do
+  let name ← realizeGlobalConstNoOverloadWithInfo id
+  let (_, result) ← sampledTarget name
+  match result with
+  | .ok proof => return proof
+  | .error reason => throwError "data hypothesis audit: {reason}"
+-- Guard a default-only failure that is genuinely recovered by bounded search.
+theorem sampled_recovered_domain : hypotheses_of% proofToy := sampled_domain_witness% proofToy
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.SampledDefaults.sampled_recovered_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms sampled_recovered_domain
+/-- error: data hypothesis audit: decidable premise unsupported at chosen values -/
+#guard_msgs in
+#check sampled_domain_witness% falseToy
+-- The finite bound is computed; lack of a registered NeZero instance cannot
+-- justify either dropping its bound proof or calling this domain empty.
+def finiteBound : Nat := 2 ^ 8
+theorem finiteNonzeroToy (value : Fin finiteBound) (_nonzero : value.val ≠ 0) : True := True.intro
+theorem sampled_recovered_fin_domain : hypotheses_of% finiteNonzeroToy := sampled_domain_witness% finiteNonzeroToy
+/-- info: 'Solidity.H62.BytecodeSelection.HypothesisAudit.SampledDefaults.sampled_recovered_fin_domain' does not depend on any axioms -/
+#guard_msgs in
+#print axioms sampled_recovered_fin_domain
+/-- error: data hypothesis audit: finite sample constructor unsupported at chosen values -/
+#guard_msgs in
+#check sampled_domain_witness% emptyToy
+'''
+    return checker.replace('.DecidableDefaults.','.SampledDefaults.')
+
+
+def data_render(repo, rows, source_candidate_names, expectations=None, *, decide_premises=False, sampled_inputs=False):
     """Kernel-checked default attempts for candidate hypotheses.
 
     Unsupported default synthesis is not an impossibility result or coverage.
     Default mode refuses proof binders; the opt-in proof-bearing mode constructs
     actual proofs with checked decisions. Resource exceptions propagate, and
     dependent Exists witnesses pass the kernel without added premises.
+    sampled_inputs tries four shared Nat/Bool/Fin seeds, not all combinations.
     """
+    if sampled_inputs and not decide_premises:
+        raise ValueError("sampled inputs require checked decidable premises")
     import kernel_metadata as metadata
     metadata.partition_records(rows, source_candidate_names)
     names = set(source_candidate_names)
@@ -534,12 +632,12 @@ def data_render(repo, rows, source_candidate_names, expectations=None, *, decide
         raise ValueError("default expectation membership differs")
     modules = sorted({r["module"] for r in selected})
     frozen_map, producer_sources = _frozen_scope(repo,modules)
-    namespace = NAMESPACE+".DecidableDefaults" if decide_premises else DATA_NAMESPACE
-    local_namespace = "DecidableDefaults" if decide_premises else "Defaults"
+    namespace = NAMESPACE+".SampledDefaults" if sampled_inputs else (NAMESPACE+".DecidableDefaults" if decide_premises else DATA_NAMESPACE)
+    local_namespace = "SampledDefaults" if sampled_inputs else ("DecidableDefaults" if decide_premises else "Defaults")
     fragment = macro_fragment((repo/MACRO_PATH).read_text())
     program = "import Lean\n" + "".join("import "+m+"\n" for m in modules)
     program += "/-! Guard default witness attempts from dropping proof premises or treating unsupported defaults as impossible. Original conclusions are not proved. -/\n"
-    program += fragment + "\nnamespace "+local_namespace+"\nopen Lean Meta Elab Term\n" + (decidable_checker() if decide_premises else DATA_CHECKER)
+    program += fragment + "\nnamespace "+local_namespace+"\nopen Lean Meta Elab Term\n" + (sampled_checker() if sampled_inputs else (decidable_checker() if decide_premises else DATA_CHECKER))
     program += '/-- error: data hypothesis audit: missing or ambiguous kernel name -/\n#guard_msgs in\n#default_hypothesis_batch ["missing.kernel.name" => reject_missing against% "" expecting% "probe"]\n'
     program += '/-- error: data hypothesis audit: recorded type differs -/\n#guard_msgs in\n#default_hypothesis_batch ["'+namespace+'.positiveToy" => reject_type against% "wrong recorded type" expecting% "probe"]\n'
     targets = {}

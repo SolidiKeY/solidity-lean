@@ -2287,3 +2287,46 @@ PowerBounds retry, proof-budget increase, new registered module or public
 import was added. The existing budget deadline remains 17:23:24 UTC.
 All original full-source/census, supported-program success, Source/physical,
 gas/fork, Bridge/runtime and performance obligations remain unfinished.
+
+### Bounded typed input sampling
+
+The existing checked-premise renderer now optionally tries four shared seeds
+(0, 1, 4, 32) for Nat/Bool/Fin inputs. This is diagonal sampling, not a search
+of all input combinations. Other data still use existing inhabited instances;
+all dependent proof premises still need actual checked decisions. Fin values
+use Fin.ofNat with NeZero evidence: if instance lookup misses a computed bound,
+the constructor first proves that bound nonzero through the checked decision
+path. Fin 0 is refused. No proof premise or bound is assumed.
+
+The same 328-candidate slice now has 49 accepted joint hypothesis witnesses
+and 279 unsupported attempts. All 18 prior successes are retained; 31 cases
+are recovered relative to that policy. Fifteen accepted declarations are private.
+Six accepted targets also occur in the existing public renderer roster; these
+counts do not imply new distinct global/census coverage. Probe/strict checks
+pass in 51.490s/37.088s, with no module above 60s. Two intervening elaboration
+failures and the earlier instance-only probe remain preserved, not accepted.
+
+Eleven inherited/sampled refusal checks, six synthetic positive domains and
+two intentional impossibility controls pass. Recovery at a nonzero Nat and a
+computed Fin bound is checked; the corresponding False/Fin-zero cases are
+refused. Unsupported sampling is never an emptiness result or a new exclusion.
+The prior data-only and unsampled checked-premise source/artifact replays still
+pass unchanged. No package performance or original-conclusion proof follows.
+
+Evidence is external under
+/workspace/parallel-20261103/executable-bytecode/sampled-premise-domains/.
+Its non-mutating verifier reconstructs the strict source, checks 603 frozen
+import products and sealed parent/source receipts, and pins the prior-policy
+comparison. Independent read-only finder and skeptic pass. The existing
+17:23:24 UTC budget deadline was reused; no prerequisite or PowerBounds retry,
+new registered module, public import or proof-budget increase occurred.
+
+The requested disk helper at /workspace/coord-tools/disk.sh was absent. H1
+cleanup removed only this worktree’s inactive regenerable native IR outputs
+and two CLI binaries with their build metadata. Shared caches, sealed evidence
+and Lean olean products remain untouched. Cleanup records include exact paths,
+file inventories and before/after free bytes; free space was restored above
+2 GiB. Native outputs will need regeneration for future full builds. All
+original source/census, supported-success, Source/physical, gas/fork, full
+runtime/Bridge and performance obligations remain open; H126 support-only
+WordValidation treatment is unchanged.

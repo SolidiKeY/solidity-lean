@@ -115,6 +115,28 @@ class ExactDomainTests(unittest.TestCase):
         with patch.object(target,'DATA_CHECKER',target.DATA_CHECKER+'\n'+target.DATA_CHECKER):
             with self.assertRaisesRegex(ValueError,'splice changed'):target.decidable_checker()
 
+    def test_sampled_policy_uses_bounded_typed_values_and_checked_proofs(self):
+        row=self.data_row();row['binders'][0]['proof_binder']=True
+        program,manifest=target.data_render(ROOT,[row],[row['name']],decide_premises=True,sampled_inputs=True)
+        self.assertIn('for seed in [0,1,4,32]',program)
+        self.assertIn('decidablePremiseProof nonzeroGoal',program)
+        self.assertIn('mkAppM ``NeZero.mk #[proof]',program)
+        self.assertIn('sampled_recovered_fin_domain : hypotheses_of% finiteNonzeroToy',program)
+        self.assertIn('mkAppOptM ``Fin.ofNat #[some bound,some nonzero,some (mkNatLit seed)]',program)
+        self.assertIn('sampledDomainProof (mkApp predicate value) seed with',program)
+        self.assertIn('liftTermElabM (sampledTarget name)',program)
+        self.assertIn('mkConst ``of_decide_eq_true',program)
+        self.assertNotIn('catch ',program)
+        self.assertEqual(manifest['namespace'],target.NAMESPACE+'.SampledDefaults')
+        self.assertFalse(manifest['kernel_accepted'])
+        with self.assertRaises(ValueError):target.data_render(ROOT,[row],[row['name']],sampled_inputs=True)
+    def test_unsampled_policy_output_is_unchanged(self):
+        old=types.ModuleType('previous_decidable_renderer');old.__file__=str(ROOT/'scripts/h62/item2/audit-bytecode-selection/exact_domains.py')
+        raw=subprocess.check_output(['git','-C',str(ROOT),'show','ec1c5145a9c1edfdf93aab2d2a07653b5b408fc9:scripts/h62/item2/audit-bytecode-selection/exact_domains.py'])
+        exec(compile(raw,old.__file__,'exec'),old.__dict__)
+        row=self.data_row();row['binders'][0]['proof_binder']=True
+        self.assertEqual(target.data_render(ROOT,[row],[row['name']],decide_premises=True),old.data_render(ROOT,[row],[row['name']],decide_premises=True))
+
     def test_scope_refactor_preserves_closed_renderer_exactly(self):
         old=types.ModuleType('frozen_closed_renderer');old.__file__=str(ROOT/'scripts/h62/item2/audit-bytecode-selection/exact_domains.py')
         raw=subprocess.check_output(['git','-C',str(ROOT),'show','26fc079a1b78aa43239e46bf6e3f25e84279607f:scripts/h62/item2/audit-bytecode-selection/exact_domains.py'])
