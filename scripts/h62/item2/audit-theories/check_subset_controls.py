@@ -9,11 +9,12 @@ def main():
     a=ap.parse_args();out=a.evidence.resolve()
     if out.is_relative_to(ROOT):raise SystemExit("Use off-Git evidence")
     base=[sys.executable,str(ROOT/"scripts/h62/item2/audit-theories/verify_subset.py"),"--evidence",str(out)]
-    selected=["Solidity/Theory/Typed/Obs/Paths.lean","Solidity/Theory/Typed/MemMirror.lean","Solidity/Theory/Bridge/Denote.lean","Solidity/Theory/Progress/Outcome.lean","Solidity/Theory/Mutability/Closer.lean"]
+    selected=["Solidity/Theory/Typed/Obs/Paths.lean","Solidity/Theory/Typed/MemMirror.lean","Solidity/Theory/Bridge/Denote.lean","Solidity/Theory/Progress/Outcome.lean","Solidity/Theory/Mutability/Closer.lean","Solidity/Theory/Mutability/Assignable.lean"]
     positive=subprocess.run(base+sum((["--module",m]for m in selected),[]),capture_output=True,text=True)
     assert positive.returncode==0,(positive.stdout,positive.stderr)
     cases=[("changed-frozen-source",["Solidity/Theory/Progress/Tuple.lean"],"frozen source changed"),
       ("uncovered-statements",["Solidity/Theory/Typed/Mem.lean"],"explicit joint witnesses missing"),
+      ("ordinary-impossible-not-H69",["Solidity/Theory/Mutability/Payable.lean"],"1 explicit joint witnesses missing"),
       ("outside-map",["../../unmapped.lean"],"outside original frozen module map"),
       ("duplicate-module",[selected[0],selected[0]],"duplicate module")]
     results=[]

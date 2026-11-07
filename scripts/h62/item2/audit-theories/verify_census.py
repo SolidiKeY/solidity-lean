@@ -132,6 +132,16 @@ WITNESSES.update({
  'Solidity.Theory.Mutability.ContractWorld.World.enter_nonpayable': ('PayableWitnesses', 'payable_enter_joint_witness'),
  'Solidity.Theory.Mutability.ContractWorld.World.callFrame_nonpayable': ('PayableWitnesses', 'payable_call_joint_witness'),
 })
+WITNESSES.update({
+ "Solidity.Theory.Mutability.Frames.nothing": ("AssignableWitnesses", "assignable_nothing_joint_witness"),
+ "Solidity.Theory.Mutability.Frames.mono": ("AssignableWitnesses", "assignable_mono_joint_witness"),
+ "Solidity.Theory.Mutability.Frames.of_globals": ("AssignableWitnesses", "assignable_globals_joint_witness"),
+ "Solidity.Theory.Mutability.Prog.frames_readOnly": ("AssignableWitnesses", "assignable_readonly_joint_witness"),
+ "Solidity.Theory.Mutability.Prog.storage_readOnly": ("AssignableWitnesses", "assignable_storage_joint_witness"),
+ "Solidity.Theory.Mutability.Prog.frames_of_storeAt": ("AssignableWitnesses", "assignable_store_joint_witness"),
+ "Solidity.Theory.Mutability.assignableCheck_sound": ("AssignableWitnesses", "assignable_check_joint_witness"),
+ "Solidity.Theory.Mutability.committed_frames": ("AssignableWitnesses", "assignable_committed_joint_witness"),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),

@@ -1,6 +1,14 @@
 # H62 item 2: audit-theories — continuing audit
 
-LATEST INVENTORY:28 original premise-role records reviewed,472 remaining.
+LATEST REBASE/CHECKPOINT: coordinator merge e0f4251ff40ad79c37bae53795b7419afe52e8d9
+contains previous315a659a985bc6185fe7b56884076d6401cfaade. Clean assigned branch
+rebased onto it with no reset/discard/push. Assignable8 inputs now jointly
+witnessed with real writing/nonempty modifies-set cases.136 current helpers,
+95joint certificates,83 unchanged-file subset records;1,370 pending original
+witness/classification records. Q-FROZEN-REBASE and Q-STATIC-VALUE remain open.
+Evidence: /workspace/h62-audit-theories-e0-rebase-20261107-evidence.
+
+PRIOR INVENTORY:28 original premise-role records reviewed,472 remaining.
 Three reviewed work items complete in this continuation; fresh-thread handoff
 to coordinator for the SAME original VM/branch/unfinished goal. No new/reset
 goal, completion transition or inferred retirement.
@@ -964,3 +972,51 @@ persistent goal. Do not create/reset/complete a goal or infer retirement/pause.
 All four full assignment checkpoints remain partial. Current queue is saved
 in scripts/h62/item2/audit-theories/handoff/CURRENT-QUEUE-20261107.md alongside
 the complete original prompt,original queues and exact frozen scope manifest.
+
+## Rebased Assignable checkpoint: all eight interfaces
+
+Fetched origin/master and verified c6 ancestry, full previous315a659a985 head
+inside reported merge e0f4251ff40ad79c37bae53795b7419afe52e8d9 and remote
+ancestry; actual git rebase origin/master succeeded on a clean assigned branch.
+Commands/output in rebase.json. Original VM/branch/unfinished goal unchanged.
+No other work discarded or reset; no push or master merge. Inspected master
+log/code before this independent item; no changed Assignable prerequisite or
+duplicate witness item. Entire original Assignable file remains byte-frozen.
+
+AssignableWitnesses provides every input and hypothesis of all8 declarations,
+including inherited C/contexts, full Frames.find/net/balance, universal subset
+premises, output/state correlation and late U/r after logical premises. Real
+named roots keep these frames observable. A proper nonempty clause inclusion
+is witnessed; frame algebra uses populated storage. Read-only cases use a
+successful nonempty local bool declaration. Modifies/check cases instead use
+flag=true through the real storage interpreter, not an empty modifies set or
+a read-only shortcut. Two additional controls check false→true flag change,
+preserved live array root, and rejection by the empty assignable clause with
+within.view=false. These are core model checks, not target-EVM compilation.
+
+The first check exposed unused root/clause warnings; strengthened additive
+packets with observed lookup/frame facts, preserving all original inputs.
+Explicit μ=.view fixed inference for these added consequences. Final accepted
+9d248803f5b1 receipt: exit0,1.406s,674,160,640 sampled peak RSS,clean diagnostics,
+standard axioms only. Historical warning/failed logs retained but not accepted.
+No statements/premises/definitions/budgets/axioms/exclusions changed. KeySort
+freshly checked in1.405s under unchanged serial -j1/LEAN_NUM_THREADS=1/resource
+bounds. New10 proof helpers and2fixtures; no existing proof refactor/timing claim.
+
+All136 helpers/31fixture defs/7private abbreviations verify current source,
+recursive-import,artifact/log hashes and axiom allowlist. Selected unchanged
+file subset now83 records across6 modules, with5 refusal controls including
+ordinary impossible Payable not silently promoted to H69.13 Python tests,
+layers901core/0elaborator/0parser/0newedges(107upstream allowances),register and
+fragments pass.26 compiler-control receipts still pass. Strict Payable returns
+exit1 for enter_static; original census exits1 on changed frozen Tuple source.
+No acceptance guard weakening. assignable-gates.json saves exact commands,
+exits and decisive outputs; all500 original declarations accounted once:
+95joint certificates,3accepted H69,18historical empty telescopes,381public+
+3private pending. All986original generated candidates retained; exact1,370
+pending names/owners remain separate from fidelity/compiler/final-gate duties.
+
+Finder and skeptic independently passed all8 premise packs,10new proof receipts,
+136total receipts,83subset records and saved gate/ledger accounting. No residual
+findings, edits or reviewer Lean/server/build jobs. Continue independent queue
+while existing two scope questions wait; no full completion or RUNTIME_GATE_PASS.
