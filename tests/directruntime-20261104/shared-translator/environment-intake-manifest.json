@@ -1,0 +1,259 @@
+{
+  "guardedRegression": "Historical environment evidence delivery must not imply current reader or whole-runtime acceptance",
+  "sourceFiles": [
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/verify-environment-intake.py",
+      "sha256": "961b85ded9af5b342e2bed4063c9dcdac28ca56436420d530215c7702460643f"
+    },
+    {
+      "repositoryRelative": "tests/directruntime-20261104/shared-translator/verify-sourcebuild-intake.py",
+      "sha256": "d34cea272ba308c4c5f7d26d2d421824d28523f02cb2ee563d58529b05ba5aad"
+    }
+  ],
+  "inputs": {
+    "native-browser-wrapper-handoff-5a21.json": "a53f2f972de3748860f20545fd0f6ffdef3d714d5fbb97e3d3de73e5dca6b365",
+    "native-browser-wrapper-index-5a21.json": "643f9d637d9f12ffd74fe5857a17becaefe0c30755071c6d3fe98de4b843e617",
+    "native-browser-e7ef/evidence.tar.gz": "c3c9ce432635b63557700dc3bb01d217f266943a9bf908e964944e5735d7e705",
+    "native-browser-e7ef/runtime-artifacts.tar.gz": "b0f6775171d94000d1c4c944d2b4688b42fc39312dff6c2ede8824f19ceaa179",
+    "native-browser-e7ef/incremental-cache.tar.gz": "0c3f22d411897b4f0822fa8b4f11b8ea4ec77e1bcd8cedc21fdbff4fabf85aee",
+    "native-browser-e7ef/evidence-files.json": "8a9c1aa9542561b541aeeccbae0ae2f9625b1e77a13754a5aa717b858023158b",
+    "native-browser-e7ef/runtime-files.json": "4e7ffa48711a3bf7ffa87a2f3c4cf6584016d2eab22d913db65312d7c71cbaa2",
+    "native-browser-e7ef/cache-files.json": "1d5d390f4e035f94efcd4981115eb3ffc3ddd9c1b7fc002ee3d043a1d7cc39c9"
+  },
+  "inspection": {
+    "guardedRegression": "Guard historical environment payload intake against freshness overclaims.",
+    "inputs": {
+      "native-browser-wrapper-handoff-5a21.json": "a53f2f972de3748860f20545fd0f6ffdef3d714d5fbb97e3d3de73e5dca6b365",
+      "native-browser-wrapper-index-5a21.json": "643f9d637d9f12ffd74fe5857a17becaefe0c30755071c6d3fe98de4b843e617",
+      "native-browser-e7ef/evidence.tar.gz": "c3c9ce432635b63557700dc3bb01d217f266943a9bf908e964944e5735d7e705",
+      "native-browser-e7ef/runtime-artifacts.tar.gz": "b0f6775171d94000d1c4c944d2b4688b42fc39312dff6c2ede8824f19ceaa179",
+      "native-browser-e7ef/incremental-cache.tar.gz": "0c3f22d411897b4f0822fa8b4f11b8ea4ec77e1bcd8cedc21fdbff4fabf85aee",
+      "native-browser-e7ef/evidence-files.json": "8a9c1aa9542561b541aeeccbae0ae2f9625b1e77a13754a5aa717b858023158b",
+      "native-browser-e7ef/runtime-files.json": "4e7ffa48711a3bf7ffa87a2f3c4cf6584016d2eab22d913db65312d7c71cbaa2",
+      "native-browser-e7ef/cache-files.json": "1d5d390f4e035f94efcd4981115eb3ffc3ddd9c1b7fc002ee3d043a1d7cc39c9"
+    },
+    "reportedSourceBuildHead": "4d7285b80e89741e9da8cb49ce7ab8b62a828a72",
+    "evidence": {
+      "payloads": 522,
+      "regularMembersIncludingIndex": 523,
+      "payloadBytes": 11979639
+    },
+    "runtime": {
+      "payloads": 5,
+      "regularMembersIncludingIndex": 6,
+      "payloadBytes": 37938626
+    },
+    "cache": {
+      "payloads": 32,
+      "regularMembersIncludingIndex": 33,
+      "payloadBytes": 5963821
+    },
+    "historicalWrappersBoundToEvidence": 20,
+    "recordedSourceModules": 343,
+    "environmentControls": [
+      {
+        "modality": "box",
+        "cases": 8,
+        "perBackend": {
+          "proved": 4,
+          "refuted": 2,
+          "unsupported": 2
+        },
+        "coreResultParity": true
+      },
+      {
+        "modality": "diamond",
+        "cases": 8,
+        "perBackend": {
+          "proved": 4,
+          "refuted": 2,
+          "unsupported": 2
+        },
+        "coreResultParity": true
+      }
+    ],
+    "gateReceipts": [
+      {
+        "path": "evidence/A-controls-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/B-controls-authenticated-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/B-kernel-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/C-controls-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/address-marker-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/box-controls-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/browser-negatives-gate.json",
+        "exit": 1
+      },
+      {
+        "path": "evidence/candidate-exclusion-gate.json",
+        "exit": 1
+      },
+      {
+        "path": "evidence/candidate-exclusion-recovered-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/closure-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/diamond-controls-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/environment-box-controls-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/environment-diamond-controls-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/finite-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/fixed-byte-box-controls-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/fixed-byte-diamond-controls-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/fixed-byte-marker-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/functional83-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/keys-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/marker-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/mcp-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/native-build-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/native-negatives-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/package-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/producer-args-compiler-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/state-refusal-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/ui-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/units-gate.json",
+        "exit": 0
+      },
+      {
+        "path": "evidence/wasm-build-gate.json",
+        "exit": 0
+      }
+    ],
+    "retainedFailureNames": [
+      "invariantCountsToBound"
+    ],
+    "retainedStack": {
+      "message": "Maximum call stack size exceeded",
+      "functionIndices": [
+        2205,
+        2207,
+        3134,
+        2205,
+        2207,
+        3134,
+        2210,
+        2212,
+        3134,
+        2210
+      ],
+      "symbolization": "Not mapped; historical6ae symbols are not a map for this5a5be8 binary."
+    },
+    "nativeSha256": "3c37185f5bffede760f3d47be04a8f17e863ab72439274e255bc453545ffab40",
+    "wasmSha256": "5a5be87b17b5f46bd959fc2cc11065ab0923050982998aaa63a4fdcb52b0d1f0",
+    "extraction": false,
+    "execution": false,
+    "cacheInstalled": false,
+    "gitSourceIdentityVerified": false,
+    "boundary": "Historical sealed payload/index/build-manifest consistency and saved request/result parity only. No current reader qualification, Git source verification, compiler/source transport, universal native correctness, performance STOP release or runtime gate acceptance. Original producer d8a141a7 evidence remains a separate undelivered archive."
+  },
+  "archive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/environment-intake-3f2b1350346c1116.tar.gz",
+    "sha256": "3f2b1350346c1116fe4423c7fda87cc2c45681967de0867ca86c33ff16115094",
+    "bytes": 22751,
+    "files": {
+      "e7ef-intake.json": "7892c309f264dcc0c497c26d96c606f0751fd072f416c1bb931e4fc657bf0bde",
+      "e7ef-reviews.json": "39f7dc080334c3523e4713befa0676dea2aaa8c19472c300ff2b60860f22250f",
+      "restored-validation.log": "bb9f62521ea638d42332cce42c070de188e9d67d10ec4145c992c8ff83d9dcd9",
+      "restored-validation-publication-failure.log": "a366b3c3f2672e8cb766a805fc79f06fa8e606cb6bcb948aac551f5e48c9886f"
+    }
+  },
+  "restoredValidation": {
+    "childMaxRssKiB": 1272216,
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/shared-translator/environment-decoder-validate.sh"
+    ],
+    "exit": 0,
+    "scopeMemoryPeakBytes": "215810048",
+    "wallSeconds": 25.073525744999642
+  },
+  "outerScope": {
+    "outerExit": 0,
+    "resourceStop": false,
+    "minimumOuterAvailableBytes": 11104948224,
+    "outerWallSeconds": 27.078413497001748
+  },
+  "restoration": "Production and legacy controls restored byte-for-byte to pre-candidate HEAD; original185input/census/profile contracts pass. Initial publication ancestry failure retained; fixed to actual merged8a710f9d44df before successful rerun. No rejected verifier/audit changes executed.",
+  "reviews": {
+    "finder": "Read-only final: mandatory guard denominator, exact stack message and frame presence confirmed; no intake blocker. No Lean/server/build/writes.",
+    "skeptic": "Read-only final: archived byte integrity/saved parity only; unmapped frames and STOP/freshness boundaries correct. No blocker; no Lean/server/build/writes."
+  },
+  "limits": [
+    "No delivered code/wrapper/binary executed; no cache installed or adopted.",
+    "SourceBuild4d7285 historical only;343array equality is not Git-source or compiler/source preservation proof.",
+    "16sealed environment cases have saved8proved/4refuted/4unsupported perbackend;2separatepositiveguards preserved.",
+    "Known invariant stackoverflow and native median/build/browser-startup STOPs persist.",
+    "Original d8a141a7 producer archive remains a distinct outgoing delivery wait."
+  ]
+}
