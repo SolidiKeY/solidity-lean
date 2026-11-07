@@ -1,0 +1,11 @@
+{
+  "requested": "PAUSED",
+  "authorization": "Latest explicit human retirement instruction",
+  "applied": false,
+  "failure": "PAUSED transition unavailable: no get_goal/pause_goal/set-goal-state tool exposed; only codex_goals_stop_goal(outcome: complete|blocked). Neither supported outcome represents PAUSED.",
+  "attempted_mutation": false,
+  "goal_created_reset_completed": false,
+  "local_worker_state": "STOPPED_BY_RETIREMENT; no automatic continuation authorized",
+  "handoff_to": "solidity-v12-v17-20261031/v17-validation-release",
+  "push": "Not attempted: H71 authorization not supplied; original no-push retained"
+}

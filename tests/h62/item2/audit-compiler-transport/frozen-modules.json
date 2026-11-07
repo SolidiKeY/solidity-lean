@@ -1,0 +1,624 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "map_sha256": "35c309bc102412f33a61a4cf739598f19b16adf76e57f78b864259fc3fa61545",
+  "modules": [
+    {
+      "module": "Solidity/Backend/Passes/Boundary.lean",
+      "sha256": "72a861f47783401b491066a1195bb32b8841ff73461ef6dcea4d44ae2cf3ee4e",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/CompilerProofChecks.lean",
+      "sha256": "fa307e4b67c0b1a5d60b2a4e388cf2dcf9c44eb112eb92502d441700723beb23",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/CoreBoundary.lean",
+      "sha256": "9ff64dc40e4f5b0e14c0f2fc3b6879c3efb062ff5da2846a0aac6741c1097fa8",
+      "theorems": 5
+    },
+    {
+      "module": "Solidity/Backend/Passes/Divergence.lean",
+      "sha256": "2482279298672903f580fd3175d602819e770cbaffa42a73a99482517bee21d0",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Backend/Passes/EmittedTail.lean",
+      "sha256": "c7c8886a9488a2a02ebec27c1cd25b62f10b08798a8770ff564d36cc41853f9e",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/Frame.lean",
+      "sha256": "ba64aa963b7dca46e5a86c1e7e6e1d4f50b32855798affc128d73ba342450824",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopBoundary.lean",
+      "sha256": "5c895c7146bd44db808286bf7fa7bfe2a006ba1451449d032f572145d0d4c2be",
+      "theorems": 8
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopReframedCompletion.lean",
+      "sha256": "cf91364b7ff948e48468609436d649f19d66ac915f156dc2e5ade263c6486737",
+      "theorems": 10
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopReframedCompletionDraftAxioms.lean",
+      "sha256": "97f6b7d803e8ae39dd4ae4ce1111a38be2d74b657220a0e3e0c7678aed71cc08",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopReframedFailureControls.lean",
+      "sha256": "96d3d98e65098eabb0cf4c3452bd8fa4129a8bf04e4517ac41df3caeadb792b3",
+      "theorems": 18
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopScopeApplication.lean",
+      "sha256": "181a351ab2f796d65bd6d2a5dbdf9bfbd01469bda2cea9baec283c743a39ec85",
+      "theorems": 9
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopScopeControls.lean",
+      "sha256": "dc64415f345ba574e650a494aecc81bf393e545b8007e62e6c241aed77bb0bf0",
+      "theorems": 18
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopScopeObservations.lean",
+      "sha256": "a1501ab9ca1e7571369d45c13dd3740605b129887bbaa1062fa2079087ff57c9",
+      "theorems": 5
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopScopeTerminal.lean",
+      "sha256": "701c99443e70cb6c2f007c768fa716522a27fe53a447bac2fda5cdafb08cde5d",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopScopeTrace.lean",
+      "sha256": "fc0904716164b5a5136fa35bfd14b55d13fc526898b2a7b5192c926058bdaa28",
+      "theorems": 19
+    },
+    {
+      "module": "Solidity/Backend/Passes/LoopSequence.lean",
+      "sha256": "acd437d0e29e5ead0151ae436763d599a797e7bb34868cf3091b03f75c2d77d7",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/Passes/MappedSequence.lean",
+      "sha256": "c39810bde8297323777a10504e64d144960234e4ec1ee9ba57c3315e8281dad3",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Backend/Passes/MappedTail.lean",
+      "sha256": "a4cbbebe48e56839057d80226e9d72365de4686dd6300c80f2bcedf05608145c",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryCallBoundary.lean",
+      "sha256": "b3942db4de1b10ffb1ede2d7482061c97198a224a46b801e81c62e5532f603c7",
+      "theorems": 5
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryCallControls.lean",
+      "sha256": "f9eef5ff626215e236f0ed11e05452f0105feac5f6a71be9c547c04d9245f5b7",
+      "theorems": 15
+    },
+    {
+      "module": "Solidity/Backend/Passes/ReframedFailureDraftAxioms.lean",
+      "sha256": "a696e8da9cac891bfc668a1d7ad13e8984509c48ed74275f685889930e61b0c8",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/ReframedFailureWitness.lean",
+      "sha256": "844cf90f61ad20b2f8d532accf15c40dd76a0aacde15e5b164c9e979d73ff792",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/ReframedLoops.lean",
+      "sha256": "90188d02bb527f09f76110b1999bc7059fed8db1d561598970cc33d86552ab95",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/ReframedSequence.lean",
+      "sha256": "c1b61f0ffa2a83ae4bc71462b130892a25270618af72167d2722814a2f9c808b",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Backend/Passes/RevertWitness.lean",
+      "sha256": "5c96c3859df167ff20ce2d73502f1cd0885ca230242419a0befda5d52d45b6d7",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/Sequence.lean",
+      "sha256": "4dbf3e95f90fc85bb49b1d4707e363ea4b5657f115846e9b61100b47d56572b3",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/SourceTerminalFailure.lean",
+      "sha256": "1ba1f073e298e0fd2cb34e9fcad60fe2878a1fdf029e4eecc4b0e021d666c78b",
+      "theorems": 5
+    },
+    {
+      "module": "Solidity/Backend/Passes/Stack.lean",
+      "sha256": "cd3bec154ccae4e104cf4846ca6e9bb1772ce22064f44cd3141dea22bb9dd740",
+      "theorems": 6
+    },
+    {
+      "module": "Solidity/Backend/Passes/TailLoop.lean",
+      "sha256": "d91f42676100f0d587178f3c5bebc5d30210a47f67c61a2cad3667e16fe9d7cf",
+      "theorems": 6
+    },
+    {
+      "module": "Solidity/Backend/Passes/TailMachine.lean",
+      "sha256": "229fc03ea2facc7cbe32742d44abca8a7c9b3a9435f4ea288f4bc3442d028708",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/TripleSequence.lean",
+      "sha256": "d0d94aca97661bf38673fb634b32cea10c2e9becc5394c79e71c28499896db28",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Backend/Passes/SourceAdditionValue.lean",
+      "sha256": "e2b10d02cc514515c2255bf7be5701782079feeb64c496a4f53b654c21b6c755",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/Passes/SourceAdditionValueControls.lean",
+      "sha256": "1484d449b1ede272276df0d76fc0614d83d378448ac908e5bf0b278fc7e27960",
+      "theorems": 9
+    },
+    {
+      "module": "Solidity/Backend/Passes/SourceAdditionValuePins.lean",
+      "sha256": "69be3a464e5cdd7a919c17c68aff0cf968077ea3d41cf1492d59fc1b64a0005b",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/RelatedMemoryCapture.lean",
+      "sha256": "14f7a82049c5a3502b053885e3614cef6cc4d98b424aec72e636f1646f42a2a6",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/Passes/RelatedMemoryCaptureControls.lean",
+      "sha256": "820464d07fee21f0b422daab0b4fef7af096adbf2e8f9fe093064bfd485a6d48",
+      "theorems": 10
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveCall.lean",
+      "sha256": "cea12d65a79b1c5e9b41eb41a7ef9a010ed77615fc3888043ebfcccb8a18e07f",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveSource.lean",
+      "sha256": "6468589a475514e9d62f2a9aaab3fdc92fd680418e43f362aeca1879d76867a9",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/Passes/RelatedStorageCapture.lean",
+      "sha256": "96d08110d936030e5c398c30a0206ef09982d08e35fdc5ad674e908383c07d58",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/Passes/RelatedStorageCaptureControls.lean",
+      "sha256": "12365841690139e3d48e9b17926dd7b8032f142d560569e989801380087cbe81",
+      "theorems": 11
+    },
+    {
+      "module": "Solidity/Backend/Passes/ReturnedStorageCapture.lean",
+      "sha256": "e87e1e6877dcc7c7664f142df30560b760b1be147e88e580d800cb7b755f6697",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/Passes/ReturnedStorageCaptureControls.lean",
+      "sha256": "b651b5abbf4cc20727f529748ea09b8b7cad55de4d067b8dc9c9eab0d50ab265",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarSourceCheck.lean",
+      "sha256": "4d7062cab8e1a24d1c06ccc07d8e2d1504501199aba5f567de200d22268dc2cd",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarSourceCheckLaws.lean",
+      "sha256": "67ce2c822eaffe699c1f7ea9956637c7e04e3ad1ae29471cd25a428b4316079a",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Optimizer/Controls.lean",
+      "sha256": "9e396cbf1035cc530ba60cc063880491c852d51927fcd6174b0e947cc911ee0d",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Optimizer/Laws.lean",
+      "sha256": "eb9ce9afd994c6d7df8705b0054159da9eea52e529068a7711c5ee7afa76e830",
+      "theorems": 10
+    },
+    {
+      "module": "Solidity/Optimizer/Pass.lean",
+      "sha256": "4b9e8062354f3dddc7213560a79f59c714a118e28267f2d7e2a186eea33f0dbe",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Optimizer/RoadmapComposition.lean",
+      "sha256": "cc562392ed80d4da3adac9ce1e3330602954e76ca2964bd2e4d0b1ad897ff56f",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameScopedSource.lean",
+      "sha256": "679a04a1258b2d2755547ea6ee91206a13e1797e15d90bacd1aa68b11f9a1661",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveScopeCheck.lean",
+      "sha256": "8ad7c90b202333e83968a7fcfcd43224a7c753452ef81a7c076ee4ed9af92e93",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/Passes/BitwiseValueContext.lean",
+      "sha256": "987e2f2320b87f2ac39c488aa32336262962c79a33c7e6880a992e9fc592889e",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/Passes/BitwiseValueContextControls.lean",
+      "sha256": "de6a7dbdeb50af924722841683cbcedc4bf4f54d7d8dd77840f73ef01beafffd",
+      "theorems": 10
+    },
+    {
+      "module": "Solidity/Backend/Passes/ValueReflection.lean",
+      "sha256": "cd3231b56f301f163f850037c1fb13f1118c5e8da6a315d44fac9eb513ec34a2",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3FrozenScopeFamily.lean",
+      "sha256": "2b8f77a4fa3aff6d9ab2255019ea6c4c24b232296d16ecd30bea9408bd24b75c",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveScopeLaws.lean",
+      "sha256": "d9d8f579219ff7d798313a88b314b073e5d91667af89c6b91f7d9c6b7368c5a2",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveAgreement.lean",
+      "sha256": "ec028d15b6ac2100bffef40d53e110dc0737f697551b29bec7597fb2fa4a8bfb",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryScopeAllocation.lean",
+      "sha256": "435ede0118ec7799c0a109f93f2612cef88293d0ff3eaf5dddace13a3a5e5328",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryScopeBoundary.lean",
+      "sha256": "cd42c5f49a75edbf4c59bb04cfcec846d7f0ed591876ac3d6cb063dd26894b54",
+      "theorems": 8
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulScalarSource.lean",
+      "sha256": "c4ebafd3351a8217a078eddbb07986a086c85153bb710b13bddaa44943ab2d55",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulSourceCheck.lean",
+      "sha256": "dcb6ca8b8b5895810dd4397ec36afc0ebb1aeea2fb36610dd4b49661ddc7b7ac",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/TupleReturnConsumerControls.lean",
+      "sha256": "973a4f842c9ed8fa569338dd005c4d2e3a3a95174aca978d396c73b7a22908f2",
+      "theorems": 6
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarParentRestore.lean",
+      "sha256": "f085ae4b3b82418446c67bbb42b9af2ada0b56318bf80eba3a8129a60ea41fb2",
+      "theorems": 1
+    },
+    {
+      "module": "Solidity/Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean",
+      "sha256": "81873e646da7eecd306ffa33c7637a4bdd5a274e22a6ff0cb45deba13217264e",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryCallScopeControls.lean",
+      "sha256": "fce1be68503ece98d6f6ac3d550d7357d66ae704aef7afe23e40298c080766ba",
+      "theorems": 9
+    },
+    {
+      "module": "Solidity/Backend/Passes/AllocatedReferenceRead.lean",
+      "sha256": "8be11e70b6d60105e12b468fce851adf5c9cfc8ec8fca9eeb6f658d7028b4114",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Backend/Passes/AllocatedReferenceReadPins.lean",
+      "sha256": "5288f7c9e568df4c38d33a2eb93f375bcf71af4c88e323d6272e0bc260e348c6",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/AssignmentAdditionPass.lean",
+      "sha256": "ddae871cd72fd0f2c5accfc3ffae28ab77bd1f6aa8798baeb6219aea838a98b7",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/AssignmentAdditionPins.lean",
+      "sha256": "3aa7de4ca94eb9fd89974017fa830d544f9486978dd1b65d23cba23e18e67dec",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/AssignmentMultiplicationPass.lean",
+      "sha256": "e6c77a1f0c6274c4ea9c30e10eb104391ca29a32ea63b34546d1f13d617bce9f",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/AssignmentMultiplicationPins.lean",
+      "sha256": "282301503348062480b98c44f22e84c1c23e1f60b7634047e5b61dce4df1f8f0",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/CheckedAdditionCapture.lean",
+      "sha256": "b6a6978f66a3798b50410449187fe4b2c2f9193ab8239897807b9b85d03ce507",
+      "theorems": 7
+    },
+    {
+      "module": "Solidity/Backend/Passes/CheckedAdditionCapturePins.lean",
+      "sha256": "3d9115ac8a8079e3e53f8400166ea2820e654dfbd5e49a2b5c8b56705cb198e3",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/CheckedAdditionReachedOverflow.lean",
+      "sha256": "1fa693ba60017e3707df87b5524d060a67a4ebb2c7cda7fefe08997eb8e2c068",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/CheckedAdditionReachedOverflowPins.lean",
+      "sha256": "c4341fa4ed43ecb47ad2b59e0e7a69ae25b4a3d7538d2acae726f85aa007adfd",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/CheckedAdditionSequenceSuccess.lean",
+      "sha256": "12c1d34307422ccf146812f702e94d023a33c400903267f79162f8440a740fcb",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/CheckedAdditionSequenceSuccessPins.lean",
+      "sha256": "16fcbd708cc3806f80973d6ac2b2505fb58101476d06f1e6b57a3f11693fa915",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/ComparisonReferenceCapture.lean",
+      "sha256": "d0529955e64456147fa5a563c0587e72c1cd0523786b72a8bfef2a2470503d70",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/CompilerCallScopePins.lean",
+      "sha256": "68bbf765667f3a75ae22395a80fa69ce3b4bbbb6b9048c6e638965897489d366",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/CompilerCallScopeRecognition.lean",
+      "sha256": "15b3340c0b571bd351e6af57cdfee6e8528278b987d86881cb0f6bcb0e9dd506",
+      "theorems": 17
+    },
+    {
+      "module": "Solidity/Backend/Passes/CompilerScopedFailure.lean",
+      "sha256": "80d61ed479c59359d631830739376228fdac5435ea2cb241d94c073dfb8c68d1",
+      "theorems": 22
+    },
+    {
+      "module": "Solidity/Backend/Passes/CompilerScopedFailurePins.lean",
+      "sha256": "a496e7a133c5e1c6645fe56e16335717838c1a67abe61fac4298928b999b7d65",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/CompilerWholeScope.lean",
+      "sha256": "dfe34b2a6b739ca74f895ff3137c1a0393b1be00c9f214aec68ac584fd6865f1",
+      "theorems": 16
+    },
+    {
+      "module": "Solidity/Backend/Passes/CompilerWholeScopePins.lean",
+      "sha256": "6d0543ceb1ca902b2dfd9e4fecba0359e1dc0e09f15749750e5fc33b1c76217d",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/DeferredCondition.lean",
+      "sha256": "457294e023a8135948f3290d2e4034260c14db22bb3fbc0ba88dcb18ee8076fe",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/DeferredConditionFailure.lean",
+      "sha256": "fadec338a05a78be6c1023d7593253b482f7cd976084f1d1d829258ee5a88413",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/EffectfulConditionalAssignment.lean",
+      "sha256": "ce51a0a150eba20c4e774f8b0d33ee345f28165271a67892bf9b9151858d4d16",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/EffectfulConditionalPins.lean",
+      "sha256": "415fd6499d3d7c154cc1de1496a51babb74d0b7f3b564297290ea80145debe75",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/FramedMemoryBoundary.lean",
+      "sha256": "27725a6f6a0d97a46a7a2c787c09c4cc9e139a1248c7c05023466187b4626df7",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryAssociation.lean",
+      "sha256": "6aa5af52bbc5a0cd6f33fb667b214fc582a3213962ff61f6fee5966ec403cd20",
+      "theorems": 5
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryAssociationPins.lean",
+      "sha256": "e7ad1fbedd21a8f45e742b47d13cacef7962edb9dda0bcc36e38a0c414dde051",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryCallScopeBoundary.lean",
+      "sha256": "61945e0327e787336afb74d6bc984703094192fee1ca24f43613d199e2063d54",
+      "theorems": 10
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryCallScopeFailures.lean",
+      "sha256": "72a1eb6ebfb4aa3d715c6cb3ad0571bec1536e9723cfa6eb1348e061e73c63ea",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryCallScopeObservations.lean",
+      "sha256": "670c8a2e45c2aab388916a0946c12ca83eb7ab8406949d21abe291d1cf002d71",
+      "theorems": 9
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryCallScopePins.lean",
+      "sha256": "37c163f8a50e2303bc634fe585f7132b1e604d8d369b05375c0b2fe029faacac",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryJoinCost.lean",
+      "sha256": "318cdc27be1c90f9a4cc222c859f6c776f525dea539f3241cb807ede49c2e4e6",
+      "theorems": 5
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryJoinCostPins.lean",
+      "sha256": "f774999d82c5c01e082eeff992b787abc17f99ff994881d7993b451a9b304d43",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryJoinFrame.lean",
+      "sha256": "2256959a16349518dd5dad019dc97c1874718e0998eb82688fb9141c125feeb4",
+      "theorems": 6
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryJoinFramePins.lean",
+      "sha256": "54ea812dabfeccf8b3de70bf543d8e6bbf49ce06d2b940b737a1289c53adceea",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryJoinedAllocation.lean",
+      "sha256": "e44c574bebce771a42d8e81de6119319c6ac0859015571e00392459a23d7685c",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryJoinedAllocationPins.lean",
+      "sha256": "5a9c7cd11b3f022959a39f98e84f55a9f5f50d64e92da044e35f1e82a3c6ec52",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryJoinedOutput.lean",
+      "sha256": "709e164e017ddebfb142c8bcb0ed7d4e6787016538abb68b1cb80132d4737d18",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryJoinedOutputPins.lean",
+      "sha256": "f6952c13517835bb64ddfcb9497704a2d7a6e396817d32268d9802aa3977a137",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryScopePins.lean",
+      "sha256": "538b6b38ba779e2fbf2a03edd16470d8c2110b291ded6e15e03f2b622e892b5e",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryTripleAdmission.lean",
+      "sha256": "77b5eb1c82511687e7b74047284895c48eb9bbe99404265dc56c57e8d8d97628",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/MemoryTripleAdmissionPins.lean",
+      "sha256": "e39c6ebdbcf4745ec37848030d3f34ca9b98d9b84d7c2e3ec58e9cd0ac7eadeb",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/P12ConditionExecution.lean",
+      "sha256": "ea4f472d11339ef1c21a1f2a0e54ae51ad33b0c4114ae4e73f5b77d987bd102a",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/P12MemoryCapture.lean",
+      "sha256": "b8e2b03e37faf846f01baccd59a974a4b3515c9d57309317833e7da02ee7d9d7",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/P12StorageCapture.lean",
+      "sha256": "3549dac146dcc63020152953510569380fe4143cdadf4f24368c48f2286d7b27",
+      "theorems": 3
+    },
+    {
+      "module": "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean",
+      "sha256": "2ebb65e8eacdd6985b6f68e4f18c807ed65a8ff3d53a7492b8c7e809108db64d",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/RelatedStorageCapturePins.lean",
+      "sha256": "852333f6d615dced76a817c3f6f4f3d61beb741b3baa6f93d2626b45c09c5c99",
+      "theorems": 0
+    },
+    {
+      "module": "Solidity/Backend/Passes/ReturnedMemoryCapture.lean",
+      "sha256": "e4b1431c36bd65f1d06424ce9d68a7843f5a296a0c6459d586efaa7ca269a118",
+      "theorems": 2
+    },
+    {
+      "module": "Solidity/Backend/Passes/ShiftCapture.lean",
+      "sha256": "7cf9b80bfa30667b209c3e9d4c1d5541c7c7bc02cfc8f652745f12c04ec121d7",
+      "theorems": 8
+    },
+    {
+      "module": "Solidity/Backend/Passes/SignedDivisionCapture.lean",
+      "sha256": "6027002878fb589088f76ddc831dd4f0bea7db0426b444ee9ae3df036719f020",
+      "theorems": 9
+    },
+    {
+      "module": "Solidity/Backend/Passes/SignedRemainderCapture.lean",
+      "sha256": "3e2354c7abd3df935943e6446967a9713874a48cd190491337f739a9702e6980",
+      "theorems": 10
+    },
+    {
+      "module": "Solidity/Backend/Passes/SignedSubtractionCapture.lean",
+      "sha256": "ad1d275d3ea1f413725e214f81b15994e4025dfe1ad64dd636a0b8ed7f5e645a",
+      "theorems": 8
+    },
+    {
+      "module": "Solidity/Backend/Passes/TupleReturnConsumer.lean",
+      "sha256": "5a9c1710ad774b529d8f5cceed97d2d3b9340373ff2c316b081fcdce32777b2b",
+      "theorems": 8
+    },
+    {
+      "module": "Solidity/Backend/Passes/UnsignedDependentCapture.lean",
+      "sha256": "2a0aab06521d2dfb513fa3713a2a4cac0804adb3db6a6b3f4f3bd48413121153",
+      "theorems": 12
+    },
+    {
+      "module": "Solidity/Backend/Passes/UnsignedDependentFailure.lean",
+      "sha256": "f0d831d215d034619ae483a12dd064b390a4783b6b497be9608c58816fe64b0e",
+      "theorems": 4
+    },
+    {
+      "module": "Solidity/Backend/Passes/UnsignedDependentScope.lean",
+      "sha256": "0edf283c785bf2f1fde45588c4f8c30224e41020f8289c62d5b00436f2165afd",
+      "theorems": 13
+    },
+    {
+      "module": "Solidity/Backend/Passes/UnsignedWidthCapture.lean",
+      "sha256": "9c4a8b6104159f07ec85074d79f0a93d763ed5836ed092616a1f6f86a43fd403",
+      "theorems": 9
+    },
+    {
+      "module": "Solidity/Backend/Passes/MachineSar.lean",
+      "sha256": "8c61de6a49f311548716ba6d35f645135e023b444a0c985e8a4f2130c19ff944",
+      "theorems": 8
+    },
+    {
+      "module": "Solidity/Backend/Passes/MachineSarPins.lean",
+      "sha256": "ff2927da9837f4375402b9d8d029bfbcd97e3a20f603e945848aec266503c24c",
+      "theorems": 0
+    }
+  ],
+  "summary": {
+    "modules": 122,
+    "theorems": 560,
+    "public": 539,
+    "private": 21,
+    "joint_witnesses_verified": 0,
+    "false_conclusions": 4
+  }
+}
