@@ -2635,3 +2635,32 @@ skeptic reviewed this accounting boundary. Original 703-source closure,
 obligations remain open. Evidence and reproduction are off branch under
 /workspace/parallel-20261103/executable-bytecode/control-source-accounting/ and
 archived privately under H145.
+
+
+### Frozen premise source and binder accounting
+
+The same static join now accounts for all 41 records in the sealed Premises and
+PremisesV2 packet, including eleven kernel theorems. The lexical theorem scanner
+finds zero source theorem candidates in these two files. Consequently all 41
+records remain unmatched to that lexical theorem inventory: generated theorems
+and structure fields are not silently excluded or credited as source matches.
+Thirty-six records have ranges and five lack them. Source bytes are pinned to
+the frozen native inspection inputs; the parent checksum list and input
+manifest/record hashes are checked before the join.
+
+Across these records there are 395 ordered raw binders, with 64 proof-binder
+flags. Thirty binder heads name records supplied in this packet, 143 name
+constants absent from it, and 222 have no constant head. Those are metadata
+observations, not classified global/per-input premises, instantiated dependent
+types or simultaneous witnesses. No private flags or structure-parent roots
+occur in this packet; no absence of inherited obligations elsewhere follows.
+All source/kernel correspondence, generated-declaration ownership and field
+obligations remain explicit open work. This adds no new domain or census credit.
+
+The existing generic helpers produced byte-identical static reports on replay;
+independent read-only finder and skeptic reviewed the counts and boundaries.
+No Lean workload, prerequisite build, budget extension or PowerBounds retry was
+performed. The original closure, full validation, Source/runtime/G01 and physical
+obligations are unchanged. Reproduction and evidence remain off branch under
+/workspace/parallel-20261103/executable-bytecode/premise-source-accounting/ and
+are archived privately under H145.
