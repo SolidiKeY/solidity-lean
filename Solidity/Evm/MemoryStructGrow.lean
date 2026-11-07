@@ -9,6 +9,9 @@ values and addresses; live-interval bounds keep the allocation writes outside
 old objects. Struct allocation interprets primitive defaults and reserves
 reference member cells; source-level recursive construction remains separate.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 

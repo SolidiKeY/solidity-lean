@@ -12,6 +12,9 @@ These target lemmas precede the source-heap growth and compiler integration.
 A capacity premise prevents word-address wrap; allocation is not yet a
 clause of the public compiler.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 
 /-- Consume a length, write the header, return its base and advance cell zero. -/
@@ -130,7 +133,9 @@ theorem ArrayRepr.keeps {H H' : HTy} {hp : Heap H} {hp' : Heap H'}
   have hm : (List.map (MVal.wk e (.prim p)) (hp.get r).val : List p.Denote) =
       (hp.get r).val := List.map_id _
   rw [hm] at hv
-  exact h.elements i v (by simpa only [MObj.elems_dyn] using hv)
+  apply h.elements i v
+  rw [MObj.elems_dyn]
+  exact hv
 
 /-- Every primitive-array reference after one allocation is old or fresh. -/
 private theorem arrayRef_cases {H : HTy} (hp : Heap H) (p : PrimTy) (size : Fin W)

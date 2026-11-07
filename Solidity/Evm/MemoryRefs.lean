@@ -8,6 +8,9 @@ uses the shared address map, so aliases and nested paths can follow pointers
 without erasing their endpoint types. The ordinary interval ownership still
 frames each pointer cell against local, array and primitive-member writes.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 

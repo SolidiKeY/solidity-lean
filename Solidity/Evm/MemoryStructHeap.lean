@@ -9,6 +9,9 @@ cell, so primitive writes preserve other structs and reserved local frames.
 The cross-relation separates these intervals from primitive dynamic arrays.
 It allows the struct and array simulation layers to share one target heap.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 

@@ -11,6 +11,9 @@ and equal object identities use the same base in the global relation.
 These local instruction and frame lemmas support the source simulations and
 checked compiler clauses in the modules above this representation layer.
 -/
+-- Preserve pre-4.35 proof elaboration transparency; declarations are unchanged.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity.Evm.Memory
 open Semantics
 

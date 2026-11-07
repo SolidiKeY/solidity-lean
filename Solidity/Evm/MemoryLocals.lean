@@ -135,20 +135,24 @@ theorem StateRepr.consMem {L b frame : Nat} {Γ : Ctx} {F : Frag Γ}
   have hmem {t : LTy} (i : Idx Γ t) :
       (writeMachine m (cell (b + Γ.length)) (.val (base r.id))).memAt (lvl b i) =
         m.memAt (lvl b i) := upd_other _ _ (Nat.ne_of_lt (lvl_lt b i))
+  have hlook {t : LTy} (j : Idx Γ t) :
+      Look.ofTEnv (Γ := .mem R :: Γ) (some r, σ.env) (.there j) = Look.ofTEnv σ.env j := by
+    simpa only [Look.cons_there] using
+      (Look.ofTEnv_cons (u := .mem R) (some r) σ.env (.there j))
   constructor
   · refine ⟨h.core.store, ?_, ?_, h.core.net, h.core.netSelf, h.core.bound,
       ?_, h.core.env, h.core.funds, h.core.oracle⟩
     · intro q i
       cases i with
-      | there j => simpa only [Look.ofTEnv_cons, Look.cons_there, lvl_there, hmem] using h.core.vals j
+      | there j => simpa only [State.push, State.glob, hlook, lvl_there, hmem] using h.core.vals j
     · intro R i hi
       cases i with
       | there j =>
-        simpa only [Look.ofTEnv_cons, Look.cons_there, lvl_there, hmem] using h.core.aliases j hi
+        simpa only [State.push, State.glob, hlook, lvl_there, hmem] using h.core.aliases j hi
     · intro R i hi
       cases i with
       | there j =>
-        simpa only [Look.ofTEnv_cons, Look.cons_there, lvl_there, hmem] using h.core.fragile j hi
+        simpa only [State.push, State.glob, hlook, lvl_there, hmem] using h.core.fragile j hi
   · exact h.heap.localWrite _ hl _
   · intro q i
     cases i with
