@@ -2526,3 +2526,22 @@ removed since the preceding snapshot. Independent read-only finder and skeptic
 checked roles, file reads, hashes and history preservation without Lean or a
 server. Evidence hashes are in `tests/h55/module-times/v10-source-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Language migration probe observations
+
+`language_migration_controls.py` records three previously unreferenced language
+migration probes with source hashes and the migration document hash. They cover
+isolated decision/bounds controls, a structural type/axiom transcript and a
+read-only elaborated interface transcript. Binder-name normalization and
+version-specific printing do not establish cross-version kernel identity.
+Current invocation, inputs, effects and outcomes remain unresolved.
+
+At merge head `e19141234da8865154664a7305184d489d46ce5d`, the refreshed static
+index has 819 candidates, 626 with supplied current references and 193 without;
+eight retain historical references for review. Three candidates were added and
+IntegerCallableJoint changed since the preceding snapshot. Its earlier callable
+artifact and source identity are retained as historical, not counted current.
+Independent read-only finder and skeptic checked roles, hashes and history
+preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/language-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
