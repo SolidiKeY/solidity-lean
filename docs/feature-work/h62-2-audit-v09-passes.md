@@ -1306,3 +1306,19 @@ supplemental counts stay separate. Evidence is external at
 `/workspace/vy3-evidence/reference-call-readback-20261107`. This establishes no
 native ByteWorld/emission, ABI/gas or full Source/G24 adequacy. Original producer
 waits, STOPs and full validation/timing obligations remain open.
+
+
+Authorized signed-bitwise transition intake: H71 routes MRS owner head
+`abf726ff80b52c1e4bfd6e95dcea64cef1ee2830`, reporting H87/H96/H126 authorization
+to replace `BitwiseValueContextControls.signed_refusal` with `signed_acceptance`.
+The tracked `authorized-statement-transitions.json` preserves the exact frozen
+old signature and records the proposed new identity separately. Fetched master
+still has the historical negative; fetching the exact owner head returned
+`upload-pack: not our ref`. No replacement signature or gate result is invented.
+The reported ticket SHA is provenance, not a locally verified artifact hash.
+Frozen registrations and every original external assertion remain unchanged;
+source notes in both inventory and external checks point to this separate intake.
+The historical negative is superseded only by the explicitly authorized live
+acceptance transition, not silently re-proved, renamed or counted unchanged.
+Adoption waits for exact replacement bytes/signature and owner validation.
+Selected489/1259,770open remain unchanged; no acceptance credit is transferred.

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "purpose": "Prevent an authorized refusal-to-acceptance change from silently relabeling frozen witness credit.",
+  "transitions": [
+    {
+      "id": "H71-MRS-SIGNED-BITWISE",
+      "reported_authority": "H87/H96/H126 authorized signed bitwise widening and replacement of old refusal controls",
+      "owner_lane": "solidity-compiler10-20261028/memory-reference-structs",
+      "owner_head": "abf726ff80b52c1e4bfd6e95dcea64cef1ee2830",
+      "owner_ticket": {
+        "path": "/workspace/mrs-h126-abi-adoption-checkpoint/evidence/v09-audit-transition.json",
+        "reported_sha256": "21cbf70664e0343c55a18d14e8ca28e73085ef9ae710c867390b1fdb93bd0777",
+        "bytes_retrieved_locally": false,
+        "provenance": "Verbatim H71 coordinator message; reported artifact hash not independently verified."
+      },
+      "interface": "Solidity/Backend/Passes/BitwiseValueContextControls.lean",
+      "frozen": {
+        "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+        "name": "Solidity.Backend.Passes.BitwiseValueContextControls.signed_refusal",
+        "source_sha256": "de6a7dbdeb50af924722841683cbcedc4bf4f54d7d8dd77840f73ef01beafffd",
+        "signature_sha256": "ba6a22655f1fa8f0fcf6c58349612682418647a2b62e42e9634f890451dd93cb",
+        "status": "historical negative preserved, not re-proved as current acceptance"
+      },
+      "replacement": {
+        "name": "Solidity.Backend.Passes.BitwiseValueContextControls.signed_acceptance",
+        "source_sha256": null,
+        "signature_sha256": null,
+        "status": "authorized transition reported; exact replacement bytes and gates unavailable"
+      },
+      "local_observation": {
+        "master": "a8f684928fa085d8976ead33e3d0db30208e7a4f",
+        "source_sha256": "de6a7dbdeb50af924722841683cbcedc4bf4f54d7d8dd77840f73ef01beafffd",
+        "old_declaration_present": true,
+        "new_declaration_present": false,
+        "exact_owner_commit_present": false,
+        "exact_owner_fetch": "origin rejected exact SHA with upload-pack: not our ref",
+        "canonical_lane_branch_probe": "No matching ref returned; other names not inferred."
+      },
+      "accounting": {
+        "frozen_registrations_rewritten": false,
+        "original_external_assertions_changed": false,
+        "selected_witness_credit_transferred": 0,
+        "checkpoint_selected": 489,
+        "checkpoint_open": 770,
+        "positive_adoption_status": "pending exact replacement statement and owner validation; no silent repin"
+      },
+      "remaining_obligation": "Obtain exact owner commit/patch plus replacement signature and existing semantic/axiom/gate evidence. Reconcile the explicitly authorized transition separately from frozen historical accounting."
+    }
+  ]
+}
