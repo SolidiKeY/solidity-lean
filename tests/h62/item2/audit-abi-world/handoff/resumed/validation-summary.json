@@ -6,7 +6,15 @@
   "full_lean_build": {
     "status": "pending",
     "command": "./run-lean.sh",
-    "boundary": "281 changed upstream validation inputs; prior6555-job pass is historical."
+    "boundary": "281 changed upstream validation inputs; prior6555-job pass is historical.",
+    "attempts": [
+      {
+        "resource_receipt": "resume-806-20261107/full-resource.json",
+        "exit_code": 1,
+        "elapsed_seconds": 3.2880843310049386,
+        "reason": "stale docs README rowordering beforeLean; fixed from unchangedfragments"
+      }
+    ]
   },
   "local_audit": {
     "modules": 9,

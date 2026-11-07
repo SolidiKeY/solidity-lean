@@ -661,3 +661,17 @@ relabelled as current. No statement, hypothesis, exclusion, proof budget,
 axiom set or observation changed. External gas/fork observations remain archived
 fixture reuse, not formal/general compiler proofs. No new unclaimed candidate
 is assigned; finish current validation before final owner handoff.
+
+### Generated documentation ordering repair
+
+The first current ./run-lean.sh attempt exited1 before starting Lean, after
+3.288084seconds: docs/README.md had one existing P8 row out of fragment order.
+The failure log and resource receipt remain immutable. Under H82's standing
+documentation-fix authorization, generated only docs/README.md using the
+repository's pure fragment renderer. Its line multiset is identical; exactly
+one row moved. All protected Lean roots, combined module maps and the central
+axiom inventory retain their hashes. No fragment, statement, source, proof
+budget, gate command or axiom changed. fragments --check now passes.
+Independent finder and skeptic verified the line multiset/protected hashes and
+retained failure, no findings; neither Lean/server/builds/edits. Current full
+retry remains pending; fragments PASS alone is not a full-build PASS.
