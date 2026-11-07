@@ -339,9 +339,12 @@ import Solidity.Backend.InternalFlow.RuntimeFrameFootprint
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV2
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV3
+import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV4
 import Solidity.Backend.InternalFlow.RuntimeFrameMutation
 import Solidity.Backend.InternalFlow.RuntimeFrameNested
 import Solidity.Backend.InternalFlow.RuntimeFrameNoneProducer
+import Solidity.Backend.InternalFlow.RuntimeFrameP1Bridge
+import Solidity.Backend.InternalFlow.RuntimeFrameP1Lang
 import Solidity.Backend.InternalFlow.RuntimeFrameReference
 import Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram
 import Solidity.Backend.InternalFlow.RuntimeFrameRestore
@@ -477,6 +480,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoopControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarUnwind
+import Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundary
+import Solidity.Backend.InternalFlow.RuntimeFrameV3GeneralBoundaryControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedCaller
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedRecursion
@@ -596,6 +601,9 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3SecondAllocatingEntry
 import Solidity.Backend.InternalFlow.RuntimeFrameV3StateShell
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionality
 import Solidity.Backend.InternalFlow.RuntimeFrameV3TypedHeapExtensionalityControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV4Migration
+import Solidity.Backend.InternalFlow.RuntimeFrameV4MigrationControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV4TrivialFamily
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Boundaries
