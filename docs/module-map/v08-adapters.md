@@ -983,3 +983,15 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Bridge/SolidityBridge/RoadmapV15/P10/CallReturndata.lean` | Frozen-API CALL controls: absent and INVALID-body callees clear the stale return buffer, the following RETURNDATASIZE reads the new buffer, and the same caller frame gives callee-dependent CALL flags. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/CallReturndataLaw.lean` | General post-CALL law: a non-erroring fetched CALL leaves the return buffer of the exact `Θ` run `EVM.call` makes (all inputs pinned) when its entry condition holds, and an empty buffer otherwise. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/CallInAgreement.lean` | Core `CALLIN` (`Evm.callIn_returndata`) against the reference CALL buffer: case alignment under explicit entry-test, depth-below-1024 and exact-`Θ`-oracle premises, and `depth_disagreement` at depth 1024. |
+| `Backend/StructuredFlow/SourceDispatch.lean` | Executable exact Source-template dispatch into Compiler.compile with typed refusals and actual artifact/code equations. |
+| `Backend/StructuredFlow/SourceDispatchAxioms.lean` | Exact kernel axiom pins for the dispatcher, all public proofs and operational factory. |
+| `Backend/StructuredFlow/SourceDispatchControls.lean` | Existing-fixture actual-entry, incompatible-mapping, syntax-refusal and observable return-flag regression controls. |
+| `Backend/StructuredFlow/SourceDispatchCorrect.lean` | All sixteen original operational correctness laws, bound to the selected program and original emitted instruction code. |
+| `Backend/StructuredFlow/SourceDispatchCoverage.lean` | Generic original-domain actual-entry coverage and proof that defensive internal refusals are unreachable. |
+| `Backend/StructuredFlow/SourceDispatchDomain.lean` | Indexed union of precisely the sixteen published Source compiler templates. |
+| `Backend/StructuredFlow/SourceDispatchLower.lean` | Case-specific original mapping requirements and reuse of the existing intrinsic target builders. |
+| `Backend/StructuredFlow/SourceDispatchRecognitionLaws.lean` | Exact plan reconstruction, arbitrary finite-block completeness and explicit outside-domain refusal equivalence. |
+| `Backend/StructuredFlow/SourceDispatchRecognize.lean` | Executable exact Source template extraction with generalizing indexed eliminators. |
+| `Backend/StructuredFlow/SourceDispatchSlotLaws.lean` | Exact operand-check reconstruction and preservation of every original selected mapping witness. |
+| `Backend/StructuredFlow/SourceDispatchSlots.lean` | Executable typed slot checks carrying the original context-map equations. |
+| `Backend/StructuredFlow/SourceDispatchViews.lean` | General exact indexed views of existing Source expressions, statements and item spines. |
