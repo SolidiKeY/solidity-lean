@@ -496,3 +496,83 @@ completes in 260.777 seconds with sampled workload-group RSS 1627312128 bytes.
 This is affected-file validation, not a full checkpoint or original-baseline
 performance pass. Imported baseline warnings remain in the log; the new bridge
 has no warnings. No individual import exceeds 60 seconds.
+
+## Signed checked-add correspondence
+
+SignedFixtures introduces bounded integer pairs that retain negative values;
+its three generic classifier lemmas are axiom-free. SignedAddCorrespondence
+adds ten checked theorems using the published SignedCheckedAdd execution
+producer. Source evaluation uses the original Controls.input directly. Target
+evaluation reuses SignedMod.Controls populated signed runtime and its constructed
+StateRepr, rather than an empty-heap seed. Public compileVal selection and
+canonical signed-word uniqueness fix the actual returned word. Successful runs
+preserve every machine field beneath an arbitrary saved tail; both Source
+pipelines, fuel+3 and fuel-zero timeout are explicit.
+
+Five original Source input rows (maximum, minimum, positive overflow, negative
+overflow and mixed signs) have Source and selected-code table specializations.
+Reject-all and both overflow-direction controls have actual distinguishing runs.
+The local relation is primitive integer content over these constructed states,
+not an arbitrary Source-to-target heap or world map. Source panic bytes/state
+remain distinct from the target coarse revert; no reverted target machine is
+invented. This is not full session/gas adequacy, all-control migration, pinned
+4.35 validation or an H68 full PassCorrect certificate.
+
+The initial fixture file failed at the existing recursion-depth limit while
+reducing an integer-power spelling of the signed bound. MCP diagnosed ten errors;
+goal inspection returned no active goal at the case header. The tactic helper
+confirmed the natural-power cast used by Source.IntTy.lo/hi. Changing the new
+bound definitions to that exact representation fixed the file without raising
+recursion, heartbeat, stack, memory or time limits. Failed source/logs are retained.
+The bridge then passed on its first attempt without warnings in 2.322 seconds,
+sampled workload peak 849240 KiB. Its 290-module incremental closure took 25.983
+seconds (14 fresh modules); no individual module exceeded 60 seconds. Ten bridge
+axiom reports contain only existing standard axioms; selection uses propext and
+Quot.sound. No producer or original statement/definition was edited.
+
+Official affected-file checks pass: 1 second for the shared signed fixtures and
+31 seconds for the bridge including import-trace rebuilding. Those costs are
+not historical before/after measurements. Independent read-only finder and
+skeptic found no semantic or table defect; neither used Lean/server/build.
+Original fidelity failures and all retained timing/global/producer obligations
+remain open; moving slow examples under H109 does not discharge them.
+
+## Shared checked signed subtraction and multiplication
+
+SignedCheckedFixtures adds one parameterized bounded-result classifier for
+integer operations, with three axiom-free success/refusal/corruption lemmas.
+The signed-subtraction and signed-multiplication bridges fix its operation to
+Int.sub and Int.mul, and use the actual published Source and selected-code
+execution producers. Each bridge has eleven checked theorems. Its original_inputs
+identity recovers the original SignedDiv.Controls source, target and machine for
+every native signed operand pair. Physical StateRepr comes from that original
+populated six-cell fixture, with no desired run or fabricated producer premise.
+Source state/panic, canonical result words, arbitrary saved tails, either pipeline
+and the stated fuel boundaries remain explicit.
+
+Five subtraction rows match the original joint controls. All seventeen
+multiplication rows are retained: both min-int times minus-one orders, upper and
+lower overflows, all four sign combinations, swapped operands, boundary successes
+and both zero-operand orders. These are exact fixture-input tables, not a claim
+that every other original control or arbitrary world/frame has been migrated.
+Positive/negative overflow and reject-all controls preserve actual distinctions;
+coarse target revert is not a target panic-payload or reverted-machine claim.
+
+The first subtraction check failed on rewriting through a classifier abbreviation.
+MCP diagnosed four errors and exposed the branch goal; the tactic helper confirmed
+the classifier equation. Explicit unfolding fixed the proof without changing its
+statement or any classifier definition/budget. Failed source and diagnostics are
+retained. The warning-free subtraction recheck takes 2.392 seconds (12.290 seconds
+with validated imports), sampled workload peak 852132 KiB. Multiplication passes
+on its first check in 2.293 seconds (18.743 seconds including incremental imports),
+sampled workload peak 853736 KiB. No individual checked import exceeds 60 seconds.
+All new bridge reports use only existing standard axioms.
+
+The official five-file group passes: signed fixtures, shared checked fixtures,
+addition, subtraction and multiplication. Its per-file invocations take 0, 1, 3,
+3 and 13 seconds, including any Lake import rebuilding. These are affected-file
+checks, not a full-core or historical timing acceptance. Together the five new
+modules have six arithmetic lemmas and 32 bridge/control theorems. Independent
+read-only finder and skeptic found no semantic or table defect; neither used
+Lean/server/build. Original-fidelity failures, full migration/C4/H68 obligations,
+producer waits and prior timing STOPs remain open.
