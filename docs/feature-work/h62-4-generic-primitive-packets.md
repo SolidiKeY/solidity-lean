@@ -802,3 +802,23 @@ The five-law kernel check passes in 1.153 seconds, sampled workload peak
 found no defect and used no Lean/server/build/edit. Original controls/census
 remain unchanged. No arbitrary heap/world/session/gas or fetched-EVM adequacy,
 full C4/H68 acceptance or timing STOP clearance is claimed.
+
+### Nonzero all-width unsigned multiplication witnesses
+
+`UnsignedMulCorrespondence.lean` adds three laws providing simultaneous actual
+Source/local and populated physical input witnesses for every legal byte width
+and every pair in `Fin (2^bits)`, including nonzero wrapping products. The joint
+law derives actual unchecked Source evaluation, public compiler selection,
+canonical typed destination word, exact machine execution and post-StateRepr.
+Source globals/state/older local tails and every saved target stack remain
+general. Reject-all is refuted. Existing zero/maximum/wrap/wrong-cleaner controls
+remain unchanged; this does not migrate the original census or prove checked
+multiplication, arbitrary heap/world/session/gas or fetched-EVM adequacy.
+
+The first check caught one extra parenthesis in the Source-result tuple. MCP
+confirmed the resulting parser diagnostics and the tactic helper checked the
+public-selection interface. The syntax-only correction leaves claims and
+budgets unchanged. The final three-law kernel check passes in 1.390 seconds,
+sampled workload peak 824876 KiB, with existing standard axioms. Independent
+read-only finder/skeptic found no semantic defect and used no Lean/server/build/
+edit. Full C4/H68, frozen-original fidelity and timing STOPs remain open.
