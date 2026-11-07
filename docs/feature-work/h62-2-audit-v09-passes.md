@@ -1215,3 +1215,19 @@ exactly one entry, with its existing null joint and zero-credit checks retained.
 Raw compatibility/axiom adjudication and checked ByteWorld realization with
 matching actual emission provenance remain producer waits. Bulk check/resource
 logs are external at `/workspace/vy3-evidence/loop-prefix-controls-20261107`.
+
+
+Loop-call checkpoint: nine public original `LoopCallControls` rows are mapped
+to exact frozen signatures in `loop-call-witness-map.json` and checked through
+`LoopCallWitness.lean`. The common witness obtains both actual selected maps
+from `LoopScopeTerminal.prefix_relations` and applies the original `receiving`
+theorem to inhabit the call Input at the actual rebound loop state. Original
+expanded frame, cost6, source success, whole-mixture recognizer refusal and
+undersized-frame refusal remain distinct. Selected accounting is458/1259,
+801open; supplemental rows stay separate. A draft using stack-replaced states
+hit the unchanged heartbeat limit; using exact existing prefix relations
+avoids that conversion without changing any statement or budget. Failed and
+successful checks are retained outside Git at
+`/workspace/vy3-evidence/loop-call-controls-20261107`. No native ByteWorld,
+Source dispatch/admission or full-lane adequacy is claimed. Existing producer
+waits, STOPs and full validation/timing obligations remain open.
