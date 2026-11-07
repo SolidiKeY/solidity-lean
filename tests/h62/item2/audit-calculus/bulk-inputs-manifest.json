@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/chunk-proof-roles-v51/semantic-roles-reviewed.json",
-    "bytes": 1631016,
-    "sha256": "ecb90fbb41a876c03b886d6e8db8217cb8f52d9729d0c5c9f343ede733546eb4"
+    "path": "/workspace/h62-successor-bulk/equation-preparation-roles-v52/semantic-roles-reviewed.json",
+    "bytes": 1648352,
+    "sha256": "3cabc5640049f6039ed23e7774e8dc8fa08b25314c1f762266253f2f341135de"
   }
 }
