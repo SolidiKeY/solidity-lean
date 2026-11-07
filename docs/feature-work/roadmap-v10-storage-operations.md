@@ -1866,3 +1866,21 @@ cleanup removed regenerable build output and restored over 2 GB free while
 preserving seals. Original/consolidated queues, actual H121b production, 3209
 uncovered rows, strict pins/docs and full gates remain open. Library-try, Y04
 physical and separate 4.35 producer waits and all STOPs remain distinct.
+
+### C275: later-operand and ordered-call failure transport
+
+Three further generic SourceAstExpressionCorrespondence laws retain exact
+right-operand failure after left success, target failure before argument lookup,
+and ordered argument-traversal failure after target success. They reuse the
+existing reader/mapM; no new traversal or per-case copy. Earlier-field checks
+remain explicit and later-field premises are absent where failure precedes them.
+Definitions, existing statements, Source interfaces and imports are unchanged.
+These are syntax conversion errors, not Source runtime failures or adequacy.
+
+Initial and final bounded serial checks passed. Final: 2.94 s, sampled peak RSS
+387387392 bytes, no resource stop; three exact guards use the standard trio.
+This is no matched speed comparison. Independent read-only finder/skeptic
+reviews found no defect; neither ran Lean/server/builds or edited. Coverage
+remains 72/3281, 3209 uncovered. Actual H121b Source/P8 production and all
+original/consolidated queues, strict pins/docs, full gates and STOPs remain open.
+External library-try, Y04 physical and separate 4.35 waits remain unchanged.
