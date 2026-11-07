@@ -1292,3 +1292,17 @@ rows stay separate. Evidence is external at
 `/workspace/vy3-evidence/compiler-call-scope-20261107`. No native ByteWorld,
 ABI/gas or full Source/G24 adequacy is inferred; original producer waits, STOPs
 and full validation/timing obligations remain open.
+
+
+Reference-call readback checkpoint: ten original `ReferenceCallReadbackControls`
+rows now have exact frozen signatures and checked aliases in
+`ReferenceCallReadbackWitness.lean`. The joint includes the actual tuple-reference
+runtime Entry atframe64, lo/pointer16 andcursor20, NoAliasPromotion flags, source
+call success/evaluated7, reached StateRepr/BaseExtends and suffixInput. The original
+complete memory/tail/allocator observations, wrong recapture, body failure,
+undersized entry and stale-map refusals retain their full statements. No private
+selector, application or observer definition adds a row. Selected489/1259,770open;
+supplemental counts stay separate. Evidence is external at
+`/workspace/vy3-evidence/reference-call-readback-20261107`. This establishes no
+native ByteWorld/emission, ABI/gas or full Source/G24 adequacy. Original producer
+waits, STOPs and full validation/timing obligations remain open.
