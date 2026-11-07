@@ -3,7 +3,7 @@ import os,pathlib
 p=pathlib.Path(__file__).resolve().parent;repo=p.parents[2];runtime=p/'runtime';runtime.mkdir(exist_ok=True)
 config=(repo/'lakefile.toml').read_text().replace('weakLeanArgs = ["--tstack=131072"]','weakLeanArgs = ["--tstack=131072", "-j1"]')
 config=config.replace('root = "SolkeyCheck"','root = "SolkeyCheck"\nweakLeanArgs = ["-j1"]')
-config+='\n[[lean_lib]]\nname = "MemoryReferenceTests"\nsrcDir = "tests/directruntime-20261104/memory-references"\nroots = ["Admission", "KernelControls", "KernelMatrix"]\nweakLeanArgs = ["--tstack=131072", "-j1"]\n'
+config+='\n[[lean_lib]]\nname = "MemoryReferenceTests"\nsrcDir = "tests/directruntime-20261104/memory-references"\nroots = ["Admission", "KernelControls", "KernelMatrix", "V1StorageCases"]\nweakLeanArgs = ["--tstack=131072", "-j1"]\n'
 (runtime/'lakefile.toml').write_text(config)
 real=os.environ.get('MEMORY_LEAN_BIN','/workspace/.setup/tools/lean-4.24.0-linux/bin')+'/lake'
 rel='tests/directruntime-20261104/memory-references/runtime/lakefile.toml'
