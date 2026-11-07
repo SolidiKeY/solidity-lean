@@ -9,7 +9,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[4]
 SCRIPT = pathlib.Path(__file__).with_name("mcp_serial_diagnostic.py")
 PROJECT = ROOT / "tests/h62/item1/packet-panic/closure-project-overlay"
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from diagnostic_policy import validated_target
+from diagnostic_policy import validated_target, validate_fresh_project
 
 class OverlayConsumerTest(unittest.TestCase):
     def test_isolated_project_and_unrelated_path_refused(self):
@@ -30,6 +30,13 @@ class OverlayConsumerTest(unittest.TestCase):
             root = pathlib.Path(tmp).resolve()
             project = root / "project"
             project.mkdir()
+            validate_fresh_project(project)
+            for name in (".lake", "lake-manifest.json"):
+                artifact = project / name
+                artifact.symlink_to(root / "missing")
+                with self.assertRaisesRegex(ValueError, "artifact already exists"):
+                    validate_fresh_project(project)
+                artifact.unlink()
             external = root / "outside.lean"
             external.write_text("outside")
             helper = project / "PanicBytes.lean"

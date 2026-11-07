@@ -104,3 +104,5 @@ Producer repair is required before that unchanged case can pass. Missing
 positioned traces cannot be replaced with certified model-prestate strings.
 All native compiler/action observations remain separate from kernel proofs,
 rendered full-lifecycle equivalence, performance/scaling matrices and row judges.
+
+`--suite dafny-compiler-output --targets dafny` isolates the pinned upstream output-directory contract in the existing native runner. It preserves ordinary/custom CLI quoting, actual terminal outcomes and output bytes; relative-path space splitting and unsupported folder scope remain failed evidence. No local AST/executable equality is inferred. Artifact scans require observed recursive filesystem support rather than a newly invented product Node floor.

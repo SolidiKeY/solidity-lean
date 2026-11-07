@@ -112,5 +112,29 @@
       "bytes": 401,
       "sha256": "25a2edc40610d04e5f226af2a70da2942172241ee9c8b599d0c07aaebf9f716c"
     }
-  ]
+  ],
+  "checkpoint_audit": {
+    "scope": "Complete review of this component checkpoint only; not complete original assignment or module-wide statement-fidelity acceptance.",
+    "source_and_evidence_verification": "All three source bindings and all 13 evidence files verified by SHA256 and recorded byte size against adopted master 902e87762e5c3fb863bc3a592892f2dc09dfa979.",
+    "joint_fact_partition": {
+      "same_unit_membership": 2,
+      "function_signature": 1,
+      "identity_argument_fit": 1,
+      "heterogeneous_error_fit": 1,
+      "declared_error_parameters": 1,
+      "heterogeneous_argument_fit": 1,
+      "matching_target_names": 1
+    },
+    "law_hypotheses": "convert_originTypes uses actual typed argument lists and fit proofs; paramsOf_unique uses fitsParams and paramTys for the same error declaration/environment; matched_names_length uses the same nonempty target arguments and namesMatch proof.",
+    "execution_boundary": "actual_binding evaluates target Args.evalT only. No Source.callInternal evaluation, Source execution/admission, body correspondence or compiler certificate is proved.",
+    "inherited_controls": [
+      "same_arity_wrong_names combines existing names/wrong_names with equal lengths",
+      "wrong_binding_refused reuses wrong_argument_order",
+      "heterogeneous_order_refused reuses wrong_error_order"
+    ],
+    "new_execution_evidence": 0,
+    "new_joint_model_families": 0,
+    "new_full_statement_fidelity_acceptances": 0,
+    "new_lean_run": false
+  }
 }

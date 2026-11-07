@@ -111,5 +111,7 @@
       "sha256": "e19e9afa8adcd7cff854cb60c21ec14be93c9c1639a740dcfeb80e101d998e2f"
     }
   ],
-  "reviews": "Independent read-only finder and skeptic accepted endpoint ranges, shared-model actual calls, mathematical numeric observations and focused timing limits; no findings, no reviewer tests/Lean."
+  "reviews": "Independent read-only finder and skeptic accepted endpoint ranges, shared-model actual calls, mathematical numeric observations and focused timing limits; no findings, no reviewer tests/Lean.",
+  "source_binding_status": "Historical measured snapshot, before the docstring-only review follow-up; retained sha256 and timing candidate identify the measured bytes.",
+  "docstring_followup_sha256": "acea5e808b0cd7e8d8dd5911fadffa548619dc874991e3ed1d4466c98e6a6b4c"
 }
