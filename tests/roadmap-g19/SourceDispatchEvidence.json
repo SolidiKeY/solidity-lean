@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "checkpoint": "H125 exact Source dispatcher",
+  "base": "65e69b6426a9a4fc3fb5541f41726a4bfefda5d0",
+  "status": "scoped-proof-validation-pass; full-library-incomplete",
+  "releaseClosed": false,
+  "source_modules": {
+    "Solidity/Backend/StructuredFlow/SourceDispatch.lean": "0a41e9af73402339ca2092cb7a751ba14f97aeb96009897d453df5e601ded21d",
+    "Solidity/Backend/StructuredFlow/SourceDispatchAxioms.lean": "b263974072170d69d110094b2f1f95da68c2a4fa40e822b11609849153497c6e",
+    "Solidity/Backend/StructuredFlow/SourceDispatchControls.lean": "fc581ecc97d8878ea0dcbec2afd2e6fa0ca59bfd60235219be9dcf5ced3184be",
+    "Solidity/Backend/StructuredFlow/SourceDispatchCorrect.lean": "2f70ef8681081da06f222e03f49b5b4aa437a85f54fe1c8e244d1ceb0571a118",
+    "Solidity/Backend/StructuredFlow/SourceDispatchCoverage.lean": "17bd461762707beac5a255faed8e1ba74668548cdc00d61933b3244973d5f0a9",
+    "Solidity/Backend/StructuredFlow/SourceDispatchDomain.lean": "c7c4dd9a14c5ca8775bb7f32118381afc102020733987600606b30a2dfce133d",
+    "Solidity/Backend/StructuredFlow/SourceDispatchLower.lean": "f52eaf40ea9bf4904a69635c599b47ce5a38381fc0d96b03b40625fdb027b3c1",
+    "Solidity/Backend/StructuredFlow/SourceDispatchRecognitionLaws.lean": "f5485db9d7012e8753d4e49ef3dc5f791d7bfa689c9e20c735706963ee321b4b",
+    "Solidity/Backend/StructuredFlow/SourceDispatchRecognize.lean": "1dd43fd30995ac5dd6d316ba3a80454f4cd6a55880257efa180163f3f6eb131e",
+    "Solidity/Backend/StructuredFlow/SourceDispatchSlotLaws.lean": "647dce243fac1a3ebe5c2b1100e6f26503da0aa5c91417111b57d37aee56881e",
+    "Solidity/Backend/StructuredFlow/SourceDispatchSlots.lean": "44a30f227d8e04817b4b631b3b05077faaaec7b4431502fbee7e071352d09b08",
+    "Solidity/Backend/StructuredFlow/SourceDispatchViews.lean": "fcaf502e0e7445c18cf2371ebadf286b2de5854b8703e5c530658c9c0140eb2a"
+  },
+  "proof_import_closure_modules": 289,
+  "original_and_validation_sources_equal": true,
+  "own_axiom_pins": 62,
+  "axioms": "Exact kernel guard pins; only propext, Classical.choice, Quot.sound or subsets.",
+  "reviews": "Independent read-only finder and skeptic source/docs PASS after exact plan and emission binding fixes.",
+  "scoped_native_build": {
+    "command": "lake build Solidity.Backend.StructuredFlow.SourceDispatchAxioms",
+    "exit": 0,
+    "seconds": 11.378589735002606,
+    "max_child_rss_kib": 838436,
+    "swap": 0
+  },
+  "full_checkpoint": {
+    "command": "bash scripts/coord-tools/gate.sh checkpoint",
+    "exit": 124,
+    "seconds": 1800.0729361200065,
+    "max_aggregate_rss_kib_sampled": 7900772,
+    "max_lean_processes": 1,
+    "swap_kib_sampled": 0,
+    "limitation": "Bounded cold library build timed out; no unchanged retry and no full-library/runtime pass."
+  },
+  "global_pins": {
+    "exit": 1,
+    "errors": 0,
+    "inherited_unrecorded_changes": 492,
+    "own_inventory_only": true
+  },
+  "static_checks": "Trust, orphan inventory, generated roots, fixed fragments/doc paths and staged whitespace pass. Raw superseded failures retained.",
+  "evidence_archive": {
+    "path": "/workspace/scratch/h125-source-dispatch-evidence.tar.gz",
+    "bytes": 158564,
+    "sha256": "99fb9e33866a1c47ad07fd5255e728f030dd4ca9bd474d230b3826da88bf4410"
+  },
+  "archive_entries": 105,
+  "limits": "LEAN_NUM_THREADS=1; 12 GiB inherited address-space limit; serial/RSS/no-swap monitored; host SwapTotal=0. No proof or resource budget raised."
+}
