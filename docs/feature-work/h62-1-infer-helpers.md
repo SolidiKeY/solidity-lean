@@ -301,3 +301,30 @@ and the default array location. Per-file Lean 4.35 MCP diagnostics returned
 `success=true`, `partial=false`, no failed dependencies and the same three
 `[propext]` axiom reports. The patch proposal was regenerated after these
 additions; its applicability check is not a semantic or full-gate pass.
+
+## Integration and proposal drift controls
+
+The coordinator reported the prior lane head integrated with a touched gate
+and finder/skeptic review. `origin/master` was fetched and the clean lane
+fast-forwarded to `b7c3cc5110b1ebee1eab45e8b1b9894ecada7237`. That tree
+contains `tests/h55/source-relations/HelperCompatibility.lean` at SHA-256
+`52d196ff64fe34b366d8b3f0456abd50e05ccf0284c522cd91432f4213eb302a`,
+matching the separately supplied H55 handoff. That interface includes the
+full conversion result-type premise, six adapters and three completeness
+consumers. The H55 handoff reports a standalone 4.24 check and independent
+reviews; it does not establish 4.35 validation or approval of this extraction
+proposal. Do not duplicate the H55 interface.
+
+`test_propose_migration.py` independently exercises the proposal generator on
+copied fixtures: each of the six original declaration anchors is altered in
+turn, and an already occupied destination is supplied. Every case is rejected
+before any patch text is emitted. These are external controls for proposal
+drift, not proof that applying the proposal preserves Lean statements or
+axioms. The proposed patch still applies in check mode and remains unapplied.
+The new control itself needs the usual independent finder/skeptic review.
+
+Source/Ctor 4.35 errors, the full Hash and language migration gates, H55
+agreement on existing definition bodies, frozen-statement and axiom checks,
+full affected validation, acceptance and timing comparison remain open. No
+prior stopped Lean build was rerun unchanged. No new owner source edit was
+made, and no master push was performed.
