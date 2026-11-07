@@ -1377,3 +1377,67 @@ continuous or identical operating-system conditions. These runs demonstrate
 repeatability for this snapshot, not complete census, Lean semantics or live
 ownership. Full reports and timings are outside Git in the
 initializer-inventory evidence directory.
+
+## Include and omit context boundaries
+
+Line-initial `include` and `omit` commands now contribute lexical context
+spans and terminate preceding bodies. Indented command boundaries reject the
+body fingerprint, and inline scoped declaration prefixes make a file
+incomplete. This addresses the reported body contamination and context-hash
+collision. Scope lifetime and implicit dependencies remain lexical
+approximations; signature and ownership rejection reasons remain mandatory.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 203 tests, including differing include/omit
+contexts, prior-body boundaries, nested commands and incomplete inline scopes.
+A bounded same-tree scan took 123.081 seconds before and 123.593 seconds after
+(+0.42%). Both used the same 7,491 inputs, recognized 125,638 declarations
+and reported no errors or unmatched globs. Statement-group counts were 4,511
+in both; body-group counts changed from 5,664 to 5,666. Counts do not prove
+equal memberships or semantic equivalence. Both scans used an 8 GiB address
+space cap and sampled cgroup reserve monitor without a resource stop; cache
+advice does not prove identical operating-system cache state. Evidence is
+outside Git under
+`/workspace/h62-duplication-scanner-evidence/include-omit/`.
+
+## Anonymous examples and unsupported binders
+
+Examples are recorded as anonymous: identifiers after `example` are not
+source declaration names. An example signature is rejected from statement and
+body grouping unless its result type follows only supported explicit binder
+groups. In particular, bare binders both before and after typed binders are
+rejected. This conservative lexical rule can refuse valid complex examples;
+it does not identify generated kernel declarations or establish source binding.
+
+The Python suite passed 204 tests. Independent finder and skeptic reviews
+without Lean identified and rechecked the mixed-binder case. A bounded scan
+of the same selected tree and pinned previous report took 123.593 seconds
+before and 124.583 seconds after (+0.80%), with an 8 GiB address-space cap
+and a sampled 4 GiB reserve monitor that did not stop either scan. Cache
+advice does not prove identical cache state and sampling does not prove
+continuous reserve. Evidence is outside Git in
+`/workspace/h62-duplication-scanner-evidence/example-binders/`. Complete
+Lean declaration and case accounting, authenticated source/dependency binding,
+current ownership and final gates remain open.
+
+
+### Merged-tree report replay
+
+At merged tree `fc17f01e229480bda02baa4394be0157efb0e8a4`, two
+serial default-mode scans used identical selection, historical registry and
+caller-pinned prior report. Both exited successfully and produced SHA256
+`9eb5b90bc8b86c7efbcea04e5cdb434f0862d03b0dce0198ea5bc12aeb08172f`;
+they selected 7,497 files and recorded 125,729 lexical declarations, 4,503
+statement groups and 5,665 body groups, with no errors or unmatched patterns.
+All recorded owners are unknown. Times were 122.090 and 128.599 seconds.
+Both used an 8 GiB process cap and a sampled 4 GiB local cgroup reserve
+monitor without a stop; cache equality and continuous system-wide reserve are
+not established.
+
+Finder and skeptic independently reviewed the replay without Lean. The
+prior report predates both scanner and source changes, so its incremental
+deltas combine their effects. Its digest identifies caller-supplied bytes,
+not an authenticated producer. The replay does not invoke opt-in signature
+binding or establish complete Lean census, semantic duplication, or live
+ownership. Evidence is outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-replay/`.
