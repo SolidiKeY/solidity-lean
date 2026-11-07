@@ -334,3 +334,13 @@ The ledger preserves full return/failure representation and genuine abstract mod
 
 
 Measured base/emission accounting passed at 0.237984s / 73,700 KiB maximum child RSS; complete acceptance failed exit 1 at 0.309202s / 73,700 KiB; 89 controls passed at 0.126576s / 15,236 KiB. Documentation gate failed exit 1 at 39.078997s / 9,216 KiB on four missing references in unchanged master citing sources. Full argv, metrics and comparisons are archived. These are static gate measurements, not tactic-performance acceptance or a whole-gate pass.
+
+
+## Table/checked-plan source roles (2026-11-07)
+
+Fresh master inspection at 94f9862b65b98a0ca5aad630a1cbb2f4532057e4 preceded complete classification of nine CallFunctionTable (two private) and five CallFunctionPlan declarations. Exact frozen/current identities match; prior 183 rows and owners unchanged. Ledger now 197 roles reviewed, 5,086 pending; 3,746 owners confirmed, 1,537 unresolved. No new audit witnesses.
+
+The ledger retains bounded lookup guards separately from unbounded logical length, full-domain logical existence and complete return/failure/composition certificates. Actual bounded expansion/checker acceptance remains explicit; raw Plan certificates do not acquire checker resource bounds or emission shrink/cap. Exact full leaf size retains modality-dependent halt-post cost without physical/performance implications. Both independent read-only reviews pass; all 89 Python controls pass; complete acceptance remains FAIL exit 1. No source/tactic/budget edits or runtime acceptance. Off-Git source snapshots, measured gates and full data are indexed by the call-table-plan manifest; original queues, H28 pause, historical gaps and STOPs remain binding.
+
+
+Measured table/plan accounting passed at 0.257004s / 74,080 KiB maximum child RSS; complete acceptance failed exit 1 at 0.233578s / 73,968 KiB; 89 controls passed at 0.121883s / 15,236 KiB. Documentation gate failed exit 1 at 41.758961s / 9,216 KiB on four missing references in unchanged master citing sources. Exact argv, metrics and comparisons are archived; no whole-gate or matched-performance pass is claimed.
