@@ -1340,3 +1340,347 @@ Exact source/signatures and complete sort/constructor/field/extractor/twin roste
 Whole assignment and four audit checkpoints remain incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context waits persist. Missing SelectedHeapBoundaryWitness documentation reference remains routed to vy3-compilation, with no duplicate ping or inferred gate pass. Existing timing/trust STOPs and historical unavailable-byte gaps remain.
 
 Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and101controls pass; complete acceptance remains FAIL exit1.
+
+## Memory-arm soundness static roles (V77)
+
+Guarded regression: memory soundness must retain source/receiver/index order, exact typed scope drops and every field/mapFree/default/new-array/step guard. NoPanic and simulation must not become normal-return or full-halt-equality claims.
+
+Complete frozen-selected Solidity/Calculus/SoundMem.lean and all 16 named signatures match frozen/current master bytes. Prior 901 rows and owners are unchanged. All 5283 candidates remain accounted: 917 reviewed, 4366 pending; 3746 owners confirmed and 1537 unresolved. Zero fresh joint witnesses. Exact signatures/section history are bound for every row; supporting definitions/generated declarations receive no extra credit.
+
+MSrc.mvalT_noPanic excludes panic only, not source failure. copyStToMG_push retains the actual map-free source, typed pushed value/environment and exact Grew.lift identity. Other interfaces conclude conditional Premise.Runs under the supplied modality/state, not normal execution or formula truth.
+
+Rebind, reference write, assignment and delete dispatcher theorems require their EXACT computed-step equations; arbitrary premises cannot replace q. Alias/copy/new-array and field/index branches retain variable/complex receivers, primitive/reference sources and simple/other index cases. Comments naming NonSimple describe usage, not added theorem hypotheses. Fresh k names are unchanged, not runtime gas or checking budgets.
+
+Primitive variable-index unfolding captures source then index and drops two locals. Primitive complex-receiver unfolding captures source, receiver and index, dropping three. Reference complex-receiver unfolding captures receiver/index then reads src.up.up, dropping two. Receiver/index captures that change failure priority use existing nonpanic/revert-only simulation facts internally; no caller success or panic-exclusion premise is invented.
+
+Existing TRes.Sim equates successful states, relates errors by panic equivalence and first-to-second exhaustion, and rejects mixed success/error. It is not equality of every halt label. Field receivers retain mapFree and field-type proofs; deletion also retains defaultOkS. New-array capture requires SIMPLE uint length and newArrOk, retains the actual grown heap, fills either storage or memory destination, then drops exactly one local. Both destination writes may fail. No physical memory/allocator/copy correctness, source compiler totality or gas/fork/world adequacy follows.
+
+Exact source/signatures and complete result/capture/dispatch/destination rosters remain off Git under /workspace/h62-successor-evidence/memory-arm-roles-v77 and /workspace/h62-successor-bulk/memory-arm-roles-v77 with path/size/hash manifests. Fresh mastera8f684928 inspected/already adopted. No producer source, statement/definition, budget, axiom, exclusion or toolchain changes; no new kernel/runtime/cache/performance acceptance.
+
+For coordinator-side review, census claims remain bound by hash only until referenced bytes are pulled and verified. Off-Git data/evidence remain on this VM under H44; local checks/reviews do not establish coordinator intake, semantic acceptance or proof validation. Delivery is coordinator-pending.
+
+Whole assignment and four audit checkpoints remain incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context waits persist; the missing SelectedHeapBoundaryWitness documentation request remains with vy3-compilation. No duplicate ping, gate pass or STOP release inferred. Historical unavailable-byte gaps remain explicit.
+
+Accounting and101controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4366 classifications pending. No proof/runtime acceptance.
+
+## Scoped stepper static role (V78)
+
+Guarded regression: equality of kernel-recursive and compiled stepper implementations must not become semantic soundness, normal execution, strategy closure or compiler totality.
+
+Complete frozen-selected Solidity/Calculus/Step.lean matches frozen and adopted master. Its sole census theorem Solidity.Fml.stepR_eq universally equates Fml.stepR k phi with Fml.stepAt k phi, including exact none/some results. No leading proposition hypothesis is added; C, context, formula and Nat seed k are arbitrary intrinsic data. k names fresh locals; it is not bounded symex n or runtime gas.
+
+All fourteen formula cases are accounted. and tries left first then right, imp steps only its consequent, not never descends, modal dispatches a first statement or exits frames, and the remaining recursive wrappers preserve their constructors. The statement dispatcher, fresh-name scans and finite symex support definitions are inspected without extra census credit. Equality does not establish that a step exists or a goal closes.
+
+Prior917 roles and owner map remain unchanged. Census918 reviewed/4365 pending of5283;3746 confirmed owners/1537 unresolved; zero fresh joint witnesses. Generated declarations stay separate. No statement, dependent definition, budget, axiom, exclusion, source or toolchain edit; no Lean/kernel/replay/runtime acceptance.
+
+Off-Git source, exact signature, case roster and dataset are bound by path/size/SHA manifests. Census claims are hash-bound only until coordinator pulls and verifies bytes; delivery coordinator-pending. Historical unavailable bytes remain UNVERIFIABLE. Whole original assignment and four audit checkpoints remain incomplete. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context producer waits remain; no unchanged STOP rerun.
+
+Accounting and101controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4365 classifications pending. No proof/runtime acceptance.
+
+## Update-rule static roles (V79)
+
+Guarded regression: update transports must retain actual landing/success guards, one-way box direction and defaulted modalFree/boxOnly proof arguments. Theory equality must remain distinct from directed evaluation refinement.
+
+Complete frozen-selected Solidity/Calculus/UpdateRules.lean matches frozen/adopted master and all19 named census signatures are bound. Prior918 roles/owner map unchanged;937 reviewed/4346 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations remain separate.
+
+The first three symbol-denotation lemmas require identical globals OR the actual symbol globFree certificate; the binary lemma additionally retains both heap-indexed SameO readings. Alias denotation retains its dangling default. Term/formula substitution requires actual U.Lands plus exact successful substitution; no substitution totality is claimed. Formula substitution handles tt/equality/wellFormed/not/and/imp and rejects other constructors. Successful substitution yields truth equivalence at the actual landing states; its box consequence does not witness execution.
+
+Index extension is exact depth arithmetic. Simplified-update global success is preserved only from original to simplified; held locals agree only at indices at least n. Local-setting removal, declaration decrement, pop depth increment and drop reset are retained. Box satisfaction transports simplified to original; no diamond or converse is claimed.
+
+andSplit needs both derivations in the same context, without added modal restrictions. Reflexive closers require boxOnly and wrapped modalFree; default tactics do not remove these hypotheses. applyOnRigidBox needs exact substitution, the substituted derivation and wrapped modalFree. simplify and its explicit-update wrapper retain their supplied derivation, exact simplification identity where present and modalFree. rewrite' requires global Theory equality plus exact context/goal rewrite identities; updRw' instead requires global directed evaluation refinement plus exact rewritten-update identity. Neither proof transport guarantees proof search or compiler success.
+
+Support definitions Tm.Theq and Tm.EvalRefines retain every-state quantifiers. Off-Git exact signatures, source snapshots, case rosters and datasets have path/size/SHA manifests; coordinator claims remain hash-bound until pull/verification. Delivery coordinator-pending; missing historical bytes UNVERIFIABLE. No producer source, statement, dependent definition, budget, axiom, exclusion or toolchain edit; no new Lean/kernel/replay/runtime acceptance. Original assignment/four audit checkpoints remain incomplete. H28 dependent proofs/replay remain paused on Raw compatibility and Context ambient-axiom review; no STOP release.
+
+Accounting and101controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4346 classifications pending. No proof/runtime acceptance.
+
+## Printed-rule static roles (V80)
+
+Guarded regression: finite printed-name partition/count facts must not be presented as rule soundness, compiler totality or semantic coverage. Callback membership and intentionally unclaimed/excluded categories must remain exact.
+
+Complete frozen-selected Solidity/Calculus/PrintedRules.lean and all six named census signatures match frozen/adopted master. Prior937 roles and owner map remain unchanged;943 reviewed/4340 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations stay separate.
+
+These are closed metadata facts without caller proof hypotheses. The partition checks every enumerated name: claimed iff kind rule and outside the exact unclaimed list. The counts are137 printed names,119 claimed and8 unclaimed. Six templates, two rejected names, one unimplemented name and one firstOrder name remain outside claims. Unclaimed entries retain four memory capture names, three literal-if shortcuts and transferWithCallbackDiamond.
+
+claims combines ordinary, Lean-only and callback origin tables. leanOnlyRows deliberately combines only ordinary and Lean-only tables, giving60 keyTier and28 calculus entries; callback-only keyTier rows are not included in those counts. All enum constructors and each table key are separately rostered. Source constructor-table checks and generated enum helpers are inspected, not newly run or credited as additional theorem/witness validation.
+
+The names and counts do not prove semantic fidelity of a rule, compiler acceptance, successful execution or physical/world/gas adequacy. No producer source, statement, dependent definition, interface, budget, axiom or exclusion changed. Exact source/signatures/rosters/dataset stay off Git with path/size/SHA manifests; coordinator claims remain hash-bound until pull/verification, delivery pending. Missing historical exact bytes remain UNVERIFIABLE. All original queues remain unfinished; no fresh Lean/kernel/replay/runtime credit or STOP release. H28 dependent proof/replay pause and Raw/Context waits remain.
+
+Accounting and101controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4340 classifications pending. No proof/runtime acceptance.
+
+## Read-bound static roles (V81)
+
+Guarded regression: equality of kernel-recursive and compiled work-bound functions must preserve refusals and exact counter values without being mistaken for successful normalization, semantic history adequacy or a performance result.
+
+Complete frozen-selected Solidity/Calculus/ReadBounds.lean and all10 named census signatures match frozen/adopted master. Prior943 roles/owner map unchanged;953 reviewed/4330 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses. Generated declarations remain separate.
+
+Every theorem has arbitrary intrinsic term/formula inputs and no caller proof hypothesis. fits equalities are function equalities for every Nat fuel, including exhaustion none and exact residual fuel. The remaining pairs preserve exact storage depth, optional literal-root/general-root, Option Known or Boolean knownness, and exposing-update depth. They assert neither successful recognition nor boundsOk=true. Known flags/root lists, none and false remain valid results.
+
+All13 term and6 formula constructor cases are accounted. fits and knownness inspect observation operands; storage/exposure counters instead return zero on observation constructors. Literal-root paths require literal array indices; general-root traversal permits arbitrary indices. Mapping keys are excluded by literal-root analysis. History rejection retains exposing updates, memory-read values and unknown roots as implemented. Formula knownness conjoins term/branch recognitions rather than proving a semantic property independently.
+
+Existing thresholds remain24000 nodes/12 depth or96000 nodes/40 depth with concrete recognition; exposeBound remains5, separately defined and not directly conjoined in these boundsOk definitions. No threshold, proof budget, statement, dependent definition, axiom, exclusion or toolchain edit. No new kernel/Lean/replay/runtime, closer-success or timing acceptance.
+
+Exact source/signatures/case rosters/dataset remain off Git with path/size/SHA manifests. Coordinator census claims remain hash-bound until pull/verification; delivery pending. Historical unavailable bytes remain UNVERIFIABLE. Whole queues remain incomplete; H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context migration waits remain. No STOP release.
+
+Accounting and101controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4330 classifications pending. No proof/runtime acceptance.
+
+## Symbolic-execution static roles (V82)
+
+Guarded regression: conditional soundness of symbolic execution must not become successful proof search, automatic residual validity or recursive program termination. Error recovery is not accepted proof evidence.
+
+Complete frozen-selected Solidity/Calculus/Symex.lean and all10 named census signatures match frozen/adopted master. Prior953 roles and owner map unchanged;963 reviewed/4320 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations remain separate.
+
+modalStep_sound and the two recursive-step soundness theorems retain exact successful-step equations and holds of the actual residual at the same state. The bounded strategy theorems require residual satisfaction for each n; zero steps and early none retain the original obligation. The four validity wrappers instead require residual Fml.Valid, quantified over every empty-context state. Single-step getD falls back to the original formula on none. These are backward soundness implications, not unconditional residual truth or equivalences.
+
+stepRS_eq is a separate unconditional Option implementation identity. The stopping strategy refuses a modality whose head is callRec, while conjunction may proceed on another branch. All14 formula cases and nil/cons/head-recursive modal branches are accounted. No nonrecursive caller premise is invented. Nat k seeds fresh names; n bounds strategy steps; neither is runtime gas. The existing tactic fuel5000 is unchanged.
+
+The complete tactic support was read: valid-goal detection, evaluable quotation/reduction, placeholders, explicit-mark restoration, definitional target replacement, unchanged-step refusal and recursive-call diagnostic. Existing evalExpr and reporting recovery/admit code are unchanged. Logged errors or recovery admissions are not passing kernel proofs; no tactic execution or trust acceptance is inferred from this classification.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain change; no new Lean/kernel/replay/runtime/performance acceptance. Exact sources/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound for coordinator review until pull/verification; delivery pending. Historical unavailable bytes remain UNVERIFIABLE. All original queues remain unfinished; H28 dependent extraction/replay pause and Raw/Context waits remain. No STOP release.
+
+Accounting and101controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4320 classifications pending. No proof/runtime acceptance.
+
+## Recursive-contract static roles (V83)
+
+Guarded regression: finite recursive-contract unrolling must retain global closure hypotheses, every contract field and actual pre/post/count obligations. Its intentionally exhausted base is not a normal execution or compiler-success witness.
+
+Complete frozen-selected Solidity/Calculus/Recursion.lean and all14 named signatures match frozen/adopted master. Prior963 roles/owner map unchanged;977 reviewed/4306 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations remain separate.
+
+Parameter closure requires actual global validity of allCtx. Contract extraction requires validity of the exact parameter-bound obligation. Canonical no-return/one-value/storage-alias contracts transport to all matching typed return configurations, preserving default or unset entry values. Multi-return transport retains2<=rs.length. Defaults equality and within nil/cons are structural identities, not returned-value or execution claims.
+
+The within and RecContract induction hypotheses range over EVERY frame index and thunk, conditional on the prior frame property. Their conclusions cover every finite depth. RecContract retains three fields: every typed return configuration meets FunContract, the body is within mutability, and it writes only return parameters. The base is Prog.recBase, intentionally exhausted and accepted under BOTH modalities. No normal-return, no-exhaustion, decreases or unbounded termination property is inferred. This intentional semantics is separately accounted from the still-open positive supported-program success obligations.
+
+useRecContract retains the exact callee RecContract, global wrapped pre/post validity, ret.nVals=rs.length and unchanged continuation/frames/modality. Wrapped conjunction requires both globally valid conjuncts. No constituent obligation is supplied by static classification.
+
+The full source-contract/tactic support was read: missing-spec and unsupported-return refusals, no automatic layout/range/invariant assumptions, recursive-head checking, finite strategy and mutability attempts, no-recovery tryOn, memory-return dispatch and exact open-goal refusal. Existing true/true candidate contracts still require contract/pre/post proofs; no automatic normal execution follows. Existing search fuel and heartbeat policy are unchanged and no tactic is executed.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests; coordinator claims hash-bound until pull/verification, delivery pending. Historical unavailable bytes remain UNVERIFIABLE. Whole queues remain unfinished; H28 dependent proof/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and101controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4306 classifications pending. No proof/runtime acceptance.
+
+## Term-equality static roles (V84)
+
+Guarded regression: every-state Theory equations, typed structural equality and successful evaluation refinement must remain distinct. Equality recognizers retain their actual true/code-equality guards and full dependent indices.
+
+Complete frozen-selected Solidity/Calculus/TermEq.lean and all24 named signatures match frozen/adopted master. Prior977 roles/owner map unchanged;1001 reviewed/4282 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses. Two anonymous examples and generated instances/declarations remain separately accounted, with no extra named or fresh proof credit.
+
+Theq reflexivity, symmetry, transitivity and of_eq concern denotation equality in EVERY typed state. Transitivity keeps the exact common middle term. No evaluation-success/refinement theorem is substituted. ArrTy/IndexTy uniqueness fixes all type indices, not arbitrary arrays or reference types.
+
+Unary/binary/ternary operator codes preserve constructor, data and argument/result types while omitting proof fields and uniquely determined FixedCopy/IndexTy/ArrTy shape witnesses, recovered by uniqueness at retained indices. Their code-equality or hbeq=true hypotheses yield exact Sigma equality of the full sort tuple and operator. Reflexivity has no such caller guard. Generic hbeqAt similarly requires actual index/fiber DecidableEq instances and, for its equality theorem, a true comparison. These instances are data; no semantic law is invented.
+
+The literal-variable collector accepts only value locals, literals, unary operators and binary operators, concatenating lists without deduplicating. Other constructors/operators return none. Its link theorem is exact Option-list equality, not universal fragment admission. Structural term comparison covers all10 term constructors; mismatch false remains. beqM soundness and cross-sort beqR soundness conclude dependent Sigma equality, while same-sort eq_of_beqR concludes term equality. The recursor/compiled link and self comparisons supply no execution-success claim.
+
+Exact source/signatures/operator and term rosters/dataset stay off Git with path/size/SHA manifests; coordinator claims hash-bound until pull/verification, delivery pending. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit. No fresh Lean/kernel/replay/runtime/performance acceptance; historical unavailable bytes remain UNVERIFIABLE. Whole queues remain incomplete; H28 dependent proof/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and101controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4282 classifications pending. No proof/runtime acceptance.
+
+## Bounded handoff receipt backfill (V85)
+
+Guarded regression: a truncated handoff display must not be reported as a complete artifact pull or proof validation. The bounded index prints four artifact bindings and a manifest hash after checking every listed local artifact.
+
+Run `python3 scripts/h62/item2/audit-calculus/handoff_index.py /absolute/handoff/directory`. The read-only helper streams SHA256 verification for every flat SHA256SUMS entry, requires HANDOFF.md/gates.json/evidence.tar.gz/original.patch, rejects missing files, symlinked artifacts/manifests, duplicate/self-referential or non-flat names, oversized manifests and more than64 entries. Output is bounded by four selected entries, not handoff or log length. It does not parse semantic claims or trust a handoff's reported gates; filenames/bytes/hashes are the only verification boundary.
+
+The selected paths identify local bytes only. Coordinator retrieval, census completeness, semantic acceptance, Lean/axiom/kernel/runtime validation and any gate interpretation remain separate obligations. Use an immutable saved packet without concurrent writers. Synthetic positive/negative tool controls do not prove Solidity/Lean statements. Existing artifact bytes/manifests are read unchanged; no historical missing bytes are reconstructed or called identical.
+
+No census credit:1001 reviewed/4282 pending of5283,1537 unresolved owners and zero fresh joint witnesses remain. Original queues remain unfinished. No source, statement, dependent definition, budget, axiom, exclusion or toolchain change; H28 dependent proof/replay pause and Raw/Context waits retained. Bulk evidence remains off Git with path/size/SHA manifest, coordinator-pending. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4282 classifications pending. No proof/runtime acceptance.
+
+## Scoped-formula static roles (V86)
+
+Guarded regression: exact scoped constructor equations must not be mistaken for semantic soundness, successful execution or true premise formulas. Hidden-binder logic remains universal under both modalities.
+
+Complete frozen-selected Solidity/Calculus/Fml.lean and all18 named census signatures match frozen/adopted master. Prior1001 roles/owner map unchanged;1019 reviewed/4264 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations remain separate.
+
+The four forallB laws retain universal predicate/pointwise implication hypotheses over arbitrary Sort. forallB_all specializes only at a supplied value; no Nonempty input or existential witness is invented. Both modalities read forallB universally. These generic laws are not positive normal-execution controls.
+
+Binders.toRet_all equates binding syntax for primitive binders converted to return binders. Eight Premise.fml equations retain exact update nesting, hidden binder, capture/pop scopes, done true/false, split/check obligations and guarded update/revert order. Three frame equations retain empty/sequence/pop behavior; two modalK equations distinguish nil from cons. Ext scope witnesses are intrinsic data rather than semantic proof assumptions. No truth, branch coverage or successful update is asserted by these equations.
+
+Complete support inventory covers10 term,8 RHS,5 update,4 frame,14 formula and13 premise constructors, plus assigning elements, naming/thinning and binder operations. Parallel RHSs remain read in their original context; sequential updates retain intermediate contexts. Empty conjunction remains tt; RetBinders memory-return refusal remains false, not an admitted success case. anonHavoc, loop break/no-break, allocation goals and frame drop definitions are read without extra named-theorem credit or semantic adequacy claim.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no new Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes remain UNVERIFIABLE. All original queues remain unfinished; H28 dependent extraction/replay pause and Raw/Context waits remain. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4264 classifications pending. No proof/runtime acceptance.
+
+## Archive-backed duplicate reclamation (V87)
+
+Guarded regression: resource cleanup must not delete the only copy of audit evidence or call regenerated bytes identical. V87 removes only two working classification reports after exact byte comparison with their retained archive members and independent finder/skeptic review.
+
+The retained archive and its original committed path/size/SHA manifest remain unchanged. The resource receipt binds original working paths, sizes, SHA256 values and exact archive-member names. Restoring either member to its recorded working path recovers the original exact bytes; old working-path checks require that restoration first. The absence is an intentional duplicate eviction, not an UNVERIFIABLE historical-byte gap.
+
+Logical bytes reclaimed14951848. Current data/logs/source/cache packs and sealed archives retained; no unique evidence removed. Post-cleanup disk remains above2GiB. No census credit:1019 reviewed/4264 pending of5283,1537 unresolved owners, zero fresh witnesses. Classification acceptance remains FAIL; no Lean/proof/replay/runtime gate or STOP release. H28 dependent pause and Raw/Context waits remain. Coordinator retrieval remains pending.
+
+## Scoped leaf-derivation static roles (V88)
+
+Guarded regression: checker-soundness implications must retain exact acceptance facts, while dropped-premise/slice transport remains one way. Intentional contradictory-branch proofs are not joint witnesses or positive program success evidence.
+
+Complete frozen-selected Solidity/Calculus/LeafDerive.lean and all16 named signatures match frozen/adopted master. Prior1019 roles/owner map unchanged;1035 reviewed/4248 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations remain separate.
+
+Nine implementation-link theorems preserve exact positions, thinning, update resolution, ground recognition, literal-position lists, read accumulators, positive-spine collection and dropped formulas, including none/false. Arbitrary Nat positions and selectors are allowed as stated; no actual-index or semantic relevance premise is invented. These equalities do not imply recognized-ground or accepted-fragment success.
+
+leafCheckS_sound requires the actual some true result; it yields the same scoped Proves derivation. RefuteCore_valid likewise requires actual true and concludes global validity; refuteS_sound requires actual branch refutation and yields Proves of ff behind H.pre c. No successful checker fact is supplied by this classification.
+
+Four holding transports retain the exact fixed state/valuation and go from dropped/sliced/refutation-form holding to the original formula. Dropping premises strengthens a formula for any selector, so no relevance proof is required for soundness; completeness and cost are separate. Positive-spine traversal, whole/slice choice and state-read flag stay exact. sliceDepth remains2 and refuteOk keeps boundsOk plus knownness/exposure guard.
+
+RefuteCore preserves toLS refusal, memory checker acceptance, assumesCT selection and its internal CleanTails case split. No external CleanTails premise or broader trust claim is introduced. Full scoped/logical constructor rosters and source helper cases are bound off Git; no source, statement, dependent definition, budget, axiom, exclusion or toolchain edit. No fresh Lean/kernel/replay/runtime/performance acceptance.
+
+Coordinator census claims remain hash-bound until exact source/signature/roster/dataset bytes are pulled and verified; delivery pending. Historical unavailable bytes UNVERIFIABLE; separately reclaimed duplicate reports remain exact archive-restorable. Original queues remain incomplete; H28 dependent extraction/replay pause and Raw/Context waits remain. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4248 classifications pending. No proof/runtime acceptance.
+
+## Rewrite-denotation static roles (V89)
+
+Guarded regression: Theory denotation unfoldings used for reification must not become runtime-success or physical-storage claims. Layout certificates, lenW and optional-word defaults remain exact.
+
+Complete frozen-selected Solidity/Calculus/RewriteSyntax.lean and all11 named signatures match frozen/adopted master. Prior1035 roles/owner map unchanged;1046 reviewed/4237 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated/tactic definitions stay separately accounted.
+
+The equations unfold literals, word find, array length, storage observation, save, delete, storage values, typed storage find, roots, fields and indexed paths. Root/field equations retain exact rootType/fieldType proofs. IndexTy is intrinsic shape data, not an in-bounds proof. Literal/find some results are Theory denotations, not runtime success. Length retains lenW; storage-value and index equations retain primitive-default getD behavior when a Theory word is absent. No physical-storage agreement or compiler totality follows.
+
+The full tactic/reifier support was read: closed side-condition refusal, named-contract compiled proposals, merge/substitution global-read restrictions, exact computed identities, type-checked subterm reuse, literal range checking and unsupported-reification refusal. Theory rewriting constructs an every-state Theq proof from simplifier proofs and checks its type. Update rewriting separately uses guarded evaluation refinement to a literal; no unconditional Theory-to-evaluation shortcut is inferred. Candidate failures restore state and theory rewriting retains its32-round bound. Scoped facades and all existing budgets remain unchanged. No tactic execution, front-end edit or acceptance claim.
+
+Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests; coordinator claims hash-bound until pull/verification, delivery pending. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain change; no fresh Lean/kernel/replay/runtime/performance acceptance. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicate reports remain exact archive-restorable. All original queues remain incomplete; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4237 classifications pending. No proof/runtime acceptance.
+
+## Loop-soundness static roles (V90)
+
+Guarded regression: conditional invariant/variant soundness must retain actual frame, evaluation and computed-step guards. A normal-or-allowed-error conclusion and existing exhausted acceptance must not become universal normal termination.
+
+Complete frozen-selected Solidity/Calculus/SoundLoops.lean and all18 named census signatures match frozen/adopted master. Prior1046 roles/owner map unchanged;1064 reviewed/4219 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated/imported helpers remain separate.
+
+Condition bridge lemmas retain actual ok/error evaluation equations; local-bool holding is an exact environment equivalence. Loop-from-outcome identity maps outcomes to states and does not assert full outcome equality. Unfolding retains condition/body/pop/recurse order and errors; arbitrary annotation equality concerns operational run only. Unwind/zero-exit soundness remains conditional Premise.Runs, with the exact condition-false check required for zero exit.
+
+Anonymisation transport retains all-local write coverage, global frame, local agreement, storage-frame agreement and original anonHavoc holding. Frame pop holding is an equivalence with the typed dropped state; result transport maps Out.drop exactly. BreakTest keeps every selected break formula, an actual typed flag and a law over every state; the computed loopBreak theorem supplies only that conditional structure.
+
+Box invariant interfaces retain exact body.frame and, where supplied, the full global BreakTest. Invariant truth and continuation/post obligations remain embedded in Premise.Runs. The generic variant theorem requires all-state closure: actual variant evaluation and true/false condition coverage, G on false, allowed error X OR successful next H on true, and nonnegative strict decrease when the next condition is true. Initial H sigma is separately required. Its conclusion is actual normal G OR actual allowed error X, not normal-return totality.
+
+Diamond invariant soundness retains actual uint variant/frame and exact loopStep=p. Existing exhausted outcomes remain accepted. Dispatcher inventory preserves zero/positive/automatic unfold, missing-frame and missing-variant done false, and every lexical annotation/helper branch. No source, statement, dependent definition, budget, axiom, exclusion or toolchain change; no fresh Lean/kernel/replay/runtime/performance acceptance.
+
+Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound for coordinator review until pull/verification; delivery pending. Historical unavailable bytes remain UNVERIFIABLE; reclaimed duplicate reports exact archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4219 classifications pending. No proof/runtime acceptance.
+
+## Member-read static roles (V91)
+
+Guarded regression: typed read/shape preservation must retain actual recognition, evaluation and coverage guards. Refused partial transformations and optional equality must not be reported as successful recognition or physical-memory adequacy.
+
+Complete frozen-selected Solidity/Calculus/TermLaws/Reads.lean and all20 named signatures match frozen/adopted master. Prior1064 roles/owner map unchanged;1084 reviewed/4199 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated helpers remain separate.
+
+Reference/member-storage equations retain exact layout certificates, prefixes and Option bind/map failures across find/save/write/delete views. UnshOK and BaseOK intentionally impose True on refused/non-target cases. Their accepted target clauses are substantive: matching successful prefix evaluation supports exact underAt equality; a successful base result also has an actually evaluated prefix and exact storage/view equation. Independent review found no vacuity defect: these partial-correctness refusal clauses are not positive witness evidence. base? and sameBase evaluation equalities require their exact syntactic certificates and permit none.
+
+Member-found and held-delete/save coverage retain actual prefix evaluation, found storage and recognizer facts. U.exhOk means every element returns OR is exhausted, excluding revert; it is not a successful whole-update return. The coverage theorems conclude non-none term evaluation only under that certificate plus actual syntactic coverage. Literal-save word reads and arbitrary-save length reads remain distinct.
+
+Address-shape evidence requires successful term evaluation. Typed apartness additionally requires both addresses successfully resolve in the SAME heap typing H; field/field, field/index and same-identity distinct-literal-index cases remain exact. Unknown shapes return false. These are typed-model address facts, not a complete alias procedure or physical byte-world separation theorem. Memory denotation is not replaced by a generic Theory equation.
+
+Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. No source, statement, dependent definition, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicate reports exact archive-restorable. Original queues unfinished; H28 dependent extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4199 classifications pending. No proof/runtime acceptance.
+
+## Memory-return static roles (V92)
+
+Guarded regression: generated return guards must retain actual recognition and memory-success antecedents. Empty conditions, heap-prefix facts and optional equalities do not independently prove successful execution or physical-memory adequacy.
+
+Complete frozen-selected Solidity/Calculus/MemRead/Ok.lean and all23 named signatures match frozen/adopted master. Prior1084 roles/owner map unchanged;1107 reviewed/4176 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations remain separate.
+
+Walked array length equals original mlen only under actual memory evaluation success; identity failure may remain. Spine lemmas require exact recognition and actual enclosing evaluation, yielding selected return and heap-typing prefix rather than heap equality. AllT append/singleton/empty laws concern exactly every selected Boolean eval=some true; empty AllT is not memory success without the relevant generation certificate. Guard-frame conversion and peeling retain successful recognition and all-frame holding conditions.
+
+MemCondN_sound requires exact some cs and preserves all three HoldsC cases. Memory questions give return iff AllT. Identity questions quantify over every actually returned memory: AllT implies actual identity/type lookup, while successful identity evaluation implies AllT. Address questions, under the same memory antecedent, relate AllT to actual address evaluation/resolution/read success in both stated directions. These conditional clauses are not replaced by unconditional or stronger symmetric type claims.
+
+lenCond retains actual memory, identity and HRef evaluation. Dynamic arrays use walked length; fixed lengths below2^256 use literal comparison, and larger fixed lengths use index-return guards, since every uint index is below them. Actual copied-source and guardQ recognition, folded-true certificates and return conditions remain required. GuardL and both seqMem transforms preserve exact Option evaluations, including refusal/none and nested order. Existing analysis depth/memFuel and literal bounds are unchanged.
+
+Full memory-write/copy/allocation, identity peel/spine/read, field/index address and fallback cases are rostered. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicate reports exact archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4176 classifications pending. No proof/runtime acceptance.
+
+## Grown-frame static roles (V93)
+
+Guarded regression: a successful allocation-preserving run must not be generalized to arbitrary memory-object writes or unconditional compiler success. Grown-frame fields retain their exact mutability conditions and local write exceptions.
+
+Complete frozen-selected Solidity/Calculus/RunFrameMem.lean and all27 named signatures match frozen/adopted master. Prior1107 roles/owner map unchanged;1134 reviewed/4149 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations remain separate.
+
+withinM nil/cons are classifier equations; recursive unrolling requires every-frame closure, not a termination witness. Typed local weakening retains all LTy cases and exact heap-prefix composition. TLocAgreeM concerns only indices at or beyond depth and outside a typed write list. Composition, weakening, set/drop and same-heap agreement preserve their precise scope; enlarging the exception list weakens the guarantee.
+
+TGFrameM has four fields: older objects are kept along the actual extension; transaction equality is unconditional; self-balance and storage/net equality require mu!=nonpayable. It does not assert all funds unchanged for every mu. Transitivity and ordinary-frame/environment/adoption transports retain full input frames or actual Heap.Keeps. Target environment replacement alone supplies no local-agreement fact.
+
+Copy/default allocation keeps older objects under actual mapFree certificates. MRhs.evalT_frame requires actual successful RHS evaluation, with no extra allocIn premise; its result has global frame and local agreement. Typed return-entry and leave transports preserve old objects/caller locals with actual return environments and exact write lists. Statement/program frame theorems require both the exact within/withinM certificate and actual successful run.
+
+All allocation, rebind, conditional, block, call/callRec and ordinary-within fallback cases are rostered. Arbitrary writes into caller objects remain outside the allocation extension; no missing run invariant is supplied here. No physical heap/capacity/source-compiler adequacy follows. No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance.
+
+Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicate reports exact archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4149 classifications pending. No proof/runtime acceptance.
+
+## Archive-backed duplicate cleanup (V94)
+
+Guarded regression: resource cleanup must retain the original exact evidence bytes, not replace them with regenerated results. Eight working classification reports were removed only after exact comparison with unique regular members of four retained, committed-hash-bound archives and independent finder/skeptic review.
+
+The receipt records every original working path, byte count, SHA256, exact archive-member name and retained archive binding. Logical bytes reclaimed58433660. Post-deletion rechecks confirm every original byte sequence remains exactly restorable. Restore members to their original paths before historical working-path checks; these intentional duplicate evictions are not UNVERIFIABLE-byte gaps. Unique evidence, source, logs, datasets and caches remain intact. The setup's incorrect older-member prefix was refused before mutation and is recorded.
+
+Census unchanged1134 reviewed/4149 pending of5283;1537 unresolved owners; zero fresh witnesses. Accounting passes, complete acceptance remains FAIL. This maintenance supplies no semantic/Lean/kernel/axiom/replay/runtime or performance acceptance. Coordinator retrieval remains pending. Whole original queues remain unfinished; H28 actualCallerFields/extractionActuallyChanges/replay pause, Raw/Context waits and all STOPs retained. No statement/definition/budget/exclusion changes or push.
+
+## Storage-soundness static roles (V95)
+
+Guarded regression: capture/reordering soundness must retain exact source/receiver/index order, scope drops and typed/default/dispatcher certificates. Directed simulation must not become unconditional halt equality or normal program success.
+
+Complete frozen-selected Solidity/Calculus/SoundStore.lean and all28 named signatures match frozen/adopted master. Prior1134 roles/owner map unchanged;1162 reviewed/4121 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated helpers remain separate.
+
+Six operational identities preserve declaration-result binds, generic map/bind and two/three pushed-local state projections after exact drops. The other22 interfaces retain conditional Premise.Runs, including actual continuation/frame/postgoal and premise-holding obligations. Primitive field captures source then receiver; primitive index captures source/receiver/index. Reference and memory index writes capture receiver/index before shifted source, relying on existing nonpanic/revert simulation. Its observation guarantees do not imply identical halt labels.
+
+All assignment targets and source constructors, including fixed-copy variants, remain rostered. MapFree/layout/default and exact computed-step=q guards remain where stated. Delete receiver capture additionally requires success and error coherence for every receiver outcome at the same fixed state. NonSimple comments add no hypotheses absent from signatures. Local-push target shifts, shifted-source defaultability and memory-derived mapFree proofs stay exact.
+
+Push/pop dispatch preserves absent/present source, primitive/reference/memory/fixed-copy captures, mapping shrink/extend/default cases and receiver captures. Push at its bound may be exhausted, accepted by existing box/diamond semantics; no nonempty array, normal termination or unlimited resource premise is invented. No physical-storage/copy/source-compiler adequacy follows.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicate reports exact archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4121 classifications pending. No proof/runtime acceptance.
+
+## Logical-language static roles (V96)
+
+Guarded regression: logical formula equality requires matching successful values; two failed evaluations do not prove equality. Evaluation equations and sufficient return recognizers must not imply runtime/compiler adequacy.
+
+Complete frozen-selected Solidity/Calculus/DecideLang.lean and all24 named signatures match frozen/adopted master. Prior1162 roles/owner map unchanged;1186 reviewed/4097 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated instances/helpers remain separate.
+
+Atom assignment/lookup retains primitive types and exact different-position guard. Twelve evaluator equations preserve typed symbol behavior, actual Option binds, left-biased orElse and actual-value kite selection. Logical index appends a reference without checking storage bounds; starting-storage observations retain defaults and absence behavior. These are logical-language semantics, not operational source/memory adequacy.
+
+Formula equality holds iff both terms return the same value; reflexive equality characterizes return and is false for none. Literal true/false certificates yield their actual Boolean values. Comparison/connective return requires actual isCmp, accepts and rhs-presence certificates; it is not total arithmetic. retsS_eval requires exact true recognition; the source/compiled recognizer equality asserts no admission or completeness. The classifier deliberately refuses app3/orElse/err even where some terms could return.
+
+Nullary typed symbols return by their logical semantics. seqL preserves exact guard bind behavior, removing guards only under the existing sufficient certificate. assert preserves true/false/missing cases. Full13-term/6-formula, printer/display and typed quotation support was read without editing or executing it; no new parser/editor/quotation/kernel acceptance follows.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicate reports exact archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4097 classifications pending. No proof/runtime acceptance.
+
+## Rule-origin static roles (V97)
+
+Guarded regression: finite name partitions, counts and heuristic tags must not be mistaken for semantic soundness, unique applicability or compiler adequacy. The existing RuleShapes runtime reserve STOP is untouched.
+
+Complete frozen-selected Solidity/Calculus/RuleShapes.lean and all five named signatures match frozen and adopted master. Prior1186 roles and owner map unchanged;1191 reviewed/4092 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations remain separate.
+
+The closed partition theorem gives exactly one of claimed, explicitly unclaimed and migration-pending for each enumerated KeyTaclet. It does not require a unique claiming constructor. Claimed names search ordinary and callback origins; list counts are exactly342 claimed and35 unclaimed. These are metadata, not operational coverage proofs. The empty migration-pending list is an existing value, not discharge of other producer obligations or exclusions.
+
+heuristics_agree quantifies ordinary tacletOrigins only, requiring one distinct heuristic after deduplication; callback rows are outside this theorem. concrete_unclaimed excludes the concreteSolidity heuristic from every claimed name, without establishing program refusal or acceptance. Neither theorem establishes rule applicability or compiler totality.
+
+The complete origin tables, callback table, operator-order groups, all35 unclaimed names and explanations, empty migration list, LeanTaclet list, enum-generation and constructor-table command implementation were read. Constructor checks reject missing, extra or duplicate constructor rows; no commands were rerun. keyTacletAt zips merged rows with operator order; localAssignIncrement retains its documented assignment/declaration double-length exception. Existing command-time unsafe implementation support is unchanged; no new execution/trust claim follows. These observations do not prove external KeY corpus fidelity or semantic lowering adequacy.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4092 classifications pending. No proof/runtime acceptance.
+
+## Shadow-write merge static roles (V98)
+
+Guarded regression: dropping a shadowed write must preserve halt/exhaustion distinctions; successful update merging cannot imply unconditional return, arbitrary modality exchange or transformation completeness.
+
+Complete frozen-selected Solidity/Calculus/RewritePast/Merge.lean and all24 named signatures match frozen/adopted master. Prior1191 roles and owner map unchanged;1215 reviewed/4068 pending of5283;3746 confirmed owners/1537 unresolved. Zero fresh joint witnesses; generated declarations separate.
+
+Spine recognition follows only the first argument recursively (or exact term equality for onSpineS). Recognized inner failure propagates to outer failure. Exhaustion propagates back only with actual inner failure, positive recognition and outer exhaustion; returns-or-exhausts remains a disjunction. Compiled/recursor recognizer equality grants no positive recognition.
+
+Global replacement commutes with elements that write neither storage nor memory, with operands evaluated at fixed sigma0. Explicit storage/memory equations retain Option failure. ShRel permits both successful globals differing in storage/memory, with equality of each component only when its pending list is empty. It also permits original none while transformed evaluation differs, provided transformed none or a pending shadow term halts. Thus dropSh_rel is not arbitrary-list evaluation equality. Held-local substitution equality is unconditional but supplies no return witness.
+
+Dropping exhaustion transport retains every pending storage/memory term returns-or-exhausts and transformed exhOk. It yields original exhOk and only the implication from transformed exhAny to original exhAny. Formula transport holds_upd_dropSh uses empty pending lists and is one-way. holds_upd_total requires actual U.totalB=true before changing modality; this is not source/compiler totality.
+
+mergeK tries seqPar, storage, memory, then local-memory merge. Modality selection uses agreement, otherwise first update totality, otherwise second update totality, otherwise fails. mergeP requires both selection and update merge success then drops shadowed writes. Every soundness interface retains exact Option success and transformed holds premises.
+
+Binder handling first attempts direct absorption, optionally all-leading-binder absorption with reorder, then guarded lift/recursion only if t.notMem or U.keepsNext; otherwise failure. absorbBind falls back unchanged when inapplicable; leading absorption proceeds innermost first. mergeAt traverses universal/hidden binders and indexed update spines; mergeRun zero is identity and successors merge inner pair first. mergePast tries n+1 merges without reordering before fallback with reordering. Full term/update/formula cases and all definition/proof branches were read; no execution or completeness credit follows.
+
+No source, statement, dependent definition, interface, budget, axiom, exclusion or toolchain edit; no fresh Lean/kernel/replay/runtime/performance acceptance. Exact source/signatures/rosters/dataset remain off Git with path/size/SHA manifests, hash-bound until coordinator pull/verification; delivery pending. Historical unavailable bytes UNVERIFIABLE; reclaimed duplicates archive-restorable. Original queues unfinished; H28 extraction/replay pause and Raw/Context waits retained. No STOP release.
+
+Accounting and115controls PASS; documentation path gate PASS exit0. Complete acceptance remains FAIL exit1:4068 classifications pending. No proof/runtime acceptance.
