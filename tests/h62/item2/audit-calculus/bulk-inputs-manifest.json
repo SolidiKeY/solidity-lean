@@ -1,0 +1,12 @@
+{
+  "frozen_scope": {
+    "path": "/workspace/h62-successor-bulk/h44-8368b14e/SCOPE-MANIFEST.json",
+    "bytes": 75913,
+    "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
+  },
+  "lifetime_roles": {
+    "path": "/workspace/h62-successor-bulk/external-try-roles-v68/semantic-roles-reviewed.json",
+    "bytes": 2026555,
+    "sha256": "a54d22781d0fc4cf011b78704057d7e824f2fa0abf2579202abb22a11082222b"
+  }
+}

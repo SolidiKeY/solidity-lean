@@ -1,0 +1,47 @@
+{
+  "scope": "Complete6 problem/reachability theorem role classifications; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 598,
+    "pending": 4685,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/problem-reachability-roles-v48/evidence.tar.gz",
+      "bytes": 1130659,
+      "sha256": "94d9f36fba85a069d736ac32ba78b07ef5c54afb920e493c90f8d488ec89ab61"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/problem-reachability-roles-v48/inputs.json",
+      "bytes": 1238,
+      "sha256": "df6ee67b7132af022feac61df671d7c46194ed15481821dc9a28ce9d3d828735"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/problem-reachability-roles-v48/gates.json",
+      "bytes": 3065,
+      "sha256": "1c6994e4d459cb70e9603be24b307515288ae7c325a845bb106d95913e306811"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/problem-reachability-roles-v48/reviews.md",
+      "bytes": 669,
+      "sha256": "6586346294457202a1ff4ef3a8c532f5c8969933a5107fe55056bae61da94c4f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/problem-reachability-roles-v48/case-rosters.json",
+      "bytes": 1029,
+      "sha256": "52ee6aa9482277a8245c6eb1997a524807a6f7d2d83817222ecd1118e7f0c5e7"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/problem-reachability-roles-v48/doc-master-repair-binding.json",
+      "bytes": 486,
+      "sha256": "194e392ca7b656d1cd7b51b2933ab5090d9a59e77df88c253cf7df1e9f20d7ea"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/problem-reachability-roles-v48/semantic-roles-reviewed.json",
+      "bytes": 1589923,
+      "sha256": "98ebdb294a2b309dbcd5e3b8e8df3ac6ee6b45ded08c201f5b389f5918a1b87a"
+    }
+  ]
+}
