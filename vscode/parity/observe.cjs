@@ -73,21 +73,28 @@ function observe(vscode, record, extensionPath, tracePath,workspacePath) {
     terminalSubscriptions.push(vscode.window.onDidEndTerminalShellExecution(event=>{if(!restored&&relevant(event.execution,event.terminal))record('terminal.end',{commandLine:event.execution.commandLine.value,executionId:identity(event.execution),exitCode:event.exitCode});}));
   }
   const original = Module._load;
+  let processSequence=0;
   const spawnObserved=(...args)=>{
+    if(restored)return childProcess.spawn(...args);
     const child=childProcess.spawn(...args);
+    const owner={processSession:randomUUID(),processSequence:++processSequence,pid:child.pid,birth:require('../src/process-state.cjs').processState(child.pid)?.birth};
+    record('process.spawn',{...owner,executable:args[0],args:args[1]||[],cwd:args[2]?.cwd});
+    child.once('error',error=>!restored&&record('process.error',{...owner,message:diagnostic(error)}));
+    child.once('exit',(code,signal)=>!restored&&record('process.exit',{...owner,code,signal}));
+    child.once('close',(code,signal)=>!restored&&record('process.close',{...owner,code,signal}));
     if(tracePath&&(args[1]?.includes('server')||args[1]?.some(a=>typeof a==='string'&&a.endsWith('lsp-server.cjs')))&&child.stdin&&child.stdout) {
       const parser=direction=>{
         const frames=new LspFrames();
         let finalized=false;
-        frames.on('message',message=>appendFileSync(tracePath,JSON.stringify({time:Date.now(),direction,message})+'\n'));
+        frames.on('message',message=>appendFileSync(tracePath,JSON.stringify({time:Date.now(),...owner,direction,message})+'\n'));
         const finish=()=>{
           if(finalized)return;finalized=true;
-          try{frames.end();appendFileSync(tracePath,JSON.stringify({direction,framingFinalized:true})+'\n');}
-          catch(error){appendFileSync(tracePath,JSON.stringify({direction,error:error.message})+'\n');}
+          try{frames.end();appendFileSync(tracePath,JSON.stringify({...owner,direction,framingFinalized:true})+'\n');}
+          catch(error){appendFileSync(tracePath,JSON.stringify({...owner,direction,error:error.message})+'\n');}
         };
         finalizers.push(finish);
         (direction==='server'?child.stdout:child.stdin).once(direction==='server'?'end':'finish',finish);
-        return chunk=>{if(finalized)return;try{frames.push(Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk));}catch(error){appendFileSync(tracePath,JSON.stringify({direction,error:error.message})+'\n');}};
+        return chunk=>{if(finalized)return;try{frames.push(Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk));}catch(error){appendFileSync(tracePath,JSON.stringify({...owner,direction,error:error.message})+'\n');}};
       };
       child.stdout.on('data',parser('server'));
       const outgoing=parser('client'),write=child.stdin.write.bind(child.stdin);
