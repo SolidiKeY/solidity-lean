@@ -548,3 +548,20 @@ group counts remained 4,412 and 5,432 respectively, although group identities
 can change with the new context spans. These are external lexical-tool checks,
 not Lean proofs. Evidence is outside Git under
 `/workspace/h62-duplication-scanner-evidence/multiline-context/`.
+
+### Multiline-context report replay
+
+Two bounded scans with the same tree, scanner, selection, registry and
+caller-pinned previous report took 108.550 and 105.122 seconds and produced
+byte-identical reports, SHA256
+`f70746c5529c35d14a076007a526011357d6738cc8fc5eecd64d38d3d9b79285`.
+Both selected 7,143 files and recognized 121,486 declarations, with no file
+errors or unmatched patterns; all recognized ownership remains unknown. The
+input delta against the older caller-pinned report is 211 added, 339 changed
+and none removed. Both the tree and scanner changed from that baseline, so
+group deltas cannot be attributed solely to source changes. The pin does not
+authenticate the prior report's producer. These runs demonstrate repeatability
+for this snapshot, not complete census, Lean signature equivalence or live
+ownership. Independent finder and skeptic reviewed the replay without Lean;
+full reports and timing records are outside Git in the multiline-context
+evidence directory.
