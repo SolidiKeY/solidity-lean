@@ -914,8 +914,8 @@ when an exact reviewed axiom-pin migration is ready.
 
 The coordinator delivered the exact b3fb module-times result/waits and both
 rejected drafts. This lane read their source without importing or executing
-either; [draft-review.json](../../tests/directruntime-20261104/native-browser/h109/draft-review.json)
-records eight concrete input, serialism, timing/RSS, CPU, cleanup, evidence and
+either; the draft review is archived in the private coordination repository under
+`evidence/solidity-directruntime-20261104/native-browser/`. It records eight concrete input, serialism, timing/RSS, CPU, cleanup, evidence and
 A/B obligations. The supplemental archive contains a duplicate self-hardlink;
 strict production membership validation rejects that form. Only selected
 regular text/JSON payloads were inspected; both draft hashes also verify in

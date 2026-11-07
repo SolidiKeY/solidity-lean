@@ -225,13 +225,9 @@ membership, unsafe/oversized reads and changing resource settings fail closed.
 Twelve controls include descriptor-leak, configuration-drift and process-identity
 cases. Synthetic filesystem cases are not actual cgroup authentication.
 
-The read-only host observation found `/init`, although the namespace path was
-`/` and the mount root `/..`. Its visible ancestor has a 16-GiB memory maximum;
-the leaf and swap limits are unbounded. The cpuset allows five concurrent CPUs,
-while the configured sustained fair-class quota ratio is four. Quota ratios are
-not short-interval concurrency guarantees; period boundaries, burst credits and
-per-thread scheduling remain relevant. The first review caught an incorrectly
-named CPU-capacity field; the corrected report separates these quantities.
+CPU cpuset cardinality and configured sustained fair-class quota rate are
+reported separately. Quota ratios are not short-interval concurrency guarantees;
+period boundaries, burst credits and per-thread scheduling remain relevant.
 
 These are non-atomic point-in-time kernel observations. Charged cgroup memory is
 not aggregate process RSS. Complete host-lineage and Docker ownership flags are
@@ -239,3 +235,26 @@ explicitly false. The host observation is not an approved worker scope. Real
 Docker probes are deferred until the owned creation/cleanup controller exists;
 there is no worker, budget authorization, continuous monitor, cleanup or complete
 measurement verdict here. The full runner and five-module A/B remain open.
+
+
+## Raw Git source preparation
+
+`source-snapshot.py` prepares regular raw Git blobs from an exact SHA1 commit,
+ignoring checkout dirt, untracked files and archive export attributes. It refuses
+symlinks and gitlinks. A fresh private shallow Git database contains the chosen
+commit, trees and blobs, with no remotes, common directory or alternates. Parent
+history is deliberately absent; a check needing it requires a separate explicit
+input rather than an implicit live-repository fallback.
+
+The external manifest hash pins file bytes/modes, directory membership and the
+Git executable used by verification. Root/manifest links and extra or changed
+entries fail verification. Preparation and verification assume exclusive private
+writer control. They do not resist a malicious concurrent same-user writer or
+prove a read-only mount. The disk preflight is a coarse estimate, not capacity
+or inode reservation; production snapshots require the future controller capacity
+monitor/reservation. Full-tree production preparation remains unqualified.
+
+The source component is independent of toolchain, package, cache, image and CI
+identity authentication, resource containment, deadline enforcement and cleanup.
+It does not execute workers or authorize slow proof or timing replays. H127 needs
+all of those layers and the five-module A/B before runner acceptance.
