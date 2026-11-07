@@ -2717,3 +2717,21 @@ retained as historical, not counted current. Independent read-only finder and
 skeptic checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/optimizer-migration-evidence.sha256`.
 This non-atomic observation does not establish current runtime acceptance.
+
+## Semantics migration probe observations
+
+`semantics_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. ExceptCompatibility
+contains isolated constructor discrimination/injectivity fixtures; ExportAbiTypes
+serializes elaborated ABI constant types and writes the path in `H62_API_OUTPUT`.
+The fixtures do not validate AbiAccess or establish cross-version equivalence.
+Current invocation, inputs and outcomes remain unresolved.
+
+At merge head `a074dd53d465860d748cdf33cce654d8061d7317`, the refreshed static
+index has 837 candidates, 643 with supplied current references and 194 without;
+fourteen retain historical references for review. Three candidates were added
+and none changed or removed since the preceding snapshot. Independent read-only
+finder and skeptic checked roles, file effect, hashes and history preservation
+without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/semantics-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
