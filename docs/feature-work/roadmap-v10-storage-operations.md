@@ -2031,3 +2031,28 @@ Those setup failures remain separate from both valid timing observations.
 No post-reversion Lean rerun is claimed; production bytes match the original
 baseline. Original/consolidated queues, prior strict pins/docs/full-gate holds,
 actual H121b Source/P8 duties and library-try/Y04/separate 4.35 waits remain open.
+
+### C282: Backfill B arbitrary positive finite copy repetitions
+
+This distinct increment reuses the accepted whole-store copy_repeat law and
+next_footprint_run. positive_repetitions proves Nat.repeat of the original copy
+for count+1 equals the first actual whole numeric store, for every natural
+count. repeated_footprint_run rewrites through that equality and reuses the
+original next-footprint certificate. No new evaluator, repetition cap, fresh
+intermediate oracle, alias exclusion, crypto premise or Source representation.
+Existing definitions, proofs and statements are unchanged. C281 extraction and
+joint-input candidate remain absent, with their timing STOP still binding.
+
+Existing populated shrinking controls instantiate both laws for arbitrary
+counts. Four exact guards use the standard trio. Fresh unchanged-control pair
+before/after passed at 4.28/4.26 s (about -0.47%); this focused pair is no stable
+whole-build speed claim. Final guarded extended controls passed at 4.18 s,
+sampled peak RSS 719740928 bytes, no resource stop. The regenerable build target
+was recreated and fetched artifacts restored before the baseline. Independent
+read-only finder/skeptic found no defect; neither ran Lean/server/builds/edits.
+
+Requested cleanup restored over 2 GB free while preserving seals. Evidence is
+off Git and archived privately under H145. No whole-Backfill or actual Source/P8
+adequacy claim. Original/consolidated queues, H121b production, 3209 uncovered
+rows, strict pins/docs and full gates remain open. External library-try/Y04/
+separate 4.35 waits and C281/prior STOPs stay distinct and unreleased.

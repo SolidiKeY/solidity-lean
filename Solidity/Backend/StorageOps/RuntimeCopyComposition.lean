@@ -30,6 +30,43 @@ theorem next_footprint_run {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
     · rw [facts.2.2.1] at read
       exact covered location (List.mem_append.mpr (Or.inr read))
 
+/-- Every positive finite repetition of the actual copy has the same whole
+numeric store as the first copy. No new loop evaluator or iteration cap. -/
+theorem positive_repetitions {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
+    {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}
+    (run : FiniteRun N L R hash P locations) (dst src : Solidity.Storage.Loc) (initial : WordStore)
+    (covered : ∀ l ∈ writeSet N hash dst src initial ++ (readSet N hash dst src initial).tail,
+      l ∈ locations)
+    (safe : dst = src ∨ ∀ w ∈ writeSet N hash dst src initial,
+      ∀ r ∈ (readSet N hash dst src initial).tail, w ≠ r)
+    (count : Nat) :
+    Nat.repeat (NumericTraversal.copy N hash dst src) (count + 1) initial =
+      NumericTraversal.copy N hash dst src initial := by
+  induction count with
+  | zero => rfl
+  | succ count ih =>
+    change NumericTraversal.copy N hash dst src
+      (Nat.repeat (NumericTraversal.copy N hash dst src) (count + 1) initial) = _
+    rw [ih]
+    exact RuntimeCopyRepeat.copy_repeat run dst src initial covered safe
+
+/-- Every positive finite repetition retains the original run evidence for
+its actual next generated footprint, including exact self aliases. -/
+theorem repeated_footprint_run {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
+    {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}
+    (run : FiniteRun N L R hash P locations) (dst src : Solidity.Storage.Loc) (initial : WordStore)
+    (covered : ∀ l ∈ writeSet N hash dst src initial ++ (readSet N hash dst src initial).tail,
+      l ∈ locations)
+    (safe : dst = src ∨ ∀ w ∈ writeSet N hash dst src initial,
+      ∀ r ∈ (readSet N hash dst src initial).tail, w ≠ r)
+    (count : Nat) :
+    let after := Nat.repeat (NumericTraversal.copy N hash dst src) (count + 1) initial
+    FiniteRun N L R hash P
+      (writeSet N hash dst src after ++ (readSet N hash dst src after).tail) := by
+  dsimp only
+  rw [positive_repetitions run dst src initial covered safe count]
+  exact next_footprint_run run dst src initial covered safe
+
 /-- BOTH actual runtime-copy transports and whole-store repetition follow from
 OLD evidence. No intermediate owner/transport/header stability/coverage oracle.
 All symbolic locations and all numeric words are covered by the equalities. -/
@@ -130,4 +167,8 @@ theorem complete {N L R : Nat} {hash : Solidity.Storage.Pre → Nat}
 #guard_msgs in #print axioms complete
 /-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.next_footprint_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms next_footprint_run
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.positive_repetitions' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms positive_repetitions
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyComposition.repeated_footprint_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms repeated_footprint_run
 end Solidity.Backend.StorageOps.RuntimeCopyComposition

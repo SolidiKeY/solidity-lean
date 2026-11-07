@@ -180,6 +180,19 @@ theorem next_generated_footprint :
     writeSet 128 hash dst src num1 ++ (readSet 128 hash dst src num1).tail =
       [dst, d 0, d 1] ++ [src, s 0, s 1] := rfl
 
+/-- Regression: the populated shrinking fixture has no fixed repetition cap. -/
+theorem all_repeated_stores (count : Nat) :
+    Nat.repeat (NumericTraversal.copy 128 hash dst src) (count + 1) initial = num1 :=
+  RuntimeCopyComposition.positive_repetitions run dst src initial covered safe count
+
+/-- Regression: every positive finite repetition keeps run evidence at its
+actual generated footprint, rather than assuming fresh intermediate coverage. -/
+theorem all_repeated_footprints (count : Nat) :
+    let after := Nat.repeat (NumericTraversal.copy 128 hash dst src) (count + 1) initial
+    FiniteRun 128 16 2 hash [.data 0, .data 1]
+      (writeSet 128 hash dst src after ++ (readSet 128 hash dst src after).tail) :=
+  RuntimeCopyComposition.repeated_footprint_run run dst src initial covered safe count
+
 /-- OLD inputs inhabit every premise; BOTH current-input transports and whole
 Store equalities are conclusions, not assumed middle certificates. -/
 theorem certificate : Transport 128 hash locations sym1 num1 ∧ Transport 128 hash locations sym2 num2 ∧ sym2=sym1 ∧ num2=num1 :=
@@ -330,4 +343,8 @@ theorem bad_rejected :
 #guard_msgs (whitespace := lax) in #print axioms next_generated_run
 /-- info: 'Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.next_generated_footprint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms next_generated_footprint
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_stores' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms all_repeated_stores
+/-- info: 'Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.all_repeated_footprints' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms all_repeated_footprints
 end Solidity.Backend.StorageOps.RuntimeCopyCompositionControls
