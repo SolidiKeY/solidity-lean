@@ -13,3 +13,4 @@
 | `Yul/Compilation/CompletionControls.lean` | General closed-normal completion from full transport, zero-prefix specialization and exact full-frame reasoning. |
 | `Yul/Compilation/Artifact.lean` | Shared intrinsic normal-completion and typed-result certificates, actual-total-run constructors and exact producer images. |
 | `Yul/Compilation/ArtifactPreparation.lean` | General certified one/two-stage and prefix selection, accepted-object totality and exact preparation-image laws preserving Some/None without runtime-failure semantics. |
+| `Yul/Views/SourceGraphEndpoints.lean` | Isolated ordinary Source recursive uint256 mapping path to public typed graph slot endpoint; no value or reached-state adequacy claim. |

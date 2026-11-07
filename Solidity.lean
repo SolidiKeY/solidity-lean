@@ -6164,6 +6164,7 @@ import Solidity.Yul.Views.SourceBalanceReads
 import Solidity.Yul.Views.SourceControls
 import Solidity.Yul.Views.SourceEnvironmentControls
 import Solidity.Yul.Views.SourceEnvironmentInputs
+import Solidity.Yul.Views.SourceGraphEndpoints
 import Solidity.Yul.Views.SourceHashBinding
 import Solidity.Yul.Views.SourceHashBuiltin
 import Solidity.Yul.Views.SourceHashControls
