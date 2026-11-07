@@ -225,7 +225,8 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='dafny-command-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-command-output')?.observation;errors.push(...require('./dafny-command-output.cjs').errors(o,config.runId));
+  if(config.suite==='trace-unavailable'){errors.push(...require('./trace-presentation.cjs').unavailableErrors(result.scenarios.find(s=>s.id==='native-trace-unavailable')?.observation,config.runId));
+  }else if(config.suite==='dafny-command-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-command-output')?.observation;errors.push(...require('./dafny-command-output.cjs').errors(o,config.runId));
   }else if(config.suite==='dafny-compiler-output'){const o=result.scenarios.find(s=>s.id==='native-dafny-output-configuration')?.observation;errors.push(...require('./dafny-output.cjs').errors(o,config.runId));
   }else if(config.suite==='compiler-output'){const o=result.scenarios.find(s=>s.id==='native-compiler-output-configuration')?.observation;errors.push(...require('./compiler-output.cjs').errors(o,config.runId));
   }else if(config.suite==='output-lifecycle'){
