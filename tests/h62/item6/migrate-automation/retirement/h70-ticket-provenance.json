@@ -1,0 +1,9 @@
+{
+  "source": "H70 message transcribed from this thread, payload only",
+  "reported_source_head": "16d7e371a1e013f492784b596397cf500dbd7543",
+  "reported_original_file": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5-owner-requests.json",
+  "reported_original_file_sha256": "749df2f108a11b11835c305aa1e00d335e8bcdfb9efa1885268c5aded08a41f5",
+  "original_file_bytes": "not delivered on this VM; hash retained as provenance, not verified against reformatted transcription",
+  "coordinator_local_paths": "provenance only; no cross-VM existence or delivery claim",
+  "worker_action": "preserved only; no shim implementation or resumed queue"
+}
