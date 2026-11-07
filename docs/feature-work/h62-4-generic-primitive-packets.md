@@ -395,3 +395,614 @@ goal API cannot set PAUSED; coordinator will pause the existing goal after the
 final report and idle turn. No complete, new, reset or competing goal is sent.
 The successor integrates the exact reported final head. All VM/branch/evidence
 is retained. No H71 lane-push permission was supplied, so no push is performed.
+
+## H86 live CheckedSub fixture correspondence
+
+`tests/h62/item4/generic-primitive-packets/SubCorrespondence.lean` connects the typed fixture classification to actual Source evaluation and public-selected EVM IR execution for every pair of `Fin W` operands in the populated CheckedSub fixture world. Source evaluation quantifies over both pipelines and `fuel+3`; target execution preserves any saved stack tail. The physical input representation is constructed, and public compiler selection is proved rather than supplied as a desired compiled value. Success preserves the machine apart from pushing the result; Source underflow retains the exact arithmetic panic data and unchanged Source state, while the target retains only its existing coarse revert.
+
+All seven existing rows specialize the same target theorem. Concrete success/underflow and reject-all/accept-underflow controls are included. This covers that fixture family, not arbitrary Source worlds, every packet family, whole-language adequacy, gas/fork semantics or the pinned 4.35 migration. Original production controls remain untouched. The bridge reports only the existing standard axioms `propext`, `Classical.choice`, `Quot.sound`; public selection reports `propext`, `Quot.sound`. Two proof-only fixture edits replace unavailable live-toolchain tactic lemmas with `dif_pos`/`dif_neg`, preserving all statements.
+
+`live_inventory.py` regenerates lexical accounting from the authenticated Git base and current source. It checks byte identity for all 82 original files/826 declarations and explicitly records the canonical helper addition: 83 live files/829 declarations. The 18 original control files and 476 control declarations remain unchanged. Four tests reject missing/changed/duplicate originals and check addition separation. This is source-byte/lexical evidence, not semantic coverage; the original frozen checker is unchanged. Complete semantic case accounting, other family migrations, full validation and comparable pinned-toolchain timing remain open.
+
+## Checked-add typed fixture correspondence
+
+The additive AddFixtures/AddCorrespondence test modules guard against checked
+addition silently wrapping or rejecting every input. The classifier has three
+axiom-free parameterized lemmas; the bridge has eight checked theorems covering
+every pair of typed uint256 operands in the populated CheckedAdd fixture,
+arbitrary saved target tails, both Source pipelines and fuel+3. It constructs
+physical StateRepr, proves selection through public compileVal, and derives the
+actual Source and selected-code runs. The five existing concrete target-input
+rows specialize that theorem. Reject-all, accept-overflow and fuel-zero timeout
+controls retain genuine distinct outcomes. Source overflow carries exact panic
+bytes and unchanged Source state; target overflow remains coarse revert without
+a payload or post-machine. This is not general session/world/gas adequacy or
+migration of the other original control declarations.
+
+The 240-module import closure was checked serially on the adopted live master.
+The first bridge attempt failed on the unavailable Nat.cast_add identifier;
+that failure is retained. MCP diagnostics failed to return a usable result and
+its owned server/worker were stopped; no proof or complete resource credit is
+claimed for that diagnostic. The tactic helper confirmed the integer cast
+equation. A fresh bounded check with Int.natCast_add then passed without warnings
+in 1.908 seconds, sampled workload peak 811752 KiB. The eight bridge axiom reports
+contain only propext, Classical.choice and Quot.sound (selection uses propext and
+Quot.sound); no new axiom, budget, premise or existing statement was added or
+changed. No module in this import-closure attempt exceeded 60 seconds. The first
+aggregate closure attempt took 721.726 seconds and ended with the bridge error;
+that is not a passing timing baseline. No comparable speed improvement is
+claimed. Independent read-only finder and skeptic found no semantic defect in
+the typed table, general quantifiers, selection, representation and failure
+boundaries; neither ran Lean/server/build.
+
+Four inventory regression tests still pass. The unchanged strict original-byte
+inventory now fails on three files changed upstream: Comparisons/Controls,
+Constants/Source and UnsignedCast/Controls. This increment edits none of those
+files, and does not waive their original-byte check or claim its historical
+826/476 counts are newly verified against this changed tree. Full original case
+accounting, remaining packet families, migration, comparable timings and full
+C4 gates remain open.
+
+The retained core checkpoint independently timed out in protected Source.Horizon
+at 300 seconds and recorded a thread-creation failure in Checked.UnitExamples.
+The guarded failed run was stopped and its receipt records interruption, not a
+full-gate pass. Protected Source was not edited and its unchanged STOP was not
+retried by this packet work; this packet closure does not import Source.Horizon.
+
+The official repository per-file gate passes both new files. Its checked-add
+bridge invocation took 250 seconds including Lake import-trace rebuilding;
+that is distinct from the 1.908-second isolated new-file check. The guarded gate
+completed in 250.375 seconds with sampled workload-group RSS 1336217600 bytes.
+Imported baseline linter warnings are retained in its log; the new bridge is
+warning-free. This is affected-file validation, not a full-core or full-C4 pass.
+
+## Checked-multiplication typed fixture correspondence
+
+MulFixtures and MulCorrespondence add a separate checked uint256 family without
+editing the original producer or controls. Three generic arithmetic lemmas are
+axiom-free. Nine bridge theorems connect every typed operand pair in the existing
+populated CheckedMul fixture to actual Source evaluation and public-selected
+structured-EVM execution. A shared overflow-bounds lemma converts the natural
+product range to the real Source integer range. Physical StateRepr is constructed;
+no desired compiled value, run or poststate is a premise. Successful target runs
+retain the entire machine beneath a result pushed over any saved stack tail.
+Source evaluation quantifies over either pipeline and fuel+3; fuel zero remains
+a distinct timeout. Source overflow preserves its full initial state and exact
+arithmetic panic bytes, while target overflow remains the existing coarse revert.
+
+The seven table rows match the original minimum, zero-left, zero-right, maximum,
+overflow, regular and double-overflow inputs. Both zero-operand guard branches
+are retained. Reject-all and accept-overflow controls have genuine distinguishing
+runs. The nine bridge reports use only existing standard axioms; the shared bounds
+lemma and public selection use propext/Quot.sound. No new axioms, statements,
+budgets, exclusions or original definition bodies were changed.
+
+The first bridge attempt passed without warnings: 1.707 seconds and sampled
+workload peak 741740 KiB. Its 154-module incremental import closure completed in
+234.825 seconds; no individual module exceeded 60 seconds. Validated imports are
+not a new full build or a comparable historical timing baseline. Independent
+read-only finder and skeptic found no semantic or table defect; neither used
+Lean/server/build. Official per-file outcomes are recorded separately below.
+
+This remains one populated fixture family, not arbitrary Source/world maps,
+full session or fetched-EVM/gas adequacy, complete migration of the 476 controls,
+a pinned 4.35 result, or an H68 full PassCorrect bridge. Original-fidelity gates,
+upstream file/statement drift, global failures and timing STOPs remain open.
+H109 moving slow examples does not establish an original-baseline pass.
+
+The official per-file checks pass both new modules. The bridge invocation takes
+260 seconds including Lake import-trace rebuilding; the guarded two-file gate
+completes in 260.777 seconds with sampled workload-group RSS 1627312128 bytes.
+This is affected-file validation, not a full checkpoint or original-baseline
+performance pass. Imported baseline warnings remain in the log; the new bridge
+has no warnings. No individual import exceeds 60 seconds.
+
+## Signed checked-add correspondence
+
+SignedFixtures introduces bounded integer pairs that retain negative values;
+its three generic classifier lemmas are axiom-free. SignedAddCorrespondence
+adds ten checked theorems using the published SignedCheckedAdd execution
+producer. Source evaluation uses the original Controls.input directly. Target
+evaluation reuses SignedMod.Controls populated signed runtime and its constructed
+StateRepr, rather than an empty-heap seed. Public compileVal selection and
+canonical signed-word uniqueness fix the actual returned word. Successful runs
+preserve every machine field beneath an arbitrary saved tail; both Source
+pipelines, fuel+3 and fuel-zero timeout are explicit.
+
+Five original Source input rows (maximum, minimum, positive overflow, negative
+overflow and mixed signs) have Source and selected-code table specializations.
+Reject-all and both overflow-direction controls have actual distinguishing runs.
+The local relation is primitive integer content over these constructed states,
+not an arbitrary Source-to-target heap or world map. Source panic bytes/state
+remain distinct from the target coarse revert; no reverted target machine is
+invented. This is not full session/gas adequacy, all-control migration, pinned
+4.35 validation or an H68 full PassCorrect certificate.
+
+The initial fixture file failed at the existing recursion-depth limit while
+reducing an integer-power spelling of the signed bound. MCP diagnosed ten errors;
+goal inspection returned no active goal at the case header. The tactic helper
+confirmed the natural-power cast used by Source.IntTy.lo/hi. Changing the new
+bound definitions to that exact representation fixed the file without raising
+recursion, heartbeat, stack, memory or time limits. Failed source/logs are retained.
+The bridge then passed on its first attempt without warnings in 2.322 seconds,
+sampled workload peak 849240 KiB. Its 290-module incremental closure took 25.983
+seconds (14 fresh modules); no individual module exceeded 60 seconds. Ten bridge
+axiom reports contain only existing standard axioms; selection uses propext and
+Quot.sound. No producer or original statement/definition was edited.
+
+Official affected-file checks pass: 1 second for the shared signed fixtures and
+31 seconds for the bridge including import-trace rebuilding. Those costs are
+not historical before/after measurements. Independent read-only finder and
+skeptic found no semantic or table defect; neither used Lean/server/build.
+Original fidelity failures and all retained timing/global/producer obligations
+remain open; moving slow examples under H109 does not discharge them.
+
+## Shared checked signed subtraction and multiplication
+
+SignedCheckedFixtures adds one parameterized bounded-result classifier for
+integer operations, with three axiom-free success/refusal/corruption lemmas.
+The signed-subtraction and signed-multiplication bridges fix its operation to
+Int.sub and Int.mul, and use the actual published Source and selected-code
+execution producers. Each bridge has eleven checked theorems. Its original_inputs
+identity recovers the original SignedDiv.Controls source, target and machine for
+every native signed operand pair. Physical StateRepr comes from that original
+populated six-cell fixture, with no desired run or fabricated producer premise.
+Source state/panic, canonical result words, arbitrary saved tails, either pipeline
+and the stated fuel boundaries remain explicit.
+
+Five subtraction rows match the original joint controls. All seventeen
+multiplication rows are retained: both min-int times minus-one orders, upper and
+lower overflows, all four sign combinations, swapped operands, boundary successes
+and both zero-operand orders. These are exact fixture-input tables, not a claim
+that every other original control or arbitrary world/frame has been migrated.
+Positive/negative overflow and reject-all controls preserve actual distinctions;
+coarse target revert is not a target panic-payload or reverted-machine claim.
+
+The first subtraction check failed on rewriting through a classifier abbreviation.
+MCP diagnosed four errors and exposed the branch goal; the tactic helper confirmed
+the classifier equation. Explicit unfolding fixed the proof without changing its
+statement or any classifier definition/budget. Failed source and diagnostics are
+retained. The warning-free subtraction recheck takes 2.392 seconds (12.290 seconds
+with validated imports), sampled workload peak 852132 KiB. Multiplication passes
+on its first check in 2.293 seconds (18.743 seconds including incremental imports),
+sampled workload peak 853736 KiB. No individual checked import exceeds 60 seconds.
+All new bridge reports use only existing standard axioms.
+
+The official five-file group passes: signed fixtures, shared checked fixtures,
+addition, subtraction and multiplication. Its per-file invocations take 0, 1, 3,
+3 and 13 seconds, including any Lake import rebuilding. These are affected-file
+checks, not a full-core or historical timing acceptance. Together the five new
+modules have six arithmetic lemmas and 32 bridge/control theorems. Independent
+read-only finder and skeptic found no semantic or table defect; neither used
+Lean/server/build. Original-fidelity failures, full migration/C4/H68 obligations,
+producer waits and prior timing STOPs remain open.
+
+### Unsigned division and remainder correspondence
+
+`UnsignedDivFixtures.lean` adds three generic lemmas for a bounded unsigned
+operation guarded by a nonzero divisor. `UnsignedDivCorrespondence.lean` proves
+19 bridge/control theorems using the published UnsignedDiv packets and public
+`compileVal` selection. Both DIV and MOD cover every uint256 operand pair, with
+constructed populated caller memory and arbitrary saved target stacks. Source
+globals, frames, local tails and state remain general; original uint inputs are
+recovered by a proved native round trip. Zero divisors preserve the exact Source
+division-by-zero panic and coarse target revert distinction, including unchecked
+frames. Fuel-zero timeout and rejecting/zero-accepting compiler controls remain
+separate. The 7/2 and 7/0 fixtures are new regression inputs, not additional
+original census cases. This is primitive content correspondence, not an arbitrary
+Source/target heap-world map, session, gas or fetched-EVM adequacy claim.
+
+The arithmetic helper checks in 0.324 seconds with no axioms; the correspondence
+checks in 3.992 seconds with only existing standard axioms. Its incremental
+closure takes 18.633 seconds with sampled workload peak 780356 KiB. Official
+serial affected-file gates pass in 1 and 14 seconds; no file exceeds 60 seconds.
+Independent read-only finder and skeptic report no defect and used no Lean,
+server, build or edits. These results do not clear original fidelity failures,
+full C4/migration/H68 gates, producer waits or prior timing STOPs.
+
+### Signed remainder correspondence
+
+`SignedModCorrespondence.lean` adds six theorems joining actual public compiler
+selection, Source local evaluation and populated target execution. Nonzero and
+zero divisor branches cover all signed-256 operands; Source globals, frame,
+state and local tail remain general. Target stacks retain the protected marker
+`w[77]` followed by an arbitrary saved tail, with all non-stack fields preserved
+on success. Negative-dividend execution gives -1 for -7 modulo 3 and refutes
+reject-all; minimum signed integer modulo -1 succeeds with zero. Fuel-zero
+Source timeout stays distinct from exact Source division-by-zero panic and
+coarse target revert. These new regressions do not replace original census rows
+or establish an arbitrary heap/world map, gas or session adequacy.
+
+The final six-theorem kernel check passes in 1.913 seconds, sampled workload
+peak 826016 KiB, with only existing standard axioms. Independent read-only
+finder and skeptic found no semantic defect and used no Lean/server/build/edit;
+the skeptic's fixed-marker stack qualification is explicit above. Earlier
+full-gate failures, original fidelity drift and timing STOPs remain open.
+
+### Signed division correspondence
+
+`SignedDivCorrespondence.lean` adds seven laws using public compiler selection
+and constructed populated physical inputs. Ordinary, zero-divisor and minimum
+integer divided by minus one branches retain general Source globals/frame/state
+and local tails, and arbitrary target saved stacks including empty. Ordinary
+division truncates toward zero in both modes; zero gives Source division-by-zero
+panic and coarse target revert. The exceptional branch gives checked arithmetic
+panic/revert versus unchecked minimum-integer wrap. Source fuel-zero timeout is
+separate. Truncation of -7/2 to -3 and reject-all controls derive from the new
+general law. Original producer/control statements and cases are unchanged.
+
+The final seven-law kernel check passes in 2.088 seconds, sampled workload peak
+833520 KiB, with existing standard axioms only. The first tooling attempt rejected
+an accidental nested-comment token in the module docstring before any proof ran;
+fixing that text left statements and budgets unchanged. Read-only finder and
+skeptic found no semantic defect and used no Lean/server/build/edit. This remains
+primitive content correspondence, not a whole-world/session/gas or fetched-EVM
+adequacy theorem; full C4/H68 gates, fidelity drift and timing STOPs remain open.
+
+### Unsigned complement correspondence
+
+`BitNotCorrespondence.lean` adds five laws covering all legal byte widths and
+bounded operands: narrow result range, arithmetic involution, actual Source and
+public-selected target execution, reject-all refusal and fuel-zero timeout.
+Source globals/frame/state/local tails remain general; populated caller memory,
+the second fixture local and every saved target stack are retained. The numeric
+wrapping equation ties the returned word to declared-width cleaning. Existing
+mask/index/wrong-value/protected-frame controls remain unchanged, and these new
+laws are not a migration of the original case census. No arbitrary heap/world,
+session/gas or fetched-EVM adequacy follows.
+
+The kernel check passes in 1.476 seconds (incremental closure 24.891 seconds),
+sampled workload peak 811316 KiB. Arithmetic uses propext/Quot.sound; bridge laws
+also use existing Classical.choice. No axiom or proof budget was added. Independent
+read-only finder/skeptic found no defect and used no Lean/server/build/edit.
+Full C4/H68, original fidelity and historical timing STOPs remain open.
+
+### Bitwise AND/OR/XOR correspondence
+
+`BitwiseCorrespondence.lean` adds three laws for all 32 unsigned byte widths and
+all supported AND/OR/XOR operand pairs. It proves the actual populated fixture's
+cell reads at 5 and 4, constructs its full initial physical StateRepr, and derives
+actual Source evaluation plus public `compileVal` selected-code execution with
+every saved target stack. Source environment/globals/frame/state remain general;
+its context is exactly two operands, without an arbitrary older local tail.
+The full fixture uses its original context/base zero; the public two-local code
+uses base four. The cell equations connect execution, and no intrinsic context
+projection or `CompiledVal.Input` adapter is asserted. Exact machine results
+preserve all non-stack fields. Reject-all is refuted by the actual execution law.
+
+The three-law kernel check passes in 1.078 seconds, sampled workload peak
+796140 KiB, using existing standard axioms. Independent read-only finder and
+skeptic found no defect and used no Lean/server/build/edit. These additive laws
+do not migrate the original case census or establish arbitrary heap/world,
+session/gas or fetched-EVM adequacy. Original fidelity failures, full C4/H68
+obligations and prior timing STOPs remain open.
+
+### Unchecked uint256 shift correspondence
+
+`ShiftsCorrespondence.lean` adds six laws for both directions and all uint256
+values/counts. It constructs the populated physical fixture and its runtime
+cell reads, derives actual public compiler selection, and combines independent
+Source local evaluation with exact selected-code execution. Source globals,
+state and older local tail, and every target saved stack remain general.
+Source is explicitly unchecked, matching the existing General producer; no
+checked-shift claim is added. Count zero preserves the value, counts at least
+256 saturate to zero, and actual success refutes reject-all. Every non-stack
+machine field survives.
+
+The six-law kernel check passes in 1.078 seconds, sampled workload peak
+809160 KiB, using existing standard axioms. Independent read-only finder and
+skeptic found no defect and used no Lean/server/build/edit. Original controls
+and census remain unchanged. This is primitive content correspondence, not
+arbitrary Source heap/world, session/gas or fetched-EVM adequacy. Full C4/H68,
+fidelity drift and prior timing STOPs remain open.
+
+### Signed-width cast correspondence
+
+`SignedCastCorrespondence.lean` adds five laws quantifying every legal source
+and destination signed width. Typed native inputs inhabit the populated signed
+local fixture; the existing input representation and word uniqueness yield
+actual selected-code execution with every saved stack. Independent Source
+explicit conversions retain arbitrary globals/frame/state/older local tail and
+wrap in either checked mode. The joint law derives public compiler selection.
+Positive sign-boundary 128 to -128, negative wrap -129 to 127 and reject-all
+controls use the general execution theorem. The emitted conditional is not
+claimed to be SIGNEXTEND code. Original controls/census remain unchanged.
+
+The first check rejected the reserved binder `from`; MCP diagnosed the parser
+failure and the binder was renamed. A selection tactic experiment failed on
+unresolved implicit context parameters and is retained without proof credit.
+The next check exposed the existing recursion-depth limit in two concrete
+implicit reductions. MCP confirmed those errors; the tactic helper checked both
+wrap equations. Explicit rewrites following the published controls fixed them
+without changing any statement, definition or budget. The final five-law kernel
+check passes in 2.942 seconds, sampled workload peak 834476 KiB, with existing
+standard axioms. Independent read-only finder/skeptic reviewed the final changes
+and found no defect; neither used Lean/server/build/edit. Full C4/H68, arbitrary
+heap/world/session/gas adequacy, fidelity drift and timing STOPs remain open.
+
+### Strict unsigned narrowing correspondence
+
+`UnsignedCastCorrespondence.lean` adds five laws for the unchanged strict
+smaller-width profile: unsigned byte multiples 8 through 248. Every uint256
+input and second populated-fixture local remain quantified. Public selection
+and actual generated-code execution are derived from constructed physical
+inputs; the exact output machine retains StateRepr, memory and every saved
+stack. Independent Source explicit casts retain general globals/frame/state
+and older local tails, wrapping in either checked mode. Reject-all is refuted,
+and horizons zero and one remain actual Source timeouts. The returned word is
+that of the typed destination-wrap integerValue, matching Source.intWrap.
+No widening or uint256 identity profile is added.
+
+The five-law kernel check passes in 1.434 seconds, sampled workload peak
+810256 KiB, with existing standard axioms. Independent read-only finder and
+skeptic found no defect and used no Lean/server/build/edit. Original controls
+and census remain unchanged. No arbitrary Source heap/world map, gas/session
+or fetched-EVM adequacy follows; full C4/H68, original fidelity drift and timing
+STOPs remain open.
+
+### Unchecked signed subtraction correspondence
+
+`UncheckedSignedSubCorrespondence.lean` adds four laws. Constructed Source
+locals and a simultaneous content/alias family connect every in-range signed
+operand pair to the published populated physical fixture. Public selection,
+actual unchecked Source wrapping and selected target execution are derived;
+Source globals/state/older local tails and every saved target stack remain
+general. The exact output retains full StateRepr. Reject-all is refuted and
+fuel zero remains timeout. Checked subtraction and arbitrary heap/world,
+session/gas or fetched-EVM adequacy are not asserted; original controls/census
+remain unchanged.
+
+The first check rejected `decide` on alias equalities with a free Source tail
+context. All dependency checks passed, none above 60 seconds; that aggregate
+attempt took 218.924 seconds. The bounded MCP diagnostic stopped at 120 seconds
+without a usable result and is retained without credit. The tactic helper
+confirmed generic index reduction; replacing only `decide` with `rfl` fixed the
+proof without narrowing the context or changing a statement/definition/budget.
+The final four-law kernel check passes in 1.376 seconds, sampled workload peak
+849148 KiB, with existing standard axioms. Independent read-only finder/skeptic
+confirmed the final proof-only change and found no defect; neither used Lean,
+server or builds. Full C4/H68, fidelity drift and timing STOPs remain open.
+
+### Populated relational comparison correspondence
+
+`ComparisonCorrespondence.lean` adds four laws covering every signed and
+unsigned 256-bit operand pair for all four relational orders. Two actual local
+words extend the published populated aliasing heap; a full StateRepr is
+constructed. The joint law derives independent Source evaluation, public
+compiler selection, canonical Boolean execution and the exact physical
+post-representation. Source globals/frame/state/older local tails and every
+saved target stack remain general. Reject-all and fuel-zero controls retain
+distinct outcomes. Original controls/census and unresolved frozen-file fidelity
+findings remain unchanged; no arbitrary heap/world/session/gas adequacy follows.
+
+The first check found a free-signedness capacity `decide` goal and a rewrite
+hidden behind the new code abbreviation. MCP confirmed both errors; the tactic
+helper checked generic capacity reduction. Explicit numeric capacity goals and
+unfolding only the abbreviation fixed the proof without changing statements,
+definitions, premises or budgets. The final four-law check passes in 1.375
+seconds, sampled workload peak 828948 KiB, with existing standard axioms.
+Independent read-only finder/skeptic confirmed the final changes and found no
+defect; neither used Lean/server/build/edit. Full C4/H68, original fidelity drift
+and prior timing STOPs remain open.
+
+### Populated integer constant correspondence
+
+`ConstantCorrespondence.lean` adds five laws covering every intrinsic integer
+type/sign/width and in-range literal. The published actual Source conversion,
+public PUSH selection, typed value relation and canonical word execution are
+instantiated on populated aliasing memory. The exact output retains StateRepr
+and every saved target stack; Source globals/frame/state and local context remain
+general. Below/above-bound controls prove actual Source constVal and conversion
+admission refusal, not fabricated target failure. Reject-all and fuel-zero
+controls preserve distinct outcomes. The current mapFree-aware interface is
+used explicitly; this does not resolve original frozen-file fidelity findings.
+
+The five-law kernel check passes in 1.153 seconds, sampled workload peak
+794436 KiB, with existing standard axioms. Independent read-only finder/skeptic
+found no defect and used no Lean/server/build/edit. Original controls/census
+remain unchanged. No arbitrary heap/world/session/gas or fetched-EVM adequacy,
+full C4/H68 acceptance or timing STOP clearance is claimed.
+
+### Nonzero all-width unsigned multiplication witnesses
+
+`UnsignedMulCorrespondence.lean` adds three laws providing simultaneous actual
+Source/local and populated physical input witnesses for every legal byte width
+and every pair in `Fin (2^bits)`, including nonzero wrapping products. The joint
+law derives actual unchecked Source evaluation, public compiler selection,
+canonical typed destination word, exact machine execution and post-StateRepr.
+Source globals/state/older local tails and every saved target stack remain
+general. Reject-all is refuted. Existing zero/maximum/wrap/wrong-cleaner controls
+remain unchanged; this does not migrate the original census or prove checked
+multiplication, arbitrary heap/world/session/gas or fetched-EVM adequacy.
+
+The first check caught one extra parenthesis in the Source-result tuple. MCP
+confirmed the resulting parser diagnostics and the tactic helper checked the
+public-selection interface. The syntax-only correction leaves claims and
+budgets unchanged. The final three-law kernel check passes in 1.390 seconds,
+sampled workload peak 824876 KiB, with existing standard axioms. Independent
+read-only finder/skeptic found no semantic defect and used no Lean/server/build/
+edit. Full C4/H68, frozen-original fidelity and timing STOPs remain open.
+
+## H121 canonical P1 and library intake
+
+Master and the V13 owner baseline `de845240a50622901bd3607dba5d3abefcc710b9`
+are adopted. P1 producer and G42.04 library adequacy are now local open work,
+not waits on the frozen V12/V13 lanes. The V13 bridge is a version-2 frame-free
+analog: it does not inhabit PendingBareRevertProducer, retain its reverting-entry
+field, or cover assert. H68 Approved/native-domain and full Local duties remain.
+
+RuntimeFrameP1V2Lift proves the actual lifted-code observation equation for all
+machines and code images using the existing MachineV2 and P1LangV2. Existing
+journal entries add no events, and every frozen outcome is handled. It introduces
+no new language or admission. Its fresh kernel check took 0.756 seconds, sampled
+workload peak 680712 KiB; axiom reports use only propext, Classical.choice and
+Quot.sound (the journal lemma uses propext alone). Independent read-only finder
+and skeptic found no defect without running Lean/server/builds. This is producer
+support, not full P1 or G42.04 completion: actual payload/event/frame execution,
+original approved-input outcome coverage and all original Local fields remain.
+
+The independent CheckedSub RuntimePair extraction candidate is parked, not
+applied: its predeclared fresh Target/Agreement/Controls timing metric measured
+10.823 seconds before and 12.638 after (+16.769842%, STOP). The original Target
+file is retained unchanged. Raw candidate, failed attempts, matched measurements
+and disposition are preserved off Git under /workspace/mrs-runtime-pair; this
+result neither clears that STOP nor replaces historical timing evidence.
+
+### H121 captured bare-revert branch
+
+RuntimeFrameP1V2FramedRevert now derives actual V2 execution of the certified
+save/body/restore image under every original physical Entry field. It retains
+L/frame/caller/base/machine/start, selected code and source failure, and arbitrary
+preexisting V2 journal. The canonical target/source prefix equation is exact.
+The source failure is a branch antecedent, never a new Approved filter. This
+supplies neither full producer packaging nor other-outcome or H68 adequacy.
+
+Its importing controls use the existing Mutation.compileCall callee-OOB fixture,
+including the source write before OOB, real physical coverage and nonempty input
+saved stack. Journal and return buffer are arbitrary. Wrong cursor and nonempty
+payload relabeling are refused. No post-revert machine/tail state is asserted:
+OutV2.revert exposes only the journal and bytes.
+
+Fresh kernel times: general0.727s; final controls0.763s, sampled workload peaks
+754192/744604 KiB. No module in the focused closure exceeded60s. Independent
+read-only finder/skeptic found no defect, without Lean/server/builds. MCP's
+separate diagnostic attempt hit its120s guard with no returned diagnostics;
+it is a retained failure, not a pass or kernel counterexample, and is not retried
+unchanged. Original full gates, fidelity debt and timing STOPs remain open.
+
+### H121 both-outcome void-call agreement
+
+RuntimeFrameP1V2CallAgreement derives success-or-bare-revert classification from
+actual checked compiler soundness at the same physical Entry. It then combines
+the existing certified captured return with the bare-failure transport to prove
+exact canonical V2 observation agreement for entered checked void calls. All
+Entry and NoAliasPromotion premises remain. No source-success/no-failure or
+new Approved-domain filter is assumed. The physical return facts proved by
+NoneProducer.returns must still be retained separately in the full H68 Local;
+this prefix equality alone is not that package or general P1/session adequacy.
+
+The positive consumer obtains a real empty-body call from Mutation.compileCall
+and derives its Entry from the same populated caller/frame/cursor fixture. Its
+success prefix holds for every existing journal/buffer and refutes an always-
+revert replacement. The prior importing consumer supplies reached callee-OOB.
+Fresh kernel times are0.761s general and0.768s positive controls; sampled workload
+peaks737848/738748 KiB. The first check caught two case-rewrite tactic mistakes,
+then a missing Decidable instance in a negative control; only proof scripts
+changed. Actual diagnostics and successful tactic-helper candidates are retained.
+Independent read-only finder/skeptic found no semantic defect; no reviewer used
+Lean/build/server. No original frozen theorem or dependent definition changed.
+
+Final per-file MCP diagnostics pass for all four H121 modules using the verified
+direct import cache (2.333/1.074/1.059/2.755s). The initial Lake-mode timeout and
+missing-artifact tactic-helper failure remain historical evidence; the changed
+server/cache setup is saved off Git. All fifteen reported theorem/certificate
+axiom sets contain only existing standard axioms (the saved-tail law only
+propext). Layer/trust/roots/fragments checks pass; no full checkpoint or Bridge
+acceptance, frozen-original fidelity restoration or timing STOP clearance is
+claimed. No module in these focused kernel checks exceeded 60 seconds.
+
+### H121 primitive value-return agreement
+
+Master 7683091e7 is adopted before this increment. RuntimeFrameP1V2ValueAgreement
+executes the existing private-result/capture/restore/export plan on MachineV2.
+Its successful-run theorem retains all original physical return facts: exact
+source output StateRepr, saved stack, BaseExtends, allocator growth, cursor and
+older-word footprint, as well as every preexisting V2 field via withBase.
+Both outcomes use that same value-result plan. A weaker checked-body Entry is
+used only to derive actual source outcome classification; it never substitutes
+a simpler target image. Exact canonical prefix agreement assumes neither source
+success nor no-failure and introduces no Approved filter or second language.
+
+The importing consumer uses the actual Composition.compileCall readAt selector.
+Index zero exports seven after restoration; index two bare-reverts, on the same
+selected call family. Its populated caller has a nonempty saved stack and a
+matching capture cursor; V2 journal/buffer remain arbitrary. An insufficient
+capture arena is refused even with represented input and matching cursor.
+This does not claim full approved-profile coverage, H68 producer packaging or
+G42.04 library/session adequacy; the original queues and STOPs remain open.
+
+Fresh kernel times: general 0.861s and controls0.815s, sampled workload peaks
+753396/751992 KiB. Final per-file MCP diagnostics pass in 2.593/3.791s.
+The first kernel/MCP check exposed an opaque plan projection in the smaller
+workspace bound. Unfolding that projection before the checked arithmetic step
+fixed only the proof; original statements and budgets stay unchanged. The
+actual failed goal, tactic attempts and passing candidates are preserved.
+Independent read-only finder/skeptic found no defect without Lean/build/server.
+Only this checkout's regenerable Lake IR cache was removed to restore the 2 GiB
+disk reserve; sources, sealed evidence and the shared Lake cache were retained.
+
+All nine new axiom reports contain only the existing standard axioms. Static
+layer/trust/roots/fragments checks pass; no focused module exceeded 60 seconds.
+Full checkpoint/Bridge acceptance and all original fidelity/timing debts remain.
+
+### H121 selected readAt full-certificate bridge
+
+Master 05d2c2587 is adopted. RuntimeFrameP1V2ReadAtBridge constructs an actual
+PassCorrect and BridgeGoal for the existing compiler-selected readAt family.
+It reuses canonical P1LangV2 sourceLang/targetLang and the exact private-result
+image. The source Allowed judgment is the original external approved predicate;
+the target Allowed judgment is the original physical admission. Identity envAbs
+and the fixed Unit resource calculation are the canonical map/bound. Both
+environment directions and prefix transports are proved from actual execution.
+No complete certificate, desired run or no-failure predicate is assumed.
+
+Local retains all six original V3 duties with their original quantifiers and
+antecedents: profile agreement, universal physical Entry coverage, genuine
+successful and reverting entries, full physical ReturnClaim and BareRevertClaim.
+The original producer is constructed with exact plan equality; producer_image
+binds its code to the same canonical target. Controls show that the original
+profile admits both real outcomes with arbitrary V2 metadata, is nonempty, and
+retains the actual reverting-entry obligation. This is a complete CONDITIONAL
+bridge for this supported ordinary-call family, not authentication of approved,
+a replacement for the full P1 native/profile/session domain, or G42.04 adequacy.
+
+Fresh kernel times: final bridge 1.072s and importing controls 0.859s, sampled
+workload peaks 750200/750460 KiB. Final MCP diagnostics pass in 2.384/1.286s.
+Independent read-only finder and skeptic found no defect and used no Lean/server/
+build/edit. Original statements, admission, exclusions and budgets are unchanged.
+
+The newly merged SourceCallProducerV2 transports captured input/returndata but
+explicitly does not execute callee code or establish full physical P1 framing.
+The newly merged P8 PlanWitness explicitly uses G07 toy programs, empty Source
+programs and a model reference rather than Source.sessionAt. Neither publication
+is treated as actual Source/library admission or a full external-call release.
+G42.04 body adequacy remains owned work; protected P8 actual-Source H24 admission
+and origin/realization evidence for library-containing Source programs remain a
+separate dependency, without weakening LibraryPremises.Inputs or assuming that
+its generic admission is impossible for every resource type.
+
+The controls also execute an actual always-revert image in the same canonical
+target language and prove that no full fixed-map BridgeGoal for that substitute
+exists: need_ok on the real successful physical input forces a completed-success
+prefix, contradicting that image's revert. This is an intentional negative
+counterexample to the substitute, not an assumed source failure. Initial parser/
+Nat annotation errors and two accidentally renamed lemma references are retained;
+only proof-local repairs changed. No focused kernel module exceeded 60 seconds.
+Generated fragments also restore the P8 README row's sorted position after the
+union merge; no bookkeeping content was edited directly. Original global gates,
+full acceptance, fidelity debt and timing STOPs remain open.
+All sixteen final axiom reports use only existing standard axioms. Final
+layer/trust/roots/fragments checks pass, with no new core edges or trust findings.
+
+
+The safe H121 split restores master Layout, SimLemmas and both original signed
+bitwise refusal declarations. The unmerged ABI totality/bridge quartet is parked
+with its exact source and history: its unrestricted binInFrag_of signature is
+refuted by signed band on master, kernel-checked without axioms. Q-HOLD-ABI asks
+for the already escalated implementation authority or a versioned contract; no
+ValOk restriction was silently introduced.
+
+ReferenceAgreement transports the actual selected reference plan to MachineV2
+while retaining all physical success fields and bare failure. The nested-default
+consumer covers every legal index and arbitrary V2 metadata. These remain native
+components, not the full P1 production session/profile/origin factory or G42.04.
+A separate rebinding consumer hit the whole-VM resource guard twice, including
+a proof-only optimization, and is parked unregistered. No failed-state rollback
+or passing rebinding proof is claimed.
+
+The bounded runner now immediately kills its owned, identity-matched descendants
+on resource stops and abnormal exits. Limits and proof budgets are unchanged.
+A tiny TERM-ignoring detached-process regression passes; the former cleanup
+fails its bound, and an injected fixture error still leaves no owned descendants.
+This repairs cleanup latency, not the rebinding proof's memory use. Original
+global failures, exact-byte fidelity debt and performance STOPs remain open.
