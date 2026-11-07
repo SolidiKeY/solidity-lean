@@ -44,6 +44,21 @@ def depth : Loc → Nat
 theorem depth_add (l : Loc) (i : Nat) : (l.add i).depth = l.depth := by
   cases l <;> rfl
 
+/-- A dynamic-array child is a distinct symbolic location from its base.
+This does not assert inequality of the corresponding hashed words. -/
+theorem data_ne_self (base : Loc) (i : Nat) : Loc.data base i ≠ base := by
+  intro same
+  have depths := congrArg Loc.depth same
+  simp only [Loc.depth] at depths
+  omega
+
+/-- A grandchild remains distinct from its original base, without a hash premise. -/
+theorem data_data_ne_self (base : Loc) (i j : Nat) : Loc.data (.data base i) j ≠ base := by
+  intro same
+  have depths := congrArg Loc.depth same
+  simp only [Loc.depth] at depths
+  omega
+
 theorem add_inj {l : Loc} {i j : Nat} (h : l.add i = l.add j) : i = j := by
   cases l <;> simp only [add, root.injEq, hash.injEq, data.injEq] at h <;> omega
 

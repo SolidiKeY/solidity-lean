@@ -8,27 +8,25 @@ The original `/workspace/solidity-lean` checkout and its `work` branch are prese
 `git merge-base --is-ancestor c6f550e281a7e5affa9a99bc2cdaed556dec00e4 origin/master`
 returned 0. No assigned remote branch existed when inspected.
 
-## Queue status — resumed after coordinator merge
+## Queue status — Nov7 rebaseline and bounded DAG recovery
 
-Coordinator explicitly authorized merging origin/master and continuing after
-H82 retirement. Fetch verified both b5668e3e56c851771a6b1b9c52178e547598aabf and
-reported20e492ee99a3fa8679aa526de0b6e731d85e4134 are origin/master ancestors.
-Assigned branch fast-forwarded to d96f2406d352de7e0b72ba6ac4ab29dc457582c6.
-No default branch, remote branch or original work checkout was modified.
+Coordinator requested rebaseline on origin/master2a43bf4fc. The original6aadc4999
+head was cherry-picked rather than literally ancestral: all3 stable patch IDs and
+all task files match upstream fdb282c76,05ba4cc6b,50b9539fd. Preserving merge into
+assigned branch produced c60d01cb49e5dff1287de4c572b39fa46bd9a48b; no reset/discard.
+Current upstream code includes further producer changes; originalc6 evidence
+remains explicitly pinned-source evidence, not a current-master timing baseline.
 
-1. **Partial:** pinned old census2143/1774 and clean baseline passed; old exported
-   inventory remains261/1774 sealed. Current merged census2145/1776 includes two
-   new read-only Yul modules; three previous source hashes changed upstream.
-2. **Partial:** B05 proof-only repair now applied and checked on both official
-   releases; original public signatures/definition/slotnum proof preserved.
-   Full directory migration and external dependency compatibility remain pending.
-3. **Pending:** clean new build/API comparison and same-source performance gates.
-   Old pinned-source baseline cannot be compared directly with changed-tree timing.
-4. **Partial:** reviewable checkpoints and artifacts exist; full root gates pending.
+1. **Partial:** pinned clean2143-module baseline passed. Original API snapshots
+   now962/1774 verified (261old prefix+700suffix+1DAG recovery);812 remain.
+2. **Partial:** B05 production repair integrated upstream. H78 generated public
+   API compatibility and full new-toolchain dependency closure remain pending.
+3. **Pending:** full new build, common-source clean timings and regression gates.
+4. **Partial:** reviewed tooling/evidence checkpoints; final root handoff pending.
 
-Historical retirement files preserve the earlier stop instruction and evidence.
-The latest explicit continue instruction supersedes that worker retirement;
-no new goal has been created/reset. No runtime pass, push, merge to default or PR.
+No full API/migration/runtime gate pass, push, default-branch merge or PR claimed.
+Original goal only; no create/reset. Historical retirement is superseded by the
+coordinator's explicit continue instructions. Original scope/queue remain saved.
 
 ## Toolchains and prerequisite evidence
 
@@ -589,3 +587,84 @@ no findings. Neither ran Lean or wrote. Tool checkpoint reviewed; full positive
 consolidation and final inventory gate still pending suffix completion.
 The export supervisor was briefly suspended at a probe boundary for this commit;
 its active bounded probe was allowed to finish and the same export then resumed.
+
+## Nov7 serializer resource recovery and complete coverage plan
+
+Original suffix export failed after700 sealed modules at
+Solidity.Yul.Views.DynamicJournalControls. Old parent manifest and truncated
+output remain unchanged. Resource guard stopped it at144.642547487s, sampled
+RSS12849807360bytes, availability4289298432bytes below4294967296 reserve; no
+passing snapshot was counted. Combined retained coverage was261+700=961.
+No unchanged retry, budget increase, source proof edit or omitted declaration.
+
+A separate tests/h62/item6/migrate-yul/ExportInterfacesDag.lean emits schema3
+canonical postorder expression DAGs for every type,implementation,proof and
+recursor RHS. ExprStructMap uses exact Expr.equal, retaining binder names and
+annotations. Canonical JSON node interning preserves literals,universes,let
+nondependency flags,projection indices and every expression edge. Only metadata
+is erased, exactly as in the original encoder. Free/expression/universe
+metavariables reject. The original tree exporter and all sealed sources remain
+byte-identical. New representation cannot be compared using old raw tree hashes;
+raw encoding-specific hashes are retained, and cross-schema normal comparisons
+reject. Control conversion uses a common complete DAG without exponential
+expansion. This is external inspection tooling, never a core proof shortcut.
+
+Python expr_dag.py rejects invalid tags/arities/primitives/names/levels,forward
+or cyclic refs,wrong roots,duplicates,unreachable nodes and noncanonical order.
+interfaces.py requires exact schema/helper binding and validates every Expr
+position.47 Python controls pass.22 tree/DAG expression controls per official
+release are identical, including all binder kinds,let flags,projections,Unicode,
+large naturals and internal metadata. Shared depth64 diamond needs65 nodes.
+Initial prototype elaboration errors and an initial parser-indentation regression
+were fixed before acceptance; failed diagnostics are retained. The bytecode flag
+was moved ahead of dynamic imports per reviewer hygiene feedback.
+
+Matched Allocation control (same old toolchain,view,cache and resources):
+74 declarations and144 Expr fields roundtrip exactly, including recursor RHS;
+old tree5.793995323s/971530240bytes versus DAG3.020941315s/939442176bytes,
+-47.86% wall,-3.30% sampled RSS. This is serializer performance only, not a clean
+Lean migration benchmark. History inspected before introducing the separate
+encoder; prior speed changes were not undone.
+
+Changed-encoder DynamicJournalControls probe passes with the same -j1,-M12288,
+stack131072,16GiB VM cap,no swap,12GiB sampled RSS guard and4GiB reserve:
+3.019191437s,1040883712bytes,53 declarations. All31 complete prior diagnostic
+rows (62 Expr fields) roundtrip exactly. Failed/truncated old output is retained
+and not accepted as coverage. Source proofs and axiom pins are unchanged.
+
+Evidence root `/workspace/migrate-yul-artifacts/resume-2a43bf4fc/`:
+expr-control-check.json,python-tests-v2.log,dag-control-roundtrip-timing.json,
+dynamic-journal-dag-check.json and source/output-bound probe reports. New helper
+copy is frozen in the detached original-base view alongside the original helper;
+tracked original sources in that view remain unchanged.
+
+Four-fragment plan explicitly covers261+700+1+812=1774 ordered unique original
+modules. First2 incomplete parent manifests contribute only their complete sealed
+prefixes; one complete source-bound DAG module is separate; final812 remain a
+plain-export fragment. consolidate-fragments.py verifies per-fragment census,
+helper/schema/hash provenance and exact global coverage, with no implicit helper
+or encoding substitution. Gap,helper/schema mismatch,missing parent hash and
+incomplete full coverage controls reject before output creation. A bounded
+--prefix-only run verifies all962 available snapshots but returns inventory
+statuspartial (not full pass):75.502079s,1846493184bytes,source bindings verified.
+The original plan remains immutable; after812 finish, finalize a new plan file
+with the final parent checksum, then perform bounded full consolidation.
+
+Read-only finder and skeptic reviewed code,fidelity,53-record recovery,all144
+Allocation Expr fields,47 tests,resource bounds and exact fragment coverage;
+no blocking findings. Neither ran Lean or wrote. Full1774 consolidation,IR-only
+name/type disposition,attributes/priority and all migration gates remain pending.
+
+Remaining812 will use the reviewed schema3 encoder explicitly via export-dag.py,
+retaining every expression/declaration with fixed bounds. The schema2 helper
+remains unchanged. New four-fragment-plan-dag-tail.json records the changed
+transport explicitly (schemas2,2,3,3); earlier plans/probe bindings are immutable.
+The exporter reuses the existing bounded driver,sealer and serial checkpoint
+logic. No full old/new compiler timing conclusion is drawn from Allocation's
+serializer control. Tail performance and resource outcomes remain recorded per
+module; no budget increase or omitted type/proof field.
+
+Final finder/skeptic checks approve the explicit812 schema3 exporter and revised
+immutable plan; no blocking findings. Final47 Python tests pass in24.988s.
+Remaining checksum stays null until the tail completes; no consolidation pass
+can be claimed from that pending plan. No reviewer ran Lean or wrote files.
