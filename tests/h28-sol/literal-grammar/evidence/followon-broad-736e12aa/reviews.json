@@ -1,8 +1,0 @@
-{
-  "scope": "Final follow-on f77 runtime/cache evidence",
-  "head": "736e12aa8b71066e49b118f1c23c0815d7159afb",
-  "finder": "No findings; actual8PASS/3registrationFAIL/exact20missing,corpus/strict/default3926/native targets/pinned377/131/scopePASS. CacheNOTshipped; aggregate49/1/5statistics no lane receipt.",
-  "skeptic": "All independentlyrunnable original phases complete; no missing phase. Retain finalcachepreflight/compatibility actualNOTshipped and20missing/3FAIL; no freshlink/fullgate/cacheimport/completion approval.",
-  "lean_or_server_or_writes": false,
-  "cache_refresh": "Completed actualexit1/configmissing; all24source/depHash/outputs matchverifiedarchive"
-}

@@ -1,4 +1,0 @@
-# H44 bulk scope manifest; bytes=178990
-# Recovery: git show cf354e514bf0b0327f89fa2c60a799a5d04b776d:tests/h62/item2/audit-v08-adapters/retirement/scope-manifest.json > /workspace/h62-audit-v08-adapters-evidence/retirement/scope-manifest.json
-# Verify: sha256sum --check /workspace/solidity-lean/tests/h62/item2/audit-v08-adapters/retirement/scope-manifest.sha256
-21694a4d9e062becbc55580eebc25d57827da64cf537e7b904224db133d8537c  /workspace/h62-audit-v08-adapters-evidence/retirement/scope-manifest.json

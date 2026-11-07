@@ -1,7 +1,0 @@
-{
-  "finder": "No scope/trust/H41finding; exact3adoptions,24source/4pin preservation and ownedlatestdelta verified",
-  "skeptic": "Static9584/H41PASS; no theorem/trustweakening. H41resolves routeonly, no import/freshness. Historicalquestionstate shouldbeexplicitlyhistorical.",
-  "fix": "Renamed historical_question_record and historical_prior_state; openquestions nowonly QRoot17.",
-  "lean_or_server_or_writes": false,
-  "acceptance": "Freshbroads/packverificationpending; no fullgoal/rootwaiver"
-}
