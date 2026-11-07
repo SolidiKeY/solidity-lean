@@ -1,0 +1,52 @@
+{
+  "scope": "twenty-one static caller-model validity roles; selected3files34namedroles complete statically only; zero fresh witnesses/runtime acceptance",
+  "counts": {
+    "role_reviewed": 335,
+    "role_pending": 4948,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/model-validity-classification-v30/evidence.tar.gz",
+      "bytes": 1004074,
+      "sha256": "8d4462427d5df180d2459070bf3ba2f6d28d1875e8000cc96ebd128436690c03"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-validity-classification-v30/inputs.json",
+      "bytes": 943,
+      "sha256": "b8f86bf5f1214692ffee34b681f9259877c54c78ba0df90ec360fe1fdbbae6aa"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-validity-classification-v30/gates.json",
+      "bytes": 3070,
+      "sha256": "f6dfd99daa3cbbe01b6775f9f4f51971995c4cee240a4050e3cefeae127c8ce4"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-validity-classification-v30/reviews.md",
+      "bytes": 791,
+      "sha256": "7428e1898532244c05dee3b4bfabf51a03e5e838de2442408d461a69c701492b"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-validity-classification-v30/formula-rosters.json",
+      "bytes": 855,
+      "sha256": "28c424b2e667ec5c0a27c2cf56487fe1349536b1053fb1f03e464379d07f1dfb"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-validity-classification-v30/supporting-source-bindings.json",
+      "bytes": 390,
+      "sha256": "4e2f6f06c76cac92ceea589cc6bea777add4aed707dc1b86022d25aefc48e6c3"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/model-validity-classification-v30/selected-area-role-coverage.json",
+      "bytes": 379,
+      "sha256": "373928f84448f40b01c2debdb8d651ba1f6e99736a062b8734ab5011d6a4d9bd"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/model-validity-classification-v30/semantic-roles-reviewed.json",
+      "bytes": 909936,
+      "sha256": "78e1474f30b364b07b8b2ac5f6e591af82db58e36d0c4fe4a463f178f88ad987"
+    }
+  ]
+}
