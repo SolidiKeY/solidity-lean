@@ -1,0 +1,13 @@
+# Focus-rule and intrinsic naming source roles
+
+Guarded regression: a matching rule requires an actual successful step; naming-definition equality must not become step completeness, name freshness or first-order semantic adequacy.
+
+Fetched/adopted master ba3c0f1539c8b64ac0c6c89e729481d3d398ee83 with owned work preserved by rebase and backup ref. Complete frozen-selected ChainRules and FirstOrder files match frozen/current bytes and signatures. Supporting ChainKit OneStep/StepBy definitions match frozen bytes. All two plus two named theorems are classified. Blocks remains pending after incomplete inspection, with no coverage credit.
+
+Focus.rule_focus is the exact retraction from a constructed rule to its supplied focus, including statement and empty cases. It proves no arbitrary formula step or uniqueness. OneStep.stepBy requires actual phi.step=some psi, then constructs existence of a rule with the same focused step and target at phi.fresh. The theorem does not prove uniqueness, unrestricted step availability, semantic soundness, termination, whole-chain completeness or compiler correctness.
+
+Idx.nameR_eq and Thin.namesR_eq compare recursor/source-twin naming definitions for arbitrary typed positions/thinnings and name lists. Empty/short lists, the original underscore default and retained/dropped names are preserved. No list-length correspondence, freshness, injectivity/bijection or name authentication is assumed or concluded. Fml.FO is a syntactic recognizer definition here; these naming theorems establish no callback-invariant semantic adequacy or formula truth.
+
+Prior 277 roles and all owners unchanged. All 5283 candidates retained: 281 roles reviewed/5002 pending; owners3746 confirmed/1537 unresolved, zero fresh audit witnesses. Supporting inputs add no classification credit; generated declarations remain separate. Independent finder/skeptic review uses no Lean/server or source edits. Bulk evidence and data stay off Git under /workspace/h62-successor-evidence/chain-names-classification-v24 and /workspace/h62-successor-bulk/chain-names-classification-v24, bound by a small evidence manifest.
+
+All original checkpoints remain incomplete. Static classification supplies no joint feasibility, kernel replay, compiler success/negative controls or source/physical/world/gas/fork adequacy. Historical missing bytes remain UNVERIFIABLE. H28 actualCallerFields/extractionActuallyChanges/replay stays paused on migrate-root-gate Raw compatibility and Context Classical.choice audit; no duplicate notice or unchanged STOP rerun. No statement/dependent-definition/budget/axiom/exclusion/toolchain changes, runtime/axiom/cache/performance acceptance or RUNTIME_GATE_PASS.

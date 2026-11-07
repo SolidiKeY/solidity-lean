@@ -1,0 +1,42 @@
+{
+  "scope": "four static focus/naming roles; no new witnesses or runtime acceptance; Blocks pending",
+  "counts": {
+    "role_reviewed": 281,
+    "role_pending": 5002,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/chain-names-classification-v24/evidence.tar.gz",
+      "bytes": 955926,
+      "sha256": "e7b3ebae39d507e02cf5701af9580ddf47288fe58ed21c7de78e813795e240a3"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/chain-names-classification-v24/inputs.json",
+      "bytes": 1140,
+      "sha256": "4eb99cf9b365df037c6d6d90e1c9ef542f943a2bb487476f05a52c57c2a61825"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/chain-names-classification-v24/gates.json",
+      "bytes": 3031,
+      "sha256": "e0ad195353c6e2174f4b23a8a9f382ac4365782351edd6e974035ec00eb4c600"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/chain-names-classification-v24/reviews.md",
+      "bytes": 580,
+      "sha256": "8987b6b015d0075a4d9b43778c502fe26bcc43a57aafbb5cb1e04202bb6bad0e"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/chain-names-classification-v24/supporting-source-bindings.json",
+      "bytes": 242,
+      "sha256": "a2877a42fe4c978d5b57a4e717600547d5c401bd5fa5cf5d732e2cc12bed8f75"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/chain-names-classification-v24/semantic-roles-reviewed.json",
+      "bytes": 773527,
+      "sha256": "daed990441723f46503f08010ac189ac39dcbec4d8c3a8e1f5f515881fdbfc62"
+    }
+  ]
+}
