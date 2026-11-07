@@ -222,3 +222,27 @@ neither used Lean/server. Exact evidence is outside Git at
 v07-family-execution-files/1.log. Local successful assignment is not whole-program
 termination, compiler totality, gas or a complete V07 interface census. No
 production statement, definition body, proof budget or G07 pin was changed.
+
+
+## Four inferred result groups: live signature resolution
+
+ResultTelescopeAudit.lean checks exact typed applications of the four declarations
+retained in the source ledger result-resolution queue. LocalFamilyControls.
+collapsed_contents_agree binds k : Keys (Bool × Bool). NodeRank.stable_by_count
+and RankConvergence.iter_stable bind k : Nat and i : Fin n; NodeRank.stable_at_nodes
+binds i : Fin n. Every original leading assumption and result premise is retained.
+These are data binders, not proof assumptions or evidence of feasible execution.
+
+All three defining files match their frozen c6f550e bytes. The small separate
+result-telescope-resolution.json pins them and the checked audit module; it does
+not rewrite the historical source ledger or clear original 4.35 pending flags.
+Master 5da4771e6 was fetched and checked first; no equivalent resolution existed.
+Live serial Lean 4.24.0 passed in 16.088s including uncached imports, under the
+unchanged resource policy. Four printed axiom sets use only the standard three.
+Exact logs remain outside Git at v07-result-telescope.json and
+v07-result-telescope-files/1.log in the existing gate-output directory. The
+remaining census, inherited telescope membership, simultaneous feasibility,
+original migration gates and full audit remain open.
+
+Independent read-only finder and skeptic reviews passed without findings; neither
+used Lean/server. The four type resolutions do not add any feasibility witness.
