@@ -140,3 +140,6 @@
 | `Lowering/V07/P12AtomicConditionControls.lean` | Mixed caller framing, actual negated Source composition and discriminating wrong atomic clauses |
 | `Lowering/V07/P12StorageCaptureControls.lean` | Concrete full P12 storage-capture producer with derived initial alias reflection, exact caller frames and empty-alias negative |
 | `Lowering/V07/P12MemoryCaptureControls.lean` | Concrete full memory-capture record, derived heap-typed identity and equal-content fresh-allocation counterexample |
+
+| `Lowering/V07/SourceRefusal.lean` | Exact current-Source local-declaration refusal characterization; environment-aware repair predicate only, no Source repair |
+| `Lowering/V07/GraphAdmissionAssembly.lean` | Shared H24 assembly from explicit environment obligations; empty-model instances do not establish actual Source adequacy |

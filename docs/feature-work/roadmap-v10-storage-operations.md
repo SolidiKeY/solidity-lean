@@ -782,3 +782,36 @@ baselined changes. The three new entries match their measured guards; no shared
 inventory is rewritten. The bounded prerequisite records Lean 4.24.0 commit
 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake 5.0.0-src+797c613 and a passing
 KeySort build. Prior full-build, strict-doc and timing failures remain retained.
+
+
+## Checkpoint 235: authorized unchanged H24 assembly packet
+
+Coordinator approval resolves V10-H121-V07. Fresh published master
+05d2c25872c4bb963a0ca7f605905e6e1e99eedc has neither SourceRefusal nor
+GraphAdmissionAssembly. Only those two files are integrated from the verified
+V07 branch commit 8ab717749c4dcf4cd5932e7fea800af1ddca5a87, not its unrelated
+branch history. Their SHA256 values remain respectively
+2b7ed2b93dd8064086673b198d12c426931b01c9ca2a080fd9bf8cfe0cd5c0a0 and
+1abed888a138c2c58c21bed309a0a9369d48a1e7ea5e211f761b70ca42dc362c.
+Generated module registration accompanies the exact packet; no master push or
+claim of coordinator publication is made. Six frozen P8/P8b files and all Source
+implementation files remain unchanged. H16 single-writer restrictions remain.
+
+The serial affected build passes 138 jobs in 6.65 seconds, aggregate RSS peak
+830517248 bytes, no resource stop. Existing unused-simp warnings belong to the
+unchanged packet/imports; no warning suppression or budget change is introduced.
+Finder and skeptic independently verified provenance and scope without Lean or
+its server, finding no proof/provenance issue. Both identified inherited prose
+requiring qualification: the blanket P8-vacuity sentence is not justified by
+the Nat-only resource obstruction, and PlanWitness's absent-from-master note is
+historical. Those sentences are retained to preserve authorized exact bytes;
+this paragraph records their current disposition rather than endorsing them.
+
+This is generic conditional H24 assembly plus current-Source refusal laws. Its
+empty-environment application is a model result, not actual Source/session or
+library lifecycle adequacy. The MRS request at
+85b3741d0ac578696e147cf5d455e38c4f8671b6 requires admission and independently
+justified origins for the same library-containing Source program/environment
+and the same pipeline/fixed parameters. MRS retains G42.04 body/result
+implementation. Actual P8 producer/origin and VY5 lifecycle work remain locally
+owned unfinished duties; Y04 and separate 4.35 timing/trust remain external.
