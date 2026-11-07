@@ -576,3 +576,26 @@ modules have six arithmetic lemmas and 32 bridge/control theorems. Independent
 read-only finder and skeptic found no semantic or table defect; neither used
 Lean/server/build. Original-fidelity failures, full migration/C4/H68 obligations,
 producer waits and prior timing STOPs remain open.
+
+### Unsigned division and remainder correspondence
+
+`UnsignedDivFixtures.lean` adds three generic lemmas for a bounded unsigned
+operation guarded by a nonzero divisor. `UnsignedDivCorrespondence.lean` proves
+19 bridge/control theorems using the published UnsignedDiv packets and public
+`compileVal` selection. Both DIV and MOD cover every uint256 operand pair, with
+constructed populated caller memory and arbitrary saved target stacks. Source
+globals, frames, local tails and state remain general; original uint inputs are
+recovered by a proved native round trip. Zero divisors preserve the exact Source
+division-by-zero panic and coarse target revert distinction, including unchecked
+frames. Fuel-zero timeout and rejecting/zero-accepting compiler controls remain
+separate. The 7/2 and 7/0 fixtures are new regression inputs, not additional
+original census cases. This is primitive content correspondence, not an arbitrary
+Source/target heap-world map, session, gas or fetched-EVM adequacy claim.
+
+The arithmetic helper checks in 0.324 seconds with no axioms; the correspondence
+checks in 3.992 seconds with only existing standard axioms. Its incremental
+closure takes 18.633 seconds with sampled workload peak 780356 KiB. Official
+serial affected-file gates pass in 1 and 14 seconds; no file exceeds 60 seconds.
+Independent read-only finder and skeptic report no defect and used no Lean,
+server, build or edits. These results do not clear original fidelity failures,
+full C4/migration/H68 gates, producer waits or prior timing STOPs.
