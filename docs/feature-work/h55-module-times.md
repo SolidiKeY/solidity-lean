@@ -1404,3 +1404,18 @@ pending. An owner migration patch is not itself accepted migration. Independent
 read-only finder and skeptic reviewed these distinctions without Lean, a
 server or a build. No current proof, production timing or H56 acceptance is
 inferred.
+
+## Generic passes candidates
+
+`generic_passes_controls.py` records four supplied source-hashed candidates.
+The generic lemma retains operator-specific producer transport; the typed
+fixture table does not prove arithmetic; correspondence aliases original
+controls and lexical checks are not elaborated equivalence. Supplied subsets
+are accepted; current inputs and results are unresolved.
+
+The historical acceptance driver uses an isolated Lean 4.35 toolchain and
+private outputs; its plan-only and lexical-only modes do not run Lean. Its
+bounded runner has no explicit wall deadline and is not an H55 300-second
+timing gate. Independent read-only finder and skeptic reviews checked these
+boundaries without Lean, server or builds. No production migration, proof,
+timing acceptance or H56 run is inferred.
