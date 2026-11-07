@@ -1484,3 +1484,32 @@ proofs. Selected538/1259,721open remains unchanged. Evidence and timing/limits
 are inventoried in `frame-allocation-evidence.json`; raw records remain at
 `/workspace/vy3-allocation-evidence-20261107`. Historical `/workspace/vy3-evidence`
 is still missing and has not been reconstructed.
+
+
+Original VY3 backfill A scoped-slot/label extension reuses the same
+`tests/h62/item2/audit-v09-passes/FrameAllocationCertificates.lean` companion.
+`Slots.covers` constructs the newest-first index for every occupied position;
+`Slots.fresh_above_old` proves fresh binders are above every old slot, complementing
+the unchanged production extension law. Finite label bounds, constructive
+coverage and separated-region disjointness are general in all bases/arities.
+A nonzero-base joint witness preserves an old address under extension, places
+a fresh binder above it and shows the actual collision from moving an adjacent
+label region backward. These identities are not assembled byte offsets or
+scanner-valid JUMPDEST certificates; runtime preservation remains separate.
+
+The focused serial Lean4.24 kernel check passed in1.309s with no resource stop.
+Label bounds/disjointness are axiom-free; the other additions use propext and
+Quot.sound. The first run failed only the new combination witness's expected
+axiom report; its actual standard dependencies are now pinned and raw failure
+is retained. Production Allocation and all prior theorem statements are
+unchanged; no new interface copy or import edge was added. Selected538/1259,
+721open stays unchanged. Prior timing STOPs and full validation holds remain;
+no unchanged STOP workload was retried. Raw resources/logs are off Git at
+`/workspace/vy3-slot-label-evidence-20261107`, inventoried in
+`slot-label-evidence.json`. Historical evidence remains missing.
+
+The unchanged documentation checker reports one missing reference in the
+base-identical generic-v08 feature document (ExecutionTransport citation).
+No changed-file citation failed. The exact source hash and owner request are
+retained in the external evidence's owner-ticket.json; the checker and other
+owner's document remain unchanged. This is not a passing global doc gate.
