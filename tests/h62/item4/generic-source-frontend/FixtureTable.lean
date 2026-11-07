@@ -108,10 +108,11 @@ theorem statementRows_exact : statementRows.map Row.fixture = statementFixtures 
 
 theorem statementRows_length : statementRows.length = 45 := rfl
 
-/-- Definitionally the same Boolean proposition as the owner's checker. -/
+/-- The same Boolean observation as the owner's checker. -/
 theorem checker_exact (c : StatementFixture) :
     statementFixtureCheck c = check (parse (ascii c.source)) c.accepts c.profile
-      c.required (fun u => u.rejections.isEmpty) fixtureBodyCtors := rfl
+      c.required (fun u => u.rejections.isEmpty) fixtureBodyCtors := by
+  cases h : parse (ascii c.source) <;> simp only [statementFixtureCheck, check, h, statementFixtureCheck_profile]
 
 theorem fixture_correspondence (c : StatementFixture) :
     statementFixtureCheck c = true ↔

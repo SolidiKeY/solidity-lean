@@ -1,0 +1,52 @@
+{
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.memory_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.object_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.reached_allocator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.reached_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.reached_memory_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.suffix_codes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.suffix_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/PreservedAllocatorWitness.lean:Solidity.Backend.Passes.AuditPreservedAllocator.suffix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

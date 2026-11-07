@@ -1,0 +1,32 @@
+{
+ "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean:H62.AuditV08Adapters.LocalGuardSuccess.actual_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean:H62.AuditV08Adapters.LocalGuardSuccess.alwaysRevert_not_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean:H62.AuditV08Adapters.LocalGuardSuccess.both_pipeline_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean:H62.AuditV08Adapters.LocalGuardSuccess.rejectAll_not_contract": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean:H62.AuditV08Adapters.LocalGuardSuccess.selected_correct_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v08-adapters/LocalGuardSuccess.lean:H62.AuditV08Adapters.LocalGuardSuccess.views_joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

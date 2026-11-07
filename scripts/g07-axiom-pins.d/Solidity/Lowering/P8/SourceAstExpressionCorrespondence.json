@@ -1,0 +1,21 @@
+{
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.assignment_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.call_ok_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.identifier_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.member_ok_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressionCorrespondence.lean:Solidity.Lowering.P8.SourceAstExpressionCorrespondence.ok_bind": []
+}
