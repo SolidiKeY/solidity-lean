@@ -1852,8 +1852,55 @@ The scan is non-atomic even under the writer lock; index flags, ignored or
 generated files, candidate resolution and runtime provenance remain
 unverified. Candidate-set changes may reflect reclassification. The
 adapter preserves historical reference labels but does not authenticate
-artifact contents or establish an executable recipe. The older
-`reference_index_update.py` ignores this adapter's historical field and must
-not consume its output until extended; identical path labels across eras do
-not preserve multiple artifact versions. Independent read-only
+artifact contents or establish an executable recipe. The earlier `reference_index_update.py` ignored this adapter's historical
+field; the version-preserving update below addresses that incompatibility.
+Identical path labels across eras do not alone preserve artifact versions. Independent read-only
 finder and skeptic reviewed the comparison without Lean, server or builds.
+
+## Reference index rebase with historical records
+
+`rebase_reference_index.py` consumes the exact extended index and drift
+artifacts, validates source and mapping transitions, and retains removed
+candidates separately. At the recorded `d0ddfa9f4ebfdea2edaf268b0da826b146f5a6ca`
+snapshot it produces 718 candidates: 471 with current-byte static references
+and 247 without. Five changed candidates retain prior candidate identity and
+reference labels as historical records; none of those stale references is
+counted current. No candidates were removed in this observation.
+
+The report is a separate schema: the older `reference_index_extend.py`
+rejects it when it has historical records or tombstones. The rebase helper
+now carries prior tombstones and rejects ambiguous reappearance.
+A skeptic found that an initial draft lost historical candidate identities on
+a second rebase; the helper now preserves them and tests repeat/removal.
+Artifact labels are paths rather than independently authenticated bytes;
+repeated labels across eras cannot by themselves prove distinct versions.
+The scan remains non-atomic and excludes ignored/generated inputs and runtime
+provenance. Independent read-only finder and skeptic reviewed the transition
+without Lean, server or builds. No execution acceptance is inferred.
+
+## Version-preserving reference updater
+
+`reference_index_update.py` now accepts extended drift with the matching
+prior index and an explicit artifact checksum manifest. It uses the rebase
+transition checks, preserves current and historical records and removed-row
+tombstones, and binds newly recorded stale artifact hashes to both the
+manifest and the earlier index's verified input lineage. The observed
+`d0ddfa9f4ebfdea2edaf268b0da826b146f5a6ca` snapshot yields 718 rows, 471
+current static references, 247 without current references and five rows with
+historical references. Their historical artifacts have recorded SHA-256s.
+The legacy path rejects extended drift instead of silently dropping fields.
+
+Pre-existing historical labels without versioned records are explicitly marked
+unbound; already recorded version entries are preserved as supplied by the hash-bound prior index,
+not independently signed attestations. Conflicting lineage versions and
+ambiguous reappearance of a removed path are refused. The older
+`reference_index_extend.py` rejects nonempty historical-record or tombstone
+schemas until it can preserve them. These are static inventory records, not
+proof, execution or runtime acceptance.
+
+The updater review found and corrected multi-generation record loss, prior
+tombstone loss, mutable artifact version attribution and historical records
+inside removed rows. Reappearing tombstones are refused rather than silently
+merged. Synthetic controls cover these paths; the current observation has no
+tombstones and no unbound historical labels. The version hashes are bound to
+the supplied checksum lineage, not independently signed attestations.
