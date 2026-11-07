@@ -129,7 +129,7 @@ prerequisites.
 | C | VX5, VT3 | After wave B's prerequisites. |
 | D | VT4 | Then G48–G55 (V16/V17) close with X, O and T included. |
 
-Peak is five concurrent lanes, plus the main chain V07–V17 and VY1–VY5.
+Peak is five concurrent lanes, plus the main chain V07–V17, VY1–VY5 and the A/U lanes of [trust-usability.md](trust-usability.md), which take priority as recorded there.
 Gate new Lean agents on memory as for the other lanes. File ownership for
 conflicts: X01 owns `solidity-features.json`, `Language/FeatureInfo.lean`
 and `Roadmap/Contracts.lean`; VO lanes own new `Solidity/Optimizer/**`; VT
