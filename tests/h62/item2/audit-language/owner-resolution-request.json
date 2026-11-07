@@ -1,0 +1,28 @@
+{
+  "id": "H70-OWNER-RESOLUTION",
+  "source_tags": [
+    "H70-router",
+    "frozen-module-map-language",
+    "frozen-module-map-source-definitions",
+    "pinned-ownership-snapshot"
+  ],
+  "type": "missing-authoritative-routing-information",
+  "paths_file": "/workspace/h62-audit-language-evidence/h70-classification-final/owner-routing.json",
+  "paths_file_sha256": "42d36af2756ad6b97a3c5d68c41436e03f968f94d5b35de1583aa251bdce3a03",
+  "exact_path_count": 262,
+  "declaration_count": 2876,
+  "request": "Identify the live producer for each exact path, or explicitly confirm that no producer reservation is recorded. Retain existing cleanup and migration roles separately. This request grants no write permission, scope expansion or ownership transfer.",
+  "known_migration_waits": [
+    {
+      "owner": "solidity-h62-6-20261106/migrate-hash",
+      "path": "Solidity/Hash/CollisionBound.lean",
+      "relay": "Partial overlay transport/source-header review completed; owner agreement, Lean and affected-gate validation remain pending."
+    },
+    {
+      "owner": "solidity-h62-6-20261106/migrate-language",
+      "path": "Solidity/Language/FixedPoint.lean",
+      "relay": "Partial overlay transport/source-header review completed; owner agreement, Lean and affected-gate validation remain pending."
+    }
+  ],
+  "host_relay_boundary": "Host journals determine delivery acceptance; delivery does not establish owner agreement or validation. No VM relay installation task."
+}
