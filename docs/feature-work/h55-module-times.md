@@ -2699,3 +2699,21 @@ This non-atomic observation does not establish current runtime acceptance.
 H127 assigns H109 runner remediation to native-browser
 (`solidity-directruntime-20261104`); five-module A/B evidence is to be handed
 over when requested. H93 and the quiet-window requirement remain in force.
+
+## Optimizer migration probe observations
+
+`optimizer_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. They cover isolated
+validator/pipeline and typed-control fixtures plus an imported kernel type and
+selected axiom transcript. Current invocation, inputs, effects and outcomes
+remain unresolved; this subset does not establish complete optimizer equivalence
+or production acceptance.
+
+At `f1fd29f2ece70f33009195446bc744a33b036baf`, the refreshed static index has
+834 candidates, 641 with supplied current references and 193 without; fourteen
+retain historical references for review. One previously referenced V10 unit
+resolution source changed; its old source identity and artifact reference are
+retained as historical, not counted current. Independent read-only finder and
+skeptic checked roles, hashes and history preservation without Lean or a server.
+Evidence hashes are in `tests/h55/module-times/optimizer-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
