@@ -1,0 +1,73 @@
+import Solidity.Calculus.ProveChunked
+
+/-!
+# Persistent frontiers for chunked proofs
+
+A frontier retains every intrinsic residual, including order and duplicates.
+A module can export its frontier and checked equality; the next module works
+from the exported terms, and reconstruction uses theorem constants rather than
+replaying previous cuts. This is a proof interface, not an unchecked serializer.
+-/
+
+namespace Solidity.Seq
+
+variable {C : Contract}
+
+/-- Every residual is an actual sequent in the original calculus. -/
+def FrontierProved (R : RuleSet) (leaves : List (SLeaf C)) : Prop :=
+  ∀ l ∈ leaves, Proves C R [] l.2.1 l.2.2
+
+/-- One bounded cut per input residual. A missing rule fails the whole stage;
+no residual may be omitted. -/
+def advanceFrontier (steps : Nat) (R : RuleSet) :
+    List (SLeaf C) → Option (List (SLeaf C))
+  | [] => some []
+  | l :: ls => do
+    let first ← cutWithin steps R l.2.1 l.2.2
+    let rest ← advanceFrontier steps R ls
+    pure (first ++ rest)
+
+/-- A checked stage reconstructs every input obligation from every output. -/
+theorem advanceFrontier_sound (steps : Nat) (R : RuleSet)
+    (inputs outputs : List (SLeaf C))
+    (checked : advanceFrontier steps R inputs = some outputs)
+    (proved : FrontierProved R outputs) : FrontierProved R inputs := by
+  induction inputs generalizing outputs with
+  | nil =>
+    intro l member
+    cases member
+  | cons l ls ih =>
+    cases firstEq : cutWithin steps R l.2.1 l.2.2 with
+    | none => simp only [advanceFrontier, firstEq, Option.bind_none] at checked
+    | some first =>
+      cases restEq : advanceFrontier steps R ls with
+      | none => simp only [advanceFrontier, firstEq, restEq, Option.bind_some,
+          Option.bind_none] at checked
+      | some rest =>
+        have same : first ++ rest = outputs := by
+          simpa only [advanceFrontier, firstEq, restEq, Option.bind_some,
+            Option.pure_def, Option.some.injEq] using checked
+        subst outputs
+        have firstProved : FrontierProved R first :=
+          fun x hx => proved x (List.mem_append_left rest hx)
+        have restProved : FrontierProved R rest :=
+          fun x hx => proved x (List.mem_append_right first hx)
+        intro x member
+        rcases List.mem_cons.mp member with equal | tail
+        · subst x
+          exact Proves.of_cutWithin steps firstEq firstProved
+        · exact ih rest restEq restProved x tail
+
+/-- Exportable stage receipt. The equality must be checked by the kernel;
+this structure supplies no evaluation oracle or admitted conclusion. -/
+structure FrontierCheckpoint (steps : Nat) (R : RuleSet)
+    (inputs : List (SLeaf C)) where
+  outputs : List (SLeaf C)
+  checked : advanceFrontier steps R inputs = some outputs
+
+theorem FrontierCheckpoint.resume {steps : Nat} {R : RuleSet}
+    {inputs : List (SLeaf C)} (stage : FrontierCheckpoint steps R inputs)
+    (proved : FrontierProved R stage.outputs) : FrontierProved R inputs :=
+  advanceFrontier_sound steps R inputs stage.outputs stage.checked proved
+
+end Solidity.Seq

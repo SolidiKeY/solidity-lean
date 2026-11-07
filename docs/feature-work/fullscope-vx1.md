@@ -1,5 +1,11 @@
 # VX1: contracts and environment fields
 
+Latest H121 status (2026-11-07): ownership resumed from move5 head90e39f89,
+merged mastera8f684928, checked transferred V1 plus new backward-completion
+consequences. Source/EVM production linkage remains open. Cross-module OpenLoops
+checkpoint prototype is a non-module draft after a180s prerequisite stop; no
+300s time-limit repair or full-gate clearance is claimed. See final H121 section.
+
 Base: `e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3`.
 Branch: `codex/solidity-fullscope-20261104/vx1-contracts-environment`.
 Repository: `/workspace/solidity-lean`.
@@ -1133,3 +1139,73 @@ defect.
 - `adapter.py --stage`: identity, 8 mutations rejected, staged hashes stable;
   `check.py`, `solidity-feature-audit.py --check`,
   `backend-scalar-thresholds.py --check`: PASS.
+
+
+### H121 resumed ownership and G01 backward completion increment
+
+H121 reverses H75: ownership/edit permission returns to VX1. Exact transferred
+base90e39f89a80c7eeec08a65f1e5b91399e168bc5e was fetched and ancestry from
+e70b959 verified. Original local headfaecbd6f3a61077bb11f61a8e62778b534303904
+is preserved at refs/vx1-preserved/pre-h121. Adoption29bd60869c58887f78366b936ca44acc7dfb1ede
+and master mergee4ae46e6ae5aa9b9d8684e2a26dd72085f5c85af retain all histories.
+Master inputa8f684928fa085d8976ead33e3d0db30208e7a4f.
+
+Merge repairs: retained transferred PowerBounds split generator rather than
+restoring the old monolith; reused master's published HorizonFuel/HorizonGrow/
+HorizonConst implementation, leaving transferred Horizon/Below,Grow,Const
+as import-only compatibility modules. Separate read-only finder confirmed no
+duplicate declarations in the shims. No Source semantics or frozen ExtCall edits.
+
+Consequences.lean proves backward_completes and backward_exact from unchanged
+V1/RunIndexed.Certificate fields. Existing compiled-artifact, eligibility, guard
+and completion premises remain exact. Completed backward prefix refinement
+becomes equality under mode.observe; exact mode retains all bytes and events.
+CompletionControls.lean exercises gasquery5/nonempty success[5] and rejects
+completed success[6] as a prefix of success[5]. Four actual axiom inventories
+contain only propext. No production adequacy instance is claimed.
+
+Separate finder/skeptic reviews found no semantic/premise defect in these
+consequences or controls; both were read-only, without Lean/server/builds. An
+initial control annotation failed OfNat target.lang.Res5; explicit Word fixed
+it. Final bounded per-file PASS: KeySort1.689s, Frozen10.350s, Consequences0.942s,
+CompletionControls0.469s. Actual Lean4.24.0/797c613 and Lake5.0.0-src+797c613.
+Docker memory.max8589934592/swap.max0, LEAN_NUM_THREADS1, explicit-j1.
+Cgroup peaks respectively128999424,296951808,115306496,92405760bytes; zeroOOM.
+AggregateRSS sampling is retained for consequences/controls only; historical
+missing RSS samples are not reconstructed. No checked module exceeded60s.
+
+The cross-module frontier prototype is retained as the non-module fixture
+tests/fullscope-20261104/vx1/checkpoint/Checkpoint.lean.txt, not kernel-checked.
+Its per-file prerequisite attempt stopped180.002s at the approved extra
+prerequisite bound, cgrouppeak836644864bytes, zeroOOM, before reaching the draft.
+No retry/cold rebuild extends that allowance. Existing artifacts retained.
+Static finder/skeptic confirm preservation of all ordered residuals, failed-cut
+propagation and reconstruction via Proves.of_cutWithin; per-input step bounds
+do not bound a whole frontier, and opaque receipt theorems are needed to avoid
+replaying previous checks. Declaration export, progress checks, terminal closure
+and original RowsNine reconstruction remain open. H121's reported memory split
+measurements are coordinator evidence, not freshly reproduced here.
+
+Current open contract boundaries: V1.D2 models creation limits but does not itself
+state exact Osaka charging; D3 is a generic physical correspondence rather than
+a full solc-reserved-memory/layout/word-machine refinement; D5 corresponds
+environments without auditing all predicates as crypto/chain-only; admitsSome
+does not establish a live eligible execution in an arbitrary instance. These
+are open producer/relation obligations, not completed proofs or new exclusions.
+Frozen V1 statements were not changed. H38 owner review receipts remain absent.
+
+Shared registration/map proposal is h121-registration.json; COORD must register
+Consequences. Native-browser owns H127 runner/registration repair: merged roots
+still default-import RowsNine despite H109. Do not delete the obligation or
+claim CI delivery. Remaining exact per-file/full gates need current source-bound
+cache; central pins remain COORD. Original all30 active regeneration and X02
+production queue remain open; transferred adapter.py/patch are staged work.
+
+Post-merge generator consistency exposed master's Elab.async=false directive
+retained in PowerBounds.lean but absent from the transferred split generator.
+Updated only the generator header template to reproduce that existing directive;
+no generated Lean declarations or proof budgets changed. Generator --check PASS.
+
+Final narrow finder/skeptic reviews confirm generator scheduling-header repair
+changes no numerical generation, declaration or proof, and no unbuilt checkpoint
+Lean module remains in the library. Draft text is explicitly not validated.
