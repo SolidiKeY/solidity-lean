@@ -1,0 +1,19 @@
+{
+ "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean:H62.AuditPrecompiles.Successor.Osaka.ecrecover_stipend_data": [],
+ "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean:H62.AuditPrecompiles.Successor.Osaka.fixed_failure_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean:H62.AuditPrecompiles.Successor.Osaka.fixed_gas_fidelity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean:H62.AuditPrecompiles.Successor.Osaka.gas_mono_joint": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-precompiles/OsakaWitnesses.lean:H62.AuditPrecompiles.Successor.Osaka.run_failure_data": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "Solidity/Backend/Executable/CreationReturnPartitionAudit.lean:Solidity.Backend.Executable.CreationReturnPartition.Controls.boundaries": [],
+ "Solidity/Backend/Executable/CreationReturnPartitionAudit.lean:Solidity.Backend.Executable.CreationReturnPartition.Controls.no_argument_at_return_end": [],
+ "Solidity/Backend/Executable/CreationReturnPartitionAudit.lean:Solidity.Backend.Executable.CreationReturnPartition.cross_exclusive": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Executable/CreationReturnPartitionAudit.lean:Solidity.Backend.Executable.CreationReturnPartition.partition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
