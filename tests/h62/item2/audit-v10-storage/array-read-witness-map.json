@@ -10,7 +10,7 @@
       "signature": "theorem run_current (machine : Evm.Machine) (tail : List Evm.Word) (slot : Evm.Slot)\n    (i : Nat) (fits : i < Evm.W) :\n    Evm.run code { machine with stack := .val \u27e8i,fits\u27e9 :: .slot slot :: tail } =\n      if i < machine.store slot then .ok { machine with stack := .val (machine.store.cells (.data slot i)) :: tail } 0 else .revert",
       "signature_sha256": "731ed72f288899eaf72a85a5b7b93c9f6f2d395bed333e7ed38299eba24c075f",
       "witness": "H62.StorageAudit.ArrayAccessWitnesses.read_joint",
-      "status": "Final exact-head kernel check and metadata review pending"
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
     },
     {
       "frozen_id": "Solidity/Backend/StorageOps/TargetArrayRead.lean:57:failure_matches",
@@ -18,7 +18,7 @@
       "signature": "theorem failure_matches {n : Nat} {G : Schema n} {p : PrimTy}\n    (old : Value G (.array (.prim p))) (i : Index) (machine : Evm.Machine)\n    (tail : List Evm.Word) (slot : Evm.Slot) (header : machine.store slot = old.length.val) :\n    Evm.run code { machine with stack := .val \u27e8i.val,i.isLt\u27e9 :: .slot slot :: tail } = .revert \u2194\n      (path i).readLive Value.dflt old = none",
       "signature_sha256": "bb6eb1b72031e8c4ec07b895c39ff958b3668d6284a41963d22764e31ca97402",
       "witness": "H62.StorageAudit.ArrayAccessWitnesses.read_failure_joint",
-      "status": "Final exact-head kernel check and metadata review pending"
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
     }
   ]
 }
