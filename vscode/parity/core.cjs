@@ -197,7 +197,9 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='trace-light-show'){
+  if(config.suite==='proof-help'){
+    if(config.target!=='local'||!ids.includes('native-certified-proof-help'))errors.push('missing native certified proof-help observation');
+  }else if(config.suite==='trace-light-show'){
     if(config.target!=='dafny'||!ids.includes('native-trace-light-show-hide'))errors.push('missing native light trace observation');
   }else if(config.suite==='trace-visibility'){
     if(config.target!=='dafny'||!ids.includes('native-trace-tab-visibility-theme'))errors.push('missing native trace visibility observation');

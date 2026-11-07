@@ -1,0 +1,28 @@
+# Stopped retirement handoff
+
+Handoff to: solidity-sol2-20261104/numeric-literals. Successor queue relay accepted by coordinator before retirement; successor is responsible for integration after final stopped/head acknowledgement.
+
+This worker is STOPPED by the user's explicit H82 retirement instruction. No automatic implementation continuation is authorized. Do not mark the assignment complete. Preserve this VM, original branch and existing goal; do not create or reset a goal.
+
+The final committed full head and clean status are in /workspace/h62-audit-v07-retirement/handoff.json and the final CLOUDVM-RESULT. Original base is c6f550e281a7e5affa9a99bc2cdaed556dec00e4; original branch is codex/solidity-h62-2-20261106/audit-v07-lowering, repository /workspace/solidity-lean. Before retirement head was 47fa918b3a01319ca5b8e27a84c7e8087c9ad3ce. No Hash overlay or proof/source edit was made after that snapshot. Only retirement documentation and scope preservation were added.
+
+Mandatory authenticated source files in this commit and cumulative patch/bundle:
+- original-assignment.txt: complete original visible user assignment, including full owner map and instructions. This is a thread transcription, not a claim to possess hidden rendered-prompt wrapper bytes.
+- original-goal-context.txt: supplied original persistent-goal objective and expected rendered prompt hash.
+- original-queues.txt: original four-checkpoint work queue and complete backfill queue.
+- scope-manifest.json: exact original write scope, 162 mapped source paths/hashes, supplemental read-only inputs, limits, frozen boundaries, every unfinished queue item and waits. Later H82 standing edit agreement is recorded separately from original restrictions.
+- SHA256SUMS: hashes for these files and this handoff. Validate from this directory with sha256sum -c SHA256SUMS.
+
+The goal tool discovery exposes only stop_goal(outcome: complete|blocked), not PAUSED or a goal-state update operation. Neither value is a substitute for the authorized pause. No goal tool was called at retirement; setting backend goal PAUSED could not be performed because that capability is unavailable. User-authorized execution stop is effective; coordinator must preserve the pause. This is not completion.
+
+No lane push: H71 permission is not supplied in this thread or available coordinator inputs. Original no-push authorization boundary therefore remains. No master push, merge, PR, publication or deployment. Integration belongs to the successor.
+
+Cumulative exports are /workspace/h62-audit-v07-retirement/cumulative.patch and lane.bundle. The bundle contains only this lane's commits relative to the original base (base is a prerequisite). Use git bundle verify lane.bundle from a repository containing the base, then fetch the original branch ref from it; do not overwrite other work. The patch includes every task file and the complete source assignment/queues/manifest. No separate VM access is assumed from coordinator-local provenance paths.
+
+Evidence archive: /workspace/h62-audit-v07-retirement/evidence.tar.gz contains saved audit evidence and coordinator inputs, excluding the bulky extracted/downloaded toolchain. Its official release URL/hash and actual version output remain in the preserved inputs/logs; the original toolchain directory remains on this VM. Archive creation uses sorted paths, mtime zero, numeric owner/group zero and gzip -n. Full original evidence is preserved at /workspace/h62-audit-v07-evidence. Export SHA256SUMS authenticates cumulative.patch, lane.bundle, evidence.tar.gz, copied frozen assignment/scope files and final handoff metadata; no manifest is claimed to hash itself.
+
+Validation boundary: previous static generators/verifiers passed and independent finder/skeptic reviews are saved. KeySort passed on official Lean 4.35.0 / Lake 5.0.0 in 1.235 seconds. Full mapped import check failed on unchanged Hash.CollisionBound (exit 1); no full affected validation, acceptance, axiom verification or comparable proof timing completed. Source semantic roles are not elaborated witnesses. No new Lean declarations/helpers, sorry, axioms or frozen-statement edits. Retirement checks only JSON parse, documentation/payload hashes, git diff --check and git bundle verify; no Lean or implementation is resumed.
+
+Open work: all four main checkpoints remain unfinished. Inventory needs actual elaborated signatures/telescope membership/constant resolution and four inferred result-input groups. No simultaneous witness was proved for any of the 968 source candidates. Supported success/totality, reject-all/always-revert negatives, failure/gas/fork boundary, verified witness/fidelity census and all final gates remain. Backfill fixture proofs, compiler negative controls and full timing/acceptance remain undone; source scanner/census, static classifier regressions and bounded reproduction tooling are delivered. Every candidate/owner is retained in the off-Git inventories.
+
+Waits: migrate-hash (solidity-h62-6-20261106/migrate-hash), Solidity/Hash/CollisionBound.lean, reviewed partial overlay plus full affected acceptance. Owner reports Syntax.Raw pending; not independently reproduced here. Supplied ticket head a3f49ee0ec1829e63022c90194048d5a1ffe0d22, source overlay head 2a18afcdba00a85645b0b3079704f78ffcd78860, supplied patch SHA256 3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff; bytes not independently verified and overlay not applied. H82 withdraws the old proof-only exact-file permission requirement; the substantive migration/validation wait remains, not an ownership permission wait.
