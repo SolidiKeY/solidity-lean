@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface_path": "Solidity/Backend/Passes/Boundary.lean",
+  "interface_sha256": "72a861f47783401b491066a1195bb32b8841ff73461ef6dcea4d44ae2cf3ee4e",
+  "witness_module": "tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean",
+  "witness_declaration": "Solidity.Backend.Passes.AuditBoundary.joint",
+  "covered_premise_bundles": [
+    {
+      "name": "Solidity.Backend.Passes.compilation_exact",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Boundary.lean",
+      "line": 21,
+      "character_span": [
+        700,
+        1221
+      ],
+      "signature": "theorem compilation_exact (result : Compilation b F P)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (hi : result.Input L frame base \u03c3 m) (hpay : Evm.Prog.pays P = false) :\n    (\u2203 o m', P.run \u03c3 = .ok o \u2227 run result.code m = .ok m' 0 \u2227\n      m'.stack = m.stack \u2227\n      result.Rep (L + Evm.Prog.pushes P) frame base \u03c3 m o.st m') \u2228\n    ((P.run \u03c3 = .error .revert \u2228 (P.asserts = true \u2227 P.run \u03c3 = .error .panic)) \u2227\n      run result.code m = .revert) \u2228\n    (P.run \u03c3 = .error .diverge \u2227 run result.code m = .fault)",
+      "signature_sha256": "1dc4041cee20fec66b877f55ce15ad99c7c3e185cbfeff0fb6fa1340bb2b38bd",
+      "source_sha256": "72a861f47783401b491066a1195bb32b8841ff73461ef6dcea4d44ae2cf3ee4e",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditBoundary.joint",
+      "witness_status": "kernel_checked_concrete_joint_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_success",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Boundary.lean",
+      "line": 41,
+      "character_span": [
+        1586,
+        1954
+      ],
+      "signature": "theorem compilation_success (result : Compilation b F P)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (hi : result.Input L frame base \u03c3 m) (hpay : Evm.Prog.pays P = false)\n    {o : Solidity.Out C \u03c3.H \u0394} (hs : P.run \u03c3 = .ok o) :\n    \u2203 m', run result.code m = .ok m' 0 \u2227 m'.stack = m.stack \u2227\n      result.Rep (L + Evm.Prog.pushes P) frame base \u03c3 m o.st m'",
+      "signature_sha256": "14680baa9e1efdc9ae4555cca2b8ca641ff7f36d803d300a5f1de7c9794e9c8e",
+      "source_sha256": "72a861f47783401b491066a1195bb32b8841ff73461ef6dcea4d44ae2cf3ee4e",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditBoundary.joint",
+      "witness_status": "kernel_checked_concrete_joint_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_reflect_success",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Boundary.lean",
+      "line": 61,
+      "character_span": [
+        2406,
+        2720
+      ],
+      "signature": "theorem compilation_reflect_success (result : Compilation b F P)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m m' : Machine}\n    (hi : result.Input L frame base \u03c3 m) (ht : run result.code m = .ok m' 0) :\n    \u2203 o, P.run \u03c3 = .ok o \u2227 m'.stack = m.stack \u2227\n      result.Rep (L + Evm.Prog.pushes P) frame base \u03c3 m o.st m'",
+      "signature_sha256": "1b754a4ecbe4a2a4bd3e1b45032690941c691004be496bd99aaef1c4bb8b177e",
+      "source_sha256": "72a861f47783401b491066a1195bb32b8841ff73461ef6dcea4d44ae2cf3ee4e",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditBoundary.joint",
+      "witness_status": "kernel_checked_concrete_joint_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    },
+    {
+      "name": "Solidity.Backend.Passes.compilation_revert_iff",
+      "visibility": "public",
+      "kind": "theorem",
+      "path": "Solidity/Backend/Passes/Boundary.lean",
+      "line": 83,
+      "character_span": [
+        3230,
+        3533
+      ],
+      "signature": "theorem compilation_revert_iff (result : Compilation b F P)\n    {base : Nat \u2192 Fin W} {\u03c3 : State C \u0393} {m : Machine}\n    (hi : result.Input L frame base \u03c3 m) (hpay : Evm.Prog.pays P = false) :\n    run result.code m = .revert \u2194\n      P.run \u03c3 = .error .revert \u2228 (P.asserts = true \u2227 P.run \u03c3 = .error .panic)",
+      "signature_sha256": "9d3dee186e350ccd3ba7b9e9b93d3df22b88d66d4b33f4651fc58e3c9dffd013",
+      "source_sha256": "72a861f47783401b491066a1195bb32b8841ff73461ef6dcea4d44ae2cf3ee4e",
+      "owner": "V09 (v07-v11/v09-compiler-passes)",
+      "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
+      "hypotheses": "pending-elaborated-classification",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditBoundary.joint",
+      "witness_status": "kernel_checked_concrete_joint_instance",
+      "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
+      "original_census_membership": false
+    }
+  ],
+  "coverage_limit": "Four supplemental Boundary premise bundles only, outside the original1259-row selection. All1259 selected census rows remain uncovered by these fixtures. No gas/fork or general totality claim.",
+  "validation": {
+    "toolchain": "Lean 4.24.0",
+    "command": "lake env lean tests/h62/item2/audit-v09-passes/BoundaryJointWitness.lean (validated import map)",
+    "evidence": "/workspace/vy3-evidence/boundary-joint-witness-20261106/witness-guarded.log",
+    "limit": "The map is source signature accounting; kernel checking establishes the referenced witness, not an elaborated census of all 1259 declarations."
+  },
+  "additional_failure_instance": {
+    "theorem": "Solidity.Backend.Passes.compilation_revert_iff",
+    "witness": "Solidity.Backend.Passes.AuditBoundary.Reverting.joint_failure",
+    "transport": "Solidity.Backend.Passes.AuditBoundary.Reverting.transported_failure",
+    "refusal": "Solidity.Backend.Passes.AuditBoundary.Reverting.success_refused",
+    "public_checked_selection": "Solidity.Backend.Passes.AuditBoundary.Reverting.selected",
+    "limit": "Additional instance of an already covered premise bundle, not a fifth covered declaration. Coarse revert only; payload/gas/fork adequacy remains open."
+  },
+  "guard_failure_family": {
+    "theorem": "Solidity.Backend.Passes.compilation_revert_iff",
+    "witness": "Solidity.Backend.Passes.AuditBoundary.GuardFailure.joint_failure",
+    "transport": "Solidity.Backend.Passes.AuditBoundary.GuardFailure.transported_failure",
+    "source_distinction": "Solidity.Backend.Passes.AuditBoundary.GuardFailure.source_distinct",
+    "target_coarsening": "Solidity.Backend.Passes.AuditBoundary.GuardFailure.coarse_target_equal",
+    "parameters": "asserting=false: require/revert; asserting=true: assert/panic with actual asserts=true",
+    "limit": "Two additional instances of an already mapped theorem, not additional covered declarations. No exact error bytes, gas, fork or divergence adequacy."
+  },
+  "original_census_accounting": {
+    "selected_files": 179,
+    "selected_rows": 1259,
+    "covered_selected_rows_by_this_map": 0,
+    "remaining_selected_rows": 1259,
+    "classification": "supplemental interfaces, not selected census members"
+  }
+}
