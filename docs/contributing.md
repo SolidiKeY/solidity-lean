@@ -23,6 +23,7 @@ each proof iteration. Documentation-only edits need path and link checks.
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |
 | `node scripts/check-layers.mjs` | No new core import boundary beyond the pinned107 snapshot; elaborator/parser bans remain unconditional; no Lean |
 | `bash scripts/coord-tools/gate.sh touched` | Merge pre-gate: check layers first on the prospective merged tree, then build touched modules; fail before build on new boundary edges |
+| `python3 scripts/check-doc-navigation.py` | Every retained Markdown document reachable through local links from both agent entry points; generated catalog current |
 | `./scripts/check-doc-paths.sh` | Backticked Lean file references in tracked prose; five exact historical/fixture pairs carry explicit reasons, with no basename-wide exemption |
 | `./scripts/check-private-paths.sh` | No personal home directories (`/home/<user>/`, `/Users/<user>/`) in tracked files, since the repository is public; write `~`, `$XDG_STATE_HOME`, `$REPO` or a relative path. Run by CI and by every merge gate |
 | `./scripts/check-evidence-files.sh` | No lane evidence (receipts, handoffs, provenance, checksum manifests, resource and validation records) under `tests/` or `Bridge/tests/`; lanes archive it in the private coordination repository with `scripts/coord-tools/coord-evidence` and cite the printed path. Run by CI and by every merge gate |
@@ -198,3 +199,12 @@ the historical snapshots. The documentation cleanup compared complete bodies
 and module inventories before deletion. Independent read-only finder and skeptic
 reviews confirmed the retained boundaries and duplicate index rows; affected
 links and generated fragments were checked.
+
+Agent guidance must be reachable by following links from `AGENTS.md`;
+`CLAUDE.md` imports the same instructions. Link new documents from their topic
+guide. After adding a document to Git, run
+`python3 scripts/check-doc-navigation.py --write` to refresh the
+[complete catalog](document-index.md). CI checks the catalog and recursive
+reachability from each entry point. Generator input fragments are represented
+by their combined documents. Finder and skeptic reviews check this navigation
+without requiring agents to read unrelated topics.
