@@ -708,3 +708,71 @@ shallow history, incompatible with permanent shrink validation. Its checkout now
 uses fetch-depth0 and it runs the two gates plus their regression controls before
 the independent layer check. Lean build/audit jobs are unchanged; no held audit
 was started. This integration fix is included in the same H112 increment.
+
+
+### Authorized current-master import baseline and merge pre-gate
+
+OT-W0-TOOLING follow-up explicitly authorizes the current-master baseline at
+fea090bf9fec1a372ad32952a5e72eb4d7015888:107edges, original95plus exactly12.
+The original95raw snapshot/hash and active cleanup history are preserved. A new
+immutable current snapshot pins all107 and full12introductions, SHA256
+880486dcbe8f1004449dc9f1d90f25a9964d0b2c5ea64dad3de3dd5cfc548b8d.
+The original95active set and additional12active set independently shrink forever;
+removing an old edge cannot be bypassed by moving it into the new component.
+No further re-pinning or baseline growth is authorized by this change. No CORE
+classification, Lean import, statement, definition, axiom, exclusion or budget
+was changed. The12 are explicit debt candidates to remove:
+
+| Direct boundary edge | Verified introducing commit | Disposition |
+|---|---|---|
+| `Solidity.Roadmap.G49Final.PassCorrectAdapters` → `Solidity.Lowering.P8b.Frozen` | `138f7a568b6aeb4a98fad985b8d7b0c628356c5e` | Open cleanup candidate |
+| `Solidity.Yul.Composition.Controls` → `Solidity.Source.StateExamples` | `e75bad809cfda97eedc97d694eaeeac3243ae353` | Open cleanup candidate |
+| `Solidity.Yul.Composition.Interface` → `Solidity.Backend.Environment.ByteConstants` | `e75bad809cfda97eedc97d694eaeeac3243ae353` | Open cleanup candidate |
+| `Solidity.Yul.Composition.MonetaryLifecycleControls` → `Solidity.Source.StateExamples` | `9572b8d3edd01e1dc11689a85f016d9d25f92af7` | Open cleanup candidate |
+| `Solidity.Yul.Composition.P6FrameCorrectness` → `Solidity.Backend.MemoryOps.PhysicalFrameImage` | `705ed8517c55ea42897c6991d252ffd45a2836be` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalBytes` → `Solidity.Yul.Views.Bytes` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalControls` → `Solidity.Yul.Views.OwnedBoolDeclarationControls` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalFrames` → `Solidity.Yul.Views.OwnedBoolFrame` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalMemory` → `Solidity.Yul.Views.MemoryControls` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.PhysicalMemory` → `Solidity.Yul.Views.MemoryImages` | `d36a280a9e6a68eefc2283b62e4623b3bfbeabdc` | Open cleanup candidate |
+| `Solidity.Yul.Composition.SourceCatchBinding` → `Solidity.Lowering.Readonly.SourceTryEffects` | `eb9c75194d65f896c9bc483050ecea67fbe41318` | Open cleanup candidate |
+| `Solidity.Yul.Composition.SourceCatchBinding` → `Solidity.Source.FailureRuntimeControls` | `eb9c75194d65f896c9bc483050ecea67fbe41318` | Open cleanup candidate |
+
+Attribution uses the import line's Git blame and verifies it is absent from all
+introducing parents. Each source file/hash/line is in the snapshot, reproduced
+from the exact source commit. These12 also occur in the original pin's parent
+1d99e32a08271752468b027a5495233c77a66f91; the original95came from the older
+fa5acebd architecture audit. Thus attribution names the actual introduction,
+without treating the first checker commit as their source introduction.
+The reproducer rejects shallow/grafted/custom history and checks its full output
+hash before emitting bytes. This is source/history evidence, not Lean elaboration.
+
+`gate.sh touched`, the repository merge pre-gate used by coordinator merge reports,
+now runs layers before touched builds and exits immediately on layer failure,
+even for a tooling-only merge. Checkpoint/full modes use the same front check;
+the later outer duplicate was removed, while run-lean.sh's own existing check
+remains. Per-file diagnostics are unchanged. Run this on the prospective combined
+merge tree; no automatic merge, push or host timer deployment is performed here.
+CI now runs the focused Python pre-gate/history controls. Disposable mocked-build
+controls verify an invalid layer never invokes Lake and valid layers precede it.
+
+Fourteen focused controls pass, covering old/new component shrink/deletion/merge
+history, legacy debt smuggling, immutable snapshots, importer parsing, SIGBUS
+behavior and fail-before-build ordering. Independent read-only finder/skeptic
+reviews used no Lean/server; a missing attribution-history guard was fixed and
+covered, and reproduced bytes match the pin. Final real tooling gates and source
+head are recorded in the accompanying evidence manifest/handoff. No new Lean
+module or full proof build is required for these tooling-only changes.
+
+
+Follow-up final local gates pass: all66 Python graph/tooling controls,14 Node
+pin controls, node syntax, bash syntax, both baseline checksums and
+fragments/register checks. The real touched pre-gate logs PASS layers then
+PASS build-touched with targets:none; no Lean process/build was invoked. The
+negative integration uses the real checker on a newly added forbidden core
+import and verifies no Lake invocation. Attribution reproduction is byte-identical
+to the pinned107snapshot. Repo-relative source pins and exact candidate ledger
+are committed in w0-followup-evidence.json; full logs remain manifested offgit.
+No full-build/proof timing or RUNTIME_GATE_PASS is claimed. The original statement
+graph queue and producer/trust/runtime/artifact waits remain unfinished. Host merge
+runner deployment/adoption follows coordinator integration, not this local test.
