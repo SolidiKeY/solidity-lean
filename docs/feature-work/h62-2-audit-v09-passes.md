@@ -1689,3 +1689,13 @@ adds no selected-row credit or native/Source/full acceptance claim. Private
 H145 records are under
 `evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-scope-capacity-publish-20261107/`.
 Prior timing, trust, census/documentation holds and missing-history waits remain.
+
+
+The same scope-capacity companion now proves `scope_bound_iff`: the entire
+entry/update/exit program satisfies the existing bound exactly when locals
+plus caller words, and one extra word for nonempty writes, fit within1024.
+Necessity uses actual entry execution and the existing write-sequence bound;
+sufficiency reuses the previously checked scope theorem. All eleven axiom
+guards pass. This numeric-only equivalence adds no selected-row credit or
+native/Source acceptance; all existing holds remain. Private H145 records:
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-scope-exact-publish-20261107/`.

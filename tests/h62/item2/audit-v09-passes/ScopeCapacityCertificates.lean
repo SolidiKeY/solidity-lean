@@ -111,6 +111,36 @@ theorem scope_updates_safe {n : Nat} (locals : Vector Word n)
   rw [shifted]
   exact rest
 
+/-- Exact scope capacity includes entry and every transient write peak;
+caller-preserving exit alone is insufficient. -/
+theorem scope_bound_iff {n : Nat} (locals : Vector Word n)
+    (writes : LocalWrites n) (tail : Stack) :
+    stackBound (pushPrefix locals.toList ++ writeSequence writes ++ popPrefix n)
+      (tail.length : Int) = true ↔
+    n + tail.length + (if writes.isEmpty then 0 else 1) ≤ 1024 := by
+  constructor
+  · intro bounded
+    cases writes with
+    | nil =>
+      have entry := prefix_capacity (pushPrefix locals.toList)
+        (writeSequence ([] : LocalWrites n) ++ popPrefix n)
+        (pushPrefix_run locals.toList tail)
+        (by simpa only [List.append_assoc] using bounded)
+      simpa only [List.length_append, Vector.length_toList, List.isEmpty_nil,
+        Bool.true_eq, if_true, Nat.add_zero] using entry
+    | cons first rest =>
+      have afterEntry := stackBound_suffix (pushPrefix locals.toList)
+        (writeSequence (first :: rest) ++ popPrefix n) (tail.length : Int)
+        (by simpa only [List.append_assoc] using bounded)
+      rw [pushPrefix_delta, Vector.length_toList] at afterEntry
+      have shifted : (tail.length : Int) + (n : Int) = ((n + tail.length : Nat) : Int) := by omega
+      rw [shifted] at afterEntry
+      have body := stackBound_prefix (writeSequence (first :: rest)) (popPrefix n)
+        ((n + tail.length : Nat) : Int) afterEntry
+      exact writeSequence_bound_necessary first rest (n + tail.length) body
+  · intro room
+    exact (scope_updates_safe locals writes tail room).2
+
 /-- Successful mathematical scope exit does not excuse an overflowing writeback. -/
 theorem scope_write_overflow {n : Nat} (locals : Vector Word n)
     (first : {i : Fin n // i.val < 16} × Word) (rest : LocalWrites n) (tail : Stack)
@@ -184,4 +214,7 @@ theorem empty_scope_full (tail : Stack) (full : tail.length = 1024) :
 /-- info: 'Solidity.Yul.Compilation.empty_scope_full' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms empty_scope_full
+/-- info: 'Solidity.Yul.Compilation.scope_bound_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms scope_bound_iff
 end Solidity.Yul.Compilation
