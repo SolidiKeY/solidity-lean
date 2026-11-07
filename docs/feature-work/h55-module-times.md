@@ -2430,3 +2430,22 @@ Lean or a server. The non-atomic snapshot at
 `e015024a5b7b45c48ca63d809badd06d57c2aecf` observed 21 new candidates;
 classification and authenticated runtime coverage remain incomplete. Evidence
 hashes are in `tests/h55/module-times/delta-real-format-evidence.sha256`.
+
+## SortCheck migration probe observations
+
+`sortcheck_migration_controls.py` records five newly observed migration probes
+with source hashes and the migration document hash. They cover alias metadata,
+constructor-tag expectations, finite scanner controls and structural/interface
+inventories. The finite controls do not establish external-parser equivalence;
+structural serialization is not cross-toolchain definitional equality. Current
+invocation, inputs, effects and outcomes remain unresolved.
+
+At `3e3e2c0b423ad9fd5fb157f961be43c218f89275`, the operational static index
+was rebased from `reference-update-1c0.json`, preserving 21 newly observed paths
+without using the synthetic delta-control output. The refreshed index has 811
+candidates, 593 with supplied current references and 218 without; seven retain
+historical references for review. Independent read-only finder and skeptic checked
+roles, hashes, historical preservation and synthetic-reference exclusion without
+Lean or a server. Evidence hashes are in
+`tests/h55/module-times/sortcheck-migration-evidence.sha256`. This non-atomic
+observation does not establish current runtime acceptance.
