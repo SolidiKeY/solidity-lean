@@ -1,5 +1,9 @@
 import Solidity.Typing.Values
 
+-- Retain legacy elaboration of the original dependent Boolean-fold proofs.
+-- Statements and budgets remain unchanged; kernel checks stay active.
+set_option backward.isDefEq.respectTransparency false
+
 namespace Solidity
 
 open Semantics (lookupBy)

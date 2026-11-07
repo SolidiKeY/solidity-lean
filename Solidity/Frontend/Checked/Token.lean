@@ -1,3 +1,5 @@
+import Lean.Elab.Command
+import Lean.Meta.Constructions.CasesOnSameCtor
 import Solidity.Source.Syntax
 
 /-!
@@ -203,4 +205,35 @@ structure Error where
   msg : String
   deriving DecidableEq, Repr
 
+
+/-! Preserve the cache-bound Lean 4.24 public constructor-index names. -/
+/-- Retain the Lean 4.24 constructor-index name for `Kw`. -/
+@[deprecated Kw.ctorIdx (since := "2025-08-25")]
+protected abbrev Kw.toCtorIdx : type_of% Kw.ctorIdx := Kw.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `Punct`. -/
+@[deprecated Punct.ctorIdx (since := "2025-08-25")]
+protected abbrev Punct.toCtorIdx : type_of% Punct.ctorIdx := Punct.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `TokClass`. -/
+@[deprecated TokClass.ctorIdx (since := "2025-08-25")]
+protected abbrev TokClass.toCtorIdx : type_of% TokClass.ctorIdx := TokClass.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `YulKw`. -/
+@[deprecated YulKw.ctorIdx (since := "2025-08-25")]
+protected abbrev YulKw.toCtorIdx : type_of% YulKw.ctorIdx := YulKw.ctorIdx
+
+run_cmd Lean.modifyEnv fun env =>
+  [``Solidity.Frontend.Checked.Kw.toCtorIdx,
+    ``Solidity.Frontend.Checked.Punct.toCtorIdx,
+    ``Solidity.Frontend.Checked.TokClass.toCtorIdx,
+    ``Solidity.Frontend.Checked.YulKw.toCtorIdx].foldl Lean.Meta.addToCompletionBlackList env
+
 end Solidity.Frontend.Checked
+
+/-! Guarded regression: retain the cache-bound public scoped Token matcher names using the existing kernel-checked compiler construction. The kernel checks the regenerated helpers. -/
+run_cmd Lean.Elab.Command.liftTermElabM do
+  let oldName : Lean.Name := Lean.Name.mkNum (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `Solidity.Frontend.Checked.Tok.match_on_same_ctor.«_@».Solidity.Frontend.Checked.Token 3213472186) "_hygCtx") "_hyg") 150
+  if (← Lean.getEnv).contains oldName then
+    throwError "cached matcher name is already present"
+  Lean.mkCasesOnSameCtor oldName ``Solidity.Frontend.Checked.Tok

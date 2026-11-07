@@ -1,6 +1,10 @@
 import Solidity.Theory.Typed.Obs
 import Solidity.Semantics.StorageWt
 
+-- Retain legacy elaboration of the original dependent value proofs.
+-- Statements and budgets remain unchanged; kernel checks stay active.
+set_option backward.isDefEq.respectTransparency false
+
 /-!
 # Typed storage values, hereditarily
 

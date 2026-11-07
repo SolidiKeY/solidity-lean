@@ -1102,3 +1102,19 @@ end Solidity.Roadmap
 #guard_msgs in #print axioms Solidity.Roadmap.Cert.comp
 /-- info: 'Solidity.Roadmap.PublicCorrectness.transfer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.transfer
+
+namespace Solidity.Roadmap
+
+/-! Preserve the cache-bound Lean 4.24 public constructor-index names. -/
+/-- Retain the Lean 4.24 constructor-index name for `AbiCoder`. -/
+@[deprecated AbiCoder.ctorIdx (since := "2025-08-25")]
+protected abbrev AbiCoder.toCtorIdx : type_of% AbiCoder.ctorIdx := AbiCoder.ctorIdx
+
+/-- Retain the Lean 4.24 constructor-index name for `Pipeline`. -/
+@[deprecated Pipeline.ctorIdx (since := "2025-08-25")]
+protected abbrev Pipeline.toCtorIdx : type_of% Pipeline.ctorIdx := Pipeline.ctorIdx
+
+-- Keep this model module free of a new command-elaborator import.
+-- The two legacy aliases retain a recorded completion-tag difference.
+
+end Solidity.Roadmap
