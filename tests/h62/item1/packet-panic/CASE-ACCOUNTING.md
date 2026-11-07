@@ -87,3 +87,7 @@ The original census matches only unmodified line-start headers and omitted priva
 ## UnsignedDiv Selection and Numeric
 
 `unsigned_div_selection_numeric_ledger.py` records eleven base-pinned literal declarations for public selection, two operand loads and binTail, nonzero operator results and Source transport. The scalar divisionFailure equality concerns Source panic bytes; symbolic EVM revert does not expose a payload. These textual observations are not Lean validation or complete dependency accounting. The ledgers now describe 343 of 474 observed literal headers; 131 of the original subtotal remain.
+
+## UnsignedDiv Execution and Composition
+
+`unsigned_div_execution_composition_ledger.py` adds ten base-pinned literal headers for intrinsic evaluation, selected execution and joint Source/target local cases. The original StateRepr and divisor premises, Source fuel n+3 and retained local/state pair remain binding; zero cases assert exact Source divZero panic data and coarse symbolic target revert. These are textual observations, not whole-state agreement, gas, ABI or target payload proofs. The ledgers now describe 353 of 474 observed literal headers; 121 of the original subtotal remain.
