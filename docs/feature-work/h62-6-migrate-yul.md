@@ -708,3 +708,36 @@ has a producer proof update and needs renewed dependency validation. No new
 original declaration,statement,budget,axiom or exclusion was changed by this
 serializer/inventory work. Kernel inventory integrity is distinct from external
 compiler/KeY/solc validation and full migration acceptance.
+
+
+## Extra compiler-name accounting — historical header correction
+
+Deterministic census-ir-names.py consumes the completed, previously reviewed
+old-kernel inventory and verifies every referenced summary hash. It retains all
+32734 extraConstNames across1774 modules (1356 with extra names), including610
+records in310 modules which ALSO occur in that module's kernel declarations.
+All32734 compiler names are globally distinct in this dataset. The historical
+header label "IR-only names; not kernel ConstantInfo declarations" was too
+narrow: extra compiler names can overlap kernel declarations. This correction
+supersedes that label's interpretation in prior prose, not the immutable raw
+headers or their source bindings. No name was omitted from either inventory.
+
+old-compiler-name-census.json retains exact structured names,per-module order,
+per-name module membership and explicit kernel overlaps. IR type and public
+visibility are null for every name; no public/private inference is made from
+name spelling. This accounts for names only, not IR signatures or attributes.
+It derives from a previously verified/hash-bound inventory rather than replaying
+the full raw/probe validation. It has migration_acceptance=false,empty shims,
+and no exclusions or waivers. Generator and name-validator hashes are recorded.
+
+Five accounting controls pass: overlap retained,summary tampering rejected,
+incomplete inventory rejected,duplicate name rejected,malformed Name rejected.
+Initial local attempts exposed the overlap and a test path typo; both corrected
+before acceptance. Finder and skeptic independently reproduce all counts and
+bindings and report no findings. Neither ran Lean or wrote files.
+
+This increment contains only additive external census/test tooling and docs.
+No original Lean declaration,statement,definition body,budget,axiom or exclusion
+changed. Original old-kernel inventory and this compiler-name accounting do not
+resolve H78 generated API shims,IR types/visibility/attributes,new builds,clean
+common-source performance comparison,KeySort35 or root runtime gates.
