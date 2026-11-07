@@ -1,6 +1,26 @@
+LATEST HANDOFF: three reviewed work items complete after the requested e0f4251ff
+rebase: Assignable8 joint packets/2controls,8 additional role inventories, and
+coherent original-scope acceptance snapshot. Same VM/branch/unfinished goal;
+coordinator-managed fresh thread per3–5-item rule.136 helpers,95joint certificates,
+36roles,1,370 original witness/classification gaps; full acceptance remains false.
+Final export: /workspace/h62-audit-theories-e0-handoff-20261107-evidence.
+
+LATEST PREMISE INVENTORY:36 original role records checked,464 remaining.
+Eight new Assignable inventories add no witnesses or H69 dispositions.
+Companion reports are regenerated/currently verified before cumulative counts.
+Evidence: /workspace/h62-audit-theories-assignable-roles-20261107-evidence.
+
 # H62 item 2: audit-theories — continuing audit
 
-LATEST INVENTORY:28 original premise-role records reviewed,472 remaining.
+LATEST REBASE/CHECKPOINT: coordinator merge e0f4251ff40ad79c37bae53795b7419afe52e8d9
+contains previous315a659a985bc6185fe7b56884076d6401cfaade. Clean assigned branch
+rebased onto it with no reset/discard/push. Assignable8 inputs now jointly
+witnessed with real writing/nonempty modifies-set cases.136 current helpers,
+95joint certificates,83 unchanged-file subset records;1,370 pending original
+witness/classification records. Q-FROZEN-REBASE and Q-STATIC-VALUE remain open.
+Evidence: /workspace/h62-audit-theories-e0-rebase-20261107-evidence.
+
+PRIOR INVENTORY:28 original premise-role records reviewed,472 remaining.
 Three reviewed work items complete in this continuation; fresh-thread handoff
 to coordinator for the SAME original VM/branch/unfinished goal. No new/reset
 goal, completion transition or inferred retirement.
@@ -964,3 +984,137 @@ persistent goal. Do not create/reset/complete a goal or infer retirement/pause.
 All four full assignment checkpoints remain partial. Current queue is saved
 in scripts/h62/item2/audit-theories/handoff/CURRENT-QUEUE-20261107.md alongside
 the complete original prompt,original queues and exact frozen scope manifest.
+
+## Rebased Assignable checkpoint: all eight interfaces
+
+Fetched origin/master and verified c6 ancestry, full previous315a659a985 head
+inside reported merge e0f4251ff40ad79c37bae53795b7419afe52e8d9 and remote
+ancestry; actual git rebase origin/master succeeded on a clean assigned branch.
+Commands/output in rebase.json. Original VM/branch/unfinished goal unchanged.
+No other work discarded or reset; no push or master merge. Inspected master
+log/code before this independent item; no changed Assignable prerequisite or
+duplicate witness item. Entire original Assignable file remains byte-frozen.
+
+AssignableWitnesses provides every input and hypothesis of all8 declarations,
+including inherited C/contexts, full Frames.find/net/balance, universal subset
+premises, output/state correlation and late U/r after logical premises. Real
+named roots keep these frames observable. A proper nonempty clause inclusion
+is witnessed; frame algebra uses populated storage. Read-only cases use a
+successful nonempty local bool declaration. Modifies/check cases instead use
+flag=true through the real storage interpreter, not an empty modifies set or
+a read-only shortcut. Two additional controls check false→true flag change,
+preserved live array root, and rejection by the empty assignable clause with
+within.view=false. These are core model checks, not target-EVM compilation.
+
+The first check exposed unused root/clause warnings; strengthened additive
+packets with observed lookup/frame facts, preserving all original inputs.
+Explicit μ=.view fixed inference for these added consequences. Final accepted
+9d248803f5b1 receipt: exit0,1.406s,674,160,640 sampled peak RSS,clean diagnostics,
+standard axioms only. Historical warning/failed logs retained but not accepted.
+No statements/premises/definitions/budgets/axioms/exclusions changed. KeySort
+freshly checked in1.405s under unchanged serial -j1/LEAN_NUM_THREADS=1/resource
+bounds. New10 proof helpers and2fixtures; no existing proof refactor/timing claim.
+
+All136 helpers/31fixture defs/7private abbreviations verify current source,
+recursive-import,artifact/log hashes and axiom allowlist. Selected unchanged
+file subset now83 records across6 modules, with5 refusal controls including
+ordinary impossible Payable not silently promoted to H69.13 Python tests,
+layers901core/0elaborator/0parser/0newedges(107upstream allowances),register and
+fragments pass.26 compiler-control receipts still pass. Strict Payable returns
+exit1 for enter_static; original census exits1 on changed frozen Tuple source.
+No acceptance guard weakening. assignable-gates.json saves exact commands,
+exits and decisive outputs; all500 original declarations accounted once:
+95joint certificates,3accepted H69,18historical empty telescopes,381public+
+3private pending. All986original generated candidates retained; exact1,370
+pending names/owners remain separate from fidelity/compiler/final-gate duties.
+
+Finder and skeptic independently passed all8 premise packs,10new proof receipts,
+136total receipts,83subset records and saved gate/ledger accounting. No residual
+findings, edits or reviewer Lean/server/build jobs. Continue independent queue
+while existing two scope questions wait; no full completion or RUNTIME_GATE_PASS.
+
+## Assignable premise-role checkpoint
+
+Fetched master before this item: remains e0f4251ff40ad79c37bae53795b7419afe52e8d9;
+no new relevant producer source or duplicate item. assignable_input_roles.py
+accounts all8 original ordered telescope/Prop roles. Frames is a relation for
+one selected state pair, universal over appropriate roots, not a global law
+for all states. Clause inclusion is universal over selected M/L, and check/
+actual-run facts are correlated. Late U/r remain explicit. committed_frames
+has no original success premise; additional real-write success is support,
+not an invented original premise or compiler-totality claim.
+
+The tool reruns both companion generators without Lean, verifies original
+hashes/full source bytes/current certificates, exact companion name sets and
+disjointness, then derives36 cumulative originals/464 remaining.35 are joint,
+1 remains ordinary impossible pending Q-STATIC-VALUE. No new witness, generated
+disposition or H69 acceptance. A finder schema finding was fixed: combined
+report now says reviewed_role_records36/new_reviewed_role_records8; standalone
+Assignable report stays8. Regenerated reports agree. Two meaningful corrupt
+census controls remove the late root or universal hML; both refuse.13 Python
+tests pass. Both read-only reviews pass source semantics/provenance/accounting;
+no residual findings or reviewer edits/Lean/server/build. Evidence includes
+all-reviewed-input-roles.json, companion hashes/commands and role-controls.json.
+
+Checkpoint handoff: same VM/branch/unfinished goal.95 joint certificates and
+1,370 original witness/classification gaps unchanged by this inventory. Original
+statement fidelity, static-value disposition, remaining464role records, broader
+compiler success and final gates remain open. Continue independent verification
+of this updated cumulative snapshot without relaxing any original obligation.
+
+## Coherent acceptance snapshot and fresh-thread handoff
+
+Fetched master before this independent item; origin/master advanced to
+fab1149c378e84ca69abacbe68e18620dfe871bc with unrelated migration/readonly/world
+merges. Log/code inspection found no duplicate original audit item or changed
+Theory prerequisite. Requested rebase base remains e0f4251ff40ad79c37bae53795b7419afe52e8d9;
+no unrequested integration of unrelated later work. Prior full315a659a985 head
+is contained in the verified e0 merge. No worker push, PR or master merge.
+
+verify_acceptance_snapshot.py cross-checks current136 helper source declarations,
+recursive dependency fingerprints, artifact/log hashes, standard axiom receipts,
+exact500 original headers/types/owners and original registry dispositions. It
+verifies all1,370 remaining ORIGINAL names and metadata/owners including986
+retained generated candidates, plus all36 reviewed role records against their
+reviewed specifications, current certificates and byte-frozen source files.
+Both actual cardinalities and serialized counts must agree. Five changed
+Progress files remain separately flagged; historical18empty telescopes are not
+promoted into current-definition equivalence. It adds no witness or exclusion.
+
+Both reviewers found a status-only promotion gap during development. Final
+checks require pending status/question/reason and ledger question-list to match
+PENDING, accepted_H69=false and no joint certificate. Existing H69 rationale
+must match its registry; explicit joint status must agree with its certificate.
+Legacy17 Bridge/Outcome roles have no status field and remain explicitly
+certificate-checked. All role interpretation/binder fields are compared with
+the reviewed generator specs, not just counted. No original theorem or premise
+was edited to satisfy these external accounting checks.
+
+Final positive snapshot passes136helpers/95joint/1,370pending/36roles/464pending
+roles. All5 corruption cases refuse without writing an accepted report: role
+count mismatch, accepted_H69 promotion, altered remaining owner, status-only
+H69 promotion, and question rerouting. Exact commands/exits/reasons are in
+/workspace/h62-audit-theories-acceptance-e0-20261107-evidence/snapshot-gates.json.
+Finder and skeptic closed the guard finding and independently verified current
+input hashes/accounting and refusal outcomes. No residual findings or reviewer
+edits/Lean/server/build. These are external deterministic-tool tests, not new
+kernel proofs or physical compiler execution proofs.
+
+Three reviewed items now complete in this continuation: all8 Assignable joint
+packets/2observational controls; all8 Assignable premise roles with authenticated
+36-record union; and coherent current receipt/original-scope acceptance. Per the
+3–5-item rule, coordinator owns fresh-thread continuation for this SAME original
+VM/branch/unfinished persistent goal. No replacement/reset/complete/pause goal
+transition, self-launched successor or inferred retirement. Saved current queue
+lists every remaining original obligation and both real waits. Independent
+witnesses/roles/generated dispositions and meaningful compiler success controls
+remain available while Q-FROZEN-REBASE and Q-STATIC-VALUE await disposition.
+
+Absolute cumulative original-scope patch, incremental e0 delivery patch, full
+ancestry bundle, original frozen assignment/queues/scope copies, current handoff
+and SHA256SUMS are exported off Git under the latest final path above. All prior
+evidence remains preserved. Full ./run-lean.sh/remaining final gates pending;
+no RUNTIME_GATE_PASS. Actual Lean4.24.0 commit797c613 and Lake5.0.0-src+797c613
+unchanged; fresh KeySort passes exit0/1.405s. No proof budgets/axioms/exclusions
+or timing thresholds changed. Historic authorized matched pair+2.073826% remains
+historical; no new before/after timing claim or unchanged STOP rerun.

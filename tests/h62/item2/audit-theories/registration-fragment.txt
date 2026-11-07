@@ -60,3 +60,8 @@ source tests/h62/item2/audit-theories/PayableWitnesses.lean
 candidate Solidity/Theory/Audit/H62/PayableWitnesses.lean
 import Solidity.Theory.Audit.H62.PayableWitnesses
 row Theory/Audit/H62/PayableWitnesses.lean | Six feasible Payable joint packets, one ordinary-input refutation pending Q-STATIC-VALUE, and three successful model API controls; no auto-H69 disposition.
+
+source tests/h62/item2/audit-theories/AssignableWitnesses.lean
+candidate Solidity/Theory/Audit/H62/AssignableWitnesses.lean
+import Solidity.Theory.Audit.H62.AssignableWitnesses
+row Theory/Audit/H62/AssignableWitnesses.lean | Joint inputs for all eight original assignable interfaces, with real nonempty storage-write and empty-clause refusal controls; standalone pending approved placement.

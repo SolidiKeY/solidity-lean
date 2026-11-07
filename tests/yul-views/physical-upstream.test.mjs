@@ -20,6 +20,13 @@ for(const f of report.results)for(const v of f.variants){
   x=clone(v);delete x.deployment;rejects(()=>assertFixtureRun(x));negatives++;
   x=clone(v);x.deployment.failed=true;rejects(()=>assertFixtureRun(x));negatives++;
   x=clone(v);x.deployment.runtimeCodeSha256='wrong';rejects(()=>assertFixtureRun(x));negatives++;
+  // Guard missing-equals-missing and equal malformed digests in saved reports.
+  x=clone(v);delete x.deployment.runtimeCodeSha256;delete x.runtimeSha256;
+  rejects(()=>assertFixtureRun(x));negatives++;
+  for(const invalid of [null,0,'','a'.repeat(63),'a'.repeat(65),'g'.repeat(64),'a'.repeat(64)+'\n','a'.repeat(64)+'\r\n']){
+    x=clone(v);x.deployment.runtimeCodeSha256=invalid;x.runtimeSha256=invalid;
+    rejects(()=>assertFixtureRun(x));negatives++;
+  }
   const artifact={evm:{methodIdentifiers:Object.fromEntries(v.plan.map(p=>[p.signature,p.calldata.slice(2,10)]))}};
   rejects(()=>rawPlan(v.vectors.slice(1),artifact,f.expectations));negatives++;
   if(v.observed.length>1){
