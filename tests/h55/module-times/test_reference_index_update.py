@@ -124,6 +124,16 @@ class ReferenceIndexUpdate(unittest.TestCase):
             self.assertNotEqual(0, subprocess.run(command[:-2]+[str(other), str(classification)], capture_output=True).returncode)
             delta.write_text('{"delta": {}}')
             self.assertNotEqual(0, subprocess.run(command, capture_output=True).returncode)
+            baseline_doc = json.loads(baseline.read_text())
+            baseline_doc['inputs'][0]['sha256'] = sha(delta)
+            baseline.write_text(json.dumps(baseline_doc))
+            drift_doc = json.loads(drift.read_text())
+            drift_doc['input_sha256'] = sha(baseline)
+            drift.write_text(json.dumps(drift_doc))
+            classification.write_text(json.dumps({'input_sha256':sha(delta), 'rows':[{'candidate':candidate}]}))
+            malformed = subprocess.run(command, capture_output=True, text=True)
+            self.assertNotEqual(0, malformed.returncode)
+            self.assertIn('invalid delta artifact', malformed.stderr)
 
 if __name__ == '__main__':
     unittest.main()

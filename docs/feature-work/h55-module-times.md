@@ -2410,3 +2410,23 @@ its input digest, so the updater does not prove each classified row belongs to
 the historical delta; and the new drift is not independently authenticated by
 this optional historical binding. This is static integrity checking, not runner,
 producer or runtime attestation. No historical result was reclassified as a pass.
+
+## Historical delta format control
+
+The extended updater was exercised with the actual historical
+`fc06-snapshot-delta-v2.json` from verified prior-index lineage and a deliberately
+synthetic classification of an unchanged candidate. The output binds the real
+delta and synthetic artifact by hash. The entire
+`/workspace/h55-module-times-evidence/delta-real-format-output.json` is test-only:
+it contains a synthetic current reference and must never be promoted into an
+operational index or counted as genuine coverage. It tests format and binding,
+not current runner provenance or acceptance.
+
+The CLI regression also rebuilds the baseline, drift and classification hashes
+after corrupting the delta shape, then verifies rejection specifically as an
+invalid delta artifact. All 116 H55 Python tests pass. Independent read-only
+finder and skeptic reviewed the artifact linkage and test-only boundary without
+Lean or a server. The non-atomic snapshot at
+`e015024a5b7b45c48ca63d809badd06d57c2aecf` observed 21 new candidates;
+classification and authenticated runtime coverage remain incomplete. Evidence
+hashes are in `tests/h55/module-times/delta-real-format-evidence.sha256`.
