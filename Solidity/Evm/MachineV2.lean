@@ -9,8 +9,10 @@ has no data on a frame's exit: `Out.revert` carries no bytes, success is the
 end of the code, and `CALL` takes only a value and an address.  Version 2
 adds, as new declarations only:
 
-* **Byte data at a frame's exit** (`OutV2`): `revert data` (EVM `REVERT`)
-  and `ret m data` (EVM `RETURN`), a halting success with the final machine.
+* **Byte data at a frame's exit** (`OutV2`): `revert calls data` (EVM
+  `REVERT`, with the journal of the external calls made before it, which a
+  revert does not undo for the environment) and `ret m data` (EVM `RETURN`),
+  a halting success with the final machine.
   Falling off the end of the code is success with empty data (`STOP`).
 * **A return buffer** (`MachineV2.returndata`), read by `RETURNDATASIZE`
   and `RETURNDATACOPY`, and set by `CALLIN`.
@@ -22,7 +24,7 @@ adds, as new declarations only:
   covers the value) sets the return buffer to that output and records the
   call in the ghost journal `calls`; a call that is not entered empties the
   buffer and records nothing.  This is the shape of the Bridge reference
-  law `CallReturndataLaw.call_returnData` (an entered call's buffer is the
+  law `CallReturndataLaw.call_returnData` on V15's branch (an entered call's buffer is the
   callee's output, otherwise empty), without depth or gas.
 
 **Memory stays word-addressed.**  A byte window starts at a cell and covers
@@ -151,11 +153,11 @@ def MachineV2.withBase (m : MachineV2) (b : Machine) : MachineV2 := { m with bas
 @[simp] theorem MachineV2.withBase_self (m : MachineV2) : m.withBase m.base = m := rfl
 
 /-- A version-2 outcome: continue with a pending skip, `RETURN` with data,
-`REVERT` with data, or a fault. -/
+`REVERT` with data (and the calls journaled before it), or a fault. -/
 inductive OutV2 where
   | ok (m : MachineV2) (skip : Nat)
   | ret (m : MachineV2) (data : List UInt8)
-  | revert (data : List UInt8)
+  | revert (calls : List CallRec) (data : List UInt8)
   | fault
 
 instance : Inhabited OutV2 := ⟨.fault⟩
@@ -163,15 +165,15 @@ instance : Inhabited OutV2 := ⟨.fault⟩
 def OutV2.bind : OutV2 → (MachineV2 → Nat → OutV2) → OutV2
   | .ok m k, f => f m k
   | .ret m d, _ => .ret m d
-  | .revert d, _ => .revert d
+  | .revert cs d, _ => .revert cs d
   | .fault, _ => .fault
 
 @[simp] theorem OutV2.ok_bind (m : MachineV2) (k : Nat) (f : MachineV2 → Nat → OutV2) :
     (OutV2.ok m k).bind f = f m k := rfl
 @[simp] theorem OutV2.ret_bind (m : MachineV2) (d : List UInt8) (f : MachineV2 → Nat → OutV2) :
     (OutV2.ret m d).bind f = .ret m d := rfl
-@[simp] theorem OutV2.revert_bind (d : List UInt8) (f : MachineV2 → Nat → OutV2) :
-    (OutV2.revert d).bind f = .revert d := rfl
+@[simp] theorem OutV2.revert_bind (cs : List CallRec) (d : List UInt8)
+    (f : MachineV2 → Nat → OutV2) : (OutV2.revert cs d).bind f = .revert cs d := rfl
 @[simp] theorem OutV2.fault_bind (f : MachineV2 → Nat → OutV2) : OutV2.fault.bind f = .fault := rfl
 
 theorem OutV2.bind_assoc (o : OutV2) (f g : MachineV2 → Nat → OutV2) :
@@ -184,13 +186,13 @@ dropped. -/
 def OutV2.forget : OutV2 → Out
   | .ok m k => .ok m.base k
   | .ret m _ => .ok m.base 0
-  | .revert _ => .revert
+  | .revert _ _ => .revert
   | .fault => .fault
 
 /-- A frozen outcome on top of the version-2 fields of `m`. -/
 def OutV2.ofOut (m : MachineV2) : Out → OutV2
   | .ok b k => .ok (m.withBase b) k
-  | .revert => .revert []
+  | .revert => .revert m.calls []
   | .fault => .fault
 
 @[simp] theorem OutV2.forget_ofOut (m : MachineV2) (o : Out) : (OutV2.ofOut m o).forget = o := by
@@ -201,7 +203,7 @@ with revert data, or no exit (a fault, or a jump still pending). -/
 def OutV2.exit : OutV2 → Option (Bool × List UInt8)
   | .ok _ 0 => some (true, [])
   | .ret _ d => some (true, d)
-  | .revert d => some (false, d)
+  | .revert _ d => some (false, d)
   | .ok _ (_ + 1) => none
   | .fault => none
 
@@ -209,16 +211,26 @@ def OutV2.exit : OutV2 → Option (Bool × List UInt8)
 check a run's revert data (`decide +kernel`) where unfolding `execV2` in the
 elaborator is slow. -/
 theorem OutV2.eq_revert_of_exit {o : OutV2} {d : List UInt8} (h : o.exit = some (false, d)) :
-    o = .revert d := by
+    ∃ cs, o = .revert cs d := by
   cases o with
   | ok m k => cases k <;> simp only [OutV2.exit, Option.some.injEq, Prod.mk.injEq,
       Bool.true_eq_false, false_and, reduceCtorEq] at h
   | ret m e => simp only [OutV2.exit, Option.some.injEq, Prod.mk.injEq, Bool.true_eq_false,
       false_and] at h
-  | revert e =>
+  | revert cs e =>
     simp only [OutV2.exit, Option.some.injEq, Prod.mk.injEq, true_and] at h
-    rw [h]
+    exact ⟨cs, by rw [h]⟩
   | fault => simp only [OutV2.exit, reduceCtorEq] at h
+
+/-- A revert's journal and data (decidable). -/
+def OutV2.revertView : OutV2 → Option (List CallRec × List UInt8)
+  | .revert cs d => some (cs, d)
+  | _ => none
+
+theorem OutV2.eq_revertView {o : OutV2} {cs : List CallRec} {d : List UInt8}
+    (h : o.revertView = some (cs, d)) : o = .revert cs d := by
+  cases o <;> simp only [OutV2.revertView, reduceCtorEq, Option.some.injEq, Prod.mk.injEq] at h
+  rw [h.1, h.2]
 
 /-- The continuing machine's stack, return buffer and journal (decidable). -/
 def OutV2.okView : OutV2 → Option (List Word × List UInt8 × List CallRec)
@@ -249,7 +261,9 @@ inductive InstrV2 where
   then the byte offset in the buffer, then the byte length. -/
   | returndatacopy
   /-- `CALL` with input: value on top, then callee, input cell, input byte
-  length; pushes `1` or `0` as the frozen `CALL` does. -/
+  length (the frozen `CALL`'s order plus the input window; no gas and no
+  output window, the output is read with `RETURNDATACOPY`); pushes `1` or
+  `0` as the frozen `CALL` does. -/
   | callIn
   /-- A loop over version-2 code. -/
   | loop (cond body : List InstrV2)
@@ -285,15 +299,10 @@ def loopIterNV2 (rc rb : MachineV2 → OutV2) : Nat → MachineV2 → MachineV2 
     | .inl m' => loopIterNV2 rc rb n m'
     | .inr r => .inr r
 
-partial def loopImplV2 (rc rb : MachineV2 → OutV2) (m : MachineV2) : OutV2 :=
-  match loopTurnV2 rc rb m with
-  | .inl m' => loopImplV2 rc rb m'
-  | .inr r => r
-
 open Classical in
 /-- A version-2 loop's outcome: what the turns end with, a fault where no
-number of turns ends it. -/
-@[implemented_by loopImplV2]
+number of turns ends it.  Unlike the frozen `loopRun` it has no compiled
+twin: version-2 runs are checked by the kernel, not evaluated. -/
 noncomputable def loopRunV2 (rc rb : MachineV2 → OutV2) (m : MachineV2) : OutV2 :=
   if h : ∃ r n, loopIterNV2 rc rb n m = .inr r then Classical.choose h else .fault
 
@@ -355,11 +364,11 @@ def copyStep (m : MachineV2) (d o len : Nat) (st : List Word) : OutV2 :=
 mutual
 
 /-- One version-2 instruction. -/
-def InstrV2.step : InstrV2 → MachineV2 → OutV2
+noncomputable def InstrV2.step : InstrV2 → MachineV2 → OutV2
   | .base i, m => OutV2.ofOut m (i.step m.base)
   | .revertData, m => match m.base.stack with
     | .val o :: .val n :: _ => match readBytes m.base.mem o.1 n.1 with
-      | some d => .revert d
+      | some d => .revert m.calls d
       | none => .fault
     | _ => .fault
   | .ret, m => match m.base.stack with
@@ -380,7 +389,7 @@ def InstrV2.step : InstrV2 → MachineV2 → OutV2
   | .loop c b, m => loopRunV2 (fun m => execV2 c 0 m) (fun m => execV2 b 0 m) m
 
 /-- Run version-2 code, skipping `k` instructions first. -/
-def execV2 : List InstrV2 → Nat → MachineV2 → OutV2
+noncomputable def execV2 : List InstrV2 → Nat → MachineV2 → OutV2
   | [], k, m => .ok m k
   | _ :: c, k + 1, m => execV2 c k m
   | i :: c, 0, m => (i.step m).bind (fun m' k' => execV2 c k' m')
@@ -388,7 +397,7 @@ def execV2 : List InstrV2 → Nat → MachineV2 → OutV2
 end
 
 /-- Run version-2 code from its first instruction. -/
-def runV2 (c : List InstrV2) (m : MachineV2) : OutV2 := execV2 c 0 m
+noncomputable def runV2 (c : List InstrV2) (m : MachineV2) : OutV2 := execV2 c 0 m
 
 @[simp] theorem execV2_nil (k : Nat) (m : MachineV2) : execV2 [] k m = .ok m k := rfl
 @[simp] theorem execV2_cons_succ (i : InstrV2) (c : List InstrV2) (k : Nat) (m : MachineV2) :
@@ -411,8 +420,8 @@ theorem runV2_append_ok {c₁ c₂ : List InstrV2} {m m' : MachineV2} (h : runV2
     runV2 (c₁ ++ c₂) m = runV2 c₂ m' := by
   simp only [runV2] at h ⊢; rw [execV2_append, h]; rfl
 
-theorem runV2_append_revert {c₁ c₂ : List InstrV2} {m : MachineV2} {d : List UInt8}
-    (h : runV2 c₁ m = .revert d) : runV2 (c₁ ++ c₂) m = .revert d := by
+theorem runV2_append_revert {c₁ c₂ : List InstrV2} {m : MachineV2} {cs : List CallRec}
+    {d : List UInt8} (h : runV2 c₁ m = .revert cs d) : runV2 (c₁ ++ c₂) m = .revert cs d := by
   simp only [runV2] at h ⊢; rw [execV2_append, h]; rfl
 
 theorem runV2_append_ret {c₁ c₂ : List InstrV2} {m m' : MachineV2} {d : List UInt8}
@@ -451,7 +460,7 @@ theorem forget_run_lift_ofBase (c : List Instr) (m : Machine) :
 
 /-- A lifted frozen revert reverts with empty data. -/
 theorem run_lift_revert {c : List Instr} {m : MachineV2} (h : run c m.base = .revert) :
-    runV2 (lift c) m = .revert [] := by rw [run_lift, h]; rfl
+    runV2 (lift c) m = .revert m.calls [] := by rw [run_lift, h]; rfl
 
 /-- A lifted frozen success keeps the version-2 fields. -/
 theorem run_lift_ok {c : List Instr} {m : MachineV2} {b : Machine} {k : Nat}
@@ -502,6 +511,16 @@ theorem callIn_returndata (m : MachineV2) (v a : Fin W) (input : List UInt8) (st
         exact ⟨_, rfl, .inl ⟨hle, rfl, rfl⟩, rfl⟩
       · rw [if_neg hs]
         exact ⟨_, rfl, .inl ⟨hle, rfl, rfl⟩, rfl⟩
+
+/-- **`CALLIN`'s input is its memory window**: on value `v`, callee `a`,
+input cell `o` and byte length `n`, the step is `callInStep` on exactly the
+bytes `readBytes` reads, and faults when that window holds a slot. -/
+theorem callIn_step (m : MachineV2) (v a o n : Fin W) (st : List Word) :
+    InstrV2.callIn.step (m.withBase { m.base with stack := .val v :: .val a :: .val o :: .val n :: st }) =
+      match readBytes m.base.mem o.1 n.1 with
+      | some input => callInStep (m.withBase { m.base with stack := .val v :: .val a :: .val o :: .val n :: st })
+          v a input st
+      | none => .fault := rfl
 
 /-- The frozen `REVERT` and the data-carrying one forget alike. -/
 theorem revertData_forget (m : MachineV2) (o n : Fin W) (st : List Word) (d : List UInt8)
