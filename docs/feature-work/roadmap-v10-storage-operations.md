@@ -1034,3 +1034,24 @@ Independent read-only finder and skeptic reviewed the final code without Lean
 or its server and reported no findings. Registration, fragments, orphans and
 layers pass; trust has 6649 sources, 289 sites and zero findings. Shared strict
 pin drift and full lane/final-gate requirements remain open; no pin rewrite.
+
+### C243 — existing-body expression syntax conversion
+
+SourceAstExpressions reuses the indexed Source expression/list constructors and
+Checked.Lexer hexBody/canonNat for compiler literal bytes and canonical integer
+values. Member receivers, positional calls, assignment operands and tuple
+components (including holes) retain their syntax and order. Unsupported forms
+and finite traversal exhaustion produce conversion errors; these do not change
+Source exclusions or resource semantics. No existing definition or statement
+was edited. Three exact propext-only guards pin the reader and zero-depth law.
+
+Runtime controls convert all 37 recognized expression nodes in each unchanged
+LibraryTry AST. They check delegated receiver t.stru, t.x = 9, successful tuple
+order and failure string bytes; malformed hex, separators, compound assignment,
+named arguments and numeric units fail explicitly. An initial test precedence
+error and rejected recovery diagnostic are retained; the corrected test passes.
+These are runtime syntax checks, not resolution, Source execution, artifact
+binding, H24 admission or lifecycle adequacy. No independent compiler rerun is
+claimed. Both read-only finder and skeptic found no findings, without Lean or
+its server. All original program, admission, resource, physical, audit coverage
+and final-gate obligations remain open, as do prior STOPs and shared pin drift.
