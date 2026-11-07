@@ -879,3 +879,44 @@ prerequisites pass. No Lean file, statement, definition, budget or axiom changed
 All 792 original audit obligations, original +80.254966536% Lean STOP and full
 original/inherited acceptance remain open. Raw ledgers and capture chains remain
 at `/workspace/h62-audit-readonly-calls/declaration-accounting/` on the original VM.
+
+
+## Upstream context and identifier integration
+
+Rebased the assigned branch onto master ba3c0f1539c8b64ac0c6c89e729481d3d398ee83
+rather than duplicate its multiline lexical-context and Lean identifier-boundary
+fixes. The old head f9328c235cf6ba9f062fed44c23585f9ce8e0520 remains under
+`refs/h62-backups/pre-context-upstream` and in the exported history bundle.
+Historical evidence packets retain their original identities.
+
+The conflicting selection cases retain this lane's existing policy: safe internal
+aliases remain distinct lexical input rows with shared-source warnings; broken,
+escaping, nonregular or inaccessible selected inputs suppress incremental
+conclusions. Recursive globbing excludes directory symlinks; finite patterns can
+select a contained directory alias. Three reconciliation controls adapt the
+upstream invalid-input, alias and failed-literal cases to this policy. This does
+not establish intrinsic signature equivalence or live ownership.
+
+All 181 Python controls pass. Five alternating measured text-scan pairs after a
+warmup pair on the same 27-file, 296-declaration tree show median 0.144871182s
+before and 0.137663267s after (-4.98%); peak child RSS 15104 KiB. Source hashes,
+lexical identities and rejection fields match on that corpus. Multiline context
+and Unicode boundary changes are exercised by dedicated fixtures; candidate keys
+remain lexical approximations. The bounded runner uses 512 MiB address space,
+10-second CPU limit, no swap and 4 GiB available reserve.
+
+A fresh isolated Scope observation passes with all 37 lexical rows and 312
+imported constants, preserving 25 links and all evidence categories. Legacy V1
+retains 286 serialized types and 26 metadata refusals; separate V2 observes 312.
+Fourteen Lean controls and the bounded KeySort prerequisite pass. Actual tools
+remain Lean 4.24.0 and Lake 5.0.0-src+797c613. No model source or toolchain changed
+in this integration; Scope/AST/KeySort bytes match the pre-rebase branch.
+Independent read-only finder and skeptic reviews found no issue and ran no Lean
+server. Detailed gates and old/new Git history are exported under
+`/workspace/h62-audit-readonly-calls/upstream-context/` on the original VM.
+
+All 792 original obligations, unresolved/private/global coverage and refusals
+remain. This text-scanner timing does not clear the original +80.254966536% Lean
+STOP. Full original/inherited acceptance, owner RO v2 migration, actual V13
+compiler success with fixed V15/P10 outcomes, and exact retired proof-cleanup
+object recovery remain outstanding. No RUNTIME_GATE_PASS is claimed.
