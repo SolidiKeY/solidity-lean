@@ -4311,6 +4311,7 @@ import Solidity.Tools.SourceCounterexample
 import Solidity.Tools.Taclet
 import Solidity.Tools.Upstream
 import Solidity.Tools.UpstreamEntry
+import Solidity.Tools.VerifierMetadata
 import Solidity.Tools.Verify
 import Solidity.TypeGraph
 import Solidity.Typing.CanonTest
