@@ -2007,3 +2007,27 @@ and bundles remain off Git. Original/consolidated queues, actual emitted-access
 alignment, H121b Source/P8 admission/origin/session/lifecycle, 3209 uncovered
 rows, strict pins/docs and full gates remain open. External library-try/Y04/
 separate 4.35 waits remain distinct. No whole-Backfill completion is claimed.
+
+### C281: rejected next-input certificate candidate — timing STOP
+
+A candidate extracted next-footprint coverage and paired the derived next-run
+certificate with store Transport at that exact actual post-copy footprint.
+Kernel checks and standard-trio guards passed; independent read-only finder and
+skeptic found no semantic defect and ran no Lean/server/builds or edits.
+
+The required unchanged-control timing pair was 4.21 s before and 4.93 s after
+(+17.1021%). The candidate is rejected under the greater-than-10% STOP rule.
+Its patch, source bytes and raw receipts are preserved off Git; all candidate
+source changes were restored byte-for-byte to the prior committed source.
+There was no unchanged timing rerun and no new accepted Lean declaration,
+coverage credit or certificate delivery. This STOP is not released by the
+kernel pass or semantic reviews. A distinct optimized candidate remains local
+unfinished work; no dependency is assigned to a retired producer.
+
+Initial baseline setup failed because requested cleanup removed the target of
+the existing build symlink. The regenerable directory was recreated, fetched
+objects restored, and the fresh valid before measurement above then passed.
+Those setup failures remain separate from both valid timing observations.
+No post-reversion Lean rerun is claimed; production bytes match the original
+baseline. Original/consolidated queues, prior strict pins/docs/full-gate holds,
+actual H121b Source/P8 duties and library-try/Y04/separate 4.35 waits remain open.
