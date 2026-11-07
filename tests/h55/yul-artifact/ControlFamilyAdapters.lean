@@ -1,4 +1,5 @@
-import Solidity.Yul.Compilation.Artifact
+import Solidity.Yul.Compilation.ArtifactPreparation
+import Solidity.Yul.Compilation.LetBranchCompletionControls
 import Solidity.Yul.Compilation.InitializedSequenceCompilationControls
 import Solidity.Yul.Compilation.LetControlCompletion
 import Solidity.Yul.Compilation.LetScopeCompletion
@@ -179,3 +180,87 @@ end Controls
 #print axioms Controls.dirty_copy
 #print axioms Controls.compiler_image_inhabited
 end Solidity.Yul.Compilation.H55ControlFamilies.InitializedSequence
+
+namespace Solidity.Yul.Compilation.H55ControlFamilies.LetBranch
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : LetBranchCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code a.source_to_model
+    (LetBranchCompletion.model_to_source a)
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+theorem source_roundtrip (a : LetBranchCompilation.Artifact fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fuel stmt) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+def prepare (a : LetBranchCompilation.Compiled fuel stmt) : Option (Artifact 0 stmt) :=
+  Artifact.select LetBranchCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) a
+
+abbrev Preparation (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt))
+
+theorem raw_roundtrip (a : LetBranchCompilation.Compiled fuel stmt) :
+    Artifact.recoverPreparation (Artifact.toPreparationImage prepare a) = a :=
+  Artifact.preparation_source_roundtrip prepare a
+
+theorem prepare_some (a : LetBranchCompilation.Compiled fuel stmt) (code : List Evm.Instr)
+    (selected : a.code = some code) : prepare a = some (encode ⟨a, code, selected⟩) :=
+  Artifact.select_some _ _ a code selected
+
+theorem prepare_none (a : LetBranchCompilation.Compiled fuel stmt) (refused : a.code = none) :
+    prepare a = none := Artifact.select_none _ _ a refused
+
+namespace Controls
+/-- Reuse the existing visitor's raw-word conditional effect and exact frame. -/
+theorem branch_model (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode LetBranchCompilation.Controls.artifact).code
+      {m with stack := coreWord b :: caller} =
+      .ok {m with stack := coreWord (LetBranchCompilation.Controls.update b) :: caller} 0 :=
+  LetBranchCompilation.Controls.target_done b m caller
+
+theorem selected_preparation : prepare LetBranchCompilation.Controls.artifact.compiled =
+    some (encode LetBranchCompilation.Controls.artifact) :=
+  prepare_some _ _ LetBranchCompilation.Controls.artifact.lowered
+
+/-- A valid source local16 has no DUP17 selection. The actual raw visitor
+still succeeds and its source-feasible refusal remains exact provenance. -/
+def refusedRaw : LetBranchCompilation.Compiled 2 LetBranchCompilation.Controls.beyondSource :=
+  (LetBranchCompilation.compile 2 LetBranchCompilation.Controls.beyondSource).get (by rfl)
+theorem refused_code : refusedRaw.code = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage prepare refusedRaw).artifact = none :=
+  prepare_none _ refused_code
+theorem refused_original :
+    Artifact.recoverPreparation (Artifact.toPreparationImage prepare refusedRaw) = refusedRaw :=
+  raw_roundtrip refusedRaw
+theorem refused_source_completes :
+    evalStmt 2 .nil True.intro LetBranchCompilation.Controls.beyondSource refusedRaw.profile
+      (sourceLocals (Vector.replicate 17 0)) =
+      some ⟨sourceLocals (Vector.replicate 17 0), .normal⟩ := rfl
+
+#guard LetBranchCompilation.Controls.update LetBranchCompilation.Controls.highOnly ≠
+  LetBranchCompilation.Controls.highOnly
+#guard (LetBranchCompilation.lower 0 LetBranchCompilation.Controls.source).isNone
+#guard (LetBranchCompilation.lower 2 LetBranchCompilation.Controls.lastSource).isSome
+#guard (LetBranchCompilation.lower 2 LetBranchCompilation.Controls.beyondSource).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms raw_roundtrip
+#print axioms prepare_some
+#print axioms prepare_none
+#print axioms Artifact.preparation_image_roundtrip
+#print axioms Controls.branch_model
+#print axioms Controls.selected_preparation
+#print axioms Controls.refused_code
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_original
+#print axioms Controls.refused_source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.LetBranch

@@ -99,6 +99,24 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.InitializedSequence",
       "adapter_kind": "selected_artifact",
       "boundary": "Instantiates generic Artifact.ofZero and exact Artifact.Image for the actual single-result let source, profile and concatenated code. Separate initializer/body fuels, selected entry/body/exit data and full original producer retained. Empty newer prefix and arbitrary caller/machine frame preserved; no arbitrary-depth strengthening or family migration."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetBranchCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetBranch",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic Artifact.select and PreparationImage for actual guarded let-sequence code. Source-feasible local16/DUP17 refusal retains full original raw producer and None without runtime-failure claims."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetBranchCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetBranch",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates Artifact.ofZero and exact Image using actual let-branch source/profile/code and both original execution laws. Original fuel/condition/arm/selection data retained; empty newer prefix and arbitrary caller frame preserved, no producer migration."
     }
   ]
 }
