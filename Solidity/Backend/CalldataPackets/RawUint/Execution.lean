@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.SourceCalldataCopy
+import Solidity.Backend.MemoryOps.CalldataViewPacking
 import Solidity.Backend.MemoryOps.SourceUintMemory
 import Solidity.Yul.Views.ScalarCodecs
 
@@ -250,6 +251,87 @@ theorem transfer {D : Source.Layout} {H : HTy} {R : RefTy}
   rw [table_uints]
   simp only [Bind.bind,Option.bind,payload_length,
     dif_pos (show start≤stop ∧ stop≤len from ⟨bounds.ordered,bounds.bounded⟩),dif_pos fits]
+
+/-- A demanded uint256 view computed from the actual frame bytes. Missing
+words retain the existing standalone reader's zero padding; this is not an
+entry-span admission or a claim that a truncated entry succeeds. -/
+def rawView {D : Source.Layout} (F : Source.Fr) (request : Nat × Nat) :
+    AbiEntry.Premises.CalldataView D :=
+  { type := .array .calldata (.int .u256) none
+    location := rfl
+    rawOffset := request.1
+    rawLength := request.2
+    contents := .array (payload F request.1 request.2).length (fun _ h => nomatch h)
+      (fun i => .val (sourceUint ((payload F request.1 request.2)[i]))) }
+
+/-- Every requested view is decoded from the same frame; duplicates need no
+supplied payload agreement and offsets may overlap without a canonical cutoff. -/
+def rawViews {D : Source.Layout} (F : Source.Fr) (requests : List (Nat × Nat)) :
+    List (AbiEntry.Premises.CalldataView D) := requests.map (rawView F)
+
+theorem rawViews_coherent {D : Source.Layout} (F : Source.Fr)
+    (requests : List (Nat × Nat)) :
+    AbiEntry.Premises.V11G34_ViewCoherence (rawViews (D := D) F requests) := by
+  constructor
+  intro i j _ offset length
+  simp only [rawViews,List.getElem_map,rawView] at offset length ⊢
+  have hi : i.val < requests.length := by
+    simpa only [rawViews,List.length_map] using i.isLt
+  have hj : j.val < requests.length := by
+    simpa only [rawViews,List.length_map] using j.isLt
+  have same : requests[i.val]=requests[j.val] := Prod.ext offset length
+  rw [List.getElem_map,List.getElem_map,same]
+
+/-- Use the published V11 packer with coherence proved from bytes. Logical keys
+retain duplicate identities while the raw references retain original offsets. -/
+def packedViews {D : Source.Layout} (F : Source.Fr) (requests : List (Nat × Nat)) :
+    AbiEntry.Premises.V11G34_PackedViews F.cd (rawViews (D := D) F requests) :=
+  packCalldataViews F.cd (rawViews F requests) (rawViews_coherent F requests)
+
+/-- The existing intrinsic uint transfer reads exactly the raw-derived payload
+at every captured logical key; no decoded value or successful run is assumed. -/
+theorem packedViews_uints {D : Source.Layout} (F : Source.Fr)
+    (requests : List (Nat × Nat)) (i : Fin requests.length) :
+    calldataUints (packedViews (D := D) F requests).calldata
+      ((packedViews (D := D) F requests).key
+        ⟨i.val,by simpa only [rawViews,List.length_map] using i.isLt⟩)=
+      some (payload F requests[i.val].1 requests[i.val].2) := by
+  unfold calldataUints
+  rw [(packedViews (D := D) F requests).lookup
+    ⟨i.val,by simpa only [rawViews,List.length_map] using i.isLt⟩]
+  simp only [rawViews]
+  rw [List.getElem_map]
+  change some (List.ofFn (fun j : Fin (payload F requests[i.val].1 requests[i.val].2).length =>
+    calldataUint (Source.Data.val (sourceUint (D := D)
+      (payload F requests[i.val].1 requests[i.val].2)[j]))))=_
+  rw [calldataUint_values]
+
+/-- Every captured raw view feeds the existing checked intrinsic transfer.
+The only bounds are its original source-slice and destination-capacity checks. -/
+theorem packedViews_transfer {D : Source.Layout} {H : HTy} {R : RefTy}
+    (F : Source.Fr) (requests : List (Nat × Nat)) (i : Fin requests.length)
+    (hp : Heap H) (dst : HRef H R) (a : ArrTy R (.prim .uint))
+    (start stop offset : Nat) (bounds : SliceBounds requests[i.val].2 start stop)
+    (fits : offset+(stop-start)≤hp.len dst a) :
+    checkedCalldataUints (packedViews (D := D) F requests).calldata
+      ((packedViews (D := D) F requests).key
+        ⟨i.val,by simpa only [rawViews,List.length_map] using i.isLt⟩)
+      hp dst a start stop offset=
+      some (overwriteSlice hp dst a offset
+        (((payload F requests[i.val].1 requests[i.val].2).drop start).take (stop-start))
+        (by rw [(show SliceBounds (payload F requests[i.val].1 requests[i.val].2).length start stop from
+          by simpa only [payload_length] using bounds).length];exact fits)) := by
+  unfold checkedCalldataUints
+  rw [packedViews_uints]
+  simp only [Bind.bind,Option.bind,payload_length,
+    dif_pos (show start≤stop ∧ stop≤requests[i.val].2 from ⟨bounds.ordered,bounds.bounded⟩),dif_pos fits]
+
+/-- info: 'Solidity.Backend.CalldataPackets.RawUint.rawViews_coherent' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rawViews_coherent
+/-- info: 'Solidity.Backend.CalldataPackets.RawUint.packedViews_uints' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms packedViews_uints
+/-- info: 'Solidity.Backend.CalldataPackets.RawUint.packedViews_transfer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms packedViews_transfer
 
 /-- info: 'Solidity.Backend.CalldataPackets.RawUint.decode_uint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decode_uint

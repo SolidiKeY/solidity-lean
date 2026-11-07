@@ -11,7 +11,9 @@ def save(code):
  pathlib.Path(a.results).write_text(json.dumps(dict(kind='fresh-original-Derived17-workload',budgetSeconds=300,exit_code=code,seconds=time.monotonic()-start,expectedModules=modules,checks=rows),indent=2)+'\n')
 save(None)
 for module in modules:
- path=module.replace('.','/');setup=json.loads((r/('.lake/build/ir/'+path+'.setup.json')).read_text());setup['importArts'].update(arts)
+ path=module.replace('.','/');sf=r/('.lake/build/ir/'+path+'.setup.json')
+ # A module fetched from Lake's artifact cache has no .setup.json in .lake/build; ask Lake for it.
+ setup=json.loads(sf.read_text() if sf.exists() else subprocess.run(['lake','setup-file',path+'.lean'],cwd=r,check=True,capture_output=True,text=True).stdout);setup['importArts'].update(arts)
  sp=d/(module+'.setup.json');sp.write_text(json.dumps(setup));source=r/(path+'.lean');log=d/(module+'.log');out=d/(module+'.olean')
  cmd=['lean','-j1','--tstack=32768','--setup',str(sp),str(source),'-o',str(out),'-c',str(d/(module+'.c'))]
  (d/(module+'.source.lean')).write_bytes(source.read_bytes())

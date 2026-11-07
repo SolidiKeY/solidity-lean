@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "purpose": "H44 retained native/certified lifecycle evidence; no completed parity row",
+  "developmentParent": "270a05d2ad77d21191f3aef214877c7b8f3f542f",
+  "archives": [
+    {
+      "path": "/workspace/dafny-parity-retention-lean-20261106/development-evidence.tar.gz",
+      "bytes": 17926,
+      "sha256": "5c65c2281dc35442ee07e694476018d5e39ec05035298fb15b0658c810c7e768"
+    },
+    {
+      "path": "/workspace/dafny-parity-retention-lean-20261106/supporting-observations.tar.gz",
+      "bytes": 1405662,
+      "sha256": "8db8a5db2546a171fbe5666102af62460fb98ad89cad71e3604cffc3f19bcb0e"
+    }
+  ],
+  "boundaries": [
+    "Normal pinned Lean shutdown reaps observed descendants; forced cancellation/crash/mixed/direct retention remains unproved.",
+    "Pool failure is injected wrong source hash following a genuine compiler/kernel-certified result.",
+    "KeySort executable check passes 377 taclets /131 read-bearing /131 covered; full library/runtime validation remains incomplete.",
+    "Native proof-help exact parent270 is partial; no physical statusbar click, macOS or paired row judges."
+  ]
+}
