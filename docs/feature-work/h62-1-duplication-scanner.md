@@ -1185,3 +1185,24 @@ focused controls demonstrate the identity correction. Statement
 and body group counts remained 4,441 and 5,551 respectively, which does not
 prove equal membership or semantic equivalence. Evidence is outside Git
 under `/workspace/h62-duplication-scanner-evidence/compound-class/`.
+
+## Explicit universe declaration names
+
+The inventory now stops a declaration name before an explicit universe suffix
+such as `.{u}`, preserving qualified names. The suffix remains in the header
+and is conservatively rejected as unsupported binder syntax; no intrinsic
+signature or body equivalence is inferred. Controls cover attributes,
+modifiers, qualified names, multiple or multiline universes, malformed
+suffixes and surrounding declaration bodies. Source bindings must match the
+updated row identities and cannot reuse stale expected inventories.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 198 tests. A matched bounded scan took 113.712
+seconds before and 124.977 seconds after (+9.91%), within but close to the
+10% stop threshold. Both used the same 7,321 input hashes, recognized 123,559
+declarations and reported no errors or unmatched globs. The real selected
+line in CollisionBound changed from the name `EagerAdaptiveBound.` to
+`EagerAdaptiveBound`; both versions reject its unsupported binder syntax.
+Equal group counts do not prove equal memberships or semantics. This single
+measurement is not a Lean runtime gate. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/universe-names/`.

@@ -15,7 +15,7 @@ import re
 import stat
 from pathlib import Path
 
-DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t\r\n]+|public[ \t\r\n]+|protected[ \t\r\n]+|meta[ \t\r\n]+|noncomputable[ \t\r\n]+|local[ \t\r\n]+|partial[ \t\r\n]+|nonrec[ \t\r\n]+|unsafe[ \t\r\n]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class[ \t\r\n]+(?:inductive|abbrev)|class|axiom|constant)(?=[\s(:{\[])(?:[ \t\r\n]+([^\s(:{\[]+))?")
+DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t\r\n]+|public[ \t\r\n]+|protected[ \t\r\n]+|meta[ \t\r\n]+|noncomputable[ \t\r\n]+|local[ \t\r\n]+|partial[ \t\r\n]+|nonrec[ \t\r\n]+|unsafe[ \t\r\n]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class[ \t\r\n]+(?:inductive|abbrev)|class|axiom|constant)(?=[\s(:{\[])(?:[ \t\r\n]+([^\s(:{\[]+?)(?=\.\{|[\s(:{\[]|\Z))?")
 ID_FIRST = r"A-Za-z_\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03b1-\u03ba\u03bc-\u03c9\u03ca-\u03fb\u1f00-\u1ffe\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u017f"
 ID_REST = ID_FIRST + r"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
 IDENT = "[" + ID_FIRST + "][" + ID_REST + "]*"
