@@ -153,8 +153,13 @@ async function captureOutput(client,directory,metadata){
  const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);
  writeFileSync(join(directory,'output-visible-before.json'),JSON.stringify(before,null,2));
  if(!valid(before)){await capture(client,directory,true).catch(()=>{});throw Error('Actual visible output channel/owned readiness line did not match');}
- const captured=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'output-visible-after.json'),JSON.stringify(after,null,2));
+ const visibility=require('./output-visibility.cjs'),expression='('+visibility.probe.toString()+')('+JSON.stringify(metadata.readinessLine)+')',inspect=async()=>{const result=await client.request('Runtime.evaluate',{expression,returnByValue:true});return result.result.value;};
+ try{
+ const glyphBefore=await inspect();writeFileSync(join(directory,'output-glyph-before.json'),JSON.stringify(glyphBefore,null,2));
+ const captured=await capture(client,directory,true),after=await read(),glyphAfter=await inspect();writeFileSync(join(directory,'output-glyph-after.json'),JSON.stringify(glyphAfter,null,2));writeFileSync(join(directory,'output-visible-after.json'),JSON.stringify(after,null,2));
+ const glyphErrors=visibility.errors(glyphBefore,glyphAfter,metadata.readinessLine,metadata.channel);if(glyphErrors.length)throw Error('Output glyph geometry refused: '+glyphErrors.join('; '));
  if(!valid(after)||before.continuousText!==after.continuousText)throw Error('Output content/channel changed during screenshot capture');
- return{...captured,output:{panelVisible:true,readinessVisibility:'not-certified',scope:'Visible panel/channel; full owned readiness is DOM-resident. Per-character clipping/visibility is unproved.',selectedChannel:before.selectedChannel,text:before.continuousText,before,after,readinessLine:metadata.readinessLine}};
+ return{...captured,output:{panelVisible:true,readinessVisibility:'not-certified',glyphGeometry:{before:glyphBefore,after:glyphAfter,scope:'DOM Range geometry/hit-test coverage, not raster glyph identity or unobserved compositor ABA.'},scope:'Visible panel/channel; full owned readiness is DOM-resident. Per-character clipping/visibility is unproved.',selectedChannel:before.selectedChannel,text:before.continuousText,before,after,readinessLine:metadata.readinessLine}};
+ }finally{await client.request('Runtime.evaluate',{expression:'('+visibility.probe.toString()+')(null,true)',returnByValue:true}).catch(()=>{});}
 }
 module.exports={availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput};
