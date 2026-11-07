@@ -19,7 +19,7 @@
       "owner": "V09 (v07-v11/v09-compiler-passes)",
       "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
       "hypotheses": "pending-elaborated-classification",
-      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
       "witness_status": "checked-original-proof-reuse",
       "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
       "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.whole_some"
@@ -40,7 +40,7 @@
       "owner": "V09 (v07-v11/v09-compiler-passes)",
       "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
       "hypotheses": "pending-elaborated-classification",
-      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
       "witness_status": "checked-original-proof-reuse",
       "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
       "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.whole_public"
@@ -61,7 +61,7 @@
       "owner": "V09 (v07-v11/v09-compiler-passes)",
       "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
       "hypotheses": "pending-elaborated-classification",
-      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
       "witness_status": "checked-original-proof-reuse",
       "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
       "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.whole_tail"
@@ -82,7 +82,7 @@
       "owner": "V09 (v07-v11/v09-compiler-passes)",
       "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
       "hypotheses": "pending-elaborated-classification",
-      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
       "witness_status": "checked-original-proof-reuse",
       "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
       "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.complete_result"
@@ -103,7 +103,7 @@
       "owner": "V09 (v07-v11/v09-compiler-passes)",
       "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
       "hypotheses": "pending-elaborated-classification",
-      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
       "witness_status": "checked-original-proof-reuse",
       "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
       "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.wrong_cursor"
@@ -124,7 +124,7 @@
       "owner": "V09 (v07-v11/v09-compiler-passes)",
       "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
       "hypotheses": "pending-elaborated-classification",
-      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
       "witness_status": "checked-original-proof-reuse",
       "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
       "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.wrong_new_reference"
@@ -145,7 +145,7 @@
       "owner": "V09 (v07-v11/v09-compiler-passes)",
       "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
       "hypotheses": "pending-elaborated-classification",
-      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
       "witness_status": "checked-original-proof-reuse",
       "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
       "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.stale_initial_map"
@@ -166,7 +166,7 @@
       "owner": "V09 (v07-v11/v09-compiler-passes)",
       "owner_basis": "Assigned V09 area owner; no per-file live-writer claim.",
       "hypotheses": "pending-elaborated-classification",
-      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+      "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
       "witness_status": "checked-original-proof-reuse",
       "source_context": "Read source prefix through character_span[0]; includes section variables and options.",
       "exercised_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.corrupted_saved_tail"
@@ -183,7 +183,7 @@
   "checked_private_rows": {
     "path": "Solidity/Backend/Passes/MemoryJoinedAllocationControls.lean",
     "kernel_prefix": "_private.Solidity.Backend.Passes.MemoryJoinedAllocationControls.0.",
-    "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint",
+    "simultaneous_witness": "Solidity.Backend.Passes.AuditJoinedAllocation.joint_admission",
     "witness_status": "checked-original-private-signature-and-axioms",
     "axioms": [
       "propext",
@@ -256,5 +256,6 @@
         "signature_sha256": "dca0a9c1e968da67ae147af6ec2cc5cb8c418347c3cfad4a75bdb1c164c344d1"
       }
     ]
-  }
+  },
+  "joint_contract": "actual-public-whole-selection-full-input-cost-and-source-success"
 }

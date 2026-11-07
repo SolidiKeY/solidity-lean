@@ -1961,3 +1961,52 @@ coverage-inference issue. Finder requested recipe/helper/test hashes for replay
 traceability; the final acceptance receipt now includes all three alongside
 input/output hashes. No reviewer used Lean, builds, server calls or edits.
 The inherited P20 documentation failure remains RED without an unchanged rerun.
+
+
+### P20 documentation owner-answer intake (2026-11-07)
+
+Coordinator delivered the owner report for VY3 head
+c9cf710a8459581006150a462b69ae8c4f0d13e0. It reports a comment-only correction
+that identifies the immutable published controls snapshot and distinguishes it
+from master integration. This is an owner answer, not locally verified bytes.
+The exact commit is absent locally, the approved relay directories contain no
+P20 correction artifact, and fetched master902e87762 retains the missing-file
+citation. The inherited documentation gate therefore remains RED; no owner
+file was reconstructed or changed and no unchanged failing gate was rerun.
+
+Exact failed object/file reads and an authenticated-artifact request are saved
+under `/workspace/parallel-20261103/executable-bytecode/p20-owner-answer-intake`.
+Await the exact owner file/patch or bundle with checksums through the coordinator
+relay before adoption and applicable gates. The reported owner handoff hash
+cannot be verified until its bytes arrive. No proof/source/control acceptance,
+producer adequacy, budget/STOP clearance or goal completion follows from this
+intake. Other original independent audit/witness work and all prior waits remain.
+
+
+### Master merge and P20 documentation adoption (2026-11-07)
+
+Resolved the audit-document conflict with master9d5ea20 by retaining the full
+reviewed local P20 intake appendix; upstream's conflict side was empty. The
+resolved document was byte-identical to the local parent, preserving historical
+failure evidence and every wait. Independent read-only finder/skeptic passed.
+
+The subsequently announced masterdf554535 was merged cleanly. It now includes
+the exact owner correction c9cf710a8459581006150a462b69ae8c4f0d13e0 and controls
+snapshot e36cd2491ea6deced730ee103f999847574c2124. Local correction bytes match
+the owner commit; control bytes match the immutable snapshot and reported
+SHA25624566bc7ba6855181af2c933f72dc5ee9034fd847ef3a7ad507a2ec768358917.
+This resolves the earlier local Git-object/control-file delivery wait through
+published master, without reconstructing a peer file or editing production.
+The old missing-file gate receipt remains historical; changed-input doc-path
+validation is now appropriate. Owner HANDOFF bytes were not separately verified.
+No P20 adequacy, proof pass, PowerBounds clearance or original-goal completion
+follows from this documentation adoption. Evidence is retained under
+`/workspace/parallel-20261103/executable-bytecode/merge-9d5ea20`.
+
+
+Changed-input doc-path gate exits1: the P20 missing-file finding is gone, but
+an inherited reference in docs/feature-work/h62-2-audit-v09-passes.md names missing
+SelectedHeapBoundaryWitness.lean. This distinct upstream documentation finding
+is retained RED for owner routing. All85 audit Python tests and generated
+roots/fragments/whitespace checks pass. No full Lean/Bridge gate was run or
+claimed; the merge does not release the original PowerBounds STOP.
