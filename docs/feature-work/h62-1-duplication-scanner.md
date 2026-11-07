@@ -850,3 +850,32 @@ two staged test-only files were added without generated-root or module-map edits
 All 792 original obligations, full acceptance and the original +80.254966536%
 Lean STOP remain. Raw final captures, legacy refusals and manifests are retained
 under `/workspace/h62-audit-readonly-calls/metadata-observations/` on the original VM.
+
+## Lossless accounting of completed declaration observations
+
+The additive `account_observed_declarations.py` executes the fresh Scope metadata
+observer, preserves its completed observation, and accounts for every imported
+constant and lexical source row exactly once. It rechecks protected child JSON,
+logs and exact staged source bytes and requires the original source-range join to
+recompute identically. This is not a new compiled/runtime artifact recertification,
+source identity inference or semantic/witness/ownership result.
+
+Two final byte-identical ledgers retain all 312 Scope constants and 37 lexical
+rows. The 25 existing direct links are unchanged. The remaining constants are
+classified by recorded evidence: 242 have no compiler range, 28 have a range whose
+fragment differs from the declaration name, and 17 have a matching-name range
+without a legacy link. All 17 of the last group are constructors; no constructor
+identity is inferred or attached. All 26 legacy expression-metadata refusals are
+in the no-range category. Their separate v2 observations remain separate; V1
+retains 286 serialized and 26 refused records, while v2 observes all 312 types.
+
+All 174 controls pass, including seven new omission/duplicate/correspondence,
+parent-range nonpromotion, version/refusal and replay controls. Independent
+read-only finder and skeptic reviews found no substantive issue and used no Lean
+server or execution. Existing producers/exporters/scanner paths were unchanged;
+new workflow timings are observations, not a matched prior-workload comparison.
+Actual tools remain Lean 4.24.0 and Lake 5.0.0-src+797c613; fresh bounded KeySort
+prerequisites pass. No Lean file, statement, definition, budget or axiom changed.
+All 792 original audit obligations, original +80.254966536% Lean STOP and full
+original/inherited acceptance remain open. Raw ledgers and capture chains remain
+at `/workspace/h62-audit-readonly-calls/declaration-accounting/` on the original VM.
