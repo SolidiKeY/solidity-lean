@@ -1,4 +1,8 @@
 """Regression controls: omitted signatures or duplicate roles cannot inflate review coverage."""
+import contextlib
+import io
+import json
+from unittest import mock
 import copy
 from pathlib import Path
 import sys
@@ -6,6 +10,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "scripts/h62/item2/audit-calculus"))
+import classify_frozen_signatures as runner
 from classify_frozen_signatures import authenticated_census, classify
 
 
@@ -65,6 +70,54 @@ class SemanticClassificationControls(unittest.TestCase):
                 self.curated["reviewed_files"] = files
                 with self.assertRaisesRegex(ValueError, "reviewed file"):
                     classify(self.source, self.curated)
+
+
+    def run_cli(self, arguments):
+        # Synthetic Python runner controls, never formal proof/witness evidence.
+        curated = dict(self.curated, base=self.source["base"],
+                       source_census_sha256=runner.EXPECTED_CENSUS)
+        output = io.StringIO()
+        with mock.patch.object(sys, "argv", ["classify"] + arguments), \
+             mock.patch.object(runner, "authenticated_census", return_value=self.source), \
+             mock.patch.object(runner, "bulk_bytes", return_value=json.dumps(curated).encode()), \
+             contextlib.redirect_stdout(output), contextlib.redirect_stderr(io.StringIO()):
+            try:
+                runner.main()
+            except SystemExit as error:
+                return error.code, output.getvalue()
+        return 0, output.getvalue()
+
+    def test_check_only_matches_report_counts_and_incomplete_exit_without_writes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            report = root / "report"
+            common = ["--census", str(root / "fixture"), "--require-complete"]
+            report_exit, report_stdout = self.run_cli(common + ["--out", str(report)])
+            saved = json.loads((report / "classification.json").read_text())
+            before = sorted(str(path.relative_to(root)) for path in root.rglob("*"))
+            check_exit, check_stdout = self.run_cli(common + ["--check-only"])
+            self.assertEqual((report_exit, check_exit), (1, 1))
+            self.assertEqual(json.loads(report_stdout), saved["counts"])
+            self.assertEqual(check_stdout, report_stdout)
+            self.assertEqual(before, sorted(str(path.relative_to(root)) for path in root.rglob("*")))
+            self.assertEqual(saved["counts"]["new_joint_witnesses"], 0)
+
+    def test_check_only_retains_signature_validation(self):
+        self.curated["declarations"][0]["signature_sha256"] = "stale"
+        with self.assertRaisesRegex(ValueError, "signature"):
+            self.run_cli(["--census", "fixture", "--check-only"])
+
+    def test_output_modes_are_required_and_mutually_exclusive(self):
+        for modes in [[], ["--check-only", "--out", "unused"]]:
+            with self.subTest(modes=modes):
+                code, output = self.run_cli(["--census", "fixture"] + modes)
+                self.assertEqual(code, 2)
+                self.assertEqual(output, "")
+
+    def test_report_mode_keeps_repository_output_refusal(self):
+        code, output = self.run_cli(["--census", "fixture", "--out", str(runner.REPO)])
+        self.assertEqual(code, 2)
+        self.assertEqual(output, "")
 
     def owner_record(self):
         self.source["sources"] = [{"path": "f", "sha256": "0" * 64}, {"path": "g", "sha256": "1" * 64}]
