@@ -300,3 +300,15 @@ Exact callback selection, evaluation-result equalities (including errors), suppl
 
 
 Capture/private-helper classification was also checked with fresh per-command measurements: accounting exit0,0.266966s,71376KiB maximum child RSS; complete acceptance exit1,0.276756s,72464KiB;89 controls exit0,0.138679s,15240KiB. Measured and initial accounting outputs are identical. These are static gate measurements, not matched tactic-performance comparisons. Documentation check still fails exit1 on the same5missing references in unchanged citing sources; exact diagnostics are archived and its RSS was not captured. No whole-gate pass is claimed.
+
+
+## Callback grown-frame/refutation source roles (2026-11-07)
+
+Fresh master inspection at 8dbbb58e6eda3d7a8e7e55fbb31e24acf5eb5990 preceded classification of all four CallbackFrameMem and fourteen CallbackDerive declarations, including twelve private helpers. Exact frozen/current source identities match; prior 131 rows and all owners are unchanged. Ledger: 149 roles reviewed, 5,134 pending; 3,746 owners confirmed, 1,537 unresolved. No new simultaneous witnesses.
+
+Frame roles retain success, exact mutability guards, grown-heap object preservation, conditional balance/storage/ledger preservation and the local write footprint. Refutation roles retain every Boolean/equality input, transformed-antecedent/dropped-fact contexts and full wrapped formula. Public contextual ex-falso is not unwrapped validity, arbitrary theorem fuel is unchanged, and ordinary soundness does not discharge callback-closing guards. No tactic/closer/sharing implementation, default or budget was edited. Both independent read-only reviews pass; all 89 Python controls pass. Complete acceptance remains FAIL exit 1. Actual commands, wall/RSS and complete off-Git data are indexed by the callback-frame-refute classification manifest; original queues, historical evidence limitations, H28 pause and prior STOPs remain binding.
+
+
+Measured static accounting passed at 0.252641s / 71,868 KiB maximum child RSS; incomplete acceptance failed exit 1 at 0.279507s / 71,860 KiB; 89 controls passed at 0.123511s / 15,240 KiB. The documentation gate failed exit 1 at 41.916230s / 9,216 KiB on the same five missing references in unchanged citing sources. These are individual gate measurements, not matched performance acceptance. Exact receipts are archived.
+
+Read-only continuation analysis also confirmed the prior runtime-v1 RuleShapes resource stop was a compilation command, not census export: exit 88, RESOURCE_RESERVE below 4 GiB, 8 GiB enclosing cgroup, observed process-group RSS 3,358,760,960 bytes. The exact old record and source-ledger hash are retained in prior-resource-stop.json. This is an available own-run receipt, not recovered retired raw evidence. No rerun or gate/resource change occurred; serializer changes alone would not address that stopped compilation.
