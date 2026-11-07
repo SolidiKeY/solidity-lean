@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/memory-arm-roles-v77/semantic-roles-reviewed.json",
-    "bytes": 2472173,
-    "sha256": "84f5a8daf829f35d62c4abcc52c55f0c3fce4fc99a362da69469ccb13a39c5b0"
+    "path": "/workspace/h62-successor-bulk/step-equivalence-roles-v78/semantic-roles-reviewed.json",
+    "bytes": 2474398,
+    "sha256": "f0317a6b826e3304165a6cafbf25a9310bb3f7c574a9339b72414f0f3c8afc95"
   }
 }
