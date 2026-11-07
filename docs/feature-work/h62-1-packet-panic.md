@@ -213,3 +213,7 @@ The advertised `codex/solidity-h62-6-20261106/migrate-roadmap` branch pointed to
 ## Overlay test interpreter follow-up
 
 `test_overlay_consumer.py` now uses the invoking `sys.executable`; the diagnostic checks the isolated-project and target policy before importing optional MCP dependencies. Tests passed with both the system interpreter and the existing MCP virtualenv. Independent read-only finder and skeptic reviewed the ordering without Lean. Actual diagnostic execution still requires the configured MCP environment; this does not validate the helper or dependency closure.
+
+## Overlay snapshot verifier
+
+`verify_overlay_snapshot.py` checks a deterministic `git archive` against every regular Git-tree blob and expected 0644/0755 mode, and requires the exact unique parent-directory set with 0755 mode. It rejects traversal, symlinks, nonregular or extra entries, duplicates and changed bytes. A safe-mode archive of overlay `2a18afcdba00a85645b0b3079704f78ffcd78860` matched 14,548 files; its SHA-256 and verification output remain off Git. Independent read-only finder and skeptic identified extra-directory and mode gaps in an initial verifier; they were fixed and negative controls added. Git does not track directory modes, so 0755 is the selected archive convention. Verification is not owner authorization, Lean validation or by itself a race-proof extraction boundary; the historical worktree remains preserved.
