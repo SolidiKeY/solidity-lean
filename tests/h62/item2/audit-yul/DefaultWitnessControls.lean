@@ -82,4 +82,36 @@ theorem word_writeback_joint : ∃ (_m : ByteView) (_a : Nat), True :=
 #print axioms word_load_congr_joint
 #print axioms word_prefix_joint
 #print axioms word_div_joint
+/-- Primitive byte-operation joint inputs. Outside-region premises refer to the
+same chosen nonempty intervals; copy indices use their final live byte. These
+are ordinary premise witnesses, not EVM range/admission or execution claims. -/
+theorem save_byte_joint : ∃ (_m : ByteView) (_a : Nat) (_v : UInt8), True :=
+  ⟨(fun _ => 0), 129, 0xaa, True.intro⟩
+
+theorem save_byte_other_joint :
+    ∃ (_m : ByteView) (a b : Nat) (_v : UInt8) (_h : b ≠ a), True :=
+  ⟨(fun _ => 0), 129, 128, 0xaa, by decide, True.intro⟩
+
+theorem copy_byte_joint :
+    ∃ (_dst _src : ByteView) (_to _start n i : Nat) (_hi : i < n), True :=
+  ⟨(fun _ => 0), (fun _ => 0xaa), 130, 129, 32, 31, by decide, True.intro⟩
+
+theorem copy_outside_joint :
+    ∃ (_dst _src : ByteView) (to : Nat) (_start : Nat) (n a : Nat)
+      (_h : ¬ (to ≤ a ∧ a < to + n)), True :=
+  ⟨(fun _ => 0), (fun _ => 0xaa), 130, 129, 32, 128, by decide, True.intro⟩
+
+theorem copy_zero_joint :
+    ∃ (_dst _src : ByteView) (_to _start : Nat), True :=
+  ⟨(fun _ => 0), (fun _ => 0xaa), 130, 129, True.intro⟩
+
+theorem store_byte_joint :
+    ∃ (_m : ByteView) (_a : Nat) (_w : Roadmap.Word) (_i : Fin 32), True :=
+  ⟨(fun _ => 0), 129, 2, ⟨31, by decide⟩, True.intro⟩
+
+theorem store_outside_joint :
+    ∃ (_m : ByteView) (a b : Nat) (_w : Roadmap.Word)
+      (_h : ¬ (a ≤ b ∧ b < a + 32)), True :=
+  ⟨(fun _ => 0), 129, 128, 2, by decide, True.intro⟩
+
 end Solidity.Yul.Views.H62
