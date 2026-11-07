@@ -3,7 +3,7 @@
   "scope": "Frozen 57-input H55 family queue; proof-entrypoint reuse is partial family migration, not definition or full-family completion.",
   "frozen_input_count": 57,
   "fully_migrated_families": 0,
-  "partially_migrated_input_files": 9,
+  "partially_migrated_input_files": 12,
   "entries": [
     {
       "path": "Solidity/Yul/Compilation/CaseCompletion.lean",
@@ -131,8 +131,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/LetSequenceCompletion.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.LetSequenceCompletion.completion_iff"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -181,8 +183,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ScopedControlCompletion.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ScopedControlCompletion.completion_iff"
+      ],
       "existing_definitions_changed": false
     },
     {
@@ -343,8 +347,10 @@
     },
     {
       "path": "Solidity/Yul/Compilation/ZeroControlCompletion.lean",
-      "status": "pending",
-      "migrated_declarations": [],
+      "status": "proof_reuse_partial",
+      "migrated_declarations": [
+        "Solidity.Yul.Compilation.ZeroControlCompletion.completion_iff"
+      ],
       "existing_definitions_changed": false
     },
     {
