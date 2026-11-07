@@ -1,0 +1,47 @@
+{
+  "scope": "Complete9 catch-data soundness theorem roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 770,
+    "pending": 4513,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/catch-soundness-roles-v70/evidence.tar.gz",
+      "bytes": 214217,
+      "sha256": "14a79b84168e5f66997057402c25004588e9c6a8e425f309e9c0ae9fc2d92281"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/catch-soundness-roles-v70/inputs.json",
+      "bytes": 908,
+      "sha256": "e1c780d28680b1ff30ed37702b2fc8cb415c7443b2618347b8c3abe39d5c926c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/catch-soundness-roles-v70/gates.json",
+      "bytes": 2824,
+      "sha256": "6bb0b5c4737c2c0b6ecef2286dd1d2c0a22fbcac383a5e3a6a95fe7703ac6963"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/catch-soundness-roles-v70/reviews.md",
+      "bytes": 758,
+      "sha256": "916e0a06ba5257f7752bed6f3d63d8c80a7aed0b5fa5a157e198028412d2bf3f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/catch-soundness-roles-v70/case-rosters.json",
+      "bytes": 1476,
+      "sha256": "e8e491b0e64e93da0464f683d9c1baa90d09e1030b2a08f47ee213ee30c1cc47"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/catch-soundness-roles-v70/doc-master-repair-binding.json",
+      "bytes": 416,
+      "sha256": "e1139f2f87251e74f0f8ddda939b0d1676a7a6906e625bdcb46f5d641ca0da3f"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/catch-soundness-roles-v70/semantic-roles-reviewed.json",
+      "bytes": 2052095,
+      "sha256": "e7e68c9f8795968e69811e4a9a4b2526f822a7265f6b985ca8bdbd18c40656de"
+    }
+  ]
+}

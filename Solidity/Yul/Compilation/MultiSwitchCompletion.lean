@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.MultiSwitchCompilation
 import Solidity.Yul.Compilation.CaseCompletion
 /-! Exact normal-success equivalence for actual finite-case switch artifacts.
@@ -67,23 +68,8 @@ theorem completion_iff {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
    some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run artifact.code {m with stack := locals.toList.map coreWord++caller} =
  .ok {m with stack := out.toList.map coreWord++caller} 0 := by
- constructor
- · rintro ⟨horizon,source⟩
-   exact artifact.normal_to_model horizon locals out source m caller
- · intro ran
-   obtain ⟨horizon,actual,source,_,frame⟩ := model_to_source artifact locals m
-     {m with stack := out.toList.map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : out.toList.map coreWord = actual.toList.map coreWord := List.append_cancel_right stacks
-   have lists : out.toList = actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp lists
-   cases equal
-   exact ⟨horizon,source⟩
-
-
-
-
+ exact CompletionControls.completion_iff_zero stmt artifact.compiled.profile artifact.code
+   artifact.normal_to_model (model_to_source artifact) locals out m caller
 
 /-- info: 'Solidity.Yul.Compilation.MultiSwitchCompletion.model_to_source' depends on axioms: [propext,
  Classical.choice,
