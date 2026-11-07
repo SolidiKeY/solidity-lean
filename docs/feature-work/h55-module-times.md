@@ -2449,3 +2449,22 @@ roles, hashes, historical preservation and synthetic-reference exclusion without
 Lean or a server. Evidence hashes are in
 `tests/h55/module-times/sortcheck-migration-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## V09 audit candidate observations
+
+`v09_audit_controls.py` records nine previously unreferenced V09 audit sources
+with hashes and the audit document hash. Their stated roles distinguish joint
+boundary, sequence, stack and memory premises, private premise fixtures and
+private kernel identity checks. The CoreBoundary over-limit bundle is a negative
+case with refused Input, not a successful-input witness. Current invocation,
+inputs, effects and outcomes remain unresolved; this subset does not establish
+whole-audit, native ByteWorld or general compiler adequacy.
+
+At merge head `d4f4b381d82b3e8c66cdc0b135d546a61aeeb3b0`, the refreshed static
+index has 813 candidates, 602 with supplied current references and 211 without;
+seven retain historical references for review. Two candidates were added and
+three previously unreferenced candidates changed since the preceding snapshot.
+Independent read-only finder and skeptic checked roles, hashes and history
+preservation without Lean or a server. Evidence hashes are in
+`tests/h55/module-times/v09-audit-evidence.sha256`. This non-atomic observation
+does not establish current runtime acceptance.
