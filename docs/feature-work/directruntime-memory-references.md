@@ -989,3 +989,46 @@ Final finder/skeptic packaging review verified the16-member sealed evidence
 archive,inspector hash and current documentation routing. No findings. Owned
 references,Python syntax and whitespace pass;global five-reference gate fails
 as recorded. No unchanged browser/build/STOP gate was rerun.
+
+
+## Authenticated V1 producer consumption and retained inputs
+
+Fresh origin/master5414256fdf7b78e8debe5e571c7af06ee55a5563 was merged
+before this item; producer9992f6906 is its ancestor. The coordinator identifies
+dafny-parity as the live certification owner. V1StorageCases.lean imports the
+four original pinned storageAlias/storageCopy diamond fixtures in legacy and
+IR modes through the V1 origin companion, declares their scoped obligations,
+and calls the candidate API on each actual identity formula. All four admit;
+all four return no candidate and no retained certificate. The unchanged
+primitive-storage guard still applies. Origin metadata is not certification.
+The precise missing proof/declaration/report fields are routed in
+v1-storage-owner-ticket.json to the authenticated owner. The prior generic
+coordinator ownership wait is replaced by that concrete producer dependency.
+
+The initial build failed on incorrect contract namespace names; its log is
+retained. Corrected build passes in3.217s, per-file gate in4.216s, serial
+Lean-j1 in verified12GiB/no-swap scope with the4GiB headroom guard. Actual Lean
+is4.24.0/797c613 and Lake5.0.0-src+797c613. All eight generated theorem axiom
+reports use no axioms or only propext; the two imported metadata lemmas use
+propext and Quot.sound. No new axiom, sorry, theorem weakening or budget change.
+Per-file MCP diagnostics are unavailable in the tool catalog; the repository
+per-file gate was used. No refactor, production edit or new semantic pass.
+
+For module-times55d74692, all260 existing files were byte-verified and packed:
+the two requested indexes, all106 normalized Admission inputs and raw originals,
+the42 generator source bodies and existing generator/control modules. The input
+manifest preserves old expected-status fields as historical obligations rather
+than new verdicts. Neither generator nor Admission was executed for this packet.
+Its archive, exact index and handoff hashes are in module-times-input-ticket.json.
+Consumer checkout absence was worked around by reading its exact published
+Git documentation. Delivery is coordinator-pending; receipt is not assumed.
+
+Separate read-only finder/skeptic reviews agree on the corrected probe and all
+input/archive hashes. Raw logs/fixtures/cache remain off Git; v1-storage-receipt.json
+seals the evidence and partial development-module cache for coordinator pickup.
+Four storage diamond certifications remain pending; existing native/browser
+results and historical UNVERIFIABLE bytes are unchanged. RUNTIME_GATE_PASS,
+source/compiler preservation and whole-assignment completion are not claimed.
+
+Final packaging reviews found no issue; global documentation paths pass with
+143 resolving ambiguity warnings. No checker policy changed.
