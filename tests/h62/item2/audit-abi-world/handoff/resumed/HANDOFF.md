@@ -1,71 +1,57 @@
 # Current ABI-world audit handoff
 
-Repository /workspace/solidity-lean; branch
-codex/solidity-h62-2-20261106/audit-abi-world; original base
+Repository /workspace/solidity-lean; assigned branch
+codex/solidity-h62-2-20261106/audit-abi-world. Original base
 c6f550e281a7e5affa9a99bc2cdaed556dec00e4. Current integration
-8863c41276f9340d3d1960df9e4808294614189b was fast-forwarded after verified
-ancestry and prior build cleanup. Observed newer remotea10b60f was not chased.
-Final committed head/clean status are recorded by the external export after
-this commit; no self-referential SHA. No push, PR, default-branch merge, reset
-or new/completed goal. Existing goal remains unfinished.
+8a710f9d44df144d4c9855aeccca56585a422122 contains reported db62b437 merge and
+prior lanehead765aacbf. Rebase fast-forwarded after verifying ancestry.
+Final committed head/clean status are recorded in the external export after
+commit; no self-SHA. No push/default-branch merge/PR/reset/new or completed goal.
 
-All original audit implementation is complete:24mappedfiles,177exactly-once
-declarations/jointpackages/independentfidelitycomparisons,439binders (113Prop),
-seven formal success/control theorems and ten encoded fixtures. New original
-Lean declarations:177witnesses+4schema fixtures/controls+7success/control.
-Four map-drift modules remain outside the original frozen map. No frozen
-statement/premise/exclusion/proofbudget change, newaxiom/sorry/native shortcut.
-Current continuation changed only audit configuration/provenance/docs.
+Original implementation complete:24frozenmodules,177declarations/joint
+hypothesis packages/independent exact-type comparisons,439binders (113Prop),
+seven formal success/control theorems and ten encoded fixtures. Four map-drift
+modules remain outside frozen scope. No weakened statement, premise, exclusion,
+observation or proof budget; no new axiom/sorry/native shortcut. New original
+proof declarations177witnesses+4schema fixtures/controls+7success/control.
 
-Fresh9auditfiles+KeySort receipts bind8028upstream paths/bytes and current
-local/support/output/resource identities. Frozen24ABI+map exactoriginalbytes.
-Acceptance177/439/7/10,3receiptcontrols,4scanner tests pass. Same-identity timing
-1.696835053 to1.665341429seconds (-1.856021535%,within10%). All staticgates pass
-except metadata pins; exact commands/output are in external static-gates.json.
+Fresh9auditfiles+KeySort bind8047upstream paths/bytes and support/local/output/
+resource identities; frozen24+map exactoriginal. Strict acceptance177/439/7/10
+and3tampering controls pass. Initial absolute-driver invocation was rejected
+by unchanged command-identity gate, preserved and rerun with correctrelative
+command. Timing+0.305313164%within10. Allstaticgates pass exceptpins.
 
-The complete current ./run-lean.sh PASS includes defaults,SolkeyTestSuite and
-mandatorySoliditySlowExamples:6640jobs,exit0,106.036377s; peakRSS5963968512,
-minavailable8508100608,oneheavyLeanjob,noSwap,cleanuptrue. Earlier resource
-stops are retained, not passes. Cold-cache bounded OpenLoops prerequisite
-passed278jobs/342.390517s/peakRSS9124495360/minavailable5720244224 with unchanged
-limits. Read-only clean-page advice changed residency, not contents or proof
-budgets. No systemd-run, virtual-address cap or memory/budget increase.
-Actual Lean4.24.0 Release797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
-Lake5.0.0-src+797c613. Explicit-j1/threads1/stack131072,16GiBhard/12GiBRSS/
-4GiBreserve preserved. KeySort passes; no solkeycheck CLI gate claimed.
+Complete ./run-lean.sh PASS6649jobs including defaulttargets,SolkeyTestSuite
+and SoliditySlowExamples:exit0/26.967879s/peakRSS3398221824/minavailable
+10289586176/heavy1/noSwap/cleanuptrue. ColdOpenLoops prerequisite replayed
+278jobs under unchangedbounds. Earlier resource failures/cancellation retained
+as failures, not passes. Actual Lean4.24.0 Release797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake5.0.0-src+797c613. Hard16GiB/taskRSS12GiB/reserve4GiB,threads1/-j1/stack131072
+preserved. No systemd-run or address-space cap. No solkeycheck CLI pass claimed.
 
-BLOCKER PIN-8863c412:16774theorems/zeroerrors/184newstandard-only registrations.
-Off-Git ticket in resume-8863-20261107 has184unique previous=null keys and
-currentcentralSHA; tiny bulk-artifacts.sha256 authenticates absolute path,
-size and SHA. Original explicit central-pin edit prohibition remains.
-Coordinator/G07 owners review/register existing pins and regenerate/check
-inventory, or retain this blocker. No theorem/premise/exclusion/axiom repair
-is proposed. All independent original/backfill work is done, no new unclaimed
-candidate assigned. Final assignment remains unfinished pending metadata.
+BLOCKER PIN-8a710f9d:16804theorems/0errors/214newstandard-only registrations.
+Exact off-Git ticket has214unique previous=null entries and currentcentralSHA.
+Original explicit central-pin edit prohibition remains: coordinator/G07 owners
+review/register existing pins and regenerate/check inventory, or retainblocker.
+No theorem/premise/exclusion/axiom repair proposed. All independent original
+work/backfill done; no new unclaimed candidate. Keep original goal unfinished.
 
-Formal Slice contracts omit gas/world. External gas/fork/failure observations
-are archived isolated-frame tests reused for exact current-byte fixtures; no
-fresh EVM run or formal gas/world/general Source/compiler adequacy claim.
-No scope takeover or other-lane proof implementation.
+H44 bulk tickets/member-manifests/logs remain offGit; small committed manifest
+and index authenticate their paths/sizes/hashes. Transfer VM bytes before
+off-VM verification; raw receipt paths are provenance, not shared endpoints.
+Portable verifier checks all archive members without Lean/extraction/original
+VM paths. External gas/fork tests are archived isolated-frame observations for
+identical current bytes, not fresh EVM/formal gas/world/Source adequacy proofs.
 
-H44: detailed tickets/member manifests/logs remain offGit. Small committed
-bulk-artifacts.sha256 and portable-evidence-index.json bind current external
-archive and manifest. Transfer bytes from VM before off-VM verification; paths
-inside raw receipts are provenance, not remotely accessible endpoints.
-Portable verifier checks every relative archive member without extraction,
-Lean or originalVM paths. Original evidence and failed attempts stay immutable.
+Original complete thread-copy prompt, original work/backfill queue and scope
+manifest remain committed in parenthandoff and cumulative patch/bundle. Thread
+copy SHAe270551e is distinct from unavailable historical launcher rendering
+SHA22740ba5; no rendering bytes invented. External export supplies exact head,
+base,branch,patch,bundle,gate/resource/review evidence and SHA256SUMS. Fresh
+thread continuation goes to coordinator on this same VM/goal/branch, never
+self-create a replacement. Goal tool context failures are reported precisely.
 
-Complete original-frozen-rendered-prompt.txt, original-work-and-backfill-queue.md
-and scope-manifest.json remain committed in the parent handoff directory and
-in cumulative patch/bundle. Available complete thread-copy SHA e270551e is
-distinct from historical launcher rendering SHA22740ba5 whose bytes are not
-available; no original rendering bytes or old passing receipts invented.
-External export contains exact final head/base/branch, cumulative patch/bundle,
-integration-only patch, full gate/resource/review evidence and SHA256SUMS.
-Continue only this existing goal/VM/branch; fresh-thread handoff after the
-standing work-item boundary goes to coordinator, never self-launch replacement.
-
-Final independent finder/skeptic reviews: no residual findings after correcting
-the trustcount to6646 and refreshing current H44 pointers/index. All1898archive
-members and four integrity controls verify. Tinymanifest17lines/1385bytes.
-Neither reviewer used Lean/server/builds or edited files.
+Final read-only finder/skeptic: no residual findings. Full6649/source/provenance
+and rejected-command correction verify; all2047archive members,current214ticket
+and index/hashes/sizes verify. Tinymanifest23lines1890bytes; no bulkGit data.
+Neither Lean/server/builds/edits. Keep original goal unfinished on214pinwait.

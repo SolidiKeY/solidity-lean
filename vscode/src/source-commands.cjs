@@ -27,7 +27,9 @@ async function execute(operation,config,source,input={},signal){
  const probe=await processJob(config,['--version'],signal,Math.min(remaining(),5000)),version=/^v(\d+)\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.exec(probe.stdout.trim());
  if(probe.code!==0||!version||Number(version[1])<18)throw Error('Configured runtime must satisfy the existing Node.js18+ contract; unknown version is not accepted');
  if(!require('./project.cjs').current(project,[]))throw Error('Source project changed during runtime probe');
- const root=path.resolve(config.backendPath),directory=path.join(root,'.lake/editor-source-artifacts');fs.mkdirSync(directory,{recursive:true});const scratch=fs.mkdtempSync(path.join(directory,operation+'-'));
+ const root=path.resolve(config.backendPath);let directory=path.join(root,'.lake/editor-source-artifacts');
+ if(operation==='build'){const output=config.compilerOutputDir??'bin';if(typeof output!=='string'||output.includes('\0'))throw Error('Compiler output directory must be a string without NUL');directory=path.resolve(config.projectRoot||path.dirname(source),output);}
+ fs.mkdirSync(directory,{recursive:true});const scratch=fs.mkdtempSync(path.join(directory,operation==='build'?path.basename(source,path.extname(source))+'-':operation+'-'));
  if(operation==='build'){
   const artifact=path.join(scratch,'source.ast.json'),args=[path.join(root,'scripts/solc-ast.mjs'),'--source',source,'--out',artifact,'--no-wrapper','--project-root',config.projectRoot];for(const p of config.includePaths||[])args.push('--include-path',path.resolve(config.projectRoot||path.dirname(source),p));for(const r of config.remappings||[])args.push('--remapping',r);
   const result=await processJob(config,args,signal,remaining());if(result.code!==0)throw Error(result.stderr||result.stdout||'Compiler build failed');const fixture=JSON.parse(fs.readFileSync(artifact,'utf8'));
@@ -35,7 +37,7 @@ async function execute(operation,config,source,input={},signal){
   if(admitted.length>1||units!==undefined){
    if(!Array.isArray(units)||units.length!==admitted.length||units.some(unit=>!unit||typeof unit.name!=='string')||new Set(units.map(unit=>unit.name)).size!==units.length||admitted.some(([name,file])=>!units.some(unit=>unit.name===name&&unit.sourceSha256===file.hash)))throw Error('Compiler artifact does not match admitted project');
   }
-  if((fixture.header?.sourceSha256??fixture.sourceUnits?.find(unit=>unit.name===fixture.header?.mainSource)?.sourceSha256)!==digest(text)||!require('./project.cjs').current(project,[]))throw Error('Source changed during build');const report={schemaVersion:1,operation:requestedOperation,kind:'compiler-ast',source,sourceHash:digest(text),artifact,projectDigest:project.digest,compilerOptions:{includePaths:[...(config.includePaths||[])],remappings:[...(config.remappings||[])]},verification:'not-run'};fs.writeFileSync(path.join(scratch,'manifest.json'),JSON.stringify(report,null,2)+'\n');return report;
+  if((fixture.header?.sourceSha256??fixture.sourceUnits?.find(unit=>unit.name===fixture.header?.mainSource)?.sourceSha256)!==digest(text)||!require('./project.cjs').current(project,[]))throw Error('Source changed during build');const report={schemaVersion:1,operation:requestedOperation,kind:'compiler-ast',outputDirectory:directory,source,sourceHash:digest(text),artifact,projectDigest:project.digest,compilerOptions:{includePaths:[...(config.includePaths||[])],remappings:[...(config.remappings||[])]},verification:'not-run'};fs.writeFileSync(path.join(scratch,'manifest.json'),JSON.stringify(report,null,2)+'\n');return report;
  }
  if(operation!=='run'&&operation!=='test')throw Error('Unknown source command');
  if(config.includePaths?.length||config.remappings?.length)throw Error('Concrete CLI currently supports its default import resolution; custom include paths/remappings are not silently ignored');
@@ -96,7 +98,7 @@ function install(vscode,context,{settings,output,cancelVerification}){
  const subscriptions=['build','run','test','buildCustomArgs'].map(operation=>vscode.commands.registerCommand('solidityLean.'+operation,command(operation)));
  if(vscode.workspace.onDidChangeTextDocument)subscriptions.push(vscode.workspace.onDidChangeTextDocument(event=>{if(event.contentChanges.length){touch(event.document.uri.toString());stop(event.document.uri.toString()).catch(recordFailure);}}));
  if(vscode.workspace.onDidCloseTextDocument)subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc=>{const uri=doc.uri.toString();touch(uri);documents.delete(uri);epochs.delete(uri);stop(uri).catch(recordFailure);}));
- if(vscode.workspace.onDidChangeConfiguration)subscriptions.push(vscode.workspace.onDidChangeConfiguration(event=>{for(const [uri,doc]of documents)if(['backendPath','nodePath','timeoutMs','includePaths','remappings'].some(key=>event.affectsConfiguration('solidityLean.'+key,doc.uri))){touch(uri);stop(uri).catch(recordFailure);}}));
+ if(vscode.workspace.onDidChangeConfiguration)subscriptions.push(vscode.workspace.onDidChangeConfiguration(event=>{for(const [uri,doc]of documents)if(['backendPath','nodePath','timeoutMs','includePaths','remappings','compilerOutputDir'].some(key=>event.affectsConfiguration('solidityLean.'+key,doc.uri))){touch(uri);stop(uri).catch(recordFailure);}}));
  subscriptions.push({dispose:()=>{dispose().catch(recordFailure);}});context.subscriptions.push(...subscriptions);return{cancel:uri=>{if(uri===undefined)for(const key of epochs.keys())touch(key);else touch(uri);const result=stop(uri);result.catch(recordFailure);return result;},dispose};
 }
 module.exports={execute,install,selection,argumentsOf,buildArguments,processJob};
