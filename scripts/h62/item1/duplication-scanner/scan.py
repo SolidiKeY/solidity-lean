@@ -15,7 +15,7 @@ import re
 import stat
 from pathlib import Path
 
-DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t\r\n]+|public[ \t\r\n]+|protected[ \t\r\n]+|meta[ \t\r\n]+|noncomputable[ \t\r\n]+|local[ \t\r\n]+|partial[ \t\r\n]+|nonrec[ \t\r\n]+|unsafe[ \t\r\n]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t\r\n]+([^\s(:{\[]+))?")
+DECL = re.compile(r"(?m)^[ \t]*(?:private[ \t\r\n]+|public[ \t\r\n]+|protected[ \t\r\n]+|meta[ \t\r\n]+|noncomputable[ \t\r\n]+|local[ \t\r\n]+|partial[ \t\r\n]+|nonrec[ \t\r\n]+|unsafe[ \t\r\n]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class[ \t\r\n]+(?:inductive|abbrev)|class|axiom|constant)(?=[\s(:{\[])(?:[ \t\r\n]+([^\s(:{\[]+?)(?=\.\{|[\s(:{\[]|\Z))?")
 ID_FIRST = r"A-Za-z_\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03b1-\u03ba\u03bc-\u03c9\u03ca-\u03fb\u1f00-\u1ffe\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u017f"
 ID_REST = ID_FIRST + r"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
 IDENT = "[" + ID_FIRST + "][" + ID_REST + "]*"
@@ -334,7 +334,8 @@ def scan(path, root, source=None):
             content_skeleton = content_skeleton[:command.start()]
         qualifiers = sorted(re.findall(r"\b(?:private|public|protected|meta|noncomputable|local|partial|nonrec|unsafe)\b", skeleton[match.start():match.start(1)]))
         context = digest([span for start, span in context_spans if start < match.start()])
-        unsupported = match.group(1) in {"structure", "inductive", "class", "axiom", "constant"}
+        kind = " ".join(match.group(1).split())
+        unsupported = kind in {"structure", "inductive", "class", "class inductive", "class abbrev", "axiom", "constant"}
         parts = None if unsupported else split_declaration(content, skeleton=content_skeleton)
         reason = "unsupported-declaration-form" if unsupported else "missing-top-level-definition"
         if parts is not None:
@@ -346,7 +347,7 @@ def scan(path, root, source=None):
         if parts is None:
             rows.append(dict(path=relative_path,
                              line=text.count("\n", 0, match.start(1))+1,
-                             kind=match.group(1), name=match.group(2) or "<anonymous>",
+                             kind=kind, name=match.group(2) or "<anonymous>",
                              statement=None, body=[], body_form=None, body_reject_reason=reason,
                              owner="unknown", context_hash=context, qualifiers=qualifiers,
                              reject_reason=reason))
@@ -368,7 +369,7 @@ def scan(path, root, source=None):
         normalized = normalize(header.strip())
         rows.append(dict(path=relative_path,
                          line=text.count("\n", 0, match.start(1))+1,
-                         kind=match.group(1), name=match.group(2) or "<anonymous>",
+                         kind=kind, name=match.group(2) or "<anonymous>",
                          statement=normalized, body=tokenize(body), body_form=body_form,
                          body_reject_reason=body_reject_reason, owner="unknown", context_hash=context, qualifiers=qualifiers,
                          reject_reason="unsupported-binder-syntax" if normalized is None else None))
