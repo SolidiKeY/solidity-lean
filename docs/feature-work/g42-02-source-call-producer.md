@@ -61,6 +61,43 @@ only re-read `Step`'s own conjuncts and the determinism of `Evm.run`.
 - Whole-body embedding of the invocation, Source/Core representation and
   compiler adequacy remain separate obligations.
 
+## Version 2: on `Evm.MachineV2` (H106)
+
+`Backend/Passes/SourceCallProducerV2.lean` closes the two gaps above on the
+versioned machine `Evm/MachineV2.lean` (master `d3597eca2`; H57 pair of the
+frozen `Evm.Machine`, which stays unchanged). The frozen-machine producer
+above stays as it is.
+
+| Piece | Declaration |
+| --- | --- |
+| Input placement | `SourceCallBytes`: `chunks` pads the captured input to 32-byte cells, `stores` emits one `PUSH`/`MSTORE` per cell, `wordBytes_bytesWord` is the byte round trip and `readBytes_stores` reads exactly the input back from the window |
+| Emission | `code i o`: the stores from cell `o`, then `CALLIN(value, receiver, o, length)`, then `POP` |
+| Input transport | `callIn_input`: `CALLIN` runs `callInStep` on exactly `i.captured.input` |
+| Every machine | `call_run`: returns with the caller's stack and storage. An entered call leaves `reply receiver value input` in the buffer and journals the captured input; an unentered one empties the buffer. |
+| Pinned relation | `Returndata i m out result`: a fixed definition. When `result` has a payload `(ok, d)` and the oracles agree (`OracleAgrees`: `reply` answers `d`, `accepts` is `ok`, the value is funded), `out` is `.ok` with buffer `d`, the caller's stack, and the journal extended by `⟨receiver, value, input, ok, d⟩` |
+| Proof | `returndata_holds`: the relation holds for every invocation and machine, with the actual source outcome `raw i` |
+| Joint satisfiability | `oracle_agrees`: every payload has agreeing oracles; `transported`: the conclusion is then reached |
+
+The relation is not trivial: `Controls.wrong_buffer_refused` refutes it for
+a run that leaves another buffer under agreeing oracles. The other controls
+use the payment invocation (`ping()`, value 0, source `success []`):
+`transported_control`, `journaled_input` (the journal holds the `ping()`
+selector bytes), `liar_disagrees` and `liar_observed` (an oracle answering
+`[1]` is not agreeing, and its answer is what the buffer holds).
+
+Limits (from `MachineV2` and this emission):
+- The callee's code is not run. Its answer is the `reply`/`accepts` oracle,
+  and the source link holds under `OracleAgrees`, an explicit premise.
+  Relating the oracle to actual callee execution (V15) remains open.
+- There is no gas and no call depth. Memory is word-addressed.
+- Source halts (timeout, depth limit, static refusal) have no payload, so the
+  relation says nothing about them.
+- `small`: the input length is below `2^256`.
+- The emission is a `MachineV2` program (`List InstrV2`). It does not
+  instantiate the frozen-machine `WorldCalls.Premises`. `callIn_forget`
+  relates its `CALLIN` to the frozen `CALL`.
+- P1 `InterfaceV3.Pending*` is still not instantiated.
+
 ## Reviews (2026-11-06)
 
 Read-only finder and skeptic reviews, neither using the Lean server, covered

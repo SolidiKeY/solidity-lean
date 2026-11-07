@@ -15,7 +15,7 @@ abbrev origin := PaymentControl.origin
 
 theorem small : (input origin).length < W := by decide
 
-theorem source_payload : payload (SourceCallProducer.raw origin) = some (true, []) := by
+theorem source_payload : SourceCallProducerV2.payload (SourceCallProducer.raw origin) = some (true, []) := by
   rw [SourceCallProducerControls.produced_raw.1]
   rfl
 
@@ -59,3 +59,37 @@ theorem wrong_buffer_refused :
   cases buffer
 
 end Solidity.Backend.Passes.SourceCallProducerV2Controls
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2Controls.small' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2Controls.small
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2Controls.source_payload' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2Controls.source_payload
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2Controls.transported_control' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2Controls.transported_control
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2Controls.journaled_input' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2Controls.journaled_input
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2Controls.liar_disagrees' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2Controls.liar_disagrees
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2Controls.liar_observed' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2Controls.liar_observed
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2Controls.wrong_buffer_refused' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2Controls.wrong_buffer_refused

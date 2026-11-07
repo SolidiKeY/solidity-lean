@@ -176,3 +176,40 @@ theorem readBytes_stores (mem : Nat → Word) (o : Nat) (input : List UInt8) :
   simp only [Option.map_some, flatten_take]
 
 end Solidity.Backend.Passes.SourceCallBytes
+
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.fold_shift' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.fold_shift
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.value_cons' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.value_cons
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.value_lt' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.value_lt
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.digit' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.digit
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.wordBytes_bytesWord' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.wordBytes_bytesWord
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.chunk_length' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.chunk_length
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.chunks_length' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.chunks_length
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.flatten_take' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.flatten_take
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.run_stores' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.run_stores
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.storeMem_below' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.storeMem_below
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.readCells_storeMem' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.readCells_storeMem
+/-- info: 'Solidity.Backend.Passes.SourceCallBytes.readBytes_stores' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallBytes.readBytes_stores

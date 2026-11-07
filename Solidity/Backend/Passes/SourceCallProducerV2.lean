@@ -46,8 +46,9 @@ def stored (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin W) (m : Machi
 
 /-- The machine at `CALLIN`. -/
 def atCall (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin W) (m : MachineV2) : MachineV2 :=
-  (stored i o m).withBase {(stored i o m).base with stack :=
-    .val (amount i) :: .val (receiver i) :: .val o :: .val (wmod (input i).length) :: m.base.stack}
+  let s := stored i o m
+  s.withBase {s.base with stack := (Word.val (amount i) :: Word.val (receiver i) :: Word.val o ::
+    Word.val (wmod (input i).length) :: m.base.stack)}
 
 theorem wmod_small (n : Nat) (small : n < W) : (wmod n).1 = n := by
   simp only [wmod, Nat.mod_eq_of_lt small]
@@ -65,9 +66,7 @@ theorem callIn_input (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin W) 
   have read : readBytes (stored i o m).base.mem o.1 (wmod (input i).length).1 = some (input i) := by
     rw [wmod_small _ small]
     exact readBytes_stores _ _ _
-  show InstrV2.callIn.step ((stored i o m).withBase {(stored i o m).base with stack := _}) = _
-  rw [callIn_step, read]
-  rfl
+  rw [atCall, callIn_step, read]
 
 /-- The frozen `CALL` pushes one status word and may move balances. -/
 theorem call_shape (b : Machine) (v a : Fin W) (st : List Word) :
@@ -108,7 +107,7 @@ theorem call_run (i : InvocationFrame.Invocation E Γ dn ps rs) (o : Fin W) (m :
     rfl
   refine ⟨m1.withBase {m1.base with stack := m.base.stack}, ?_, rfl, ?_, reply1, cases⟩
   · have split : code i o = (lift (stores o.1 (chunks (input i))) ++ operands i o) ++ (.callIn :: [.base .pop]) := by
-      simp only [code, List.append_assoc]; rfl
+      simp only [code, List.append_assoc]
     rw [split, runV2_append_ok (prefix_run i o m)]
     show (InstrV2.callIn.step (atCall i o m)).bind (fun m' k' => execV2 [.base .pop] k' m') = _
     rw [callIn_input i o m small, step1]
@@ -179,3 +178,33 @@ theorem source (i : InvocationFrame.Invocation E Γ dn ps rs) :
   ⟨SourceCallProducer.rawAt i, SourceCallProducer.history i⟩
 
 end Solidity.Backend.Passes.SourceCallProducerV2
+
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.wmod_small' depends on axioms: [propext] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.wmod_small
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.prefix_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.prefix_run
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.callIn_input' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.callIn_input
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.call_shape' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.call_shape
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.call_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.call_run
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.returndata_holds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.returndata_holds
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.oracle_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.oracle_agrees
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.transported' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.transported
+/-- info: 'Solidity.Backend.Passes.SourceCallProducerV2.source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Backend.Passes.SourceCallProducerV2.source
