@@ -1419,3 +1419,24 @@ bounded runner has no explicit wall deadline and is not an H55 300-second
 timing gate. Independent read-only finder and skeptic reviews checked these
 boundaries without Lean, server or builds. No production migration, proof,
 timing acceptance or H56 run is inferred.
+
+## Standalone candidate drift after master merge
+
+`snapshot_delta.py` compares the earlier 540-row standalone projection with
+the mapped tracked index/worktree scan at `fc06f636ea0668fcb1f4cc63da88e327cdb9ef9b`.
+The scan observed 7,804 tracked Lean paths and 621 standalone candidates:
+81 additional standalone-set rows, none removed, and no changed bytes or
+mapping fields among the 540 shared rows. No nonignored untracked Lean path
+was observed. The historical snapshot checksum and current mapper hash match
+the earlier recorded values. Both reports and the 81 full rows are bound by
+`tests/h55/module-times/snapshot-delta-evidence.sha256`.
+
+These are changes to a candidate set, not necessarily Git additions: a row
+may enter or leave through reclassification. The older artifact does not
+contain the complete historic census; its census-generator identity was not
+recorded. The current index/worktree scan is non-atomic even under the
+repository writer lock, index flags can hide changes, and ignored/generated
+inputs, symlinked parent directories, Lake resolution, cache and runtime
+provenance are not authenticated. Historical and current contexts remain
+review hints; no candidate is excluded or accepted. Independent read-only
+finder and skeptic reviews identified these limits. No Lean or build ran.
