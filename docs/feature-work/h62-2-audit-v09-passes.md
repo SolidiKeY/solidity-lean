@@ -1658,3 +1658,55 @@ failed guard and retained timing hold are in the private H145 evidence directory
 `evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-relative-reference-publish-20261107/`.
 This adds no selected-row credit and no jump-execution, Source/native or full
 validation claim. All prior holds and historical-evidence waits remain open.
+
+
+The generic linking companion
+`tests/h62/item2/audit-v09-passes/LinkingCertificates.lean` connects existing
+link_patch results to a specific original emitted pushTag: byte substitution
+preserves that reference and its scanner-valid destination, leaves no unresolved
+links, and makes another link pass inert. Existing resolved addresses remain
+unchanged. A generic PUSH payload law derives scanner rejection of every
+immediate byte from actual instruction boundaries, including arbitrary trailing
+bytes and every valid width. The linked nonempty-placeholder fixture uses20
+address bytes0x5b and proves both the real target valid and every payload byte
+invalid behind every correctly placed prefix. No new linker/interface or
+production definition was added. Private H145 proof/resource/provenance records
+are under
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-linking-reference-publish-20261107/`.
+This is byte-emission/scanner backfill only, with no jump-execution, native,
+Source/G24 or full validation claim, and no selected-row credit. Prior timing,
+trust, census/documentation failures and missing-history waits remain open.
+
+
+`tests/h62/item2/audit-v09-passes/ScopeCapacityCertificates.lean` composes the
+existing scope execution contracts with generic prefix/suffix capacity laws.
+It retains actual entry, repeated updates and caller-preserving exit, while
+distinguishing empty writes from the extra word required by nonempty writes.
+The full-capacity negative control keeps successful model execution separate
+from the rejected intermediate peak. All ten declarations have checked axiom
+reports; production statements and definitions are unchanged. This backfill
+adds no selected-row credit or native/Source/full acceptance claim. Private
+H145 records are under
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-scope-capacity-publish-20261107/`.
+Prior timing, trust, census/documentation holds and missing-history waits remain.
+
+
+The same scope-capacity companion now proves `scope_bound_iff`: the entire
+entry/update/exit program satisfies the existing bound exactly when locals
+plus caller words, and one extra word for nonempty writes, fit within1024.
+Necessity uses actual entry execution and the existing write-sequence bound;
+sufficiency reuses the previously checked scope theorem. All eleven axiom
+guards pass. This numeric-only equivalence adds no selected-row credit or
+native/Source acceptance; all existing holds remain. Private H145 records:
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-scope-exact-publish-20261107/`.
+
+
+The existing scope-capacity companion also supplies `stackBound_append_iff`
+and `Slice.comp_bound_iff`. The former retains the exact accumulated opcode
+height; the latter derives the intermediate arity from an actual successful
+slice execution. Thus a composed check is equivalent to both component
+checks at their actual heights, rather than checking the suffix at entry.
+All thirteen axiom guards pass. No production, selected-row or native/Source
+claim changes. Private H145 records:
+`evidence/solidity-inline-assembly5-20261031/vy3-compilation/vy3-composed-bound-publish-20261107/`.
+Existing holds and producer waits remain.
