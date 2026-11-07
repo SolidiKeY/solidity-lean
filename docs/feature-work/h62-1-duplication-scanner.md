@@ -1117,5 +1117,31 @@ is outside Git under
 `/workspace/h62-duplication-scanner-evidence/rebased-recursive-links/`.
 
 The rebased repository documentation-path gate exited 1 on two missing
-references, `A.lean` and `B.lean`, cited by the upstream audit-evm-compiler
+references named A.lean and B.lean, cited by the upstream audit-evm-compiler
 scope test. These are outside this scanner lane; the gate remains failed.
+
+## Finite directory alias containment
+
+Finite directory symlinks are now resolved and checked against the selected
+root before descent, for both literal and wildcard components. Outside-root,
+dangling and inaccessible targets make the report incomplete; valid
+inside-root aliases retain logical paths and existing shared-source checks.
+This closes the stable-filesystem pre-descent enumeration issue noted above.
+Resolution, containment check and enumeration are not atomic, so concurrent
+replacement remains outside this guarantee.
+
+Finder and skeptic independently reviewed the change without Lean. The
+combined Python suite passed 196 tests, including literal and wildcard
+outside aliases, a guard against enumerating the outside alias, and prior
+inside-root alias controls. A matched bounded scan took 115.784 seconds before
+and 113.029 seconds after (-2.38%). Both used the same 7,303 inputs,
+recognized 123,314 declarations and reported no errors or unmatched globs.
+The complete reports matched after normalizing scanner identity. These are
+external lexical-tool checks, not proof of race-free confinement, complete
+census or intrinsic-signature equivalence. Evidence is outside Git under
+`/workspace/h62-duplication-scanner-evidence/alias-containment/`.
+
+The documentation-path gate still fails on the two upstream scope-test
+references noted above. The first containment-check run also flagged two
+references in this document's description of that failure; those descriptions
+were corrected and the rerun reports only the two upstream failures.

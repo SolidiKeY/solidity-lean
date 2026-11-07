@@ -626,6 +626,30 @@ class ScannerControls(unittest.TestCase):
             self.assertNotEqual(explicit.returncode, 0)
             self.assertTrue(any(Path(e["path"]).name == "dangling" for e in json.loads(explicit.stdout)["errors"]))
 
+    def test_external_directory_alias_is_not_enumerated(self):
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as outside:
+            root, foreign = Path(directory), Path(outside)
+            (root / "good").mkdir()
+            (root / "good" / "Target.lean").write_text("def good : Nat := 0\n")
+            (foreign / "Target.lean").write_text("def foreign : Nat := 0\n")
+            (root / "external").symlink_to(foreign, target_is_directory=True)
+            for pattern in ("external/*.lean", "*/Target.lean"):
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), pattern], capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                report = json.loads(result.stdout)
+                self.assertTrue(any("resolves outside root" in e["reason"] for e in report["errors"]))
+                self.assertFalse(any(r["path"].startswith("external/") for r in report["inputs"]))
+                self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            original = scanner.os.scandir
+            def guarded(path):
+                if Path(path) == root / "external":
+                    raise AssertionError("outside alias must not be enumerated")
+                return original(path)
+            errors = []
+            with mock.patch.object(scanner.os, "scandir", guarded):
+                list(scanner.selected_paths(root, "external/*.lean", errors))
+            self.assertTrue(any("resolves outside root" in e["reason"] for e in errors))
+
     def test_nonrecursive_selection_does_not_read_unselected_subtree(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)

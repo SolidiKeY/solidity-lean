@@ -429,6 +429,12 @@ def selected_paths(root, pattern, errors):
         if error not in errors:
             errors.append(error)
 
+    def checked_link_directory(path):
+        resolved = path.resolve(strict=True)
+        if not resolved.is_relative_to(root):
+            raise ValueError("selected directory symlink resolves outside root")
+        return stat.S_ISDIR(resolved.stat().st_mode)
+
     def descend(base, index):
         if index == len(parts):
             try:
@@ -451,11 +457,10 @@ def selected_paths(root, pattern, errors):
                 yield from descend(path, index + 1)
             else:
                 try:
-                    if stat.S_ISLNK(mode):
-                        mode = path.stat().st_mode
-                    if stat.S_ISDIR(mode):
+                    is_directory = checked_link_directory(path) if stat.S_ISLNK(mode) else stat.S_ISDIR(mode)
+                    if is_directory:
                         yield from descend(path, index + 1)
-                except OSError as exc:
+                except (OSError, ValueError, RuntimeError) as exc:
                     failure(path, exc)
             return
         if part == "**":
@@ -486,12 +491,12 @@ def selected_paths(root, pattern, errors):
                 else:
                     try:
                         if entry.is_symlink():
-                            is_directory = stat.S_ISDIR(entry.stat(follow_symlinks=True).st_mode)
+                            is_directory = checked_link_directory(path)
                         else:
                             is_directory = entry.is_dir(follow_symlinks=False)
                         if is_directory:
                             yield from descend(path, index + 1)
-                    except OSError as exc:
+                    except (OSError, ValueError, RuntimeError) as exc:
                         failure(path, exc)
     yield from descend(root, 0)
 
