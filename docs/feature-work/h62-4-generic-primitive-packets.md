@@ -1199,3 +1199,22 @@ producer waits retained. Original global/fidelity/performance STOPs remain open.
 ### Dated signed-bitwise transition
 
 On 2026-11-06, H87 authorized signed bitwise `&`, `|`, `^`, aliases and storage compound assignments; H96 covered storage aliases through array indices. H126 (2026-11-07) confirms that authority and accepts the widening as delivered. The former `signed_refused` / `signed_refusal` results describe the historical unsigned-only implementation; `signed_accepted` / `signed_acceptance` now guard the authorized implementation. Historical refusal accounting above remains history, not a current refusal requirement. The coordinator authorized local pin reconciliation for these names without new axioms or allowance widening.
+
+### Native primitive-value bridge, 2026-11-07
+
+RuntimeFrameP1V2ValueBridge generalizes the existing selected primitive-result
+plan to a conditional native PassCorrect/BridgeGoal. It reuses P1V2ValueAgreement
+and canonical P1LangV2: the exact image saves the private primitive result before
+restoring caller cells and exports it afterward. All six original V3 Local
+duties and the external Approved/physical agreement remain intact, including
+both original outcome witnesses. No desired run, complete producer or full
+certificate is assumed. The source quotation selects the same native call; it
+is not recursive-session coverage.
+
+Importing controls reuse the actual readAt successful and reverting entries,
+retain full Local, and refute an always-reverting replacement on the same
+physical domain. Existing native execution/export/capacity controls remain
+unchanged. These checks do not authenticate an external Approved profile or
+actual Source origin and do not finish production P1/G42.04. Independent
+read-only finder and skeptic found no domain weakening or provenance overclaim.
+Original full-validation and timing STOPs remain open.
