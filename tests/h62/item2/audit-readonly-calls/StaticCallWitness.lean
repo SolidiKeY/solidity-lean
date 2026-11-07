@@ -1,9 +1,11 @@
 import Solidity.Lowering.Readonly.SourceDispatchInterfaceV2Controls
 
-/-! Guard an impossible static-mode premise being counted as a positive witness.
-This is one actual joint input for the versioned storage theorem, plus its
-instantiated conclusion. It proves no compiler success, gas/fork behavior or
-source-to-target callee correspondence. The frozen V1 interfaces stay unchanged.
+/-! Static-mode premise inhabitation and storage-law specialization.
+`jointly_satisfiable` supplies values for the single mode equation: choosing
+`requested = true` reduces it to `true || F.static = true`. It establishes no
+execution feasibility beyond that flag condition. `client` separately applies
+the existing versioned storage law. Neither result proves compiler success,
+gas/fork behavior or source-to-target callee correspondence; V1 stays unchanged.
 -/
 namespace Solidity.H62.ReadonlyAudit.StaticCallWitness
 open Solidity.Source Solidity.Source.SemanticsExamples Solidity.Roadmap
