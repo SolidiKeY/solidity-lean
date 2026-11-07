@@ -1242,3 +1242,73 @@ Artifacts: /workspace/h62-audit-readonly-calls/command-surface/; committed pins
 Next independent work: actual compiler consumer kernel/type binding and remaining
 original inputs under the holds. No scope question, owner ticket, push or goal
 reset/completion.
+
+
+### Public compiler consumer kernel/type and outcome checks (2026-11-07)
+
+Fetched master5414256fdf7b78e8debe5e571c7af06ee55a5563 and rebased prior audit
+work; checked tree2652005dc61266e7386b6e696d3a72f19e6bac5a. The producer's187-module
+current closure including Controls excludes WorldCalls.Premises. An attempted
+standard cache seed was stopped by the memory-reserve guard: its default tmpdir
+was RAM-backed. The task-owned partial extraction and unused downloaded archive
+were removed after recording checksum/failure evidence. No cache provisioning
+pass is claimed. Existing cache plus necessary current-source rebuilds were used.
+
+`tests/h62/item2/audit-readonly-calls/CompilerOutcomeWitnesses.lean` instantiates
+PublicCompilerTotal on a nonempty Boolean-declaration program and a supported
+bare-revert program. Both have actual intrinsic-source outcomes and share the
+same explicit fresh typed state, machine, simulation and word bound. The Boolean
+source local is true. joint_agreement retains those inputs with the FULL fixed
+Compilation.Agrees relation. General lemmas derive target success from actual
+source success and no payment, and target revert from actual source revert.
+The no-payment fact follows the existing domain's quiet theorem. The public
+compiler thus actually accepts and executes successfully at this supported
+input; reject-all and always-revert behavior are refuted there. A second actual
+compiled run reverts. No target-outcome/OracleAgrees premise is assumed.
+Fourteen new audit theorems,five fixture definitions,no original statement,
+definition,premise,exclusion,axiom or budget changed; no sorry/native_decide.
+
+The repository per-file dependency check built the producer closure; its first
+whole gate failed only because new generic helper applications left L/frame/
+base/state implicit. Making those exact inputs explicit fixed the leaf. Final
+per-file PASS1.514s. The final metadata/consumer kernel probe PASS18.608s with
+1023172608 bytes peak aggregate RSS. It checks the same client source, nine
+imported producer names/modules/closed types and exact direct source selections
+against the prior SDK ranges. All14consumer and9producer axiom sets are within
+propext/Classical.choice/Quot.sound(or subsets). The published totality theorem
+and its inhabited owner controls therefore have current consumer kernel/type
+validation under ordinary Lake cached-dependency assumptions. Nine of the69
+producer surfaces have these explicit links; the other60 are not individually
+type/location-inventoried by this probe. No private fallback or ownership claim.
+
+The driver seals the transitive H62 Python tool tree, source/export/config
+buffers, SDK/toolchain, complete187-source import graph and actual query log.
+Original coverage is pinned before/after. Lake traces and374object-path snapshots
+are post-query observations, NOT source-to-object fidelity or loader-byte
+attestation. This is current-tree cached-import checking, not an independently
+fresh dependency proof or SDK-library certification. Five external controls
+refuse missing/duplicate identities, wrong modules/names/types, mismatched direct
+locations, UTF-8 position errors and unexpected/missing/duplicate axioms. They
+are tooling controls, distinct from kernel proofs. Read-only finder/skeptic
+reviews confirm the final source/evidence with no findings; neither runs
+Lean/server/tests or writes files.
+
+This advances checkpoint3 only on the owner-stated intrinsic ProgOk/Matches
+compiler domain. Agrees supplies its existing typed state/stack relation; these
+outcome controls do not separately expose a target Boolean memory cell. Failure
+is the basic machine's data-free revert, not returndata bytes. The word bound
+is not gas/depth/fork; the basic machine does not supply those resources. This
+is NOT resolved Solidity.Source/callee body adequacy, physical P1/native frames,
+external/self/library call coverage or G42.04 body binding. Our full H121 producer
+remains unfinished. No existing exclusion or observation is weakened to claim
+those properties.
+
+All792 original identities,429ordinary pending,three private gaps and nineteen
+transports remain unchanged,with zero original witness credit from these new
+post-base compiler consumers. Other checkpoints and inherited queues/full
+acceptance remain open. Historical Premises +80.254966536% STOP is retained;
+no unchanged held proof was rerun,no before/after rebaseline or RUNTIME_GATE_PASS.
+Evidence: /workspace/h62-audit-readonly-calls/compiler-consumer/; committed pins
+`tests/h62/item2/audit-readonly-calls/compiler-consumer.sha256`. Next:remaining
+original joint inputs and full RO Source/callee/native-frame producer under all
+holds. No new scope question, owner ticket, push or goal reset/completion.
