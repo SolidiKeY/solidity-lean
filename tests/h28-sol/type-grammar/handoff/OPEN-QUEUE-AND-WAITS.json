@@ -1,0 +1,64 @@
+{
+  "original_queue_file": "ORIGINAL-WORK-AND-BACKFILL-QUEUE.md",
+  "queue_status": [
+    {
+      "item": 1,
+      "status": "owned inventory/constructor/field/layout/source contracts previously complete and reviewed"
+    },
+    {
+      "item": 2,
+      "status": "owned arbitrary-depth boundary/AST/layout exactness complete within explicit local atom contracts;false raw claim counterexample retained"
+    },
+    {
+      "item": 3,
+      "status": "owned constructive fuel/parser/source corollaries complete within explicit local atom contracts"
+    },
+    {
+      "item": 4,
+      "status": "owned controls/fixtures/prior reviews complete;fresh integrated acceptance OPEN because human canceled full validation"
+    }
+  ],
+  "open_validation": [
+    {
+      "command": "python3 -B tests/h28-sol/type-grammar/final_policy.py full",
+      "status": "OPEN;human retirement canceled active full gate,exit137;not timingSTOP/not passing"
+    },
+    {
+      "command": "python3 -B tests/h28-sol/type-grammar/final_policy.py build",
+      "status": "NOT RUN in current sequence;controller terminated before this step"
+    },
+    {
+      "command": "python3 -B tests/h28-sol/type-grammar/final_policy.py solkey",
+      "status": "NOT RUN in current sequence;controller terminated before this step"
+    }
+  ],
+  "backfill": {
+    "original_categories": [
+      "type-list decomposition",
+      "suffix consumption",
+      "canonical layout lemmas"
+    ],
+    "remaining_concrete_assigned_item": "No additional concrete item identified by prior full-queue reviews;do not invent whole-expression/unit work. Survivor owns any continuation.",
+    "worker_action": "No backfill implementation after retirement instruction."
+  },
+  "external_contracts": [
+    "Arbitrary expression LengthAtom facts remain external by original permitted atom boundary;not silently discharged."
+  ],
+  "waits": [
+    {
+      "lane": "coordinator",
+      "item": "Set existing goal PAUSED;worker tool cannot express PAUSED."
+    },
+    {
+      "lane": "solidity-sol2-20261104/numeric-literals",
+      "item": "Retrieve complete frozen prompt/scope/queues,integrate final head,and own any remaining validation/implementation. No takeover before final stopped/head acknowledgment."
+    },
+    {
+      "lane": "coordinator-g07-one-off",
+      "item": "Reconcile G07 inventory centrally under H67;this lane supplies no pin/fragment changes and claims no current passing pin gate."
+    }
+  ],
+  "delivery": "No successor integration,publication,delivery or handoff approval claimed.",
+  "current_recut": "H67:docs/handoff-only candidate;G07 reconciliation separate one-off job;all former pin additions omitted.",
+  "historical_validation_only": true
+}
