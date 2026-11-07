@@ -326,3 +326,6 @@ before asking a prompt that might be cancelled. Retirement still uses the
 existing ownership checks and deadline; new work cannot bypass a failed cleanup.
 
 The existing headless parity runner supports `--suite compiler-output --targets local` for Settings UI/resource JSON, ordinary/custom key builds and actual two-folder pending-prompt configuration ownership. It reuses the compiler/import fixture with verification disabled. The observations distinguish local AST directory placement from Dafny executable stems; paired upstream settings, macOS and full lifecycle evidence remain incomplete.
+
+
+Trace presentation currently has no production positioned producer. F7/Show and Copy report this unavailability; they do not reinterpret model counterexamples, start proof work or derive locations from function ranges. F8/Hide clears owned presentation. A source-bound consumer handles per-document enablement, cancellation, debounce, theme decoration and exact assumption copying, but its rendering tests inject a presentation adapter and are not real trace/kernel evidence. Any future producer adapter must establish its source/version/session correspondence before using that boundary. `solidityLean.verificationTraceColor` configures resource-owned colors only when real positioned data is available. Native trace equivalence remains incomplete.

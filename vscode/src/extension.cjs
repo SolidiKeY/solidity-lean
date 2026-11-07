@@ -39,6 +39,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       workers: cfg.get('workers', 1), automaticVerification: {onchange:'change',onsave:'save',never:'never'}[automatic] || 'never' };
   }
   const sourceCommands=require('./source-commands.cjs').install(vscode,context,{settings,output,cancelVerification:uri=>cancel(uri,true)});
+  const tracePresentation=require('./trace-presentation.cjs').install(vscode,context,{notify:message=>{output.appendLine(message);vscode.window.showInformationMessage?.(message);}});
   function cancel(uri,preserveSource=false) {
     if(!preserveSource)sourceCommands.cancel(uri?key(uri):undefined);
     automaticTests.stop(uri);
@@ -227,7 +228,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     diagnostics, controller, outputOwner,
     vscode.commands.registerCommand('solidityLean.verify', () => activeCommand(false)),
     vscode.commands.registerCommand('solidityLean.list', () => activeCommand(true)),
-    vscode.commands.registerCommand('solidityLean.cancel', () => {for(const cancellation of testRunCancellations)cancellation.cancel();cancel();}),
+    vscode.commands.registerCommand('solidityLean.cancel', () => {tracePresentation.reset();for(const cancellation of testRunCancellations)cancellation.cancel();cancel();}),
     vscode.commands.registerCommand('solidityLean.showOutput', () => output.show(true)),
     vscode.workspace.onDidChangeConfiguration(event=>{
       for(const doc of documents.values())if(event.affectsConfiguration('solidityLean.displayVerificationAsTests',doc.uri)){
@@ -288,14 +289,14 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       const doc=documents.get(params.uri);if(!doc||doc.isClosed||doc.version!==params.version)return;
       diagnostics.set(doc.uri,params.diagnostics.map(row=>{const d=new vscode.Diagnostic(toRange(row.range),row.message,row.severity-1);d.source=row.source;d.code=row.code;if(row.relatedInformation)d.relatedInformation=row.relatedInformation.map(r=>new vscode.DiagnosticRelatedInformation(new vscode.Location(vscode.Uri.parse(r.location.uri),toRange(r.location.range)),r.message));return d;}));
     };
-    const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version)clear(doc.uri,false);};
+    const invalidated=params=>{const doc=documents.get(params.uri);if(doc?.version===params.version){tracePresentation.reset(doc.uri);clear(doc.uri,false);}};
     service.on('invalidated',invalidated);
     const serverError=error=>{
       if(disposed||[-32800,-32801].includes(error.code)||error.code==='CANCELLED')return;
       if(error.uris&&!error.uris.some(uri=>{const doc=documents.get(uri);return doc&&!doc.isClosed;}))return;
       const affected=error.uris?new Set(error.uris):null;
       for(const [id,doc]of documents)if(!affected||affected.has(id)){
-        saving.delete(id);active.get(id)?.abort();clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);
+        tracePresentation.reset(doc.uri);saving.delete(id);active.get(id)?.abort();clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);
       }
       showError(error);
     };
@@ -303,7 +304,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     service.on('status',receiveStatus);service.on('report',receive);service.on('diagnostics',receiveDiagnostics);service.on('serverError',serverError);service.on('log',log);
     const restart=async selected=>{
       if(disposed)return;
-      const operation=++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
+      if(selected)for(const doc of selected)tracePresentation.reset(doc.uri);else tracePresentation.reset();const operation=++restartGeneration;const targets=selected||[...documents.values()],generations=new Map();
       if(!selected)cancel();
       for(const doc of targets){const id=key(doc.uri),generation=(documentGenerations.get(id)||0)+1;documentGenerations.set(id,generation);generations.set(id,generation);if(selected)cancel(doc.uri);clear(doc.uri,false);editorServices?.clearIdentity(doc.uri);}
       const current=doc=>!disposed&&!doc.isClosed&&documentGenerations.get(key(doc.uri))===generations.get(key(doc.uri));

@@ -216,6 +216,9 @@ function terminalSdkIdentity(output,executable,version){
  if(resolved!==selected)throw Error('Terminal SDK canonical executable differs from selected SDK');
  return{executable:resolved,sha256,version,lines};
 }
+// Preserve rejected observations for diagnosis; they never become accepted metrics.
+function scenarioFailure(id,elapsedMs,error){return{id,status:error.code==='TIMEOUT'?'timeout':'broken',elapsedMs,error:error.stack||String(error),...(error.observation?{observation:error.observation}:{})};}
+function validateHostResult(result,config){const validationErrors=hostEvidenceErrors(result,config);return validationErrors.length?{rejectedResult:result,validationErrors,error:'Host evidence is stale, incomplete or inconsistent: '+validationErrors.join('; ')}:{result};}
 function hostEvidenceErrors(result,config) {
   const errors=[];
   if(result?.runId!==config.runId||result?.target!==config.target||result?.schemaVersion!==1)errors.push('stale or foreign identity');
@@ -288,4 +291,4 @@ function hostEvidenceErrors(result,config) {
   if(result.status!==status&&!(['broken','timeout'].includes(result.status)&&result.error))errors.push('aggregate status contradicts scenarios');
   return errors;
 }
-module.exports = {LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity,outputLifecycleErrors};
+module.exports = {scenarioFailure,validateHostResult,LspFrames, statistics, normalize, differences, ProcessSampler, summarize,scaling,protocol,hostEvidenceErrors,terminalSdkIdentity,outputLifecycleErrors};

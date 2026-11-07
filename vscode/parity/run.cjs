@@ -206,16 +206,15 @@ async function launch(config,options) {
     probe.observedDuringVerification=probe.started>=begin&&probe.finished<=end;
     if(result?.metrics&&probe.observedDuringVerification&&probe.focusedEditor)result.metrics.rendererKeyRoundTripMs=probe.roundTripMs;
   }
-  if(result&&hostEvidenceErrors(result,config).length) {
-    error='Host evidence is stale, incomplete or inconsistent: '+hostEvidenceErrors(result,config).join('; ');result=undefined;
-  }
+  let rejectedResult,validationErrors;
+  if(result){const checked=require('./core.cjs').validateHostResult(result,config);if(checked.error){error=checked.error;rejectedResult=checked.rejectedResult;validationErrors=checked.validationErrors;result=undefined;}}
   if(cleanup.refused.length)error='Owned process identity changed during cleanup; no subsequent trial admitted';
   if(resources.cleanup.remaining.length)error='Owned verifier processes survived cleanup; subsequent trials must not run';
   writeFileSync(join(config.dir,'resource-terminal.json'),JSON.stringify({resourceStop,resourceStopDetails:resourceStopDetails??null}));
   const run={target:config.target,workers:config.workers,cache:config.cache,suite:options.suite||'full',trial:config.trial,warmup:config.warmup,
     status:interrupted?'interrupted':resourceStop?'resource-stop':timedOut||result?.status==='timeout'?'timeout':
       !error&&exitCode===0&&['passed','passed-with-gaps'].includes(result?.status)?result.status:'broken',exitCode,error,
-    wallMs:performance.now()-start,result,resources:{...resources,samples:undefined},artifacts:config.dir,
+    wallMs:performance.now()-start,result,rejectedResult,validationErrors,resources:{...resources,samples:undefined},artifacts:config.dir,
     renderer:{...(rendererCapture||{captured:false,reason:'Host did not reach renderer capture'}),inputProbe:probe||{status:'unexamined'}},
     protocol:protocol(options.trace==='off'?null:config.trace),
     applied:config.target==='local'?{workers:config.workers,cache:'exact snapshot and persistent Lean document',reason:'The local cache does not implement Dafny caching-policy levels'}:{workers:config.workers,cache:config.cache}};

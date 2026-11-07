@@ -52,7 +52,7 @@ async function run() {
       scenarios.push({id,status,elapsedMs:performance.now()-start,observation});
       if(status==='passed')result.checks.push(id);
     }
-    catch(error) {scenarios.push({id,status:error.code === 'TIMEOUT' ? 'timeout' : 'broken',elapsedMs:performance.now()-start,error:error.stack});}
+    catch(error) {scenarios.push(require('./core.cjs').scenarioFailure(id,performance.now()-start,error));}
     record('scenario.end',{id}); activeScenario=null;
   }
   function keybindingRequest(request){require('./phase-capture.cjs').atomicJson(join(config.dir,'keybinding-request.json'),request);}

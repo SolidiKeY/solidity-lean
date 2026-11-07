@@ -17,3 +17,12 @@ test('a matching terminal outcome before source command activation cannot be reu
 test('invocation ordering/version and real artifact membership cannot be omitted',()=>{for(const change of [o=>o.cases[0].events[0].ms=NaN,o=>o.cases[0].before.version=undefined,o=>{const c=o.cases[0],group=c.events.splice(1,4);c.events.unshift(...group);},o=>{const c=o.cases[0];for(const key of Object.keys(c.detailsAfter))c.detailsAfter[key].sha256='a'.repeat(64);}]){const o=fixture();change(o);assert.ok(errors(o,'run').length);}});
 
 test('persisted JSON receipts retain terminal ordering without shared object identities',()=>{assert.deepEqual(errors(JSON.parse(JSON.stringify(fixture())),'run'),[]);});
+
+test('failed complete command observations survive scenario and report JSON boundaries without becoming accepted',()=>{
+ const {scenarioFailure,validateHostResult}=require('../parity/core.cjs'),o=fixture();
+ const path=Object.keys(o.cases[2].artifactsBefore)[0];o.cases[2].artifactsAfter[path]='b'.repeat(64);o.cases[2].mutations=[[path,o.cases[2].artifactsBefore[path]]];o.validationErrors=['previous artifact mutated'];
+ const original=JSON.parse(JSON.stringify(o));const scenario=scenarioFailure('native-dafny-command-output',10,Object.assign(Error('previous artifact mutated'),{observation:o}));
+ const report=JSON.parse(JSON.stringify({schemaVersion:1,runId:'run',target:'dafny',status:'broken',checks:[],scenarios:[scenario]}));const checked=validateHostResult(report,{runId:'run',target:'dafny',suite:'dafny-command-output'});
+ assert.equal(checked.result,undefined);assert.match(checked.error,/previous artifact mutated/);assert.ok(!checked.error.includes('missing pinned command output cases'));assert.deepEqual(checked.rejectedResult.scenarios[0].observation,original);assert.equal(checked.rejectedResult.scenarios[0].status,'broken');assert.deepEqual(original.cases.map(c=>[c.id,c.command,c.exitCode,c.mutations]),checked.rejectedResult.scenarios[0].observation.cases.map(c=>[c.id,c.command,c.exitCode,c.mutations]));
+ const missing=validateHostResult({...report,scenarios:[scenarioFailure('native-dafny-command-output',10,Error('failed before any cases'))]},{runId:'run',target:'dafny',suite:'dafny-command-output'});assert.match(missing.error,/missing pinned command output cases/);
+});

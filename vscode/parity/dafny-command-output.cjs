@@ -26,7 +26,7 @@ async function run({vscode,config,events,keybindingRequest,until,observation}){
  }catch(error){result.error={message:error.message,code:error.code};throw error;}
  finally{
   result.restored=[];for(const key of keys){try{await configuration().update(key,previous[key],vscode.ConfigurationTarget.Workspace);const actual=configuration().inspect(key)?.workspaceValue,raw=JSON.parse(fs.readFileSync(config.workspaceFile)).settings?.['dafny.'+key];assert.deepEqual(actual,previous[key]);assert.deepEqual(raw,previous[key]);result.restored.push({key,settingsFile:config.workspaceFile,target:'Workspace',confirmed:true,previous:previous[key],actual,raw});}catch(error){result.restored.push({key,confirmed:false,error:error.message});}}
-  result.validationErrors=errors(result,config.runId);if(result.validationErrors.length)result.error??={message:'Pinned command-output obligations failed: '+result.validationErrors.join('; ')};fs.writeFileSync(path.join(config.dir,'dafny-command-output-observations.json'),JSON.stringify(result,null,2));if(result.validationErrors.length)throw Error(result.error.message);
+  result.validationErrors=errors(result,config.runId);if(result.validationErrors.length)result.error??={message:'Pinned command-output obligations failed: '+result.validationErrors.join('; ')};fs.writeFileSync(path.join(config.dir,'dafny-command-output-observations.json'),JSON.stringify(result,null,2));if(result.validationErrors.length)throw Object.assign(Error(result.error.message),{observation:result});
  }
 }
 function validate(o,runId){
