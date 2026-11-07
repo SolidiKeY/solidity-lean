@@ -1,0 +1,114 @@
+{
+  "status": "PROVED_ARGUMENT_COMPONENT_JOINT_MODEL",
+  "checked_head": "5ca3b755f427aef65e09aed9dde7e84682aec254",
+  "source_bindings": {
+    "tests/h62/item2/audit-v08-adapters/FixedBytesArgumentJoint.lean": "a67fe4209824af649c4f8885afe7bb04048d4307500e101f26e78ff74bb3f491",
+    "Solidity/Lowering/V08/FixedBytesCallableArgument.lean": "1edb47995bd30e1cad89092920bc2046ece8065e073e861d0b850259a65aea70",
+    "Solidity/Lowering/V08/FixedBytesCallableArgumentControls.lean": "78df90673105a8c64646a0f1dd058c09c2eb80fe4224a1f70a388057b9463d16",
+    "Solidity/Lowering/V07/FixedBytesAssignment.lean": "e2cd9c8c8fdfb54ca1b2e6744eface9dcb389e0628db89f9e31663487ad4dba3",
+    "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean": "4a38e10af514c9c1f6acef77a35fd8e26c4ec57895229fd8c623c2be4eaa434c"
+  },
+  "original_target": "Solidity.Lowering.V08.FixedBytesCallableArgument.transport_argument",
+  "premise_groups": 6,
+  "typed_domain_premise": "1 <= n and n <= 32, with explicit width2 inhabitant; all valid widths and arbitrary old/rhs lists.",
+  "new_joint_model_families": 1,
+  "full_statement_fidelity_acceptances": 0,
+  "gate": {
+    "command": [
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-v08-adapters/FixedBytesArgumentJoint.lean"
+    ],
+    "exit": 0,
+    "stop": null,
+    "seconds": 1.457,
+    "peak_sampled_aggregate_rss": 797024256,
+    "max_lean_processes": 1,
+    "limits": "12GiB per-process AS; sampled aggregate12GiB,4GiB reserve,600s,one Lean, no host swap",
+    "LEAN_NUM_THREADS": "1"
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "retained_negative_controls": [
+    "Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.wrong_byte_order",
+    "Solidity.Lowering.V08.FixedBytesCallableArgument.Controls.stale_caller"
+  ],
+  "reviews": "Independent read-only finder/skeptic accepted coherent six-group model, full four conclusions, exact normalized-width decoding and timeout states; no findings, no reviewer tests/builds.",
+  "limitations": [
+    "Known-width reconstruction preserves fitBytes-normalized payload, not arbitrary raw list identity.",
+    "Argument phase only: no selected callee execution, ABI, runtime frame, heap/World representation or global SourceSpec admission.",
+    "First cold check built imports; final warm check adds decode proof. These are not matched performance measurements or speedup evidence.",
+    "Complete census-fidelity and full-family timing remain open."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107/registration.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107/trust.log",
+      "bytes": 79,
+      "sha256": "08e28fda6a6a75b70d7abe7628b4afc1cd37c611edce8548efe445e0d79dd44c"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-first/checked-source.lean",
+      "bytes": 4606,
+      "sha256": "a0ba874342a2f94388536f3050a48192aae4c28114da21912ecb5a20d9f62eb5"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-first/console.log",
+      "bytes": 162,
+      "sha256": "871b8e57159ab6bd608b13a94dded27d257b70ba52fd7d302157883c19573af2"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-first/gates/1.log",
+      "bytes": 25311,
+      "sha256": "a62cf6a99baab75807281be8cc740e2126ba38fa3faa16e1b5ddc692432fdfaf"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-first/gates/HEAD",
+      "bytes": 41,
+      "sha256": "1fa3a1a07b74c8bc50c1a8b55fb9c70e819554f0bff2ed49d9a43b7666ef0e8b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-first/gates/gates.tsv",
+      "bytes": 255,
+      "sha256": "67fd3209eda8a8c9d0587f9f3ecd08d06af422fcb7ac2461715952dc72191236"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-first/results.json",
+      "bytes": 404,
+      "sha256": "d7acbbff3b18837f1b4b022673c3fae58ec563afd31a7037be92330519740789"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-final/console.log",
+      "bytes": 161,
+      "sha256": "7c2a83c08d9e8944c5f9a4391549e75828f5dcc96993f6777f3aa074360f7715"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-final/gates/1.log",
+      "bytes": 24369,
+      "sha256": "181c45bf4cff134a3de42d0b311f438b06c194ca55ea316078eb579d1132c8cb"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-final/gates/HEAD",
+      "bytes": 41,
+      "sha256": "1fa3a1a07b74c8bc50c1a8b55fb9c70e819554f0bff2ed49d9a43b7666ef0e8b"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-final/gates/gates.tsv",
+      "bytes": 254,
+      "sha256": "3d326b52e86f93602d9daf232a1ec41ee923064f57132729bfd36003d8d1a3b9"
+    },
+    {
+      "path": "/workspace/v08-world-lowering-evidence/fixed-bytes-joint-20261107-final/results.json",
+      "bytes": 403,
+      "sha256": "e6ed856ecd362fcfa076157342aa811d1f91a5aa0b1b70e37f761c9f0df35f02"
+    }
+  ]
+}
