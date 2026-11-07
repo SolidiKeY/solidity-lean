@@ -270,3 +270,33 @@ Lean/server use. Logs remain at v07-rank-joint-checked.json and the correspondin
 checked-files/1.log in the external gate-output directory. No production source,
 statement, budget or frozen ledger was edited. General graph feasibility, the
 rest of the simultaneous-witness census, original 4.35 and full gates remain open.
+
+
+## Frozen source-ledger recovery
+
+reproduce_frozen.py reconstructs the original V07 snapshot from Git base
+c6f550e281a7e5affa9a99bc2cdaed556dec00e4. It authenticates the exact retired scope
+manifest against the final-head receipt SHA, checks every pinned map/module hash,
+and uses frozen Git blobs for supplemental inputs. It never reads current master
+as the source census. Bulk snapshots and ledgers are emitted outside the checkout;
+existing destinations and destinations inside the checkout are refused.
+
+The original generators and verifiers pass on the recovered snapshot: 162 mapped
+modules, 968 unique theorem slices, 6,254 explicit groups, 28 result groups, and
+17 selected imported definitions / 82 fields. All source/dependency/semantic
+outputs are generated twice and compared byte-for-byte. Four negative controls
+reject substituted scope/source bytes before writing and protect existing or
+checkout destinations. Each command log and tool hash is retained. A small
+frozen-reproduction.json pins the off-Git outputs and checksum manifest.
+
+Master ac46c1978 was fetched and checked before this item. This is reconstructed
+source-only evidence, not recovery of the original portable worker packet or a
+Lean validation. Historical pending statuses, including the four original untyped
+result groups, are retained; the separate live resolution receipt is not silently
+merged into them. Simultaneous-witness reconciliation, elaboration, constant
+resolution, full original gates and acceptance remain unfinished. No source,
+statement, budget, original ledger or central pin was changed.
+
+Independent read-only finder and skeptic reviews passed. Generators run twice;
+verifiers run once against the first outputs. Failed attempts retain logs without
+a final success manifest. Neither reviewer used tests, Lean or a server.

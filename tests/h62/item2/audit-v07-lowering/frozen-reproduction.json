@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "boundary": "Reconstructed source-only evidence, not the original evidence packet or Lean validation.",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "retirement_head": "42e78a67e07fd786cb744036e7a4e53b0324ad65",
+  "scope_manifest_sha256": "1d4682cc0a4055d1513a868e3162b12edff1424847d180aa1dc1077d10c8a644",
+  "external_directory": "/workspace/sol-numeric-literals-v07-frozen-reproduction-final",
+  "reproduction_sha256": "977c275c07617bb228bd42bf7b73a6cf5e18eafd31406404da342d628f1be939",
+  "checksums_sha256": "38827bcffa7d67ef33a1b4c326e0fc46988cdd62dbab6d7f5658bfb40edc4ac3",
+  "artifacts": {
+    "source-inventory.json": "43d0f854e22026978220b1e9925a12fbc866012ae4f01b5140c15aa1389e0db6",
+    "dependency-inventory.json": "5ce62858443c2244b2d4bdb1e718bde9abbe174aa5b05b2bca0943ccd6015d81",
+    "semantic-inventory.json": "3ed8c880f20f5decd9768afa8e7647ccb204c20b3c15b6874bbcc3717aed0f4f"
+  },
+  "source_counts": {
+    "mapped_modules": 162,
+    "theorem_slices": 968,
+    "explicit_binder_groups": 6254,
+    "result_input_groups": 28,
+    "untyped_result_groups_retained": 4,
+    "selected_imported_contracts": 17,
+    "selected_imported_fields": 82
+  },
+  "limitations": [
+    "This recovers source-only ledgers, not the missing original portable evidence packet.",
+    "Original ledger pending statuses remain unchanged.",
+    "Separate live type resolutions and witnesses require their own evidence and reconciliation."
+  ]
+}
