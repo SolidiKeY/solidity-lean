@@ -2735,3 +2735,20 @@ finder and skeptic checked roles, file effect, hashes and history preservation
 without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/semantics-migration-evidence.sha256`. This non-atomic
 observation does not establish current runtime acceptance.
+
+## Source migration probe observations
+
+`source_migration_controls.py` records two previously unreferenced migration
+probes with source hashes and the migration document hash. IntegerInstanceSemantics
+states a bounded Q.isInt bridge and nonvacuous zero control; Inventory emits a
+compiler-format Source constant/type ledger to `H62_API_OUTPUT`. These do not
+establish unrelated function behavior, semantic API equivalence or complete
+migration. Current invocation, inputs and outcomes remain unresolved.
+
+At `b11f931bdfa81d543319ba05d04e22e5d0e5b023`, the refreshed static index has
+837 candidates, 645 with supplied current references and 192 without; fourteen
+retain historical references for review. No candidates were added, changed or
+removed since the preceding snapshot. Independent read-only finder and skeptic
+checked roles, output effect, hashes and history preservation without Lean or a
+server. Evidence hashes are in `tests/h55/module-times/source-migration-evidence.sha256`.
+This non-atomic observation does not establish current runtime acceptance.
