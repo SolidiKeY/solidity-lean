@@ -3225,6 +3225,7 @@ import Solidity.Lowering.P8.FieldAdmission
 import Solidity.Lowering.P8.FrozenInterface
 import Solidity.Lowering.P8.GraphSchema
 import Solidity.Lowering.P8.GraphSchemaControls
+import Solidity.Lowering.P8.PlanWitness
 import Solidity.Lowering.P8.ProducerAssembly
 import Solidity.Lowering.P8.ResourceBoundary
 import Solidity.Lowering.P8.ResourceContractLaw1
@@ -3249,6 +3250,8 @@ import Solidity.Lowering.P8.SourceSize
 import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen
+import Solidity.Lowering.P8b.Merged
+import Solidity.Lowering.P8b.MergedControls
 import Solidity.Lowering.P8b.P8aInterface
 import Solidity.Lowering.P9.AdmissionControls
 import Solidity.Lowering.P9.CallControls
