@@ -27,24 +27,26 @@ open Solidity
 variable {C : Contract} {Γ : Ctx}
 
 /-- The value of a state-independent simple value. -/
-def _root_.Solidity.Simple.const? : {p : PrimTy} → Simple C Γ p → Option p.Denote
-  | p, .lit n h => some (PrimTy.ofLit p n h)
-  | _, .bool b => some b
-  | _, .local _ => none
-  | _, .env _ _ => none
+def _root_.Solidity.Simple.const? : {p : PrimTy} → Simple C Γ p → Option p.Denote :=
+  fun {_} value => Simple.casesOn (motive := fun p _ => Option p.Denote) value
+    (fun {p} n h => some (PrimTy.ofLit p n h))
+    (fun b => some b)
+    (fun {_} _ => none)
+    (fun {_} _ _ => none)
 
 /-- The value of a state-independent literal. -/
-def _root_.Solidity.Val.const? : {p : PrimTy} → Val C Γ p → Option p.Denote
-  | _, .simple s => s.const?
-  | _, .read _ => none
-  | _, .binop .. => none
-  | _, .unop .. => none
-  | _, .ternary .. => none
-  | _, .readMem _ => none
-  | _, .len .. => none
-  | _, .mlen .. => none
-  | _, .modular .. => none
-  | _, .hash .. => none
+def _root_.Solidity.Val.const? : {p : PrimTy} → Val C Γ p → Option p.Denote :=
+  fun {_} value => Val.casesOn (motive_5 := fun p _ => Option p.Denote) value
+    (fun {_} s => s.const?)
+    (fun {_} _ => none)
+    (fun {_ _} _ _ _ _ _ => none)
+    (fun {_ _} _ _ _ _ => none)
+    (fun {_} _ _ _ => none)
+    (fun {_} _ => none)
+    (fun {_ _} _ _ => none)
+    (fun {_ _} _ _ => none)
+    (fun _ _ _ _ => none)
+    (fun {_ _} _ _ _ => none)
 
 /-- The literal denoting a value of a primitive type. -/
 def litV : (p : PrimTy) → p.Denote → Val C Γ p
