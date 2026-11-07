@@ -53,6 +53,8 @@ class CoverageControls(unittest.TestCase):
                 target[field] = int(target[field]) + 0.5
             return mutate
         mutations = [
+            ('string-log-list', lambda s,c,r:next(tx for row in r for block in row['blocks'] for tx in block['transactions'] if tx['execution_exception'] is None).update(logs='garbage'), 'malformed native logs'),
+            ('malformed-log-data', lambda s,c,r:r[0]['blocks'][0]['transactions'][0].update(logs=[dict(address='0x'+'00'*20,topics=[],data='0x0')]), 'malformed native logs'),
             ('bool-row-index', lambda s,c,r:r[0].update(index=False), 'range identity'),
             ('float-selected', lambda s,c,r:s.update(selected=20.0), 'summary count'),
             ('float-status-count', lambda s,c,r:s['counts'].update(payload_reference_match=20.0), 'status count'),
