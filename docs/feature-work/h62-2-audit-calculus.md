@@ -1216,3 +1216,13 @@ Existing source axiom guards are text only, not freshly executed. Exact signatur
 Whole assignment/four audit checkpoints unfinished. H28 actualCallerFields/extractionActuallyChanges/replay pause and Raw/Context trust waits persist; no notice releases performance/trust STOPs. Documentation gate outcome remains actual and explicit. No statement/dependent-definition/budget/axiom/exclusion/toolchain change or new kernel/runtime/cache/performance acceptance; historical unavailable exact-byte gaps remain.
 
 Documentation gate FAIL exit1: adopted-master docs/feature-work/h62-2-audit-v09-passes.md cites missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/master and full failure log archived; no local other-lane documentation/scanner edit or waiver. Accounting and93controls pass; complete acceptance remains FAIL exit1.
+
+## Direct standing-owner controls (V69)
+
+Guarded regression: executing test_standing_owners.py directly must actually execute its ten existing controls rather than silently exit without tests. Added only a guarded unittest.main entry point; test bodies, imports, ownership policy and discovery behavior unchanged. Actual before direct command exited0 with no test output; after and discovery results are recorded separately. This is a test invocation correction, not a matched performance improvement.
+
+Fresh mastere286f1843 adopted. Static role inventory unchanged at761 reviewed/4522pending,1537 owners unresolved,0 fresh witnesses. SoundCatch source read remains uncredited pending complete ledger review. Existing h82-static-handoff verify.py reads immutable historical absolute manifest paths; relocation support and review-note doc spacing remain separate follow-up. Other-lane sourceFiles naming is not edited here. No Lean/source/proof/budget/axiom/exclusion/toolchain change or fresh runtime acceptance. H28 proof/replay pause and existing timing/trust STOPs remain.
+
+Exact command logs, exits/timing/RSS and before/after source bytes stay off Git under /workspace/h62-successor-evidence/direct-owner-controls-v69 with a small manifest. Whole assignment/four audit checkpoints remain unfinished; completeness failure is not cleared by these Python controls.
+
+V69 gates: direct10 PASS, discovery93 PASS; documentation FAIL exit1 on unchanged master audit-v09-passes reference to missing SelectedHeapBoundaryWitness.lean. Exact citing bytes/log archived, no waiver. Independent finder/skeptic PASS. Guard-only change, zero new Lean lines/modules.
