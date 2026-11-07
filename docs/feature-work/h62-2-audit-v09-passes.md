@@ -1338,3 +1338,18 @@ axiom reports are guarded. Evidence is external at
 `/workspace/vy3-evidence/reference-call-capture-failure-20261107`. No native
 ByteWorld/emission, ABI/gas or full Source/G24 adequacy is inferred. Existing
 transition-intake/producer waits, STOPs and original acceptance obligations remain.
+
+
+Runtime primitive-return capture checkpoint: ten original
+`RuntimeReturnCaptureControls` rows have exact frozen signature accounting and
+checked aliases in `RuntimeReturnCaptureWitness.lean`. The joint includes actual
+positive/negative call members atframe16, lo/pointer8 andcursor10, alias flags,
+source success/revert and evaluated7, then the real returned run, StateRepr,
+BaseExtends and correlated captureInput. Original complete memory/stack success,
+all-tail failure, wrong order/capture/tail and capacity refusal types remain
+unchanged. No instantiated/application definition adds a selected row.
+Selected505/1259,754open; supplemental counts stay separate. Eleven reports are
+guarded: wrong_capture has no axioms; the other aliases and joint use the existing
+standard set. Evidence: `/workspace/vy3-evidence/runtime-return-capture-20261107`.
+No native ByteWorld/emission, ABI/gas or full Source/G24 adequacy is inferred.
+Existing transition/producer waits, STOPs and final acceptance obligations remain.

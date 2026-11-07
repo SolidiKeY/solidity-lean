@@ -1,0 +1,73 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "interface": "Solidity/Backend/Passes/RuntimeReturnCaptureControls.lean",
+  "interface_sha256": "a29a0758114a21a8b8657df49f23f63b145c194877745dc19a5087a87b16ad22",
+  "joint_witness": "Solidity.Backend.Passes.AuditRuntimeReturnCapture.joint",
+  "exercised_public_namespace": "Solidity.Backend.Passes.AuditRuntimeReturnCapture",
+  "checked_private_names": [],
+  "rows": [
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.evaluated",
+      "signature_sha256": "4c619130e486c81e5cbc56b4ac487dfdaa3361a2e718f4bae6abaeecfeb02e96",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.ordered",
+      "signature_sha256": "3cbf6b684e3650bcb82a50d02f6eb0169bab6f6b8e78b18cabc389d659186dbb",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.failure",
+      "signature_sha256": "e6e74bda4ca04cd63b5849903d14ee96a706e3547df4954ce3a96fb233844d6f",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.failure_source",
+      "signature_sha256": "37fc9c8bccdef52c465577e5e951e220616c4efa36480314a6904bd6dc4f3ab4",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.failure_tail",
+      "signature_sha256": "cf7ee4bce88b5365db901452c014d8673e208fef1ce22855bd2e0637e8fe6197",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.suffix_instructions",
+      "signature_sha256": "f5b4d12bdfc0b3075b619eccd24a723005fc0ebb3e3c4477718075e45bfec6f2",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.wrong_order",
+      "signature_sha256": "1f7629dd34a697cc47eba20889e4c94f5f2ed337f2f63ee63ff42ec926e546ac",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.wrong_capture",
+      "signature_sha256": "c5397562ef9d5a25a8f2b6252fac830c6d4c3f160eae143b808fde1ca7f3f812",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.wrong_tail",
+      "signature_sha256": "02e43ce956a40e10b9786ed03c4afd339c39f3244fe52a0a213b06db1867c167",
+      "kind": "public-original-proof-reuse"
+    },
+    {
+      "name": "Solidity.Backend.Passes.RuntimeReturnCapture.Controls.Fixture.insufficient_private_frame",
+      "signature_sha256": "7449ce0fbf3d34a6f84c36463521b20cf243e696b25c374f45c05c700b109727",
+      "kind": "public-original-proof-reuse"
+    }
+  ],
+  "aggregate_selected": 505,
+  "aggregate_remaining": 754,
+  "auxiliary_definition_credit": 0,
+  "joint_contract": "actual-success-failure-call-members-flags-source-and-correlated-capture-input",
+  "limits": "Ten original public controls. Actual positive/negative members at frame16 lo/pointer8 cursor10, alias flags and source outcomes, returned selected map and suffixInput retained. Full original ordered-memory/tail success and failure, wrong order/capture and capacity refusal exact aliases. No instantiated/application/definition/supplemental credit; no native ByteWorld/emission, ABI/gas or full Source/G24 adequacy.",
+  "checked_axioms": {
+    "wrong_capture": [],
+    "joint_and_other_aliases": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  }
+}
