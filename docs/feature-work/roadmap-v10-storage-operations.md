@@ -367,3 +367,47 @@ and recursive physical emission, aggregate target lifecycle and compiler/world
 rollback composition remain open. G27.01–G27.05, G28, G29.01–G29.03, G30 and
 Backfill A/B therefore remain partial. Published owner results are reused with
 explicit premises; no missing representation or target bridge is assumed closed.
+
+## Snapshot fixture extraction boundary
+
+A shared initial-store fixture was evaluated without changing control statements
+or observations. Both implementation variants passed affected kernel checks, but
+the sequence fixture runtime increased by 22.7%, then by 10.5% after a
+reducibility optimization, exceeding the 10% limit in both trials. The original fixture definitions remain
+in production. Candidate patches and raw measurements are retained separately;
+this result is not migration or performance acceptance.
+
+## C224 adopted-head checkpoint (2026-11-07)
+
+The preserved branch had adopted master through 8319ae6ccb2df62ac6b4e8aad460f4d87853cd9f.
+Owned StorageOps sources, Source/Ctor, the toolchain and Lake configuration were
+unchanged from C223. Fresh KeySort passes by artifact fetch; the initially empty
+build directory does not establish cold compilation or a performance baseline.
+
+The checkpoint selected 350 touched targets. That build timed out with exit 124
+after 600.22 seconds (602 seconds wrapper wall time), peak sampled aggregate RSS
+1112567808 bytes and no resource stop. It completed 487 jobs without a recorded
+compiler error; those jobs are partial progress, not a completed build. Run-lean
+ran its preliminary checks but its heavy build was refused by the retained
+prerequisite guard. No identical retry, timeout increase or guard bypass was made.
+The V10-C224-TIMEOUT policy question was sent immediately through coord-ask;
+independent per-file proof work remains separate from full confirmation.
+
+Trust, orphans and layers pass. Strict docs remain FAIL: 4 missing references and
+131 ambiguous references. Running the same current checker on exact committed
+trees gives identical current/published findings at master 2a43bf4fcdaf24750265afc8f8be5b420d1d22b0
+(zero new/removed). The frozen original base under that same checker has 0 missing
+and 12 ambiguous references; its comparison remains FAIL with 132 new and 9 removed
+findings. Published equality is not a raw strict or frozen-baseline waiver and
+reproduces no build-timeout baseline. Strict axiom pins also remain FAIL: 16312
+pinned theorems, zero errors, 271 unrecorded changes. No inventory or gate policy
+was edited. All raw failures and completion-validated comparison logs are retained.
+
+Separate read-only finder and skeptic reviews found no receipt-boundary issue.
+Original closure still needs concrete Source-origin/layout/alignment and reached
+state construction for the published PathEndpoint/StateEndpoint/ReachedEndpoint
+interfaces; generated intermediate copy/clear coverage remains an explicit
+per-run premise. Generic recursive emitted selection, ordinary Source aggregate
+lifecycle and physical/P8/caller-world composition remain producer obligations.
+Existing intrinsic leaves and the 52-row audit reference ledger do not close
+G27-G30, the backfills or any consolidated proof/acceptance queue.
