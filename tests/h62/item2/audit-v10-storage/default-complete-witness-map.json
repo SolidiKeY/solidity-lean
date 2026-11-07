@@ -11,6 +11,14 @@
       "signature_sha256": "e28121de0e8154e51cbeac7d92d393bcf910fa15ff52c3713f4be3a74f5ead91",
       "witness": "H62.StorageAudit.ArrayAccessWitnesses.default_joint",
       "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/TargetDefaultInit.lean:80:updates_fit",
+      "theorem": "Solidity.Backend.StorageOps.TargetDefaultInit.updates_fit",
+      "signature": "theorem updates_fit {n : Nat} (G : Schema n) (T : TypeGraph.Ty n)\n (base : Solidity.Storage.Loc) (fits : TargetOperations.KeysFit base) :\n \u2200 op \u2208 CopyDefaults.updates G T base, TargetOperations.KeysFit op.1",
+      "signature_sha256": "6e65c44bf58157a15328e0d45bd4e0034224b9421f1348073b758ad690aa3583",
+      "witness": "H62.StorageAudit.ArrayAccessWitnesses.default_fit_base_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
     }
   ]
 }
