@@ -901,3 +901,64 @@ The current committed handoff section is mirrored in
 `tests/h62/item6/migrate-yul/handoff/nov7-old-compiler-completion.md`; final
 head-bound artifact state records the actual commit,patch/bundle/evidence hashes
 and all original unfinished queue obligations. No push authorization delivered.
+
+
+## Nov7 d93f6839 rebaseline and focused old declaration metadata
+
+Fetched and fast-forwarded the clean assigned branch to
+`d93f6839c613468610ea488356b174cd183e3772`; the complete old-inventory commits
+are verified ancestors. The known Syntax.Raw, Hash.CollisionBound,
+Backend.Scalar.Slice, Frontend.Checked.Token and SortCheck.Parser failure sources
+are unchanged. No unchanged failure or new-toolchain IR performance STOP was
+rerun. The original c6 view/cache and all historical inspectors remain intact.
+
+Additive `ExportDeclarationMetadata.lean` observes selected old persisted
+families: class entries and out-parameter positions, ordered ordinary/scoped
+instance registrations with priority and synthesis order, default instances,
+and per-declaration private/protected/class/effective-instance fields. It is not
+a generic attribute inventory or public API classifier. Instance expression
+Repr text is retained without claiming to typecheck it. No core imports changed.
+
+A fixture exposes an important loader boundary. `importModules` defaults to
+`loadExts=false`; aggregate extension state then has initial values. Early
+uninitialized trials were rejected. The final observer follows Lean's documented
+`enableInitializersExecution` then `loadExts=true` path. That API requires unsafe
+IO, confined to this external test inspector's run/main; it supplies no model
+proof, axiom or compatibility shortcut. Official old source quotations/hashes
+are in `import-api-provenance.json`. Existing constant/raw-IR inspectors were
+not changed or silently reinterpreted as attribute classifiers.
+
+The accepted fixture compiles and inspects on actual Lean4.24. It retains18
+declarations,1class,4persisted instances and1default. Global priorities17/63,
+private priority11 and scoped priority41 are exact; the scoped registration is
+retained but inactive without opening its namespace. A local97 declaration
+remains while its local attribute does not persist. Default priority7 and
+protected/private/class flags match controls. Final inspection exit0,
+5.560865639s,2113134592bytes sampled RSS; unchanged limits and no resource stop.
+Rejected compile/uninitialized prototypes remain diagnostic evidence only.
+
+The original Allocation sample passes74declarations with exact old kernel
+name/private-marker coverage,0class entries,2sizeOf instances at priority1000,
+and0defaults. Actual exit0,2.016755444s,780693504bytes sampled RSS. This is one
+assigned module, not a completed metadata census or a migration speed comparison.
+Fixture controls link the compiled olean hash to the inspection input; both
+outputs are source/probe/output-bound and reject partial,uninitialized,count-
+mismatched and falsely accepted snapshots. All67Python tests pass in25.521s.
+Finder and skeptic independently re-seal both reports and approve controls and
+unsafe-IO boundaries with no findings; neither ran Lean or wrote files.
+
+This checkpoint adds only test/tooling code and metadata observations. No
+production Lean statement,definition body,proof budget,axiom,interface or
+exclusion changed. The full original queue remains: broad compatibility evidence,
+generated public API shims,new builds,common-source clean timings,KeySort35 and
+root gates. Earlier Allocation kernel/old-only enumeration differences remain
+unwaived; no shims implemented. No4.35run occurred in this checkpoint, and its
+existing performance STOP remains. Bulk evidence is off Git in
+`resume-d93f6839c`; deterministic inspector/fixture/validator/controls are in Git.
+
+Current d93f6839 source census remains1811Yul/2234closure/2237union modules;
+85original sources now differ from c6. Static dependency evidence is refreshed
+without treating inherited producer changes as migration acceptance. The full
+original rendered assignment,queue,exact scope and provenance remain committed
+and are included in the authenticated patch/bundle handoff. All prior completed
+old inventories are preserved. No H71 push authorization was delivered.
