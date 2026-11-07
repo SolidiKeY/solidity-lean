@@ -1,0 +1,53 @@
+{
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.failure_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.failure_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.insufficient_private_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.suffix_instructions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.wrong_capture": [],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/RuntimeReturnCaptureWitness.lean:Solidity.Backend.Passes.AuditRuntimeReturnCapture.wrong_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
