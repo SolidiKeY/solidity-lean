@@ -114,6 +114,62 @@ theorem failure_boundaries_differ (pipeline : Roadmap.Pipeline) :
   change 2 = 1 at heapSame
   cases heapSame
 
+/-- Signature, actual argument step and actual callee step coexist. -/
+theorem expression_steps (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    functionDecl.fnSig E = some ([.bool,.bool],[.bool]) ∧
+    (Source.evalConvArgs (global pipeline) callerFrame (extra+25) arguments).run
+      (locals,populated) =
+      (.ok (params false false),(.cons (.bool false) .nil,populated)) ∧
+    (Source.callInternal (global pipeline) callerFrame (extra+25) functionDecl
+      (params false false) [.bool]).run (Source.L0 E,populated) =
+      (.ok (.val (.bool false)),(Source.L0 E,SourceKeccak.afterLiteral populated binary)) :=
+  ⟨signature, arguments_execute (global pipeline) extra, actual pipeline extra false false⟩
+
+theorem actual_expression (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    (Source.evalE (global pipeline) callerFrame (extra+26) expression).run (locals,populated) =
+      (.ok (.val (.bool false)),
+        (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) := by
+  have h := expression_steps pipeline extra
+  exact SourceCallable.expression_complete (global pipeline) callerFrame (extra+25)
+    functionDecl h.1 arguments locals (.cons (.bool false) .nil) (params false false)
+    (.val (.bool false)) populated populated _ h.2.1 h.2.2
+
+/-- Source argument order is retained before the same selected body executes. -/
+theorem actual_reordered_expression (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    (Source.evalE (global pipeline) callerFrame (extra+26) reorderedExpression).run
+      (locals,populated) =
+      (.ok (.val (.bool true)),
+        (.cons (.bool false) .nil,SourceKeccak.afterLiteral populated binary)) :=
+  SourceCallable.expression_complete (global pipeline) callerFrame (extra+25)
+    functionDecl signature reorderedArguments locals (.cons (.bool false) .nil)
+    (params true false) (.val (.bool true)) populated populated _
+    (reordered_arguments_execute (global pipeline) extra) (actual pipeline extra true false)
+
+/-- Same caller update and heap do not erase the observable argument order. -/
+theorem expression_order_refused (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    (Source.evalE (global pipeline) callerFrame (extra+26) expression).run (locals,populated) ≠
+    (Source.evalE (global pipeline) callerFrame (extra+26) reorderedExpression).run
+      (locals,populated) := by
+  rw [actual_expression, actual_reordered_expression]
+  intro same
+  have resultSame := congrArg Prod.fst same
+  cases resultSame
+
+/-- Caller restoration must retain argument effects, not the pre-argument local. -/
+theorem original_caller_refused (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    (Source.evalE (global pipeline) callerFrame (extra+26) expression).run (locals,populated) ≠
+      (.ok (.val (.bool false)),(locals,SourceKeccak.afterLiteral populated binary)) := by
+  rw [actual_expression]
+  intro same
+  have localsSame := congrArg (fun result => result.2.1) same
+  cases localsSame
+
+#print axioms expression_steps
+#print axioms actual_expression
+#print axioms actual_reordered_expression
+#print axioms expression_order_refused
+#print axioms original_caller_refused
+
 #print axioms failure_joint
 #print axioms actual_body_failure
 #print axioms actual_body_expression

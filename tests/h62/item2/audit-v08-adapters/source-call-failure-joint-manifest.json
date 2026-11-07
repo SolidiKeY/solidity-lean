@@ -66,5 +66,6 @@
       "sha256": "a09e072c784cea7a02d417d9077499619b189ec608a60e82f486521c441203e5"
     }
   ],
-  "reviews": "Independent read-only finder/skeptic: no findings on same-program failure premises, exact full outcomes and distinct reached heaps. No reviewer scripts/tests/Lean/server."
+  "reviews": "Independent read-only finder/skeptic: no findings on same-program failure premises, exact full outcomes and distinct reached heaps. No reviewer scripts/tests/Lean/server.",
+  "source_binding_status": "Historical failure-extension test snapshot. Later additive expression-success checks and current source bindings are recorded in source-expression-joint-manifest.json; old hashes/evidence remain unchanged."
 }
