@@ -1,0 +1,47 @@
+{
+  "scope": "Complete7 guarded rewrite-law theorem role classifications; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 564,
+    "pending": 4719,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-law-roles-v43/evidence.tar.gz",
+      "bytes": 1116138,
+      "sha256": "42a787214d35d109cd88addcbd137c558e7aef1c37112fb6e2f951e836003ce6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-law-roles-v43/inputs.json",
+      "bytes": 1525,
+      "sha256": "d8a849ab18f2ccfccfb14d7e3ecaf4c085941d69dd2ee0a112a3ccfcce332a50"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-law-roles-v43/gates.json",
+      "bytes": 2950,
+      "sha256": "69b1872f6be0e61920c967226fb93161f67c93ab0a1eee4ecaeb6987c2d59bd9"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-law-roles-v43/reviews.md",
+      "bytes": 715,
+      "sha256": "0fa1b22797408b7024a0a215ca73dd14c9ae74ebe8a3e8227f4e5215249640aa"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-law-roles-v43/case-rosters.json",
+      "bytes": 849,
+      "sha256": "fb165da54744573e2ff36c42957f2a4c487cdb4ad2dc42c6ecd67592b7a9446f"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/rewrite-law-roles-v43/doc-master-repair-binding.json",
+      "bytes": 486,
+      "sha256": "e2ae6cbc5eafebcb2c54c13434b869d97fc62aa9611bf21ecbb6959c4eafdd62"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/rewrite-law-roles-v43/semantic-roles-reviewed.json",
+      "bytes": 1504709,
+      "sha256": "df9372a52fe8558b4608ee23dfc715db69dd0df7f0529d570b98af1d926fe867"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "scope": "Complete12 joined-leaf split theorem roles; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 651,
+    "pending": 4632,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-split-roles-v59/evidence.tar.gz",
+      "bytes": 160930,
+      "sha256": "1d7cffe1094ecf67ea57edf0adb362403c10cfa63023d20c6e2155db105fc01c"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-split-roles-v59/inputs.json",
+      "bytes": 893,
+      "sha256": "4131d528a9d13f373c5f93bbc08a06bd0c947acd49185ee6053e1227c209b896"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-split-roles-v59/gates.json",
+      "bytes": 2818,
+      "sha256": "53682c6031363ba9a922004f6fe9c1398b597b8d16e030a0c136c0f1cb916373"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-split-roles-v59/reviews.md",
+      "bytes": 765,
+      "sha256": "dce97728ae5ba2babbc5b669b5162d4071e053dd0c0ca5815475ca495ea100ff"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-split-roles-v59/case-rosters.json",
+      "bytes": 929,
+      "sha256": "d329210ca6b555778ad0fb521fbacd9af693b9fa69b4cd812d6a0c5d150c345e"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/leaf-split-roles-v59/doc-master-repair-binding.json",
+      "bytes": 486,
+      "sha256": "33a4396a0061596fc3e3dc7ac3ebbcb099cf0d7d0ffc7c5f7b90c341e6ea7a34"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/leaf-split-roles-v59/semantic-roles-reviewed.json",
+      "bytes": 1726199,
+      "sha256": "863bdb6ed74866d8d51b5bacf5426e56025c52d0d794533182e53ca02e4b7809"
+    }
+  ]
+}

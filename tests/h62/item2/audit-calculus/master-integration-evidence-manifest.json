@@ -1,0 +1,35 @@
+{
+  "scope": "Authorized master merge and inherited packet rename; no new semantic rows/proofs",
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/master-integration-v65/evidence.tar.gz",
+      "bytes": 31932,
+      "sha256": "2b4060bef4c6f598643a57dce85614d8762a89dc01845d74cf65d08a8e3a2065"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/master-integration-v65/integration.json",
+      "bytes": 1668,
+      "sha256": "de9567850bf2421fa303759f8e0caffba43545736d65b0999a031afe78e6c943"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/master-integration-v65/gates.json",
+      "bytes": 2833,
+      "sha256": "ec875dcccec68cca843ef5730e8b6dcd668f4aada8ae9b159a80571299c99832"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/master-integration-v65/reviews.md",
+      "bytes": 308,
+      "sha256": "5f23debea630de7a9928b827536cec3a772f26eba192351f3f794bfa0ffa8b59"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/master-integration-v65/documentation-boundary.json",
+      "bytes": 379,
+      "sha256": "5cd71753c1af5d8bc3d8a09c9da472c19688fabcb65d7ab8eac9599fe22dc3a5"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/master-integration-v65/remote-patch-equivalence.txt",
+      "bytes": 258,
+      "sha256": "4a97fef08b5dfdf552cda0b139d1be7ab50c5e813995d52c27ddaedd10dda185"
+    }
+  ]
+}

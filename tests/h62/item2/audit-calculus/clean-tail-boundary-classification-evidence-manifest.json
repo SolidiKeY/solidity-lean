@@ -1,0 +1,47 @@
+{
+  "scope": "Complete6 clean-tail boundary theorem role classifications; zero fresh proofs/runtime acceptance",
+  "counts": {
+    "reviewed": 536,
+    "pending": 4747,
+    "owner_confirmed": 3746,
+    "owner_unresolved": 1537,
+    "new_joint_witnesses": 0
+  },
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/clean-tail-boundary-roles-v37/evidence.tar.gz",
+      "bytes": 1099803,
+      "sha256": "b01a2f2bc34a31582777275bbc5c1880e8e221564a0a9af6127e9cdedf25e58a"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/clean-tail-boundary-roles-v37/inputs.json",
+      "bytes": 1527,
+      "sha256": "e53b4c43e3336840c7b1bbabe310e60561dbc0b057ecd3f0a5a016f9708de493"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/clean-tail-boundary-roles-v37/gates.json",
+      "bytes": 3018,
+      "sha256": "e74cf3734383b2af59ccb15ceebcaea591f0177d363f203c569be6b1e9954bcf"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/clean-tail-boundary-roles-v37/reviews.md",
+      "bytes": 873,
+      "sha256": "bb23653f0bf06b02e0c1c69b52a46bbbf8fd2f1f91f1bf5c622bf3939fb22e18"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/clean-tail-boundary-roles-v37/case-rosters.json",
+      "bytes": 636,
+      "sha256": "481ee56bdd62a961fc6fb26235b949efc947a2e161d1284f836880b3beb2200d"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/clean-tail-boundary-roles-v37/doc-failure-source-binding.json",
+      "bytes": 371,
+      "sha256": "e69bcdb4f37992a5954a3a0aae27f155a2386675a5ce1256338d7efeb90d3d0c"
+    },
+    {
+      "path": "/workspace/h62-successor-bulk/clean-tail-boundary-roles-v37/semantic-roles-reviewed.json",
+      "bytes": 1429926,
+      "sha256": "630e36512a2c046adcd1f9c8397d24ad203b33edcb1e2521b1785a9e5d621c5a"
+    }
+  ]
+}

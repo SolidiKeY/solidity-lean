@@ -1,0 +1,154 @@
+{
+  "guardedRegression": "Empty dynamic-reference model behavior must be observed rather than inferred from bare declarations",
+  "checkpointBase": "47ed3d5afe5712c0da949207266246bb78458df3",
+  "sourceFile": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/DynamicBytesModelControls.lean",
+    "sha256": "dcd8afa64cbccd8605d991788e211f04e15699f7f4a2e25300a2465747d838fa"
+  },
+  "modelInputs": [
+    {
+      "repositoryRelative": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+      "sha256": "74c01bacb59ba4783bc20a02d23b594dff458a34e30b2c3e40aa9f9fc0b64577"
+    },
+    {
+      "repositoryRelative": "Solidity/Syntax/Elab/Context.lean",
+      "sha256": "29648f77f4398feb59e713d808c5ad68a7a4aa4787f9f84d5d0d1120c24de657"
+    },
+    {
+      "repositoryRelative": "Solidity/Syntax/Elab/Arms.lean",
+      "sha256": "518335dc8c62d9f7bb493b32f372c5f96cb38dc142ce4d0061406d136699d194"
+    },
+    {
+      "repositoryRelative": "Solidity/Syntax/Elab/Values.lean",
+      "sha256": "1f11c77e3d374d273755f7146714c170b8b370834cfe92eb9d0c267da8128e66"
+    },
+    {
+      "repositoryRelative": "Solidity/Semantics/RunFuel.lean",
+      "sha256": "0fd7dc30448640647d83598790e32eaac881cafb96cb413f10c598a0de8e1490"
+    }
+  ],
+  "observations": {
+    "guardedRegression": "Empty dynamic-reference model behavior must be observed rather than inferred from bare declarations",
+    "cases": [
+      {
+        "name": "bytesEmpty",
+        "box": false,
+        "halt": "normal"
+      },
+      {
+        "name": "bytesEmpty",
+        "box": true,
+        "halt": "normal"
+      },
+      {
+        "name": "bytesWrong",
+        "box": false,
+        "halt": "panic"
+      },
+      {
+        "name": "bytesWrong",
+        "box": true,
+        "halt": "panic"
+      },
+      {
+        "name": "stringViaBytesEmpty",
+        "box": false,
+        "halt": "normal"
+      },
+      {
+        "name": "stringViaBytesEmpty",
+        "box": true,
+        "halt": "normal"
+      },
+      {
+        "name": "stringViaBytesWrong",
+        "box": false,
+        "halt": "panic"
+      },
+      {
+        "name": "stringViaBytesWrong",
+        "box": true,
+        "halt": "panic"
+      },
+      {
+        "name": "bytesAliasEmpty",
+        "box": false,
+        "halt": "normal"
+      },
+      {
+        "name": "bytesAliasEmpty",
+        "box": true,
+        "halt": "normal"
+      },
+      {
+        "name": "stringAliasEmpty",
+        "box": false,
+        "halt": "normal"
+      },
+      {
+        "name": "stringAliasEmpty",
+        "box": true,
+        "halt": "normal"
+      }
+    ],
+    "markerABIGuards": 4,
+    "fuel": 128,
+    "initialState": "State.init of each explicit no-parameter/no-return Contract",
+    "interpretation": "Finite intrinsic execution and ABI marker checks only; not AST/source/default-memory/ABI transport or modal formula proofs. Empty aliases do not establish alias identity versus copying.",
+    "initialFailures": "Test numeral helper initially used Int instead of RawExpr.num Nat; marker context initially used Lean.Name constructors rather than String-based Solidity.Name. Both corrected; diagnostics retained. No sorry/admit/axiom/eval override written."
+  },
+  "gate": {
+    "childMaxRssKiB": 1082720,
+    "command": [
+      "bash",
+      "-c",
+      "set -e; export GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/dynamic-bytes-model/gates; bash scripts/coord-tools/gate.sh per-file tests/directruntime-20261104/shared-translator/DynamicBytesModelControls.lean tests/directruntime-20261104/shared-translator/DynamicBytesBoundaryControls.lean Solidity/KeySort.lean; python3 tests/directruntime-20261104/shared-translator/validation-inputs.py; python3 tests/directruntime-20261104/shared-translator/verify-h90-census.py; python3 tests/directruntime-20261104/shared-translator/verify-h90-reader-profile.py; python3 tests/directruntime-20261104/shared-translator/audit.py"
+    ],
+    "exit": 0,
+    "scopeMemoryPeakBytes": "212951040",
+    "wallSeconds": 7.48372633800318
+  },
+  "outerScope": {
+    "outerExit": 0,
+    "resourceStop": false,
+    "minimumOuterAvailableBytes": 11102654464,
+    "outerWallSeconds": 9.78180577299645
+  },
+  "archive": {
+    "repositoryRelative": "tests/directruntime-20261104/shared-translator/artifacts/dynamic-bytes-model-32c5f7e8ed7e30ef.tar.gz",
+    "sha256": "32c5f7e8ed7e30ef68ec4103e76917c0bb2a187643af7664080b3a4e375718ce",
+    "bytes": 13282,
+    "files": {
+      "final-gate.log": "d1fc7e8b657aff142060b280a79f67d81f707585994009e91726caf4868e7da9",
+      "final-mcp.log": "606bd50392d6b28af9304f019ad9aa86750c26c9c3e620494db061991cae6de3",
+      "gates/1.log": "c15692e3f2c48a0e07d835e15537983aa5264f7eca8a6c5ece6da0a480f0496f",
+      "gates/2.log": "21e77f627cedf797eb20b97bc92b07adfd6478193c02ec5c247d7d7a34198afd",
+      "gates/3.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gates/HEAD": "e4e4f60c2c7943b35c67fd1cd279e33edc10dd77c1df5dc59a952a856103b043",
+      "gates/gates.tsv": "bebe4ec984d17eb9e5047f3b47cf0f9d2721c340ca9b2e1cee2435693ae964aa",
+      "marker-recovery-mcp.log": "6a29f11185a0f2eed17bee2ff8e8744b3e1c7b86f371afb1e8bd0b4e58a38cf9",
+      "mcp.log": "f6a210a5cbcf63f9d1f0a471a72ce15686a7dab43a98a39eff8d1edff0a684e9",
+      "observations.json": "7a7a0e00c544c255ef9e08209960ed801225da15543ecb21d72b7197fe71399b",
+      "prerequisite/1.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "prerequisite/HEAD": "e4e4f60c2c7943b35c67fd1cd279e33edc10dd77c1df5dc59a952a856103b043",
+      "prerequisite/gates.tsv": "2b3613b25053e71e4734b9eab53ff9123a97daa9fb0a5e0585211f9d5ad78345",
+      "recovery-mcp.log": "f14b4b50b0107a9ce81464297c3b2a21a48b556b34072c5b971b26f711a851df",
+      "reviews.json": "b1e2b49803b8f8a5817de3dfa15ab266249f719993669979e33ba1ec9f800151"
+    }
+  },
+  "reviews": {
+    "finder": "Final read-only: source/archive pins and12finite observations/four synthetic ABI marker guards verified; no checkpoint blocker. No candidate activation or metadata propagation proof; no Lean/server/build/writes.",
+    "skeptic": "Final read-only: source/archive hashes and narrow model-only claims verified; no checkpoint blocker. Broader admission and validation-contract decision remain open; no Lean/server/build/writes."
+  },
+  "productionChanges": false,
+  "candidateIntegrated": false,
+  "frozenValidationChanged": false,
+  "limits": [
+    "No new production declaration, theorem, dependent definition, signature, axiom, premise, exclusion or proof/resource budget changes.",
+    "Candidate f7501b315211 remains held pending Q-H90-DYNAMIC-VALIDATION; tests never install or invoke it.",
+    "Existing ten decoder refusals,185inputs,78fixturecensus and5692profile observations pass unchanged.",
+    "No pre-work equivalent for this new additive file; checking timing is not performance acceptance or STOP release.",
+    "Bulk logs remain offGit H44; isolated tests do not register a production root or API.",
+    "ABI marker contexts are supplied explicitly; no declaration-to-context propagation proof is claimed."
+  ]
+}
