@@ -164,6 +164,68 @@ theorem original_caller_refused (pipeline : Roadmap.Pipeline) (extra : Nat) :
   have localsSame := congrArg (fun result => result.2.1) same
   cases localsSame
 
+/-- Intentional negative body-table model; not SourceSpec admission. -/
+def FrameMismatchJoint (pipeline : Roadmap.Pipeline) (extra : Nat) : Prop :=
+  (mismatchedGlobal pipeline).prog.body
+    ((mismatchedGlobal pipeline).dispatchFn callerFrame.contract functionDecl) = some mismatchedBody ∧
+  ([.bool] : List STy).reverseAux (([.bool,.bool] : List STy).reverseAux []) ≠
+    mismatchedBody.locals ∧
+  (Source.zeroVals (extra+24) [.bool] : Source.EM E [] _).run (Source.L0 E,populated) =
+    (.ok (.cons (.bool false) .nil),(Source.L0 E,populated))
+
+theorem frame_mismatch_joint (pipeline : Roadmap.Pipeline) (extra : Nat) :
+    FrameMismatchJoint pipeline extra := ⟨rfl, by decide +kernel, zero_returns extra⟩
+
+/-- The exact wrong-frame law, with real initialization and arbitrary arguments. -/
+theorem actual_wrong_frame (pipeline : Roadmap.Pipeline) (extra : Nat) (first second : Bool) :
+    (Source.callInternal (mismatchedGlobal pipeline) callerFrame (extra+25) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) =
+      (.error (.stuck "call frame"),(Source.L0 E,populated)) := by
+  have h := frame_mismatch_joint pipeline extra
+  exact SourceCallable.wrong_frame (mismatchedGlobal pipeline) callerFrame (extra+24)
+    functionDecl (params first second) mismatchedBody h.1 (.cons (.bool false) .nil)
+    h.2.1 populated populated h.2.2
+
+/-- Missing-body selection is witnessed, not supplied as an unproved assumption. -/
+theorem missing_selected (pipeline : Roadmap.Pipeline) :
+    (missingGlobal pipeline).prog.body
+      ((missingGlobal pipeline).dispatchFn callerFrame.contract functionDecl) = none := rfl
+
+theorem actual_missing_body (pipeline : Roadmap.Pipeline) (horizon : Nat)
+    (first second : Bool) :
+    (Source.callInternal (missingGlobal pipeline) callerFrame (horizon+1) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) =
+      (.error (.stuck "function without a body"),(Source.L0 E,populated)) :=
+  SourceCallable.missing_body (missingGlobal pipeline) callerFrame horizon functionDecl
+    (params first second) populated (missing_selected pipeline)
+
+/-- Zero horizon applies to an actual selected-body program with nonempty arguments. -/
+theorem actual_zero_horizon (pipeline : Roadmap.Pipeline) (first second : Bool) :
+    (Source.callInternal (global pipeline) callerFrame 0 functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) =
+      (.error .timeout,(Source.L0 E,populated)) :=
+  SourceCallable.zero_horizon (global pipeline) callerFrame functionDecl (params first second) populated
+
+/-- Both errors retain the original state but their exact stuck reasons differ. -/
+theorem missing_wrong_frame_differ (pipeline : Roadmap.Pipeline) (extra : Nat)
+    (first second : Bool) :
+    (Source.callInternal (missingGlobal pipeline) callerFrame (extra+25) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) ≠
+    (Source.callInternal (mismatchedGlobal pipeline) callerFrame (extra+25) functionDecl
+      (params first second) [.bool]).run (Source.L0 E,populated) := by
+  rw [actual_missing_body pipeline (extra+24), actual_wrong_frame]
+  intro same
+  have statuses := congrArg Prod.fst same
+  have messages := Source.Halt.stuck.inj (Except.error.inj statuses)
+  exact (by decide +kernel : ("function without a body" : String) ≠ "call frame") messages
+
+#print axioms frame_mismatch_joint
+#print axioms actual_wrong_frame
+#print axioms missing_selected
+#print axioms actual_missing_body
+#print axioms actual_zero_horizon
+#print axioms missing_wrong_frame_differ
+
 #print axioms expression_steps
 #print axioms actual_expression
 #print axioms actual_reordered_expression
