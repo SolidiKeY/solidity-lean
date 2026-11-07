@@ -1,3 +1,4 @@
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.GuardedFor
 /-! Reverse normal-success transport for the actual source conditional around
 an existing loop artifact; no inactive-body completion premise. -/
@@ -49,24 +50,10 @@ theorem completion_iff (condition : Compiled fc test) (loop : ForCompilation.Art
    (sourceLocals locals) = some ⟨sourceLocals out,.normal⟩) ↔
  Evm.run code {m with stack := (newer.toList++locals.toList).map coreWord++caller} =
    .ok {m with stack := (newer.toList++out.toList).map coreWord++caller} 0 := by
- constructor
- · rintro ⟨fuel,source⟩
-   obtain ⟨actual,same,target⟩ := GuardedFor.source_to_model condition loop code lowered
-     fuel locals ⟨sourceLocals out,.normal⟩ source newer m caller
-   have equal : out = actual := SourceLoopCompletion.sourceLocals_injective (congrArg Outcome.vars same)
-   cases equal
-   exact target
- · intro ran
-   obtain ⟨fuel,actual,source,_,frame⟩ := model_to_source condition loop code lowered
-     locals newer m {m with stack := (newer.toList++out.toList).map coreWord++caller} caller 0 ran
-   have stacks := congrArg Evm.Machine.stack frame
-   have mapped : (newer.toList++out.toList).map coreWord =
-     (newer.toList++actual.toList).map coreWord := List.append_cancel_right stacks
-   have lists : newer.toList++out.toList = newer.toList++actual.toList :=
-     (List.map_inj_right (fun _ _ h => coreWord_injective h)).mp mapped
-   have equal : out = actual := Vector.toList_inj.mp (List.append_cancel_left lists)
-   cases equal
-   exact ⟨fuel,source⟩
+ exact CompletionControls.completion_iff_of_transport (.if_ test body)
+   ⟨condition.profile, loop.compiled.profile⟩ code
+   (GuardedFor.source_to_model condition loop code lowered)
+   (model_to_source condition loop code lowered) locals out newer m caller
 
 /-- info: 'Solidity.Yul.Compilation.GuardedForCompletion.model_to_source' depends on axioms: [propext,
  Classical.choice,
