@@ -1307,3 +1307,11 @@ the degenerate-record wording. Fixed: the merge parent (`806a972a4`, not
 `2102e024a`), "p8-producer merge" (the commits landed linearly), "fixes the
 layers failure" (the edges were baselined), and the module docstring (it is
 `accepted_empty` that holds by `rfl`).
+
+CP78 gates at `078b1373` (later commits change only docs and docstrings,
+each Lean file rechecked by MCP diagnostics): `gate.sh checkpoint`
+layers, build-touched, library, trust, orphans, roots and fragments PASS.
+doc-paths FAIL: three inherited references outside V07
+(`h62-6-migrate-evm.md`, `tests/h62/.../check_scope.py`). axiom-pins FAIL:
+0 errors, 85 unrecorded changes, none in V07. `./run-lean.sh` PASS: "Build
+completed successfully (6626 jobs)", exit 0.
