@@ -595,3 +595,16 @@ boundary and retaining premise text on error rows. Three negative controls cover
 source drift, duplicate candidate accounting and parse-error premise retention.
 The original ownership-bound classifier and acceptance checker remain unchanged.
 Fresh bulk classification and reproduction evidence are archived privately.
+
+The optional `--refine` path reuses the existing frozen definition refinements
+for PrimTy.Denote, ContractWorld.Address and FixedPoint.Fx. Its 418 binder
+annotations increase source-classified rows to 3,664, leaving 482 unresolved.
+All 4,146 candidates and their original binder domains, dependencies, signatures,
+section variables and unknown historical owners are retained. The address and
+integer/fixed-point subtype bounds remain explicit joint-witness obligations;
+no inhabitance or semantic completeness follows from a source refinement.
+
+Six negative controls pass, including rejection of changed premises, omitted
+candidates and invented historical owners. Independent read-only finder and
+skeptic reviews accept this narrow integration of the existing generic rules.
+The original historical acceptance and ownership checks remain unchanged.
