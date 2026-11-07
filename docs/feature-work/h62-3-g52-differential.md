@@ -1475,3 +1475,74 @@ Full H121b/H121c/canonical producer/source-runtime binding, fullApproved_i and a
 prerequisites. No complete producer implementation file/head is available. Next
 native interval is[520,540), not an accepted gate. The original persistent goal
 is neither created/reset/stopped/completed; this audit-fix handoff is partial.
+
+
+## Engine-X native continuation through index 999 (2026-11-07)
+
+Fetched origin/master and inspected its log and new SourceDispatch sources before
+continuing. Merged baseline 6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f cleanly at
+22bf832484857fd2a382f941377b380bab3383f7. SourceDispatchCorrect preserves existing
+per-construct theorem signatures and their remaining premises; it supplies no
+complete canonical Source/session/artifact/resource producer. The G49 and P10
+owned obligations and exact external prerequisites above remain open. V17 is a
+downstream consumer, not our missing full producer. No complete producer file/head
+is available. No original factory owner is inferred from a generic theorem.
+
+Executed the next disjoint 24 ranges, [520,1000), twenty cases per serial job,
+using the existing runner and validators without source changes. All 24 commands
+returned exit2/incomplete with no stop. This processes480 additional cases:
+459 payload_reference_match and21 unsupported negative/version Engine RPC profiles.
+Unsupported cases are not execution passes. Native command elapsed time totals
+2346.272s; maximum aggregate RSS1394933760bytes. Unchanged bounds:300s external
+job,60s/5Mstep worker,12GiB aggregate RSS/per-process address space,4GiB available
+reserve,Node heap4096MiB,LEAN_NUM_THREADS=1,no swap. No cached cases accepted.
+
+The corrected input-bound checker validates the real disjoint union [0,1000):
+979payload matches/validated blocks,1127transaction observations,0raw logs,
+21unsupported and0payload mismatches/engine errors. There are20124 UNPROCESSED
+cases in[1000,21124). All three input payload/allocation/transaction identity
+bindings are true. Full payload match, final account-map presence, Engine RPC,
+forkchoice and differential completeness remain false; source matches added0.
+The checker validates pinned input commitments and captured observation
+consistency, not independently recomputed return/revert bytes/logs/execution gas,
+runtime attestation or a Lean source/runtime theorem.
+
+Aggregate validation and its artifact replay both returned exit2/incomplete,
+17.105/17.114s,peak993460224/994664448bytes,no stops. Outputs are byte-identical,
+SHA2568357c8b70c004c6ab708241291ab495ec59abc475b75fc8a281545b471b5f2ad.
+This is a checker/artifact replay, not a replay of the480 new native cases.
+Fresh strict block-acceptance returned exit1/FAIL,1.009s,no stop, retaining the
+same six reference failures and existing G52-REF-001 ticket. No new owner ticket
+or source/compiler mismatch is fabricated. Exact command arrays, outcomes and
+limits are recorded in $BULK/evidence/engine-x-native-START-END-command.json,
+engine-native-1000-coverage-command.json, its replay command receipt,
+engine-native-1000-block-acceptance-command.json and
+engine-native-1000-accounting.json. All3353 previously sealed files rehashed
+unchanged before manifest augmentation.
+
+Independent read-only finder and skeptic source reviews found no new continuation
+blocker and confirmed the checker/runner/native validators are byte-identical to
+the prior audit fix. Final artifact/document review is recorded with this
+checkpoint's evidence. No Lean/server/native work is delegated to reviewers.
+Actual version inspection only:Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b,
+Lake5.0.0-src+797c613,Node24.19.0. No Lean build, fresh KeySort or migration gate ran;
+historical KeySort remains historical and RUNTIME_GATE_PASS is false. Own Lean
+line/declaration delta0; no axiom/sorry/native_decide, statement, dependent
+definition, interface, budget or exclusion change. No code refactor or comparable
+before/after checking measurement applies to this new fixture workload.
+
+Full H121b/H121c producers, full Approved_i and all15 public obligations remain
+OWNED unfinished with the same typed external prerequisites. Next independent
+native interval:[1000,1020), label engine-x-native-1000-1020, same serial runner
+and limits. Original persistent goal remains unfinished; no goal mutation,
+master publication or full-conformance acceptance is performed.
+
+Final finder and skeptic artifact reviews both cleared with no blocking findings;
+see engine-native-1000-reviews.json. Global documentation-path checking returned
+exit1 because unchanged baseline docs/feature-work/h62-4-generic-v08.md cites the
+absent ExecutionTransport.lean. The citing document is byte-identical to fetched
+master and the target is absent there; no diagnostic names our task document.
+The new section adds no backticked Lean path. This pre-existing global failure
+is retained, not represented as a passing gate; exact baseline evidence is in
+engine-native-1000-doc-path-baseline.json. Whitespace checking is recorded
+separately. No unrelated source or documentation was edited to hide the failure.
