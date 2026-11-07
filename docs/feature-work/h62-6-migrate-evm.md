@@ -194,13 +194,19 @@ adapters. Generated-root registration and fragment checks passed without editing
 those files. Python/shell syntax, scanner/sealer tests, cache negative controls,
 source-census equality and diff whitespace checks passed.
 
-`bash scripts/check-doc-paths.sh` exited 1: existing
-`docs/feature-work/after-roadmap-va1.md:198` cites the absent
-`Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean` cache. That document is
-byte-identical to the pinned base; the new lane document introduced no missing
-citation. **B-DOC-CITE** is a pre-existing out-of-scope owner request, not a waived
-check. No cache file was invented and no Mathlib dependency was added. The root
-handoff records this failed gate alongside the syntax/performance blockers.
+In the archived lane run, `bash scripts/check-doc-paths.sh` exited 1 because
+an earlier version of the after-roadmap VA1 note cited an absent optional Mathlib
+cache test. The stable provenance is the
+[pinned upstream SplitIfs test](https://github.com/leanprover-community/mathlib4/blob/f897ebcf72cd16f89ab4577d0c826cd14afaafc7/MathlibTest/SplitIfs.lean),
+also linked in the current after-roadmap VA1 note. This is an upstream source
+reference, not a claim that a local cache file exists. The historical failed gate
+remains part of the handoff alongside the syntax/performance blockers.
+
+H70 documentation repair, 2026-11-07: the inherited **B-DOC-CITE** literal
+cache-path citation is replaced by that pinned upstream reference. No cache file
+is invented, no Mathlib dependency is added, and the documentation checker is
+unchanged. This repairs the citation only; it does not turn the historical gate,
+axiom inventory or v4.35 migration into an acceptance pass.
 
 ## Final H82 retirement checkpoint
 

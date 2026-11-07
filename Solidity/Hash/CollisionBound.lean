@@ -405,7 +405,7 @@ theorem countP_contains_le {A : List Nat} (hA : A.Nodup) (t : List Nat) :
           (List.nodup_cons.mp hnd).1
     have hsplit : A.countP (fun a => (x :: t).contains a) =
         A.countP (fun a => (a == x) || t.contains a) := by
-      congr 1
+      simp only [List.contains_cons]
     rw [hsplit, List.length_cons]
     have hor : A.countP (fun a => (a == x) || t.contains a) ≤
         A.countP (fun a => a == x) + A.countP (fun a => t.contains a) :=
@@ -655,7 +655,8 @@ theorem countP_near_le {N L b : Nat} (hb : b < N) :
     apply countP_le_of_imp
     intro a ha hn
     have ha' : a < N := List.mem_range.mp ha
-    simp only [decide_eq_true_eq, Near] at hn
+    have hn' : Near N L a b := of_decide_eq_true hn
+    unfold Near at hn'
     simp only [Bool.or_eq_true, decide_eq_true_eq]
     omega
   have h1 := countP_or_le (List.range N)
@@ -675,7 +676,8 @@ theorem countP_covers_le {N L r : Nat} (hr : r < N) :
     apply countP_le_of_imp
     intro a ha hn
     have ha' : a < N := List.mem_range.mp ha
-    simp only [decide_eq_true_eq, Covers] at hn
+    have hn' : Covers N L a r := of_decide_eq_true hn
+    unfold Covers at hn'
     simp only [Bool.or_eq_true, decide_eq_true_eq]
     omega
   have h1 := countP_or_le (List.range N) (fun a => decide (r + 1 - L ≤ a ∧ a < r + 1))

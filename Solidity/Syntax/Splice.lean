@@ -231,13 +231,13 @@ example : Prog.toStr [] (sol{ bool c = true; Person memory mx = alice; Person me
     Person memory m = c ? mx : my; }) =
     "bool c = true; Person memory mx = alice; Person memory my = bob; \
     Person memory mv1 = mx; if (c) { mv1 = mx; } else { mv1 = my; } \
-    Person memory m = mv1;" := rfl
+    Person memory m = mv1;" := by decide +kernel
 
 /-- Both indexing, it is bound to a fresh default object first. -/
 example : Prog.toStr [] (sol{ bool c = true; Person[] memory xs = new Person[](2);
     Person memory m = c ? xs[0] : xs[1]; }) =
     "bool c = true; Person[] memory xs = new Person[](2); Person memory mv1; \
-    if (c) { mv1 = xs[0]; } else { mv1 = xs[1]; } Person memory m = mv1;" := rfl
+    if (c) { mv1 = xs[0]; } else { mv1 = xs[1]; } Person memory m = mv1;" := by decide +kernel
 
 -- The scope is the type's: a local nothing declares, one read at another
 -- type than declared, one a branch declares read after it.
@@ -315,7 +315,7 @@ info: uint y; uint se1 = 3; uint se2; uint se3 = se1; uint se4; se4 = se3 + 1; s
 example : Prog.toStr [] (sol{ if (total > 2) { total = 1; } else if (total > 1) { total = 2; }
     else if (total > 0) { total = 3; } else { total = 4; } }) =
     "if (total > 2) { total = 1; } else { if (total > 1) { total = 2; } else { \
-    if (total > 0) { total = 3; } else { total = 4; } } }" := rfl
+    if (total > 0) { total = 3; } else { total = 4; } } }" := by decide +kernel
 
 /-- A statement ending in a block needs no `;`; one with it reads the same. -/
 example : (sol{ if (total > 0) { total = 0; } unchecked { total += 1; } total = 1; } :
