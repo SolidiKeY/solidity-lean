@@ -1754,3 +1754,21 @@ diagnostics and records; its expected outcomes depend on case and phase.
 The earlier schema-2 `cases` scan is not a complete role roster for these
 fixtures. Independent read-only finder and skeptic reviewed these boundaries
 without Lean, server or builds. No runtime acceptance is inferred.
+
+## Extended standalone static-reference index
+
+`reference_index_extend.py` joins the existing 640-row `9cf44aa56e9c8c5bbf0fd18a511edaa21dfe4c02`
+snapshot index with the seven signature, five bytecode-selection and 23
+mutation-oracle references. Their 35 paths are distinct and match recorded
+source hashes and candidate mapping fields. The resulting snapshot-relative
+index has 466 referenced and 174 without supplied references; 63 rows retain
+overlapping earlier references. Historical references remain separate from
+current-byte references.
+
+Input manifests and the index are checksum-bound by
+`tests/h55/module-times/reference-index-extend-evidence.sha256`. These
+counts describe supplied static artifacts, not current-tree coverage,
+resolved invocation, proof or execution acceptance. Unreferenced rows are
+not excluded. The join checks candidate consistency, not the content or
+authority of each supplied reference. Independent read-only finder and skeptic
+checked the join without Lean, server or builds.
