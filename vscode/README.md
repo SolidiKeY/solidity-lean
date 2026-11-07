@@ -324,3 +324,5 @@ proof performance, EVM equivalence or complete menu/trace parity.
 Starting another source command now retires the invalidated older command
 before asking a prompt that might be cancelled. Retirement still uses the
 existing ownership checks and deadline; new work cannot bypass a failed cleanup.
+
+The existing headless parity runner supports `--suite compiler-output --targets local` for Settings UI/resource JSON, ordinary/custom key builds and actual two-folder pending-prompt configuration ownership. It reuses the compiler/import fixture with verification disabled. The observations distinguish local AST directory placement from Dafny executable stems; paired upstream settings, macOS and full lifecycle evidence remain incomplete.
