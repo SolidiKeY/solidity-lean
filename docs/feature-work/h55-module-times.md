@@ -2064,3 +2064,24 @@ removed since the previous snapshot. Independent read-only finder and skeptic
 checked roles, hashes and history preservation without Lean or a server.
 Evidence hashes are in `tests/h55/module-times/language-audit-evidence.sha256`.
 This non-atomic static observation does not establish runtime acceptance.
+
+## Theory audit witness observations
+
+`theories_audit_witnesses.py` records four previously unreferenced theory
+candidates with source hashes and the audit feature document hash. They cover
+Bridge/Denote, Closer, Progress/Outcome and Payable model inputs. The Payable
+empty-input certificate is a refutation; the source records Q-STATIC-VALUE as
+pending and does not H69-classify it or close the public witness gap. Positive
+Payable packets remain distinct. Current driver, exact inputs, effects and
+outcomes remain unresolved. This subset does not establish physical EVM or
+payment-settlement adequacy.
+
+At merge head `2e480e34ae3d43f21da9457ee33aab4d0e464e82`, the refreshed static
+index has 766 candidates, 519 with supplied current references and 247 without;
+six retain historical references for review. One candidate was added and one
+previously unreferenced candidate changed since the previous snapshot. Independent
+read-only finder and skeptic checked roles, hashes and history preservation
+without Lean or a server. The skeptic requested the explicit Payable refutation
+and pending-question boundary above; the regenerated artifact was rechecked.
+Evidence hashes are in `tests/h55/module-times/theories-witness-evidence.sha256`.
+This non-atomic static observation does not establish runtime acceptance.
