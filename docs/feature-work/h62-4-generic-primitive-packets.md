@@ -1171,3 +1171,50 @@ otherwise. Two unused forwarding aliases old_alias_source/wrong_root were
 removed at coordinator request; their original source_observation and
 default_root_refused statements and proofs remain in the defining rebind
 controls. Native execution and export-refusal proofs are retained.
+
+
+H124/H126 disposition supersedes the earlier ABI HOLD notes. H124 accepts the
+frame-free V13 p1_revert_bridge as delivered and closes Q-H68-PAYLOAD; its three
+documented deviations remain exact, with no P1-frame redesign. H126 confirms
+the earlier H87/H96 widening authority and approves head 85b3741d as-is. The
+exact approved Layout/SimLemmas and signed acceptance controls, ABI totality/
+P1-REVERT quartet, V13 pin additions and owned area/doc files are restored.
+All twelve restored source/doc/pin files are byte-identical to that head.
+Registration is regenerated. No versioned domain split or narrowing is added.
+
+The earlier counterexample concerned the then-restored unsigned-only backend;
+its receipt remains historical and does not refute the now-authorized wider
+compiler. Old signed_refused/signed_refusal controls are explicitly superseded
+by signed_accepted/signed_acceptance under H87/H126. Source/ExtCall and proof
+budgets are unchanged. The specific V13 pins are restored as authorized;
+central G07 pin/name reconciliation and V09 frozen inventory transition are
+provided as proposals for their owners, not silently rewritten or marked pass.
+
+The ancestry-only H124 merge had not restored the parked quartet in the current
+tree; this authorized content adoption supplies its exact accepted files.
+Full V12 P1 session/profile/origin and G42.04 adequacy remain separate owned
+work, with actual Source H24/library lifecycle, RO physical-frame and decoder
+producer waits retained. Original global/fidelity/performance STOPs remain open.
+
+### Dated signed-bitwise transition
+
+On 2026-11-06, H87 authorized signed bitwise `&`, `|`, `^`, aliases and storage compound assignments; H96 covered storage aliases through array indices. H126 (2026-11-07) confirms that authority and accepts the widening as delivered. The former `signed_refused` / `signed_refusal` results describe the historical unsigned-only implementation; `signed_accepted` / `signed_acceptance` now guard the authorized implementation. Historical refusal accounting above remains history, not a current refusal requirement. The coordinator authorized local pin reconciliation for these names without new axioms or allowance widening.
+
+### Native primitive-value bridge, 2026-11-07
+
+RuntimeFrameP1V2ValueBridge generalizes the existing selected primitive-result
+plan to a conditional native PassCorrect/BridgeGoal. It reuses P1V2ValueAgreement
+and canonical P1LangV2: the exact image saves the private primitive result before
+restoring caller cells and exports it afterward. All six original V3 Local
+duties and the external Approved/physical agreement remain intact, including
+both original outcome witnesses. No desired run, complete producer or full
+certificate is assumed. The source quotation selects the same native call; it
+is not recursive-session coverage.
+
+Importing controls reuse the actual readAt successful and reverting entries,
+retain full Local, and refute an always-reverting replacement on the same
+physical domain. Existing native execution/export/capacity controls remain
+unchanged. These checks do not authenticate an external Approved profile or
+actual Source origin and do not finish production P1/G42.04. Independent
+read-only finder and skeptic found no domain weakening or provenance overclaim.
+Original full-validation and timing STOPs remain open.

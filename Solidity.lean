@@ -155,11 +155,15 @@ import Solidity.Backend.AbiWorld.MutatingWritePhysical
 import Solidity.Backend.AbiWorld.MutatingWritePhysicalControls
 import Solidity.Backend.AbiWorld.NativeParentWord
 import Solidity.Backend.AbiWorld.NativeParentWordControls
+import Solidity.Backend.AbiWorld.P1RevertBridge
+import Solidity.Backend.AbiWorld.P1RevertBridgeControls
 import Solidity.Backend.AbiWorld.PacketPrefix
 import Solidity.Backend.AbiWorld.PacketPrefixControls
 import Solidity.Backend.AbiWorld.PanicCallFrame
 import Solidity.Backend.AbiWorld.PanicCallFrameControls
 import Solidity.Backend.AbiWorld.PanicReadWindow
+import Solidity.Backend.AbiWorld.PublicCompilerTotal
+import Solidity.Backend.AbiWorld.PublicCompilerTotalControls
 import Solidity.Backend.AbiWorld.ReturnWordTransport
 import Solidity.Backend.AbiWorld.ReturnWordTransportControls
 import Solidity.Backend.AbiWorld.TypedPacketMaterialize
@@ -390,6 +394,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ReferenceRebindExecutionControls
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueAgreementControls
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueBridge
+import Solidity.Backend.InternalFlow.RuntimeFrameP1V2ValueBridgeControls
 import Solidity.Backend.InternalFlow.RuntimeFrameReference
 import Solidity.Backend.InternalFlow.RuntimeFrameReferenceProgram
 import Solidity.Backend.InternalFlow.RuntimeFrameRestore
@@ -3296,9 +3302,13 @@ import Solidity.Lowering.P8b.Merged
 import Solidity.Lowering.P8b.MergedControls
 import Solidity.Lowering.P8b.P8aInterface
 import Solidity.Lowering.P9.AdmissionControls
+import Solidity.Lowering.P9.BoundRecognizer
+import Solidity.Lowering.P9.BoundRecognizerControls
 import Solidity.Lowering.P9.CallControls
 import Solidity.Lowering.P9.CatalogControls
 import Solidity.Lowering.P9.DeclarationIdentity
+import Solidity.Lowering.P9.DefaultRecognizerCompleteness
+import Solidity.Lowering.P9.DefaultRecognizerControls
 import Solidity.Lowering.P9.ElaboratedCalls
 import Solidity.Lowering.P9.ElaborationAdmission
 import Solidity.Lowering.P9.FragmentDecidable
@@ -4164,6 +4174,7 @@ import Solidity.Source.HorizonDeploy
 import Solidity.Source.HorizonFuel
 import Solidity.Source.HorizonGrow
 import Solidity.Source.Infer
+import Solidity.Source.InferHelpers
 import Solidity.Source.Inheritance
 import Solidity.Source.InlineExamples
 import Solidity.Source.Ledger

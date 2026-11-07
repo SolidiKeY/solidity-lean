@@ -1,0 +1,32 @@
+{
+ "tests/h62/item2/audit-v09-passes/StackJointWitness.lean:Solidity.Backend.Passes.AuditStack.input_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackJointWitness.lean:Solidity.Backend.Passes.AuditStack.input_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackJointWitness.lean:Solidity.Backend.Passes.AuditStack.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackJointWitness.lean:Solidity.Backend.Passes.AuditStack.premises": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackJointWitness.lean:Solidity.Backend.Passes.AuditStack.success_stack_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/h62/item2/audit-v09-passes/StackJointWitness.lean:Solidity.Backend.Passes.AuditStack.wrong_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

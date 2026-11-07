@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/AbiWorld/PublicCompilerTotalControls.lean:Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/PublicCompilerTotalControls.lean:Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

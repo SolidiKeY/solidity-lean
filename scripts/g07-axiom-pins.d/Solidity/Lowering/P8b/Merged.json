@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/P8b/Merged.lean:Solidity.Lowering.P8b.Merged.nonempty_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

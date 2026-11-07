@@ -1,0 +1,11 @@
+{
+ "Solidity/Lowering/P8/SourceAstExpressions.lean:Solidity.Lowering.P8.SourceAstExpressions.depth_zero": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressions.lean:Solidity.Lowering.P8.SourceAstExpressions.expression": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceAstExpressions.lean:Solidity.Lowering.P8.SourceAstExpressions.literal": [
+  "propext"
+ ]
+}
