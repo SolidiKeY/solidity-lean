@@ -474,3 +474,9 @@ A second shared completion specialization consumes the actual whole-source trans
 Before/after elaborated types and axiom exports are byte-identical. Three prespecified serial timing samples give median seconds: GuardedFor 0.75→0.75 (0%), InitializedLoop 0.82→0.81 (−1.2%), LoopControl 1.19→1.21 (+1.7%). No 10% stop is triggered; these are targeted measurements, not full-scope timing acceptance. Independent read-only finder and skeptic found no defects. The 84-module Compilation-area affected closure and eight H55 consumers are recorded in `/workspace/vy2-evidence/h55-family-prefix/`; final status is in its handoff.
 
 The migration ledger now marks six of 57 input files with partial proof-entrypoint reuse, and no complete family migration. Adapter census remains 38 (24 semantic, 14 preparation). Remaining proof/family/source-kind work, full-scope timings, runtime/final gates and complete-scope acceptance remain open.
+
+### Let scope, nested control and branch proof reuse
+
+LetScopeCompletion, LetControlCompletion and LetBranchCompletion now instantiate the existing zero-prefix completion equivalence with their original transport and reflection proofs. All original definitions and statements remain unchanged; exact elaborated types and axiom exports match before and after. Independent read-only finder and skeptic found no defects.
+
+Three serial samples per file give median seconds: LetScope 0.84→0.90 (+7.1%), LetControl 1.08→1.16 (+7.4%), LetBranch 0.90→0.93 (+3.3%). No 10% stop is triggered. Evidence and affected checks are retained in `/workspace/vy2-evidence/h55-family-let/`. These targeted measurements do not establish full-scope timing acceptance. The ledger marks nine of 57 files with partial proof reuse, zero fully migrated families; final/runtime gates and the physical/source bridges remain open.
