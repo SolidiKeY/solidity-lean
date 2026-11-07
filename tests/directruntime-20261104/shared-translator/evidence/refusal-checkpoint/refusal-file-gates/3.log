@@ -1,6 +1,0 @@
-Solidity.Frontend.ExecutableAst.Shared.BodyLoopLowerer : Type
-Solidity.Frontend.ExecutableAst.Shared.PlainEntryPre : Type
-Solidity.Frontend.ExecutableAst.Shared.assertionObligation (lowerBodyLoops : BodyLoopLowerer) (callPre : PlainEntryPre)
-  (C : Contract) (name : String) (box : Bool) : Except String (Fml C [])
-Solidity.Frontend.ExecutableAst.Shared.obligation (lowerBodyLoops : BodyLoopLowerer) (callPre : PlainEntryPre)
-  (C : Contract) (name : String) (specified box : Bool) : Except String (Fml C [])

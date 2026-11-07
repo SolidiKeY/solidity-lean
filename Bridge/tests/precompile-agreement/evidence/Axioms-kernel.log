@@ -1,3 +1,0 @@
-CWD: /workspace/solidity-lean/Bridge
-COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 tests/precompile-agreement/Axioms.lean
-EXIT=0 SECONDS=3.415 PEAK_RSS=391913472 MIN_AVAILABLE=17642041344 RESOURCE_STOP=False

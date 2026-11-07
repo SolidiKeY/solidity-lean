@@ -1,1 +1,0 @@
-{"counts": {"catalogFeatures": 212, "compilerSolidityKinds": 58, "recognizedYulKinds": 16}, "localIntrinsicImportModules": 104, "localSharedImportModules": 17, "rawConstructorCounts": {"RawExpr": 17, "RawInv": 3, "RawStmt": 42, "RawTy": 4}, "status": "initial census; full coverage gates pending"}

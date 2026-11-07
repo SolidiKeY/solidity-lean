@@ -1,4 +1,0 @@
-PASS	lean:Solidity/Frontend/LiteralGrammarH28/Hex.lean	1	/workspace/solidity-lean/tests/h28-sol/literal-grammar/evidence/hex-per-file/1.log	lake env lean --tstack=131072 Solidity/Frontend/LiteralGrammarH28/Hex.lean 
-PASS	lean:Solidity/Frontend/LiteralGrammarH28/HexEncoding.lean	1	/workspace/solidity-lean/tests/h28-sol/literal-grammar/evidence/hex-per-file/2.log	lake env lean --tstack=131072 Solidity/Frontend/LiteralGrammarH28/HexEncoding.lean 
-PASS	lean:Solidity/Frontend/LiteralGrammarH28/HexControls.lean	1	/workspace/solidity-lean/tests/h28-sol/literal-grammar/evidence/hex-per-file/3.log	lake env lean --tstack=131072 Solidity/Frontend/LiteralGrammarH28/HexControls.lean 
-PASS	lean:Solidity/Frontend/LiteralGrammarH28/HexPins.lean	0	/workspace/solidity-lean/tests/h28-sol/literal-grammar/evidence/hex-per-file/4.log	lake env lean --tstack=131072 Solidity/Frontend/LiteralGrammarH28/HexPins.lean 

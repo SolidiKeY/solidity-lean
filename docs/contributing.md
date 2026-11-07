@@ -25,6 +25,7 @@ each proof iteration. Documentation-only edits need path and link checks.
 | `bash scripts/coord-tools/gate.sh touched` | Merge pre-gate: check layers first on the prospective merged tree, then build touched modules; fail before build on new boundary edges |
 | `./scripts/check-doc-paths.sh` | Backticked Lean file references in tracked prose; five exact historical/fixture pairs carry explicit reasons, with no basename-wide exemption |
 | `./scripts/check-private-paths.sh` | No personal home directories (`/home/<user>/`, `/Users/<user>/`) in tracked files, since the repository is public; write `~`, `$XDG_STATE_HOME`, `$REPO` or a relative path. Run by CI and by every merge gate |
+| `./scripts/check-evidence-files.sh` | No lane evidence (receipts, handoffs, provenance, checksum manifests, resource and validation records) under `tests/` or `Bridge/tests/`; lanes archive it in the private coordination repository with `scripts/coord-tools/coord-evidence` and cite the printed path. Run by CI and by every merge gate |
 | `node scripts/check-axiom-pins.mjs` | Original axiom-policy errors plus new unrecorded pin changes; exact existing H112 drift uses a SHA256-pinned, shrink-only baseline |
 | `solidity-lean rules check --key FILE` | Sort annotations against a SolKey rules file; manual, not part of any gate (H89) |
 | `./scripts/check-corpus.sh` | `SolidityCorpus` against `tests/solkey/expected.tsv` |

@@ -1,9 +1,0 @@
-{
-  "memory_max": 12884901888,
-  "memory_swap_total": 12884901888,
-  "memory_swap_max": 0,
-  "parent_memory_max": 17179869184,
-  "headroom_bytes": 4294967296,
-  "container": "h28-solkey-check",
-  "threads": "LEAN_NUM_THREADS=1; wrappers and weakLeanArgs inject -j1; compiler wrapper serializes via flock"
-}

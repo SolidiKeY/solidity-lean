@@ -1,5 +1,0 @@
-Independent finder (/root/finder), read-only, no Lean server:
-No confirmed correctness or scope violations. Verified Raw constructors, DirectRuntime rejection paths, tuple declaration self-read rejection, nested tuple restrictions and do-while lowering. Candidates distinguished from admission/proof success. Clarification: boundary wording should support recursive routing without requiring private parser exposure. Applied.
-
-Independent skeptic (/root/skeptic), read-only, no Lean server:
-No blocking backfill correctness finding. Dependency audit shows unavailable locally/on published heads, not whether A committed on its own VM. Change whileZero admission label from existing to existing-route-unverified. Applied. Negative AST, annotation, box/diamond, proof, runtime and provenance gates remain pending.
