@@ -155,6 +155,27 @@ theorem unit_head_failure (fuel : Nat) (node head : Json) (tail : List Json)
   rw [order]
   exact mapM_head_failure (SourceAstUnit.top fuel) head tail message failed
 
+/-- Whole-unit traversal failure identifies the first failing top-level child. -/
+theorem unit_first_failure (fuel : Nat) (node : Json) (children : Array Json)
+    (message : String)
+    (kind : node.getObjValAs? String "nodeType" = .ok "SourceUnit")
+    (fields : node.getObjValAs? (Array Json) "nodes" = .ok children)
+    (failed : SourceAstUnit.unit fuel node = .error message) :
+    ∃ before values child tail, children.toList = before ++ child :: tail ∧
+      Each (fun x y => SourceAstUnit.top fuel x = .ok y) before values ∧
+      SourceAstUnit.top fuel child = .error message := by
+  rw [SourceAstUnit.unit] at failed
+  simp only [kind, fields, ok_bind, beq_self_eq_true, ite_true, pure_bind] at failed
+  cases traversal : children.toList.mapM (SourceAstUnit.top fuel) with
+  | error actual =>
+    rw [traversal] at failed
+    change Except.error actual = Except.error message at failed
+    cases failed
+    exact (mapM_error_iff_first (SourceAstUnit.top fuel) children.toList message).mp traversal
+  | ok values =>
+    rw [traversal] at failed
+    cases failed
+
 /-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.state_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms state_exact
 /-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.function_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -215,4 +236,6 @@ theorem top_ok_iff_each (fuel : Nat) (node : Json) (children : Array Json)
 #guard_msgs (whitespace := lax) in #print axioms unit_children_failure
 /-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.unit_head_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms unit_head_failure
+/-- info: 'Solidity.Lowering.P8.SourceAstDeclarationCorrespondence.unit_first_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms unit_first_failure
 end Solidity.Lowering.P8.SourceAstDeclarationCorrespondence

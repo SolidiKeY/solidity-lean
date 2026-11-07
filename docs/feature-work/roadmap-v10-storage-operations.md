@@ -1904,3 +1904,24 @@ Lean/server/builds or edited. Requested cleanup restored over 2 GB free from
 regenerable build output only. Actual H121b production, original/consolidated
 queues, 3209 uncovered rows, strict pins/docs and full gates remain open.
 External library-try, Y04 physical and separate 4.35 waits/STOPs remain distinct.
+
+### C277: exact first-failure accounting for container traversal
+
+Each.prefix_failure and first_failure_of_mapM_error characterize an exact
+successful ordered prefix followed by the failed child and an unconstrained
+tail. mapM_error_iff_first composes them; unit_first_failure uses this generic
+interface for whole-unit diagnostics. No children are skipped or reordered.
+Reader definitions, earlier statements, imports and Source interfaces remain
+unchanged. These are syntax diagnostics, not Source runtime/admission evidence.
+
+Initial reserved-binder syntax and a consumer reference after equality
+elimination failed; both are fixed with raw failures preserved. Final bounded
+check passed in 4.35 s, sampled peak RSS 372924416 bytes, no resource stop.
+Three generic guards use propext/Quot.sound; the consumer uses the standard trio.
+No matched speed comparison or row coverage credit. Read-only finder/skeptic
+confirmed no remaining findings without Lean/server/builds or edits. Master
+private-path cleanup was adopted before this item. Original/consolidated queues,
+H121b actual production, 3209 uncovered rows and strict/full gates remain open.
+Next priority follows the coordinator: inspect original Backfill B finite
+operation-generated transport, reuse completed laws and preserve all aliases
+and per-run region premises. External library-try/Y04/4.35 waits remain distinct.
