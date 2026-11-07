@@ -1189,3 +1189,35 @@ changed, and no Lean/build/timing result is claimed from it.
 
 Read-only finder and skeptic reviewed this clarification and found no findings;
 neither used Lean/server/build. Import and executable-suffix byte checks pass.
+
+### C249 — receiver, operand and positional-call correspondence
+
+SourceAstExpressionCorrespondence proves exact identifier spelling, member
+receiver conversion, assignment left/right conversion and positional callee /
+ordered-argument conversion for the unchanged expression reader. The call law
+reuses C247 Each/build correspondence. Exact JSON field hypotheses identify
+supported syntax, not Source admission or execution filters. These laws remain
+relative to recursive child conversion; they do not establish compiler-ID/name
+resolution coherence, independent compiler fidelity, artifact binding, Source
+meaning/origin/H24 admission or lifecycle adequacy. Literal and tuple structural
+correspondence and those semantic obligations remain open.
+
+The successful-Except-bind helper is axiom-free. Identifier/member laws use
+propext+Quot.sound; assignment/call laws use the existing standard trio including
+Classical.choice. Exact measured guards pin all five; no new axiom declaration
+or trust-policy expansion. Initial normalization/elaboration attempts failed;
+outer-only unfolding, explicit successful-bind normalization, the equalities
+already substituted by case analysis and an explicitly typed intrinsic call
+builder resolve them. Failed/recovery diagnostics retained; no failing artifact
+or sorryAx pin accepted. No statement, converter definition, Source file,
+proof budget or exclusion was changed.
+
+Existing SourceAstExpressionsControls reuses the same 37 actual expression
+nodes per pipeline; only its import changes to cover the new proofs. All receiver,
+dirty-write, tuple/bytes and refusal/nonzero-depth checks pass. No cloned case
+fixtures were added. Finder and skeptic reviewed final code read-only without
+Lean/server/build and found no findings. Manual C246 full-unit elaboration
+probe remains a historical failed manual check outside automated gates, not
+replaced by these proofs; H16 library try/Error(string) support is still pending.
+General mapping-bearing H24, Y04 and separate4.35 waits and every STOP remain.
+Original/consolidated proof/backfill/coverage and full final gates remain open.

@@ -10,3 +10,4 @@
 | `Lowering/P8/SourceAstStatements.lean` | Partial compiler block/statement/catch reader retaining original bodies; no resolution, origin or admission claim |
 | `Lowering/P8/SourceAstUnit.lean` | Partial compiler declaration/unit reader preserving original bodies and catalogue syntax; no admission claim |
 | `Lowering/P8/SourceAstCorrespondence.lean` | Ordered child-by-child syntax conversion relation and traversal equivalence; no Source meaning/origin claim |
+| `Lowering/P8/SourceAstExpressionCorrespondence.lean` | Structural receiver/operand/argument correspondence for unchanged expression conversion; no meaning or origin claim |
