@@ -2008,3 +2008,22 @@ Independent read-only finder and skeptic checked roles, hashes and historical
 record preservation without Lean or a server. Evidence hashes are in
 `tests/h55/module-times/scanner-observation-evidence.sha256`. This non-atomic
 static observation does not establish runtime coverage or acceptance.
+
+## Readonly-call audit observations
+
+`readonly_audit_controls.py` records six previously unreferenced readonly-call
+candidates with their source hashes and the audit feature document hash. The
+roles distinguish the negative always-revert relation, joint clients, dispatch
+refutations, static-mode flag inhabitation and isolated Source-success fixtures.
+These are not compiler-success replacements or producer adequacy proofs; current
+driver, exact inputs, effects and outcomes remain unresolved. The classifier
+covers only the supplied subset.
+
+At `11541784d177ac3404a9809222fe4438caf87b1d`, the refreshed static index
+has 765 candidates, 505 with supplied current references and 260 without; six
+retain historical references for review. Three candidates were added and none
+changed or removed since the preceding snapshot. Independent read-only finder
+and skeptic checked the roles, hashes and history preservation without Lean or a
+server. Evidence hashes are in
+`tests/h55/module-times/readonly-audit-evidence.sha256`. This non-atomic static
+observation does not establish runtime coverage or acceptance.
