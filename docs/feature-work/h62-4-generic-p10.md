@@ -449,3 +449,97 @@ Independent read-only finder and skeptic pass the source application and test
 updates, with no statement weakening found. Source checks and trust/orphans/
 roots/fragments/whitespace pass. These results do not discharge the pending
 kernel, axiom, meaning, timing, touched-build or full Bridge gates.
+
+
+## H133 VX1 G01 producer-review intake (2026-11-07)
+
+H133 routes the former V15 G01 EVM/resource review to this successor. The
+requester identifies head6cff82c7dcde5d21792a9467486f54408cf11f1a. That Git object
+and prior ee8eccaf5f9536a44912c7d2ec31329e7b46adaf are absent locally; the reported
+VX1 test directory/run-indexed interface is not available on fetched master.
+Exact consumer fields and proofs therefore have not been reviewed. Request an
+authenticated head-bound bundle/patch or frozen V1.RunIndexed interface with
+consequences/controls, paths and checksums through the coordinator relay; no
+peer VM branch was fetched and no interface was reconstructed from prose.
+
+A preliminary review of actual master G01 contracts and local P10 producers is
+saved under `/workspace/parallel-20261103/executable-bytecode/h133-vx1-g01-review`.
+P10 FrozenV1.api supplies constructed-site decode, charged local-step and
+continuation laws. It does not instantiate EvmSpec/Execution session deployment,
+all-history gas schedules, uniform environment maps, two-sided resource/prefix
+transport, source/compiler origin, physical memory, hash/world/chain coupling
+or arbitrary-instance nonvacuity. Local BYTE word-image laws are relevant inputs,
+not a physical-layout or full solc-convention certificate. CALL case alignment
+still assumes the exact entered Theta reply; it does not derive callee coupling.
+
+The reviewed public master references are EvmSpec/Execution in
+Solidity/Roadmap/Contracts.lean and GasRes/Certificate in Solidity/Roadmap/Evm.lean.
+These are context, not a substitute for VX1's unavailable exact run-indexed
+signature. The reported gasquery5 control does not supply a universal operational
+producer. No consumer theorem defect or frozen repair is inferred from missing
+bytes, no certificate/premise is invented, and no producer linkage is approved.
+All five capability-review gaps remain explicit. No Source/H16 or frozen
+interface edit, build, proof budget change, narrowing of eligibility, gate
+waiver or old Claude contact occurred. Original work and exact producer/cache
+waits remain unchanged.
+
+Independent read-only finder/skeptic reviews pass this preliminary capability
+review and authenticated-input request. Neither reviewed the missing consumer
+proof bytes or ran Lean/builds/server calls. No new producer certificate or
+operational linkage is delivered by this receipt.
+
+## H133 exact G01 snapshot review (2026-11-07)
+
+The coordinator delivered the exact VX1 source snapshot at
+6cff82c7dcde5d21792a9467486f54408cf11f1a. Archive SHA256 is
+be65675def5c8a03a7f7998312e623f95c5ed5849fe3780b0ff7ba0b295eb80d;
+metadata SHA256 is
+cd5741b329a2fe19b1a15d6ae48f019d483b09ec63ec4ea19f94193e8f9c8008.
+The nine files are preserved under
+/workspace/parallel-20261103/executable-bytecode/h133-exact-g01-review/source/.
+This resolves the preceding exact-source availability wait. It does not deliver
+the original VM handoff, external import/cache closure or a production certificate.
+
+RunIndexed is in the snapshot path
+Solidity/Language/EnvironmentFields/Contracts.lean. All ten Certificate fields
+are source-bound and accounted: admission; envSound/envOnto; legality;
+sourceResourceCoverage; need; sourceCoverage/targetCoverage; forward/backward.
+The chosen source oracle/resource and compiled artifact remain fixed; need and
+resource coverage precede Forward/Guard checks. The guarded directions retain
+their original eligibility, environment, coupling and observation obligations.
+The backward field does not assert source Forward, and this review adds none.
+
+TargetRuns relates observed scalar kinds/values to its query list and reader.
+Coupled orders complete Query labels, including code/occurrence, but the actual
+execution provenance of those labels remains a producer obligation. Agreement
+is only on executed queries; no agreement is inferred for unexecuted reads.
+The completion statements preserve compiled equality, eligibility, target guard
+and completion; their written proofs use inherited Prefix.Le.final_eq.
+Exact mode preserves the full completed prefix and raw outcome bytes. The
+provided gasleft5/success[5] and success[6] refusal remain toy-model controls,
+not gas-cost, session or callee-world proofs.
+
+The delivered EmptyDomainControls explicitly keeps admitted compilation and live
+D2/D3/D4 witnesses while setting both Allowed predicates to False. It supplies
+no eligible source/target execution. Thus admitsSome is not a production
+execution-nonvacuity result. This is an intentional limitation control already
+in the consumer snapshot, not a frozen-statement repair or permission for empty
+production domains. Actual chain environments and eligible runs must be linked
+by the operational producer under the unchanged public contract.
+
+All eleven reviewed P10/public producer files are unchanged from the preliminary
+review. Constructed-site decoding/charging/continuation, numeric BYTE laws and
+CALL case alignment do not supply the ten-field run certificate, full Osaka
+resource semantics, independent source legality, physical solc layout, unsafe
+actual-exit linkage or crypto/chain/session adapters. D2-D4 are explicitly
+parameterized producer relations; their connection to target execution is still
+an adapter obligation. Entered CALL reply agreement still depends on hreply.
+No new public premise, eligibility restriction or interface change is proposed.
+
+Source review and the exact field-to-producer gap map are complete for these
+bytes. The snapshot omits its external direct import Solidity.Roadmap.Contracts;
+its imported semantics and kernel closure were not independently validated.
+No producer instance, Source-owner approval, H38 full-freeze approval, new proof,
+axiom audit, build or runtime gate is claimed. Separate read-only finder and
+skeptic reviews pass this bounded source review; original obligations and
+physical/cache/compatibility/PowerBounds waits remain unchanged.

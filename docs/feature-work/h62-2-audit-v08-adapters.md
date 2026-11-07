@@ -1,5 +1,7 @@
 # H62 item 2 — v08-adapters audit, ongoing
 
+> H145 archive: historical lane evidence named below is preserved in private `SolidiKeY/solidity-lean-coord` at `3b6d1771be16710843a2c2f6e7a54e5a28af65c8 evidence/solidity-v07-v11-20261030/v08-world-lowering/`. Append a cited `branch-evidence/...` archive-relative path once; a filename-only historical receipt resolves as `branch-evidence/<original repository-relative path>`. These receipt paths are archive coordinates, not public-tree dependencies. Lean, scripts and genuine checker fixtures remain in the code repository. Evidence moved by master is under `archive/solidity-lean/` in that private repository.
+
 Owner: `solidity-h62-2-20261106/audit-v08-adapters`.
 Repository: `/workspace/solidity-lean`.
 Branch: `codex/solidity-h62-2-20261106/audit-v08-adapters`.
@@ -213,7 +215,8 @@ limits, metadata field typing, wrong census-run substitution, and cache stabilit
 plus artifact verification. Final review text is saved in reviews-v424-h69.json.
 Full goal completion remains unclaimed.
 
-Registration proposals are in the owned tests registration-fragment.md; no
+Registration proposals are archived under the H145 private coordinates as
+branch-evidence/tests/h62/item2/audit-v08-adapters/registration-fragment.md; no
 central registration or import promotion is applied. Metaprograms importing Lean
 must remain outside the dependency-free core.
 
@@ -360,7 +363,7 @@ An independent production-frame item has only completed its three pre-edit basel
 
 ## Census acceptance under Python optimization
 
-The lexical regression driver now uses explicit refusals for all 16 original assertion predicates, preserving their AST expressions. Normal and optimized Python accept valid synthetic metadata and explicit unresolved headers, and reject ten malformed metadata cases each. The retained census snapshot also passes; this does not revalidate current source bytes or establish witnesses, kernel statement fidelity, or complete inventory. Commands and off-Git evidence hashes are in `tests/h62/item2/audit-v08-adapters/census-optimization-manifest.json`. No Lean source, premise, exclusion or budget changed.
+The lexical regression driver now uses explicit refusals for all 16 original assertion predicates, preserving their AST expressions. Normal and optimized Python accept valid synthetic metadata and explicit unresolved headers, and reject ten malformed metadata cases each. The retained census snapshot also passes; this does not revalidate current source bytes or establish witnesses, kernel statement fidelity, or complete inventory. Commands and off-Git evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/census-optimization-manifest.json`. No Lean source, premise, exclusion or budget changed.
 
 Independent read-only finder and skeptic reviews found no blocking issue; neither used Lean or the Lean server.
 
@@ -368,7 +371,7 @@ Independent read-only finder and skeptic reviews found no blocking issue; neithe
 
 The unchanged `LocalGuardSuccess.Contract` now entails a general runtime distinction: deterministic selection yields the same code image, and its `Out.isRevert` observations differ for true and false. `inputBlind_not_contract` rejects any compiler whose selected code has equal revert observations on these inputs; `actual_not_inputBlind` applies the real public selection contract. All original declarations are byte-preserved. This is one existing fixture, without charged-gas, fork or complete compiler adequacy.
 
-The finder identified that comparing complete outputs could distinguish only retained input machines. The revised proof compares the existing revert observation and passed the serial per-file gate. The initial timing STOP (1.862→2.165 seconds, +16.3%) is retained. After removing duplicate transitive axiom queries, the changed candidate measured 1.968→2.058 seconds (+4.6%); the remaining query covers all three proofs transitively and reports only the existing standard Lean axioms. Evidence and exact commands are indexed in `tests/h62/item2/audit-v08-adapters/input-blind-manifest.json`. No global gate pass is claimed.
+The finder identified that comparing complete outputs could distinguish only retained input machines. The revised proof compares the existing revert observation and passed the serial per-file gate. The initial timing STOP (1.862→2.165 seconds, +16.3%) is retained. After removing duplicate transitive axiom queries, the changed candidate measured 1.968→2.058 seconds (+4.6%); the remaining query covers all three proofs transitively and reports only the existing standard Lean axioms. Evidence and exact commands are indexed in `branch-evidence/tests/h62/item2/audit-v08-adapters/input-blind-manifest.json`. No global gate pass is claimed.
 
 Final independent finder and skeptic reviews accepted the corrected status observation. Their review was read-only without Lean/server use; the transitive footprint report is not a complete declaration census.
 
@@ -376,13 +379,13 @@ Final independent finder and skeptic reviews accepted the corrected status obser
 
 A general axiom-free `option_selection_joint` candidate proves that deterministic Option selection yields one witness for every runtime case, provided an explicit index inhabits the case domain. Its checked `contract_joint_iff` and `actual_joint` instances retain the original local-guard contract and actual selected execution. Independent read-only finder and skeptic found no semantic issue, without Lean/server use. This is packaging of existing execution evidence, not additional compiler coverage.
 
-Runtime acceptance is NOT satisfied: the first matched check measured 2.066→2.278 seconds (+10.26%). Removing a redundant diagnostic command produced a changed candidate, measured once at 1.958→2.162 seconds (+10.42%), also STOP. Both failures are retained. The checked candidate and patch are preserved off Git, and the production test file was restored exactly to its committed source. No unchanged retry or integration is claimed. Exact evidence hashes are in `tests/h62/item2/audit-v08-adapters/selection-joint-manifest.json`. Further proof-cost reduction or another independent queue item is required.
+Runtime acceptance is NOT satisfied: the first matched check measured 2.066→2.278 seconds (+10.26%). Removing a redundant diagnostic command produced a changed candidate, measured once at 1.958→2.162 seconds (+10.42%), also STOP. Both failures are retained. The checked candidate and patch are preserved off Git, and the production test file was restored exactly to its committed source. No unchanged retry or integration is claimed. Exact evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/selection-joint-manifest.json`. Further proof-cost reduction or another independent queue item is required.
 
 ## Shared-selection proof cost reduction
 
 The held shared-selection candidate now has a direct elimination/transport proof of `option_selection_joint`. Its statement, `contract_joint_iff`, and `actual_joint` are unchanged from the checked held candidate. All previously committed declarations remain byte-identical. Deterministic selection identifies the same witness for every case; the explicit index preserves the nonempty-domain condition. The actual instance still packages existing execution evidence, without expanding compiler, Source, gas or fork coverage.
 
-The direct-term candidate passed the approved serial gate and matched warm timing, 2.164→2.266 seconds (+4.7%), with one Lean process and under 0.84 GB sampled aggregate RSS. The remaining `actual_joint` axiom query covers the general lemma and exact equivalence transitively and reports only existing standard Lean axioms; the earlier standalone report established the general lemma axiom-free. All earlier STOPs and candidate bytes remain retained, rather than overwritten. This resolves only the local timing hold, not full-family acceptance. Evidence hashes are in `tests/h62/item2/audit-v08-adapters/selection-joint-direct-manifest.json`.
+The direct-term candidate passed the approved serial gate and matched warm timing, 2.164→2.266 seconds (+4.7%), with one Lean process and under 0.84 GB sampled aggregate RSS. The remaining `actual_joint` axiom query covers the general lemma and exact equivalence transitively and reports only existing standard Lean axioms; the earlier standalone report established the general lemma axiom-free. All earlier STOPs and candidate bytes remain retained, rather than overwritten. This resolves only the local timing hold, not full-family acceptance. Evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/selection-joint-direct-manifest.json`.
 
 Independent read-only finder and skeptic accepted the direct-term proof and unchanged statements; neither used Lean or the Lean server.
 
@@ -390,7 +393,7 @@ Independent read-only finder and skeptic accepted the direct-term proof and unch
 
 `P8StatementCensus.lean` now supports `H62_WORLD_CENSUS=1` to inventory EnvironmentProjection, ConstructorScalarTransport, LibraryFrameTransport, CreationPremises and LibraryPremises by exact defining-module identity. It reuses the existing collector and adds a distinct `H62_WORLD_CENSUS_JSON` marker. All 157 original P8 rows match the original collector byte-for-byte under the same imports; default mode emits no world rows. Private/generated declarations are retained.
 
-The opt-in run checked 369 world declarations (module counts 46/111/57/71/84 respectively), retaining raw kernel types, structure fields, binders, provenance and per-declaration axiom footprints. Every entry remains PENDING and zero new joint witnesses are claimed. Only existing standard Lean axioms appeared. The full 881-file interface audit remains unfinished. Raw inventory stays off Git; hashes and exact invocation are in `tests/h62/item2/audit-v08-adapters/world-agreement-inventory-manifest.json`.
+The opt-in run checked 369 world declarations (module counts 46/111/57/71/84 respectively), retaining raw kernel types, structure fields, binders, provenance and per-declaration axiom footprints. Every entry remains PENDING and zero new joint witnesses are claimed. Only existing standard Lean axioms appeared. The full 881-file interface audit remains unfinished. Raw inventory stays off Git; hashes and exact invocation are in `branch-evidence/tests/h62/item2/audit-v08-adapters/world-agreement-inventory-manifest.json`.
 
 The corrected opt-in run passed in 45.461 seconds with one Lean process and 1.181 GB sampled aggregate RSS. The initial reserved-identifier parse failure is retained. Original/default collector measurements under the same expanded import environment were 13.081/13.435 seconds; this is not a comparison against the original import graph or full-family performance acceptance. Imports are unconditional even in default mode. Independent read-only finder and skeptic accepted filtering, output compatibility and limited inventory claims; neither used Lean/server. No producer, Source, theorem, premise, axiom set or proof budget was changed.
 
@@ -398,7 +401,7 @@ The corrected opt-in run passed in 45.461 seconds with one Lean process and 1.18
 
 All five original predicates in `reconcile.py` now use explicit refusals rather than removable assertions. The regression suite compares 49 original predicate ASTs across the four acceptance scripts to the preserved baseline. Seven malformed reconciliation cases (complete-inventory claim, either invalid input status, duplicate census IDs, overlapping coverage, wrong coverage count, and an unknown covered ID) are rejected in both normal and optimized Python with no result artifact or success message. Valid synthetic metadata still reports 13 accounted targets, two remaining entries, and zero global SourceSpec witnesses.
 
-All six tests pass in both modes. The first development invocation ran only the four old tests because the new class followed unittest discovery; discovery order was fixed before acceptance. Original, normal, and optimized reconciliation outputs on the retained census/resource/local snapshots are byte-identical. These are metadata regression checks, not renewed source/fidelity validation or additional witness coverage. Exact commands, output hashes and logs stay off Git, indexed by `tests/h62/item2/audit-v08-adapters/reconciliation-optimization-manifest.json`. Independent read-only finder and skeptic found no issue; neither used Lean/server. No Lean source, original predicate, proof budget or exclusion changed.
+All six tests pass in both modes. The first development invocation ran only the four old tests because the new class followed unittest discovery; discovery order was fixed before acceptance. Original, normal, and optimized reconciliation outputs on the retained census/resource/local snapshots are byte-identical. These are metadata regression checks, not renewed source/fidelity validation or additional witness coverage. Exact commands, output hashes and logs stay off Git, indexed by `branch-evidence/tests/h62/item2/audit-v08-adapters/reconciliation-optimization-manifest.json`. Independent read-only finder and skeptic found no issue; neither used Lean/server. No Lean source, original predicate, proof budget or exclusion changed.
 
 ## Exact kernel types for seven unresolved calldata headers
 
@@ -406,7 +409,7 @@ The four published RawAddress/RawBool/RawInt/RawUintN Execution modules now have
 
 The small `scripts/h62/item2/audit-v08-adapters/generate_calldata_census.py` reuses the existing P8 collector body verbatim. Its fixed module set, validated output name/scope, symlink-redirection checks, exclusive creation and pinned-output-SHA option are exercised by five tests in normal and optimized Python. Use the writer lease for materialization. The generated diagnostic stays untracked; regenerate it with the recorded expected hash before the approved per-file gate. The actual diagnostic passed in 194.404 seconds, with one Lean process and 1.235 GB sampled aggregate RSS, including import rebuilding. This is new diagnostic coverage, not a checking-speed comparison or a production runtime acceptance claim.
 
-The full inventory is a verified gzip outside Git. Exact generation/gate commands, source/hash provenance, seven target names, counts and evidence hashes are in `tests/h62/item2/audit-v08-adapters/calldata-kernel-manifest.json`. Independent read-only finder and skeptic accepted the generator, inventory and bounded claims before sealing; neither used Lean/server. Separate cleanup finder and skeptic verified all four lossless archives and reviewed restoration without executing it.
+The full inventory is a verified gzip outside Git. Exact generation/gate commands, source/hash provenance, seven target names, counts and evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/calldata-kernel-manifest.json`. Independent read-only finder and skeptic accepted the generator, inventory and bounded claims before sealing; neither used Lean/server. Separate cleanup finder and skeptic verified all four lossless archives and reviewed restoration without executing it.
 
 H1 losslessly archived four specifically reviewed historical cumulative-log copies after independent full decompression/hash/size checks and fresh inactivity/identity checks. The retained canonical log and all source/caches/current outputs are unchanged. Each compressed copy independently retains every original byte. Net free space increased by 284,717,056 bytes (1,865,076,736→2,149,793,792 immediately after archival). The old raw paths are intentionally absent: historical raw-path seals are NOT complete in place until exclusive verified restoration using the retained restore script, before running those old acceptance commands. Receipt, SHA manifest, restoration code and four compressed files stay together under the evidence directory. Cache shipment remains unadmitted; immutable hardlinked census logs were untouched.
 
@@ -416,7 +419,7 @@ H1 losslessly archived four specifically reviewed historical cumulative-log copi
 
 The tool checks input name/ID uniqueness, exact module scope and kernel type hashes. It recognizes only exact public names or the standard module-qualified private prefix with an ASCII numeric counter. Ambiguous matches retain every candidate; missing or unsupported private spellings remain unmatched. All output fidelity/witness statuses remain PENDING, with zero new witnesses and zero fidelity acceptances. It does not infer a parsed-type equivalence, feasible premises or current-source validation from name alignment. The lexical scanner and original snapshot bytes are unchanged.
 
-Five regression tests pass under normal and optimized Python, including multiple-candidate retention, missing names, malformed private spellings, duplicate/scope/type-digest refusals, owner-hint nonpromotion and outside-scope accounting. Actual normal/optimized outputs are byte-identical. Reusing an existing output path fails without altering its bytes. Evidence, exact commands and source hashes are in `tests/h62/item2/audit-v08-adapters/kernel-name-reconciliation-manifest.json`; no Lean build was started for this metadata-only increment. Producer waits, full audit validation and earlier pin/layer failures remain open.
+Five regression tests pass under normal and optimized Python, including multiple-candidate retention, missing names, malformed private spellings, duplicate/scope/type-digest refusals, owner-hint nonpromotion and outside-scope accounting. Actual normal/optimized outputs are byte-identical. Reusing an existing output path fails without altering its bytes. Evidence, exact commands and source hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/kernel-name-reconciliation-manifest.json`; no Lean build was started for this metadata-only increment. Producer waits, full audit validation and earlier pin/layer failures remain open.
 
 Independent read-only finder and skeptic accepted this snapshot-accounting boundary without Lean/server use. Type digests establish input self-consistency, not trusted kernel provenance; the original kernel-capture receipt remains separate evidence. Outside-scope lexical rows are counted rather than copied, and multiple lexical IDs may reference one kernel candidate; no bijection is asserted.
 
@@ -426,21 +429,21 @@ Published master 254c60df was adopted on the existing branch. One generic-v08 do
 
 The actual layer gate now PASSES with zero new closure edges and 107 published pinned allowances, clearing the earlier layer wait. Trust, registration and whitespace pass. The actual pin gate still FAILS: zero errors, thirteen unrecorded changes, all from the two owned guarded audit fixtures. Fresh serial per-file checks validate their seven axiom-free resource reports and six reports using only the existing standard three Lean axioms. This is revalidation of existing statements, not new witness coverage or producer closure.
 
-`tests/h62/item2/audit-v08-adapters/g07-pin-registration-request.json` supplies exact contents for two proposed per-file generated fragments, including the current registry/source hashes and request WORLD-G07-13. It uses the unchanged production collector/comparator rather than a second parser. Applying only these entries in memory yields zero errors and zero changes; NO shared registry or fragment was edited, and the real pin gate remains failed until coordinator G07 registers and regenerates the aggregate, then reruns it. No statement, exclusion, budget, axiom set or error classification was relaxed.
+`branch-evidence/tests/h62/item2/audit-v08-adapters/g07-pin-registration-request.json` supplies exact contents for two proposed per-file generated fragments, including the current registry/source hashes and request WORLD-G07-13. It uses the unchanged production collector/comparator rather than a second parser. Applying only these entries in memory yields zero errors and zero changes; NO shared registry or fragment was edited, and the real pin gate remains failed until coordinator G07 registers and regenerates the aggregate, then reruns it. No statement, exclusion, budget, axiom set or error classification was relaxed.
 
-Independent read-only finder and skeptic accepted the exact guarded footprints and the proposal-only boundary without Lean/server use. Commands, merge preservation, final-head source bindings and raw evidence hashes are in `tests/h62/item2/audit-v08-adapters/master-pin-layer-refresh-manifest.json`. Global SourceSpec/body/world producers, full H68 certificates and all unfinished original audit/generic queues remain open.
+Independent read-only finder and skeptic accepted the exact guarded footprints and the proposal-only boundary without Lean/server use. Commands, merge preservation, final-head source bindings and raw evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/master-pin-layer-refresh-manifest.json`. Global SourceSpec/body/world producers, full H68 certificates and all unfinished original audit/generic queues remain open.
 
 ### Non-theorem frozen-source worklist
 
 `declaration_signals.py` supplements the theorem-only lexical snapshot without changing its predicates. It reads the exact frozen Git blobs selected by the existing census and checks each against the snapshot SHA256 before producing an off-Git worklist. All 881 module bindings passed. The worklist retains 4,850 non-theorem keyword occurrences (including 4,041 `def`, 534 `abbrev` and 136 `structure` signals), plus all 7,951 theorem tokens. Syntax quotations and other false positives remain pending rather than being silently filtered.
 
-This is neither an all-kind kernel census nor semantic declaration classification: generated declarations, proof projections, inherited binders and namespaces remain unresolved. It adds zero witnesses or statement-fidelity acceptances and does not validate current source bytes. Eight regression tests pass in normal and optimized Python, including duplicate-module, unknown-module and mismatched-snapshot refusal. Bulk output and test logs remain outside Git, indexed by `tests/h62/item2/audit-v08-adapters/declaration-signals-manifest.json`.
+This is neither an all-kind kernel census nor semantic declaration classification: generated declarations, proof projections, inherited binders and namespaces remain unresolved. It adds zero witnesses or statement-fidelity acceptances and does not validate current source bytes. Eight regression tests pass in normal and optimized Python, including duplicate-module, unknown-module and mismatched-snapshot refusal. Bulk output and test logs remain outside Git, indexed by `branch-evidence/tests/h62/item2/audit-v08-adapters/declaration-signals-manifest.json`.
 
 ### Bounded mapped kernel-collector preparation
 
 `generate_mapped_census.py` reuses the existing collector body for one to four explicitly selected files from the frozen audit snapshot. It checks the snapshot hash against the frozen Git blob and checks each selected current import against those same bytes before materializing a diagnostic. Duplicate, unmapped, stale and redirected inputs are refused. Generated files stay in the existing owned diagnostic directory, use exclusive creation, and can be pinned by output SHA256. No new collector implementation or lexical acceptance predicate was introduced. The old calldata renderer's default output remains byte-identical (`82c3ee64…`).
 
-Seven mapped-generator tests and five original calldata-generator tests passed in normal and optimized Python. The actual FailureResources diagnostic was materialized off Git and a repeated write was refused without changing its bytes. Finder and skeptic reported no findings. This is preparation only: no Lean check or new kernel inventory is claimed, and selected-file checks do not validate transitive imports. Disk remains below the retained reserve, so the approved per-file gate was not started. Exact bindings and evidence are indexed in `tests/h62/item2/audit-v08-adapters/mapped-census-generator-manifest.json`.
+Seven mapped-generator tests and five original calldata-generator tests passed in normal and optimized Python. The actual FailureResources diagnostic was materialized off Git and a repeated write was refused without changing its bytes. Finder and skeptic reported no findings. This is preparation only: no Lean check or new kernel inventory is claimed, and selected-file checks do not validate transitive imports. Disk remains below the retained reserve, so the approved per-file gate was not started. Exact bindings and evidence are indexed in `branch-evidence/tests/h62/item2/audit-v08-adapters/mapped-census-generator-manifest.json`.
 ## H44 packaging correction (2026-11-07)
 
 The 178990-byte scope JSON is preserved byte-for-byte off-tree at
@@ -456,13 +459,13 @@ Packaging only: retirement pause remains; no proof continuation or push.
 
 The coordinator clarified that the retained 4 GiB reserve applies to RAM, not disk. With approximately 3.4 GB disk free and adequate available RAM, the prepared FailureResources diagnostic passed the approved serial per-file gate in 6.754 seconds, with one Lean process, 708,759,552 bytes peak sampled aggregate RSS, no swap and no STOP. The unchanged wrapper enforced the 12 GiB limits and 4 GiB RAM reserve. The initial checkout build remains untouched; `Q-WORLD-INITIAL-BUILD` no longer blocks these checks.
 
-The actual kernel output contains twenty defining-module records: twelve theorems, seven other declarations and one predicate definition. Only the existing standard Lean axioms appear. Every record remains PENDING, with zero new witnesses or fidelity acceptances. This validates the prepared collector on this existing resource family; it does not add global SourceSpec/body/world coverage, semantic adequacy or an all-module gate pass. Bulk types and logs remain outside Git, indexed by `tests/h62/item2/audit-v08-adapters/mapped-census-check-manifest.json`. Earlier disk-reserve STOP/hold reports remain historical evidence; the capacity interpretation is corrected here rather than changing proof or memory budgets.
+The actual kernel output contains twenty defining-module records: twelve theorems, seven other declarations and one predicate definition. Only the existing standard Lean axioms appear. Every record remains PENDING, with zero new witnesses or fidelity acceptances. This validates the prepared collector on this existing resource family; it does not add global SourceSpec/body/world coverage, semantic adequacy or an all-module gate pass. Bulk types and logs remain outside Git, indexed by `branch-evidence/tests/h62/item2/audit-v08-adapters/mapped-census-check-manifest.json`. Earlier disk-reserve STOP/hold reports remain historical evidence; the capacity interpretation is corrected here rather than changing proof or memory budgets.
 
 ### ABI, crypto, selector and declaration-role kernel inventory
 
 The existing mapped collector checked four frozen-mapped observation modules whose current source bytes match their recorded snapshots. The approved serial per-file gate passed in 9.112 seconds with one Lean process, 858,378,240 bytes peak sampled aggregate RSS and no STOP. It captured 66 unique defining-module declarations: AbiObservations 25, CryptoObservations 17, DeclarationRoles 14 and SelectorObservations 10. Of these, 62 are theorems and four are other declarations. Only the existing standard Lean axioms appeared.
 
-Every record remains PENDING and adds zero witnesses or statement-fidelity acceptances. These observation laws do not establish source ABI execution, signature resolution, installation/layout admission, the global SourceSpec producer or H68 full-session correspondence. Generated diagnostic source and bulk kernel types remain off Git; exact source bindings, invocation and evidence hashes are indexed in `tests/h62/item2/audit-v08-adapters/observation-kernel-manifest.json`.
+Every record remains PENDING and adds zero witnesses or statement-fidelity acceptances. These observation laws do not establish source ABI execution, signature resolution, installation/layout admission, the global SourceSpec producer or H68 full-session correspondence. Generated diagnostic source and bulk kernel types remain off Git; exact source bindings, invocation and evidence hashes are indexed in `branch-evidence/tests/h62/item2/audit-v08-adapters/observation-kernel-manifest.json`.
 
 ### Twelve callable/metadata kernel inventories
 
@@ -470,7 +473,7 @@ Three serial groups of four frozen-mapped modules passed the approved bounded ga
 
 The groups capture 576 unique defining-module declarations: 374 theorems, 187 other declarations, seven proof definitions, two structure carriers and six predicate definitions. Private/generated/support records remain present. The carriers include `ScalarCallableTransport.BodySelection` and `IntegerCallable.Inputs`; capturing their fields is not a simultaneous witness. Only the existing standard Lean axioms appeared. Counts do not establish lexical-name correspondence or exact statement-fidelity acceptance.
 
-All records remain PENDING, with zero new witnesses and zero fidelity acceptances. Callable execution adequacy, nonvacuity of the full public compiler contract, global SourceSpec/body producers and H68 session correspondence remain separate obligations. Exact module counts, commands, source bindings and off-Git bulk hashes are in `tests/h62/item2/audit-v08-adapters/callable-kernel-manifest.json`.
+All records remain PENDING, with zero new witnesses and zero fidelity acceptances. Callable execution adequacy, nonvacuity of the full public compiler contract, global SourceSpec/body producers and H68 session correspondence remain separate obligations. Exact module counts, commands, source bindings and off-Git bulk hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/callable-kernel-manifest.json`.
 
 ### All-native integer callable joint model
 
@@ -478,13 +481,13 @@ All records remain PENDING, with zero new witnesses and zero fidelity acceptance
 
 Missing selection is refuted as an Inputs inhabitant and also yields the actual original stuck outcome. Zero horizon yields the actual timeout, with the complete source locals/state pair retained. A different mathematical target value is refused through the existing numeric observation. These are component fixtures: the program uses the constant selected-body pattern already present in the signed client, and the target entry still specializes the transported argument as a typed literal. No arbitrary-body compiler, ABI ingress, external-call or global SourceSpec admission claim follows.
 
-The first conditional-name fixture hit the unchanged 200,000 heartbeat limit during input elaboration; its source and failure logs are retained. Simplifying to the existing selected-body pattern and separating field proofs passed without raising a budget. The final extended fixture passed the approved serial gate in 1.458 seconds, with one Lean process, 760,143,872 bytes peak sampled aggregate RSS and no STOP. Six axiom reports use only the existing standard axioms. Trust, registration and whitespace checks passed, and independent finder/skeptic reviews found no issues. This contributes one parameterized component joint-model family; complete census correspondence, full public-compiler acceptance and full-family timing remain unfinished. Exact source bindings and all failed/successful evidence are in `tests/h62/item2/audit-v08-adapters/integer-joint-manifest.json`.
+The first conditional-name fixture hit the unchanged 200,000 heartbeat limit during input elaboration; its source and failure logs are retained. Simplifying to the existing selected-body pattern and separating field proofs passed without raising a budget. The final extended fixture passed the approved serial gate in 1.458 seconds, with one Lean process, 760,143,872 bytes peak sampled aggregate RSS and no STOP. Six axiom reports use only the existing standard axioms. Trust, registration and whitespace checks passed, and independent finder/skeptic reviews found no issues. This contributes one parameterized component joint-model family; complete census correspondence, full public-compiler acceptance and full-family timing remain unfinished. Exact source bindings and all failed/successful evidence are in `branch-evidence/tests/h62/item2/audit-v08-adapters/integer-joint-manifest.json`.
 
 ### Explicit native integer endpoints
 
 The same all-native joint model now realizes minimum, zero and maximum calls together for every valid integer type. Both endpoint range proofs derive from the original `zero_mem` bounds. Each actual source call preserves the entire supplied locals/state pair. Target numeric observations retain the mathematical lower and upper values, including the signed lower endpoint. These are three separate calls sharing one model, not composed session execution or a fixed runtime compiler artifact.
 
-The additive proof passed the approved serial gate with one Lean process, 762,490,880 bytes peak sampled aggregate RSS and no STOP. Matched focused times were 1.566 seconds before and 1.561 seconds after (−0.32%); this is not a speedup or a full-family performance claim. The prior accepted fixture, candidate bytes and both runs remain retained. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. No new joint-model family or full statement-fidelity acceptance is counted. All global Source/body/world and H68 obligations remain open. Evidence is indexed in `tests/h62/item2/audit-v08-adapters/integer-boundaries-manifest.json`.
+The additive proof passed the approved serial gate with one Lean process, 762,490,880 bytes peak sampled aggregate RSS and no STOP. Matched focused times were 1.566 seconds before and 1.561 seconds after (−0.32%); this is not a speedup or a full-family performance claim. The prior accepted fixture, candidate bytes and both runs remain retained. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. No new joint-model family or full statement-fidelity acceptance is counted. All global Source/body/world and H68 obligations remain open. Evidence is indexed in `branch-evidence/tests/h62/item2/audit-v08-adapters/integer-boundaries-manifest.json`.
 
 ### Conditional-call simultaneous premise witness
 
@@ -492,13 +495,13 @@ The additive proof passed the approved serial gate with one Lean process, 762,49
 
 The actual instance retains the full source result/state, target operand result/state, value relation and reached caller-local alignment. Existing stale-snapshot and skipped-write negative controls are retained. This is the existing signed-int8 fixture, not an all-native claim, target-callee compilation, full SourceWorld/store relation, ABI or SourceSpec admission proof.
 
-The first attempt had unresolved implicit contract/heap parameters and remains retained as failed evidence. Explicitly tying them to the same caller fixed the annotation without changing the relation or a proof budget. The successful serial gate took 1.253 seconds, with one Lean process, 794,189,824 bytes peak sampled aggregate RSS and no STOP; all four axiom reports use only existing standard axioms. Trust, registration and whitespace checks passed, and finder/skeptic reviews found no issues. One component joint-model family is recorded; full census-fidelity acceptance and full-family timing remain open. Exact bindings and evidence are in `tests/h62/item2/audit-v08-adapters/conditional-joint-manifest.json`.
+The first attempt had unresolved implicit contract/heap parameters and remains retained as failed evidence. Explicitly tying them to the same caller fixed the annotation without changing the relation or a proof budget. The successful serial gate took 1.253 seconds, with one Lean process, 794,189,824 bytes peak sampled aggregate RSS and no STOP; all four axiom reports use only existing standard axioms. Trust, registration and whitespace checks passed, and finder/skeptic reviews found no issues. One component joint-model family is recorded; full census-fidelity acceptance and full-family timing remain open. Exact bindings and evidence are in `branch-evidence/tests/h62/item2/audit-v08-adapters/conditional-joint-manifest.json`.
 
 ### Saved sixteen-module name accounting
 
 The unchanged `reconcile_kernel_names.reconcile` interface now accounts for the saved callable and observation snapshots together. Their sixteen modules contain 642 unique kernel records and 207 scoped lexical declarations; all 207 have public-name candidates. The 435 kernel-only records remain pending, including generated and support declarations. The full lexical input contains 7,951 entries, with 7,744 outside this operation's scope retained as an explicit count. Kernel roles are 436 theorems, 191 other declarations, seven proof definitions, two carriers and six predicate definitions.
 
-This is name accounting only. Owner hints remain unconfirmed; type digests check captured strings, not independent kernel provenance or parsed-type equivalence. No witness or statement-fidelity acceptance is added. The operation head records metadata execution, not a fresh validation of current source; kernel inputs retain the previously checked snapshot bindings. An off-Git reproducer pins the API and every input hash. Actual normal and optimized runs produced byte-identical results, and overwrite was refused without changing the saved output. Bulk records and reproduction files remain outside Git, indexed by `tests/h62/item2/audit-v08-adapters/v08-name-reconciliation-manifest.json`.
+This is name accounting only. Owner hints remain unconfirmed; type digests check captured strings, not independent kernel provenance or parsed-type equivalence. No witness or statement-fidelity acceptance is added. The operation head records metadata execution, not a fresh validation of current source; kernel inputs retain the previously checked snapshot bindings. An off-Git reproducer pins the API and every input hash. Actual normal and optimized runs produced byte-identical results, and overwrite was refused without changing the saved output. Bulk records and reproduction files remain outside Git, indexed by `branch-evidence/tests/h62/item2/audit-v08-adapters/v08-name-reconciliation-manifest.json`.
 
 ### Coherent populated catalogue/image/reset fixture
 
@@ -506,7 +509,7 @@ This is name accounting only. Owner hints remain unconfirmed; type digests check
 
 Empty accounts cannot satisfy this Image because source code is installed, and zero funds cannot match its nonzero relative sender balance. A separately assembled zero-clock world still satisfies Image but fails TimeAligned against timestamp 12345. This demonstrates the interface's intentional clock-free boundary, not a defect or weakened frozen statement. The history-insensitive toy ledger remains explicit: relative sender balance 100 differs from raw account balance 93. No canonical ledger, SourceSpec admission, body/frame execution adequacy or H68 bridge is supplied.
 
-The first attempt used a Nat observation annotation for the existing Int-valued intrinsic words; its failed source/logs remain retained. Correct Int annotations passed the serial gate in 1.142 seconds, with one Lean process, 729,341,952 bytes peak sampled aggregate RSS and no STOP. All six axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One relative joint-model family is recorded, with no full census-fidelity or full-family timing acceptance. Exact bindings and evidence are in `tests/h62/item2/audit-v08-adapters/world-image-joint-manifest.json`.
+The first attempt used a Nat observation annotation for the existing Int-valued intrinsic words; its failed source/logs remain retained. Correct Int annotations passed the serial gate in 1.142 seconds, with one Lean process, 729,341,952 bytes peak sampled aggregate RSS and no STOP. All six axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One relative joint-model family is recorded, with no full census-fidelity or full-family timing acceptance. Exact bindings and evidence are in `branch-evidence/tests/h62/item2/audit-v08-adapters/world-image-joint-manifest.json`.
 
 ### Fixed-bytes argument simultaneous witness
 
@@ -514,7 +517,7 @@ The first attempt used a Nat observation annotation for the existing Int-valued 
 
 Generic zero- and one-horizon timeouts retain the complete source pair. Known-width reconstruction recovers the exact `fitBytes`-normalized payload, including leading zeros, from the returned scalar. This does not assert identity with arbitrary raw input lists or define ABI encoding. Existing wrong-byte-order and stale-caller negative controls remain imported unchanged. The relation aligns local values/references; no callee execution, heap/World representation, runtime frame or global SourceSpec admission is established.
 
-The initial check passed in 18.556 seconds while building imports. The final extended fixture passed in 1.457 seconds with one Lean process, 797,024,256 bytes peak sampled aggregate RSS and no STOP. These cold/warm runs are not a matched speed comparison. Five axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `tests/h62/item2/audit-v08-adapters/fixed-bytes-joint-manifest.json`.
+The initial check passed in 18.556 seconds while building imports. The final extended fixture passed in 1.457 seconds with one Lean process, 797,024,256 bytes peak sampled aggregate RSS and no STOP. These cold/warm runs are not a matched speed comparison. Five axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `branch-evidence/tests/h62/item2/audit-v08-adapters/fixed-bytes-joint-manifest.json`.
 
 ### Ordered tuple simultaneous witness
 
@@ -522,7 +525,7 @@ The initial check passed in 18.556 seconds while building imports. The final ext
 
 Wrong protected target-slot and reversed numeric-result controls remain meaningful; the reversed-order control intentionally uses a numeric Option projection, while the main actual theorem retains full statuses. The original wrong-source-slot control remains imported unchanged. Actual zero-horizon timeout retains the same populated source pair. No tuple ABI codec, external-call semantics, arbitrary tuple family or canonical body/frame/admission adequacy is established.
 
-The exact final source passed the serial gate in 1.361 seconds, with one Lean process, 789,078,016 bytes peak sampled aggregate RSS and no STOP. Five axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; full census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `tests/h62/item2/audit-v08-adapters/tuple-joint-manifest.json`.
+The exact final source passed the serial gate in 1.361 seconds, with one Lean process, 789,078,016 bytes peak sampled aggregate RSS and no STOP. Five axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; full census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `branch-evidence/tests/h62/item2/audit-v08-adapters/tuple-joint-manifest.json`.
 
 ### Signed-write / unsigned-return cast joint witness
 
@@ -530,7 +533,7 @@ The exact final source passed the serial gate in 1.361 seconds, with one Lean pr
 
 The full original four conclusions retain the entire Source pair, raw signed caller writes, converted unsigned result relation and reached alias-aware family. Stale-source and raw-write/converted-return negative controls remain meaningful: for −1 the caller stores raw −1 while the return is unsigned maximum. Numeric projections are used only in the distinction control; actual retains complete runs. No target-callee compilation, ABI, heap/World/frame or admission adequacy is claimed.
 
-The exact final source passed the serial gate in 1.249 seconds, with one Lean process, 791,781,376 bytes peak sampled aggregate RSS and no STOP. Four axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact bindings and evidence are in `tests/h62/item2/audit-v08-adapters/word-cast-joint-manifest.json`.
+The exact final source passed the serial gate in 1.249 seconds, with one Lean process, 791,781,376 bytes peak sampled aggregate RSS and no STOP. Four axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact bindings and evidence are in `branch-evidence/tests/h62/item2/audit-v08-adapters/word-cast-joint-manifest.json`.
 
 The coordinator's latest routing identifies `solidity-v07-v11-20261030/v10-storage-operations` for actual Source admission/origin/lifecycle beyond SourceAstTypes, and `solidity-compiler10-20261028/memory-reference-structs` for complete production P1/G42.04 body/frame correspondence. These notices are not producer completion or validation. The full canonical H68 world-phase bridge remains assigned to V08; it is not delegated to a broad external owner label. WORLD-G07-13 still requires actual registration and a current pin-gate pass; the presence of central reconciliation commits alone is not gate evidence.
 
@@ -540,7 +543,7 @@ The coordinator's latest routing identifies `solidity-v07-v11-20261030/v10-stora
 
 On maximum-value increment, the two actual Source negative controls hold the updated caller fixed at zero while separately rejecting a new-value postfix return and an old-value prefix return. Generic zero-horizon timeout retains the whole source pair. This is the original unchecked component (`checked := false`) and the existing uint8 fixture, not all-width or checked-overflow coverage, target-callee compilation, ABI, heap/World/frame or canonical admission adequacy.
 
-The exact final source passed the serial gate in 1.569 seconds, with one Lean process, 801,652,736 bytes peak sampled aggregate RSS and no STOP. Five axiom reports use existing standard axioms. The first run built imports and is not a matched speed baseline. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `tests/h62/item2/audit-v08-adapters/unsigned-update-joint-manifest.json`.
+The exact final source passed the serial gate in 1.569 seconds, with one Lean process, 801,652,736 bytes peak sampled aggregate RSS and no STOP. Five axiom reports use existing standard axioms. The first run built imports and is not a matched speed baseline. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `branch-evidence/tests/h62/item2/audit-v08-adapters/unsigned-update-joint-manifest.json`.
 
 ### Joint-witness target accounting and frozen-scope boundary
 
@@ -548,7 +551,7 @@ The proof index links seven original frozen-snapshot targets exactly once to six
 
 The existing collector correctly refused `FixedBytesCallableArgument.lean`, which is absent from the frozen 881-file snapshot. Its valid V08 component witness remains separate uncounted backfill; the original census predicate and exclusions are unchanged. The target `WorldImage.image_reset` is captured from its actual module `WorldReset.lean`, rather than inferring a module from its namespace.
 
-A global-name merge also found three generated `Source.evalConvArgs.eq_*` names with different captured-module provenance across import snapshots. Both records for each name are retained with pending provenance, even though their captured type hashes agree. No canonical owner or single merged kernel environment is inferred. A refreshed WorldCatalogueTransport capture replaces only the older view of that module; the earlier snapshot remains preserved. Independent finder/skeptic reviews found no accounting overclaim. Bulk types, scope refusal and ambiguity records remain off Git, indexed in `tests/h62/item2/audit-v08-adapters/joint-target-index-manifest.json`.
+A global-name merge also found three generated `Source.evalConvArgs.eq_*` names with different captured-module provenance across import snapshots. Both records for each name are retained with pending provenance, even though their captured type hashes agree. No canonical owner or single merged kernel environment is inferred. A refreshed WorldCatalogueTransport capture replaces only the older view of that module; the earlier snapshot remains preserved. Independent finder/skeptic reviews found no accounting overclaim. Bulk types, scope refusal and ambiguity records remain off Git, indexed in `branch-evidence/tests/h62/item2/audit-v08-adapters/joint-target-index-manifest.json`.
 
 ### Pure-argument actual evaluation witness
 
@@ -556,7 +559,7 @@ A global-name merge also found three generated `Source.evalConvArgs.eq_*` names 
 
 The actual theorem retains all five original clauses: full source call/state, target body, result extraction, complete caller restoration and value relation. A value8 frame cannot witness the value7 target-step premise, and identical target syntax reads genuinely different paid frames. Those controls use numeric projections only; the main actual result retains full states/statuses. Separate source/target worlds are not asserted canonically related, and no general expression/callee, heap/World/frame, admission or H68 adequacy is established.
 
-The exact source passed the serial gate in 1.360 seconds with one Lean process, 796,925,952 bytes peak sampled aggregate RSS and no STOP. Four axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; full census-fidelity and full-family timing remain open. Evidence is indexed in `tests/h62/item2/audit-v08-adapters/pure-argument-joint-manifest.json`.
+The exact source passed the serial gate in 1.360 seconds with one Lean process, 796,925,952 bytes peak sampled aggregate RSS and no STOP. Four axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One component joint-model family is recorded; full census-fidelity and full-family timing remain open. Evidence is indexed in `branch-evidence/tests/h62/item2/audit-v08-adapters/pure-argument-joint-manifest.json`.
 
 The adopted-master static refresh at 80c156bf1 passed the layer gate with zero new edges and 107 allowances. Its actual pin gate failed with zero errors and 214 unregistered changes, including the unchanged WORLD-G07-13 entries. No shared registry was edited or full-gate pass inferred. Raw results remain in `/workspace/v08-world-lowering-evidence/master-gates-80c156bf1-20261107`.
 
@@ -566,7 +569,7 @@ The adopted-master static refresh at 80c156bf1 passed the layer gate with zero n
 
 Length observation is deliberately noninjective on two equal-length distinct byte lists. This is an H69 countermodel to the premise, not a fabricated ordinary witness or a defect in the conditional reflection law. Existing real paid-call lossy-equality and exact-byte-distinction controls remain intact. No independent Source, ABI, compiler/frame/admission or H68 adequacy is established.
 
-The initial monadic simplification failure and intermediate unused-simp warnings remain retained. Explicit bind reductions and removal of unused arguments produced a final pass in 1.154 seconds with one Lean process, 672,387,072 bytes peak sampled aggregate RSS and no STOP. The new fixture has zero warnings; nineteen imported warning lines remain in the log. Four axiom reports use only existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no semantic issues. One intrinsic component joint-model family is recorded; full census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `tests/h62/item2/audit-v08-adapters/callable-reflection-joint-manifest.json`.
+The initial monadic simplification failure and intermediate unused-simp warnings remain retained. Explicit bind reductions and removal of unused arguments produced a final pass in 1.154 seconds with one Lean process, 672,387,072 bytes peak sampled aggregate RSS and no STOP. The new fixture has zero warnings; nineteen imported warning lines remain in the log. Four axiom reports use only existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no semantic issues. One intrinsic component joint-model family is recorded; full census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `branch-evidence/tests/h62/item2/audit-v08-adapters/callable-reflection-joint-manifest.json`.
 
 ### Same-environment callable metadata witness
 
@@ -574,7 +577,7 @@ The initial monadic simplification failure and intermediate unused-simp warnings
 
 Target argument evaluation binds the last source argument innermost. Equal typed arity does not justify swapped names, wrong value order or reversed heterogeneous source types, as the retained negative controls show. The source unit is abstract: none of this proves independent Source function execution, deployment admission, body preservation, ABI or compiler/H68 adequacy.
 
-The initial ambiguous context-type annotation failure remains retained. Explicit Solidity.Ctx passed the final serial gate in 1.248 seconds, with one Lean process, 700,428,288 bytes peak sampled aggregate RSS and no STOP. Eight axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One metadata joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `tests/h62/item2/audit-v08-adapters/callable-metadata-joint-manifest.json`.
+The initial ambiguous context-type annotation failure remains retained. Explicit Solidity.Ctx passed the final serial gate in 1.248 seconds, with one Lean process, 700,428,288 bytes peak sampled aggregate RSS and no STOP. Eight axiom reports use existing standard axioms. Trust, registration and whitespace checks passed; independent finder/skeptic reviews found no issues. One metadata joint-model family is recorded; complete census-fidelity and full-family timing remain open. Exact source and evidence bindings are in `branch-evidence/tests/h62/item2/audit-v08-adapters/callable-metadata-joint-manifest.json`.
 
 ### Callable metadata checkpoint audit closure
 
@@ -584,7 +587,7 @@ Re-audited the complete `CallableMetadataJoint` component against adopted master
 
 ### Inherited metadata hypothesis coverage
 
-The four public `InheritedMetadata` theorems now have an explicit static hypothesis inventory in `tests/h62/item2/audit-v08-adapters/inherited-metadata-hypothesis-inventory.json`. The existing payable fixture supplies the full ten-field `FnOverrideOK` and an actual member of its singleton base list. `override_enter` changes only the payment Boolean on the same supplied world/context/storage; the funded target-call control is not Source override execution.
+The four public `InheritedMetadata` theorems now have an explicit static hypothesis inventory in `branch-evidence/tests/h62/item2/audit-v08-adapters/inherited-metadata-hypothesis-inventory.json`. The existing payable fixture supplies the full ten-field `FnOverrideOK` and an actual member of its singleton base list. `override_enter` changes only the payment Boolean on the same supplied world/context/storage; the funded target-call control is not Source override execution.
 
 The existing payable fixture cannot jointly witness `override_nonzero_rejected`, whose nonpayable premise contradicts that fixture's payable base. Separate stricter-mutability and wrong-header controls do not fill this gap. A genuine nonpayable checked-override witness remains independent backfill, not a missing-producer wait. This inventory adds no joint witnesses, kernel checks or statement-fidelity acceptances.
 
@@ -592,41 +595,41 @@ The existing payable fixture cannot jointly witness `override_nonzero_rejected`,
 
 `InheritedNonpayableJoint.lean` closes the preceding component witness gap using a separate abstract inheritance unit with nonpayable base and view override. Its full ten-field `FnOverrideOK`, actual singleton-list member, nonpayable tag and existing nonzero payment context coexist. The original `override_nonzero_rejected` yields exact `.error .revert` for arbitrary supplied target world/storage. This does not assert independent Source execution, body/admission, session or H68 adequacy. The existing payable fixture is unchanged; its rejected nonpayable premise is a tag check, not execution evidence.
 
-The final serial check passed in 1.152 seconds, one Lean process, peak sampled aggregate RSS 733,720,576 bytes and no STOP. An initial ambiguous `Address` annotation failure is retained; explicit `ContractWorld.Address` corrected it. Trust and registration checks passed. One component model is added, zero full statement-fidelity acceptances; no matched speed comparison or full-family completion is claimed. Evidence and source hashes are in `tests/h62/item2/audit-v08-adapters/inherited-nonpayable-joint-manifest.json`.
+The final serial check passed in 1.152 seconds, one Lean process, peak sampled aggregate RSS 733,720,576 bytes and no STOP. An initial ambiguous `Address` annotation failure is retained; explicit `ContractWorld.Address` corrected it. Trust and registration checks passed. One component model is added, zero full statement-fidelity acceptances; no matched speed comparison or full-family completion is claimed. Evidence and source hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/inherited-nonpayable-joint-manifest.json`.
 
 ### Funded payment-guard joint model
 
 `PayableGuardJoint.lean` realizes the four original `source_payable_entered` premises together: actual receive flag, sender funds100, ordinary payment7 and receiver0+7 within uint256. It applies the original theorem with the same initial world, paid context and Cell storage, preserving its exact Option/isOk conclusion. The same world/payment also yields the original exact nonpayable fallback rejection. A zero-ledger control genuinely fails funding; malformed receive refusal is inherited, not new execution evidence.
 
-This initial world is pre-deployment: the proof supplies target entry-guard evidence, not installed code, dispatch, independent Source execution, admission or body correspondence. The supplied entry and Source receive body are not asserted related. Final serial check passed in 1.050 seconds, one Lean, peak sampled aggregate RSS 696,528,896 bytes, no STOP. Initial implicit catalog-key elaboration failure is retained; explicit unit keys fixed it. Trust and registration passed. One component family, zero full statement-fidelity acceptances; full-family timings and H68 remain open. Exact source/evidence hashes are in `tests/h62/item2/audit-v08-adapters/payable-guard-joint-manifest.json`.
+This initial world is pre-deployment: the proof supplies target entry-guard evidence, not installed code, dispatch, independent Source execution, admission or body correspondence. The supplied entry and Source receive body are not asserted related. Final serial check passed in 1.050 seconds, one Lean, peak sampled aggregate RSS 696,528,896 bytes, no STOP. Initial implicit catalog-key elaboration failure is retained; explicit unit keys fixed it. Trust and registration passed. One component family, zero full statement-fidelity acceptances; full-family timings and H68 remain open. Exact source/evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/payable-guard-joint-manifest.json`.
 
 ### Role attachment framing and joint model
 
 `RoleAttachmentJoint.frames` is a general lemma packaging the original attachment law with equality of entire account and ledger functions, timestamp and another distinct catalogue key's role. Its instance uses the existing library/interface source unit and Bool catalogue: library membership, selected library role, false≠true and sender funds100 coexist. This avoids treating other-key preservation over a singleton catalogue as nontrivial coverage.
 
-The same attached world retains exact ordinary creation/callFrame rejection for arbitrary supplied typed bodies and contexts, using the original generic refusal laws. These are no new Source execution results. The initial world has no installed accounts, and metadata attachment does not fabricate them; Source deployment/body/link/layout/admission and H68 remain unproved. The serial gate passed in 2.009 seconds, one Lean, peak sampled aggregate RSS 693,489,664 bytes, no STOP; trust and registration passed. One component model, zero full statement-fidelity acceptances, no full-family timing claim. Source/evidence hashes are in `tests/h62/item2/audit-v08-adapters/role-attachment-joint-manifest.json`.
+The same attached world retains exact ordinary creation/callFrame rejection for arbitrary supplied typed bodies and contexts, using the original generic refusal laws. These are no new Source execution results. The initial world has no installed accounts, and metadata attachment does not fabricate them; Source deployment/body/link/layout/admission and H68 remain unproved. The serial gate passed in 2.009 seconds, one Lean, peak sampled aggregate RSS 693,489,664 bytes, no STOP; trust and registration passed. One component model, zero full statement-fidelity acceptances, no full-family timing claim. Source/evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/role-attachment-joint-manifest.json`.
 
 ### Metadata proof-component accounting
 
 `index_components.py` links the recent callable metadata, nonpayable override, payment-guard and role-attachment receipts to ten distinct original public targets. It verifies current source bindings and all receipt evidence before matching each target once to the unchanged frozen lexical inventory and one saved snapshot-qualified kernel record. Type-expression hashes are checked for consistency; this does not elaborate current imports or prove semantic fidelity.
 
-The off-Git index reproduces byte-identically under normal and optimized Python. Unknown/duplicate targets, altered source bindings and corrupted kernel type expressions are refused. The index adds zero witnesses, zero fresh kernel checks and zero full statement-fidelity acceptances. It does not count inherited refusal applications as new execution evidence. Inputs, script and output hashes are in `tests/h62/item2/audit-v08-adapters/metadata-target-accounting-manifest.json`; all original census predicates and exclusions remain unchanged.
+The off-Git index reproduces byte-identically under normal and optimized Python. Unknown/duplicate targets, altered source bindings and corrupted kernel type expressions are refused. The index adds zero witnesses, zero fresh kernel checks and zero full statement-fidelity acceptances. It does not count inherited refusal applications as new execution evidence. Inputs, script and output hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/metadata-target-accounting-manifest.json`; all original census predicates and exclusions remain unchanged.
 
 ### Current pin/layer gate refresh
 
-After adopting master `e286f1843`, the actual pin gate at integrated head `3adf13b6efc0b47616361be9d38c7a7e0af3434c` exits1: zero axiom errors, 435 unrecorded changes. All thirteen WORLD-G07-13 entries remain explicitly listed as new; both pending request source hashes still match. No inventory was edited and no pin waiver or pass is claimed. The separate layer check passes: 903 core modules, zero new forbidden edges, 107 pinned allowances. Exact logs/results and hashes are retained through `tests/h62/item2/audit-v08-adapters/current-pin-layer-manifest.json`. These are static gate results, not full build or producer/session acceptance.
+After adopting master `e286f1843`, the actual pin gate at integrated head `3adf13b6efc0b47616361be9d38c7a7e0af3434c` exits1: zero axiom errors, 435 unrecorded changes. All thirteen WORLD-G07-13 entries remain explicitly listed as new; both pending request source hashes still match. No inventory was edited and no pin waiver or pass is claimed. The separate layer check passes: 903 core modules, zero new forbidden edges, 107 pinned allowances. Exact logs/results and hashes are retained through `branch-evidence/tests/h62/item2/audit-v08-adapters/current-pin-layer-manifest.json`. These are static gate results, not full build or producer/session acceptance.
 
 ### Typed-byte bounds and fixed Keccak joint model
 
 `TypedKeccakJoint.typed_bytes` proves the original per-member Nat-byte bound for every `List UInt8`, without an input-length restriction. The same input jointly inhabits that premise and the published complete `toyFixed.Keccak` pin, including its Sane conjunct. The original strict fold bound applies to arbitrary initial accumulators, and the two exact fixed-hash word/byte observations share the same pin and input. Nat input `[256]` genuinely refutes boundedness; it is not a collision or Source failure claim.
 
-The bounded serial check passed in 50.138 seconds including import builds, one Lean, peak sampled aggregate RSS 2,206,543,872 bytes and no STOP. This cold elapsed is not a matched timing result. Trust and registration passed. One component family, zero full statement-fidelity acceptances. The toy model's ledger/precompile mocks are not certified; no hash injectivity, Source expression execution, admission or H68 adequacy follows. Exact bindings are in `tests/h62/item2/audit-v08-adapters/typed-keccak-joint-manifest.json`.
+The bounded serial check passed in 50.138 seconds including import builds, one Lean, peak sampled aggregate RSS 2,206,543,872 bytes and no STOP. This cold elapsed is not a matched timing result. Trust and registration passed. One component family, zero full statement-fidelity acceptances. The toy model's ledger/precompile mocks are not certified; no hash injectivity, Source expression execution, admission or H68 adequacy follows. Exact bindings are in `branch-evidence/tests/h62/item2/audit-v08-adapters/typed-keccak-joint-manifest.json`.
 
 After coordinator master `32d810f1d` was adopted, the same module passed again in 0.946 seconds (one Lean, peak sampled aggregate RSS 687,300,608 bytes, no STOP). This cached revalidation is not compared with the earlier cold import build as a speed result. Independent read-only finder/skeptic reviews found no issues.
 
 ### Current serial component validation
 
-At head `790cbf3a536cd7719e997cf6d099d46122c56d58`, actual toolchain versions were recorded and KeySort plus all fourteen selected recent joint-model modules passed the approved per-file gate serially. Every selected source hash remained stable. Total gate elapsed was 187.866 seconds, maximum sampled aggregate RSS 1,854,423,040 bytes, at most one Lean process and no resource STOP. Per-file results, exact commands, versions and evidence hashes are in `tests/h62/item2/audit-v08-adapters/component-focused-validation-manifest.json`; all raw logs remain off Git.
+At head `790cbf3a536cd7719e997cf6d099d46122c56d58`, actual toolchain versions were recorded and KeySort plus all fourteen selected recent joint-model modules passed the approved per-file gate serially. Every selected source hash remained stable. Total gate elapsed was 187.866 seconds, maximum sampled aggregate RSS 1,854,423,040 bytes, at most one Lean process and no resource STOP. Per-file results, exact commands, versions and evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/component-focused-validation-manifest.json`; all raw logs remain off Git.
 
 This is a focused current-source/import check, not the full project or mapped-family gate. Cold/cached import rebuilding is not a matched speed comparison and releases no timing STOP. FixedBytesArgumentJoint remains outside the original frozen audit census and is validated only as V08 backfill. This check adds zero models and zero full fidelity acceptances; producer/session obligations, canonical H68 and the pin registration hold remain open.
 
@@ -634,83 +637,83 @@ This is a focused current-source/import check, not the full project or mapped-fa
 
 Reused the existing generic name reconciler on five saved world-agreement module snapshots. All 72 scoped lexical theorem candidates have unique public-name matches among 369 kernel records; 297 additional kernel records remain pending. The scope includes 61 proof fields, 19 data fields, nine carriers, 24 proof definitions and five predicate definitions, alongside theorem/other records. This accounting does not discharge their hypotheses or prove statement fidelity.
 
-Twelve private-name captures have no lexical theorem match. Repeated normalized Except.map equation/splitter names across captured modules remain separate, module-qualified provenance candidates; no source owner or common generated declaration is inferred. Normal/optimized reconciliation reproduces byte-identically. Bulk outputs, reproducer and exact hashes are indexed by `tests/h62/item2/audit-v08-adapters/world-name-accounting-manifest.json`. This adds zero witnesses, fresh kernel checks or fidelity acceptances. CallableMetadataJoint component review was already completed earlier and is not recounted.
+Twelve private-name captures have no lexical theorem match. Repeated normalized Except.map equation/splitter names across captured modules remain separate, module-qualified provenance candidates; no source owner or common generated declaration is inferred. Normal/optimized reconciliation reproduces byte-identically. Bulk outputs, reproducer and exact hashes are indexed by `branch-evidence/tests/h62/item2/audit-v08-adapters/world-name-accounting-manifest.json`. This adds zero witnesses, fresh kernel checks or fidelity acceptances. CallableMetadataJoint component review was already completed earlier and is not recounted.
 
 ### Fresh P8/runtime frame field accounting
 
 The existing P8 and runtime-frame collectors passed current serial bounded checks (42.886s and 13.489s; peaks 1,083,232,256 and 920,592,384 bytes; one Lean and no STOP). Fresh snapshots contain 157 P8 and 137 frame records. All 76 structure field names resolve uniquely to captured projections: 38 proof and 38 data fields. Raw constant kinds are retained; the 38 proof projections also have theorem kind, so source-role accounting separates them from 39 other theorem constants. Fifteen carriers, seven predicate definitions, four proof definitions and 153 other declarations remain explicitly accounted.
 
-Neither captured module has lexical theorem entries in the frozen snapshot: all294 are additional pending records, not original-census matches. The old worker inventory paths are absent here; matching earlier reported counts does not recover or verify their bytes or statements. Field accounting proves no joint producer inhabitance. This adds zero witnesses or fidelity acceptances and closes no Source/body/frame/H68 obligation. Exact current source and raw output hashes are in `tests/h62/item2/audit-v08-adapters/p8-frame-accounting-manifest.json`; all bulk snapshots remain off Git.
+Neither captured module has lexical theorem entries in the frozen snapshot: all294 are additional pending records, not original-census matches. The old worker inventory paths are absent here; matching earlier reported counts does not recover or verify their bytes or statements. Field accounting proves no joint producer inhabitance. This adds zero witnesses or fidelity acceptances and closes no Source/body/frame/H68 obligation. Exact current source and raw output hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/p8-frame-accounting-manifest.json`; all bulk snapshots remain off Git.
 
 ### Source-facing execution-boundary census
 
 The existing mapped census generator accepted unchanged frozen bytes for SourceAbi, SourceCustomErrors, SourceDispatch and SourceCallable. The serial kernel check passed in 18.358 seconds, one Lean, peak sampled aggregate RSS 882,003,968 bytes and no STOP. Initial setup failed before Lean because the evidence parent was missing; creating it left the generated source unchanged. The collector and bulk outputs remain outside the review increment.
 
-The four captures contain 93 records (64 ABI, nine custom error, four dispatch, sixteen callable), including 81 theorem-kind and twelve other constants. All34 scoped lexical theorem candidates have unique public-name matches; 59 kernel-only records remain pending. These are not 81 written source declarations or 34 fidelity acceptances. A top-level proposition-binder worklist retains actual execution/encoding premises without discharging them; data-bundle and nested obligations remain. No producer/SourceSpec/body/frame/H68 closure follows. Source hashes, frozen snapshot identity and exact outputs are indexed by `tests/h62/item2/audit-v08-adapters/source-execution-boundary-census-manifest.json`.
+The four captures contain 93 records (64 ABI, nine custom error, four dispatch, sixteen callable), including 81 theorem-kind and twelve other constants. All34 scoped lexical theorem candidates have unique public-name matches; 59 kernel-only records remain pending. These are not 81 written source declarations or 34 fidelity acceptances. A top-level proposition-binder worklist retains actual execution/encoding premises without discharging them; data-bundle and nested obligations remain. No producer/SourceSpec/body/frame/H68 closure follows. Source hashes, frozen snapshot identity and exact outputs are indexed by `branch-evidence/tests/h62/item2/audit-v08-adapters/source-execution-boundary-census-manifest.json`.
 
 ### Source callable completion joint witness
 
 `SourceCallableJoint` assembles the original `SourceCallable.complete` hypotheses on the existing resolved program, caller frame and populated Source state. Selected body, type fit, argument-to-frame identity, return initialization, actual runMods and extraction coexist for every pipeline, extra sufficient horizon and pair of Boolean arguments. The original law supplies the full status/value/locals/state result. A general stale-state refusal proves that returning the correct value cannot discard the actual heap allocation (next2 versus original next1).
 
-No body fixture is added: existing evaluator proofs are reused. The manually supplied Source body has no canonical syntax-to-body/admission or target body/frame certificate. This adds one component joint model and zero full fidelity acceptances, not general all-outcome/session/H68 adequacy. The serial check passed in 1.267 seconds, one Lean, peak sampled aggregate RSS 732,733,440 bytes and no STOP; trust and registration passed. Exact source/evidence bindings are in `tests/h62/item2/audit-v08-adapters/source-callable-joint-manifest.json`.
+No body fixture is added: existing evaluator proofs are reused. The manually supplied Source body has no canonical syntax-to-body/admission or target body/frame certificate. This adds one component joint model and zero full fidelity acceptances, not general all-outcome/session/H68 adequacy. The serial check passed in 1.267 seconds, one Lean, peak sampled aggregate RSS 732,733,440 bytes and no STOP; trust and registration passed. Exact source/evidence bindings are in `branch-evidence/tests/h62/item2/audit-v08-adapters/source-callable-joint-manifest.json`.
 
 ### Residual declarations and exact execution hypotheses
 
 An additive diagnostic collector copy retains binder types in their local telescope, alongside each full outer type. It passed in 12.101 seconds, one Lean, peak sampled aggregate RSS 872,214,528 bytes and no STOP. All93 outer type hashes match the prior capture. All59 residuals are accounted once: three source-linked written definition candidates, 44 equation-name shapes, three proof-helper shapes and nine splitter shapes. The latter groups are descriptive names, not compiler provenance or owner assignments.
 
-All34 public statement records now retain exact contextual binder types, including 41 top-level proposition binders. Local free-variable identities are not canonical cross-snapshot equality evidence; full outer types preserve the context. Joint feasibility, nested/data-bundle obligations and fidelity remain pending. No witness or acceptance count increases. Bulk records and hashes are indexed by `tests/h62/item2/audit-v08-adapters/source-boundary-hypotheses-manifest.json`.
+All34 public statement records now retain exact contextual binder types, including 41 top-level proposition binders. Local free-variable identities are not canonical cross-snapshot equality evidence; full outer types preserve the context. Joint feasibility, nested/data-bundle obligations and fidelity remain pending. No witness or acceptance count increases. Bulk records and hashes are indexed by `branch-evidence/tests/h62/item2/audit-v08-adapters/source-boundary-hypotheses-manifest.json`.
 
 ### Authorized initial-build cleanup
 
-Coordinator answer Q-WORLD-INITIAL-BUILD #89 optionA authorized removal of `/workspace/solidity-lean/.lake/build`. Exact initial HEAD204eb1545cbf57e436196e4cba346075515b7279 and path were verified, with no matching active process. The regenerable build was removed without retaining its contents; the setup cache and owned checkout build were not deleted. Removed logical size was 1,766,730,423 bytes, but measured free-space change was −4,096 bytes, so no physical capacity gain is claimed. Available RAM afterward was 11,209,003,008 bytes, above the 4GiB reserve, with no swap. Device/inode checks retain protected directory identity, not a whole-tree content attestation. Receipt: `tests/h62/item2/audit-v08-adapters/h1-initial-build-cleanup-manifest.json`. No STOP or proof/trust hold is cleared.
+Coordinator answer Q-WORLD-INITIAL-BUILD #89 optionA authorized removal of `/workspace/solidity-lean/.lake/build`. Exact initial HEAD204eb1545cbf57e436196e4cba346075515b7279 and path were verified, with no matching active process. The regenerable build was removed without retaining its contents; the setup cache and owned checkout build were not deleted. Removed logical size was 1,766,730,423 bytes, but measured free-space change was −4,096 bytes, so no physical capacity gain is claimed. Available RAM afterward was 11,209,003,008 bytes, above the 4GiB reserve, with no swap. Device/inode checks retain protected directory identity, not a whole-tree content attestation. Receipt: `branch-evidence/tests/h62/item2/audit-v08-adapters/h1-initial-build-cleanup-manifest.json`. No STOP or proof/trust hold is cleared.
 
 ### Joint failure phases in the same Source call model
 
 Extended `SourceCallableJoint.lean` within its existing family using unchanged `body_failure`, `expression_failure` and `argument_failure` laws. Actual body selection, frame fit, initialization and failing runMods coexist; actual argument/callee steps supply expression failure. Both compared expressions use the same failing program, declaration, caller frame, horizon26 and populated state. Body failure retains heap allocation and exact arithmetic panic; division-by-zero during arguments skips body allocation. Both caller-local updates remain false, but their complete reached states differ (heap.next2 versus1). No automatic rollback or fictitious failing typed return extraction is assumed.
 
-The serial check passed in 2.749 seconds, one Lean, peak sampled aggregate RSS 753,491,968 bytes and no STOP; trust and registration passed. Three additional original target applications extend the existing family; zero new body fixtures/families or full fidelity acceptances. This manually supplied Source program still has no canonical admission or target correspondence. No full-session/H68 or matched speed claim. The old success-only receipt is explicitly historical; current hashes/evidence are in `tests/h62/item2/audit-v08-adapters/source-call-failure-joint-manifest.json`.
+The serial check passed in 2.749 seconds, one Lean, peak sampled aggregate RSS 753,491,968 bytes and no STOP; trust and registration passed. Three additional original target applications extend the existing family; zero new body fixtures/families or full fidelity acceptances. This manually supplied Source program still has no canonical admission or target correspondence. No full-session/H68 or matched speed claim. The old success-only receipt is explicitly historical; current hashes/evidence are in `branch-evidence/tests/h62/item2/audit-v08-adapters/source-call-failure-joint-manifest.json`.
 
 ### Source expression success and caller-effect ordering
 
 The existing `SourceCallableJoint` family now assembles the original `expression_complete` premises explicitly: signature, actual argument step and actual callee result share one program/frame/reached state. For every pipeline and extra sufficient horizon, normal arguments yield false, reordered arguments yield true, and both retain the post-argument false caller local and complete afterLiteral Source state. Full-run inequality detects argument order; a separate refusal rejects incorrectly restoring the pre-argument true caller local. No desired argument/callee equation is assumed.
 
-The serial check passed in 2.664 seconds, one Lean, peak sampled aggregate RSS 751,161,344 bytes, no STOP; trust and registration passed. This is one additional original target application inside the existing component family, zero new body fixtures/families or full fidelity acceptances. The manually supplied Source program still lacks canonical origin/admission and target compiler correspondence; no full-session/H68 or matched speed claim. Historical failure receipt is explicitly marked; latest source/evidence hashes are in `tests/h62/item2/audit-v08-adapters/source-expression-joint-manifest.json`.
+The serial check passed in 2.664 seconds, one Lean, peak sampled aggregate RSS 751,161,344 bytes, no STOP; trust and registration passed. This is one additional original target application inside the existing component family, zero new body fixtures/families or full fidelity acceptances. The manually supplied Source program still lacks canonical origin/admission and target compiler correspondence; no full-session/H68 or matched speed claim. Historical failure receipt is explicitly marked; latest source/evidence hashes are in `branch-evidence/tests/h62/item2/audit-v08-adapters/source-expression-joint-manifest.json`.
 
 ### Remaining callable boundaries and eight-law component accounting
 
 Extended the same `SourceCallableJoint` family with exact zero-horizon, missing-body and wrong-frame applications. Actual selection/frame mismatch and return initialization coexist for the deliberately mismatched body table. Missing selection is proved rather than assumed; both errors retain full original state and distinct stuck reasons. Zero horizon times out on an actual selected-body program with nonempty arguments. The mismatch is an intentional negative runtime model, not a SourceSpec/admitted-program witness.
 
-All eight original public SourceCallable laws now have an exactly-once component application table with frozen lexical IDs and saved type hashes. This is module-local component coverage, not full fidelity or complete mapped-interface acceptance; remaining source-facing modules and producer obligations remain. No new body fixtures/families are counted. The serial check passed in 3.293 seconds, one Lean, peak sampled aggregate RSS 766,078,976 bytes, no STOP; trust and registration passed. Latest exact source/evidence and component table: `tests/h62/item2/audit-v08-adapters/source-call-boundaries-manifest.json`. No canonical admission/target/session/H68 or matched timing acceptance follows.
+All eight original public SourceCallable laws now have an exactly-once component application table with frozen lexical IDs and saved type hashes. This is module-local component coverage, not full fidelity or complete mapped-interface acceptance; remaining source-facing modules and producer obligations remain. No new body fixtures/families are counted. The serial check passed in 3.293 seconds, one Lean, peak sampled aggregate RSS 766,078,976 bytes, no STOP; trust and registration passed. Latest exact source/evidence and component table: `branch-evidence/tests/h62/item2/audit-v08-adapters/source-call-boundaries-manifest.json`. No canonical admission/target/session/H68 or matched timing acceptance follows.
 
 ### Mixed ABI execution joint witness
 
 `SourceAbiJoint` supplies both original `SourceAbi.execute` premises together on the existing five-argument fixture: actual argument evaluation reaches the false caller local and allocated hash-input bytes; actual encoding starts at that exact reached state. Across pipelines and both static/packed flags, the original law retains pointer2, callerfalse and the full state with both input/result allocations. Actual horizon6 timeout retains the preceding assignment; it is not automatic rollback or a gas theorem. Skipped-allocation refusal reuses the existing control and is not counted as a new execution case.
 
-The serial check passed in 16.165 seconds including import builds, one Lean, peak sampled aggregate RSS 1,101,459,456 bytes and no STOP; trust and registration passed. One component family, zero new Source fixtures/encoders or full fidelity acceptances. No canonical origin/admission, target preservation, gas/fork or H68 adequacy follows; remaining ABI/custom-error/dispatch and full audit queues remain. Exact bindings: `tests/h62/item2/audit-v08-adapters/source-abi-joint-manifest.json`.
+The serial check passed in 16.165 seconds including import builds, one Lean, peak sampled aggregate RSS 1,101,459,456 bytes and no STOP; trust and registration passed. One component family, zero new Source fixtures/encoders or full fidelity acceptances. No canonical origin/admission, target preservation, gas/fork or H68 adequacy follows; remaining ABI/custom-error/dispatch and full audit queues remain. Exact bindings: `branch-evidence/tests/h62/item2/audit-v08-adapters/source-abi-joint-manifest.json`.
 
 ### Custom-error execution and selector joint witness
 
 `SourceCustomErrorJoint` realizes the original execution and selector-transport premises together: actual error parameter types, evaluated arguments, encoding from the same reached state, complete published Keccak pin and actual signature input-byte equality. Across pipelines/static flags and extra sufficient horizons, the original laws retain exact revert selector/payload and the complete afterLiteral state. Statement outer locals remain L0 as the original execS API specifies. A same-payload stale-state result is refused by heap.next2 versus1, so reverting is not treated as automatic rollback.
 
-The inherited non-ASCII mismatch refutes only the byte-representation premise; it is not an identifier exclusion, collision theorem or execution witness. No admitted domain is narrowed. The serial check passed in 1.831 seconds, one Lean, peak sampled aggregate RSS 728,281,088 bytes, no STOP; trust and registration passed. One component family, zero new Source fixtures/emitters or full fidelity acceptances. Canonical admission/target correspondence, gas/fork/session and H68 remain open. Exact bindings: `tests/h62/item2/audit-v08-adapters/source-custom-error-joint-manifest.json`.
+The inherited non-ASCII mismatch refutes only the byte-representation premise; it is not an identifier exclusion, collision theorem or execution witness. No admitted domain is narrowed. The serial check passed in 1.831 seconds, one Lean, peak sampled aggregate RSS 728,281,088 bytes, no STOP; trust and registration passed. One component family, zero new Source fixtures/emitters or full fidelity acceptances. Canonical admission/target correspondence, gas/fork/session and H68 remain open. Exact bindings: `branch-evidence/tests/h62/item2/audit-v08-adapters/source-custom-error-joint-manifest.json`.
 
 ### Nonempty free/outside dispatch joint witness
 
 `SourceDispatchJoint` jointly supplies the free predicate, actual caller chain[C], outside-library predicate and real body/decoy identities in the existing environment/program. The four original free/outside selection/body laws apply without an empty-chain witness. Exact declaration identity prevents selecting the same-name scopeC decoy in place of the scopeL library function; that in-chain decoy cannot supply the outside=false hypothesis. Existing full ambient call results are linked as two independent calls from the same state, not new execution cases or sequential session composition.
 
-The serial check passed in 5.637 seconds, one Lean, peak sampled aggregate RSS 800,448,512 bytes and no STOP; trust and registration passed. All four public laws have exactly-once component links, not fidelity acceptance. One component family, zero new Source fixtures/body producers. Virtual/override dispatch, canonical admission and library deployment/link/layout/target-frame certificates remain separate; no H68 or matched timing acceptance. Exact bindings: `tests/h62/item2/audit-v08-adapters/source-dispatch-joint-manifest.json`.
+The serial check passed in 5.637 seconds, one Lean, peak sampled aggregate RSS 800,448,512 bytes and no STOP; trust and registration passed. All four public laws have exactly-once component links, not fidelity acceptance. One component family, zero new Source fixtures/body producers. Virtual/override dispatch, canonical admission and library deployment/link/layout/target-frame certificates remain separate; no H68 or matched timing acceptance. Exact bindings: `branch-evidence/tests/h62/item2/audit-v08-adapters/source-dispatch-joint-manifest.json`.
 
 ### Generic typed-word ABI observation witness
 
 Extended `SourceAbiJoint` using the existing `word_bytes_field` and `encode_fixed_bytes32` laws. For every typed word, Source environment/context, frame, encoding horizon and packing flag, the existing mkBytes/wordBytes value supplies the actual word observation and hence the exact single-value encoder equation. Its run retains any supplied locals and entire state. This is not a claim that every context is inhabited or that an outer ABI expression succeeds at zero horizon.
 
-A distinct observed word cannot justify the same value's premise; actual typed inputs0 and1 demonstrate a nonempty negative domain. No new encoder/table/fixture is introduced. The serial check passed in 1.588 seconds, one Lean, peak sampled aggregate RSS 735,162,368 bytes and no STOP; trust and registration passed. Two additional original target applications, zero new audit families/fidelity acceptances. Canonical admission/target/session/H68 and timing holds remain. Historical mixed-ABI receipt is explicitly marked; current bindings: `tests/h62/item2/audit-v08-adapters/source-abi-word-joint-manifest.json`.
+A distinct observed word cannot justify the same value's premise; actual typed inputs0 and1 demonstrate a nonempty negative domain. No new encoder/table/fixture is introduced. The serial check passed in 1.588 seconds, one Lean, peak sampled aggregate RSS 735,162,368 bytes and no STOP; trust and registration passed. Two additional original target applications, zero new audit families/fidelity acceptances. Canonical admission/target/session/H68 and timing holds remain. Historical mixed-ABI receipt is explicitly marked; current bindings: `branch-evidence/tests/h62/item2/audit-v08-adapters/source-abi-word-joint-manifest.json`.
 
 ### Coherent prefix phases and reached argument failure
 
 Extended `SourceAbiJoint` with original selector/signature execution premises: actual arguments, conversion or byte reading and tail encoding share the reached heap/caller state. Existing binary-selector and empty-signature fixtures retain pointer2 and complete allocated state. Raw-byte prefix transport uses the actual full Keccak pin for arbitrary bytes. The argument-failure application retains the original arbitrary Source.AbiKind quantifier: actual timeout preserves earlier caller assignment and skips later prefix work. These bytes are ABI expression inputs, not callable admission metadata.
 
-The final serial check passed in 2.435 seconds, one Lean, peak sampled aggregate RSS 749,047,808 bytes, no STOP. The first ambiguous AbiKind annotation failure is retained; explicit Source.AbiKind fixed it. Trust and registration passed. Four additional target applications extend the existing family, with zero new fixtures/encoders/fidelity acceptances. No target/session/gas/H68 or matched timing acceptance. Current bindings: `tests/h62/item2/audit-v08-adapters/source-abi-prefix-joint-manifest.json`.
+The final serial check passed in 2.435 seconds, one Lean, peak sampled aggregate RSS 749,047,808 bytes, no STOP. The first ambiguous AbiKind annotation failure is retained; explicit Source.AbiKind fixed it. Trust and registration passed. Four additional target applications extend the existing family, with zero new fixtures/encoders/fidelity acceptances. No target/session/gas/H68 or matched timing acceptance. Current bindings: `branch-evidence/tests/h62/item2/audit-v08-adapters/source-abi-prefix-joint-manifest.json`.
 
 ### WORLD-G07-13 registration verified
 
@@ -720,19 +723,19 @@ Adopted master a648f2790 publishes both requested fragments. Their exact thirtee
 
 Added literal execution boundaries to the existing ABI family for arbitrary raw byte lists, pipelines/static/packing flags and extra sufficient horizons. Successful raw literals allocate the result at pointer1; their horizon0/1 boundaries retain the full prestate. Selector/signature literal laws retain exact normalization/prefix bytes, not callable metadata. Existing mixed paths still retain their different reached pointer2.
 
-All17 public SourceAbi laws now have unique frozen-ID/type-hash component links: twelve operational/typed applications and five direct total-observation references. The latter remain original identities, not new execution cases or an aggregate emitter/admission result. Existing populated Source data and typed byte/word/Nat domains supply concrete inputs; no proof-binder absence is used to infer global program feasibility. Full fidelity remains pending. The serial check passed in 2.985 seconds, one Lean, peak sampled aggregate RSS 750,346,240 bytes, no STOP; trust and registration passed. No new family/fixture/encoder, canonical producer or H68/matched timing acceptance. Exact table/evidence: `tests/h62/item2/audit-v08-adapters/source-abi-module-coverage-manifest.json`.
+All17 public SourceAbi laws now have unique frozen-ID/type-hash component links: twelve operational/typed applications and five direct total-observation references. The latter remain original identities, not new execution cases or an aggregate emitter/admission result. Existing populated Source data and typed byte/word/Nat domains supply concrete inputs; no proof-binder absence is used to infer global program feasibility. Full fidelity remains pending. The serial check passed in 2.985 seconds, one Lean, peak sampled aggregate RSS 750,346,240 bytes, no STOP; trust and registration passed. No new family/fixture/encoder, canonical producer or H68/matched timing acceptance. Exact table/evidence: `branch-evidence/tests/h62/item2/audit-v08-adapters/source-abi-module-coverage-manifest.json`.
 
 ### Thirty-four source-facing component links
 
 All34 public targets from the four-module source-boundary census now link exactly once to their original lexical IDs, saved type hashes and checked component receipts: SourceAbi17, SourceCallable8, SourceDispatch4 and SourceCustomErrors5. The custom-error entries distinguish two conditional applications, one total selector-width observation, one concrete UTF8 fact and the intentional input-encoding countermodel. The countermodel is not an inhabitant of a false equality or an identifier-admission refusal. No existing application is recounted as a new model.
 
-All four current component files passed serial bounded checks with stable source hashes: total 8.167 seconds, peak sampled aggregate RSS 760,967,168 bytes, one Lean and no STOP. This is not one combined kernel-import census, full-root validation, semantic fidelity or matched family timing. All59 residual records and the whole original mapped audit remain pending. The generated index and evidence are off Git, sealed through `tests/h62/item2/audit-v08-adapters/source-facing-component-index-manifest.json`.
+All four current component files passed serial bounded checks with stable source hashes: total 8.167 seconds, peak sampled aggregate RSS 760,967,168 bytes, one Lean and no STOP. This is not one combined kernel-import census, full-root validation, semantic fidelity or matched family timing. All59 residual records and the whole original mapped audit remain pending. The generated index and evidence are off Git, sealed through `branch-evidence/tests/h62/item2/audit-v08-adapters/source-facing-component-index-manifest.json`.
 
 ### Supported native compilation of the supplied V08 body
 
 Consumed the newly published generic PublicCompilerTotal APIs without duplicating their producer. `NativeEntryCompilerJoint` proves the structural domain for the existing V08 entry's exact saved=3/scratch=9 body, hence actual public compiler acceptance at every base and non-None output for that body. The published freshT/Machine.init Sim and actual L1 bound inhabit the public agreement premises; the accepted native result retains Agrees for all original frame/base parameters. No acceptance or desired target-run equation is assumed.
 
-This producer module is outside the original frozen audit snapshot and adds zero original target/fidelity counts. It is supported-program backfill on an existing V08 body, not entry payment/dispatch/result compilation, an arbitrary-compiler/always-revert refutation, independent Source admission or the production frame/world/H68 bridge. The fresh native model is not asserted to be an actual reached Source boundary. The cold serial check passed in 176.269 seconds including import builds, one Lean, peak sampled aggregate RSS 1,134,284,800 bytes, no STOP; trust and registration passed. No matched timing or hold release. Exact bindings: `tests/h62/item2/audit-v08-adapters/native-entry-compiler-joint-manifest.json`. Residual records and full original joint-witness/fidelity queues remain open.
+This producer module is outside the original frozen audit snapshot and adds zero original target/fidelity counts. It is supported-program backfill on an existing V08 body, not entry payment/dispatch/result compilation, an arbitrary-compiler/always-revert refutation, independent Source admission or the production frame/world/H68 bridge. The fresh native model is not asserted to be an actual reached Source boundary. The cold serial check passed in 176.269 seconds including import builds, one Lean, peak sampled aggregate RSS 1,134,284,800 bytes, no STOP; trust and registration passed. No matched timing or hold release. Exact bindings: `branch-evidence/tests/h62/item2/audit-v08-adapters/native-entry-compiler-joint-manifest.json`. Residual records and full original joint-witness/fidelity queues remain open.
 
 ### Source-effect kernel/name checkpoint (2026-11-07)
 
@@ -927,3 +930,423 @@ logs remain off Git.
 Independent read-only finder and skeptic found no issue in the actual hash run,
 shared reached state, separate observations or full-result negative. Neither ran
 Lean or a server; review evidence remains off Git.
+
+### Local event encoding-error domain (2026-11-07)
+
+The original exec_encoding_failure statement quantifies over typed states with
+no Source admission premise. SourceEmitJoint now proves its parameter-type,
+argument-execution and failed-encoding premises together using the existing
+explicitly dangling pointer99 control, then applies that exact original law.
+This is a genuine local typed-domain model of encoding error and intentionally
+not an inhabitant of canonical Source admission. The distinction preserves both
+the full original theorem domain and H69's separation of negative controls from
+admitted global witnesses. No premise or exclusion is added.
+
+This adds one original target application without adding a fixture or failure
+mechanism. The earlier three applications remain checked; four event observation
+targets and full residual/fidelity acceptance remain pending. The old event
+manifest is explicitly historical and retains its old source hash and receipt;
+the new source-emit-encoding-joint manifest binds the current audit source.
+
+The serial check passed in 1.826 seconds, one Lean, peak sampled RSS 736,567,296
+bytes, no STOP. All seven declarations use only the existing standard axioms;
+registration passed. No canonical Source/session/target/H68 or full-gate claim.
+
+MRS's routed adf3c75bedb77faa8b012abab7cf7a4f0251b64c status identifies the
+accepted H124 frame-free P1RevertBridge and conditional value/reference bridges
+as available components, explicitly not full production transport. H124 remains
+closed. The wait retains actual delegated-frame LibraryPremises.Inputs.g42_body
+with Source.callInternal, entry.body/result, reached stateRelation/valueRelation,
+and complete all-outcome session/profile/origin/physical-frame transports;
+native component certificates do not discharge those obligations.
+
+Read-only finder and skeptic found no issue with the local typed-domain joint,
+negative-model/admission distinction, historical receipt or production boundary.
+Neither ran Lean or a server; review evidence remains off Git.
+
+### Eight event component links (2026-11-07)
+
+All eight original SourceEmit targets now have unique frozen-ID/type-hash links:
+four checked conditional applications and four existing observation references.
+The latter are logged_erasure, three_static, three_words_transport and
+logged_payload_injective. Total layout/word identities do not supply typed event
+admission or argument/layout correspondence. Log erasure keeps all other fields
+and is not rollback. Payload injectivity retains its actual full logged-state
+equality premise with the same global/frame/event/types/prestate; it is not
+unconditional log equality or hash injectivity.
+
+The index preserves all original saved types, flags and unresolved feasibility,
+ownership and fidelity obligations. It adds zero witnesses, fixtures or fidelity
+acceptances. Earlier four application checks remain tied to their recorded heads;
+this metadata-only index claims no new Lean/current import gate or timing result.
+Current original SourceEmit bytes match the checked source binding. Bulk table is
+off Git, sealed by source-emit-component-index-manifest.json.
+
+Master 81f77e5a7 was adopted before this item. Its memory-reference checkpoint
+and the conditional reference bridge do not supply complete actual-Source/session
+provenance or the full production P1/G42.04 factory. Existing producer waits and
+assigned H68 world-phase work remain open; H124 stays closed.
+
+Independent read-only finder and skeptic found no issue in the eight-law
+partition, exact conditional premise, observation boundaries or historical-gate
+qualifications. Neither ran Lean or a server; review receipt remains off Git.
+
+### Hash timeout boundary and seven component links (2026-11-07)
+
+SourceHashJoint now retains the exact zero-horizon timeout/prestate and proves
+its full result differs from every sufficient-horizon successful hash run,
+including empty input. The existing generic zero_horizon law supplies the
+boundary; no new interpreter, resource cutoff or admission restriction is added.
+
+All seven original hash targets now link exactly once: four current checked
+components, one historical checked literal-run component in SourceEnvironmentJoint,
+and two existing total word-constructor/bytesNat observation references. The
+historical environment gate is not claimed rerun. Exact saved type hashes and
+original IDs remain in the off-Git index. No new fixture, noncollision claim or
+full feasibility/fidelity acceptance is counted; residual declarations remain open.
+The old hash receipt retains its historical source hash/scope and points to the
+new source-hash-boundaries manifest for the current audit source.
+
+After adopting master ed4d9cfb7, the serial check passed in 101.970 seconds
+including rebuilt imports, one Lean, peak sampled aggregate RSS 1,367,560,192
+bytes and no STOP. All five declarations use the existing standard axioms;
+registration passed. This is not matched timing, a full-root gate or release of
+prior STOPs. The new conditional v2 assembly on master explicitly leaves actual
+library Source/origin/session/lifecycle bindings open; canonical producer waits
+and the assigned H68 bridge therefore remain unchanged.
+
+Read-only finder and skeptic found no issue in the full timeout/success
+boundary, seven-law partition, bindings or historical-gate qualifications.
+Neither ran Lean or a server; review evidence remains off Git.
+
+### Eight environment records, including the private helper (2026-11-07)
+
+All eight original SourceEnvironment lexical records are indexed exactly once:
+seven public-name candidates and one private word_range candidate. Three link
+to the historical reached-read checks, two to existing Source timeout/statement
+controls, two to original projection transports, and one retains the private
+range-helper obligation. The saved private numeric name is not promoted to a
+public API or asserted canonical across snapshots; no alias is introduced.
+
+Sender transport explicitly constructs stateEnvironment from the Source world,
+request, target world, response table and typed state. Value/timestamp transport
+uses the same explicit projection while retaining their distinct context fields.
+Neither law supplies production physical-frame admission, store equality or a
+compiler-selected target body. The private helper derives u256 bounds from a
+bounded Roadmap.Word; zero explicit proof binders does not establish inhabitance
+of every dependent parameter in any indexed law.
+
+Current SourceEnvironment and fixture bytes match the historical receipt, but
+its Lean gate is not claimed rerun. No new witness, fidelity acceptance, wrapper
+theorem, current full gate or timing result is counted. Full ownership/joint
+feasibility/fidelity and residual semantic inventory remain open, alongside the
+canonical Source producers and assigned H68 bridge. Exact saved IDs/types and
+boundaries are off Git, bound by source-environment-component-index-manifest.json.
+
+Independent read-only finder and skeptic found no issue in the eight-record
+partition, private-name status, projection boundaries or historical validation
+qualifications. Neither ran Lean or a server; receipt retained off Git.
+
+### Source-effect residual source-name accounting (2026-11-07)
+
+All 349 kernel-only records from the four-module Source-effect capture now have
+an explicit worklist classification: eight written-definition name candidates,
+317 equation-name shapes, three proof-helper-name shapes and 21 splitter-name
+shapes. The eight names match explicit def lines in the guarded unchanged Source
+files: frameRequest, sourceWord, literal, afterLiteral, logged, eraseLogs,
+allocated and fromExpression, qualified by their original modules. No dependent
+definition body is edited or replaced.
+
+These are name/source candidates, not proof of generated-declaration provenance,
+semantic role or ownership. Dependency-namespaced helpers and captured module
+fields are retained as recorded; neither is used to assign a producer. Private
+mangling remains unresolved. Every residual retains its exact saved type and
+pending provenance, owner, joint-feasibility and fidelity status. The table adds
+zero witnesses or acceptance counts and does not omit helper records from the
+original audit obligation.
+
+All four source hashes still match the guarded capture; all residual type hashes
+validate. This metadata-only item runs no Lean or timing gate. The bulk table
+stays off Git, bound by source-effects-residuals-manifest.json. Full semantic
+census, canonical Source/production frame producers, final gates and assigned
+H68 bridge remain open; no held timing or trust requirement is relaxed.
+
+Independent read-only finder and skeptic found no issue in the full residual
+partition, source-line/type/hash bindings or unresolved-provenance boundaries.
+Neither ran Lean or a server; the review receipt remains off Git.
+
+### Thirty-two Source-effect component links, fresh serial checks (2026-11-07)
+
+The four current SourceEnvironmentJoint, SourceHashJoint, SourceEmitJoint and
+SourceRethrowJoint modules passed serial bounded per-file checks against the
+same stable four audit-source/four original-source hashes. Total elapsed was
+116.393 seconds including rebuilt imports, peak sampled aggregate RSS
+1,412,104,192 bytes, one Lean per check and no STOP. All 19 printed audit
+declarations retain only the existing standard axiom set; registration passed.
+These are four separate checks, not one combined kernel import/census, full-root
+gate or matched before/after timing. No earlier STOP is released.
+
+The consolidated index accounts for all32 original lexical IDs exactly once:
+14 checked component applications, 17 existing-law references and one pending
+private helper. Applications/reference roles do not recalculate existing models
+as new fixtures or establish whole-domain feasibility, source-owner acceptance
+or statement fidelity. The malformed encoding control remains a genuine local
+typed-domain model, not canonical Source admission; no scope is narrowed around
+successful runs. Saved type hashes remain archival bindings rather than claims
+of equivalence across changed dependent modules.
+
+All349 residual provenance/owner/feasibility/fidelity obligations remain explicit
+in their separate ledger. No global SourceSpec, actual program/session/origin,
+production delegated body/frame or H68 certificate follows from the32 links.
+All original/consolidated full audit and final gates remain open. Bulk receipts,
+index and trust output are off Git, bound by source-effects-component-index-manifest.json.
+
+Read-only finder and skeptic found no issue in the32-link partition, fresh
+serial receipts, stable bindings, trust reports or unresolved global/residual
+boundaries. Neither ran Lean or a server; review receipt remains off Git.
+
+### Original reason/custom-error/standard-rethrow census (2026-11-07)
+
+The next guarded original modules are SourceFailures, SourceCustomErrorFailures
+and SourceStandardRethrow. Their census captures 120 kernel records and 19 public
+lexical name candidates, leaving 101 kernel-only records explicitly pending.
+Six matched targets have twelve explicit proposition binders in total; thirteen
+have none flagged. This does not establish dependent parameter inhabitance,
+simultaneous feasibility, ownership or statement fidelity for any target.
+
+The generated default diagnostic is retained unrun. Its derived checked copy
+removes only the previously reviewed global constants mergeSort; the collector
+predicate and captured fields are unchanged, with saved rows sorted afterward.
+Both diagnostic hashes and exact replacement are recorded. No proof/source
+statement, trust rule, failure classification or budget changes; previous OOM
+receipts and timing STOPs remain retained.
+
+The bounded three-module diagnostic passed in 17.494 seconds with one Lean,
+peak sampled aggregate RSS 941,608,960 bytes and no STOP. This is kernel/name
+accounting, not a full-root gate, semantic case census, matched timing or witness
+acceptance. Canonical Source/session/production frame and assigned H68 work stay
+open. Bulk captures/types remain off Git, sealed through source-failure-census-manifest.json.
+
+Read-only finder and skeptic found no issue in the original bindings, sort-only
+derivation, record/binder counts or unfinished acceptance boundaries. Neither
+ran Lean or a server; their receipt remains with the off-Git evidence.
+
+### Converted-head/tail failure joint and observation (2026-11-07)
+
+SourceCustomErrorFailureJoint supplies the original converted_tail_failure
+premises together: the existing actual hash head returns its digest and reached
+allocation, and the actual tail starts from exactly that locals/heap, changes
+the Bool local and panics. Reflexive conversion/declaration bindings retain the
+original typing obligations. The prefix result supplies arguments_failure, then
+the exact statement result supplies attempt_failure, for both pipelines and
+static flags. Three original conditional target links are added without new
+body fixtures or a replacement evaluator/payload producer.
+
+The full EM.attempt result is proved unequal to normal recovered execution.
+Its outer success contains the original inner panic and retains the reached
+state; no catch dispatch, Source admission or rollback is inferred. The other
+three CustomErrorFailures targets, full19-target feasibility/fidelity audit and
+all101 residual records remain open, as do production Source/body/frame/world/H68
+obligations. Existing control applications are not recounted as new models.
+
+The serial per-file gate passed in 5.916 seconds with one Lean, peak sampled
+aggregate RSS 808,034,304 bytes and no STOP. All five declarations retain only
+the existing standard axioms; registration passed. No full-root/matched timing
+acceptance or STOP release. Exact bindings: source-custom-error-failure-joint-manifest.json;
+bulk proof receipts remain off Git.
+
+Read-only finder and skeptic found no issue in the shared head/tail state,
+original typing/execution premises, complete attempted-result negative or
+limited target acceptance. Neither ran Lean or a server; receipt retained off Git.
+
+### Standard ABI rethrow reached-expression joint (2026-11-07)
+
+SourceStandardRethrowJoint supplies the original expression_statement_timeout
+premise with an actual standard ABI literal run and the same reached-object
+lookup. Arbitrary bytes, both pipelines/static flags and all sufficient allocation
+fuel remain supported in the existing populated model. Zero statement horizon
+retains the encoded allocation; a full-result inequality rejects the prestate
+through heap.next 2 versus 1. No allocator/encoder/evaluator is replaced.
+
+On the existing binary input, standard ABI bytes differ from raw bytes and
+Error(string) data. A full successful-rethrow run with the correct final heap
+still refuses the raw payload substitution, consuming the original literal_execution
+law. These concrete payload distinctions add no admission exclusion or generic
+noncollision claim. One conditional target and one existing execution-law
+consumption link are recorded; five other StandardRethrow target links and all
+full feasibility/fidelity remain pending. No new body fixture is counted.
+
+After adopting master dcf33632c, the serial per-file check passed in 1.514 seconds,
+one Lean, peak sampled RSS 739,815,424 bytes and no STOP. Four declarations use
+only the existing standard axioms; the concrete payload fact is axiom-free.
+Registration and the new private-path check passed. No full-root/matched timing
+acceptance, Source/catch/compiler/session/body/frame/H68 certificate or STOP
+release. Exact bindings: source-standard-rethrow-joint-manifest.json; logs remain
+off Git.
+
+Read-only finder and skeptic found no issue in the actual standard-expression
+premise, reached object, full-state/payload negatives or limited target claims.
+Neither ran Lean or a server; review receipt retained off Git.
+
+The newly routed MRS status at 6fbbf971caeb4c9946fbd20aaa0b25b3f1fb1f9f
+explicitly reports LibraryPremises.Inputs.g42_body not implemented/delivered.
+Available native/frame-free bridges and local v2 refusal do not supply that
+actual delegated-frame duty or complete session/origin/physical transport.
+No H124 redesign or frozen-v1 substitution is requested. The earlier generic-v08
+citation correction remains recorded at 361ab3e4ac8b2b247d157d600d9f4d18b4a7b436;
+it is a documentation fix, not execution acceptance.
+
+### Actual hash-then-reason Source composition (2026-11-07)
+
+SourceReasonJoint composes the published evalE hash and reason expressions using
+ordinary EM bind. General proofs retain arbitrary typed environments/contexts,
+global/frame, locals/state, two byte lists and the original sufficient horizons.
+The reason revert carries exact Error(string) bytes and the already allocated
+head state. A tail timeout retains that allocation too; a head timeout stops
+before allocation. No evaluator, allocator or payload emitter is introduced.
+
+In the existing populated model, full-result inequalities reject pairing either
+the exact reason revert or the tail timeout with the input prestate: heap.next
+is 2 rather than 1. These local actual steps establish neither compiled/session
+execution nor canonical Source admission, catch selection or production
+body/frame/world/H68 transport. Two SourceFailures applications are linked;
+four other original targets and all full19-target/101-residual audit obligations
+remain pending. No new deployed body fixture or fidelity acceptance is counted.
+
+The first check failed on reserved binder spelling prefix; the corrected binder
+hashInput preserves the statement meaning and limits. The failed receipt remains
+retained. Final serial check passed in 1.502 seconds, one Lean, peak sampled RSS
+747,864,064 bytes, no STOP. All five declarations use only existing standard
+axioms; registration passed. No full-root/matched timing acceptance or prior STOP
+release. Exact bindings: source-reason-joint-manifest.json; logs remain off Git.
+
+Read-only finder and skeptic found no issue in the actual EM composition,
+retained generic domains, full-result negatives or failure/acceptance receipts.
+Neither ran Lean or a server; review evidence remains off Git.
+
+### Six local custom-error failure component links (2026-11-07)
+
+The existing SourceCustomErrorFailureJoint audit now supplies the remaining
+encoding and rethrow premises. Encoding uses the existing real record allocation:
+arguments allocate hash input and a record and change a local, then encoding
+returns exactly stuck "not ABI-encodable". This is neither a dangling pointer
+nor a proof of canonical Source admission. Its full-result negative refuses
+reclassifying that stuck result as an empty revert.
+
+The rethrow local selects the same newly allocated bytes object. Its reference
+and heap premises are proved together for arbitrary bytes, then the original
+positive-horizon law and zero-horizon law are consumed. Full timeout and rethrow
+runs differ even for empty bytes. All six original local failure targets now
+link to checked component applications; full-domain feasibility, ownership and
+frozen fidelity remain pending, as do the whole19-target/101-residual audit.
+No existing model is counted as a new deployed body fixture or producer.
+
+The first extension check failed on a lemma outside its imports; the proof now
+uses the already imported generic SourceKeccak.allocated law. The failed receipt,
+including its error-recovery output, is retained and supplies no proof credit.
+Final serial check passed in 2.379 seconds, one Lean, peak sampled aggregate RSS
+735,293,440 bytes and no STOP. All twelve audit declarations retain only existing
+standard axioms, with no error-recovery axiom in the passing output; registration
+passed. Old source/hash/three-target receipt is explicitly historical; current
+bindings are in source-custom-error-failure-boundaries-manifest.json.
+
+No Source origin/lifecycle, compiler/catch selection, complete delegated
+body/frame/session/world/H68 certificate, full-root/matched timing acceptance or
+prior STOP release. H124 remains closed; all original budgets and exclusions stay
+unchanged. Bulk index/logs remain off Git.
+
+Read-only finder and skeptic found no issue in the allocated-record encoding
+premises, reference/heap joint, full failure distinctions or historical/final
+receipt boundaries. Neither ran Lean or a server; review evidence remains off Git.
+
+### Evidence-policy adoption and failure-family accounting (2026-11-07)
+
+Adopted master 896fd3451 and its private coordination evidence policy. Before
+adoption, all eleven affected owned resource/handoff/retirement files were
+copied byte-for-byte off Git with hashes, including both frozen assignment and
+scope/queue packets. The new evidence-files gate passes. Existing dirty work
+and all source/proof checkpoints remain preserved; no public code/master push was attempted.
+
+Independent audit accounting continues off Git: all 19 failure-family targets
+retain exact saved types and binder lists, with ten historical checked component
+links and nine existing local-law references. Independent Source/explicit-target
+execution conjunctions remain distinct from compiler/session adequacy. All 101
+residual records remain pending: three explicit definition-name candidates,
+92 equation-name shapes, one proof-helper shape and five splitter shapes.
+Source hashes match the guarded capture; names do not assign ownership or prove
+provenance, simultaneous feasibility or fidelity. No new Lean run or witness/
+fixture/fidelity acceptance is claimed by this classification.
+
+The sealed 29-file intake (full type/accounting table, original census/diagnostics
+and eleven preserved handoff files) is published privately as
+`source-failure-policy-intake.tar.gz` under the H145 archive coordinates above.
+H145 explicitly authorizes this private publication; no permission question or
+public code/master push is needed. The 88 archived lane evidence files are removed
+from the public tests tree after the successful private upload. Three genuine
+checker inputs remain byte-identical: witness-ledger.json, local-guard-ledger.json
+and generic-v08's inventory-manifest.json. All 287 checked code files checked before/
+after removal remain byte-identical. Full original queues, semantic/fidelity
+audits, producer waits, final gates and assigned H68 bridge remain open.
+
+### Standard-rethrow early and post-allocation timeouts (2026-11-07)
+
+The existing SourceStandardRethrowJoint audit now supplies both original early
+horizon laws together. Allocation horizon0 and argument horizon1 retain the full
+prestate for every later statement horizon. In contrast, sufficient allocation
+followed by statement horizon0 retains its encoded poststate. Reusing the
+existing full-state negative proves this latter run differs from both early
+runs, despite all three returning timeout. Arbitrary bytes, both pipelines/static
+flags and the original horizon parameters remain; no admission/resource bound,
+success filter, evaluator or fixture is introduced.
+
+All seven original standard-rethrow targets now have component links: three
+checked component applications, one checked use of the existing execution law,
+and three existing local-law references. The independent Source/explicit-target
+execution conjunction remains separate from compiler/frame/session adequacy.
+Full-domain feasibility, ownership, frozen fidelity, residual inventory, final
+gates and the assigned H68 bridge remain open; no previous model is counted as
+new fixture evidence.
+
+The serial per-file check passed in 1.597 seconds, one Lean, peak sampled RSS
+737,890,304 bytes and no STOP. Six printed declarations use only existing
+standard axioms; the prior concrete payload distinction remains axiom-free.
+Registration/evidence checks passed. This is not full-root or matched timing
+acceptance and releases no prior STOP. H145 private checkpoint receipts/index:
+`3a739dc3e2f20a2445cd9ef99cf2e8e6326c5798 evidence/solidity-v07-v11-20261030/v08-world-lowering/source-standard-rethrow-boundaries-20261107/`.
+The earlier five-declaration receipt remains historical and unchanged.
+
+Independent read-only finder and skeptic accepted the full-state comparison,
+retained parameters, source/type/evidence bindings and limited component scope.
+Neither ran Lean or a server; review receipts are private under this checkpoint.
+
+### Actual reason statement scope after hashing (2026-11-07)
+
+SourceReasonJoint now composes the existing hash expression with actual execS
+reason-statement execution through ordinary EM.sub. The original exec_reason
+law supplies the statement result; a separate low-horizon lemma derives the
+statement's horizon3 timeout from the original expression horizon2 timeout.
+Both statement paths preserve the hash's reached machine while returning the
+outer typed locals. No new inner-local mutation fixture, evaluator, encoder or
+body producer is introduced.
+
+General proofs retain arbitrary typed environments/contexts, global/frame,
+locals/state, byte inputs and the original horizon parameters. A concrete
+full-result negative with the exact reason payload refuses rolling the machine
+back to the pre-hash heap. This is Source monadic/statement composition, not
+canonical Source admission, a compiler-selected body, physical frame or session
+correspondence. Six original reason targets are indexed: three checked component
+applications and three existing local-law references. Explicit target-constructor
+execution and its independent Source/target conjunction remain references, not
+compiler adequacy. Full19-target/101-residual audits and assigned H68/final gates
+remain open; no new fixture or fidelity acceptance is counted.
+
+The serial per-file check passed in 2.159 seconds, one Lean, peak sampled RSS
+760,795,136 bytes and no STOP. All nine printed declarations retain only the
+existing standard axioms; registration/evidence checks passed. No full-root or
+matched timing acceptance or earlier STOP release. H145 private receipts/index:
+`4617252ee466882535b24eb1a81b6cb886385529 evidence/solidity-v07-v11-20261030/v08-world-lowering/source-reason-statement-joint-20261107/`.
+Earlier five-declaration receipts remain historical and unchanged.
+
+Independent read-only finder and skeptic accepted the actual statement-scope
+composition, horizon derivation, full-result negative and source/type/evidence
+bindings. Neither ran Lean or a server; final review receipts remain private.

@@ -1749,3 +1749,315 @@ transport proofs and original/consolidated proof/backfill/coverage/final gates.
 Incoming library-try/Error Source support, Y04 physical and separate 4.35 waits
 remain; unrelated STOPs stay binding. Coverage is still 72 mapped / 3281 rows,
 3209 uncovered. No model-control witness credit or whole-lane completion.
+
+### C270 — whole resolved-unit computed graphs
+
+SourceAstResolvedGraphs composes the existing full-unit converter, resolver and
+location graph producer. Result retains the complete Source.Resolution plus
+the optional existing graph/certificate at its exact environment. No struct-only
+environment or new AST. resolution_exact preserves unit/body/declaration data,
+full environment, pipeline and coder. certified_output jointly ties successful
+conversion and graph output to the original Source resolution relation and a
+certificate for that converted unit's environment. The existing empty-link
+premise is explicit for Resolves', not hidden as a new conversion filter.
+Seven production guards use the standard trio. Original readers/resolver/graph
+producer and all frozen Source/P8 interfaces remain unchanged.
+
+Runtime checks on both unchanged actual LibraryTry AST files retain all eight
+declarations and produce storage, memory and calldata views for L.S, field
+x:uint, each using Source declaration index 1. That index is not compiler AST
+ID 3. Exact fixture/source hashes and these observations are recorded. The
+generic kernel laws do not make the IO checks closed kernel witnesses or prove
+compiler/Source semantics. The supplied graph origin string is only a label,
+not SourceOrigins or accepted-artifact provenance.
+
+The existing inline-cycle Source unit is reused: coherent resolution and its
+old WellFormed proof remain, while runtime graph output is None. Conversion
+error and graph component None are distinct; neither manufactures Source
+rejection or a profile exclusion. Existing inspector and all previous controls
+remain. Initial new control namespace qualification failed and was corrected;
+that receipt remains, with no recovery proof accepted. One new control guard
+uses the standard trio. Read-only finder/skeptic reviews report no findings;
+neither ran Lean/server/builds or edited. No Source cases copied.
+
+Actual library Source program typing/admission, accepted-artifact/independent
+origin, frame/session/lifecycle/S03-PANIC41 and H121b producer obligations remain
+open. Incoming library-try/Error support is still separate; C246's manual full
+elaboration failure remains. This component supplies computed resolved metadata
+and conditional certificate soundness, not a concrete P8 producer or v1 Inputs
+inhabitant. Original/consolidated proof/backfill/coverage/final gates, exact-19
+transport proofs, Y04 physical and separate 4.35 waits and unrelated STOPs remain.
+Coverage stays 72 mapped / 3281 rows, 3209 uncovered; no fixture IO witness credit.
+
+### C271: computed resolved-environment v2 contract
+
+ResolvedGraphAdmissionV2 retains the complete resolution and constructs the
+existing v2 EnvAdmission only when all three computed location views succeed.
+The joint theorem ties the contract to the converted unit and existing Resolves
+relation, retaining its empty-links premise. This is an environment contract,
+not actual Source program typing/admission, accepted-artifact binding, independent
+origin or session/lifecycle adequacy. Frozen interfaces and Source are unchanged.
+Both existing LibraryTry pipelines retain eight declarations and all three graph
+views; the reused inline cycle retains its resolution and receives None.
+Five guards report only propext, Classical.choice and Quot.sound.
+
+Initial proof syntax and a duplicated generated guard failed; both are fixed and
+failed receipts retained. The final serial bounded control check passed in 8.98 s,
+peak sampled RSS 938557440 bytes, without a resource stop. This is no matched
+performance comparison. Independent read-only finder/skeptic each identified the
+duplicate guard; neither ran Lean or edited. Original/consolidated queues, strict
+pins/docs and final gates remain open. Coverage stays 72/3281, 3209 uncovered.
+Library-try/Error support, Y04 physical adequacy and separate 4.35 disposition
+remain external waits; actual Source/P8 production remains this lane’s duty.
+
+### C272: wrapper transport and returned readiness
+
+Three additive ResolvedGraphAdmissionV2 laws preserve the exact conversion-error
+message, return the complete assembled resolution on successful conversion
+(including optional certification None), and equate returned certificate success
+with computed readiness at that same resolution. They reuse existing conversion
+and environment-certification laws. Existing definitions, statements, imports,
+Source bodies and interfaces are unchanged. Each new guard reports only the
+standard trio; this proves no actual Source admission or lifecycle adequacy.
+
+Bounded serial final module check passed in 1.83 s, sampled peak RSS 797171712
+bytes, no resource stop. The preceding two-law check passed in 2.46 s; these are
+incremental checks, not a matched speed comparison. Read-only finder/skeptic
+reviews found no defect and ran no Lean/server/builds. Cleanup removed only the
+regenerable pinned build directory, restoring more than 2 GB free. Strict pin,
+documentation and full gates remain open as recorded in C271. Coverage remains
+72/3281, 3209 uncovered. Actual H121b Source/P8 production, original/consolidated
+queues and all previously recorded external waits and STOPs remain binding.
+
+### C273: mapping-key syntax correspondence and refusal
+
+SourceAstTypeCorrespondence now proves generic preservation of named path keys
+and elementary keys with the existing nonpayable grammar restriction. A third
+law retains the exact payable-address refusal instead of normalizing that key
+to plain address. Existing reader definitions, statements, imports and Source
+interfaces are unchanged. These are syntax laws, not H24 or actual Source
+admission, artifact binding or lifecycle adequacy.
+
+The first elementary proof left a pure/Except definitional equality; rfl closes
+it. Failed diagnostics remain in evidence, with no recovery proof accepted.
+All three final guards use only propext. Bounded serial module checking passed
+in 2.48 s, sampled peak RSS 381669376 bytes, no resource stop. This is no matched
+performance comparison. Read-only finder and skeptic found no semantic defect;
+neither ran Lean/server/builds or edited. Cleanup removed regenerable build
+output and restored over 2 GB free, preserving sealed evidence. Original and
+consolidated queues, 3209 uncovered rows, strict pin/docs and final gates remain
+open. External library-try, Y04 physical and separate 4.35 waits remain distinct.
+
+### C274: expression conversion failure order
+
+Three additive SourceAstExpressionCorrespondence laws preserve exact existing
+failure boundaries: receiver failure precedes member-name lookup, assignment
+left failure precedes right-field lookup, and named-call refusal precedes target
+or argument conversion. No later-field validity is assumed. Existing reader
+bodies, statements, imports, Source interfaces and exclusions are unchanged.
+These are conversion diagnostics, not Source execution failures or admission.
+
+Initial and final bounded serial module checks passed. Final: 2.92 s, sampled
+peak RSS 354230272 bytes, no resource stop. Exact guards use propext/Quot.sound
+for receiver failure and the standard trio for the other two laws. No matched
+speed comparison or new coverage credit is claimed. Read-only finder/skeptic
+reviews found no defect; neither ran Lean/server/builds or edited. Requested
+cleanup removed regenerable build output and restored over 2 GB free while
+preserving seals. Original/consolidated queues, actual H121b production, 3209
+uncovered rows, strict pins/docs and full gates remain open. Library-try, Y04
+physical and separate 4.35 producer waits and all STOPs remain distinct.
+
+### C275: later-operand and ordered-call failure transport
+
+Three further generic SourceAstExpressionCorrespondence laws retain exact
+right-operand failure after left success, target failure before argument lookup,
+and ordered argument-traversal failure after target success. They reuse the
+existing reader/mapM; no new traversal or per-case copy. Earlier-field checks
+remain explicit and later-field premises are absent where failure precedes them.
+Definitions, existing statements, Source interfaces and imports are unchanged.
+These are syntax conversion errors, not Source runtime failures or adequacy.
+
+Initial and final bounded serial checks passed. Final: 2.94 s, sampled peak RSS
+387387392 bytes, no resource stop; three exact guards use the standard trio.
+This is no matched speed comparison. Independent read-only finder/skeptic
+reviews found no defect; neither ran Lean/server/builds or edited. Coverage
+remains 72/3281, 3209 uncovered. Actual H121b Source/P8 production and all
+original/consolidated queues, strict pins/docs, full gates and STOPs remain open.
+External library-try, Y04 physical and separate 4.35 waits remain unchanged.
+
+### C276: whole-unit conversion failure and generic first-error reuse
+
+The original shared unit_ok_iff_each already accounts for every successful
+whole-unit child; a redundant draft copy was identified by both independent
+reviews and removed. New unit_children_failure retains exact traversal errors.
+New mapM_head_failure is generic over reader/error types and is used by
+unit_head_failure, which requires no conversion premise for later children.
+No failed child becomes a shortened successful unit. Existing definitions,
+statements, imports, Source interfaces, budgets and exclusions are unchanged.
+These are syntax conversion laws, not Source runtime or admission evidence.
+
+All bounded checks passed. Final: 4.82 s, sampled peak RSS 377634816 bytes, no
+resource stop. Generic guard uses propext/Quot.sound; both unit guards use the
+standard trio. This is no matched timing comparison. Finder/skeptic confirmed
+the duplicate removal and final reuse with no remaining findings; neither ran
+Lean/server/builds or edited. Requested cleanup restored over 2 GB free from
+regenerable build output only. Actual H121b production, original/consolidated
+queues, 3209 uncovered rows, strict pins/docs and full gates remain open.
+External library-try, Y04 physical and separate 4.35 waits/STOPs remain distinct.
+
+### C277: exact first-failure accounting for container traversal
+
+Each.prefix_failure and first_failure_of_mapM_error characterize an exact
+successful ordered prefix followed by the failed child and an unconstrained
+tail. mapM_error_iff_first composes them; unit_first_failure uses this generic
+interface for whole-unit diagnostics. No children are skipped or reordered.
+Reader definitions, earlier statements, imports and Source interfaces remain
+unchanged. These are syntax diagnostics, not Source runtime/admission evidence.
+
+Initial reserved-binder syntax and a consumer reference after equality
+elimination failed; both are fixed with raw failures preserved. Final bounded
+check passed in 4.35 s, sampled peak RSS 372924416 bytes, no resource stop.
+Three generic guards use propext/Quot.sound; the consumer uses the standard trio.
+No matched speed comparison or row coverage credit. Read-only finder/skeptic
+confirmed no remaining findings without Lean/server/builds or edits. Master
+private-path cleanup was adopted before this item. Original/consolidated queues,
+H121b actual production, 3209 uncovered rows and strict/full gates remain open.
+Next priority follows the coordinator: inspect original Backfill B finite
+operation-generated transport, reuse completed laws and preserve all aliases
+and per-run region premises. External library-try/Y04/4.35 waits remain distinct.
+
+### C278: Backfill B resolved finite-footprint membership transport
+
+Existing touched_word_iff handles arithmetic touched sets; LayoutAccess already
+supplies checked recursive-path bounds, resolved-family commutation and outside
+queries. Its new resolved_word_membership fills the exact resolved-list gap:
+a checked query belongs to the numeric word image iff it belongs to the original
+resolved accesses. It reuses word_inj only under the existing bounded placements
+and complete per-run RegionsDisjoint over addresses plus the query preimages.
+Repeated accesses and aliases remain; no global hash premise, live-only filter
+or deduplication. resolved_family_outside now reuses this law with its statement
+and all original premises unchanged. Existing shrink/regrow and live/retained
+semantics and controls are untouched; this is no whole-Backfill completion.
+
+The existing nested LayoutControls fixture now proves repeated-address
+membership and distinct sibling nonmembership through the new generic law.
+Both exact guards use the standard trio. First baseline failed on an absent
+cache-fetched OperationFamilies object; repository restore helper materialized
+66 local outputs, zero missing hashes. Raw failure retained. Fresh unchanged
+control checks before/after proof integration passed at 1.82/1.85 s (+1.65%),
+with warm imports and identical limits; this single pair is not a statistically
+stable benchmark. Final guarded extended controls pass 1.83 s, sampled peak RSS
+645230592 bytes, no resource stop. No existing STOP is released.
+
+Independent read-only finder/skeptic found no defect in the complete query
+preimages, aliases, proof reuse or final controls/guards; neither ran Lean/server
+or edited. Actual Source/P8 origin/admission/lifecycle, broader emitted-access
+alignment, remaining original/consolidated obligations, strict pins/docs and
+final gates remain open. Coverage stays 72/3281, 3209 uncovered. External waits
+remain library-try, Y04 physical and separate 4.35 trust/timing disposition.
+
+### C279: Backfill B exact repeated-access multiplicity
+
+LayoutAccess.resolved_word_count strengthens finite membership transport to
+exact occurrence counts for checked operation-generated path accesses. The
+proof uses pointwise query/address equality under the same original resolved
+bounds and complete per-run regions over addresses plus query preimages.
+No request is deduplicated; aliases remain allowed, with no liveness restriction,
+global hash injectivity or new cryptographic premise. Definitions and existing
+statements are unchanged. Existing shrink/regrow semantics remain untouched.
+
+The existing nested fixture now checks count two for the repeated address and
+count zero for its distinct checked sibling via the generic law. Both guards
+use the standard trio. Kernel module check passed. First control check failed
+on a cache-fetched object absent after cleanup; repository restore helper placed
+48 outputs with zero missing hashes. Corrected and final guarded controls pass:
+1.85 s, sampled peak RSS 647352320 bytes, no resource stop. This additive-law
+check is no matched performance comparison and releases no prior STOP.
+
+Independent read-only finder/skeptic confirmed exact multiplicity, unchanged
+region premises and no semantic copies or remaining findings; neither ran Lean
+or edited. Requested disk cleanup restored over 2 GB free using regenerable
+build output only. No whole-Backfill or actual Source/P8 adequacy claim. Original
+and consolidated queues, 3209 uncovered rows, strict pins/docs and full gates
+remain open. External library-try/Y04/separate 4.35 waits remain distinct.
+
+### C280: Backfill B next runtime-generated footprint certificate
+
+RuntimeCopyComposition.next_footprint_run derives FiniteRun for the NEXT actual
+copy write/read footprint from the original run, OLD generated coverage and
+unchanged self-or-disjoint safety. The separated branch reuses the derived
+unchanged source reads and write subset; the self branch uses actual copy
+identity. The original hash parameters, complete preimages and regions are
+retained through restrict. No intermediate coverage oracle, length cap, global
+hash injectivity, liveness filter or new cryptographic premise is introduced.
+Existing definitions, statements, Source interfaces and budgets are unchanged.
+
+Existing shrinking-copy controls now derive the next run and pin its shorter
+footprint; stale-tail writes do not recur. Existing self-alias, unsafe overlap,
+raw/default and live/retained controls remain unchanged. Three exact guards use
+the standard trio. Initial adjacent docstrings failed syntax; original comment
+attachment was restored, with raw failure preserved. Final bounded controls
+pass in 4.26 s, sampled peak RSS 718344192 bytes, no resource stop. Cache-fetched
+outputs were restored before direct Lean. No matched speed comparison or prior
+STOP release. Independent read-only finder/skeptic confirmed no findings and
+ran no Lean/server/builds or edits.
+
+Published private-evidence policy was adopted before this item; raw receipts
+and bundles remain off Git. Original/consolidated queues, actual emitted-access
+alignment, H121b Source/P8 admission/origin/session/lifecycle, 3209 uncovered
+rows, strict pins/docs and full gates remain open. External library-try/Y04/
+separate 4.35 waits remain distinct. No whole-Backfill completion is claimed.
+
+### C281: rejected next-input certificate candidate
+
+The candidate coverage extraction and joint next-input certificate were reverted
+under the required timing STOP. They are not available APIs. Production source
+was restored exactly; the rejected patch and validation evidence are archived
+privately under H145. The STOP remains binding independently of later work.
+
+### C282: arbitrary positive finite copy repetitions
+
+positive_repetitions reuses the existing whole-store copy equality for every
+positive finite repetition of the original numeric copy. repeated_footprint_run
+then reuses the accepted next-footprint certificate at that same store. No new
+evaluator, iteration cap, intermediate oracle or alias exclusion. The populated
+shrinking fixture covers arbitrary counts rather than a fixed table. C281 stays
+rejected; no Source/P8 or whole-Backfill completion follows. Validation records
+are archived privately under H145.
+
+### C283: symbolic repetition and same-count full-location transport
+
+symbolic_positive_repetitions reuses the original complete theorem to preserve
+the whole symbolic store for every positive finite count. repeated_transport
+combines it with numeric repetition at the same count over the ORIGINAL finite
+location set, including retained observations beyond the smaller live footprint.
+Original OLD run/transport/generated coverage and self-or-disjoint safety are
+unchanged. No intermediate oracle, crypto premise, liveness filter or Source
+semantics change. Existing definitions, proofs, budgets and interfaces remain.
+
+The existing populated shrinking fixture instantiates both laws for arbitrary
+counts. Existing self-alias, unsafe-overlap and raw/default/live-retained
+controls remain intact. Validation and independent reviews are archived under
+H145; the evidence and timing figures are kept out of this code-branch summary.
+Actual emitted-access alignment, H121b Source/P8 admission/origin/lifecycle,
+original/consolidated queues and final gates remain open. C281 and prior STOPs
+are not released by these separate transport laws.
+
+### C284: disjoint partial-family failure stability
+
+modifyMany_failure_commutes extracts the original partial commutation law for
+an already failing family: a disjoint preceding family cannot make the combined
+result succeed, even if the preceding family itself fails.
+modifyMany_failure_after_disjoint specializes this to its actual successful
+poststate. Internal repeated keys remain allowed; captured effects and existing
+cross-family separation are unchanged. No transaction rollback, journal or
+Source runtime outcome is asserted.
+
+The existing recursive populated fixture now checks repeated-pop failure at
+the exact successful disjoint-clear poststate. Original forward/reverse
+failure, success and alias-control proofs are untouched, preserving their axiom
+sets. No new evaluator, state representation, fixture copy, budget or interface
+change. Validation, measured axiom guards, timings and independent reviews are
+archived privately under H145. Original/consolidated queues, strict/full gates,
+actual H121b Source/P8 production and all external waits remain open. C281 and
+prior STOPs are unaffected; no whole-Backfill or coverage completion is claimed.
