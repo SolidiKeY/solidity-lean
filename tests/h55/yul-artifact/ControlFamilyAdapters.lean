@@ -2,6 +2,7 @@ import Solidity.Yul.Compilation.ArtifactPreparation
 import Solidity.Yul.Compilation.LetBranchCompletionControls
 import Solidity.Yul.Compilation.LetControlCompilationControls
 import Solidity.Yul.Compilation.LetSequenceCompletion
+import Solidity.Yul.Compilation.MultiSwitchCompletion
 import Solidity.Yul.Compilation.InitializedSequenceCompilationControls
 import Solidity.Yul.Compilation.LetControlCompletion
 import Solidity.Yul.Compilation.LetScopeCompletion
@@ -521,3 +522,97 @@ end RawControls
 #print axioms RawControls.refused_original
 #print axioms RawControls.refused_source_completes
 end Solidity.Yul.Compilation.H55ControlFamilies.LoopControl
+
+namespace Solidity.Yul.Compilation.H55ControlFamilies.MultiSwitch
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : MultiSwitchCompilation.Artifact fuel stmt) : Artifact 0 stmt :=
+  Artifact.ofZero a.compiled.profile a.code a.source_to_model
+    (MultiSwitchCompletion.model_to_source a)
+
+abbrev Image (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encode (fuel := fuel) (stmt := stmt))
+
+theorem source_roundtrip (a : MultiSwitchCompilation.Artifact fuel stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+theorem image_roundtrip (a : Image fuel stmt) :
+    Artifact.toImage encode (Artifact.fromImage a) = a := Artifact.image_roundtrip a
+
+def prepare (a : MultiSwitchCompilation.Compiled fuel stmt) : Option (Artifact 0 stmt) :=
+  Artifact.afterSelection (fun a : MultiSwitchCompilation.Compiled fuel stmt => a.emit) WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩) a
+
+abbrev Preparation (fuel : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (stmt := stmt))
+
+theorem selected (a : MultiSwitchCompilation.Artifact fuel stmt) : prepare a.compiled = some (encode a) :=
+  Artifact.afterSelection_some _ _ _ a.compiled a.block a.code a.emitted a.selected
+
+theorem emission_none (a : MultiSwitchCompilation.Compiled fuel stmt) (refused : a.emit = none) :
+    prepare a = none :=
+  Artifact.afterSelection_first_none (fun a : MultiSwitchCompilation.Compiled fuel stmt => a.emit)
+    WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩) a refused
+
+theorem selection_none (a : MultiSwitchCompilation.Compiled fuel stmt) (block : Backend.Block)
+    (emitted : a.emit = some block) (refused : WordControl.blockCode block = none) : prepare a = none :=
+  Artifact.afterSelection_second_none (fun a : MultiSwitchCompilation.Compiled fuel stmt => a.emit)
+    WordControl.blockCode
+    (fun compiled block emitted code selected => encode ⟨compiled, block, code, emitted, selected⟩)
+    a block emitted refused
+
+namespace Controls
+theorem first_model (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode MultiSwitchCompilation.Controls.artifact).code
+      {m with stack := coreWord 0 :: coreWord b :: caller} =
+      .ok {m with stack := coreWord 0 :: coreWord (b+3) :: caller} 0 :=
+  MultiSwitchCompilation.Controls.first_target b m caller
+
+theorem later_model (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode MultiSwitchCompilation.Controls.artifact).code
+      {m with stack := coreWord SourceLoop.Controls.dirty :: coreWord b :: caller} =
+      .ok {m with stack := coreWord (ScopedControlCompilation.Controls.update SourceLoop.Controls.dirty) :: coreWord b :: caller} 0 :=
+  MultiSwitchCompilation.Controls.later_target b m caller
+
+theorem alias_default_model (b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode MultiSwitchCompilation.Controls.artifact).code
+      {m with stack := coreWord SwitchCompilation.Controls.lowOnly :: coreWord b :: caller} =
+      .ok {m with stack := coreWord SwitchCompilation.Controls.lowOnly :: coreWord b :: caller} 0 :=
+  MultiSwitchCompilation.Controls.alias_target b m caller
+
+theorem prepared : prepare MultiSwitchCompilation.Controls.artifact.compiled =
+    some (encode MultiSwitchCompilation.Controls.artifact) := selected _
+
+def refusedSource : Stmt [] [] SourceLoop.Controls.root 17 := .switch (.local 16) .nil .skip
+def refusedRaw : MultiSwitchCompilation.Compiled 2 refusedSource :=
+  (MultiSwitchCompilation.compile 2 refusedSource).get (by rfl)
+theorem refused_emission : refusedRaw.emit = none := rfl
+theorem refused_preparation : (Artifact.toPreparationImage prepare refusedRaw).artifact = none :=
+  emission_none _ refused_emission
+theorem refused_original : Artifact.recoverPreparation (Artifact.toPreparationImage prepare refusedRaw) =
+    refusedRaw := Artifact.preparation_source_roundtrip prepare refusedRaw
+theorem source_completes :
+    evalStmt 2 .nil True.intro refusedSource refusedRaw.profile (sourceLocals (Vector.replicate 17 0)) =
+      some ⟨sourceLocals (Vector.replicate 17 0), .normal⟩ := rfl
+#guard (MultiSwitchCompilation.compile 0 MultiSwitchCompilation.Controls.source).isNone
+end Controls
+
+#print axioms encode
+#print axioms source_roundtrip
+#print axioms image_roundtrip
+#print axioms prepare
+#print axioms selected
+#print axioms emission_none
+#print axioms selection_none
+#print axioms Artifact.preparation_image_roundtrip
+#print axioms Controls.first_model
+#print axioms Controls.later_model
+#print axioms Controls.alias_default_model
+#print axioms Controls.prepared
+#print axioms Controls.refused_emission
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_original
+#print axioms Controls.source_completes
+end Solidity.Yul.Compilation.H55ControlFamilies.MultiSwitch

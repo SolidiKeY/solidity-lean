@@ -162,6 +162,24 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LoopControl",
       "adapter_kind": "preselection_provenance",
       "boundary": "Instantiates generic two-stage afterSelection and PreparationImage with actual depth-indexed block emission and WordControl instruction selection. Both selection proofs feed existing semantic encode. Full raw producer retained; actual source-completing depth15 emission refusal is None, not runtime failure."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/MultiSwitchCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.MultiSwitch",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic two-stage preparation from actual block emission and instruction selection. Full original finite-case/default producer retained; genuine source-completing local16 emission refusal remains None without runtime-failure claims."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/MultiSwitchCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.MultiSwitch",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates generic zero-prefix Artifact and exact Image from both actual finite-case switch laws. Actual selector, cases/default, fuel, emitted block, selected code and full source/profile data retained; original empty-newer-prefix convention and arbitrary caller/machine frame preserved."
     }
   ]
 }
