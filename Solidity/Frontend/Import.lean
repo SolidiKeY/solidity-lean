@@ -584,6 +584,29 @@ private def readImportedContract (ast : Json) (name : String)
     (readsSpecification env sourceNames) entrypoints
     (!provenance.legacyFixture && provenance.pipeline == some .viaIR) compilerCode namedErrorSourceOrder compilationUnits
 
+
+/-- Exact admitted import computation for versioned metadata consumers.
+Reusing this wrapper preserves private binding normalization instead of reproducing
+`readContract` with different defaults. Existing import outputs are unchanged. -/
+def readImportedContractV1 (ast : Json) (name : String)
+    (ren : List (String × String)) (testing entrypoints : Bool)
+    (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json := []) : Except String SolcContract :=
+  readImportedContract ast name ren testing entrypoints env sourceNames provenance
+    compilerCode namedErrorSourceOrder compilationUnits
+
+/-- The versioned accessor is definitionally the original private computation. -/
+theorem readImportedContractV1_eq (ast : Json) (name : String)
+    (ren : List (String × String)) (testing entrypoints : Bool)
+    (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool)
+    (compilationUnits : List Json := []) :
+    readImportedContractV1 ast name ren testing entrypoints env sourceNames provenance
+      compilerCode namedErrorSourceOrder compilationUnits =
+    readImportedContract ast name ren testing entrypoints env sourceNames provenance
+      compilerCode namedErrorSourceOrder compilationUnits := rfl
+
 private structure ImportedMembers where
   members : List String
   bad : List (String × String)

@@ -882,3 +882,29 @@ workload. The first test harness attempt mistook pop()'s return value for an
 exit status; explicit status handling fixed the test setup. This was not a
 browser/runtime rerun or a guard-acceptance defect. Existing seals remain
 unchanged; no Lean source, theorem, budget or trust boundary changed.
+
+
+## H127 slow-example runner intake and pre-use design
+
+H127 assigns this lane the H109 slow-example runner after two rejected Terra
+drafts. It does not transfer the rest of H55–H58 or clear runtime STOPs. The
+existing fourteen-module non-default slow library is retained. The
+[pre-use contract](../../tests/directruntime-20261104/native-browser/h109/RUNNER-DESIGN.md)
+requires sealed source/Git/package/toolchain/cache inputs, actual kernel cgroup
+checks, serial execution, whole-container cleanup and precise timing/memory
+provenance. A candidate total 600-second deadline is conservative pending exact
+H116 scope from the requested latest handoff; it is not multiplied by fourteen.
+No proof heartbeat, statement, exclusion or other budget changes.
+
+The source-plan preparer validates all committed regular-file bytes against
+Git and records SHA256, source modes and all fourteen targets. Descriptor-based
+reads reject symlink ancestors, special files and size drift. It only prepares
+a plan: live observations are not a sealed executable snapshot or resource
+attestation. Synthetic metadata controls and the existing slow-root partition
+checks run without Lean. Full source inventory stays outside Git with a hash.
+Independent read-only finder/skeptic reviews found and resolved regular-file,
+isolated-Git/package and cleanup-contract gaps. No production runner, real
+slow-module checks, matched measurements, CI qualification or pin relocation
+is claimed. The latest module-times result/drafts remain requested; the available
+H82 report is historical. A coordinator quiet window will be requested only
+when an exact reviewed axiom-pin migration is ready.
