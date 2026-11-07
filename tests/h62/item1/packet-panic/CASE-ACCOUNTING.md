@@ -67,3 +67,7 @@ The base-byte-pinned `signed_mod_selection_ledger.py` adds ten literal declarati
 ## SignedDiv Origin
 
 The base-byte-pinned `signed_div_origin_ledger.py` covers ten literal declarations for Source signed division origins. It distinguishes zero divisor in both modes, checked minimum/-1 arithmetic panic, unchecked minimum/-1 success, and ordinary division with a nonzero divisor and the overflow pair excluded. Local origin retains the original reads, frame, fuel+3 and full Source state. This is a textual Source account, not a target proof. The ledgers now account for 294 of 465 literal headers; 171 remain unclassified.
+
+## SignedDiv Selected
+
+The base-byte-pinned `signed_div_selected_ledger.py` adds twelve literal declarations covering public compiler selection, checked raw division and the unchecked minimum/-1 conditional, intrinsic evaluation under local-read premises, and symbolic `ValOutT` under the original physical StateRepr and arbitrary EVM-word tail. This is not a numeric capacity proof, target panic-payload claim, Lean proof or complete semantic account. The ledgers now account for 306 of 465 literal headers; 159 remain unclassified.

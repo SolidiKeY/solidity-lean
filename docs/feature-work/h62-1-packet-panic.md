@@ -93,3 +93,7 @@ The base-byte-pinned `signed_mod_source_ledger.py` adds 12 manually reviewed Sou
 ## SignedDiv Origin continuation
 
 `signed_div_origin_ledger.py` adds ten base-pinned Source origin observations. Negative controls reject missing, duplicate or forged census headers and changed source, even with refreshed census hashes. Independent read-only finder and skeptic reviews matched all observations and case premises without Lean; no material discrepancy was found. This is not a semantic-closure, target-payload or proof claim.
+
+## SignedDiv Selected continuation
+
+`signed_div_selected_ledger.py` records twelve base-pinned selection declarations. Tests reject missing, duplicate, forged and changed-source inputs. Independent read-only finder and skeptic reviews matched the selection, intrinsic and symbolic observations to the originals without Lean, and found no material discrepancy. Source-only and target observations remain distinct; the textual ledger is not full semantic closure.
