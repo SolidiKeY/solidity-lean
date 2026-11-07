@@ -5,8 +5,8 @@
     "sha256": "c6d26b9f50936dec304b19e226e069be8f9f9f6e4229ac016cb73b156caf6c92"
   },
   "lifetime_roles": {
-    "path": "/workspace/h62-successor-bulk/dispatch-soundness-classification-v26/semantic-roles-reviewed.json",
-    "bytes": 796689,
-    "sha256": "7bf69b3b8f09f3acecec4fa8120e5c46bb7e1a5af146425812e1ac88a012735b"
+    "path": "/workspace/h62-successor-bulk/structural-soundness-classification-v27/semantic-roles-reviewed.json",
+    "bytes": 823995,
+    "sha256": "d22f3f885d4897174cd41b2081985b6aa0573550c07a5a99e44243843b797df3"
   }
 }
