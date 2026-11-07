@@ -187,11 +187,11 @@ V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-wor
 - [Core EVM revert/return data (machine V2)](feature-work/evm-machine-v2.md): versioned `OutV2`/`MachineV2` with revert/return data, return buffer and CALL input bytes; migration to the frozen machine.
 - [Canonical P1 languages V2](feature-work/p1-lang-v2.md): `P1LangV2` with revert data, call events and frame classes over the V2 machine; `p1_frame_bridge` for a guarded revert-with-data family.
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 | V13 ABI/world independent preparation (parent open) | [roadmap-v13-abi-world.md](feature-work/roadmap-v13-abi-world.md) |
 | V13 intrinsic catch consumer recovery (parent blocked) | [roadmap-v13-abi-world.md](feature-work/roadmap-v13-abi-world.md#recovery-catch-consumer-checkpoint) |
 | V13 published compiled-memory-call consumer (parent open) | [roadmap-v13-abi-world.md](feature-work/roadmap-v13-abi-world.md#published-memory-call-consumption) |
 | V13 uniform returned-array observation (parent blocked) | [roadmap-v13-abi-world.md](feature-work/roadmap-v13-abi-world.md#uniform-returned-array-observation) |
-| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 - [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
 - V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
 | V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
