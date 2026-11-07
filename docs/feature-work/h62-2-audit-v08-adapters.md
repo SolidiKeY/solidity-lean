@@ -363,3 +363,11 @@ An independent production-frame item has only completed its three pre-edit basel
 The lexical regression driver now uses explicit refusals for all 16 original assertion predicates, preserving their AST expressions. Normal and optimized Python accept valid synthetic metadata and explicit unresolved headers, and reject ten malformed metadata cases each. The retained census snapshot also passes; this does not revalidate current source bytes or establish witnesses, kernel statement fidelity, or complete inventory. Commands and off-Git evidence hashes are in `tests/h62/item2/audit-v08-adapters/census-optimization-manifest.json`. No Lean source, premise, exclusion or budget changed.
 
 Independent read-only finder and skeptic reviews found no blocking issue; neither used Lean or the Lean server.
+
+## Runtime outcome sensitivity of the supported local guard
+
+The unchanged `LocalGuardSuccess.Contract` now entails a general runtime distinction: deterministic selection yields the same code image, and its `Out.isRevert` observations differ for true and false. `inputBlind_not_contract` rejects any compiler whose selected code has equal revert observations on these inputs; `actual_not_inputBlind` applies the real public selection contract. All original declarations are byte-preserved. This is one existing fixture, without charged-gas, fork or complete compiler adequacy.
+
+The finder identified that comparing complete outputs could distinguish only retained input machines. The revised proof compares the existing revert observation and passed the serial per-file gate. The initial timing STOP (1.862→2.165 seconds, +16.3%) is retained. After removing duplicate transitive axiom queries, the changed candidate measured 1.968→2.058 seconds (+4.6%); the remaining query covers all three proofs transitively and reports only the existing standard Lean axioms. Evidence and exact commands are indexed in `tests/h62/item2/audit-v08-adapters/input-blind-manifest.json`. No global gate pass is claimed.
+
+Final independent finder and skeptic reviews accepted the corrected status observation. Their review was read-only without Lean/server use; the transitive footprint report is not a complete declaration census.

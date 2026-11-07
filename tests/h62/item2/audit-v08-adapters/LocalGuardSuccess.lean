@@ -1,7 +1,8 @@
 import Solidity.Backend.FailurePaths.LocalGuardSelectionControls
 
 /-! Supported dynamic local-require success, exact failure, joint premises and
-trivial compiler refutations. This instruction interpreter has no charged gas
+trivial compiler refutations. Guards the regression where selected execution
+ignores the runtime Boolean input. This instruction interpreter has no charged gas
 or fork parameter; no gas/fork adequacy is asserted by this module. -/
 namespace H62.AuditV08Adapters.LocalGuardSuccess
 open Solidity Solidity.Backend Solidity.Backend.FailurePaths
@@ -44,6 +45,40 @@ theorem alwaysRevert_not_contract : ¬ Contract alwaysRevert := by
   rw [←same] at ran
   change Evm.Out.revert = Evm.Out.ok (RuntimeGuard.Controls.machine true) 0 at ran
   cases ran
+
+/-- Regression guarded: a contract cannot be met by code whose observed
+outcome ignores the runtime Boolean input, even when selection succeeds. -/
+def InputBlind (compiler : Candidate) : Prop :=
+  ∀ code, compiler LocalGuardSelection.Controls.input = some code →
+    (run code (RuntimeGuard.Controls.machine true)).isRevert =
+      (run code (RuntimeGuard.Controls.machine false)).isRevert
+
+/-- Any supported compiler must select one code image with distinct runtime
+outcomes. No Source-success or desired-execution hypothesis is added. -/
+theorem contract_distinguishes_runtime_input (compiler : Candidate)
+    (supported : Contract compiler) :
+    ∃ code, compiler LocalGuardSelection.Controls.input = some code ∧
+      (run code (RuntimeGuard.Controls.machine true)).isRevert ≠
+        (run code (RuntimeGuard.Controls.machine false)).isRevert := by
+  obtain ⟨code, selected, success⟩ := supported true
+  obtain ⟨other, selectedOther, failure⟩ := supported false
+  have same : code = other := Option.some.inj (selected.symm.trans selectedOther)
+  subst other
+  refine ⟨code, selected, ?_⟩
+  intro indistinguishable
+  rw [success, failure] at indistinguishable
+  change false = true at indistinguishable
+  cases indistinguishable
+
+theorem inputBlind_not_contract (compiler : Candidate) (blind : InputBlind compiler) :
+    ¬ Contract compiler := by
+  intro supported
+  obtain ⟨code, selected, distinct⟩ := contract_distinguishes_runtime_input compiler supported
+  exact distinct (blind code selected)
+
+theorem actual_not_inputBlind : ¬ InputBlind actual := by
+  intro blind
+  exact inputBlind_not_contract actual blind actual_contract
 
 /-- Exact simultaneous nontrivial premises of frozen selected_correct, on
 one shared value/machine/local frame. No result-execution premise is assumed. -/
@@ -93,4 +128,5 @@ theorem views_joint :
 #guard_msgs (whitespace := lax) in #print axioms both_pipeline_runs
 /-- info: 'H62.AuditV08Adapters.LocalGuardSuccess.views_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms views_joint
+#print axioms actual_not_inputBlind
 end H62.AuditV08Adapters.LocalGuardSuccess
