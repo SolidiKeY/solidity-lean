@@ -12,6 +12,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   const diagnostics = vscode.languages.createDiagnosticCollection('solidity-lean');
   const controller = vscode.tests.createTestController('solidityLean', 'Solidity Lean');
   const output = vscode.window.createOutputChannel('Solidity Lean');
+  let outputClosed=false;const outputOwner={dispose(){if(!outputClosed){outputClosed=true;output.dispose();}}};
   const active = new Map(), saving = new Map(), reports = new Map(), metadata = new Map(), documents = new Map();
   let editorServices;
   const testingTree=require('./testing-tree.cjs').install(vscode,controller,metadata),symbolSnapshots=new Map();
@@ -22,7 +23,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
   context.subscriptions.push({dispose:disposeTesting});
   const testRunCancellations=new Set();
   let discoveryVersion = 0;
-  let disposed=false,restartGeneration=0;
+  let disposed=false,restartGeneration=0,disposal;
   const documentGenerations=new Map();
   const key = uri => uri.toString();
   const isSolidity = doc => doc?.uri.scheme === 'file' && extname(doc.uri.fsPath).toLowerCase() === '.sol';
@@ -223,7 +224,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     }
   },true);
   context.subscriptions.push(
-    diagnostics, controller, output,
+    diagnostics, controller, outputOwner,
     vscode.commands.registerCommand('solidityLean.verify', () => activeCommand(false)),
     vscode.commands.registerCommand('solidityLean.list', () => activeCommand(true)),
     vscode.commands.registerCommand('solidityLean.cancel', () => {for(const cancellation of testRunCancellations)cancellation.cancel();cancel();}),
@@ -318,7 +319,20 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     for(const doc of vscode.workspace.textDocuments)open(doc);
   }
   return { verify, cancel, controller, diagnostics, reports, service,
-    async dispose(){if(disposed)return;disposed=true;disposeTesting();for(const cancellation of testRunCancellations)cancellation.cancel();cancel();for(const item of context.subscriptions)item.dispose();const sourceRetirement=sourceCommands.dispose();try{await service?.dispose();}finally{await sourceRetirement;}} };
+    dispose(){
+      if(disposal)return disposal;disposed=true;
+      let resolveDisposal,rejectDisposal;disposal=new Promise((resolve,reject)=>{resolveDisposal=resolve;rejectDisposal=reject;});
+      const cleanup=async()=>{
+        const errors=[],pending=[];
+        const attempt=fn=>{try{const result=fn();if(result!==disposal&&result&&typeof result.then==='function')pending.push(Promise.resolve(result).catch(error=>{errors.push(error);}));}catch(error){errors.push(error);}};
+        attempt(disposeTesting);for(const cancellation of testRunCancellations)attempt(()=>cancellation.cancel());attempt(cancel);
+        for(const item of context.subscriptions)if(item!==outputOwner)attempt(()=>item.dispose());
+        attempt(()=>service?.dispose());attempt(()=>sourceCommands.dispose());
+        try{await Promise.all(pending);}finally{attempt(()=>outputOwner.dispose());}
+        const failures=[...new Set(errors)];if(failures.length)throw failures.length===1?failures[0]:new AggregateError(failures,'Extension cleanup failed');
+      };
+      cleanup().then(resolveDisposal,rejectDisposal);return disposal;
+    } };
 }
 let runtime;
 function activate(context) {

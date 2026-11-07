@@ -26,7 +26,7 @@ async function run() {
   let last = performance.now();
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);
   const result = {schemaVersion:1,runId:config.runId,target,startedWallTime:Date.now(),metrics,scenarios,observations:{},checks:[],status:'running'};
-  let api, client, activeScenario = null;
+  let api, client, activeScenario = null, localRetirementStarted=false;
   let localStatus;
   const visual=config.suite==='visual',traceSessions=new WeakMap(),sessionFor=doc=>{if(!traceSessions.has(doc))traceSessions.set(doc,require('node:crypto').randomUUID());return traceSessions.get(doc);};
   const timeout = config.operationTimeoutMs;
@@ -117,7 +117,15 @@ async function run() {
         const observed={status:'partial',channel:channel[0],channels:events.filter(e=>['output.create','output.dispose'].includes(e.kind)&&e.data.channel===name),startup,events:rows,uri:doc.uri.toString(),version,sourceHash:createHash('sha256').update(source).digest('hex'),scope:'Actual native output API and registered restart action. No output-panel rendering, failed/native overlap matrix, performance, kernel or exact branded-text parity. Upstream readiness is global; local readiness names the document.'};assert.deepEqual(require('./core.cjs').outputLifecycleErrors(observed,target),[]);
         if(target==='local')await vscode.commands.executeCommand('solidityLean.showOutput');else{const owned=observation.outputs.filter(o=>o.name===name&&o.channelId===channel[0].data.channelId);assert.equal(owned.length,1);owned[0].channel.show(true);}
         observed.panel=await require('./phase-capture.cjs').requestPhase(config.dir,config.runId,'output-channel',{uri:observed.uri,version,sourceHash:observed.sourceHash,channelId:channel[0].data.channelId,channel:name,readinessPrefix:target==='local'?'Solidity Lean is ready again':'Dafny is ready again.',readinessLine:rows[ready].data.text.split('\n')[0]},timeout);
-        assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.ok(!doc.isClosed);observed.panelScope='Actual output panel shown through registered local Show Output or captured public Dafny OutputChannel.show; visible panel/channel DOM/AX/PNG and owned DOM-resident readiness; full source-path glyph visibility is unproved, not a Dafny contribution action or full phase/lifecycle equivalence.';return observed;
+        assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.ok(!doc.isClosed);observed.panelScope='Actual output panel shown through registered local Show Output or captured public Dafny OutputChannel.show; visible panel/channel DOM/AX/PNG and owned DOM-resident readiness; full source-path glyph visibility is unproved, not a Dafny contribution action or full phase/lifecycle equivalence.';
+        if(target==='local'){
+          const state=require('../src/process-state.cjs'),clients=[...api.service.clients.values()],children=clients.map(client=>({client,child:client.child,before:state.processState(client.child.pid),workers:[...client.ownedProcesses.values()]}));assert.ok(children.length,'actual current native language client required');const shutdownStart=events.length;
+          for(const {child}of children)for(const event of ['exit','close'])child.once(event,()=>record('output.shutdown.'+event,{pid:child.pid,birth:child.processBirth}));
+          localRetirementStarted=true;const pending=api.dispose();assert.equal(events.slice(shutdownStart).some(e=>e.kind==='output.dispose'&&e.data.channelId===channel[0].data.channelId),false,'channel remains pending retirement');assert.equal(api.dispose(),pending);await pending;assert.equal(api.dispose(),pending);
+          observed.shutdown={ownerPid:process.pid,events:events.slice(shutdownStart),children:children.map(({client,child,before,workers})=>({pid:child.pid,birth:child.processBirth,before,confirmedClose:client.childClosureConfirmed,exitCode:child.exitCode,signalCode:child.signalCode,afterGroup:state.groupMembers(child),workers:workers.map(worker=>({pid:worker.pid,birth:worker.processBirth,afterGroup:state.groupMembers(worker)}))})),scope:'Actual local extension API retirement, physical child close and registered-worker group readback. Not paired upstream context shutdown or all unobserved descendant/kernel evidence.'};
+          assert.equal(observed.shutdown.events.filter(e=>e.kind==='output.dispose'&&e.data.channelId===channel[0].data.channelId).length,1);for(const child of observed.shutdown.children){assert.ok(child.confirmedClose);assert.deepEqual(child.afterGroup,[]);for(const worker of child.workers)assert.deepEqual(worker.afterGroup,[]);}
+        }
+        return observed;
       });
     }else if(['trace-visibility','trace-light-show'].includes(config.suite)){
       await scenario(config.suite==='trace-light-show'?'native-trace-light-show-hide':'native-trace-tab-visibility-theme',async()=>{
@@ -512,7 +520,7 @@ async function run() {
     if(localStatus)api.service.removeListener('status',localStatus);
     clearInterval(timer);observation.restore();result.elapsedMs=performance.now()-started;
     writeFileSync(config.result,JSON.stringify(result,null,2));
-    if(target==='local') api?.cancel();
+    if(target==='local'&&!localRetirementStarted) api?.cancel();
     const captureStart=performance.now();
     while(!existsSync(join(config.dir,'renderer-done'))&&performance.now()-captureStart<15000)
       await new Promise(resolve=>setTimeout(resolve,50));
