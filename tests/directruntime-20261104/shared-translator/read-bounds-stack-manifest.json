@@ -1,0 +1,81 @@
+{
+  "guardedRegression": "Recursive ReadBounds fitsM compiled traversal exhausted browser stack while limits and exact tree occurrence budgets must remain unchanged.",
+  "authority": "H126 semantic owner; H82 statement-preserving split",
+  "base": "9ef9482d550ee45efb7660e2dd961bfe3f1e8e98",
+  "sourceFiles": [
+    {
+      "path": "Solidity/Calculus/ReadBounds.lean",
+      "sha256": "d1eeab45116531508dfd0bcbff4724644f78d74a9f3d6a30f98290f699557472"
+    },
+    {
+      "path": "Solidity/Calculus/ReadBoundsStack.lean",
+      "sha256": "e671347329e3dc782fd71c92ecd8a9edbb70fd26e4018779494fd880ab15233c"
+    },
+    {
+      "path": "Solidity/Calculus/ReadBoundsStackCorrect.lean",
+      "sha256": "c1c0f1704b64b49fca0393310657e2900b43eb32bd3e9c00f12ab4e62661a764"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/ReadBoundsStackControls.lean",
+      "sha256": "314e02fc3b44705d3853cdbdce1fb38fbd308755552e894c418a60a0e206efa5"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/verify-read-bounds-preservation.py",
+      "sha256": "08d815ed20621b327f0bcc8706f87858433db8d91222239a98f080af77b9dadb"
+    },
+    {
+      "path": "tests/directruntime-20261104/shared-translator/read-bounds-validate.sh",
+      "sha256": "7e01aae224341164b54d443937a675355a978ab3d7cffa039d2673b5c9a37117"
+    }
+  ],
+  "evidence": {
+    "path": "tests/directruntime-20261104/shared-translator/artifacts/read-bounds-stack-evidence-cb371490a5a50c39.tar.gz",
+    "sha256": "cb371490a5a50c3983c27b5931f0ea7c98b2b380cbc995a3d0a0946d9dab5d66",
+    "bytes": 220015,
+    "offGit": true
+  },
+  "gates": {
+    "affectedBuildAndPerFile": "PASS: DirectRuntime closure plus 27 per-file checks",
+    "wallSeconds": 833.7348501959932,
+    "scopeMemoryPeakBytes": 1546248192,
+    "resourceStop": false,
+    "sourcePreservation": "PASS: old module unchanged except import and two attached implementation attributes",
+    "frozenCensusAndProfiles": "PASS: unchanged 78 files and 5692 profile rows"
+  },
+  "proofs": [
+    "LTm.fitsM_eq_fitsStack",
+    "LFml.fitsM_eq_fitsStack"
+  ],
+  "axioms": [
+    "propext",
+    "Quot.sound"
+  ],
+  "limits": {
+    "normalizationSize": 24000,
+    "normalizationDepth": 12,
+    "concreteSize": 96000,
+    "concreteDepth": 40
+  },
+  "checking": {
+    "status": "PASS",
+    "baseMedian": 8.74440316700202,
+    "headMedian": 8.101685978006572,
+    "ratio": 0.9264995933146344
+  },
+  "timingBoundary": "Existing ReadBounds module only; separate new implementation/proof checks passed at 2s each. Earlier monolithic/factored checking STOP attempts retained. Not total cold build or native cost recovery.",
+  "generatedCode": {
+    "symbol": "l_Solidity_Decide_ReadBoundsStack_work___redArg",
+    "loopBackEdges": 1,
+    "directSelfCalls": 0,
+    "generatedCSha256": "bcb4e8331007892c1931b92dc715efd721b18265bb0395d0d1c5a2c942e37779",
+    "boundary": "Generated C observation only; no native/WASM acceptance."
+  },
+  "reviews": "Independent finder/skeptic no confirmed blocker; no Lean/server/build/writes.",
+  "remaining": [
+    "Fresh native/WASM consumption and stack-failure validation",
+    "Global native median +21.32%, browser startup +32.20%, prior native build +26.13% STOPs unchanged",
+    "H57 dynamic decoder versioned validation pair and observable defaults",
+    "Transferred CR fixture/importer migration; P8 producer remains external/read-only",
+    "Four storageAlias/storageCopy diamond cases remain pending"
+  ]
+}

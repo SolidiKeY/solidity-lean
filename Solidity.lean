@@ -2289,6 +2289,8 @@ import Solidity.Calculus.QueryReduction
 import Solidity.Calculus.Quote
 import Solidity.Calculus.QuotientCut
 import Solidity.Calculus.ReadBounds
+import Solidity.Calculus.ReadBoundsStack
+import Solidity.Calculus.ReadBoundsStackCorrect
 import Solidity.Calculus.ReadFlattening
 import Solidity.Calculus.ReadFree
 import Solidity.Calculus.ReadLayout
