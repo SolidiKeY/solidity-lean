@@ -144,6 +144,8 @@
 | `Backend/InternalFlow/RuntimeFrameP1V2Lift.lean` | Exact canonical V2 observation of actual lifted frozen execution, including arbitrary existing call journals and every frozen outcome; no frame, admission, payload-producing or full P1 adequacy claim. |
 | `Backend/InternalFlow/RuntimeFrameP1V2FramedRevert.lean` | Actual V2 bare-revert execution and exact canonical prefix agreement for certified save/body/restore code under unchanged physical Entry. |
 | `Backend/InternalFlow/RuntimeFrameP1V2FramedRevertControls.lean` | Selected callee-OOB importing consumer with arbitrary journal/buffer, physical Entry, nonempty input stack, wrong-cursor and payload-misclassification refusals. |
+| `Backend/InternalFlow/RuntimeFrameP1V2CallAgreement.lean` | Source outcome classification from actual checked compiler soundness and exact canonical V2 agreement for both outcomes of entered void calls, retaining physical Entry and alias compatibility. |
+| `Backend/InternalFlow/RuntimeFrameP1V2CallAgreementControls.lean` | Actual Mutation.compileCall empty-call success on the populated caller and refusal of an always-revert replacement; complements the reached callee-OOB branch. |
 | `Backend/PrimitivePackets/PanicBytes.lean` | Exact arithmetic Source panic bytes and nontruncation/nonemptiness observations; no selected-target payload claim. |
 | `Backend/Payments/CoreExact.lean` | G43: the core compiler with no refused-payment outcome (`compile_paid`, `compile_success`, `compile_revert`, `compile_storage_paid`); `Sim` carries the joint world/payment relation. |
 | `Backend/Payments/CompilerExact.lean` | G43: `AgreesExact`, `correct_exact` and the compiler-success theorem `compile_success` over every `Compilation` result. |

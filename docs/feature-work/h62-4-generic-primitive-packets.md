@@ -869,3 +869,34 @@ read-only finder/skeptic found no defect, without Lean/server/builds. MCP's
 separate diagnostic attempt hit its120s guard with no returned diagnostics;
 it is a retained failure, not a pass or kernel counterexample, and is not retried
 unchanged. Original full gates, fidelity debt and timing STOPs remain open.
+
+### H121 both-outcome void-call agreement
+
+RuntimeFrameP1V2CallAgreement derives success-or-bare-revert classification from
+actual checked compiler soundness at the same physical Entry. It then combines
+the existing certified captured return with the bare-failure transport to prove
+exact canonical V2 observation agreement for entered checked void calls. All
+Entry and NoAliasPromotion premises remain. No source-success/no-failure or
+new Approved-domain filter is assumed. The physical return facts proved by
+NoneProducer.returns must still be retained separately in the full H68 Local;
+this prefix equality alone is not that package or general P1/session adequacy.
+
+The positive consumer obtains a real empty-body call from Mutation.compileCall
+and derives its Entry from the same populated caller/frame/cursor fixture. Its
+success prefix holds for every existing journal/buffer and refutes an always-
+revert replacement. The prior importing consumer supplies reached callee-OOB.
+Fresh kernel times are0.761s general and0.768s positive controls; sampled workload
+peaks737848/738748 KiB. The first check caught two case-rewrite tactic mistakes,
+then a missing Decidable instance in a negative control; only proof scripts
+changed. Actual diagnostics and successful tactic-helper candidates are retained.
+Independent read-only finder/skeptic found no semantic defect; no reviewer used
+Lean/build/server. No original frozen theorem or dependent definition changed.
+
+Final per-file MCP diagnostics pass for all four H121 modules using the verified
+direct import cache (2.333/1.074/1.059/2.755s). The initial Lake-mode timeout and
+missing-artifact tactic-helper failure remain historical evidence; the changed
+server/cache setup is saved off Git. All fifteen reported theorem/certificate
+axiom sets contain only existing standard axioms (the saved-tail law only
+propext). Layer/trust/roots/fragments checks pass; no full checkpoint or Bridge
+acceptance, frozen-original fidelity restoration or timing STOP clearance is
+claimed. No module in these focused kernel checks exceeded 60 seconds.
