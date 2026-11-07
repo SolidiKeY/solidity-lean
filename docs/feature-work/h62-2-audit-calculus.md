@@ -324,3 +324,13 @@ Read-only cache inspection found a RuleShapes artifact/trace and equal 60-file c
 
 
 Measured call-result accounting passed at 0.275562s / 73,480 KiB maximum child RSS; complete acceptance failed exit 1 at 0.364618s / 73,484 KiB; 89 controls passed at 0.131811s / 15,240 KiB. Documentation gate failed exit 1 at 40.060537s / 9,216 KiB on four missing references in unchanged master citing sources (one former failure was repaired upstream). No whole gate pass. The cache-source comparison was separately reproduced with all 60 source files checked against exact frozen Git blobs; compiled provenance/replay remains unvalidated.
+
+
+## Base call-function/emission source roles (2026-11-07)
+
+After adopting master 94f9862b65b98a0ca5aad630a1cbb2f4532057e4 with owned history preserved, classified all seven CallFunctionBase and six CallFunctionEmit declarations. Exact frozen/current source identities and supporting Plan/Table/Graph bytes match. Prior 170 roles and owners unchanged; ledger now 183 roles reviewed, 5,100 pending; 3,746 owners confirmed, 1,537 unresolved. No new audit witnesses.
+
+The ledger preserves full return/failure representation and genuine abstract model existence without feasible enumeration; operational observation retains agreeB. Emission retains exact indexing, every Plan certificate, strict full-leaf shrink and unchanged 512 cap. Whole-post equivalence asserts no unconditional truth; refusal returns the exact original and size nonincrease is not runtime/proof-cost compression. Both read-only reviews pass; all 89 Python controls pass; complete acceptance remains FAIL exit 1. No sharing/tactic/source edit or runtime acceptance. Off-Git measured evidence and source snapshots are indexed by the call-base-emit manifest; all original queues, pauses, historical gaps and STOPs remain binding.
+
+
+Measured base/emission accounting passed at 0.237984s / 73,700 KiB maximum child RSS; complete acceptance failed exit 1 at 0.309202s / 73,700 KiB; 89 controls passed at 0.126576s / 15,236 KiB. Documentation gate failed exit 1 at 39.078997s / 9,216 KiB on four missing references in unchanged master citing sources. Full argv, metrics and comparisons are archived. These are static gate measurements, not tactic-performance acceptance or a whole-gate pass.
